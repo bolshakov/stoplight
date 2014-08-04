@@ -7,6 +7,11 @@ module Stoplight
       self
     end
 
+    def with_fallback(&block)
+      @fallback = block
+      self
+    end
+
     def code
       return @code if defined?(@code)
       fail NotImplementedError

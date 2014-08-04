@@ -19,6 +19,20 @@ describe Stoplight::Light do
     end
   end
 
+  describe '#with_fallback' do
+    let(:block) { proc {} }
+
+    subject(:result) { light.with_fallback(&block) }
+
+    it 'returns self' do
+      expect(result).to equal(light)
+    end
+
+    it 'assigns @fallback' do
+      expect(result.instance_variable_get(:@fallback)).to eql(block)
+    end
+  end
+
   describe '#code' do
     subject(:result) { light.code }
 
