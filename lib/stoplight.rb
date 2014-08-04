@@ -1,5 +1,7 @@
 # coding: utf-8
 
+require 'stoplight/light'
+
 # @author Cameron Desautels <camdez@gmail.com>
 # @author Taylor Fausak <taylor@fausak.me>
 #
