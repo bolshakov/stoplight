@@ -10,4 +10,12 @@ describe Stoplight::Errors do
       expect(result).to be < StandardError
     end
   end
+
+  describe '::NoCode' do
+    subject(:result) { described_class.const_get(:NoCode) }
+
+    it 'subclasses Base' do
+      expect(result).to be < described_class.const_get(:Base)
+    end
+  end
 end

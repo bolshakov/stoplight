@@ -14,7 +14,7 @@ module Stoplight
 
     def code
       return @code if defined?(@code)
-      fail NotImplementedError
+      fail Errors::NoCode
     end
 
     def fallback
