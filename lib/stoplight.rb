@@ -1,5 +1,6 @@
 # coding: utf-8
 
+require 'stoplight/errors'
 require 'stoplight/light'
 
 # @author Cameron Desautels <camdez@gmail.com>
