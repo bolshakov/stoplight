@@ -18,4 +18,24 @@ describe Stoplight::Light do
       expect(result.instance_variable_get(:@code)).to eql(block)
     end
   end
+
+  describe '#code' do
+    subject(:result) { light.code }
+
+    context 'without code' do
+      it 'raises an error' do
+        expect { result }.to raise_error(NotImplementedError)
+      end
+    end
+
+    context 'with code' do
+      let(:block) { proc {} }
+
+      before { light.with_code(&block) }
+
+      it 'return the code' do
+        expect(result).to eql(block)
+      end
+    end
+  end
 end

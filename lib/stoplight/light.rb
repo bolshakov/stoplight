@@ -6,5 +6,10 @@ module Stoplight
       @code = block
       self
     end
+
+    def code
+      return @code if defined?(@code)
+      fail NotImplementedError
+    end
   end
 end
