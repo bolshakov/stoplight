@@ -2,13 +2,18 @@
 
 module Stoplight
   class Light
-    def with_code(&block)
-      @code = block
+    def with_code(&code)
+      @code = code
       self
     end
 
-    def with_fallback(&block)
-      @fallback = block
+    def with_fallback(&fallback)
+      @fallback = fallback
+      self
+    end
+
+    def with_name(name)
+      @name = name
       self
     end
 
