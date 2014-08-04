@@ -18,4 +18,12 @@ describe Stoplight::Errors do
       expect(result).to be < described_class.const_get(:Base)
     end
   end
+
+  describe '::NoFallback' do
+    subject(:result) { described_class.const_get(:NoFallback) }
+
+    it 'subclasses Base' do
+      expect(result).to be < described_class.const_get(:Base)
+    end
+  end
 end

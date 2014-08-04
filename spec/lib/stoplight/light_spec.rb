@@ -58,7 +58,7 @@ describe Stoplight::Light do
 
     context 'without fallback' do
       it 'raises an error' do
-        expect { result }.to raise_error(NotImplementedError)
+        expect { result }.to raise_error(Stoplight::Errors::NoFallback)
       end
     end
 

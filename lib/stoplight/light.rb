@@ -19,7 +19,7 @@ module Stoplight
 
     def fallback
       return @fallback if defined?(@fallback)
-      fail NotImplementedError
+      fail Errors::NoFallback
     end
   end
 end
