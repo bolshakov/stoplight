@@ -16,5 +16,10 @@ module Stoplight
       return @code if defined?(@code)
       fail NotImplementedError
     end
+
+    def fallback
+      return @fallback if defined?(@fallback)
+      fail NotImplementedError
+    end
   end
 end

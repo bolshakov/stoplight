@@ -52,4 +52,24 @@ describe Stoplight::Light do
       end
     end
   end
+
+  describe '#fallback' do
+    subject(:result) { light.fallback }
+
+    context 'without fallback' do
+      it 'raises an error' do
+        expect { result }.to raise_error(NotImplementedError)
+      end
+    end
+
+    context 'with fallback' do
+      let(:block) { proc {} }
+
+      before { light.with_fallback(&block) }
+
+      it 'return the fallback' do
+        expect(result).to eql(block)
+      end
+    end
+  end
 end
