@@ -67,7 +67,7 @@ describe Stoplight::Light do
 
       before { light.with_code(&code) }
 
-      it 'return the code' do
+      it 'returns the code' do
         expect(result).to eql(code)
       end
     end
@@ -87,7 +87,7 @@ describe Stoplight::Light do
 
       before { light.with_fallback(&fallback) }
 
-      it 'return the fallback' do
+      it 'returns the fallback' do
         expect(result).to eql(fallback)
       end
     end
