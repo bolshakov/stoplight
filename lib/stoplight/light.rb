@@ -2,6 +2,12 @@
 
 module Stoplight
   class Light
+    attr_reader :name
+
+    def initialize
+      @name = caller_locations(1, 1).first.to_s
+    end
+
     def with_code(&code)
       @code = code
       self

@@ -5,6 +5,12 @@ require 'spec_helper'
 describe Stoplight::Light do
   subject(:light) { described_class.new }
 
+  describe '#initialize' do
+    it 'assigns @name' do
+      expect(light.instance_variable_get(:@name)).to start_with(__FILE__)
+    end
+  end
+
   describe '#with_code' do
     let(:code) { proc {} }
 
@@ -83,6 +89,26 @@ describe Stoplight::Light do
 
       it 'return the fallback' do
         expect(result).to eql(fallback)
+      end
+    end
+  end
+
+  describe '#name' do
+    subject(:result) { light.name }
+
+    context 'without name' do
+      it 'returns the default name' do
+        expect(result).to start_with(__FILE__)
+      end
+    end
+
+    context 'with name' do
+      let(:name) { SecureRandom.hex }
+
+      before { light.with_name(name) }
+
+      it 'returns the name' do
+        expect(result).to eql(name)
       end
     end
   end
