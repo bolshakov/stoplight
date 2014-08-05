@@ -5,10 +5,10 @@ require 'spec_helper'
 describe Stoplight::DataStore::Memory do
   subject(:data_store) { described_class.new }
 
-  describe '#read' do
+  describe '#[]' do
     let(:key) { SecureRandom.hex }
 
-    subject(:result) { data_store.read(key) }
+    subject(:result) { data_store[key] }
 
     context 'without value' do
       it 'returns nil' do

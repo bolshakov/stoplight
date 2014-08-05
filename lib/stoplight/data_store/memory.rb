@@ -7,7 +7,7 @@ module Stoplight
         @data = {}
       end
 
-      def read(key)
+      def [](key)
         @data[key]
       end
 

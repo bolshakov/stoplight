@@ -6,7 +6,7 @@ module Stoplight
     class Base
       # @param key [Object]
       # @return [Object, nil]
-      def read(_key)
+      def [](_key)
         fail NotImplementedError
       end
 
