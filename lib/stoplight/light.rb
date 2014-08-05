@@ -89,7 +89,9 @@ module Stoplight
     # @return [Object]
     # @raise (see #code)
     def run_code
-      code.call
+      result = code.call
+      self.class.data_store.clear_failures(name)
+      result
     rescue => e # REVIEW: rescue Exception?
       if allow_error?(e)
         self.class.data_store.clear_failures(name)
@@ -98,8 +100,6 @@ module Stoplight
       end
 
       raise
-    else
-      self.class.data_store.clear_failures(name)
     end
 
     # @return [Object]
