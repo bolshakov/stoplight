@@ -26,4 +26,12 @@ describe Stoplight::Error do
       expect(result).to be < described_class.const_get(:Base)
     end
   end
+
+  describe '::NoName' do
+    subject(:result) { described_class.const_get(:NoName) }
+
+    it 'subclasses Base' do
+      expect(result).to be < described_class.const_get(:Base)
+    end
+  end
 end

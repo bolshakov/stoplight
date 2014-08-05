@@ -2,19 +2,12 @@
 
 module Stoplight
   class Light
-    # @return [String]
-    attr_reader :name
-
     # @param data_store [DataStore::Base, nil]
     # @return [DataStore::Base]
     def self.data_store(data_store = nil)
       @data_store = data_store if data_store
       @data_store = DataStore::Memory.new unless @data_store
       @data_store
-    end
-
-    def initialize
-      @name = caller_locations(1, 1).first.to_s
     end
 
     # @yield []
@@ -50,6 +43,13 @@ module Stoplight
     def fallback
       return @fallback if defined?(@fallback)
       fail Error::NoFallback
+    end
+
+    # @return [String]
+    # @raise [Error::NoName]
+    def name
+      return @name if defined?(@name)
+      fail Error::NoName
     end
   end
 end

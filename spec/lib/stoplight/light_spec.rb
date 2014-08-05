@@ -27,12 +27,6 @@ describe Stoplight::Light do
     end
   end
 
-  describe '#initialize' do
-    it 'assigns @name' do
-      expect(light.instance_variable_get(:@name)).to start_with(__FILE__)
-    end
-  end
-
   describe '#with_code' do
     let(:code) { proc {} }
 
@@ -119,8 +113,8 @@ describe Stoplight::Light do
     subject(:result) { light.name }
 
     context 'without a name' do
-      it 'returns the default' do
-        expect(result).to start_with(__FILE__)
+      it 'raises an error' do
+        expect { result }.to raise_error(Stoplight::Error::NoName)
       end
     end
 

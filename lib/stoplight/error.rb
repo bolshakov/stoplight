@@ -10,5 +10,8 @@ module Stoplight
 
     # @return [Class]
     NoFallback = Class.new(Base)
+
+    # @return [Class]
+    NoName = Class.new(Base)
   end
 end
