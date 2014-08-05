@@ -6,6 +6,16 @@ module Stoplight
     class Base
       KEY_PREFIX = 'stoplight'
 
+      STATES = Set.new([
+        STATE_LOCKED_GREEN = 'locked_green',
+        STATE_LOCKED_RED = 'locked_red',
+        STATE_UNLOCKED = 'unlocked'
+      ]).freeze
+
+      def validate_state!(state)
+        fail ArgumentError, 'Invalid state' unless STATES.include?(state)
+      end
+
       def names
         fail NotImplementedError
       end
@@ -31,6 +41,15 @@ module Stoplight
       end
 
       def record_attempt(_name)
+        fail NotImplementedError
+      end
+
+      def state(_name)
+        fail NotImplementedError
+      end
+
+      # REVIEW: Should we clear failures here?
+      def set_state(_name, _state)
         fail NotImplementedError
       end
 

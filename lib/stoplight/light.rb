@@ -14,7 +14,14 @@ module Stoplight
 
     # @return [Boolean]
     def self.green?(name)
-      data_store.failures(name).size < failure_threshold(name)
+      case data_store.state(name)
+      when DataStore::Base::STATE_LOCKED_GREEN
+        true
+      when DataStore::Base::STATE_LOCKED_RED
+        false
+      else
+        data_store.failures(name).size < failure_threshold(name)
+      end
     end
 
     # Returns names of all known stoplights.

@@ -52,6 +52,16 @@ module Stoplight
       def record_attempt(name)
         @redis.incr(attempt_key(name))
       end
+
+      def state(name)
+        @redis.hget(settings_key(name), 'state') || STATE_UNLOCKED
+      end
+
+      def set_state(name, state)
+        validate_state!(state)
+        @redis.hset(settings_key(name), 'state', state)
+        state
+      end
     end
   end
 end

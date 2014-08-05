@@ -45,6 +45,15 @@ module Stoplight
         @data[key] ||= 0
         @data[key] += 1
       end
+
+      def state(name)
+        settings(name)['state'] || STATE_UNLOCKED
+      end
+
+      def set_state(name, state)
+        validate_state!(state)
+        settings(name)['state'] = state
+      end
     end
   end
 end
