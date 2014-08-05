@@ -6,7 +6,9 @@ describe Stoplight::Light do
   subject(:light) { described_class.new }
 
   describe '.data_store' do
-    subject(:result) { described_class.data_store }
+    let(:klass) { Class.new(described_class) }
+
+    subject(:result) { klass.data_store }
 
     context 'without a data store' do
       it 'returns the default' do
@@ -17,7 +19,7 @@ describe Stoplight::Light do
     context 'with a data store' do
       let(:data_store) { double }
 
-      before { described_class.data_store(data_store) }
+      before { klass.data_store(data_store) }
 
       it 'returns the data store' do
         expect(result).to eql(data_store)

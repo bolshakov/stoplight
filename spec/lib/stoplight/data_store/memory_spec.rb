@@ -10,13 +10,13 @@ describe Stoplight::DataStore::Memory do
 
     subject(:result) { data_store[key] }
 
-    context 'without value' do
+    context 'without a value' do
       it 'returns nil' do
         expect(result).to be_nil
       end
     end
 
-    context 'with value' do
+    context 'with a value' do
       let(:value) { double }
 
       before { data_store[key] = value }
