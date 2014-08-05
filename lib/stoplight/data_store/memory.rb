@@ -24,6 +24,12 @@ module Stoplight
       def clear_failures(name)
         @data.delete(failure_key(name))
       end
+
+      def record_attempt(name)
+        key = attempt_key(name)
+        @data[key] ||= 0
+        @data[key] += 1
+      end
     end
   end
 end

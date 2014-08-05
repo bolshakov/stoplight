@@ -62,5 +62,12 @@ module Stoplight
     else
       self.class.data_store.clear_failures(name)
     end
+
+    # @return [Object]
+    # @raise (see #fallback)
+    def run_fallback
+      self.class.data_store.record_attempt(name)
+      fallback.call
+    end
   end
 end

@@ -132,4 +132,8 @@ describe Stoplight::Light do
   describe '#run_code' do
     pending
   end
+
+  describe '#run_fallback' do
+    pending
+  end
 end

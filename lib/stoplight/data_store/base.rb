@@ -25,8 +25,20 @@ module Stoplight
         fail NotImplementedError
       end
 
+      def record_attempt(_name)
+        fail NotImplementedError
+      end
+
+      def key(name, slug)
+        "stoplight:#{name}:#{slug}"
+      end
+
+      def attempt_key(name)
+        key(name, 'attempts')
+      end
+
       def failure_key(name)
-        "stoplight:#{name}:failures"
+        key(name, 'failures')
       end
     end
   end
