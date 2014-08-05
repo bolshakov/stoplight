@@ -3,4 +3,5 @@
 doc/
 Gemfile.lock
 pkg/
+tmp/
 vendor/
