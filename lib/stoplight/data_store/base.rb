@@ -6,19 +6,6 @@ module Stoplight
     class Base
       KEY_PREFIX = 'stoplight'
 
-      # @param key [Object]
-      # @return [Object, nil]
-      def [](_key)
-        fail NotImplementedError
-      end
-
-      # @param key [Object]
-      # @param value [Object]
-      # @return [Object]
-      def []=(_key, _value)
-        fail NotImplementedError
-      end
-
       def names
         fail NotImplementedError
       end

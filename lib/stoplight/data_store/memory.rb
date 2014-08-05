@@ -7,14 +7,6 @@ module Stoplight
         @data = {}
       end
 
-      def [](key)
-        @data[key]
-      end
-
-      def []=(key, value)
-        @data[key] = value
-      end
-
       def names
         @data.keys.map do |key|
           match = /^#{KEY_PREFIX}:(.+):([^:]+)$/.match(key)
