@@ -5,6 +5,26 @@ require 'spec_helper'
 describe Stoplight::Light do
   subject(:light) { described_class.new }
 
+  describe '.data_store' do
+    subject(:result) { described_class.data_store }
+
+    context 'without a data store' do
+      it 'returns the default' do
+        expect(result).to be_a(Stoplight::DataStore::Memory)
+      end
+    end
+
+    context 'with a data store' do
+      let(:data_store) { double }
+
+      before { described_class.data_store(data_store) }
+
+      it 'returns the data store' do
+        expect(result).to eql(data_store)
+      end
+    end
+  end
+
   describe '#initialize' do
     it 'assigns @name' do
       expect(light.instance_variable_get(:@name)).to start_with(__FILE__)
@@ -76,13 +96,13 @@ describe Stoplight::Light do
   describe '#fallback' do
     subject(:result) { light.fallback }
 
-    context 'without fallback' do
+    context 'without a fallback' do
       it 'raises an error' do
         expect { result }.to raise_error(Stoplight::Errors::NoFallback)
       end
     end
 
-    context 'with fallback' do
+    context 'with a fallback' do
       let(:fallback) { proc {} }
 
       before { light.with_fallback(&fallback) }
@@ -96,13 +116,13 @@ describe Stoplight::Light do
   describe '#name' do
     subject(:result) { light.name }
 
-    context 'without name' do
-      it 'returns the default name' do
+    context 'without a name' do
+      it 'returns the default' do
         expect(result).to start_with(__FILE__)
       end
     end
 
-    context 'with name' do
+    context 'with a name' do
       let(:name) { SecureRandom.hex }
 
       before { light.with_name(name) }
