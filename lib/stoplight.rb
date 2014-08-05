@@ -1,6 +1,7 @@
 # coding: utf-8
 
 require 'stoplight/data_store/base'
+require 'stoplight/data_store/memory'
 require 'stoplight/errors'
 require 'stoplight/failure'
 require 'stoplight/light'
