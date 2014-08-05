@@ -2,12 +2,21 @@
 
 module Stoplight
   class Light
+    DEFAULT_FAILURE_THRESHOLD = 3
+
     # @param data_store [DataStore::Base, nil]
     # @return [DataStore::Base]
     def self.data_store(data_store = nil)
       @data_store = data_store if data_store
       @data_store = DataStore::Memory.new unless defined?(@data_store)
       @data_store
+    end
+
+    # @return [Boolean]
+    def self.green?(name)
+      threshold = data_store.failure_threshold(name) ||
+        DEFAULT_FAILURE_THRESHOLD
+      data_store.failures(name).size < threshold
     end
 
     # @yield []
@@ -28,6 +37,11 @@ module Stoplight
     # @return [Light]
     def with_name(name)
       @name = name
+      self
+    end
+
+    def with_threshold(threshold)
+      self.class.data_store.set_failure_threshold(name, threshold)
       self
     end
 
@@ -68,6 +82,14 @@ module Stoplight
     def run_fallback
       self.class.data_store.record_attempt(name)
       fallback.call
+    end
+
+    def run
+      if self.class.green?(name)
+        run_code
+      else
+        run_fallback
+      end
     end
   end
 end

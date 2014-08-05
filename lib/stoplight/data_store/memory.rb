@@ -25,6 +25,18 @@ module Stoplight
         @data.delete(failure_key(name))
       end
 
+      def failures(name)
+        @data[failure_key(name)] || []
+      end
+
+      def failure_threshold(name)
+        @data[failure_threshold_key(name)]
+      end
+
+      def set_failure_threshold(name, threshold)
+        @data[failure_threshold_key(name)] = threshold
+      end
+
       def record_attempt(name)
         key = attempt_key(name)
         @data[key] ||= 0

@@ -25,6 +25,18 @@ module Stoplight
         fail NotImplementedError
       end
 
+      def failures(_name)
+        fail NotImplementedError
+      end
+
+      def failure_threshold(_name)
+        fail NotImplementedError
+      end
+
+      def set_failure_threshold(_name, _threshold)
+        fail NotImplementedError
+      end
+
       def record_attempt(_name)
         fail NotImplementedError
       end
@@ -39,6 +51,10 @@ module Stoplight
 
       def failure_key(name)
         key(name, 'failures')
+      end
+
+      def failure_threshold_key(name)
+        key(name, 'failure_threshold')
       end
     end
   end
