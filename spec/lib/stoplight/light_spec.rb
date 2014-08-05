@@ -128,4 +128,8 @@ describe Stoplight::Light do
       end
     end
   end
+
+  describe '#run_code' do
+    pending
+  end
 end

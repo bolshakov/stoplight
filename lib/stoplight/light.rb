@@ -51,5 +51,16 @@ module Stoplight
       return @name if defined?(@name)
       fail Error::NoName
     end
+
+    # @return [Object]
+    # @raise (see #code)
+    def run_code
+      code.call
+    rescue => error
+      self.class.data_store.record_failure(name, error)
+      raise error
+    else
+      self.class.data_store.clear_failures(name)
+    end
   end
 end

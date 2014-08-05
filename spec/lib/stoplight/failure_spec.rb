@@ -3,7 +3,8 @@
 require 'spec_helper'
 
 describe Stoplight::Failure do
-  subject(:failure) { described_class.new }
+  let(:error) { double }
+  subject(:failure) { described_class.new(error) }
 
   describe '#initialize' do
     it 'assigns @time' do

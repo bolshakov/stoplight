@@ -16,6 +16,18 @@ module Stoplight
       def []=(_key, _value)
         fail NotImplementedError
       end
+
+      def record_failure(_name, _error)
+        fail NotImplementedError
+      end
+
+      def clear_failures(_name)
+        fail NotImplementedError
+      end
+
+      def failure_key(name)
+        "stoplight:#{name}:failures"
+      end
     end
   end
 end
