@@ -13,5 +13,8 @@ module Stoplight
 
     # @return [Class]
     NoName = Class.new(Base)
+
+    # @return [Class]
+    NoRedis = Class.new(Base)
   end
 end
