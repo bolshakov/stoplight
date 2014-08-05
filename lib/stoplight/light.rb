@@ -14,9 +14,16 @@ module Stoplight
 
     # @return [Boolean]
     def self.green?(name)
-      threshold = data_store.failure_threshold(name) ||
-        DEFAULT_FAILURE_THRESHOLD
-      data_store.failures(name).size < threshold
+      data_store.failures(name).size < failure_threshold(name)
+    end
+
+    # Returns names of all known stoplights.
+    def self.names
+      data_store.names
+    end
+
+    def self.failure_threshold(name)
+      data_store.failure_threshold(name) || DEFAULT_FAILURE_THRESHOLD
     end
 
     # @yield []
@@ -85,11 +92,18 @@ module Stoplight
     end
 
     def run
+      sync_settings # REVIEW: Maybe this should be in #initialize.
+
       if self.class.green?(name)
         run_code
       else
         run_fallback
       end
+    end
+
+    def sync_settings
+      threshold = self.class.failure_threshold(name)
+      self.class.data_store.set_failure_threshold(name, threshold)
     end
   end
 end

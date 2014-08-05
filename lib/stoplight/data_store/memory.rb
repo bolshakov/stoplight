@@ -15,6 +15,13 @@ module Stoplight
         @data[key] = value
       end
 
+      def names
+        @data.keys.map do |key|
+          match = /^#{KEY_PREFIX}:(.+):([^:]+)$/.match(key)
+          match[1] if match
+        end.compact.uniq
+      end
+
       def record_failure(name, error)
         failure = Failure.new(error)
         array = @data[failure_key(name)] ||= []

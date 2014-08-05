@@ -4,6 +4,8 @@ module Stoplight
   module DataStore
     # @abstract
     class Base
+      KEY_PREFIX = 'stoplight'
+
       # @param key [Object]
       # @return [Object, nil]
       def [](_key)
@@ -14,6 +16,10 @@ module Stoplight
       # @param value [Object]
       # @return [Object]
       def []=(_key, _value)
+        fail NotImplementedError
+      end
+
+      def names
         fail NotImplementedError
       end
 
@@ -42,7 +48,7 @@ module Stoplight
       end
 
       def key(name, slug)
-        "stoplight:#{name}:#{slug}"
+        [KEY_PREFIX, name, slug].join(':')
       end
 
       def attempt_key(name)
