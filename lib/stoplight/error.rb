@@ -1,7 +1,7 @@
 # coding: utf-8
 
 module Stoplight
-  module Errors
+  module Error
     # @return [Class]
     Base = Class.new(StandardError)
 

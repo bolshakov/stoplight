@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Stoplight::Errors do
+describe Stoplight::Error do
   describe '::Base' do
     subject(:result) { described_class.const_get(:Base) }
 

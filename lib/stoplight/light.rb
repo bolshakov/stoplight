@@ -39,17 +39,17 @@ module Stoplight
     end
 
     # @return [Proc]
-    # @raise [Errors::NoCode]
+    # @raise [Error::NoCode]
     def code
       return @code if defined?(@code)
-      fail Errors::NoCode
+      fail Error::NoCode
     end
 
     # @return [Proc]
-    # @raise [Errors::NoFallback]
+    # @raise [Error::NoFallback]
     def fallback
       return @fallback if defined?(@fallback)
-      fail Errors::NoFallback
+      fail Error::NoFallback
     end
   end
 end

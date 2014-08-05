@@ -2,7 +2,7 @@
 
 require 'stoplight/data_store/base'
 require 'stoplight/data_store/memory'
-require 'stoplight/errors'
+require 'stoplight/error'
 require 'stoplight/failure'
 require 'stoplight/light'
 

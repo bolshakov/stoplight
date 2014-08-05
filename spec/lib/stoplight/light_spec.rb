@@ -80,7 +80,7 @@ describe Stoplight::Light do
 
     context 'without code' do
       it 'raises an error' do
-        expect { result }.to raise_error(Stoplight::Errors::NoCode)
+        expect { result }.to raise_error(Stoplight::Error::NoCode)
       end
     end
 
@@ -100,7 +100,7 @@ describe Stoplight::Light do
 
     context 'without a fallback' do
       it 'raises an error' do
-        expect { result }.to raise_error(Stoplight::Errors::NoFallback)
+        expect { result }.to raise_error(Stoplight::Error::NoFallback)
       end
     end
 
