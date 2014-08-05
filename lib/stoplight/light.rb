@@ -33,6 +33,19 @@ module Stoplight
       self
     end
 
+    def with_allowed_errors(errors)
+      @allowed_errors = errors
+      self
+    end
+
+    def allowed_errors
+      @allowed_errors ||= []
+    end
+
+    def allow_error?(error)
+      allowed_errors.any? { |klass| error.is_a?(klass) }
+    end
+
     # @yield []
     # @return [Light]
     def with_fallback(&fallback)
@@ -77,9 +90,14 @@ module Stoplight
     # @raise (see #code)
     def run_code
       code.call
-    rescue => error
-      self.class.data_store.record_failure(name, error)
-      raise error
+    rescue => e # REVIEW: rescue Exception?
+      if allow_error?(e)
+        self.class.data_store.clear_failures(name)
+      else
+        self.class.data_store.record_failure(name, e)
+      end
+
+      raise
     else
       self.class.data_store.clear_failures(name)
     end
