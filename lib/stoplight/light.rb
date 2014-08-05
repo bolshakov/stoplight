@@ -6,7 +6,7 @@ module Stoplight
     # @return [DataStore::Base]
     def self.data_store(data_store = nil)
       @data_store = data_store if data_store
-      @data_store = DataStore::Memory.new unless @data_store
+      @data_store = DataStore::Memory.new unless defined?(@data_store)
       @data_store
     end
 
