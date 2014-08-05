@@ -46,8 +46,8 @@ module Stoplight
         key(name, 'failures')
       end
 
-      def failure_threshold_key(name)
-        key(name, 'failure_threshold')
+      def settings_key(name)
+        key(name, 'settings')
       end
     end
   end

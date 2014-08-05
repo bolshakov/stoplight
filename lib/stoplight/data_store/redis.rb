@@ -39,13 +39,13 @@ module Stoplight
       end
 
       def failure_threshold(name)
-        value = @redis.get(failure_threshold_key(name))
+        value = @redis.hget(settings_key(name), 'failure_threshold')
         Integer(value) if value # REVIEW: Fault tolerance.
       end
 
       def set_failure_threshold(name, threshold)
         # REVIEW: Make sure threshold is an integer.
-        @redis.set(failure_threshold_key(name), threshold)
+        @redis.hset(settings_key(name), 'failure_threshold', threshold)
         threshold
       end
 

@@ -28,12 +28,16 @@ module Stoplight
         @data[failure_key(name)] || []
       end
 
+      def settings(name)
+        @data[settings_key(name)] ||= {}
+      end
+
       def failure_threshold(name)
-        @data[failure_threshold_key(name)]
+        settings(name)['failure_threshold']
       end
 
       def set_failure_threshold(name, threshold)
-        @data[failure_threshold_key(name)] = threshold
+        settings(name)['failure_threshold'] = threshold
       end
 
       def record_attempt(name)
