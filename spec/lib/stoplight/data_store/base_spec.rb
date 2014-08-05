@@ -14,4 +14,15 @@ describe Stoplight::DataStore::Base do
       expect { result }.to raise_error(NotImplementedError)
     end
   end
+
+  describe '#write' do
+    let(:key) { SecureRandom.hex }
+    let(:value) { double }
+
+    subject(:result) { data_store.write(key, value) }
+
+    it 'raises an error' do
+      expect { result }.to raise_error(NotImplementedError)
+    end
+  end
 end
