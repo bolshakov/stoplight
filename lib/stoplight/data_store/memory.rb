@@ -11,7 +11,7 @@ module Stoplight
         @data[key]
       end
 
-      def write(key, value)
+      def []=(key, value)
         @data[key] = value
       end
     end

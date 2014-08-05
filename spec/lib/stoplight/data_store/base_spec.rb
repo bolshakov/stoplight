@@ -15,11 +15,11 @@ describe Stoplight::DataStore::Base do
     end
   end
 
-  describe '#write' do
+  describe '#[]=' do
     let(:key) { SecureRandom.hex }
     let(:value) { double }
 
-    subject(:result) { data_store.write(key, value) }
+    subject(:result) { data_store[key] = value }
 
     it 'raises an error' do
       expect { result }.to raise_error(NotImplementedError)

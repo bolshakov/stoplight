@@ -13,7 +13,7 @@ module Stoplight
       # @param key [Object]
       # @param value [Object]
       # @return [Object]
-      def write(_key, _value)
+      def []=(_key, _value)
         fail NotImplementedError
       end
     end

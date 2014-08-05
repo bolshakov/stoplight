@@ -19,7 +19,7 @@ describe Stoplight::DataStore::Memory do
     context 'with value' do
       let(:value) { double }
 
-      before { data_store.write(key, value) }
+      before { data_store[key] = value }
 
       it 'returns the value' do
         expect(result).to eql(value)
@@ -27,11 +27,11 @@ describe Stoplight::DataStore::Memory do
     end
   end
 
-  describe '#write' do
+  describe '#[]=' do
     let(:key) { SecureRandom.hex }
     let(:value) { SecureRandom.hex }
 
-    subject(:result) { data_store.write(key, value) }
+    subject(:result) { data_store[key] = value }
 
     it 'returns the value' do
       expect(result).to eql(value)
