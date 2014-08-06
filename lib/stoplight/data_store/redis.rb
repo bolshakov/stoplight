@@ -19,8 +19,7 @@ module Stoplight
 
       def names
         @redis.scan_each(match: "#{KEY_PREFIX}:*:*").map do |key|
-          match = /^#{KEY_PREFIX}:(.+):[^:]+$/.match(key)
-          match[1] if match
+          key[/^#{KEY_PREFIX}:(.+):[^:]+$/o, 1]
         end.uniq
       end
 
