@@ -1,5 +1,6 @@
 # coding: utf-8
 
+require 'stoplight/data_store'
 require 'stoplight/data_store/base'
 require 'stoplight/data_store/memory'
 require 'stoplight/data_store/redis'

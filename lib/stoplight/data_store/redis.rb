@@ -18,8 +18,8 @@ module Stoplight
       end
 
       def names
-        @redis.scan_each(match: "#{KEY_PREFIX}:*:*").map do |key|
-          key[/^#{KEY_PREFIX}:(.+):[^:]+$/o, 1]
+        @redis.scan_each(match: "#{DataStore::KEY_PREFIX}:*:*").map do |key|
+          key[/^#{DataStore::KEY_PREFIX}:(.+):[^:]+$/o, 1]
         end.uniq
       end
 
@@ -53,7 +53,7 @@ module Stoplight
       end
 
       def state(name)
-        @redis.hget(settings_key(name), 'state') || STATE_UNLOCKED
+        @redis.hget(settings_key(name), 'state') || DataStore::STATE_UNLOCKED
       end
 
       def set_state(name, state)

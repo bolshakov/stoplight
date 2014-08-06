@@ -9,7 +9,7 @@ module Stoplight
 
       def names
         @data.keys.map do |key|
-          match = /^#{KEY_PREFIX}:(.+):([^:]+)$/.match(key)
+          match = /^#{DataStore::KEY_PREFIX}:(.+):([^:]+)$/.match(key)
           match[1] if match
         end.compact.uniq
       end
@@ -47,7 +47,7 @@ module Stoplight
       end
 
       def state(name)
-        settings(name)['state'] || STATE_UNLOCKED
+        settings(name)['state'] || DataStore::STATE_UNLOCKED
       end
 
       def set_state(name, state)

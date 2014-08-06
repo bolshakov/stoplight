@@ -12,9 +12,9 @@ module Stoplight
 
     def self.green?(name)
       case data_store.state(name)
-      when DataStore::Base::STATE_LOCKED_GREEN
+      when DataStore::STATE_LOCKED_GREEN
         true
-      when DataStore::Base::STATE_LOCKED_RED
+      when DataStore::STATE_LOCKED_RED
         false
       else
         data_store.failures(name).size < failure_threshold(name)

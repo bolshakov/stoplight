@@ -3,14 +3,6 @@
 module Stoplight
   module DataStore
     class Base
-      KEY_PREFIX = 'stoplight'
-
-      STATES = Set.new([
-        STATE_LOCKED_GREEN = 'locked_green',
-        STATE_LOCKED_RED = 'locked_red',
-        STATE_UNLOCKED = 'unlocked'
-      ]).freeze
-
       def names
         fail NotImplementedError
       end
@@ -51,11 +43,12 @@ module Stoplight
       private
 
       def validate_state!(state)
-        fail ArgumentError, 'Invalid state' unless STATES.include?(state)
+        return if DataStore::STATES.include?(state)
+        fail ArgumentError, 'Invalid state'
       end
 
       def key(name, slug)
-        [KEY_PREFIX, name, slug].join(':')
+        [DataStore::KEY_PREFIX, name, slug].join(':')
       end
 
       def attempt_key(name)
