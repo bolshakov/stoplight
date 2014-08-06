@@ -13,7 +13,9 @@ module Stoplight
       Stoplight::Light.new
         .with_name("#{controller_name}/#{action_name}")
         .with_code(&block)
-        .with_fallback { render(nothing: true, status: :service_unavailable) }
+        .with_fallback do
+          controller.render(nothing: true, status: :service_unavailable)
+        end
         .run
     end
   end
