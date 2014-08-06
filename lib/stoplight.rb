@@ -5,7 +5,6 @@ require 'stoplight/data_store/memory'
 require 'stoplight/data_store/redis'
 require 'stoplight/error'
 require 'stoplight/failure'
-require 'stoplight/filter'
 require 'stoplight/light'
 
 module Stoplight
