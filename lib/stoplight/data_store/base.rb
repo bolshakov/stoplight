@@ -2,7 +2,6 @@
 
 module Stoplight
   module DataStore
-    # @abstract
     class Base
       KEY_PREFIX = 'stoplight'
 
