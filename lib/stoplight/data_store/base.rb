@@ -11,10 +11,6 @@ module Stoplight
         STATE_UNLOCKED = 'unlocked'
       ]).freeze
 
-      def validate_state!(state)
-        fail ArgumentError, 'Invalid state' unless STATES.include?(state)
-      end
-
       def names
         fail NotImplementedError
       end
@@ -50,6 +46,12 @@ module Stoplight
       # REVIEW: Should we clear failures here?
       def set_state(_name, _state)
         fail NotImplementedError
+      end
+
+      private
+
+      def validate_state!(state)
+        fail ArgumentError, 'Invalid state' unless STATES.include?(state)
       end
 
       def key(name, slug)

@@ -12,15 +12,17 @@ module Stoplight
       @error = error
     end
 
+    def to_json
+      JSON.dump(to_h)
+    end
+
+    private
+
     def to_h
       {
         time: time,
         error: error.inspect
       }
-    end
-
-    def to_json
-      JSON.dump(to_h)
     end
   end
 end

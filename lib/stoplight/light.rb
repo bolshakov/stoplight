@@ -44,10 +44,6 @@ module Stoplight
       @allowed_errors ||= []
     end
 
-    def allow_error?(error)
-      allowed_errors.any? { |klass| error.is_a?(klass) }
-    end
-
     def with_fallback(&fallback)
       @fallback = fallback
       self
@@ -78,6 +74,22 @@ module Stoplight
       fail Error::NoName
     end
 
+    def run
+      sync_settings # REVIEW: Maybe this should be in #initialize.
+
+      if self.class.green?(name)
+        run_code
+      else
+        run_fallback
+      end
+    end
+
+    private
+
+    def allow_error?(error)
+      allowed_errors.any? { |klass| error.is_a?(klass) }
+    end
+
     def run_code
       result = code.call
       self.class.data_store.clear_failures(name)
@@ -95,16 +107,6 @@ module Stoplight
     def run_fallback
       self.class.data_store.record_attempt(name)
       fallback.call
-    end
-
-    def run
-      sync_settings # REVIEW: Maybe this should be in #initialize.
-
-      if self.class.green?(name)
-        run_code
-      else
-        run_fallback
-      end
     end
 
     def sync_settings
