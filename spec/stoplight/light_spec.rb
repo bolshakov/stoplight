@@ -3,7 +3,9 @@
 require 'spec_helper'
 
 describe Stoplight::Light do
-  subject(:light) { described_class.new }
+  let(:name) { SecureRandom.hex }
+
+  subject(:light) { described_class.new(name) }
 
   describe '.data_store' do
     let(:klass) { Class.new(described_class) }
@@ -55,20 +57,6 @@ describe Stoplight::Light do
     end
   end
 
-  describe '#with_name' do
-    let(:name) { SecureRandom.hex }
-
-    subject(:result) { light.with_name(name) }
-
-    it 'returns self' do
-      expect(result).to equal(light)
-    end
-
-    it 'assigns @name' do
-      expect(result.instance_variable_get(:@name)).to eql(name)
-    end
-  end
-
   describe '#code' do
     subject(:result) { light.code }
 
@@ -112,20 +100,8 @@ describe Stoplight::Light do
   describe '#name' do
     subject(:result) { light.name }
 
-    context 'without a name' do
-      it 'raises an error' do
-        expect { result }.to raise_error(Stoplight::Error::NoName)
-      end
-    end
-
-    context 'with a name' do
-      let(:name) { SecureRandom.hex }
-
-      before { light.with_name(name) }
-
-      it 'returns the name' do
-        expect(result).to eql(name)
-      end
+    it 'returns the name' do
+      expect(result).to eql(name)
     end
   end
 

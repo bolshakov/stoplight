@@ -30,6 +30,10 @@ module Stoplight
       data_store.failure_threshold(name) || DEFAULT_FAILURE_THRESHOLD
     end
 
+    def initialize(name)
+      @name = name
+    end
+
     def with_code(&code)
       @code = code
       self
@@ -46,11 +50,6 @@ module Stoplight
 
     def with_fallback(&fallback)
       @fallback = fallback
-      self
-    end
-
-    def with_name(name)
-      @name = name
       self
     end
 
