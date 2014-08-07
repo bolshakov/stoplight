@@ -4,8 +4,9 @@ require 'spec_helper'
 
 describe Stoplight::Light do
   let(:name) { SecureRandom.hex }
+  let(:code) { proc {} }
 
-  subject(:light) { described_class.new(name) }
+  subject(:light) { described_class.new(name, &code) }
 
   describe '.data_store' do
     let(:klass) { Class.new(described_class) }
@@ -29,20 +30,6 @@ describe Stoplight::Light do
     end
   end
 
-  describe '#with_code' do
-    let(:code) { proc {} }
-
-    subject(:result) { light.with_code(&code) }
-
-    it 'returns self' do
-      expect(result).to equal(light)
-    end
-
-    it 'assigns @code' do
-      expect(result.instance_variable_get(:@code)).to eql(code)
-    end
-  end
-
   describe '#with_fallback' do
     let(:fallback) { proc {} }
 
@@ -60,20 +47,8 @@ describe Stoplight::Light do
   describe '#code' do
     subject(:result) { light.code }
 
-    context 'without code' do
-      it 'raises an error' do
-        expect { result }.to raise_error(Stoplight::Error::NoCode)
-      end
-    end
-
-    context 'with code' do
-      let(:code) { proc {} }
-
-      before { light.with_code(&code) }
-
-      it 'returns the code' do
-        expect(result).to eql(code)
-      end
+    it 'returns the code' do
+      expect(result).to eql(code)
     end
   end
 
