@@ -3,11 +3,9 @@
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
-require 'stoplight'
-
 Gem::Specification.new do |spec|
   spec.name = 'stoplight'
-  spec.version = Stoplight::VERSION
+  spec.version = '0.0.0' # Stoplight::VERSION
   spec.summary = 'Traffic control for code.'
   spec.description = spec.summary
   spec.homepage = 'https://github.com/orgsync/stoplight'
