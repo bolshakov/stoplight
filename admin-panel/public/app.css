@@ -10,3 +10,7 @@ td.indicator {
 td.name {
   font-weight: bold
 }
+
+td.locked button {
+  font-size: 200%
+}

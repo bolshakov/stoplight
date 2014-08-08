@@ -1,3 +1,4 @@
+require 'haml'
 require 'sinatra'
 require 'stoplight'
 
@@ -11,6 +12,18 @@ get '/' do
 
   haml :index, locals: stats.merge(lights: ls)
 end
+
+post '/lock' do
+  lock [*params[:names]]
+  redirect to('/')
+end
+
+post '/unlock' do
+  unlock [*params[:names]]
+  redirect to('/')
+end
+
+###
 
 def lights
   Stoplight::Light.names.map do |name|
@@ -50,4 +63,24 @@ def stat_params(ls)
     success_percentage: success_percentage,
     failure_percentage: failure_percentage
   }
+end
+
+def lock(names)
+  names.each do |name|
+    new_state =
+      if Stoplight::Light.green?(name)
+        Stoplight::DataStore::STATE_LOCKED_GREEN
+      else
+        Stoplight::DataStore::STATE_LOCKED_RED
+      end
+
+    Stoplight::Light.data_store.set_state(name, new_state)
+  end
+end
+
+def unlock(names)
+  names.each do |name|
+    new_state = Stoplight::DataStore::STATE_UNLOCKED
+    Stoplight::Light.data_store.set_state(name, new_state)
+  end
 end
