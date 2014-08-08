@@ -37,7 +37,7 @@ module Stoplight
     end
 
     def with_threshold(threshold)
-      Stoplight.data_store.set_failure_threshold(threshold.to_i)
+      Stoplight.data_store.set_failure_threshold(name, threshold.to_i)
       self
     end
 
@@ -57,7 +57,7 @@ module Stoplight
     end
 
     def threshold
-      Stoplight.failure_threshold(name)
+      Stoplight.threshold(name)
     end
 
     private
