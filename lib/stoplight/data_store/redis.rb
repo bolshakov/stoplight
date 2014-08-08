@@ -52,6 +52,14 @@ module Stoplight
         @redis.incr(attempt_key(name))
       end
 
+      def clear_attempts(name)
+        @redis.del(attempt_key(name))
+      end
+
+      def attempts(name)
+        @redis.get(attempt_key(name)).to_i
+      end
+
       def state(name)
         @redis.hget(settings_key(name), 'state') || DataStore::STATE_UNLOCKED
       end

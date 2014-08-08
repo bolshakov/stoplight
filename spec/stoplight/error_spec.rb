@@ -11,24 +11,8 @@ describe Stoplight::Error do
     end
   end
 
-  describe '::NoCode' do
-    subject(:result) { described_class.const_get(:NoCode) }
-
-    it 'subclasses Base' do
-      expect(result).to be < described_class.const_get(:Base)
-    end
-  end
-
   describe '::NoFallback' do
     subject(:result) { described_class.const_get(:NoFallback) }
-
-    it 'subclasses Base' do
-      expect(result).to be < described_class.const_get(:Base)
-    end
-  end
-
-  describe '::NoName' do
-    subject(:result) { described_class.const_get(:NoName) }
 
     it 'subclasses Base' do
       expect(result).to be < described_class.const_get(:Base)

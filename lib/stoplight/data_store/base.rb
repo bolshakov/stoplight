@@ -31,6 +31,14 @@ module Stoplight
         fail NotImplementedError
       end
 
+      def clear_attempts(_name)
+        fail NotImplementedError
+      end
+
+      def attempts(_name)
+        fail NotImplementedError
+      end
+
       def state(_name)
         fail NotImplementedError
       end

@@ -46,6 +46,14 @@ module Stoplight
         @data[key] += 1
       end
 
+      def clear_attempts(name)
+        @data.delete(attempt_key(name))
+      end
+
+      def attempts(name)
+        @data[attempt_key(name)] || 0
+      end
+
       def state(name)
         settings(name)['state'] || DataStore::STATE_UNLOCKED
       end
