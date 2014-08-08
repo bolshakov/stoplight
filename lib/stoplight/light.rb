@@ -2,6 +2,8 @@
 
 module Stoplight
   class Light
+    attr_reader :code
+
     DEFAULT_FAILURE_THRESHOLD = 3
 
     def self.data_store(data_store = nil)
@@ -52,11 +54,6 @@ module Stoplight
     def with_threshold(threshold)
       self.class.data_store.set_failure_threshold(name, threshold)
       self
-    end
-
-    def code
-      return @code if defined?(@code)
-      fail Error::NoCode
     end
 
     def fallback
