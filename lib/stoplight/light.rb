@@ -8,39 +8,6 @@ module Stoplight
     attr_reader :code
     attr_reader :name
 
-    class << self
-      def green?(name)
-        case data_store.state(name)
-        when DataStore::STATE_LOCKED_GREEN
-          true
-        when DataStore::STATE_LOCKED_RED
-          false
-        else
-          data_store.failures(name).size < threshold(name)
-        end
-      end
-
-      def red?(name)
-        !green(name)
-      end
-
-      def threshold(name)
-        data_store.failure_threshold(name) || DEFAULT_FAILURE_THRESHOLD
-      end
-
-      # Data store
-
-      def data_store(data_store = nil)
-        @data_store = data_store if data_store
-        @data_store = DataStore::Memory.new unless defined?(@data_store)
-        @data_store
-      end
-
-      def names
-        data_store.names
-      end
-    end
-
     def initialize(name, &code)
       @allowed_errors = []
       @code = code.to_proc
@@ -70,7 +37,7 @@ module Stoplight
     end
 
     def with_threshold(threshold)
-      self.class.data_store.set_failure_threshold(threshold.to_i)
+      Stoplight.data_store.set_failure_threshold(threshold.to_i)
       self
     end
 
@@ -82,7 +49,7 @@ module Stoplight
     end
 
     def green?
-      self.class.green?(name)
+      Stoplight.green?(name)
     end
 
     def red?
@@ -90,7 +57,7 @@ module Stoplight
     end
 
     def threshold
-      self.class.failure_threshold(name)
+      Stoplight.failure_threshold(name)
     end
 
     private
@@ -101,25 +68,25 @@ module Stoplight
 
     def run_code
       result = code.call
-      self.class.data_store.clear_failures(name)
+      Stoplight.data_store.clear_failures(name)
       result
     rescue => error
       if error_allowed?(error)
-        self.class.data_store.clear_failures(name)
+        Stoplight.data_store.clear_failures(name)
       else
-        self.class.data_store.record_failure(name, error)
+        Stoplight.data_store.record_failure(name, error)
       end
 
       raise
     end
 
     def run_fallback
-      self.class.data_store.record_attempt(name)
+      Stoplight.data_store.record_attempt(name)
       fallback.call
     end
 
     def sync_settings
-      self.class.data_store.set_failure_threshold(name, threshold)
+      Stoplight.data_store.set_failure_threshold(name, threshold)
     end
   end
 end
