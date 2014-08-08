@@ -19,7 +19,11 @@ def lights
       green: Stoplight::Light.green?(name),
       locked: locked?(name)
     }
-  end.sort_by { |light| light[:green] ? 1 : 0 }
+  end.sort_by { |light| light_sort_key(light) }
+end
+
+def light_sort_key(light)
+  [light[:green] ? 1 : 0, light[:name]]
 end
 
 def locked?(light_name)
