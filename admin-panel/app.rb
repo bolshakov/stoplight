@@ -1,3 +1,5 @@
+# coding: utf-8
+
 require 'haml'
 require 'sinatra'
 require 'stoplight'
@@ -36,17 +38,21 @@ end
 ###
 
 def lights
-  Stoplight::Light.names.map do |name|
-    green = Stoplight::Light.green?(name)
-    attempts = green ? 0 : Stoplight::Light.data_store.attempts(name)
+  Stoplight::Light.names
+    .map { |name| light_info(name) }
+    .sort_by { |light| light_sort_key(light) }
+end
 
-    {
-      name: name,
-      green: green,
-      attempts: attempts,
-      locked: locked?(name)
-    }
-  end.sort_by { |light| light_sort_key(light) }
+def light_info(light)
+  green = Stoplight::Light.green?(light)
+  attempts = green ? 0 : Stoplight::Light.data_store.attempts(light)
+
+  {
+    name: light,
+    green: green,
+    attempts: attempts,
+    locked: locked?(light)
+  }
 end
 
 def light_sort_key(light)
@@ -59,13 +65,14 @@ def locked?(light_name)
     .include?(Stoplight::Light.data_store.state(light_name))
 end
 
+# rubocop:disable Style/MethodLength
 def stat_params(ls)
   total_count = ls.size
-  success_count = ls.select { |l| l[:green] }.size
+  success_count = ls.count { |l| l[:green] }
   failure_count = total_count - success_count
 
   if total_count > 0
-    failure_percentage = (failure_count.to_f / total_count.to_f * 100.0).ceil
+    failure_percentage = (100.0 * failure_count / total_count).ceil
     success_percentage = 100 - failure_percentage
   else
     failure_percentage = success_percentage = 0
@@ -78,6 +85,7 @@ def stat_params(ls)
     failure_percentage: failure_percentage
   }
 end
+# rubocop:enable Style/MethodLength
 
 def lock(light)
   new_state =
