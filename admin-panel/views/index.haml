@@ -14,8 +14,10 @@
       %thead
         %tr
           %th Status
-          %th Locked?
-          %th Attempts
+          %th
+            %abbr{title: 'Locked lights will not change color automatically.'} Locked?
+          %th
+            %abbr{title: 'Number of times the light was invoked while red.'} Attempts
           %th Name
       %tbody
         - lights.each do |l|
