@@ -4,13 +4,22 @@ body {
 }
 
 td.indicator {
-  font-size: 200%
+  font-size: 200%;
 }
 
 td.name {
-  font-weight: bold
+  font-weight: bold;
 }
 
 td.locked button {
-  font-size: 200%
+  font-size: 200%;
+}
+
+td.failures span.error {
+  font-weight: bold;
+}
+
+td.failures ul {
+  padding: 0;
+  list-style-type: none;
 }

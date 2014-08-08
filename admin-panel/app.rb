@@ -45,11 +45,13 @@ end
 
 def light_info(light)
   green = Stoplight::Light.green?(light)
-  attempts = green ? 0 : Stoplight::Light.data_store.attempts(light)
+  attempts = green ? 0  : Stoplight::Light.data_store.attempts(light)
+  failures = green ? [] : Stoplight::Light.data_store.failures(light).map { |f| JSON.parse(f) }
 
   {
     name: light,
     green: green,
+    failures: failures,
     attempts: attempts,
     locked: locked?(light)
   }

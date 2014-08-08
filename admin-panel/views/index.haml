@@ -17,6 +17,8 @@
           %th
             %abbr{title: 'Locked lights will not change color automatically.'} Locked?
           %th
+            %abbr{title: 'Exceptions which caused the light to turn red.'} Failures
+          %th
             %abbr{title: 'Number of times the light was invoked while red.'} Attempts
           %th Name
       %tbody
@@ -42,6 +44,16 @@
                   %input{type: 'hidden', name: 'names', value: URI.escape(l[:name])}
                   %button{type: 'submit', class: 'btn btn-link'}
                     %span{class: 'glyphicon glyphicon-play'}
+            %td.failures
+              - if l[:failures]
+                %ul
+                  - l[:failures].each do |failure|
+                    %li
+                      %span.error
+                        &= failure['error']
+                      @
+                      %span.timestamp
+                        &= failure['time']
             %td.attempts
               - if l[:attempts] > 0
                 = l[:attempts]
