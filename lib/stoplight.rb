@@ -12,33 +12,6 @@ require 'stoplight/light'
 module Stoplight
   VERSION = Gem::Version.new('0.0.0')
 
-  module_function
-
-  def data_store(data_store = nil)
-    @data_store = data_store if data_store
-    @data_store = DataStore::Memory.new unless defined?(@data_store)
-    @data_store
-  end
-
-  def green?(name)
-    case data_store.state(name)
-    when DataStore::STATE_LOCKED_GREEN
-      true
-    when DataStore::STATE_LOCKED_RED
-      false
-    else
-      data_store.failures(name).size < threshold(name)
-    end
-  end
-
-  def red?(name)
-    !green?(name)
-  end
-
-  def threshold(name)
-    data_store.failure_threshold(name) || Light::DEFAULT_FAILURE_THRESHOLD
-  end
-
   class << self
     extend Forwardable
 
@@ -53,5 +26,30 @@ module Stoplight
       set_state
       state
     )
+
+    def data_store(data_store = nil)
+      @data_store = data_store if data_store
+      @data_store = DataStore::Memory.new unless defined?(@data_store)
+      @data_store
+    end
+
+    def green?(name)
+      case data_store.state(name)
+      when DataStore::STATE_LOCKED_GREEN
+        true
+      when DataStore::STATE_LOCKED_RED
+        false
+      else
+        data_store.failures(name).size < threshold(name)
+      end
+    end
+
+    def red?(name)
+      !green?(name)
+    end
+
+    def threshold(name)
+      data_store.failure_threshold(name) || Light::DEFAULT_FAILURE_THRESHOLD
+    end
   end
 end
