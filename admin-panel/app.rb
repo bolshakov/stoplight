@@ -37,6 +37,10 @@ end
 
 ###
 
+def data_store
+  Stoplight::Light.data_store
+end
+
 def lights
   Stoplight::Light.names
     .map { |name| light_info(name) }
@@ -45,8 +49,8 @@ end
 
 def light_info(light)
   green = Stoplight::Light.green?(light)
-  attempts = green ? 0  : Stoplight::Light.data_store.attempts(light)
-  failures = green ? [] : Stoplight::Light.data_store.failures(light).map { |f| JSON.parse(f) }
+  attempts = green ? 0  : data_store.attempts(light)
+  failures = green ? [] : data_store.failures(light).map { |f| JSON.parse(f) }
 
   {
     name: light,
@@ -66,7 +70,7 @@ end
 def locked?(light_name)
   [Stoplight::DataStore::STATE_LOCKED_GREEN,
    Stoplight::DataStore::STATE_LOCKED_RED]
-    .include?(Stoplight::Light.data_store.state(light_name))
+    .include?(data_store.state(light_name))
 end
 
 # rubocop:disable Style/MethodLength
@@ -99,27 +103,24 @@ def lock(light)
       Stoplight::DataStore::STATE_LOCKED_RED
     end
 
-  Stoplight::Light.data_store.set_state(light, new_state)
+  data_store.set_state(light, new_state)
 end
 
 def unlock(light)
-  new_state = Stoplight::DataStore::STATE_UNLOCKED
-  Stoplight::Light.data_store.set_state(light, new_state)
+  data_store.set_state(light, Stoplight::DataStore::STATE_UNLOCKED)
 end
 
 def green(light)
-  if Stoplight::Light.data_store.state(light) ==
-      Stoplight::DataStore::STATE_LOCKED_RED
+  if data_store.state(light) == Stoplight::DataStore::STATE_LOCKED_RED
     new_state = Stoplight::DataStore::STATE_LOCKED_GREEN
-    Stoplight::Light.data_store.set_state(light, new_state)
+    data_store.set_state(light, new_state)
   else
-    Stoplight::Light.data_store.clear_failures(light)
+    data_store.clear_failures(light)
   end
 
-  Stoplight::Light.data_store.clear_attempts(light)
+  data_store.clear_attempts(light)
 end
 
 def red(light)
-  new_state = Stoplight::DataStore::STATE_LOCKED_RED
-  Stoplight::Light.data_store.set_state(light, new_state)
+  data_store.set_state(light, Stoplight::DataStore::STATE_LOCKED_RED)
 end
