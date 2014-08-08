@@ -2,63 +2,68 @@
   %h1 &#x1f6a6; All of the Lights
   %p Cop lights, flashlights, spotlights, strobe lights&hellip;
 
-.lights
+.main
   - if lights.any?
+    .btn-group
+      %form{method: 'post', action: '/green_all'}
+        %button.btn-lg.btn.btn-success{type: 'submit', disabled: failure_count > 0 ? nil : 'disabled'} Greenify All
+
     .progress
       .progress-bar.progress-bar-danger{style: "width: #{failure_percentage}%"}
         .span= failure_count
       .progress-bar.progress-bar-success{style: "width: #{success_percentage}%"}
         .span= success_count
 
-    %table.table
-      %thead
-        %tr
-          %th Status
-          %th
-            %abbr{title: 'Locked lights will not change color automatically.'} Locked?
-          %th
-            %abbr{title: 'Exceptions which caused the light to turn red.'} Failures
-          %th
-            %abbr{title: 'Number of times the light was invoked while red.'} Attempts
-          %th Name
-      %tbody
-        - lights.each do |l|
+    .lights
+      %table.table.table-hover
+        %thead
           %tr
-            %td.indicator
-              - if l[:green]
-                %form{method: 'post', action: '/red'}
-                  %input{type: 'hidden', name: 'names', value: URI.escape(l[:name])}
-                  %button{type: 'submit', class: 'btn btn-success'} GREEN
-              - else
-                %form{method: 'post', action: '/green'}
-                  %input{type: 'hidden', name: 'names', value: URI.escape(l[:name])}
-                  %button{type: 'submit', class: 'btn btn-danger'} RED
-            %td.locked
-              - if l[:locked]
-                %form{method: 'post', action: '/unlock'}
-                  %input{type: 'hidden', name: 'names', value: URI.escape(l[:name])}
-                  %button{type: 'submit', class: 'btn btn-link'}
-                    %span{class: 'glyphicon glyphicon-lock'}
-              - else
-                %form{method: 'post', action: '/lock'}
-                  %input{type: 'hidden', name: 'names', value: URI.escape(l[:name])}
-                  %button{type: 'submit', class: 'btn btn-link'}
-                    %span{class: 'glyphicon glyphicon-play'}
-            %td.failures
-              - if l[:failures]
-                %ul
-                  - l[:failures].each do |failure|
-                    %li
-                      %span.error
-                        &= failure['error']
-                      @
-                      %span.timestamp
-                        &= failure['time']
-            %td.attempts
-              - if l[:attempts] > 0
-                = l[:attempts]
-            %td.name
-              = l[:name]
+            %th Status
+            %th
+              %abbr{title: 'Locked lights will not change color automatically.'} Locked?
+            %th
+              %abbr{title: 'Exceptions which caused the light to turn red.'} Failures
+            %th
+              %abbr{title: 'Number of times the light was invoked while red.'} Attempts
+            %th Name
+        %tbody
+          - lights.each do |l|
+            %tr
+              %td.indicator
+                - if l[:green]
+                  %form{method: 'post', action: '/red'}
+                    %input{type: 'hidden', name: 'names', value: URI.escape(l[:name])}
+                    %button{type: 'submit', class: 'btn btn-success'} GREEN
+                - else
+                  %form{method: 'post', action: '/green'}
+                    %input{type: 'hidden', name: 'names', value: URI.escape(l[:name])}
+                    %button{type: 'submit', class: 'btn btn-danger'} RED
+              %td.locked
+                - if l[:locked]
+                  %form{method: 'post', action: '/unlock'}
+                    %input{type: 'hidden', name: 'names', value: URI.escape(l[:name])}
+                    %button{type: 'submit', class: 'btn btn-link'}
+                      %span{class: 'glyphicon glyphicon-lock'}
+                - else
+                  %form{method: 'post', action: '/lock'}
+                    %input{type: 'hidden', name: 'names', value: URI.escape(l[:name])}
+                    %button{type: 'submit', class: 'btn btn-link'}
+                      %span{class: 'glyphicon glyphicon-play'}
+              %td.failures
+                - if l[:failures]
+                  %ul
+                    - l[:failures].each do |failure|
+                      %li
+                        %span.error
+                          &= failure['error']
+                        @
+                        %span.timestamp
+                          &= failure['time']
+              %td.attempts
+                - if l[:attempts] > 0
+                  = l[:attempts]
+              %td.name
+                = l[:name]
   - else
     .alert.alert-warning{role: 'alert'}
       %strong No lights found.

@@ -3,6 +3,10 @@ body {
   padding-bottom: 30px;
 }
 
+.progress {
+  margin-top: 30px
+}
+
 td.indicator {
   font-size: 200%;
 }

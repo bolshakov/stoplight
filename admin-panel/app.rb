@@ -35,6 +35,13 @@ post '/red' do
   redirect to('/')
 end
 
+post '/green_all' do
+  Stoplight::Light.names
+    .reject { |l| Stoplight::Light.green?(l) }
+    .each { |l| green(l) }
+  redirect to('/')
+end
+
 ###
 
 def data_store
