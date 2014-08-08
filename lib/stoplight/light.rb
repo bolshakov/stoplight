@@ -3,6 +3,7 @@
 module Stoplight
   class Light
     attr_reader :code
+    attr_reader :name
 
     DEFAULT_FAILURE_THRESHOLD = 3
 
@@ -59,11 +60,6 @@ module Stoplight
     def fallback
       return @fallback if defined?(@fallback)
       fail Error::NoFallback
-    end
-
-    def name
-      return @name if defined?(@name)
-      fail Error::NoName
     end
 
     def run
