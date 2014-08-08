@@ -7,30 +7,32 @@ module Stoplight
 
     DEFAULT_FAILURE_THRESHOLD = 3
 
-    def self.data_store(data_store = nil)
-      @data_store = data_store if data_store
-      @data_store = DataStore::Memory.new unless defined?(@data_store)
-      @data_store
-    end
-
-    def self.green?(name)
-      case data_store.state(name)
-      when DataStore::STATE_LOCKED_GREEN
-        true
-      when DataStore::STATE_LOCKED_RED
-        false
-      else
-        data_store.failures(name).size < failure_threshold(name)
+    class << self
+      def data_store(data_store = nil)
+        @data_store = data_store if data_store
+        @data_store = DataStore::Memory.new unless defined?(@data_store)
+        @data_store
       end
-    end
 
-    # Returns names of all known stoplights.
-    def self.names
-      data_store.names
-    end
+      def green?(name)
+        case data_store.state(name)
+        when DataStore::STATE_LOCKED_GREEN
+          true
+        when DataStore::STATE_LOCKED_RED
+          false
+        else
+          data_store.failures(name).size < failure_threshold(name)
+        end
+      end
 
-    def self.failure_threshold(name)
-      data_store.failure_threshold(name) || DEFAULT_FAILURE_THRESHOLD
+      # Returns names of all known stoplights.
+      def names
+        data_store.names
+      end
+
+      def failure_threshold(name)
+        data_store.failure_threshold(name) || DEFAULT_FAILURE_THRESHOLD
+      end
     end
 
     def initialize(name, &code)
