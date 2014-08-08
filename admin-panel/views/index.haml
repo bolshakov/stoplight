@@ -48,7 +48,7 @@
                   %form{method: 'post', action: '/lock'}
                     %input{type: 'hidden', name: 'names', value: URI.escape(l[:name])}
                     %button{type: 'submit', class: 'btn btn-link'}
-                      %span{class: 'glyphicon glyphicon-play'}
+                      %span{class: 'glyphicon glyphicon-minus'}
               %td.failures
                 - if l[:failures]
                   %ul
