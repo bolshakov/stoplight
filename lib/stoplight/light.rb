@@ -2,7 +2,7 @@
 
 module Stoplight
   class Light
-    DEFAULT_FAILURE_THRESHOLD = 3
+    DEFAULT_THRESHOLD = 3
 
     attr_reader :allowed_errors
     attr_reader :code
@@ -37,7 +37,7 @@ module Stoplight
     end
 
     def with_threshold(threshold)
-      Stoplight.data_store.set_failure_threshold(name, threshold.to_i)
+      Stoplight.data_store.set_threshold(name, threshold.to_i)
       self
     end
 
@@ -86,7 +86,7 @@ module Stoplight
     end
 
     def sync_settings
-      Stoplight.data_store.set_failure_threshold(name, threshold)
+      Stoplight.data_store.set_threshold(name, threshold)
     end
   end
 end

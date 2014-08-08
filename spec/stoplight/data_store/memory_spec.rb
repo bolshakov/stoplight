@@ -33,15 +33,15 @@ describe Stoplight::DataStore::Memory do
     end
   end
 
-  describe '#failure_threshold' do
-    subject(:result) { data_store.failure_threshold(name) }
+  describe '#threshold' do
+    subject(:result) { data_store.threshold(name) }
 
     it 'is nil' do
       expect(result).to be nil
     end
 
     context 'with a threshold' do
-      before { data_store.set_failure_threshold(name, threshold) }
+      before { data_store.set_threshold(name, threshold) }
 
       it 'returns the threshold' do
         expect(result).to eql(threshold)
@@ -107,8 +107,8 @@ describe Stoplight::DataStore::Memory do
     end
   end
 
-  describe '#set_failure_threshold' do
-    subject(:result) { data_store.set_failure_threshold(name, threshold) }
+  describe '#set_threshold' do
+    subject(:result) { data_store.set_threshold(name, threshold) }
 
     it 'returns the threshold' do
       expect(result).to eql(threshold)

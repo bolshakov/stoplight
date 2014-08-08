@@ -17,13 +17,12 @@ module Stoplight
 
     def_delegators :data_store, *%i(
       clear_failures
-      failure_threshold
       failures
       names
       record_attempt
       record_failure
-      set_failure_threshold
       set_state
+      set_threshold
       state
     )
 
@@ -49,7 +48,7 @@ module Stoplight
     end
 
     def threshold(name)
-      data_store.failure_threshold(name) || Light::DEFAULT_FAILURE_THRESHOLD
+      data_store.threshold(name) || Light::DEFAULT_THRESHOLD
     end
   end
 end

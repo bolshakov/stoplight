@@ -7,12 +7,12 @@ describe Stoplight::DataStore::Base do
 
   %i(
     clear_failures
-    failure_threshold
+    threshold
     failures
     names
     record_attempt
     record_failure
-    set_failure_threshold
+    set_threshold
     set_state
     state
   ).each do |method|

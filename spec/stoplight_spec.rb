@@ -112,13 +112,13 @@ describe Stoplight do
     subject(:result) { described_class.threshold(name) }
 
     it 'uses the default threshold' do
-      expect(result).to eql(Stoplight::Light::DEFAULT_FAILURE_THRESHOLD)
+      expect(result).to eql(Stoplight::Light::DEFAULT_THRESHOLD)
     end
 
     context 'with a custom threshold' do
       let(:threshold) { rand(10) }
 
-      before { described_class.set_failure_threshold(name, threshold) }
+      before { described_class.set_threshold(name, threshold) }
 
       it 'uses the threshold' do
         expect(result).to eql(threshold)

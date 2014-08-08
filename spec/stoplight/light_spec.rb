@@ -27,9 +27,9 @@ describe Stoplight::Light do
     subject(:result) { light.run }
 
     it 'syncs settings' do
-      expect(Stoplight.data_store.failure_threshold(name)).to be nil
+      expect(Stoplight.data_store.threshold(name)).to be nil
       result
-      expect(Stoplight.data_store.failure_threshold(name)).to eql(
+      expect(Stoplight.data_store.threshold(name)).to eql(
         light.threshold)
     end
 
@@ -213,7 +213,7 @@ describe Stoplight::Light do
 
     it 'uses the default threshold' do
       expect(result).to eql(
-        described_class.const_get(:DEFAULT_FAILURE_THRESHOLD))
+        described_class.const_get(:DEFAULT_THRESHOLD))
     end
   end
 end

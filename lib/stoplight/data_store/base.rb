@@ -19,11 +19,11 @@ module Stoplight
         fail NotImplementedError
       end
 
-      def failure_threshold(_name)
+      def threshold(_name)
         fail NotImplementedError
       end
 
-      def set_failure_threshold(_name, _threshold)
+      def set_threshold(_name, _threshold)
         fail NotImplementedError
       end
 
