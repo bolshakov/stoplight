@@ -56,7 +56,9 @@ def light_info(light)
 end
 
 def light_sort_key(light)
-  [light[:green] ? 1 : 0, light[:name]]
+  [light[:green] ? 1 : 0,
+   light[:attempts] * -1,
+   light[:name]]
 end
 
 def locked?(light_name)
