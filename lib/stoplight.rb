@@ -16,6 +16,8 @@ module Stoplight
     extend Forwardable
 
     def_delegators :data_store, *%i(
+      attempts
+      clear_attempts
       clear_failures
       failures
       names

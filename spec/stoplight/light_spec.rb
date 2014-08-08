@@ -95,7 +95,10 @@ describe Stoplight::Light do
         expect(result).to eql(fallback_result)
       end
 
-      it 'records the attempt'
+      it 'records the attempt' do
+        result
+        expect(Stoplight.data_store.attempts(name)).to eql(1)
+      end
     end
   end
 

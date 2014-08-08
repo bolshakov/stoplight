@@ -6,15 +6,17 @@ describe Stoplight::DataStore::Base do
   subject(:data_store) { described_class.new }
 
   %i(
+    attempts
+    clear_attempts
     clear_failures
-    threshold
     failures
     names
     record_attempt
     record_failure
-    set_threshold
     set_state
+    set_threshold
     state
+    threshold
   ).each do |method|
     it "responds to #{method}" do
       expect(data_store).to respond_to(method)

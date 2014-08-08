@@ -11,6 +11,43 @@ describe Stoplight::DataStore::Memory do
 
   subject(:data_store) { described_class.new }
 
+  describe '#attempts' do
+    subject(:result) { data_store.attempts(name) }
+
+    it 'is zero' do
+      expect(result).to eql(0)
+    end
+
+    context 'with an attempt' do
+      before { data_store.record_attempt(name) }
+
+      it 'is one' do
+        expect(result).to eql(1)
+      end
+    end
+  end
+
+  describe '#clear_attempts' do
+    subject(:result) { data_store.clear_attempts(name) }
+
+    it 'returns nil' do
+      expect(result).to be_nil
+    end
+
+    context 'with an attempt' do
+      before { data_store.record_attempt(name) }
+
+      it 'returns one' do
+        expect(result).to eql(1)
+      end
+
+      it 'clears attempts' do
+        result
+        expect(data_store.attempts(name)).to eql(0)
+      end
+    end
+  end
+
   describe '#clear_failures' do
     subject(:result) { data_store.clear_failures(name) }
 
@@ -92,7 +129,10 @@ describe Stoplight::DataStore::Memory do
   describe '#record_attempt' do
     subject(:result) { data_store.record_attempt(name) }
 
-    it 'records the attempt'
+    it 'records the attempt' do
+      result
+      expect(data_store.attempts(name)).to eql(1)
+    end
   end
 
   describe '#record_failure' do
