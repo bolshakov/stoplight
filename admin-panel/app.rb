@@ -38,12 +38,12 @@ end
 def lights
   Stoplight::Light.names.map do |name|
     green = Stoplight::Light.green?(name)
-    failures = green ? [] : Stoplight::Light.data_store.failures(name)
+    attempts = green ? 0 : Stoplight::Light.data_store.attempts(name)
 
     {
       name: name,
       green: green,
-      failures: failures,
+      attempts: attempts,
       locked: locked?(name)
     }
   end.sort_by { |light| light_sort_key(light) }
@@ -103,6 +103,8 @@ def green(light)
   else
     Stoplight::Light.data_store.clear_failures(light)
   end
+
+  Stoplight::Light.data_store.clear_attempts(light)
 end
 
 def red(light)

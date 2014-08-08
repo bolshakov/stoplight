@@ -15,7 +15,7 @@
         %tr
           %th Status
           %th Locked?
-          %th Failures
+          %th Attempts
           %th Name
       %tbody
         - lights.each do |l|
@@ -40,9 +40,9 @@
                   %input{type: 'hidden', name: 'names', value: URI.escape(l[:name])}
                   %button{type: 'submit', class: 'btn btn-link'}
                     %span{class: 'glyphicon glyphicon-play'}
-            %td.failures
-              - if l[:failures].any?
-                = l[:failures].size
+            %td.attempts
+              - if l[:attempts] > 0
+                = l[:attempts]
             %td.name
               = l[:name]
   - else
