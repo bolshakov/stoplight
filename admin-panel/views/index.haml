@@ -1,0 +1,33 @@
+.jumbotron
+  %h1 All of the Lights
+  %p This is a basic starting point.
+
+.lights
+  - if lights.any?
+    .progress
+      .progress-bar.progress-bar-danger{style: "width: #{failure_percentage}%"}
+        .span= failure_count
+      .progress-bar.progress-bar-success{style: "width: #{success_percentage}%"}
+        .span= success_count
+
+    %table.table
+      %thead
+        %tr
+          %th Status
+          %th Name
+          %th Locked?
+      %tbody
+        - lights.each do |l|
+          %tr
+            %td.indicator
+              - if l[:green]
+                %span.label.label-success Green
+              - else
+                %span.label.label-danger Red
+            %td.name
+              = l[:name]
+            %td.locked= l[:locked]
+  - else
+    .alert.alert-warning{role: 'alert'}
+      %strong No lights found.
+      Ensure that your Stoplight data store is properly configured and that your Stoplight blocks have been run.

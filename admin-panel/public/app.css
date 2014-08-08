@@ -1,0 +1,12 @@
+body {
+  padding-top: 70px;
+  padding-bottom: 30px;
+}
+
+td.indicator {
+  font-size: 200%
+}
+
+td.name {
+  font-weight: bold
+}
