@@ -4,12 +4,12 @@ require 'json'
 
 module Stoplight
   class Failure
-    attr_reader :time
     attr_reader :error
+    attr_reader :time
 
     def initialize(error)
-      @time = Time.now
       @error = error
+      @time = Time.now
     end
 
     def to_json
@@ -19,10 +19,7 @@ module Stoplight
     private
 
     def to_h
-      {
-        time: time,
-        error: error.inspect
-      }
+      { error: error.inspect, time: time }
     end
   end
 end
