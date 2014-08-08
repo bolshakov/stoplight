@@ -14,12 +14,12 @@ get '/' do
 end
 
 post '/lock' do
-  lock [*params[:names]]
+  [*params[:names]].each { |l| lock(l) }
   redirect to('/')
 end
 
 post '/unlock' do
-  unlock [*params[:names]]
+  [*params[:names]].each { |l| unlock(l) }
   redirect to('/')
 end
 
@@ -65,22 +65,18 @@ def stat_params(ls)
   }
 end
 
-def lock(names)
-  names.each do |name|
-    new_state =
-      if Stoplight::Light.green?(name)
-        Stoplight::DataStore::STATE_LOCKED_GREEN
-      else
-        Stoplight::DataStore::STATE_LOCKED_RED
-      end
+def lock(light)
+  new_state =
+    if Stoplight::Light.green?(light)
+      Stoplight::DataStore::STATE_LOCKED_GREEN
+    else
+      Stoplight::DataStore::STATE_LOCKED_RED
+    end
 
-    Stoplight::Light.data_store.set_state(name, new_state)
-  end
+  Stoplight::Light.data_store.set_state(light, new_state)
 end
 
-def unlock(names)
-  names.each do |name|
-    new_state = Stoplight::DataStore::STATE_UNLOCKED
-    Stoplight::Light.data_store.set_state(name, new_state)
-  end
+def unlock(light)
+  new_state = Stoplight::DataStore::STATE_UNLOCKED
+  Stoplight::Light.data_store.set_state(light, new_state)
 end
