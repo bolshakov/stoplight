@@ -23,6 +23,16 @@ post '/unlock' do
   redirect to('/')
 end
 
+post '/green' do
+  [*params[:names]].each { |l| green(l) }
+  redirect to('/')
+end
+
+post '/red' do
+  [*params[:names]].each { |l| red(l) }
+  redirect to('/')
+end
+
 ###
 
 def lights
@@ -78,5 +88,20 @@ end
 
 def unlock(light)
   new_state = Stoplight::DataStore::STATE_UNLOCKED
+  Stoplight::Light.data_store.set_state(light, new_state)
+end
+
+def green(light)
+  if Stoplight::Light.data_store.state(light) ==
+      Stoplight::DataStore::STATE_LOCKED_RED
+    new_state = Stoplight::DataStore::STATE_LOCKED_GREEN
+    Stoplight::Light.data_store.set_state(light, new_state)
+  else
+    Stoplight::Light.data_store.clear_failures(light)
+  end
+end
+
+def red(light)
+  new_state = Stoplight::DataStore::STATE_LOCKED_RED
   Stoplight::Light.data_store.set_state(light, new_state)
 end

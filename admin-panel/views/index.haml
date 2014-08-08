@@ -21,9 +21,13 @@
           %tr
             %td.indicator
               - if l[:green]
-                %span.label.label-success Green
+                %form{method: 'post', action: '/red'}
+                  %input{type: 'hidden', name: 'names', value: URI.escape(l[:name])}
+                  %button{type: 'submit', class: 'btn btn-success'} GREEN
               - else
-                %span.label.label-danger Red
+                %form{method: 'post', action: '/green'}
+                  %input{type: 'hidden', name: 'names', value: URI.escape(l[:name])}
+                  %button{type: 'submit', class: 'btn btn-danger'} RED
             %td.locked
               - if l[:locked]
                 %form{method: 'post', action: '/unlock'}
