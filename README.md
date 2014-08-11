@@ -149,12 +149,12 @@ Stoplight::Error::NoFallback: Stoplight::Error::NoFallback
 
 ## Credits
 
-Stoplight is brought to you by @camdez and @tfausak from @OrgSync. We were
-inspired by Martin Fowler's [CircuitBreaker][14] article.
+Stoplight is brought to you by [@camdez][14] and [@tfausak][15] from [@OrgSync][16]. We were
+inspired by Martin Fowler's [CircuitBreaker][17] article.
 
 If this gem isn't cutting it for you, there are a few alternatives, including:
-[circuit_b][15], [circuit_breaker][16], [simple_circuit_breaker][17], and
-[ya_circuit_breaker][18].
+[circuit_b][18], [circuit_breaker][19], [simple_circuit_breaker][20], and
+[ya_circuit_breaker][21].
 
 [1]: https://github.com/orgsync/stoplight
 [2]: https://badge.fury.io/rb/stoplight.svg
@@ -169,8 +169,11 @@ If this gem isn't cutting it for you, there are a few alternatives, including:
 [11]: https://gemnasium.com/orgsync/stoplight
 [12]: http://semver.org/spec/v2.0.0.html
 [13]: https://rubygems.org/gems/redis
-[14]: http://martinfowler.com/bliki/CircuitBreaker.html
-[15]: https://github.com/alg/circuit_b
-[16]: https://github.com/wsargent/circuit_breaker
-[17]: https://github.com/soundcloud/simple_circuit_breaker
-[18]: https://github.com/wooga/circuit_breaker
+[14]: https://github.com/camdez
+[15]: https://github.com/tfausak
+[16]: https://github.com/OrgSync
+[17]: http://martinfowler.com/bliki/CircuitBreaker.html
+[18]: https://github.com/alg/circuit_b
+[19]: https://github.com/wsargent/circuit_breaker
+[20]: https://github.com/soundcloud/simple_circuit_breaker
+[21]: https://github.com/wooga/circuit_breaker
