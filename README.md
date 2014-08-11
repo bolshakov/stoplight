@@ -48,6 +48,19 @@ gem][13] installed before configuring Stoplight.
 => #<Stoplight::DataStore::Redis:...>
 ```
 
+### Rails
+
+Stoplight is designed to work seamlessly with Rails. If you want to use the
+in-memory data store, you don't need to do anything special. If you want to use
+a persistent data store, you'll need to configure it. Create an initializer for
+Stoplight:
+
+``` rb
+# config/initializers/stoplight.rb
+require 'stoplight'
+Stoplight.data_store(Stoplight::DataStore::Redis.new(...))
+```
+
 ## Usage
 
 To get started, create a stoplight:
@@ -145,6 +158,24 @@ You can configure this by setting a custom threshold in seconds.
 RuntimeError:
 >> light.run
 Stoplight::Error::NoFallback: Stoplight::Error::NoFallback
+```
+
+### Rails
+
+Stoplight was designed to wrap Rails actions with minimal effort. Here's an
+example configuration:
+
+``` rb
+class ApplicationController < ActionController::Base
+  around_action :stoplight
+  private
+  def stoplight(&block)
+    Stoplight::Light.new("#{params[:controller]}##{params[:action]}", &block)
+      .with_allowed_errors([ActiveRecord::RecordNotFound])
+      .with_fallback { render(nothing: true, status: :service_unavailable) }
+      .run
+  end
+end
 ```
 
 ## Credits
