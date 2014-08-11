@@ -5,6 +5,7 @@ require 'sinatra/base'
 require 'stoplight'
 
 module Sinatra
+  # rubocop:disable Style/MethodLength
   module StoplightAdmin
     module Helpers
       def data_store
@@ -24,7 +25,9 @@ module Sinatra
       def light_info(light)
         green = Stoplight.green?(light)
         attempts = green ? 0  : data_store.attempts(light)
-        failures = green ? [] : data_store.failures(light).map { |f| JSON.parse(f) }
+        failures = green ? [] : data_store.failures(light).map do |f|
+          JSON.parse(f)
+        end
 
         {
           name: light,
@@ -47,7 +50,6 @@ module Sinatra
           .include?(data_store.state(light_name))
       end
 
-      # rubocop:disable Style/MethodLength
       def stat_params(ls)
         total_count = ls.size
         success_count = ls.count { |l| l[:green] }
@@ -67,7 +69,6 @@ module Sinatra
           failure_percentage: failure_percentage
         }
       end
-      # rubocop:enable Style/MethodLength
 
       def lock(light)
         new_state =
@@ -139,6 +140,7 @@ module Sinatra
       end
     end
   end
+  # rubocop:enable Style/MethodLength
 
   register StoplightAdmin
 end
