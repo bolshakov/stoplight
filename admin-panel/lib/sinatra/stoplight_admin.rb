@@ -88,11 +88,10 @@ module Sinatra
         if data_store.state(light) == Stoplight::DataStore::STATE_LOCKED_RED
           new_state = Stoplight::DataStore::STATE_LOCKED_GREEN
           data_store.set_state(light, new_state)
-        else
-          data_store.clear_failures(light)
         end
 
         data_store.clear_attempts(light)
+        data_store.clear_failures(light)
       end
 
       def red(light)
