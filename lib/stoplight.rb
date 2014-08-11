@@ -15,7 +15,7 @@ module Stoplight
   class << self
     extend Forwardable
 
-    def_delegators :data_store, *%i(
+    def_delegators :data_store, *%w(
       attempts
       clear_attempts
       clear_failures

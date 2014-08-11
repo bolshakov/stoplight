@@ -5,7 +5,7 @@ require 'spec_helper'
 describe Stoplight::DataStore::Base do
   subject(:data_store) { described_class.new }
 
-  %i(
+  %w(
     attempts
     clear_attempts
     clear_failures
