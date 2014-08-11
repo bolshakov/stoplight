@@ -8,7 +8,38 @@
 
     %link{rel: 'stylesheet', href: '//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css'}
     %link{rel: 'stylesheet', href: '//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css'}
-    %link{rel: 'stylesheet', href: '/app.css'}
+
+    :css
+      body {
+        padding-top: 70px;
+        padding-bottom: 30px;
+      }
+
+      .progress {
+        margin-top: 30px
+      }
+
+      td.indicator {
+        font-size: 200%;
+      }
+
+      td.name {
+        font-weight: bold;
+      }
+
+      td.locked button {
+        font-size: 200%;
+      }
+
+      td.failures span.error {
+        font-weight: bold;
+      }
+
+      td.failures ul {
+        padding: 0;
+        list-style-type: none;
+      }
+
   %body
     .navbar.navbar-inverse.navbar-fixed-top{role: 'navigation'}
       .container
