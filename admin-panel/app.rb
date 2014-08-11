@@ -6,7 +6,7 @@ require 'stoplight'
 
 REDIS_URL = 'redis://localhost:6379'
 DATA_STORE = Stoplight::DataStore::Redis.new(url: REDIS_URL)
-Stoplight::Light.data_store DATA_STORE
+Stoplight.data_store DATA_STORE
 
 get '/' do
   ls    = lights
@@ -36,8 +36,8 @@ post '/red' do
 end
 
 post '/green_all' do
-  Stoplight::Light.names
-    .reject { |l| Stoplight::Light.green?(l) }
+  data_store.names
+    .reject { |l| Stoplight.green?(l) }
     .each { |l| green(l) }
   redirect to('/')
 end
@@ -45,17 +45,18 @@ end
 ###
 
 def data_store
-  Stoplight::Light.data_store
+  Stoplight.data_store
 end
 
 def lights
-  Stoplight::Light.names
+  data_store
+    .names
     .map { |name| light_info(name) }
     .sort_by { |light| light_sort_key(light) }
 end
 
 def light_info(light)
-  green = Stoplight::Light.green?(light)
+  green = Stoplight.green?(light)
   attempts = green ? 0  : data_store.attempts(light)
   failures = green ? [] : data_store.failures(light).map { |f| JSON.parse(f) }
 
@@ -104,7 +105,7 @@ end
 
 def lock(light)
   new_state =
-    if Stoplight::Light.green?(light)
+    if Stoplight.green?(light)
       Stoplight::DataStore::STATE_LOCKED_GREEN
     else
       Stoplight::DataStore::STATE_LOCKED_RED
