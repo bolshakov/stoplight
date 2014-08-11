@@ -2,18 +2,30 @@
 
 module Stoplight
   class Light
+    # @return [Integer]
     DEFAULT_THRESHOLD = 3
 
+    # @return [Array<Exception>]
     attr_reader :allowed_errors
+
+    # @return [Proc]
     attr_reader :code
+
+    # @return [String]
     attr_reader :name
 
+    # @param name [String]
+    # @yield []
     def initialize(name, &code)
       @allowed_errors = []
       @code = code.to_proc
       @name = name.to_s
     end
 
+    # @return [Object]
+    # @raise [Error::NoFallback]
+    # @see #fallback
+    # @see #green?
     def run
       sync_settings
 
@@ -26,16 +38,22 @@ module Stoplight
 
     # Fluent builders
 
+    # @param allowed_errors [Array<Exception>]
+    # @return [self]
     def with_allowed_errors(allowed_errors)
       @allowed_errors = allowed_errors.to_a
       self
     end
 
+    # @yield []
+    # @return [self]
     def with_fallback(&fallback)
       @fallback = fallback.to_proc
       self
     end
 
+    # @param threshold [Integer]
+    # @return [self]
     def with_threshold(threshold)
       Stoplight.data_store.set_threshold(name, threshold.to_i)
       self
@@ -43,19 +61,24 @@ module Stoplight
 
     # Attribute readers
 
+    # @return [Object]
+    # @raise [Error::NoFallback]
     def fallback
       return @fallback if defined?(@fallback)
       fail Error::NoFallback
     end
 
+    # @return (see Stoplight.green?)
     def green?
       Stoplight.green?(name)
     end
 
+    # @return (see Stoplight.red?)
     def red?
       !green?
     end
 
+    # @return (see Stoplight.threshold)
     def threshold
       Stoplight.threshold(name)
     end

@@ -4,11 +4,13 @@ require 'json'
 
 module Stoplight
   class Failure
+    # @param error [Exception]
     def initialize(error)
       @error = error
       @time = Time.now
     end
 
+    # @return [String]
     def to_json
       JSON.dump(to_h)
     end

@@ -9,7 +9,6 @@ end
 
 module Stoplight
   module DataStore
-    # @note redis ~> 3.1.0
     class Redis < Base
       def initialize(*args)
         fail Error::NoRedis unless REDIS_LOADED
@@ -39,11 +38,10 @@ module Stoplight
 
       def threshold(name)
         value = @redis.hget(settings_key(name), 'threshold')
-        Integer(value) if value # REVIEW: Fault tolerance.
+        Integer(value) if value
       end
 
       def set_threshold(name, threshold)
-        # REVIEW: Make sure threshold is an integer.
         @redis.hset(settings_key(name), 'threshold', threshold)
         threshold
       end
