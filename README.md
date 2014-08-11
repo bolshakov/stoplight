@@ -40,9 +40,7 @@ the only supported persistent data store is Redis. Make sure you have [the Redis
 gem][13] installed before configuring Stoplight.
 
 ``` irb
->> config = { url: 'redis://127.0.0.1:6379/0' }
-=> {:url=>"redis://127.0.0.1:6379/0"}
->> redis = Stoplight::DataStore::Redis.new(config)
+>> redis = Stoplight::DataStore::Redis.new(url: 'redis://127.0.0.1:6379/0')
 => #<Stoplight::DataStore::Redis:...>
 >> Stoplight.data_store(redis)
 => #<Stoplight::DataStore::Redis:...>
@@ -66,7 +64,7 @@ Stoplight.data_store(Stoplight::DataStore::Redis.new(...))
 To get started, create a stoplight:
 
 ``` irb
->> light = Stoplight::Light.new('example-1') { 22 / 7 }
+>> light = Stoplight::Light.new('example-1') { 22.0 / 7 }
 => #<Stoplight::Light:...>
 ```
 
@@ -75,7 +73,7 @@ the "green" state.
 
 ``` irb
 >> light.run
-=> 3
+=> 3.142857142857143
 >> light.green?
 => true
 ```
@@ -89,8 +87,8 @@ stoplight. That's not very interesting though. Let's create a failing stoplight:
 ```
 
 Now when you run it, the error will be recorded and passed through. After
-running it a couple of times, the stoplight will stop trying and fail fast. This
-is the "red" state.
+running it a few times, the stoplight will stop trying and fail fast. This is
+the "red" state.
 
 ``` irb
 >> light.run
@@ -112,15 +110,15 @@ these are handled elsewhere in your stack and don't represent real failures. A
 good example is `ActiveRecord::RecordNotFound`.
 
 ``` irb
->> light = Stoplight::Light.new('example-3') { fail ArgumentError }.
-?> with_allowed_errors([ArgumentError])
+>> light = Stoplight::Light.new('example-3') { User.find(123) }.
+?> with_allowed_errors([ActiveRecord::RecordNotFound])
 => #<Stoplight::Light:...>
 >> light.run
-ArgumentError: ArgumentError
+ActiveRecord::RecordNotFound: Couldn't find User with ID=123
 >> light.run
-ArgumentError: ArgumentError
+ActiveRecord::RecordNotFound: Couldn't find User with ID=123
 >> light.run
-ArgumentError: ArgumentError
+ActiveRecord::RecordNotFound: Couldn't find User with ID=123
 >> light.green?
 => true
 ```
