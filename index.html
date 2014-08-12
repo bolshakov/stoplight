@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="description" content="Stoplight : Traffic control for code.">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Stoplight</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/orgsync/stoplight">View on GitHub</a>
+
+          <h1 id="project_title">Stoplight</h1>
+          <h2 id="project_tagline">Traffic control for code.</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/orgsync/stoplight/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/orgsync/stoplight/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <p><a href="https://rubygems.org/gems/stoplight"><img src="https://badge.fury.io/rb/stoplight.svg" alt="Gem version"></a>
+<a href="https://travis-ci.org/orgsync/stoplight"><img src="https://travis-ci.org/orgsync/stoplight.svg" alt="Build status"></a>
+<a href="https://coveralls.io/r/orgsync/stoplight"><img src="https://img.shields.io/coveralls/orgsync/stoplight.svg" alt="Coverage status"></a>
+<a href="https://codeclimate.com/github/orgsync/stoplight"><img src="https://codeclimate.com/github/orgsync/stoplight/badges/gpa.svg" alt="Quality status"></a>
+<a href="https://gemnasium.com/orgsync/stoplight"><img src="https://gemnasium.com/orgsync/stoplight.svg" alt="Dependency status"></a></p>
+
+<p>Traffic control for code. An implementation of the circuit breaker pattern in Ruby.</p>
+
+<h2>
+<a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h2>
+
+<p>Add it to your Gemfile:</p>
+
+<div class="highlight highlight-rb"><pre><span class="n">gem</span> <span class="s1">'stoplight'</span><span class="p">,</span> <span class="s1">'~&gt; 0.1.0'</span>
+</pre></div>
+
+<p>Or install it manually:</p>
+
+<div class="highlight highlight-sh"><pre><span class="nv">$ </span>gem install stoplight
+</pre></div>
+
+<p>This project uses <a href="http://semver.org/spec/v2.0.0.html">Semantic Versioning</a>.</p>
+
+<h2>
+<a name="setup" class="anchor" href="#setup"><span class="octicon octicon-link"></span></a>Setup</h2>
+
+<p>Stoplight uses an in-memory data store out of the box.</p>
+
+<div class="highlight highlight-irb"><pre><span class="gp">&gt;&gt; </span><span class="nb">require</span> <span class="s1">'stoplight'</span>
+<span class="go">=&gt; true</span>
+<span class="gp">&gt;&gt; </span><span class="no">Stoplight</span><span class="o">.</span><span class="n">data_store</span>
+<span class="go">=&gt; #&lt;Stoplight::DataStore::Memory:...&gt;</span>
+</pre></div>
+
+<p>If you want to use a persistent data store, you'll have to set it up. Currently
+the only supported persistent data store is Redis. Make sure you have <a href="https://rubygems.org/gems/redis">the Redis
+gem</a> installed before configuring Stoplight.</p>
+
+<div class="highlight highlight-irb"><pre><span class="gp">&gt;&gt; </span><span class="n">redis</span> <span class="o">=</span> <span class="no">Stoplight</span><span class="o">::</span><span class="no">DataStore</span><span class="o">::</span><span class="no">Redis</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">url</span><span class="p">:</span> <span class="s1">'redis://127.0.0.1:6379/0'</span><span class="p">)</span>
+<span class="go">=&gt; #&lt;Stoplight::DataStore::Redis:...&gt;</span>
+<span class="gp">&gt;&gt; </span><span class="no">Stoplight</span><span class="o">.</span><span class="n">data_store</span><span class="p">(</span><span class="n">redis</span><span class="p">)</span>
+<span class="go">=&gt; #&lt;Stoplight::DataStore::Redis:...&gt;</span>
+</pre></div>
+
+<h3>
+<a name="rails" class="anchor" href="#rails"><span class="octicon octicon-link"></span></a>Rails</h3>
+
+<p>Stoplight is designed to work seamlessly with Rails. If you want to use the
+in-memory data store, you don't need to do anything special. If you want to use
+a persistent data store, you'll need to configure it. Create an initializer for
+Stoplight:</p>
+
+<div class="highlight highlight-rb"><pre><span class="c1"># config/initializers/stoplight.rb</span>
+<span class="nb">require</span> <span class="s1">'stoplight'</span>
+<span class="no">Stoplight</span><span class="o">.</span><span class="n">data_store</span><span class="p">(</span><span class="no">Stoplight</span><span class="o">::</span><span class="no">DataStore</span><span class="o">::</span><span class="no">Redis</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="o">.</span><span class="n">.</span><span class="o">.</span><span class="p">))</span>
+</pre></div>
+
+<h2>
+<a name="usage" class="anchor" href="#usage"><span class="octicon octicon-link"></span></a>Usage</h2>
+
+<p>To get started, create a stoplight:</p>
+
+<div class="highlight highlight-irb"><pre><span class="gp">&gt;&gt; </span><span class="n">light</span> <span class="o">=</span> <span class="no">Stoplight</span><span class="o">::</span><span class="no">Light</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">'example-1'</span><span class="p">)</span> <span class="p">{</span> <span class="mi">22</span><span class="o">.</span><span class="mi">0</span> <span class="o">/</span> <span class="mi">7</span> <span class="p">}</span>
+<span class="go">=&gt; #&lt;Stoplight::Light:...&gt;</span>
+</pre></div>
+
+<p>Then you can run it and it will return the result of calling the block. This is
+the "green" state.</p>
+
+<div class="highlight highlight-irb"><pre><span class="gp">&gt;&gt; </span><span class="n">light</span><span class="o">.</span><span class="n">run</span>
+<span class="go">=&gt; 3.142857142857143</span>
+<span class="gp">&gt;&gt; </span><span class="n">light</span><span class="o">.</span><span class="n">green?</span>
+<span class="go">=&gt; true</span>
+</pre></div>
+
+<p>If everything goes well, you shouldn't even be able to tell that you're using a
+stoplight. That's not very interesting though. Let's create a failing stoplight:</p>
+
+<div class="highlight highlight-irb"><pre><span class="gp">&gt;&gt; </span><span class="n">light</span> <span class="o">=</span> <span class="no">Stoplight</span><span class="o">::</span><span class="no">Light</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">'example-2'</span><span class="p">)</span> <span class="p">{</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">0</span> <span class="p">}</span>
+<span class="go">=&gt; #&lt;Stoplight::Light:...&gt;</span>
+</pre></div>
+
+<p>Now when you run it, the error will be recorded and passed through. After
+running it a few times, the stoplight will stop trying and fail fast. This is
+the "red" state.</p>
+
+<div class="highlight highlight-irb"><pre><span class="gp">&gt;&gt; </span><span class="n">light</span><span class="o">.</span><span class="n">run</span>
+<span class="go">ZeroDivisionError: divided by 0</span>
+<span class="gp">&gt;&gt; </span><span class="n">light</span><span class="o">.</span><span class="n">run</span>
+<span class="go">ZeroDivisionError: divided by 0</span>
+<span class="gp">&gt;&gt; </span><span class="n">light</span><span class="o">.</span><span class="n">run</span>
+<span class="go">ZeroDivisionError: divided by 0</span>
+<span class="gp">&gt;&gt; </span><span class="n">light</span><span class="o">.</span><span class="n">run</span>
+<span class="go">Stoplight::Error::NoFallback: Stoplight::Error::NoFallback</span>
+<span class="gp">&gt;&gt; </span><span class="n">light</span><span class="o">.</span><span class="n">red?</span>
+<span class="go">=&gt; true</span>
+</pre></div>
+
+<h3>
+<a name="custom-errors" class="anchor" href="#custom-errors"><span class="octicon octicon-link"></span></a>Custom errors</h3>
+
+<p>Some errors shouldn't cause your stoplight to move into the red state. Usually
+these are handled elsewhere in your stack and don't represent real failures. A
+good example is <code>ActiveRecord::RecordNotFound</code>.</p>
+
+<div class="highlight highlight-irb"><pre><span class="gp">&gt;&gt; </span><span class="n">light</span> <span class="o">=</span> <span class="no">Stoplight</span><span class="o">::</span><span class="no">Light</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">'example-3'</span><span class="p">)</span> <span class="p">{</span> <span class="no">User</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="mi">123</span><span class="p">)</span> <span class="p">}</span><span class="o">.</span>
+<span class="gp">?&gt; </span><span class="n">with_allowed_errors</span><span class="p">(</span><span class="o">[</span><span class="no">ActiveRecord</span><span class="o">::</span><span class="no">RecordNotFound</span><span class="o">]</span><span class="p">)</span>
+<span class="go">=&gt; #&lt;Stoplight::Light:...&gt;</span>
+<span class="gp">&gt;&gt; </span><span class="n">light</span><span class="o">.</span><span class="n">run</span>
+<span class="go">ActiveRecord::RecordNotFound: Couldn't find User with ID=123</span>
+<span class="gp">&gt;&gt; </span><span class="n">light</span><span class="o">.</span><span class="n">run</span>
+<span class="go">ActiveRecord::RecordNotFound: Couldn't find User with ID=123</span>
+<span class="gp">&gt;&gt; </span><span class="n">light</span><span class="o">.</span><span class="n">run</span>
+<span class="go">ActiveRecord::RecordNotFound: Couldn't find User with ID=123</span>
+<span class="gp">&gt;&gt; </span><span class="n">light</span><span class="o">.</span><span class="n">green?</span>
+<span class="go">=&gt; true</span>
+</pre></div>
+
+<h3>
+<a name="custom-fallback" class="anchor" href="#custom-fallback"><span class="octicon octicon-link"></span></a>Custom fallback</h3>
+
+<p>Instead of raising a <code>Stoplight::Error::NoFallback</code> error when in the red state,
+you can provide a block to be run. This is useful when there's a good default
+value for the block.</p>
+
+<div class="highlight highlight-irb"><pre><span class="gp">&gt;&gt; </span><span class="n">light</span> <span class="o">=</span> <span class="no">Stoplight</span><span class="o">::</span><span class="no">Light</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">'example-4'</span><span class="p">)</span> <span class="p">{</span> <span class="nb">fail</span> <span class="p">}</span><span class="o">.</span>
+<span class="gp">?&gt; </span><span class="n">with_fallback</span> <span class="p">{</span> <span class="o">[]</span> <span class="p">}</span>
+<span class="go">=&gt; #&lt;Stoplight::Light:...&gt;</span>
+<span class="gp">&gt;&gt; </span><span class="n">light</span><span class="o">.</span><span class="n">run</span>
+<span class="go">RuntimeError:</span>
+<span class="gp">&gt;&gt; </span><span class="n">light</span><span class="o">.</span><span class="n">run</span>
+<span class="go">RuntimeError:</span>
+<span class="gp">&gt;&gt; </span><span class="n">light</span><span class="o">.</span><span class="n">run</span>
+<span class="go">RuntimeError:</span>
+<span class="gp">&gt;&gt; </span><span class="n">light</span><span class="o">.</span><span class="n">run</span>
+<span class="go">=&gt; []</span>
+</pre></div>
+
+<h3>
+<a name="custom-threshold" class="anchor" href="#custom-threshold"><span class="octicon octicon-link"></span></a>Custom threshold</h3>
+
+<p>Some bits of code might be allowed to fail more or less frequently than others.
+You can configure this by setting a custom threshold in seconds.</p>
+
+<div class="highlight highlight-irb"><pre><span class="gp">&gt;&gt; </span><span class="n">light</span> <span class="o">=</span> <span class="no">Stoplight</span><span class="o">::</span><span class="no">Light</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">'example-5'</span><span class="p">)</span> <span class="p">{</span> <span class="nb">fail</span> <span class="p">}</span><span class="o">.</span>
+<span class="gp">?&gt; </span><span class="n">with_threshold</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="go">=&gt; #&lt;Stoplight::Light:...&gt;</span>
+<span class="gp">&gt;&gt; </span><span class="n">light</span><span class="o">.</span><span class="n">run</span>
+<span class="go">RuntimeError:</span>
+<span class="gp">&gt;&gt; </span><span class="n">light</span><span class="o">.</span><span class="n">run</span>
+<span class="go">Stoplight::Error::NoFallback: Stoplight::Error::NoFallback</span>
+</pre></div>
+
+<h3>
+<a name="rails-1" class="anchor" href="#rails-1"><span class="octicon octicon-link"></span></a>Rails</h3>
+
+<p>Stoplight was designed to wrap Rails actions with minimal effort. Here's an
+example configuration:</p>
+
+<div class="highlight highlight-rb"><pre><span class="k">class</span> <span class="nc">ApplicationController</span> <span class="o">&lt;</span> <span class="no">ActionController</span><span class="o">::</span><span class="no">Base</span>
+  <span class="n">around_action</span> <span class="ss">:stoplight</span>
+  <span class="kp">private</span>
+  <span class="k">def</span> <span class="nf">stoplight</span><span class="p">(</span><span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
+    <span class="no">Stoplight</span><span class="o">::</span><span class="no">Light</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s2">"</span><span class="si">#{</span><span class="n">params</span><span class="o">[</span><span class="ss">:controller</span><span class="o">]</span><span class="si">}</span><span class="s2">#</span><span class="si">#{</span><span class="n">params</span><span class="o">[</span><span class="ss">:action</span><span class="o">]</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
+      <span class="o">.</span><span class="n">with_allowed_errors</span><span class="p">(</span><span class="o">[</span><span class="no">ActiveRecord</span><span class="o">::</span><span class="no">RecordNotFound</span><span class="o">]</span><span class="p">)</span>
+      <span class="o">.</span><span class="n">with_fallback</span> <span class="p">{</span> <span class="n">render</span><span class="p">(</span><span class="ss">nothing</span><span class="p">:</span> <span class="kp">true</span><span class="p">,</span> <span class="ss">status</span><span class="p">:</span> <span class="ss">:service_unavailable</span><span class="p">)</span> <span class="p">}</span>
+      <span class="o">.</span><span class="n">run</span>
+  <span class="k">end</span>
+<span class="k">end</span>
+</pre></div>
+
+<h2>
+<a name="credits" class="anchor" href="#credits"><span class="octicon octicon-link"></span></a>Credits</h2>
+
+<p>Stoplight is brought to you by <a href="https://github.com/camdez">@camdez</a> and <a href="https://github.com/tfausak">@tfausak</a> from <a href="https://github.com/OrgSync">@OrgSync</a>. We were
+inspired by Martin Fowler's <a href="http://martinfowler.com/bliki/CircuitBreaker.html">CircuitBreaker</a> article.</p>
+
+<p>If this gem isn't cutting it for you, there are a few alternatives, including:
+<a href="https://github.com/alg/circuit_b">circuit_b</a>, <a href="https://github.com/wsargent/circuit_breaker">circuit_breaker</a>, <a href="https://github.com/soundcloud/simple_circuit_breaker">simple_circuit_breaker</a>, and
+<a href="https://github.com/wooga/circuit_breaker">ya_circuit_breaker</a>.</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Stoplight maintained by <a href="https://github.com/orgsync">orgsync</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
