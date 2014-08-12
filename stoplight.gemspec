@@ -26,4 +26,9 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rspec', '~> 3.0.0'
   spec.add_development_dependency 'rubocop', '~> 0.24.1'
   spec.add_development_dependency 'yard', '~> 0.8.7.4'
+
+  # Admin panel dependencies
+  spec.add_dependency 'haml', '~> 4.0.4'
+  spec.add_dependency 'redis', '~> 3.1.0'
+  spec.add_dependency 'sinatra', '~> 1.4.5'
 end
