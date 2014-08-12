@@ -11,7 +11,7 @@ require 'stoplight/light'
 
 module Stoplight
   # @return [Gem::Version]
-  VERSION = Gem::Version.new('0.0.0')
+  VERSION = Gem::Version.new('0.1.0')
 
   class << self
     extend Forwardable

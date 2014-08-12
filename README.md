@@ -13,7 +13,7 @@ Traffic control for code. An implementation of the circuit breaker pattern in Ru
 Add it to your Gemfile:
 
 ``` rb
-gem 'stoplight', '~> 0.0.0'
+gem 'stoplight', '~> 0.1.0'
 ```
 
 Or install it manually:
