@@ -29,6 +29,8 @@ This project uses [Semantic Versioning][13].
 
 ## Setup
 
+### Data store
+
 Stoplight uses an in-memory data store out of the box.
 
 ``` irb
@@ -47,6 +49,28 @@ gem][14] installed before configuring Stoplight.
 => #<Stoplight::DataStore::Redis:...>
 >> Stoplight.data_store(redis)
 => #<Stoplight::DataStore::Redis:...>
+```
+
+### Notifiers
+
+Stoplight sends notifications to standard error by default.
+
+``` irb
+>> Stoplight.notifiers
+=> [#<Stoplight::Notifier::StandardError:...>]
+```
+
+If you want to send notifications elsewhere, you'll have to set them up.
+Currently the only other supported notifier is HipChat. Make sure you have [the
+HipChat gem][] installed before configuring Stoplight.
+
+``` irb
+>> hipchat = HipChat::Client.new('token')
+=> #<HipChat::Client:...>
+>> notifier = Stoplight::Notifier::HipChat.new(hipchat, 'room')
+=> #<Stoplight::Notifier::HipChat:...>
+>> Stoplight.notifiers([notifier])
+=> [#<Stoplight::Notifier::HipChat:...>]
 ```
 
 ### Rails
@@ -105,6 +129,9 @@ Stoplight::Error::RedLight: Stoplight::Error::RedLight
 >> light.red?
 => true
 ```
+
+When the stoplight changes from green to red, it will notify every configured
+notifier.
 
 ### Mixin
 
@@ -214,6 +241,7 @@ If this gem isn't cutting it for you, there are a few alternatives, including:
 [12]: https://github.com/orgsync/stoplight-admin
 [13]: http://semver.org/spec/v2.0.0.html
 [14]: https://rubygems.org/gems/redis
+[the hipchat gem]: https://rubygems.org/gems/hipchat
 [15]: https://github.com/camdez
 [16]: https://github.com/tfausak
 [17]: https://github.com/OrgSync
