@@ -11,6 +11,7 @@ require 'stoplight/light'
 require 'stoplight/mixin'
 require 'stoplight/notifier'
 require 'stoplight/notifier/base'
+require 'stoplight/notifier/hip_chat'
 require 'stoplight/notifier/standard_error'
 
 module Stoplight
