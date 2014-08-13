@@ -2,9 +2,6 @@
 
 module Stoplight
   class Light
-    # @return [Integer]
-    DEFAULT_THRESHOLD = 3
-
     # @return [Array<Exception>]
     attr_reader :allowed_errors
 
