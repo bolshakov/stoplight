@@ -6,7 +6,8 @@
 [![Quality status][8]][9]
 [![Dependency status][10]][11]
 
-Traffic control for code. An implementation of the circuit breaker pattern in Ruby.
+Traffic control for code. An implementation of the circuit breaker pattern in
+Ruby.
 
 ## Installation
 
