@@ -23,7 +23,7 @@ module Stoplight
     end
 
     # @return [Object]
-    # @raise [Error::NoFallback]
+    # @raise [Error::RedLight]
     # @see #fallback
     # @see #green?
     def run
@@ -62,10 +62,10 @@ module Stoplight
     # Attribute readers
 
     # @return [Object]
-    # @raise [Error::NoFallback]
+    # @raise [Error::RedLight]
     def fallback
       return @fallback if defined?(@fallback)
-      fail Error::NoFallback
+      fail Error::RedLight
     end
 
     # @return (see Stoplight.green?)
