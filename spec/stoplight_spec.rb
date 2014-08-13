@@ -88,6 +88,60 @@ describe Stoplight do
     end
   end
 
+  describe '.yellow?' do
+    subject(:result) { described_class.yellow?(name) }
+
+    context 'locked green' do
+      before do
+        described_class.set_state(
+          name, Stoplight::DataStore::STATE_LOCKED_GREEN)
+      end
+
+      it 'is false' do
+        expect(result).to be(false)
+      end
+    end
+
+    context 'green' do
+      it 'is false' do
+        expect(result).to be(false)
+      end
+    end
+
+    context 'yellow' do
+      before do
+        Stoplight.set_threshold(name, 0)
+        failure = Stoplight::Failure.new(nil)
+        failure.instance_variable_set(:@time, Time.now - (10 * 60))
+        allow(Stoplight::Failure).to receive(:new).with(nil).and_return(failure)
+        Stoplight.record_failure(name, nil)
+      end
+
+      it 'is true' do
+        expect(result).to be(true)
+      end
+    end
+
+    context 'red' do
+      before { Stoplight.set_threshold(name, 0) }
+
+      it 'is false' do
+        expect(result).to be(false)
+      end
+    end
+
+    context 'locked red' do
+      before do
+        described_class.set_state(
+          name, Stoplight::DataStore::STATE_LOCKED_RED)
+      end
+
+      it 'is false' do
+        expect(result).to be(false)
+      end
+    end
+  end
+
   describe '.red?' do
     subject(:result) { described_class.red?(name) }
 

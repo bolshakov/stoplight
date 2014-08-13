@@ -203,7 +203,9 @@ describe Stoplight::Light do
     end
 
     context 'not green' do
-      before { allow(light).to receive(:green?).and_return(false) }
+      before do
+        allow(Stoplight).to receive(:green?).with(name).and_return(false)
+      end
 
       it 'is true' do
         expect(result).to be true

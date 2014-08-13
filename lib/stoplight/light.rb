@@ -73,9 +73,14 @@ module Stoplight
       Stoplight.green?(name)
     end
 
+    # @return (see Stoplight.yellow?)
+    def yellow?
+      Stoplight.yellow?(name)
+    end
+
     # @return (see Stoplight.red?)
     def red?
-      !green?
+      Stoplight.red?(name)
     end
 
     # @return (see Stoplight.threshold)
