@@ -24,37 +24,35 @@ describe Stoplight::Light do
   end
 
   describe '#run' do
-    subject(:result) { light.run }
+    subject(:result) { light.with_fallback(&fallback).run }
+    let(:fallback) { proc { fallback_result } }
+    let(:fallback_result) { double }
 
-    it 'syncs settings' do
-      expect(Stoplight.data_store.threshold(name)).to be nil
+    it 'sync settings' do
+      expect(Stoplight.data_store.threshold(name)).to be(nil)
       result
-      expect(Stoplight.data_store.threshold(name)).to eql(
-        light.threshold)
+      expect(Stoplight.data_store.threshold(name)).to eql(light.threshold)
     end
 
-    context 'green' do
-      before { allow(light).to receive(:green?).and_return(true) }
-
+    shared_examples 'run_code' do
       it 'runs the code' do
         expect(result).to eql(code_result)
       end
 
       it 'clears failures' do
         Stoplight.record_failure(name, nil)
-        expect(Stoplight.failures(name)).to_not be_empty
         result
         expect(Stoplight.failures(name)).to be_empty
       end
 
       context 'with failing code' do
         let(:code_result) { fail error }
-        let(:error) { klass.new }
-        let(:klass) { Class.new(StandardError) }
+        let(:error) { error_class.new }
+        let(:error_class) { Class.new(StandardError) }
         let(:safe_result) do
           begin
             result
-          rescue klass
+          rescue error_class
             nil
           end
         end
@@ -64,17 +62,22 @@ describe Stoplight::Light do
         end
 
         it 'records the failure' do
-          expect(Stoplight.failures(name)).to be_empty
+          failures = Stoplight.failures(name)
           safe_result
-          expect(Stoplight.failures(name)).to_not be_empty
+          expect(Stoplight.failures(name).size).to eql(failures.size + 1)
         end
 
-        context do
-          before { light.with_allowed_errors([klass]) }
+        context 'with the error allowed' do
+          let(:allowed_errors) { [error_class] }
+
+          before { light.with_allowed_errors(allowed_errors) }
+
+          it 'raises the error' do
+            expect { result }.to raise_error(error)
+          end
 
           it 'clears failures' do
             Stoplight.record_failure(name, nil)
-            expect(Stoplight.failures(name)).to_not be_empty
             safe_result
             expect(Stoplight.failures(name)).to be_empty
           end
@@ -82,13 +85,31 @@ describe Stoplight::Light do
       end
     end
 
-    context 'not green' do
-      let(:fallback) { proc { fallback_result } }
-      let(:fallback_result) { double }
-
+    context 'green' do
       before do
-        light.with_fallback(&fallback)
+        allow(light).to receive(:green?).and_return(true)
+        allow(light).to receive(:yellow?).and_return(false)
+        allow(light).to receive(:red?).and_return(false)
+      end
+
+      include_examples 'run_code'
+    end
+
+    context 'yellow' do
+      before do
         allow(light).to receive(:green?).and_return(false)
+        allow(light).to receive(:yellow?).and_return(true)
+        allow(light).to receive(:red?).and_return(false)
+      end
+
+      include_examples 'run_code'
+    end
+
+    context 'red' do
+      before do
+        allow(light).to receive(:green?).and_return(false)
+        allow(light).to receive(:yellow?).and_return(false)
+        allow(light).to receive(:red?).and_return(true)
       end
 
       it 'runs the fallback' do
@@ -97,7 +118,7 @@ describe Stoplight::Light do
 
       it 'records the attempt' do
         result
-        expect(Stoplight.data_store.attempts(name)).to eql(1)
+        expect(Stoplight.attempts(name)).to eql(1)
       end
     end
   end

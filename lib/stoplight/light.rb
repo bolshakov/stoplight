@@ -29,10 +29,10 @@ module Stoplight
     def run
       sync_settings
 
-      if green?
-        run_code
-      else
+      if red?
         run_fallback
+      else
+        run_code
       end
     end
 
