@@ -9,6 +9,9 @@ require 'stoplight/error'
 require 'stoplight/failure'
 require 'stoplight/light'
 require 'stoplight/mixin'
+require 'stoplight/notifier'
+require 'stoplight/notifier/base'
+require 'stoplight/notifier/standard_error'
 
 module Stoplight
   # @return [Gem::Version]
