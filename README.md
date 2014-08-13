@@ -103,6 +103,18 @@ Stoplight::Error::NoFallback: Stoplight::Error::NoFallback
 => true
 ```
 
+### Mixin
+
+Since creating and running a stoplight is so common, we provide a mixin that
+makes it easy.
+
+``` irb
+>> include Stoplight::Mixin
+=> Object
+>> stoplight('example-3') { 1.0 / 3 }
+=> 0.3333333333333333
+```
+
 ### Custom errors
 
 Some errors shouldn't cause your stoplight to move into the red state. Usually
@@ -110,7 +122,7 @@ these are handled elsewhere in your stack and don't represent real failures. A
 good example is `ActiveRecord::RecordNotFound`.
 
 ``` irb
->> light = Stoplight::Light.new('example-3') { User.find(123) }.
+>> light = Stoplight::Light.new('example-4') { User.find(123) }.
 ?> with_allowed_errors([ActiveRecord::RecordNotFound])
 => #<Stoplight::Light:...>
 >> light.run
@@ -130,7 +142,7 @@ you can provide a block to be run. This is useful when there's a good default
 value for the block.
 
 ``` irb
->> light = Stoplight::Light.new('example-4') { fail }.
+>> light = Stoplight::Light.new('example-5') { fail }.
 ?> with_fallback { [] }
 => #<Stoplight::Light:...>
 >> light.run
@@ -149,7 +161,7 @@ Some bits of code might be allowed to fail more or less frequently than others.
 You can configure this by setting a custom threshold in seconds.
 
 ``` irb
->> light = Stoplight::Light.new('example-5') { fail }.
+>> light = Stoplight::Light.new('example-6') { fail }.
 ?> with_threshold(1)
 => #<Stoplight::Light:...>
 >> light.run
