@@ -12,6 +12,8 @@ describe Stoplight::DataStore::Redis do
 
   subject(:data_store) { described_class.new }
 
+  it_behaves_like 'a data store'
+
   describe '#attempts' do
     subject(:result) { data_store.attempts(name) }
 
