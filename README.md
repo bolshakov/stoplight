@@ -101,7 +101,7 @@ ZeroDivisionError: divided by 0
 >> light.run
 ZeroDivisionError: divided by 0
 >> light.run
-Stoplight::Error::NoFallback: Stoplight::Error::NoFallback
+Stoplight::Error::RedLight: Stoplight::Error::RedLight
 >> light.red?
 => true
 ```
@@ -140,7 +140,7 @@ ActiveRecord::RecordNotFound: Couldn't find User with ID=123
 
 ### Custom fallback
 
-Instead of raising a `Stoplight::Error::NoFallback` error when in the red state,
+Instead of raising a `Stoplight::Error::RedLight` error when in the red state,
 you can provide a block to be run. This is useful when there's a good default
 value for the block.
 
@@ -170,7 +170,7 @@ You can configure this by setting a custom threshold in seconds.
 >> light.run
 RuntimeError:
 >> light.run
-Stoplight::Error::NoFallback: Stoplight::Error::NoFallback
+Stoplight::Error::RedLight: Stoplight::Error::RedLight
 ```
 
 ### Rails

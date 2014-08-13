@@ -1,5 +1,6 @@
 # Changelog
 
+- Renamed `Stoplight::Error::NoFallback` to `Stoplight::Error::RedLight`.
 - Created `Stoplight::Mixin#stoplight` for easily creating and running simple
   stoplights.
 

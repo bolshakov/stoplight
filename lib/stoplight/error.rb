@@ -5,7 +5,7 @@ module Stoplight
     # @return [Class]
     Base = Class.new(StandardError)
     # @return [Class]
-    NoFallback = Class.new(Base)
+    RedLight = Class.new(Base)
     # @return [Class]
     NoRedis = Class.new(Base)
   end
