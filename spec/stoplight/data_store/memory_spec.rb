@@ -118,7 +118,7 @@ describe Stoplight::DataStore::Memory do
     end
 
     context 'with a name' do
-      before { data_store.settings(name) }
+      before { data_store.set_state(name, state) }
 
       it 'includes the name' do
         expect(result).to include(name)
