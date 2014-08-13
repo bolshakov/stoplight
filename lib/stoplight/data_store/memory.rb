@@ -29,17 +29,15 @@ module Stoplight
       # @group Failures
 
       def failures(name)
-        all_failures[name] || []
+        @data[failure_key(name)] || []
       end
 
       def record_failure(name, error)
-        all_failures[name] ||= []
-        failure = Failure.new(error)
-        all_failures[name].push(failure)
+        (@data[failure_key(name)] ||= []).push(Failure.new(error))
       end
 
       def clear_failures(name)
-        all_failures.delete(name)
+        @data.delete(failure_key(name))
       end
 
       # @group State
