@@ -9,6 +9,8 @@
 Traffic control for code. An implementation of the circuit breaker pattern in
 Ruby.
 
+Check out [stoplight-admin][12] for controlling your stoplights.
+
 ## Installation
 
 Add it to your Gemfile:
@@ -23,7 +25,7 @@ Or install it manually:
 $ gem install stoplight
 ```
 
-This project uses [Semantic Versioning][12].
+This project uses [Semantic Versioning][13].
 
 ## Setup
 
@@ -38,7 +40,7 @@ Stoplight uses an in-memory data store out of the box.
 
 If you want to use a persistent data store, you'll have to set it up. Currently
 the only supported persistent data store is Redis. Make sure you have [the Redis
-gem][13] installed before configuring Stoplight.
+gem][14] installed before configuring Stoplight.
 
 ``` irb
 >> redis = Stoplight::DataStore::Redis.new(url: 'redis://127.0.0.1:6379/0')
@@ -179,12 +181,12 @@ end
 
 ## Credits
 
-Stoplight is brought to you by [@camdez][14] and [@tfausak][15] from [@OrgSync][16]. We were
-inspired by Martin Fowler's [CircuitBreaker][17] article.
+Stoplight is brought to you by [@camdez][15] and [@tfausak][16] from [@OrgSync][17]. We were
+inspired by Martin Fowler's [CircuitBreaker][18] article.
 
 If this gem isn't cutting it for you, there are a few alternatives, including:
-[circuit_b][18], [circuit_breaker][19], [simple_circuit_breaker][20], and
-[ya_circuit_breaker][21].
+[circuit_b][19], [circuit_breaker][20], [simple_circuit_breaker][21], and
+[ya_circuit_breaker][22].
 
 [1]: https://github.com/orgsync/stoplight
 [2]: https://badge.fury.io/rb/stoplight.svg
@@ -197,13 +199,14 @@ If this gem isn't cutting it for you, there are a few alternatives, including:
 [9]: https://codeclimate.com/github/orgsync/stoplight
 [10]: https://gemnasium.com/orgsync/stoplight.svg
 [11]: https://gemnasium.com/orgsync/stoplight
-[12]: http://semver.org/spec/v2.0.0.html
-[13]: https://rubygems.org/gems/redis
-[14]: https://github.com/camdez
-[15]: https://github.com/tfausak
-[16]: https://github.com/OrgSync
-[17]: http://martinfowler.com/bliki/CircuitBreaker.html
-[18]: https://github.com/alg/circuit_b
-[19]: https://github.com/wsargent/circuit_breaker
-[20]: https://github.com/soundcloud/simple_circuit_breaker
-[21]: https://github.com/wooga/circuit_breaker
+[12]: https://github.com/orgsync/stoplight-admin
+[13]: http://semver.org/spec/v2.0.0.html
+[14]: https://rubygems.org/gems/redis
+[15]: https://github.com/camdez
+[16]: https://github.com/tfausak
+[17]: https://github.com/OrgSync
+[18]: http://martinfowler.com/bliki/CircuitBreaker.html
+[19]: https://github.com/alg/circuit_b
+[20]: https://github.com/wsargent/circuit_breaker
+[21]: https://github.com/soundcloud/simple_circuit_breaker
+[22]: https://github.com/wooga/circuit_breaker
