@@ -32,6 +32,11 @@ module Stoplight
       if green?
         run_code
       else
+        if Stoplight.attempts(name).zero?
+          message = "Switching #{name} stoplight from green to red."
+          Stoplight.notifiers.each { |notifier| notifier.notify(message) }
+        end
+
         run_fallback
       end
     end

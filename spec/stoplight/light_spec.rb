@@ -89,6 +89,9 @@ describe Stoplight::Light do
       before do
         light.with_fallback(&fallback)
         allow(light).to receive(:green?).and_return(false)
+        Stoplight.notifiers.each do |notifier|
+          allow(notifier).to receive(:notify)
+        end
       end
 
       it 'runs the fallback' do
@@ -98,6 +101,24 @@ describe Stoplight::Light do
       it 'records the attempt' do
         result
         expect(Stoplight.data_store.attempts(name)).to eql(1)
+      end
+
+      it 'notifies' do
+        result
+        Stoplight.notifiers.each do |notifier|
+          expect(notifier).to have_received(:notify)
+        end
+      end
+
+      context 'with an attempt' do
+        before { allow(Stoplight).to receive(:attempts).and_return(1) }
+
+        it 'does not notify' do
+          result
+          Stoplight.notifiers.each do |notifier|
+            expect(notifier).to_not have_received(:notify)
+          end
+        end
       end
     end
   end
