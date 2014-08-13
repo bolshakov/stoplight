@@ -8,6 +8,7 @@ require 'stoplight/data_store/redis'
 require 'stoplight/error'
 require 'stoplight/failure'
 require 'stoplight/light'
+require 'stoplight/mixin'
 
 module Stoplight
   # @return [Gem::Version]
