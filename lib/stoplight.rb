@@ -41,6 +41,14 @@ module Stoplight
       @data_store
     end
 
+    # @param notifiers [Array<Notifier::Base>]
+    # @return [Array<Notifier::Base>]
+    def notifiers(notifiers = nil)
+      @notifiers = notifiers if notifiers
+      @notifiers = [Notifier::StandardError.new] unless defined?(@notifiers)
+      @notifiers
+    end
+
     # @param name [String]
     # @return [Boolean]
     def green?(name)
