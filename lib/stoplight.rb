@@ -18,6 +18,9 @@ module Stoplight
   # @return [Gem::Version]
   VERSION = Gem::Version.new('0.1.0')
 
+  # @return [Integer]
+  DEFAULT_THRESHOLD = 3
+
   class << self
     extend Forwardable
 
@@ -72,7 +75,7 @@ module Stoplight
     # @param name [String]
     # @return [Integer]
     def threshold(name)
-      data_store.threshold(name) || Light::DEFAULT_THRESHOLD
+      data_store.threshold(name) || DEFAULT_THRESHOLD
     end
   end
 end

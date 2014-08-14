@@ -236,8 +236,7 @@ describe Stoplight::Light do
     subject(:result) { light.threshold }
 
     it 'uses the default threshold' do
-      expect(result).to eql(
-        described_class.const_get(:DEFAULT_THRESHOLD))
+      expect(result).to eql(Stoplight::DEFAULT_THRESHOLD)
     end
   end
 end
