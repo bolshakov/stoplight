@@ -9,8 +9,7 @@ module Stoplight
 
       def names
         @data.keys.map do |key|
-          match = /^#{DataStore::KEY_PREFIX}:(.+):([^:]+)$/.match(key)
-          match[1] if match
+          key[/^#{DataStore::KEY_PREFIX}:(.+):[^:]+$/o, 1]
         end.compact.uniq
       end
 
