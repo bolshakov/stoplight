@@ -6,7 +6,10 @@
 [![Quality status][8]][9]
 [![Dependency status][10]][11]
 
-Traffic control for code. An implementation of the circuit breaker pattern in Ruby.
+Traffic control for code. An implementation of the circuit breaker pattern in
+Ruby.
+
+Check out [stoplight-admin][12] for controlling your stoplights.
 
 ## Installation
 
@@ -22,7 +25,7 @@ Or install it manually:
 $ gem install stoplight
 ```
 
-This project uses [Semantic Versioning][12].
+This project uses [Semantic Versioning][13].
 
 ## Setup
 
@@ -37,7 +40,7 @@ Stoplight uses an in-memory data store out of the box.
 
 If you want to use a persistent data store, you'll have to set it up. Currently
 the only supported persistent data store is Redis. Make sure you have [the Redis
-gem][13] installed before configuring Stoplight.
+gem][14] installed before configuring Stoplight.
 
 ``` irb
 >> redis = Stoplight::DataStore::Redis.new(url: 'redis://127.0.0.1:6379/0')
@@ -98,9 +101,21 @@ ZeroDivisionError: divided by 0
 >> light.run
 ZeroDivisionError: divided by 0
 >> light.run
-Stoplight::Error::NoFallback: Stoplight::Error::NoFallback
+Stoplight::Error::RedLight: Stoplight::Error::RedLight
 >> light.red?
 => true
+```
+
+### Mixin
+
+Since creating and running a stoplight is so common, we provide a mixin that
+makes it easy.
+
+``` irb
+>> include Stoplight::Mixin
+=> Object
+>> stoplight('example-3') { 1.0 / 3 }
+=> 0.3333333333333333
 ```
 
 ### Custom errors
@@ -110,7 +125,7 @@ these are handled elsewhere in your stack and don't represent real failures. A
 good example is `ActiveRecord::RecordNotFound`.
 
 ``` irb
->> light = Stoplight::Light.new('example-3') { User.find(123) }.
+>> light = Stoplight::Light.new('example-4') { User.find(123) }.
 ?> with_allowed_errors([ActiveRecord::RecordNotFound])
 => #<Stoplight::Light:...>
 >> light.run
@@ -125,12 +140,12 @@ ActiveRecord::RecordNotFound: Couldn't find User with ID=123
 
 ### Custom fallback
 
-Instead of raising a `Stoplight::Error::NoFallback` error when in the red state,
+Instead of raising a `Stoplight::Error::RedLight` error when in the red state,
 you can provide a block to be run. This is useful when there's a good default
 value for the block.
 
 ``` irb
->> light = Stoplight::Light.new('example-4') { fail }.
+>> light = Stoplight::Light.new('example-5') { fail }.
 ?> with_fallback { [] }
 => #<Stoplight::Light:...>
 >> light.run
@@ -149,13 +164,13 @@ Some bits of code might be allowed to fail more or less frequently than others.
 You can configure this by setting a custom threshold in seconds.
 
 ``` irb
->> light = Stoplight::Light.new('example-5') { fail }.
+>> light = Stoplight::Light.new('example-6') { fail }.
 ?> with_threshold(1)
 => #<Stoplight::Light:...>
 >> light.run
 RuntimeError:
 >> light.run
-Stoplight::Error::NoFallback: Stoplight::Error::NoFallback
+Stoplight::Error::RedLight: Stoplight::Error::RedLight
 ```
 
 ### Rails
@@ -178,12 +193,12 @@ end
 
 ## Credits
 
-Stoplight is brought to you by [@camdez][14] and [@tfausak][15] from [@OrgSync][16]. We were
-inspired by Martin Fowler's [CircuitBreaker][17] article.
+Stoplight is brought to you by [@camdez][15] and [@tfausak][16] from [@OrgSync][17]. We were
+inspired by Martin Fowler's [CircuitBreaker][18] article.
 
 If this gem isn't cutting it for you, there are a few alternatives, including:
-[circuit_b][18], [circuit_breaker][19], [simple_circuit_breaker][20], and
-[ya_circuit_breaker][21].
+[circuit_b][19], [circuit_breaker][20], [simple_circuit_breaker][21], and
+[ya_circuit_breaker][22].
 
 [1]: https://github.com/orgsync/stoplight
 [2]: https://badge.fury.io/rb/stoplight.svg
@@ -196,13 +211,14 @@ If this gem isn't cutting it for you, there are a few alternatives, including:
 [9]: https://codeclimate.com/github/orgsync/stoplight
 [10]: https://gemnasium.com/orgsync/stoplight.svg
 [11]: https://gemnasium.com/orgsync/stoplight
-[12]: http://semver.org/spec/v2.0.0.html
-[13]: https://rubygems.org/gems/redis
-[14]: https://github.com/camdez
-[15]: https://github.com/tfausak
-[16]: https://github.com/OrgSync
-[17]: http://martinfowler.com/bliki/CircuitBreaker.html
-[18]: https://github.com/alg/circuit_b
-[19]: https://github.com/wsargent/circuit_breaker
-[20]: https://github.com/soundcloud/simple_circuit_breaker
-[21]: https://github.com/wooga/circuit_breaker
+[12]: https://github.com/orgsync/stoplight-admin
+[13]: http://semver.org/spec/v2.0.0.html
+[14]: https://rubygems.org/gems/redis
+[15]: https://github.com/camdez
+[16]: https://github.com/tfausak
+[17]: https://github.com/OrgSync
+[18]: http://martinfowler.com/bliki/CircuitBreaker.html
+[19]: https://github.com/alg/circuit_b
+[20]: https://github.com/wsargent/circuit_breaker
+[21]: https://github.com/soundcloud/simple_circuit_breaker
+[22]: https://github.com/wooga/circuit_breaker

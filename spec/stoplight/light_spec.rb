@@ -149,7 +149,7 @@ describe Stoplight::Light do
     subject(:result) { light.fallback }
 
     it 'uses the default fallback' do
-      expect { result }.to raise_error(Stoplight::Error::NoFallback)
+      expect { result }.to raise_error(Stoplight::Error::RedLight)
     end
   end
 

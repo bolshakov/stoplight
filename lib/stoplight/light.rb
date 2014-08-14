@@ -20,7 +20,7 @@ module Stoplight
     end
 
     # @return [Object]
-    # @raise [Error::NoFallback]
+    # @raise [Error::RedLight]
     # @see #fallback
     # @see #green?
     def run
@@ -52,17 +52,17 @@ module Stoplight
     # @param threshold [Integer]
     # @return [self]
     def with_threshold(threshold)
-      Stoplight.data_store.set_threshold(name, threshold.to_i)
+      Stoplight.set_threshold(name, threshold.to_i)
       self
     end
 
     # Attribute readers
 
     # @return [Object]
-    # @raise [Error::NoFallback]
+    # @raise [Error::RedLight]
     def fallback
       return @fallback if defined?(@fallback)
-      fail Error::NoFallback
+      fail Error::RedLight
     end
 
     # @return (see Stoplight.green?)
@@ -88,25 +88,25 @@ module Stoplight
 
     def run_code
       result = code.call
-      Stoplight.data_store.clear_failures(name)
+      Stoplight.clear_failures(name)
       result
     rescue => error
       if error_allowed?(error)
-        Stoplight.data_store.clear_failures(name)
+        Stoplight.clear_failures(name)
       else
-        Stoplight.data_store.record_failure(name, error)
+        Stoplight.record_failure(name, error)
       end
 
       raise
     end
 
     def run_fallback
-      Stoplight.data_store.record_attempt(name)
+      Stoplight.record_attempt(name)
       fallback.call
     end
 
     def sync_settings
-      Stoplight.data_store.set_threshold(name, threshold)
+      Stoplight.set_threshold(name, threshold)
     end
   end
 end
