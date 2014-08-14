@@ -55,9 +55,21 @@ module Stoplight
     end
 
     # @param name [String]
-    # @return (see .green?)
+    # @return [Boolean]
+    def yellow?(name)
+      return false if green?(name)
+
+      failures = failures(name)
+      return false if failures.empty?
+
+      failure = failures.last
+      Time.now - failure.time > (5 * 60)
+    end
+
+    # @param name [String]
+    # @return [Boolean]
     def red?(name)
-      !green?(name)
+      !green?(name) && !yellow?(name)
     end
 
     # @param name [String]

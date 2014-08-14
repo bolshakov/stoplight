@@ -4,6 +4,9 @@ require 'json'
 
 module Stoplight
   class Failure
+    # @return [Time]
+    attr_reader :time
+
     # @param error [Exception]
     def initialize(error)
       @error = error

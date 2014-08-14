@@ -7,6 +7,14 @@ describe Stoplight::Failure do
 
   subject(:failure) { described_class.new(error) }
 
+  describe '#time' do
+    subject(:result) { failure.time }
+
+    it 'returns the time' do
+      expect(result).to be_within(1).of(Time.now)
+    end
+  end
+
   describe '#to_json' do
     let(:json) { JSON.parse(result) }
 

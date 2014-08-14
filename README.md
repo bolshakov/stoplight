@@ -118,6 +118,26 @@ makes it easy.
 => 0.3333333333333333
 ```
 
+### Recovery
+
+If a stoplight has been in the red state for a while, it will automatically
+attempt to move back into the green state.
+
+``` irb
+>> light = Stoplight::Light.new('example-3') { 1 / 0 }
+=> #<Stoplight::Light:...>
+>> Stoplight.threshold(light.name).times { light.run rescue nil }
+=> 3
+>> light.run
+Stoplight::Error::RedLight: Stoplight::Error::RedLight
+>> sleep(5 * 60) # Coffee break!
+=> 300
+>> light.run
+ZeroDivisionError: divided by 0
+>> light.run
+Stoplight::Error::RedLight: Stoplight::Error::RedLight
+```
+
 ### Custom errors
 
 Some errors shouldn't cause your stoplight to move into the red state. Usually

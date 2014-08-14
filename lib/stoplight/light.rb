@@ -26,10 +26,10 @@ module Stoplight
     def run
       sync_settings
 
-      if green?
-        run_code
-      else
+      if red?
         run_fallback
+      else
+        run_code
       end
     end
 
@@ -70,9 +70,14 @@ module Stoplight
       Stoplight.green?(name)
     end
 
+    # @return (see Stoplight.yellow?)
+    def yellow?
+      Stoplight.yellow?(name)
+    end
+
     # @return (see Stoplight.red?)
     def red?
-      !green?
+      Stoplight.red?(name)
     end
 
     # @return (see Stoplight.threshold)
