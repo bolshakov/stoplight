@@ -1,23 +1,29 @@
 # coding: utf-8
 
-begin
-  require 'redis'
-  REDIS_LOADED = true
-rescue LoadError
-  REDIS_LOADED = false
-end
-
 module Stoplight
   module DataStore
     class Redis < Base
-      def initialize(*args)
-        fail Error::NoRedis unless REDIS_LOADED
-
-        @redis = ::Redis.new(*args)
+      def initialize(redis)
+        @redis = redis
       end
 
       def names
         @redis.hkeys(thresholds_key)
+      end
+
+      def purge
+        names
+          .select { |l| failures(l).empty? }
+          .each   { |l| delete(l) }
+      end
+
+      def delete(name)
+        @redis.pipelined do
+          clear_attempts(name)
+          clear_failures(name)
+          @redis.hdel(states_key, name)
+          @redis.hdel(thresholds_key, name)
+        end
       end
 
       # @group Attempts
