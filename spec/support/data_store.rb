@@ -21,7 +21,12 @@ shared_examples_for 'a data store' do
     end
 
     context 'with a name' do
-      before { data_store.set_state(name, state) }
+      before do
+        @data_store = Stoplight.data_store
+        Stoplight.data_store(data_store)
+        Stoplight::Light.new(name) {}.run
+      end
+      after { Stoplight.data_store(@data_store) }
 
       it 'includes the name' do
         expect(result).to include(name)

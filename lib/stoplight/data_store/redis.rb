@@ -17,7 +17,7 @@ module Stoplight
       end
 
       def names
-        @redis.hkeys(states_key)
+        @redis.hkeys(thresholds_key)
       end
 
       # @group Attempts

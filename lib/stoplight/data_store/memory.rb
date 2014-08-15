@@ -8,7 +8,7 @@ module Stoplight
       end
 
       def names
-        all_states.keys
+        all_thresholds.keys
       end
 
       # @group Attempts
