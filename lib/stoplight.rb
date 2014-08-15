@@ -21,6 +21,9 @@ module Stoplight
   # @return [Integer]
   DEFAULT_THRESHOLD = 3
 
+  @data_store = DataStore::Memory.new
+  @notifiers = [Notifier::StandardError.new]
+
   class << self
     extend Forwardable
 
@@ -37,21 +40,11 @@ module Stoplight
       state
     )
 
-    # @param data_store [DataStore::Base]
     # @return [DataStore::Base]
-    def data_store(data_store = nil)
-      @data_store = data_store if data_store
-      @data_store = DataStore::Memory.new unless defined?(@data_store)
-      @data_store
-    end
+    attr_accessor :data_store
 
-    # @param notifiers [Array<Notifier::Base>]
     # @return [Array<Notifier::Base>]
-    def notifiers(notifiers = nil)
-      @notifiers = notifiers if notifiers
-      @notifiers = [Notifier::StandardError.new] unless defined?(@notifiers)
-      @notifiers
-    end
+    attr_accessor :notifiers
 
     # @param name [String]
     # @return [Boolean]
