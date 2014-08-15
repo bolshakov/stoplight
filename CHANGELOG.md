@@ -1,5 +1,7 @@
 # Changelog
 
+- Switched `Stoplight.data_store` and `Stoplight.notifiers` over to using
+  simple accessors.
 - Modified `Stoplight::DataStore::Redis` to accept an instance of `Redis`.
 - Refactored `Stoplight::DataStore::Redis` to use fewer keys.
 - Created `Stoplight::Notifier` and subclasses.

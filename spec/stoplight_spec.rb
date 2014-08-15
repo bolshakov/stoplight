@@ -35,10 +35,10 @@ describe Stoplight do
 
       before do
         @data_store = described_class.data_store
-        described_class.data_store(data_store)
+        described_class.data_store = data_store
       end
 
-      after { described_class.data_store(@data_store) }
+      after { described_class.data_store = @data_store }
 
       it 'returns the data store' do
         expect(result).to eql(data_store)
@@ -65,10 +65,10 @@ describe Stoplight do
 
       before do
         @notifiers = described_class.notifiers
-        described_class.notifiers(notifiers)
+        described_class.notifiers = notifiers
       end
 
-      after { described_class.notifiers(@notifiers) }
+      after { described_class.notifiers = @notifiers }
 
       it 'returns the notifiers' do
         expect(result).to eql(notifiers)

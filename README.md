@@ -46,8 +46,11 @@ gem][14] installed before configuring Stoplight.
 
 ``` irb
 >> redis = Redis.new(url: 'redis://127.0.0.1:6379/0')
+=> #<Redis:...>
 >> data_store = Stoplight::DataStore::Redis.new(redis)
+=> #<Stoplight::DataStore::Redis:...>
 >> Stoplight.data_store = data_store
+=> #<Stoplight::DataStore::Redis:...>
 ```
 
 ### Notifiers
@@ -68,7 +71,7 @@ HipChat gem][] installed before configuring Stoplight.
 => #<HipChat::Client:...>
 >> notifier = Stoplight::Notifier::HipChat.new(hipchat, 'room')
 => #<Stoplight::Notifier::HipChat:...>
->> Stoplight.notifiers([notifier])
+>> Stoplight.notifiers = [notifier])
 => [#<Stoplight::Notifier::HipChat:...>]
 ```
 
@@ -82,7 +85,7 @@ Stoplight:
 ``` rb
 # config/initializers/stoplight.rb
 require 'stoplight'
-Stoplight.data_store(Stoplight::DataStore::Redis.new(...))
+Stoplight.data_store = Stoplight::DataStore::Redis.new(...)
 ```
 
 ## Usage
