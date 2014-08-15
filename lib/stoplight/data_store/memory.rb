@@ -14,6 +14,17 @@ module Stoplight
         end.compact.uniq
       end
 
+      def purge
+        names
+          .select { |l| failures(l).empty? }
+          .each   { |l| delete(l) }
+      end
+
+      def delete(name)
+        keys = [attempt_key(name), failure_key(name), settings_key(name)]
+        keys.each { |k| @data.delete(k) }
+      end
+
       def record_failure(name, error)
         failure = Failure.new(error)
         array = @data[failure_key(name)] ||= []

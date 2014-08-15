@@ -8,6 +8,16 @@ module Stoplight
         fail NotImplementedError
       end
 
+      # Deletes all green lights without failures.
+      def purge
+        fail NotImplementedError
+      end
+
+      # @param _name [String]
+      def delete(_name)
+        fail NotImplementedError
+      end
+
       # @param _name [String]
       # @param _error [Exception]
       def record_failure(_name, _error)

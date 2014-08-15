@@ -22,6 +22,17 @@ module Stoplight
         end.uniq
       end
 
+      def purge
+        names
+          .select { |l| failures(l).empty? }
+          .each   { |l| delete(l) }
+      end
+
+      def delete(name)
+        keys = [attempt_key(name), failure_key(name), settings_key(name)]
+        keys.each { |k| @redis.del(k) }
+      end
+
       def record_failure(name, error)
         failure = Failure.new(error)
         @redis.rpush(failure_key(name), failure.to_json)
