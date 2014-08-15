@@ -86,20 +86,24 @@ module Stoplight
         fail ArgumentError, 'Invalid state'
       end
 
-      def key(name, slug)
-        [DataStore::KEY_PREFIX, name, slug].join(':')
+      def attempts_key
+        key('attempts')
       end
 
-      def attempt_key(name)
-        key(name, 'attempts')
+      def failures_key(name)
+        key('failures', name)
       end
 
-      def failure_key(name)
-        key(name, 'failures')
+      def states_key
+        key('states')
       end
 
-      def settings_key(name)
-        key(name, 'settings')
+      def thresholds_key
+        key('thresholds')
+      end
+
+      def key(slug, name = nil)
+        [KEY_PREFIX, name, slug].compact.join(':')
       end
     end
   end

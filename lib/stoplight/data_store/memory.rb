@@ -8,10 +8,7 @@ module Stoplight
       end
 
       def names
-        @data.keys.map do |key|
-          match = /^#{DataStore::KEY_PREFIX}:(.+):([^:]+)$/.match(key)
-          match[1] if match
-        end.compact.uniq
+        all_states.keys
       end
 
       def purge
@@ -21,57 +18,74 @@ module Stoplight
       end
 
       def delete(name)
-        keys = [attempt_key(name), failure_key(name), settings_key(name)]
-        keys.each { |k| @data.delete(k) }
+        clear_attempts(name)
+        clear_failures(name)
+        all_states.delete(name)
+        all_thresholds.delete(name)
       end
 
-      def record_failure(name, error)
-        failure = Failure.new(error)
-        array = @data[failure_key(name)] ||= []
-        array.push(failure)
-      end
+      # @group Attempts
 
-      def clear_failures(name)
-        @data.delete(failure_key(name))
-      end
-
-      def failures(name)
-        @data[failure_key(name)] || []
-      end
-
-      def settings(name)
-        @data[settings_key(name)] ||= {}
-      end
-
-      def threshold(name)
-        settings(name)['threshold']
-      end
-
-      def set_threshold(name, threshold)
-        settings(name)['threshold'] = threshold
+      def attempts(name)
+        all_attempts[name] || 0
       end
 
       def record_attempt(name)
-        key = attempt_key(name)
-        @data[key] ||= 0
-        @data[key] += 1
+        all_attempts[name] ||= 0
+        all_attempts[name] += 1
       end
 
       def clear_attempts(name)
-        @data.delete(attempt_key(name))
+        all_attempts.delete(name)
       end
 
-      def attempts(name)
-        @data[attempt_key(name)] || 0
+      # @group Failures
+
+      def failures(name)
+        @data[failures_key(name)] || []
       end
+
+      def record_failure(name, error)
+        (@data[failures_key(name)] ||= []).push(Failure.new(error))
+      end
+
+      def clear_failures(name)
+        @data.delete(failures_key(name))
+      end
+
+      # @group State
 
       def state(name)
-        settings(name)['state'] || DataStore::STATE_UNLOCKED
+        all_states[name] || STATE_UNLOCKED
       end
 
       def set_state(name, state)
         validate_state!(state)
-        settings(name)['state'] = state
+        all_states[name] = state
+      end
+
+      # @group Threshold
+
+      def threshold(name)
+        all_thresholds[name]
+      end
+
+      def set_threshold(name, threshold)
+        all_thresholds[name] = threshold
+      end
+
+      private
+
+      def all_attempts
+        @data[attempts_key] ||= {}
+      end
+
+      def all_states
+        @data[states_key] ||= {}
+      end
+
+      def all_thresholds
+        @data[thresholds_key] ||= {}
       end
     end
   end

@@ -17,9 +17,7 @@ module Stoplight
       end
 
       def names
-        @redis.scan_each(match: "#{DataStore::KEY_PREFIX}:*:*").map do |key|
-          key[/^#{DataStore::KEY_PREFIX}:(.+):[^:]+$/o, 1]
-        end.uniq
+        @redis.hkeys(states_key)
       end
 
       def purge
@@ -29,54 +27,64 @@ module Stoplight
       end
 
       def delete(name)
-        keys = [attempt_key(name), failure_key(name), settings_key(name)]
-        keys.each { |k| @redis.del(k) }
+        @redis.pipelined do
+          clear_attempts(name)
+          clear_failures(name)
+          @redis.hdel(states_key, name)
+          @redis.hdel(thresholds_key, name)
+        end
       end
 
-      def record_failure(name, error)
-        failure = Failure.new(error)
-        @redis.rpush(failure_key(name), failure.to_json)
-        # TODO: Trim failures (think ring buffer). Probably in a multi block.
-      end
+      # @group Attempts
 
-      def clear_failures(name)
-        @redis.del(failure_key(name))
-      end
-
-      def failures(name)
-        @redis.lrange(failure_key(name), 0, -1)
-      end
-
-      def threshold(name)
-        value = @redis.hget(settings_key(name), 'threshold')
-        Integer(value) if value
-      end
-
-      def set_threshold(name, threshold)
-        @redis.hset(settings_key(name), 'threshold', threshold)
-        threshold
+      def attempts(name)
+        @redis.hget(attempts_key, name).to_i
       end
 
       def record_attempt(name)
-        @redis.incr(attempt_key(name))
+        @redis.hincrby(attempts_key, name, 1)
       end
 
       def clear_attempts(name)
-        @redis.del(attempt_key(name))
+        @redis.hdel(attempts_key, name)
       end
 
-      def attempts(name)
-        @redis.get(attempt_key(name)).to_i
+      # @group Failures
+
+      def failures(name)
+        @redis.lrange(failures_key(name), 0, -1)
       end
+
+      def record_failure(name, error)
+        @redis.rpush(failures_key(name), Failure.new(error).to_json)
+      end
+
+      def clear_failures(name)
+        @redis.del(failures_key(name))
+      end
+
+      # @group State
 
       def state(name)
-        @redis.hget(settings_key(name), 'state') || DataStore::STATE_UNLOCKED
+        @redis.hget(states_key, name) || STATE_UNLOCKED
       end
 
       def set_state(name, state)
         validate_state!(state)
-        @redis.hset(settings_key(name), 'state', state)
+        @redis.hset(states_key, name, state)
         state
+      end
+
+      # @group Threshold
+
+      def threshold(name)
+        value = @redis.hget(thresholds_key, name)
+        Integer(value) if value
+      end
+
+      def set_threshold(name, threshold)
+        @redis.hset(thresholds_key, name, threshold)
+        threshold
       end
     end
   end

@@ -1,5 +1,6 @@
 # Changelog
 
+- Refactored `Stoplight::DataStore::Redis` to use fewer keys.
 - Created `Stoplight::Notifier` and subclasses.
 - Sent notifications when moving from green to red.
 - Renamed `Stoplight::Light::DEFAULT_THRESHOLD` to
