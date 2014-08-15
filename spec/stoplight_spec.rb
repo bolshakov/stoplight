@@ -46,6 +46,36 @@ describe Stoplight do
     end
   end
 
+  describe '.notifiers' do
+    subject(:result) { described_class.notifiers }
+
+    it 'uses the default notifier' do
+      expect(result).to be_an(Array)
+      expect(result.size).to eql(1)
+      expect(result.first).to be_a(Stoplight::Notifier::StandardError)
+    end
+
+    it 'memoizes the result' do
+      expect(result).to be described_class.notifiers
+    end
+
+    context 'with custom notifiers' do
+      let(:notifiers) { [notifier] }
+      let(:notifier) { double }
+
+      before do
+        @notifiers = described_class.notifiers
+        described_class.notifiers(notifiers)
+      end
+
+      after { described_class.notifiers(@notifiers) }
+
+      it 'returns the notifiers' do
+        expect(result).to eql(notifiers)
+      end
+    end
+  end
+
   describe '.green?' do
     subject(:result) { described_class.green?(name) }
 
@@ -112,7 +142,7 @@ describe Stoplight do
     subject(:result) { described_class.threshold(name) }
 
     it 'uses the default threshold' do
-      expect(result).to eql(Stoplight::Light::DEFAULT_THRESHOLD)
+      expect(result).to eql(Stoplight::DEFAULT_THRESHOLD)
     end
 
     context 'with a custom threshold' do

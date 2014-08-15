@@ -29,6 +29,8 @@ This project uses [Semantic Versioning][13].
 
 ## Setup
 
+### Data store
+
 Stoplight uses an in-memory data store out of the box.
 
 ``` irb
@@ -47,6 +49,28 @@ gem][14] installed before configuring Stoplight.
 => #<Stoplight::DataStore::Redis:...>
 >> Stoplight.data_store(redis)
 => #<Stoplight::DataStore::Redis:...>
+```
+
+### Notifiers
+
+Stoplight sends notifications to standard error by default.
+
+``` irb
+>> Stoplight.notifiers
+=> [#<Stoplight::Notifier::StandardError:...>]
+```
+
+If you want to send notifications elsewhere, you'll have to set them up.
+Currently the only other supported notifier is HipChat. Make sure you have [the
+HipChat gem][] installed before configuring Stoplight.
+
+``` irb
+>> hipchat = HipChat::Client.new('token')
+=> #<HipChat::Client:...>
+>> notifier = Stoplight::Notifier::HipChat.new(hipchat, 'room')
+=> #<Stoplight::Notifier::HipChat:...>
+>> Stoplight.notifiers([notifier])
+=> [#<Stoplight::Notifier::HipChat:...>]
 ```
 
 ### Rails
@@ -101,9 +125,24 @@ ZeroDivisionError: divided by 0
 >> light.run
 ZeroDivisionError: divided by 0
 >> light.run
-Stoplight::Error::NoFallback: Stoplight::Error::NoFallback
+Stoplight::Error::RedLight: Stoplight::Error::RedLight
 >> light.red?
 => true
+```
+
+When the stoplight changes from green to red, it will notify every configured
+notifier.
+
+### Mixin
+
+Since creating and running a stoplight is so common, we provide a mixin that
+makes it easy.
+
+``` irb
+>> include Stoplight::Mixin
+=> Object
+>> stoplight('example-3') { 1.0 / 3 }
+=> 0.3333333333333333
 ```
 
 ### Custom errors
@@ -113,7 +152,7 @@ these are handled elsewhere in your stack and don't represent real failures. A
 good example is `ActiveRecord::RecordNotFound`.
 
 ``` irb
->> light = Stoplight::Light.new('example-3') { User.find(123) }.
+>> light = Stoplight::Light.new('example-4') { User.find(123) }.
 ?> with_allowed_errors([ActiveRecord::RecordNotFound])
 => #<Stoplight::Light:...>
 >> light.run
@@ -128,12 +167,12 @@ ActiveRecord::RecordNotFound: Couldn't find User with ID=123
 
 ### Custom fallback
 
-Instead of raising a `Stoplight::Error::NoFallback` error when in the red state,
+Instead of raising a `Stoplight::Error::RedLight` error when in the red state,
 you can provide a block to be run. This is useful when there's a good default
 value for the block.
 
 ``` irb
->> light = Stoplight::Light.new('example-4') { fail }.
+>> light = Stoplight::Light.new('example-5') { fail }.
 ?> with_fallback { [] }
 => #<Stoplight::Light:...>
 >> light.run
@@ -152,13 +191,13 @@ Some bits of code might be allowed to fail more or less frequently than others.
 You can configure this by setting a custom threshold in seconds.
 
 ``` irb
->> light = Stoplight::Light.new('example-5') { fail }.
+>> light = Stoplight::Light.new('example-6') { fail }.
 ?> with_threshold(1)
 => #<Stoplight::Light:...>
 >> light.run
 RuntimeError:
 >> light.run
-Stoplight::Error::NoFallback: Stoplight::Error::NoFallback
+Stoplight::Error::RedLight: Stoplight::Error::RedLight
 ```
 
 ### Rails
@@ -202,6 +241,7 @@ If this gem isn't cutting it for you, there are a few alternatives, including:
 [12]: https://github.com/orgsync/stoplight-admin
 [13]: http://semver.org/spec/v2.0.0.html
 [14]: https://rubygems.org/gems/redis
+[the hipchat gem]: https://rubygems.org/gems/hipchat
 [15]: https://github.com/camdez
 [16]: https://github.com/tfausak
 [17]: https://github.com/OrgSync

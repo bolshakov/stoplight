@@ -8,10 +8,18 @@ require 'stoplight/data_store/redis'
 require 'stoplight/error'
 require 'stoplight/failure'
 require 'stoplight/light'
+require 'stoplight/mixin'
+require 'stoplight/notifier'
+require 'stoplight/notifier/base'
+require 'stoplight/notifier/hip_chat'
+require 'stoplight/notifier/standard_error'
 
 module Stoplight
   # @return [Gem::Version]
   VERSION = Gem::Version.new('0.1.0')
+
+  # @return [Integer]
+  DEFAULT_THRESHOLD = 3
 
   class << self
     extend Forwardable
@@ -37,6 +45,14 @@ module Stoplight
       @data_store
     end
 
+    # @param notifiers [Array<Notifier::Base>]
+    # @return [Array<Notifier::Base>]
+    def notifiers(notifiers = nil)
+      @notifiers = notifiers if notifiers
+      @notifiers = [Notifier::StandardError.new] unless defined?(@notifiers)
+      @notifiers
+    end
+
     # @param name [String]
     # @return [Boolean]
     def green?(name)
@@ -59,7 +75,7 @@ module Stoplight
     # @param name [String]
     # @return [Integer]
     def threshold(name)
-      data_store.threshold(name) || Light::DEFAULT_THRESHOLD
+      data_store.threshold(name) || DEFAULT_THRESHOLD
     end
   end
 end
