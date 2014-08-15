@@ -20,6 +20,21 @@ module Stoplight
         @redis.hkeys(thresholds_key)
       end
 
+      def purge
+        names
+          .select { |l| failures(l).empty? }
+          .each   { |l| delete(l) }
+      end
+
+      def delete(name)
+        @redis.pipelined do
+          clear_attempts(name)
+          clear_failures(name)
+          @redis.hdel(states_key, name)
+          @redis.hdel(thresholds_key, name)
+        end
+      end
+
       # @group Attempts
 
       def attempts(name)

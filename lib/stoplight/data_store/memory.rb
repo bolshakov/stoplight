@@ -11,6 +11,19 @@ module Stoplight
         all_thresholds.keys
       end
 
+      def purge
+        names
+          .select { |l| failures(l).empty? }
+          .each   { |l| delete(l) }
+      end
+
+      def delete(name)
+        clear_attempts(name)
+        clear_failures(name)
+        all_states.delete(name)
+        all_thresholds.delete(name)
+      end
+
       # @group Attempts
 
       def attempts(name)
