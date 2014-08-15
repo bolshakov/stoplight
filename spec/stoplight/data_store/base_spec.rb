@@ -9,8 +9,10 @@ describe Stoplight::DataStore::Base do
     attempts
     clear_attempts
     clear_failures
+    delete
     failures
     names
+    purge
     record_attempt
     record_failure
     set_state
