@@ -21,7 +21,7 @@ shared_examples_for 'a data store' do
     end
 
     context 'with a name' do
-      before { data_store.set_threshold(name, threshold) }
+      before { data_store.set_state(name, state) }
 
       it 'includes the name' do
         expect(result).to include(name)
