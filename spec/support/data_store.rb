@@ -38,9 +38,11 @@ shared_examples_for 'a data store' do
       end
 
       context 'with an attempt' do
-        before { data_store.record_attempt(name) }
-
-        it 'includes the attempt'
+        it 'includes the attempt' do
+          attempts = data_store.attempts(name)
+          data_store.record_attempt(name)
+          expect(result).to be > attempts
+        end
       end
     end
 
@@ -90,9 +92,11 @@ shared_examples_for 'a data store' do
       end
 
       context 'with a failure' do
-        before { data_store.record_failure(name, error) }
-
-        it 'includes the failure'
+        it 'includes the failure' do
+          failures = data_store.failures(name)
+          data_store.record_failure(name, error)
+          expect(result.size).to be > failures.size
+        end
       end
     end
 
