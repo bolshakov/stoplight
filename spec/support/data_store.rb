@@ -7,8 +7,6 @@ shared_examples_for 'a data store' do
   let(:state) { Stoplight::DataStore::STATES.to_a.sample }
   let(:threshold) { rand(10) }
 
-  subject(:data_store) { described_class.new }
-
   it 'is a DataStore::Base' do
     expect(data_store).to be_a(Stoplight::DataStore::Base)
   end

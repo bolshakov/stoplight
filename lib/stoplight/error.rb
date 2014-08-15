@@ -6,7 +6,5 @@ module Stoplight
     Base = Class.new(StandardError)
     # @return [Class]
     RedLight = Class.new(Base)
-    # @return [Class]
-    NoRedis = Class.new(Base)
   end
 end
