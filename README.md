@@ -45,10 +45,9 @@ the only supported persistent data store is Redis. Make sure you have [the Redis
 gem][14] installed before configuring Stoplight.
 
 ``` irb
->> redis = Stoplight::DataStore::Redis.new(url: 'redis://127.0.0.1:6379/0')
-=> #<Stoplight::DataStore::Redis:...>
->> Stoplight.data_store(redis)
-=> #<Stoplight::DataStore::Redis:...>
+>> redis = Redis.new(url: 'redis://127.0.0.1:6379/0')
+>> data_store = Stoplight::DataStore::Redis.new(redis)
+>> Stoplight.data_store = data_store
 ```
 
 ### Notifiers

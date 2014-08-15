@@ -1,5 +1,6 @@
 # Changelog
 
+- Modified `Stoplight::DataStore::Redis` to accept an instance of `Redis`.
 - Refactored `Stoplight::DataStore::Redis` to use fewer keys.
 - Created `Stoplight::Notifier` and subclasses.
 - Sent notifications when moving from green to red.

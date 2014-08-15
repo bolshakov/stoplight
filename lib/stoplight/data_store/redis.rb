@@ -1,19 +1,10 @@
 # coding: utf-8
 
-begin
-  require 'redis'
-  REDIS_LOADED = true
-rescue LoadError
-  REDIS_LOADED = false
-end
-
 module Stoplight
   module DataStore
     class Redis < Base
-      def initialize(*args)
-        fail Error::NoRedis unless REDIS_LOADED
-
-        @redis = ::Redis.new(*args)
+      def initialize(redis)
+        @redis = redis
       end
 
       def names
