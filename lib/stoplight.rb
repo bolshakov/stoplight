@@ -60,9 +60,15 @@ module Stoplight
     end
 
     # @param name [String]
-    # @return (see .green?)
+    # @return [Boolean]
     def red?(name)
       color(name) == DataStore::COLOR_RED
+    end
+
+    # @param name [String]
+    # @return [Boolean]
+    def yellow?(name)
+      color(name) == DataStore::COLOR_YELLOW
     end
 
     # @param name [String]
