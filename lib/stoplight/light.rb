@@ -26,16 +26,10 @@ module Stoplight
     def run
       sync_settings
 
-      case color
-      when DataStore::COLOR_GREEN, DataStore::COLOR_YELLOW
-        run_code
-      else
-        if Stoplight.attempts(name).zero?
-          message = "Switching #{name} stoplight from green to red."
-          Stoplight.notifiers.each { |notifier| notifier.notify(message) }
-        end
-
+      if color == DataStore::COLOR_RED
         run_fallback
+      else
+        run_code
       end
     end
 
@@ -112,6 +106,11 @@ module Stoplight
     end
 
     def run_fallback
+      if Stoplight.attempts(name).zero?
+        message = "Switching #{name} stoplight from green to red."
+        Stoplight.notifiers.each { |notifier| notifier.notify(message) }
+      end
+
       Stoplight.record_attempt(name)
       fallback.call
     end
