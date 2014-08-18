@@ -77,6 +77,18 @@ module Stoplight
         @redis.hset(thresholds_key, name, threshold)
         threshold
       end
+
+      # @group Timeout
+
+      def timeout(name)
+        timeout = @redis.hget(timeouts_key, name)
+        timeout.to_i if timeout
+      end
+
+      def set_timeout(name, timeout)
+        @redis.hset(timeouts_key, name, timeout)
+        timeout
+      end
     end
   end
 end

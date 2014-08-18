@@ -74,6 +74,16 @@ module Stoplight
         all_thresholds[name] = threshold
       end
 
+      # @group Timeout
+
+      def timeout(name)
+        all_timeouts[name]
+      end
+
+      def set_timeout(name, timeout)
+        all_timeouts[name] = timeout
+      end
+
       private
 
       def all_attempts
@@ -86,6 +96,10 @@ module Stoplight
 
       def all_thresholds
         @data[thresholds_key] ||= {}
+      end
+
+      def all_timeouts
+        @data[timeouts_key] ||= {}
       end
     end
   end

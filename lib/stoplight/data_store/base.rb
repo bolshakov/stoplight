@@ -79,6 +79,19 @@ module Stoplight
         fail NotImplementedError
       end
 
+      # @param _name [String]
+      # @return [Integer]
+      def timeout(_name)
+        fail NotImplementedError
+      end
+
+      # @param _name [String]
+      # @param _timeout [Integer]
+      # @return [Integer]
+      def set_timeout(_name, _timeout)
+        fail NotImplementedError
+      end
+
       private
 
       def validate_state!(state)
@@ -100,6 +113,10 @@ module Stoplight
 
       def thresholds_key
         key('thresholds')
+      end
+
+      def timeouts_key
+        key('timeouts')
       end
 
       def key(slug, name = nil)

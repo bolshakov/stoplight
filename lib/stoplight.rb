@@ -21,6 +21,9 @@ module Stoplight
   # @return [Integer]
   DEFAULT_THRESHOLD = 3
 
+  # @return [Integer]
+  DEFAULT_TIMEOUT = 5 * 60
+
   @data_store = DataStore::Memory.new
   @notifiers = [Notifier::StandardError.new]
 
@@ -39,6 +42,7 @@ module Stoplight
       record_failure
       set_state
       set_threshold
+      set_timeout
       state
     )
 
@@ -71,6 +75,12 @@ module Stoplight
     # @return [Integer]
     def threshold(name)
       data_store.threshold(name) || DEFAULT_THRESHOLD
+    end
+
+    # @param name [String]
+    # @return [Integer]
+    def timeout(name)
+      data_store.timeout(name) || DEFAULT_TIMEOUT
     end
   end
 end

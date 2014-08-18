@@ -61,6 +61,13 @@ module Stoplight
       self
     end
 
+    # @param timeout [Integer]
+    # @return [self]
+    def with_timeout(timeout)
+      Stoplight.set_timeout(name, timeout.to_i)
+      self
+    end
+
     # Attribute readers
 
     # @return [Object]
@@ -83,6 +90,11 @@ module Stoplight
     # @return (see Stoplight.threshold)
     def threshold
       Stoplight.threshold(name)
+    end
+
+    # @return (see Stoplight.timeout)
+    def timeout
+      Stoplight.timeout(name)
     end
 
     private
