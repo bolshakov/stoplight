@@ -100,6 +100,27 @@ module Stoplight
 
       private
 
+      def _color(failures, state, threshold, timeout)
+        threshold = threshold ? threshold.to_i : Stoplight::DEFAULT_THRESHOLD
+        timeout = timeout ? timeout.to_i : Stoplight::DEFAULT_TIMEOUT
+
+        case state
+        when STATE_LOCKED_GREEN
+          COLOR_GREEN
+        when STATE_LOCKED_RED
+          COLOR_RED
+        else
+          return COLOR_GREEN if failures.size < threshold
+
+          # If the threshold is 0, the light is always red.
+          return COLOR_RED if failures.empty?
+
+          return COLOR_YELLOW if Time.now - failures.last.time > timeout
+
+          COLOR_RED
+        end
+      end
+
       def validate_state!(state)
         return if DataStore::STATES.include?(state)
         fail ArgumentError, 'Invalid state'

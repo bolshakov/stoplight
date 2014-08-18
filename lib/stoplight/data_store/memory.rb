@@ -25,24 +25,7 @@ module Stoplight
       end
 
       def color(name)
-        case state(name)
-        when STATE_LOCKED_GREEN
-          COLOR_GREEN
-        when STATE_LOCKED_RED
-          COLOR_RED
-        when STATE_UNLOCKED
-          failures = self.failures(name)
-          return COLOR_GREEN if failures.size < Stoplight.threshold(name)
-          return COLOR_RED if failures.empty?
-
-          if Time.now - failures.last.time > Stoplight.timeout(name)
-            COLOR_YELLOW
-          else
-            COLOR_RED
-          end
-        else
-          fail ArgumentError
-        end
+        _color(failures(name), state(name), threshold(name), timeout(name))
       end
 
       # @group Attempts

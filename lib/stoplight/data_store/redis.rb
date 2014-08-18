@@ -30,31 +30,17 @@ module Stoplight
       end
 
       def color(name)
-        failures = state = threshold = timeout = nil
-        @redis.multi do
-          failures = @redis.lrange(failures_key(name), 0, -1)
-          state = @redis.hget(states_key, name)
-          threshold = @redis.hget(thresholds_key, name)
-          timeout = @redis.hget(timeouts_key, name)
+        failures, state, threshold, timeout = @redis.multi do
+          @redis.lrange(failures_key(name), 0, -1)
+          @redis.hget(states_key, name)
+          @redis.hget(thresholds_key, name)
+          @redis.hget(timeouts_key, name)
+        end
+        failures.map! do |failure|
+          Failure.new(nil, JSON.parse(failure)['time'])
         end
 
-        case state.value
-        when STATE_LOCKED_GREEN
-          COLOR_GREEN
-        when STATE_LOCKED_RED
-          COLOR_RED
-        else
-          failures = failures.value
-          threshold = threshold.value ? threshold.value.to_i : Stoplight::DEFAULT_THRESHOLD
-          return COLOR_GREEN if failures.size < threshold
-          return COLOR_RED if failures.empty?
-
-          time = Time.parse(JSON.parse(failures.last)['time'])
-          timeout = timeout.value ? timeout.value.to_i : Stoplight::DEFAULT_TIMEOUT
-          return COLOR_YELLOW if Time.now - time > timeout
-
-          COLOR_RED
-        end
+        _color(failures, state, threshold, timeout)
       end
 
       # @group Attempts
