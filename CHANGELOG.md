@@ -1,5 +1,7 @@
 # Changelog
 
+## v0.2.0 (2014-08-18)
+
 - Switched `Stoplight.data_store` and `Stoplight.notifiers` over to using
   simple accessors.
 - Modified `Stoplight::DataStore::Redis` to accept an instance of `Redis`.
