@@ -20,10 +20,10 @@ Gem::Specification.new do |spec|
 
   spec.required_ruby_version = '>= 1.9.3'
 
-  spec.add_development_dependency 'coveralls', '~> 0.7.0'
+  spec.add_development_dependency 'coveralls', '~> 0.7.1'
   spec.add_development_dependency 'fakeredis', '~> 0.5.0'
   spec.add_development_dependency 'rake', '~> 10.3.2'
   spec.add_development_dependency 'rspec', '~> 3.0.0'
-  spec.add_development_dependency 'rubocop', '~> 0.24.1'
+  spec.add_development_dependency 'rubocop', '~> 0.25.0'
   spec.add_development_dependency 'yard', '~> 0.8.7.4'
 end
