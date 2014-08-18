@@ -30,7 +30,7 @@ module Stoplight
       end
 
       def color(name)
-        failures, state, threshold, timeout = @redis.multi do
+        failures, state, threshold, timeout = @redis.pipelined do
           @redis.lrange(failures_key(name), 0, -1)
           @redis.hget(states_key, name)
           @redis.hget(thresholds_key, name)
