@@ -34,6 +34,7 @@ module Stoplight
       attempts
       clear_attempts
       clear_failures
+      color
       delete
       failures
       names

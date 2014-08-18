@@ -19,6 +19,12 @@ module Stoplight
       end
 
       # @param _name [String]
+      # @return [String]
+      def color(_name)
+        fail NotImplementedError
+      end
+
+      # @param _name [String]
       # @param _error [Exception]
       def record_failure(_name, _error)
         fail NotImplementedError
