@@ -78,34 +78,17 @@ module Stoplight
       fail Error::RedLight
     end
 
-    # @return (see Stoplight.green?)
-    def green?
-      Stoplight.green?(name)
-    end
-
-    # @return (see Stoplight.red?)
-    def red?
-      Stoplight.red?(name)
-    end
-
-    # @return (see Stoplight.yellow?)
-    def yellow?
-      Stoplight.yellow?(name)
-    end
-
-    # @return (see Stoplight.color)
-    def color
-      Stoplight.color(name)
-    end
-
-    # @return (see Stoplight.threshold)
-    def threshold
-      Stoplight.threshold(name)
-    end
-
-    # @return (see Stoplight.timeout)
-    def timeout
-      Stoplight.timeout(name)
+    %w(
+      color
+      green?
+      red?
+      threshold
+      timeout
+      yellow?
+    ).each do |method|
+      define_method(method) do
+        Stoplight.public_send(method, name)
+      end
     end
 
     private
