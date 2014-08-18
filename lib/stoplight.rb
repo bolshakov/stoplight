@@ -56,20 +56,13 @@ module Stoplight
     # @param name [String]
     # @return [Boolean]
     def green?(name)
-      case data_store.state(name)
-      when DataStore::STATE_LOCKED_GREEN
-        true
-      when DataStore::STATE_LOCKED_RED
-        false
-      else
-        data_store.failures(name).size < threshold(name)
-      end
+      color(name) == DataStore::COLOR_GREEN
     end
 
     # @param name [String]
     # @return (see .green?)
     def red?(name)
-      !green?(name)
+      color(name) == DataStore::COLOR_RED
     end
 
     # @param name [String]

@@ -122,7 +122,10 @@ describe Stoplight do
     subject(:result) { described_class.red?(name) }
 
     context 'green' do
-      before { allow(described_class).to receive(:green?).and_return(true) }
+      before do
+        allow(described_class.data_store).to receive(:color)
+          .and_return(Stoplight::DataStore::COLOR_GREEN)
+      end
 
       it 'is false' do
         expect(result).to be false
@@ -130,7 +133,10 @@ describe Stoplight do
     end
 
     context 'not green' do
-      before { allow(described_class).to receive(:green?).and_return(false) }
+      before do
+        allow(described_class.data_store).to receive(:color)
+          .and_return(Stoplight::DataStore::COLOR_RED)
+      end
 
       it 'is true' do
         expect(result).to be true

@@ -84,7 +84,7 @@ module Stoplight
 
     # @return (see Stoplight.red?)
     def red?
-      !green?
+      Stoplight.red?(name)
     end
 
     # @return (see Stoplight.color)
