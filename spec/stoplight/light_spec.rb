@@ -88,7 +88,8 @@ describe Stoplight::Light do
 
       before do
         light.with_fallback(&fallback)
-        allow(light).to receive(:green?).and_return(false)
+        allow(light).to receive(:color)
+          .and_return(Stoplight::DataStore::COLOR_RED)
         Stoplight.notifiers.each do |notifier|
           allow(notifier).to receive(:notify)
         end

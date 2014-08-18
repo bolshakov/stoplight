@@ -26,7 +26,8 @@ module Stoplight
     def run
       sync_settings
 
-      if green?
+      case color
+      when DataStore::COLOR_GREEN, DataStore::COLOR_YELLOW
         run_code
       else
         if Stoplight.attempts(name).zero?
