@@ -100,26 +100,25 @@ module Stoplight
 
       private
 
+      # rubocop:disable Metrics/CyclomaticComplexity
+      # rubocop:disable Metrics/PerceivedComplexity
       def _color(failures, state, threshold, timeout)
+        return COLOR_GREEN if state == STATE_LOCKED_GREEN
+        return COLOR_RED if state == STATE_LOCKED_RED
+
         threshold = threshold ? threshold.to_i : Stoplight::DEFAULT_THRESHOLD
+        return COLOR_GREEN if failures.size < threshold
+
+        # If the threshold is 0, the light is always red.
+        return COLOR_RED if failures.empty?
+
         timeout = timeout ? timeout.to_i : Stoplight::DEFAULT_TIMEOUT
+        return COLOR_YELLOW if Time.now - failures.last.time > timeout
 
-        case state
-        when STATE_LOCKED_GREEN
-          COLOR_GREEN
-        when STATE_LOCKED_RED
-          COLOR_RED
-        else
-          return COLOR_GREEN if failures.size < threshold
-
-          # If the threshold is 0, the light is always red.
-          return COLOR_RED if failures.empty?
-
-          return COLOR_YELLOW if Time.now - failures.last.time > timeout
-
-          COLOR_RED
-        end
+        COLOR_RED
       end
+      # rubocop:enable Metrics/CyclomaticComplexity
+      # rubocop:enable Metrics/PerceivedComplexity
 
       def validate_state!(state)
         return if DataStore::STATES.include?(state)
