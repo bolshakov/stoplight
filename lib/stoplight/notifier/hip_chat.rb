@@ -20,7 +20,7 @@ module Stoplight
       private
 
       def default_options
-        { color: 'red', notify: true }
+        { color: 'red', message_format: 'text', notify: true }
       end
     end
   end
