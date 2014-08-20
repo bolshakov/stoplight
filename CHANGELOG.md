@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.2.1 (2014-08-20)
+
+- Forced times to be serialized as strings.
+
 ## v0.2.0 (2014-08-18)
 
 - Switched `Stoplight.data_store` and `Stoplight.notifiers` over to using
