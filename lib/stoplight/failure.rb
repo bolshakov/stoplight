@@ -18,7 +18,7 @@ module Stoplight
     private
 
     def to_h
-      { error: @error.inspect, time: @time }
+      { error: @error.inspect, time: @time.inspect }
     end
   end
 end
