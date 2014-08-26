@@ -102,6 +102,7 @@ module Stoplight
       define_method(method) do |*args|
         Stoplight.data_store.public_send(method, name, *args)
       end
+      private method
     end
 
     %w(
@@ -112,6 +113,7 @@ module Stoplight
       define_method(method[4..-1]) do
         Stoplight.data_store.public_send(method, name)
       end
+      private method[4..-1]
     end
 
     %w(
@@ -122,6 +124,7 @@ module Stoplight
       define_method("#{method[4..-1]}=") do |value|
         Stoplight.data_store.public_send(method, name, value)
       end
+      private "#{method[4..-1]}="
     end
 
     def error_allowed?(error)
