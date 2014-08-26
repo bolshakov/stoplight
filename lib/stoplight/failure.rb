@@ -7,10 +7,21 @@ module Stoplight
     # @return [Time]
     attr_reader :time
 
+    def self.from_json(json)
+      h = JSON.parse(json)
+
+      match = /#<(.+): (.+)>/.match(h['error'])
+      error = Object.const_get(match[1]).new(match[2]) if match
+
+      time = Time.parse(h['time'])
+
+      new(error, time)
+    end
+
     # @param error [Exception]
-    def initialize(error)
+    def initialize(error, time = nil)
       @error = error
-      @time = Time.now
+      @time = time || Time.now
     end
 
     def to_json(*args)

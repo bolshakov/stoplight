@@ -36,9 +36,7 @@ module Stoplight
           @redis.hget(thresholds_key, name)
           @redis.hget(timeouts_key, name)
         end
-        failures.map! do |failure|
-          Failure.new(nil, JSON.parse(failure)['time'])
-        end
+        failures.map! { |json| Failure.from_json(json) }
 
         _color(failures, state, threshold, timeout)
       end
