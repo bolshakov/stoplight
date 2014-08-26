@@ -8,72 +8,101 @@ module Stoplight
         fail NotImplementedError
       end
 
-      # Deletes all green lights without failures.
-      def purge
+      # @return [nil]
+      def clear_all
         fail NotImplementedError
       end
 
       # @param _name [String]
-      def delete(_name)
+      # @return [nil]
+      def clear(_name)
         fail NotImplementedError
+      end
+
+      # @param _name [String]
+      # @return [nil]
+      def sync(_name)
+        fail NotImplementedError
+      end
+
+      # @group Colors
+
+      # @param name [String]
+      # @return [Boolean]
+      def green?(name)
+        color = get_color(name)
+        DataStore.validate_color!(color)
+        color == COLOR_GREEN
+      end
+
+      # @param name [String]
+      # @return [Boolean]
+      def yellow?(name)
+        color = get_color(name)
+        DataStore.validate_color!(color)
+        color == COLOR_YELLOW
+      end
+
+      # @param name [String]
+      # @return [Boolean]
+      def red?(name)
+        color = get_color(name)
+        DataStore.validate_color!(color)
+        color == COLOR_RED
       end
 
       # @param _name [String]
       # @return [String]
-      def color(_name)
+      def get_color(_name)
         fail NotImplementedError
       end
 
-      # @param _name [String]
-      # @param _error [Exception]
-      def record_failure(_name, _error)
-        fail NotImplementedError
-      end
+      # @group Attempts
 
       # @param _name [String]
-      def clear_failures(_name)
-        fail NotImplementedError
-      end
-
-      # @param _name [String]
-      # @return [Array<Failure>]
-      def failures(_name)
+      # @return [Integer]
+      def get_attempts(_name)
         fail NotImplementedError
       end
 
       # @param _name [String]
       # @return [Integer]
-      def threshold(_name)
-        fail NotImplementedError
-      end
-
-      # @param _name [String]
-      # @param _threshold [Integer]
-      # @return (see #threshold)
-      def set_threshold(_name, _threshold)
-        fail NotImplementedError
-      end
-
-      # @param _name [String]
-      # @return (see #attempts)
       def record_attempt(_name)
         fail NotImplementedError
       end
 
       # @param _name [String]
+      # @return [nil]
       def clear_attempts(_name)
         fail NotImplementedError
       end
 
+      # @group Failures
+
       # @param _name [String]
-      # @return [Integer]
-      def attempts(_name)
+      # @return [Array<Failure>]
+      def get_failures(_name)
         fail NotImplementedError
       end
 
       # @param _name [String]
+      # @param _failure [Failure]
+      # @return [Failure]
+      def record_failure(_name, _failure)
+        fail NotImplementedError
+      end
+
+      # @param _name [String]
+      # @return [nil]
+      def clear_failures(_name)
+        fail NotImplementedError
+      end
+
+      # @group States
+
+      # @param _name [String]
       # @return [String]
-      def state(_name)
+      def get_state(_name)
         fail NotImplementedError
       end
 
@@ -81,13 +110,41 @@ module Stoplight
       # @param _state [String]
       # @return [String]
       def set_state(_name, _state)
-        # REVIEW: Should we clear failures here?
         fail NotImplementedError
       end
 
       # @param _name [String]
+      # @return [nil]
+      def clear_state(_name)
+        fail NotImplementedError
+      end
+
+      # @group Thresholds
+
+      # @param _name [String]
       # @return [Integer]
-      def timeout(_name)
+      def get_threshold(_name)
+        fail NotImplementedError
+      end
+
+      # @param _name [String]
+      # @param _threshold [Integer]
+      # @return [Integer]
+      def set_threshold(_name, _threshold)
+        fail NotImplementedError
+      end
+
+      # @param _name [String]
+      # @return [nil]
+      def clear_threshold(_name)
+        fail NotImplementedError
+      end
+
+      # @group Timeouts
+
+      # @param _name [String]
+      # @return [Integer]
+      def get_timeout(_name)
         fail NotImplementedError
       end
 
@@ -98,55 +155,10 @@ module Stoplight
         fail NotImplementedError
       end
 
-      private
-
-      # rubocop:disable Metrics/CyclomaticComplexity
-      # rubocop:disable Metrics/PerceivedComplexity
-      def _color(failures, state, threshold, timeout)
-        return COLOR_GREEN if state == STATE_LOCKED_GREEN
-        return COLOR_RED if state == STATE_LOCKED_RED
-
-        threshold = threshold ? threshold.to_i : DEFAULT_THRESHOLD
-        return COLOR_GREEN if failures.size < threshold
-
-        # If the threshold is 0, the light is always red.
-        return COLOR_RED if failures.empty?
-
-        timeout = timeout ? timeout.to_i : DEFAULT_TIMEOUT
-        return COLOR_YELLOW if Time.now - failures.last.time > timeout
-
-        COLOR_RED
-      end
-      # rubocop:enable Metrics/CyclomaticComplexity
-      # rubocop:enable Metrics/PerceivedComplexity
-
-      def validate_state!(state)
-        return if DataStore::STATES.include?(state)
-        fail ArgumentError, 'Invalid state'
-      end
-
-      def attempts_key
-        key('attempts')
-      end
-
-      def failures_key(name)
-        key('failures', name)
-      end
-
-      def states_key
-        key('states')
-      end
-
-      def thresholds_key
-        key('thresholds')
-      end
-
-      def timeouts_key
-        key('timeouts')
-      end
-
-      def key(slug, name = nil)
-        [KEY_PREFIX, name, slug].compact.join(':')
+      # @param _name [String]
+      # @return [nil]
+      def clear_timeout(_name)
+        fail NotImplementedError
       end
     end
   end

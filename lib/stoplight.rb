@@ -26,23 +26,5 @@ module Stoplight
 
     # @return [Array<Notifier::Base>]
     attr_accessor :notifiers
-
-    # @param name [String]
-    # @return [Boolean]
-    def green?(name)
-      data_store.color(name) == DataStore::COLOR_GREEN
-    end
-
-    # @param name [String]
-    # @return [Boolean]
-    def red?(name)
-      data_store.color(name) == DataStore::COLOR_RED
-    end
-
-    # @param name [String]
-    # @return [Boolean]
-    def yellow?(name)
-      data_store.color(name) == DataStore::COLOR_YELLOW
-    end
   end
 end

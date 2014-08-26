@@ -1,256 +1,32 @@
 # coding: utf-8
+# rubocop:disable Metrics/LineLength
 
 require 'spec_helper'
 
 describe Stoplight::Light do
-  let(:code) { proc { code_result } }
-  let(:code_result) { double }
-  let(:name) { SecureRandom.hex }
-
   subject(:light) { described_class.new(name, &code) }
+  let(:name) { SecureRandom.hex }
+  let(:code) { -> { code_result } }
+  let(:code_result) { double }
+  let(:allowed_errors) { [error_class] }
+  let(:error_class) { Class.new(StandardError) }
+  let(:fallback) { -> { fallback_result } }
+  let(:fallback_result) { double }
+  let(:threshold) { rand(100) }
+  let(:timeout) { rand(100) }
 
-  describe '#initialize' do
-    it 'uses the default allowed errors' do
-      expect(light.allowed_errors).to eql([])
-    end
-
-    it 'sets the code' do
-      expect(light.code).to eql(code.to_proc)
-    end
-
-    it 'sets the name' do
-      expect(light.name).to eql(name.to_s)
-    end
-  end
-
-  describe '#run' do
-    subject(:result) { light.run }
-
-    it 'syncs settings' do
-      expect(Stoplight.data_store.threshold(name)).to eql(
-         Stoplight::DataStore::DEFAULT_THRESHOLD)
-      result
-      expect(Stoplight.data_store.threshold(name)).to eql(
-        light.threshold)
-    end
-
-    context 'green' do
-      before { allow(light).to receive(:green?).and_return(true) }
-
-      it 'runs the code' do
-        expect(result).to eql(code_result)
-      end
-
-      it 'clears failures' do
-        Stoplight.data_store.record_failure(name, nil)
-        expect(Stoplight.data_store.failures(name)).to_not be_empty
-        result
-        expect(Stoplight.data_store.failures(name)).to be_empty
-      end
-
-      context 'with failing code' do
-        let(:code_result) { fail error }
-        let(:error) { klass.new }
-        let(:klass) { Class.new(StandardError) }
-        let(:safe_result) do
-          begin
-            result
-          rescue klass
-            nil
-          end
-        end
-
-        it 'raises the error' do
-          expect { result }.to raise_error(error)
-        end
-
-        it 'records the failure' do
-          expect(Stoplight.data_store.failures(name)).to be_empty
-          safe_result
-          expect(Stoplight.data_store.failures(name)).to_not be_empty
-        end
-
-        context do
-          before { light.with_allowed_errors([klass]) }
-
-          it 'clears failures' do
-            Stoplight.data_store.record_failure(name, nil)
-            expect(Stoplight.data_store.failures(name)).to_not be_empty
-            safe_result
-            expect(Stoplight.data_store.failures(name)).to be_empty
-          end
-        end
-      end
-    end
-
-    context 'not green' do
-      let(:fallback) { proc { fallback_result } }
-      let(:fallback_result) { double }
-
-      before do
-        light.with_fallback(&fallback)
-        allow(light).to receive(:color)
-          .and_return(Stoplight::DataStore::COLOR_RED)
-        Stoplight.notifiers.each do |notifier|
-          allow(notifier).to receive(:notify)
-        end
-      end
-
-      it 'runs the fallback' do
-        expect(result).to eql(fallback_result)
-      end
-
-      it 'records the attempt' do
-        result
-        expect(Stoplight.data_store.attempts(name)).to eql(1)
-      end
-
-      it 'notifies' do
-        result
-        Stoplight.notifiers.each do |notifier|
-          expect(notifier).to have_received(:notify)
-        end
-      end
-
-      context 'with an attempt' do
-        before do
-          allow(Stoplight.data_store).to receive(:attempts).and_return(1)
-        end
-
-        it 'does not notify' do
-          result
-          Stoplight.notifiers.each do |notifier|
-            expect(notifier).to_not have_received(:notify)
-          end
-        end
-      end
-    end
-  end
-
-  describe '#with_allowed_errors' do
-    let(:allowed_errors) { [double] }
-
-    subject(:result) { light.with_allowed_errors(allowed_errors) }
-
-    it 'returns self' do
-      expect(result).to be light
-    end
-
-    it 'sets the allowed errors' do
-      expect(result.allowed_errors).to eql(allowed_errors)
-    end
-  end
-
-  describe '#with_fallback' do
-    let(:fallback) { proc { fallback_result } }
-    let(:fallback_result) { double }
-
-    subject(:result) { light.with_fallback(&fallback) }
-
-    it 'returns self' do
-      expect(result).to be light
-    end
-
-    it 'sets the fallback' do
-      expect(result.fallback).to eql(fallback)
-    end
-  end
-
-  describe '#with_threshold' do
-    let(:threshold) { rand(10) }
-
-    subject(:result) { light.with_threshold(threshold) }
-
-    it 'returns self' do
-      expect(result).to be light
-    end
-
-    it 'sets the threshold' do
-      expect(result.threshold).to eql(threshold)
-    end
-  end
-
-  describe '#fallback' do
-    subject(:result) { light.fallback }
-
-    it 'uses the default fallback' do
-      expect { result }.to raise_error(Stoplight::Error::RedLight)
-    end
-  end
-
-  describe '#green?' do
-    subject(:result) { light.green? }
-
-    it 'is true' do
-      expect(result).to be true
-    end
-
-    context 'locked green' do
-      before do
-        Stoplight.data_store.set_state(
-          name, Stoplight::DataStore::STATE_LOCKED_GREEN)
-      end
-
-      it 'is true' do
-        expect(result).to be true
-      end
-    end
-
-    context 'locked red' do
-      before do
-        Stoplight.data_store.set_state(
-          name, Stoplight::DataStore::STATE_LOCKED_RED)
-      end
-
-      it 'is false' do
-        expect(result).to be false
-      end
-    end
-
-    context 'with failures' do
-      before do
-        light.threshold.times do
-          Stoplight.data_store.record_failure(name, nil)
-        end
-      end
-
-      it 'is false' do
-        expect(result).to be false
-      end
-    end
-  end
-
-  describe '#red?' do
-    subject(:result) { light.red? }
-
-    context 'green' do
-      before do
-        allow(Stoplight.data_store).to receive(:color)
-          .and_return(Stoplight::DataStore::COLOR_GREEN)
-      end
-
-      it 'is false' do
-        expect(result).to be false
-      end
-    end
-
-    context 'not green' do
-      before do
-        allow(Stoplight.data_store).to receive(:color)
-          .and_return(Stoplight::DataStore::COLOR_RED)
-      end
-
-      it 'is true' do
-        expect(result).to be true
-      end
-    end
-  end
-
-  describe '#threshold' do
-    subject(:result) { light.threshold }
-
-    it 'uses the default threshold' do
-      expect(result).to eql(Stoplight::DataStore::DEFAULT_THRESHOLD)
-    end
-  end
+  it { expect(light.run).to eql(code_result) }
+  it { expect(light.with_allowed_errors(allowed_errors)).to eql(light) }
+  it { expect(light.with_fallback(&fallback)).to eql(light) }
+  it { expect(light.with_threshold(threshold)).to eql(light) }
+  it { expect(light.with_timeout(timeout)).to eql(light) }
+  it { expect { light.fallback }.to raise_error(Stoplight::Error::RedLight) }
+  it { expect(light.allowed_errors).to eql([]) }
+  it { expect(light.code).to eql(code) }
+  it { expect(light.name).to eql(name) }
+  it { expect(light.green?).to eql(true) }
+  it { expect(light.yellow?).to eql(false) }
+  it { expect(light.red?).to eql(false) }
+  it { expect(light.threshold).to eql(Stoplight::DataStore::DEFAULT_THRESHOLD) }
+  it { expect(light.timeout).to eql(Stoplight::DataStore::DEFAULT_TIMEOUT) }
 end

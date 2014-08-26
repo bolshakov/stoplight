@@ -6,19 +6,29 @@ describe Stoplight::DataStore::Base do
   subject(:data_store) { described_class.new }
 
   %w(
-    attempts
-    clear_attempts
-    clear_failures
-    delete
-    failures
     names
-    purge
+    clear_all
+    clear
+    sync
+    green?
+    yellow?
+    red?
+    get_color
+    get_attempts
     record_attempt
+    clear_attempts
+    get_failures
     record_failure
+    clear_failures
+    get_state
     set_state
+    clear_state
+    get_threshold
     set_threshold
-    state
-    threshold
+    clear_threshold
+    get_timeout
+    set_timeout
+    clear_timeout
   ).each do |method|
     it "responds to #{method}" do
       expect(data_store).to respond_to(method)

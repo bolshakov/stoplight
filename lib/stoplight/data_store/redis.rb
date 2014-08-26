@@ -1,109 +1,162 @@
 # coding: utf-8
 
 require 'json'
-require 'time'
 
 module Stoplight
   module DataStore
-    class Redis < Base
+    class Redis < Base # rubocop:disable Metrics/ClassLength
       def initialize(redis)
         @redis = redis
       end
 
       def names
-        @redis.hkeys(thresholds_key)
+        @redis.hkeys(DataStore.thresholds_key)
       end
 
-      def purge
-        names
-          .select { |l| failures(l).empty? }
-          .each   { |l| delete(l) }
+      def clear_all
+        names = self.names
+        @redis.pipelined { names.each { |name| clear(name) } }
+        nil
       end
 
-      def delete(name)
+      def clear(name)
         @redis.pipelined do
           clear_attempts(name)
           clear_failures(name)
-          @redis.hdel(states_key, name)
-          @redis.hdel(thresholds_key, name)
+          clear_state(name)
+          clear_threshold(name)
+          clear_timeout(name)
         end
+
+        nil
       end
 
-      def color(name)
-        failures, state, threshold, timeout = @redis.pipelined do
-          @redis.lrange(failures_key(name), 0, -1)
-          @redis.hget(states_key, name)
-          @redis.hget(thresholds_key, name)
-          @redis.hget(timeouts_key, name)
-        end
-        failures.map! { |json| Failure.from_json(json) }
-
-        _color(failures, state, threshold, timeout)
+      def sync(name)
+        threshold = @redis.hget(DataStore.thresholds_key, name)
+        threshold = normalize_threshold(threshold)
+        @redis.hset(DataStore.thresholds_key, name, threshold)
+        nil
       end
 
-      # @group Attempts
+      def get_color(name) # rubocop:disable Metrics/MethodLength
+        state, threshold, failures, timeout = @redis.pipelined do
+          @redis.hget(DataStore.states_key, name)
+          @redis.hget(DataStore.thresholds_key, name)
+          @redis.lrange(DataStore.failures_key(name), 0, -1)
+          @redis.hget(DataStore.timeouts_key, name)
+        end
 
-      def attempts(name)
-        @redis.hget(attempts_key, name).to_i
+        DataStore.colorize(
+          normalize_state(state),
+          normalize_threshold(threshold),
+          normalize_failures(failures),
+          normalize_timeout(timeout))
+      end # rubocop:enable Metrics/MethodLength
+
+      def get_attempts(name)
+        normalize_attempts(@redis.hget(DataStore.attempts_key, name))
       end
 
       def record_attempt(name)
-        @redis.hincrby(attempts_key, name, 1)
+        @redis.hincrby(DataStore.attempts_key, name, 1)
       end
 
       def clear_attempts(name)
-        @redis.hdel(attempts_key, name)
+        @redis.hdel(DataStore.attempts_key, name)
+        nil
       end
 
-      # @group Failures
-
-      def failures(name)
-        @redis.lrange(failures_key(name), 0, -1)
+      def get_failures(name)
+        normalize_failures(@redis.lrange(DataStore.failures_key(name), 0, -1))
       end
 
-      def record_failure(name, error)
-        @redis.rpush(failures_key(name), Failure.new(error).to_json)
+      def record_failure(name, failure)
+        DataStore.validate_failure!(failure)
+        @redis.rpush(DataStore.failures_key(name), failure.to_json)
+        failure
       end
 
       def clear_failures(name)
-        @redis.del(failures_key(name))
+        @redis.del(DataStore.failures_key(name))
+        nil
       end
 
-      # @group State
-
-      def state(name)
-        @redis.hget(states_key, name) || STATE_UNLOCKED
+      def get_state(name)
+        normalize_state(@redis.hget(DataStore.states_key, name))
       end
 
       def set_state(name, state)
-        validate_state!(state)
-        @redis.hset(states_key, name, state)
+        DataStore.validate_state!(state)
+        @redis.hset(DataStore.states_key, name, state)
         state
       end
 
-      # @group Threshold
+      def clear_state(name)
+        @redis.hdel(DataStore.states_key, name)
+        nil
+      end
 
-      def threshold(name)
-        threshold = @redis.hget(thresholds_key, name)
-        threshold ? threshold.to_i : DEFAULT_THRESHOLD
+      def get_threshold(name)
+        normalize_threshold(@redis.hget(DataStore.thresholds_key, name))
       end
 
       def set_threshold(name, threshold)
-        @redis.hset(thresholds_key, name, threshold)
+        DataStore.validate_threshold!(threshold)
+        @redis.hset(DataStore.thresholds_key, name, threshold)
         threshold
       end
 
-      # @group Timeout
+      def clear_threshold(name)
+        @redis.hdel(DataStore.thresholds_key, name)
+        nil
+      end
 
-      def timeout(name)
-        timeout = @redis.hget(timeouts_key, name)
-        timeout ? timeout.to_i : DEFAULT_TIMEOUT
+      def get_timeout(name)
+        normalize_timeout(@redis.hget(DataStore.timeouts_key, name))
       end
 
       def set_timeout(name, timeout)
-        @redis.hset(timeouts_key, name, timeout)
+        DataStore.validate_timeout!(timeout)
+        @redis.hset(DataStore.timeouts_key, name, timeout)
         timeout
       end
-    end
+
+      def clear_timeout(name)
+        @redis.hdel(DataStore.timeouts_key, name)
+        nil
+      end
+
+      private
+
+      # @param attempts [String, nil]
+      # @return [Integer]
+      def normalize_attempts(attempts)
+        attempts ? attempts.to_i : DEFAULT_ATTEMPTS
+      end
+
+      # @param failures [Array<String>]
+      # @return [Array<Failure>]
+      def normalize_failures(failures)
+        failures.map { |json| Failure.from_json(json) }
+      end
+
+      # @param state [String, nil]
+      # @return [String]
+      def normalize_state(state)
+        state || DEFAULT_STATE
+      end
+
+      # @param threshold [String, nil]
+      # @return [Integer]
+      def normalize_threshold(threshold)
+        threshold ? threshold.to_i : DEFAULT_THRESHOLD
+      end
+
+      # @param timeout [String, nil]
+      # @return [Integer]
+      def normalize_timeout(timeout)
+        timeout ? timeout.to_i : DEFAULT_TIMEOUT
+      end
+    end # rubocop:enable Metrics/ClassLength
   end
 end

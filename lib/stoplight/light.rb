@@ -1,7 +1,7 @@
 # coding: utf-8
 
 module Stoplight
-  class Light
+  class Light # rubocop:disable Metrics/ClassLength
     # @return [Array<Exception>]
     attr_reader :allowed_errors
 
@@ -24,13 +24,8 @@ module Stoplight
     # @see #fallback
     # @see #green?
     def run
-      sync_settings
-
-      if color == DataStore::COLOR_RED
-        run_fallback
-      else
-        run_code
-      end
+      sync
+      red? ? run_fallback : run_code
     end
 
     # Fluent builders
@@ -52,14 +47,14 @@ module Stoplight
     # @param threshold [Integer]
     # @return [self]
     def with_threshold(threshold)
-      Stoplight.data_store.set_threshold(name, threshold.to_i)
+      self.threshold = threshold
       self
     end
 
     # @param timeout [Integer]
     # @return [self]
     def with_timeout(timeout)
-      Stoplight.set_timeout(name, timeout.to_i)
+      self.timeout = timeout
       self
     end
 
@@ -72,31 +67,62 @@ module Stoplight
       fail Error::RedLight
     end
 
-    def color
-      Stoplight.data_store.color(name)
+    %w(
+      green?
+      yellow?
+      red?
+    ).each do |method|
+      define_method(method) do
+        Stoplight.data_store.public_send(method, name)
+      end
     end
 
-    def green?
-      Stoplight.green?(name)
-    end
-
-    def red?
-      Stoplight.red?(name)
-    end
-
-    def threshold
-      Stoplight.data_store.threshold(name)
-    end
-
-    def timeout
-      Stoplight.data_store.timeout(name)
-    end
-
-    def yellow?
-      Stoplight.yellow?(name)
+    %w(
+      get_threshold
+      get_timeout
+    ).each do |method|
+      define_method(method[4..-1]) do
+        Stoplight.data_store.public_send(method, name)
+      end
     end
 
     private
+
+    %w(
+      sync
+      clear
+      record_attempt
+      clear_attempts
+      record_failure
+      clear_failures
+      clear_state
+      clear_threshold
+      clear_timeout
+    ).each do |method|
+      define_method(method) do |*args|
+        Stoplight.data_store.public_send(method, name, *args)
+      end
+    end
+
+    %w(
+      get_attempts
+      get_failures
+      get_state
+    ).each do |method|
+      define_method(method[4..-1]) do
+        Stoplight.data_store.public_send(method, name)
+      end
+    end
+
+    %w(
+      set_state
+      set_threshold
+      set_timeout
+    ).each do |method|
+      define_method("#{method[4..-1]}=") do |value|
+        Stoplight.data_store.public_send(method, name, value)
+      end
+    end
 
     def error_allowed?(error)
       allowed_errors.any? { |klass| error.is_a?(klass) }
@@ -104,30 +130,26 @@ module Stoplight
 
     def run_code
       result = code.call
-      Stoplight.data_store.clear_failures(name)
+      clear_failures
       result
     rescue => error
       if error_allowed?(error)
-        Stoplight.data_store.clear_failures(name)
+        clear_failures
       else
-        Stoplight.data_store.record_failure(name, error)
+        record_failure(Failure.new(error))
       end
 
       raise
     end
 
     def run_fallback
-      if Stoplight.data_store.attempts(name).zero?
+      if attempts.zero?
         message = "Switching #{name} stoplight from green to red."
         Stoplight.notifiers.each { |notifier| notifier.notify(message) }
       end
 
-      Stoplight.data_store.record_attempt(name)
+      record_attempt(name)
       fallback.call
     end
-
-    def sync_settings
-      Stoplight.data_store.set_threshold(name, threshold)
-    end
-  end
+  end # rubocop:enable Metrics/ClassLength
 end
