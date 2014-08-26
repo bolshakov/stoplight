@@ -163,7 +163,7 @@ shared_examples_for 'a data store' do
       subject(:result) { data_store.threshold(name) }
 
       it 'returns nil' do
-        expect(result).to eql(nil)
+        expect(result).to eql(Stoplight::DataStore::DEFAULT_THRESHOLD)
       end
 
       context 'with a threshold' do

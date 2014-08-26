@@ -101,7 +101,7 @@ describe Stoplight do
 
     context 'with failures' do
       before do
-        described_class.threshold(name).times do
+        described_class.data_store.threshold(name).times do
           described_class.data_store.record_failure(name, nil)
         end
       end
@@ -134,24 +134,6 @@ describe Stoplight do
 
       it 'is true' do
         expect(result).to be true
-      end
-    end
-  end
-
-  describe '.threshold' do
-    subject(:result) { described_class.threshold(name) }
-
-    it 'uses the default threshold' do
-      expect(result).to eql(Stoplight::DEFAULT_THRESHOLD)
-    end
-
-    context 'with a custom threshold' do
-      let(:threshold) { rand(10) }
-
-      before { described_class.data_store.set_threshold(name, threshold) }
-
-      it 'uses the threshold' do
-        expect(result).to eql(threshold)
       end
     end
   end

@@ -23,5 +23,8 @@ module Stoplight
 
     # @return [Integer]
     DEFAULT_TIMEOUT = 5 * 60
+
+    # @return [Integer]
+    DEFAULT_THRESHOLD = 3
   end
 end

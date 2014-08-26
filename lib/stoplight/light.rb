@@ -85,7 +85,7 @@ module Stoplight
     end
 
     def threshold
-      Stoplight.threshold(name)
+      Stoplight.data_store.threshold(name)
     end
 
     def timeout

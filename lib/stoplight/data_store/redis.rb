@@ -84,8 +84,8 @@ module Stoplight
       # @group Threshold
 
       def threshold(name)
-        value = @redis.hget(thresholds_key, name)
-        Integer(value) if value
+        threshold = @redis.hget(thresholds_key, name)
+        threshold ? threshold.to_i : DEFAULT_THRESHOLD
       end
 
       def set_threshold(name, threshold)

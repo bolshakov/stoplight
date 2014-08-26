@@ -71,7 +71,7 @@ module Stoplight
       # @group Threshold
 
       def threshold(name)
-        all_thresholds[name]
+        all_thresholds[name] || DEFAULT_THRESHOLD
       end
 
       def set_threshold(name, threshold)

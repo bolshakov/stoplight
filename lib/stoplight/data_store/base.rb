@@ -106,7 +106,7 @@ module Stoplight
         return COLOR_GREEN if state == STATE_LOCKED_GREEN
         return COLOR_RED if state == STATE_LOCKED_RED
 
-        threshold = threshold ? threshold.to_i : Stoplight::DEFAULT_THRESHOLD
+        threshold = threshold ? threshold.to_i : DEFAULT_THRESHOLD
         return COLOR_GREEN if failures.size < threshold
 
         # If the threshold is 0, the light is always red.

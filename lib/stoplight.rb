@@ -17,9 +17,6 @@ module Stoplight
   # @return [Gem::Version]
   VERSION = Gem::Version.new('0.2.1')
 
-  # @return [Integer]
-  DEFAULT_THRESHOLD = 3
-
   @data_store = DataStore::Memory.new
   @notifiers = [Notifier::StandardError.new]
 
@@ -46,12 +43,6 @@ module Stoplight
     # @return [Boolean]
     def yellow?(name)
       data_store.color(name) == DataStore::COLOR_YELLOW
-    end
-
-    # @param name [String]
-    # @return [Integer]
-    def threshold(name)
-      data_store.threshold(name) || DEFAULT_THRESHOLD
     end
   end
 end
