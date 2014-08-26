@@ -16,7 +16,7 @@ Check out [stoplight-admin][12] for controlling your stoplights.
 Add it to your Gemfile:
 
 ``` rb
-gem 'stoplight', '~> 0.1.0'
+gem 'stoplight', '~> 0.2.1'
 ```
 
 Or install it manually:

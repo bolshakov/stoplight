@@ -16,7 +16,7 @@ require 'stoplight/notifier/standard_error'
 
 module Stoplight
   # @return [Gem::Version]
-  VERSION = Gem::Version.new('0.1.0')
+  VERSION = Gem::Version.new('0.2.1')
 
   # @return [Integer]
   DEFAULT_THRESHOLD = 3

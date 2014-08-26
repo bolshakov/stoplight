@@ -5,7 +5,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
 Gem::Specification.new do |spec|
   spec.name = 'stoplight'
-  spec.version = '0.1.0' # Stoplight::VERSION
+  spec.version = '0.2.1' # Stoplight::VERSION
   spec.summary = 'Traffic control for code.'
   spec.description = spec.summary
   spec.homepage = 'https://github.com/orgsync/stoplight'
