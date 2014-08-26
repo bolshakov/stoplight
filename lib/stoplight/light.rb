@@ -52,7 +52,7 @@ module Stoplight
     # @param threshold [Integer]
     # @return [self]
     def with_threshold(threshold)
-      Stoplight.set_threshold(name, threshold.to_i)
+      Stoplight.data_store.set_threshold(name, threshold.to_i)
       self
     end
 
@@ -72,17 +72,28 @@ module Stoplight
       fail Error::RedLight
     end
 
-    %w(
-      color
-      green?
-      red?
-      threshold
-      timeout
-      yellow?
-    ).each do |method|
-      define_method(method) do
-        Stoplight.public_send(method, name)
-      end
+    def color
+      Stoplight.data_store.color(name)
+    end
+
+    def green?
+      Stoplight.green?(name)
+    end
+
+    def red?
+      Stoplight.red?(name)
+    end
+
+    def threshold
+      Stoplight.threshold(name)
+    end
+
+    def timeout
+      Stoplight.timeout(name)
+    end
+
+    def yellow?
+      Stoplight.yellow?(name)
     end
 
     private
@@ -93,30 +104,30 @@ module Stoplight
 
     def run_code
       result = code.call
-      Stoplight.clear_failures(name)
+      Stoplight.data_store.clear_failures(name)
       result
     rescue => error
       if error_allowed?(error)
-        Stoplight.clear_failures(name)
+        Stoplight.data_store.clear_failures(name)
       else
-        Stoplight.record_failure(name, error)
+        Stoplight.data_store.record_failure(name, error)
       end
 
       raise
     end
 
     def run_fallback
-      if Stoplight.attempts(name).zero?
+      if Stoplight.data_store.attempts(name).zero?
         message = "Switching #{name} stoplight from green to red."
         Stoplight.notifiers.each { |notifier| notifier.notify(message) }
       end
 
-      Stoplight.record_attempt(name)
+      Stoplight.data_store.record_attempt(name)
       fallback.call
     end
 
     def sync_settings
-      Stoplight.set_threshold(name, threshold)
+      Stoplight.data_store.set_threshold(name, threshold)
     end
   end
 end

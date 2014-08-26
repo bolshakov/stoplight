@@ -41,10 +41,10 @@ describe Stoplight::Light do
       end
 
       it 'clears failures' do
-        Stoplight.record_failure(name, nil)
-        expect(Stoplight.failures(name)).to_not be_empty
+        Stoplight.data_store.record_failure(name, nil)
+        expect(Stoplight.data_store.failures(name)).to_not be_empty
         result
-        expect(Stoplight.failures(name)).to be_empty
+        expect(Stoplight.data_store.failures(name)).to be_empty
       end
 
       context 'with failing code' do
@@ -64,19 +64,19 @@ describe Stoplight::Light do
         end
 
         it 'records the failure' do
-          expect(Stoplight.failures(name)).to be_empty
+          expect(Stoplight.data_store.failures(name)).to be_empty
           safe_result
-          expect(Stoplight.failures(name)).to_not be_empty
+          expect(Stoplight.data_store.failures(name)).to_not be_empty
         end
 
         context do
           before { light.with_allowed_errors([klass]) }
 
           it 'clears failures' do
-            Stoplight.record_failure(name, nil)
-            expect(Stoplight.failures(name)).to_not be_empty
+            Stoplight.data_store.record_failure(name, nil)
+            expect(Stoplight.data_store.failures(name)).to_not be_empty
             safe_result
-            expect(Stoplight.failures(name)).to be_empty
+            expect(Stoplight.data_store.failures(name)).to be_empty
           end
         end
       end
@@ -112,7 +112,9 @@ describe Stoplight::Light do
       end
 
       context 'with an attempt' do
-        before { allow(Stoplight).to receive(:attempts).and_return(1) }
+        before do
+          allow(Stoplight.data_store).to receive(:attempts).and_return(1)
+        end
 
         it 'does not notify' do
           result
@@ -184,7 +186,8 @@ describe Stoplight::Light do
 
     context 'locked green' do
       before do
-        Stoplight.set_state(name, Stoplight::DataStore::STATE_LOCKED_GREEN)
+        Stoplight.data_store.set_state(
+          name, Stoplight::DataStore::STATE_LOCKED_GREEN)
       end
 
       it 'is true' do
@@ -194,7 +197,8 @@ describe Stoplight::Light do
 
     context 'locked red' do
       before do
-        Stoplight.set_state(name, Stoplight::DataStore::STATE_LOCKED_RED)
+        Stoplight.data_store.set_state(
+          name, Stoplight::DataStore::STATE_LOCKED_RED)
       end
 
       it 'is false' do
@@ -204,7 +208,9 @@ describe Stoplight::Light do
 
     context 'with failures' do
       before do
-        light.threshold.times { Stoplight.record_failure(name, nil) }
+        light.threshold.times do
+          Stoplight.data_store.record_failure(name, nil)
+        end
       end
 
       it 'is false' do

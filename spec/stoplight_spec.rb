@@ -5,12 +5,6 @@ require 'spec_helper'
 describe Stoplight do
   let(:name) { SecureRandom.hex }
 
-  it 'forwards all data store methods' do
-    (Stoplight::DataStore::Base.new.methods - Object.methods).each do |method|
-      expect(Stoplight).to respond_to(method)
-    end
-  end
-
   describe '::VERSION' do
     subject(:result) { described_class.const_get(:VERSION) }
 
@@ -85,7 +79,7 @@ describe Stoplight do
 
     context 'locked green' do
       before do
-        described_class.set_state(
+        described_class.data_store.set_state(
           name, Stoplight::DataStore::STATE_LOCKED_GREEN)
       end
 
@@ -96,7 +90,7 @@ describe Stoplight do
 
     context 'locked red' do
       before do
-        described_class.set_state(
+        described_class.data_store.set_state(
           name, Stoplight::DataStore::STATE_LOCKED_RED)
       end
 
@@ -108,7 +102,7 @@ describe Stoplight do
     context 'with failures' do
       before do
         described_class.threshold(name).times do
-          described_class.record_failure(name, nil)
+          described_class.data_store.record_failure(name, nil)
         end
       end
 
@@ -154,7 +148,7 @@ describe Stoplight do
     context 'with a custom threshold' do
       let(:threshold) { rand(10) }
 
-      before { described_class.set_threshold(name, threshold) }
+      before { described_class.data_store.set_threshold(name, threshold) }
 
       it 'uses the threshold' do
         expect(result).to eql(threshold)

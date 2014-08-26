@@ -1,6 +1,5 @@
 # coding: utf-8
 
-require 'forwardable'
 require 'stoplight/data_store'
 require 'stoplight/data_store/base'
 require 'stoplight/data_store/memory'
@@ -28,25 +27,6 @@ module Stoplight
   @notifiers = [Notifier::StandardError.new]
 
   class << self
-    extend Forwardable
-
-    def_delegators :data_store, *%w(
-      attempts
-      clear_attempts
-      clear_failures
-      color
-      delete
-      failures
-      names
-      purge
-      record_attempt
-      record_failure
-      set_state
-      set_threshold
-      set_timeout
-      state
-    )
-
     # @return [DataStore::Base]
     attr_accessor :data_store
 
@@ -56,19 +36,19 @@ module Stoplight
     # @param name [String]
     # @return [Boolean]
     def green?(name)
-      color(name) == DataStore::COLOR_GREEN
+      data_store.color(name) == DataStore::COLOR_GREEN
     end
 
     # @param name [String]
     # @return [Boolean]
     def red?(name)
-      color(name) == DataStore::COLOR_RED
+      data_store.color(name) == DataStore::COLOR_RED
     end
 
     # @param name [String]
     # @return [Boolean]
     def yellow?(name)
-      color(name) == DataStore::COLOR_YELLOW
+      data_store.color(name) == DataStore::COLOR_YELLOW
     end
 
     # @param name [String]
