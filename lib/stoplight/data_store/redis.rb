@@ -97,7 +97,7 @@ module Stoplight
 
       def timeout(name)
         timeout = @redis.hget(timeouts_key, name)
-        timeout.to_i if timeout
+        timeout ? timeout.to_i : DEFAULT_TIMEOUT
       end
 
       def set_timeout(name, timeout)

@@ -112,7 +112,7 @@ module Stoplight
         # If the threshold is 0, the light is always red.
         return COLOR_RED if failures.empty?
 
-        timeout = timeout ? timeout.to_i : Stoplight::DEFAULT_TIMEOUT
+        timeout = timeout ? timeout.to_i : DEFAULT_TIMEOUT
         return COLOR_YELLOW if Time.now - failures.last.time > timeout
 
         COLOR_RED

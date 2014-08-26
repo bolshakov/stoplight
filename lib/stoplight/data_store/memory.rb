@@ -81,7 +81,7 @@ module Stoplight
       # @group Timeout
 
       def timeout(name)
-        all_timeouts[name]
+        all_timeouts[name] || DEFAULT_TIMEOUT
       end
 
       def set_timeout(name, timeout)

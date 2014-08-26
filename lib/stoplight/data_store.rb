@@ -20,5 +20,8 @@ module Stoplight
 
     # @return [String]
     COLOR_RED = 'red'.freeze
+
+    # @return [Integer]
+    DEFAULT_TIMEOUT = 5 * 60
   end
 end

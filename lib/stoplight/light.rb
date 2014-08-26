@@ -89,7 +89,7 @@ module Stoplight
     end
 
     def timeout
-      Stoplight.timeout(name)
+      Stoplight.data_store.timeout(name)
     end
 
     def yellow?
