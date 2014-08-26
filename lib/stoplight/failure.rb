@@ -13,15 +13,11 @@ module Stoplight
       @time = Time.now
     end
 
-    # @return [String]
-    def to_json
-      JSON.dump(to_h)
-    end
-
-    private
-
-    def to_h
-      { error: @error.inspect, time: @time.inspect }
+    def to_json(*args)
+      {
+        error: @error.inspect,
+        time: time.inspect
+      }.to_json(*args)
     end
   end
 end
