@@ -12,7 +12,9 @@ module Stoplight
       end
 
       def clear_all
-        names.each { |name| clear(name) }
+        names
+          .select { |name| get_failures(name).empty? }
+          .each { |name| clear(name) }
         nil
       end
 

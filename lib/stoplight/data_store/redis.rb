@@ -15,7 +15,16 @@ module Stoplight
 
       def clear_all
         names = self.names
-        @redis.pipelined { names.each { |name| clear(name) } }
+        futures = @redis.pipelined do
+          names.each { |n| @redis.llen(DataStore.failures_key(n)) }
+        end
+
+        @redis.pipelined do
+          names.zip(futures).each do |name, future|
+            clear(name) if future.value.zero?
+          end
+        end
+
         nil
       end
 
