@@ -47,20 +47,9 @@ module Stoplight
         nil
       end
 
-      def get_color(name) # rubocop:disable Metrics/MethodLength
-        state, threshold, failures, timeout = @redis.pipelined do
-          @redis.hget(DataStore.states_key, name)
-          @redis.hget(DataStore.thresholds_key, name)
-          @redis.lrange(DataStore.failures_key(name), 0, -1)
-          @redis.hget(DataStore.timeouts_key, name)
-        end
-
-        DataStore.colorize(
-          normalize_state(state),
-          normalize_threshold(threshold),
-          normalize_failures(failures),
-          normalize_timeout(timeout))
-      end # rubocop:enable Metrics/MethodLength
+      def get_color(name)
+        DataStore.colorize(*colorize_args(name))
+      end
 
       def get_attempts(name)
         normalize_attempts(@redis.hget(DataStore.attempts_key, name))
@@ -136,6 +125,25 @@ module Stoplight
       end
 
       private
+
+      def colorize_args(name)
+        state, threshold, failures, timeout = @redis.pipelined do
+          @redis.hget(DataStore.states_key, name)
+          @redis.hget(DataStore.thresholds_key, name)
+          @redis.lrange(DataStore.failures_key(name), 0, -1)
+          @redis.hget(DataStore.timeouts_key, name)
+        end
+        normalize_colorize_args(state, threshold, failures, timeout)
+      end
+
+      def normalize_colorize_args(state, threshold, failures, timeout)
+        [
+          normalize_state(state),
+          normalize_threshold(threshold),
+          normalize_failures(failures),
+          normalize_timeout(timeout)
+        ]
+      end
 
       # @param attempts [String, nil]
       # @return [Integer]
