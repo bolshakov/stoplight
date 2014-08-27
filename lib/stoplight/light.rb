@@ -107,7 +107,7 @@ module Stoplight
       if error_allowed?(error)
         Stoplight.data_store.clear_failures(name)
       else
-        Stoplight.data_store.record_failure(Failure.new(error))
+        Stoplight.data_store.record_failure(name, Failure.new(error))
       end
     end
 
@@ -122,7 +122,7 @@ module Stoplight
     end
 
     def notify
-      return unless Stoplight.data_store.attempts(name).zero?
+      return unless Stoplight.data_store.get_attempts(name).zero?
 
       message = "Switching #{name} stoplight from green to red."
       Stoplight.notifiers.each { |notifier| notifier.notify(message) }
