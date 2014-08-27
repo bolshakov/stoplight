@@ -14,8 +14,8 @@ module Stoplight
     ]).freeze
 
     STATE_UNLOCKED = 'unlocked'.freeze
-    STATE_LOCKED_GREEN = 'locked-green'.freeze
-    STATE_LOCKED_RED = 'locked-red'.freeze
+    STATE_LOCKED_GREEN = 'locked_green'.freeze
+    STATE_LOCKED_RED = 'locked_red'.freeze
     STATES = Set.new([
       STATE_UNLOCKED,
       STATE_LOCKED_GREEN,
