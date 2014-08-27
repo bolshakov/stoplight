@@ -147,7 +147,7 @@ module Stoplight
     # @param suffix [String, nil]
     # @return [String]
     def key(slug, suffix = nil)
-      "#{KEY_PREFIX}:#{slug}:#{suffix}"
+      [KEY_PREFIX, slug, suffix].compact.join(':')
     end
   end
 end
