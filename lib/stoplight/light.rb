@@ -96,32 +96,36 @@ module Stoplight
 
     private
 
-    def error_allowed?(error)
-      allowed_errors.any? { |klass| error.is_a?(klass) }
+    def run_code
+      code.call.tap { Stoplight.data_store.clear_failures(name) }
+    rescue => error
+      handle_error(error)
+      raise
     end
 
-    def run_code
-      result = code.call
-      Stoplight.data_store.clear_failures(name)
-      result
-    rescue => error
+    def handle_error(error)
       if error_allowed?(error)
         Stoplight.data_store.clear_failures(name)
       else
         Stoplight.data_store.record_failure(Failure.new(error))
       end
+    end
 
-      raise
+    def error_allowed?(error)
+      allowed_errors.any? { |klass| error.is_a?(klass) }
     end
 
     def run_fallback
-      if Stoplight.data_store.attempts(name).zero?
-        message = "Switching #{name} stoplight from green to red."
-        Stoplight.notifiers.each { |notifier| notifier.notify(message) }
-      end
-
+      notify
       Stoplight.data_store.record_attempt(name)
       fallback.call
+    end
+
+    def notify
+      return unless Stoplight.data_store.attempts(name).zero?
+
+      message = "Switching #{name} stoplight from green to red."
+      Stoplight.notifiers.each { |notifier| notifier.notify(message) }
     end
   end
 end
