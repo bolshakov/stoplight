@@ -7,7 +7,7 @@ describe Stoplight::DataStore::Base do
 
   %w(
     names
-    clear_all
+    clear_stale
     clear
     sync
     green?

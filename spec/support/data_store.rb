@@ -12,7 +12,7 @@ shared_examples_for 'a data store' do
   let(:timeout) { rand(100) }
 
   it { expect(data_store.names).to eql([]) }
-  it { expect(data_store.clear_all).to eql(nil) }
+  it { expect(data_store.clear_stale).to eql(nil) }
   it { expect(data_store.clear(name)).to eql(nil) }
   it { expect(data_store.sync(name)).to eql(nil) }
   it { expect(data_store.get_color(name)).to eql(Stoplight::DataStore::COLOR_GREEN) }

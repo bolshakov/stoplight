@@ -13,7 +13,7 @@ module Stoplight
         @redis.hkeys(DataStore.thresholds_key)
       end
 
-      def clear_all
+      def clear_stale
         names = self.names
         futures = @redis.pipelined do
           names.each { |n| @redis.llen(DataStore.failures_key(n)) }

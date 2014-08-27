@@ -9,7 +9,7 @@ module Stoplight
       end
 
       # @return [nil]
-      def clear_all
+      def clear_stale
         fail NotImplementedError
       end
 

@@ -11,7 +11,7 @@ module Stoplight
         thresholds.keys
       end
 
-      def clear_all
+      def clear_stale
         names
           .select { |name| get_failures(name).empty? }
           .each { |name| clear(name) }
