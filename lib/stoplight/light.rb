@@ -72,7 +72,7 @@ module Stoplight
     # @raise [Error::RedLight]
     def fallback
       return @fallback if defined?(@fallback)
-      fail Error::RedLight
+      fail Error::RedLight, name
     end
 
     # @return (see Stoplight::DataStore::Base#threshold)
