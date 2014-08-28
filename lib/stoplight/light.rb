@@ -25,7 +25,15 @@ module Stoplight
     # @see #green?
     def run
       Stoplight.data_store.sync(name)
-      red? ? run_fallback : run_code
+
+      case color
+      when DataStore::COLOR_GREEN
+        run_green
+      when DataStore::COLOR_YELLOW
+        run_yellow
+      when DataStore::COLOR_RED
+        run_red
+      end
     end
 
     # Fluent builders
@@ -101,11 +109,23 @@ module Stoplight
 
     private
 
-    def run_code
+    def run_green
       code.call.tap { Stoplight.data_store.clear_failures(name) }
     rescue => error
       handle_error(error)
       raise
+    end
+
+    def run_yellow
+      run_green
+    end
+
+    def run_red
+      if Stoplight.data_store.get_attempts(name).zero?
+        notify("Switching #{name} stoplight from green to red.")
+      end
+      Stoplight.data_store.record_attempt(name)
+      fallback.call
     end
 
     def handle_error(error)
@@ -120,16 +140,7 @@ module Stoplight
       allowed_errors.any? { |klass| error.is_a?(klass) }
     end
 
-    def run_fallback
-      notify
-      Stoplight.data_store.record_attempt(name)
-      fallback.call
-    end
-
-    def notify
-      return unless Stoplight.data_store.get_attempts(name).zero?
-
-      message = "Switching #{name} stoplight from green to red."
+    def notify(message)
       Stoplight.notifiers.each { |notifier| notifier.notify(message) }
     end
   end
