@@ -121,10 +121,9 @@ module Stoplight
     end
 
     def run_red
-      if Stoplight.data_store.get_attempts(name).zero?
+      if Stoplight.data_store.record_attempt(name) == 1
         notify("Switching #{name} from green to red.")
       end
-      Stoplight.data_store.record_attempt(name)
       fallback.call
     end
 
