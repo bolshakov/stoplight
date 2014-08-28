@@ -24,10 +24,10 @@ describe Stoplight::Light do
   let(:timeout) { rand(100) }
 
   it { expect(light.run).to eql(code_result) }
-  it { expect(light.with_allowed_errors(allowed_errors)).to eql(light) }
-  it { expect(light.with_fallback(&fallback)).to eql(light) }
-  it { expect(light.with_threshold(threshold)).to eql(light) }
-  it { expect(light.with_timeout(timeout)).to eql(light) }
+  it { expect(light.with_allowed_errors(allowed_errors)).to equal(light) }
+  it { expect(light.with_fallback(&fallback)).to equal(light) }
+  it { expect(light.with_threshold(threshold)).to equal(light) }
+  it { expect(light.with_timeout(timeout)).to equal(light) }
   it { expect { light.fallback }.to raise_error(Stoplight::Error::RedLight) }
   it { expect(light.allowed_errors).to eql([]) }
   it { expect(light.code).to eql(code) }
