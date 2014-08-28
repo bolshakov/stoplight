@@ -54,7 +54,7 @@ module Stoplight
     # @raise [ArgumentError]
     def validate_color!(color)
       return if valid_color?(color)
-      fail ArgumentError, "invalid color: #{color.inspect}"
+      fail Error::InvalidColor, color.inspect
     end
 
     # @param color [String]
@@ -67,7 +67,7 @@ module Stoplight
     # @raise [ArgumentError]
     def validate_failure!(failure)
       return if valid_failure?(failure)
-      fail ArgumentError, "invalid failure: #{failure.inspect}"
+      fail Error::InvalidFailure, failure.inspect
     end
 
     # @param failure [Failure]
@@ -80,7 +80,7 @@ module Stoplight
     # @raise [ArgumentError]
     def validate_state!(state)
       return if valid_state?(state)
-      fail ArgumentError, "invalid state: #{state.inspect}"
+      fail Error::InvalidState, state.inspect
     end
 
     # @param state [String]
@@ -93,7 +93,7 @@ module Stoplight
     # @raise [ArgumentError]
     def validate_threshold!(threshold)
       return if valid_threshold?(threshold)
-      fail ArgumentError, "invalid threshold: #{threshold.inspect}"
+      fail Error::InvalidThreshold, threshold.inspect
     end
 
     # @param threshold [Integer]
@@ -106,7 +106,7 @@ module Stoplight
     # @raise [ArgumentError]
     def validate_timeout!(timeout)
       return if valid_timeout?(timeout)
-      fail ArgumentError, "invalid timeout: #{timeout.inspect}"
+      fail Error::InvalidTimeout, timeout.inspect
     end
 
     # @param timeout [Integer]

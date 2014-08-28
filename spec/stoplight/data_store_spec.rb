@@ -9,7 +9,7 @@ describe Stoplight::DataStore do
 
     context 'with an invalid color' do
       it 'raises an error' do
-        expect { result }.to raise_error(ArgumentError)
+        expect { result }.to raise_error(Stoplight::Error::InvalidColor)
       end
     end
   end
@@ -20,7 +20,7 @@ describe Stoplight::DataStore do
 
     context 'with an invalid failure' do
       it 'raises an error' do
-        expect { result }.to raise_error(ArgumentError)
+        expect { result }.to raise_error(Stoplight::Error::InvalidFailure)
       end
     end
   end
@@ -31,7 +31,7 @@ describe Stoplight::DataStore do
 
     context 'with an invalid state' do
       it 'raises an error' do
-        expect { result }.to raise_error(ArgumentError)
+        expect { result }.to raise_error(Stoplight::Error::InvalidState)
       end
     end
   end
@@ -42,7 +42,7 @@ describe Stoplight::DataStore do
 
     context 'with an invalid threshold' do
       it 'raises an error' do
-        expect { result }.to raise_error(ArgumentError)
+        expect { result }.to raise_error(Stoplight::Error::InvalidThreshold)
       end
     end
   end
@@ -53,7 +53,7 @@ describe Stoplight::DataStore do
 
     context 'with an invalid timeout' do
       it 'raises an error' do
-        expect { result }.to raise_error(ArgumentError)
+        expect { result }.to raise_error(Stoplight::Error::InvalidTimeout)
       end
     end
   end
