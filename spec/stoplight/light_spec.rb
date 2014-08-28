@@ -32,6 +32,7 @@ describe Stoplight::Light do
   it { expect(light.allowed_errors).to eql([]) }
   it { expect(light.code).to eql(code) }
   it { expect(light.name).to eql(name) }
+  it { expect(light.color).to eql(Stoplight::DataStore::COLOR_GREEN) }
   it { expect(light.green?).to eql(true) }
   it { expect(light.yellow?).to eql(false) }
   it { expect(light.red?).to eql(false) }

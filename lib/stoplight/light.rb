@@ -79,6 +79,11 @@ module Stoplight
 
     # Colors
 
+    # @return (see Stoplight::DataStore::Base#get_color)
+    def color
+      Stoplight.data_store.get_color(name)
+    end
+
     # @return (see Stoplight::DataStore::Base#green?)
     def green?
       Stoplight.data_store.green?(name)
