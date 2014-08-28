@@ -5,12 +5,6 @@ require 'spec_helper'
 describe Stoplight do
   let(:name) { SecureRandom.hex }
 
-  it 'forwards all data store methods' do
-    (Stoplight::DataStore::Base.new.methods - Object.methods).each do |method|
-      expect(Stoplight).to respond_to(method)
-    end
-  end
-
   describe '::VERSION' do
     subject(:result) { described_class.const_get(:VERSION) }
 
@@ -72,86 +66,6 @@ describe Stoplight do
 
       it 'returns the notifiers' do
         expect(result).to eql(notifiers)
-      end
-    end
-  end
-
-  describe '.green?' do
-    subject(:result) { described_class.green?(name) }
-
-    it 'is true' do
-      expect(result).to be true
-    end
-
-    context 'locked green' do
-      before do
-        described_class.set_state(
-          name, Stoplight::DataStore::STATE_LOCKED_GREEN)
-      end
-
-      it 'is true' do
-        expect(result).to be true
-      end
-    end
-
-    context 'locked red' do
-      before do
-        described_class.set_state(
-          name, Stoplight::DataStore::STATE_LOCKED_RED)
-      end
-
-      it 'is false' do
-        expect(result).to be false
-      end
-    end
-
-    context 'with failures' do
-      before do
-        described_class.threshold(name).times do
-          described_class.record_failure(name, nil)
-        end
-      end
-
-      it 'is false' do
-        expect(result).to be false
-      end
-    end
-  end
-
-  describe '.red?' do
-    subject(:result) { described_class.red?(name) }
-
-    context 'green' do
-      before { allow(described_class).to receive(:green?).and_return(true) }
-
-      it 'is false' do
-        expect(result).to be false
-      end
-    end
-
-    context 'not green' do
-      before { allow(described_class).to receive(:green?).and_return(false) }
-
-      it 'is true' do
-        expect(result).to be true
-      end
-    end
-  end
-
-  describe '.threshold' do
-    subject(:result) { described_class.threshold(name) }
-
-    it 'uses the default threshold' do
-      expect(result).to eql(Stoplight::DEFAULT_THRESHOLD)
-    end
-
-    context 'with a custom threshold' do
-      let(:threshold) { rand(10) }
-
-      before { described_class.set_threshold(name, threshold) }
-
-      it 'uses the threshold' do
-        expect(result).to eql(threshold)
       end
     end
   end
