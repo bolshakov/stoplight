@@ -14,17 +14,9 @@ module Stoplight
       end
 
       def clear_stale
-        names = self.names
-        futures = @redis.pipelined do
-          names.each { |n| @redis.llen(DataStore.failures_key(n)) }
-        end
-
-        @redis.pipelined do
-          names.zip(futures).each do |name, future|
-            clear(name) if future.value.zero?
-          end
-        end
-
+        names
+          .select { |name| get_failures(name).empty? }
+          .each { |name| clear(name) }
         nil
       end
 

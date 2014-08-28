@@ -34,4 +34,11 @@ shared_examples_for 'a data store' do
   it { expect(data_store.get_timeout(name)).to eql(Stoplight::DataStore::DEFAULT_TIMEOUT) }
   it { expect(data_store.set_timeout(name, timeout)).to eql(timeout) }
   it { expect(data_store.clear_timeout(name)).to eql(nil) }
+
+  it 'clears stale lights' do
+    data_store.sync(name)
+    expect(data_store.names).to include(name)
+    data_store.clear_stale
+    expect(data_store.names).to_not include(name)
+  end
 end
