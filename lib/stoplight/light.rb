@@ -117,12 +117,12 @@ module Stoplight
     end
 
     def run_yellow
-      run_green
+      run_green.tap { notify("Switching #{name} from red to green.") }
     end
 
     def run_red
       if Stoplight.data_store.get_attempts(name).zero?
-        notify("Switching #{name} stoplight from green to red.")
+        notify("Switching #{name} from green to red.")
       end
       Stoplight.data_store.record_attempt(name)
       fallback.call
