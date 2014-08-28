@@ -11,6 +11,20 @@ Ruby.
 
 Check out [stoplight-admin][12] for controlling your stoplights.
 
+- [Installation](#installation)
+- [Setup](#setup)
+  - [Data store](#data-store)
+  - [Notifiers](#notifiers)
+  - [Rails](#rails)
+- [Usage](#usage)
+  - [Mixin](#mixin)
+  - [Custom errors](#custom-errors)
+  - [Custom fallback](#custom-fallback)
+  - [Custom threshold](#custom-threshold)
+  - [Custom timeout](#custom-timeout)
+  - [Rails](#rails-1)
+- [Credits](#credits)
+
 ## Installation
 
 Add it to your Gemfile:
@@ -45,6 +59,8 @@ the only supported persistent data store is Redis. Make sure you have [the Redis
 gem][14] installed before configuring Stoplight.
 
 ``` irb
+>> require 'redis'
+=> true
 >> redis = Redis.new(url: 'redis://127.0.0.1:6379/0')
 => #<Redis:...>
 >> data_store = Stoplight::DataStore::Redis.new(redis)
@@ -64,15 +80,17 @@ Stoplight sends notifications to standard error by default.
 
 If you want to send notifications elsewhere, you'll have to set them up.
 Currently the only other supported notifier is HipChat. Make sure you have [the
-HipChat gem][] installed before configuring Stoplight.
+HipChat gem][15] installed before configuring Stoplight.
 
 ``` irb
+>> require 'hipchat'
+=> true
 >> hipchat = HipChat::Client.new('token')
 => #<HipChat::Client:...>
 >> notifier = Stoplight::Notifier::HipChat.new(hipchat, 'room')
 => #<Stoplight::Notifier::HipChat:...>
->> Stoplight.notifiers = [notifier])
-=> [#<Stoplight::Notifier::HipChat:...>]
+>> Stoplight.notifiers << notifier
+=> [#<Stoplight::Notifier::StandardError:...>, #<Stoplight::Notifier::HipChat:...>]
 ```
 
 ### Rails
@@ -86,6 +104,7 @@ Stoplight:
 # config/initializers/stoplight.rb
 require 'stoplight'
 Stoplight.data_store = Stoplight::DataStore::Redis.new(...)
+Stoplight.notifiers << Stoplight::Notifier::HipChat.new(...)
 ```
 
 ## Usage
@@ -127,7 +146,8 @@ ZeroDivisionError: divided by 0
 >> light.run
 ZeroDivisionError: divided by 0
 >> light.run
-Stoplight::Error::RedLight: Stoplight::Error::RedLight
+Switching example-2 from green to red.
+Stoplight::Error::RedLight: example-2
 >> light.red?
 => true
 ```
@@ -155,7 +175,7 @@ good example is `ActiveRecord::RecordNotFound`.
 
 ``` irb
 >> light = Stoplight::Light.new('example-4') { User.find(123) }.
-?> with_allowed_errors([ActiveRecord::RecordNotFound])
+..   with_allowed_errors([ActiveRecord::RecordNotFound])
 => #<Stoplight::Light:...>
 >> light.run
 ActiveRecord::RecordNotFound: Couldn't find User with ID=123
@@ -175,7 +195,7 @@ value for the block.
 
 ``` irb
 >> light = Stoplight::Light.new('example-5') { fail }.
-?> with_fallback { [] }
+..   with_fallback { [] }
 => #<Stoplight::Light:...>
 >> light.run
 RuntimeError:
@@ -194,13 +214,41 @@ You can configure this by setting a custom threshold in seconds.
 
 ``` irb
 >> light = Stoplight::Light.new('example-6') { fail }.
-?> with_threshold(1)
+..   with_threshold(1)
 => #<Stoplight::Light:...>
 >> light.run
 RuntimeError:
 >> light.run
-Stoplight::Error::RedLight: Stoplight::Error::RedLight
+Stoplight::Error::RedLight: example-6
 ```
+
+### Custom timeout
+
+Stoplights will automatically attempt to recover after a certain amount of time.
+This timeout is customizable.
+
+``` irb
+>> light = Stoplight::Light.new('example-7') { fail }.
+..   with_timeout(1)
+=> #<Stoplight::Light:...>
+>> light.run
+RuntimeError:
+>> light.run
+RuntimeError:
+>> light.run
+RuntimeError:
+>> light.run
+Switching example-7 from green to red.
+Stoplight::Error::RedLight: example-7
+>> sleep(1)
+=> 1
+>> light.yellow?
+=> true
+>> light.run
+RuntimeError:
+```
+
+Set the timeout to `-1` to disable automatic recovery.
 
 ### Rails
 
@@ -222,12 +270,13 @@ end
 
 ## Credits
 
-Stoplight is brought to you by [@camdez][15] and [@tfausak][16] from [@OrgSync][17]. We were
-inspired by Martin Fowler's [CircuitBreaker][18] article.
+Stoplight is brought to you by [@camdez][16] and [@tfausak][17] from
+[@OrgSync][18]. We were inspired by Martin Fowler's [CircuitBreaker][19]
+article.
 
 If this gem isn't cutting it for you, there are a few alternatives, including:
-[circuit_b][19], [circuit_breaker][20], [simple_circuit_breaker][21], and
-[ya_circuit_breaker][22].
+[circuit_b][20], [circuit_breaker][21], [simple_circuit_breaker][22], and
+[ya_circuit_breaker][23].
 
 [1]: https://github.com/orgsync/stoplight
 [2]: https://badge.fury.io/rb/stoplight.svg
@@ -243,12 +292,12 @@ If this gem isn't cutting it for you, there are a few alternatives, including:
 [12]: https://github.com/orgsync/stoplight-admin
 [13]: http://semver.org/spec/v2.0.0.html
 [14]: https://rubygems.org/gems/redis
-[the hipchat gem]: https://rubygems.org/gems/hipchat
-[15]: https://github.com/camdez
-[16]: https://github.com/tfausak
-[17]: https://github.com/OrgSync
-[18]: http://martinfowler.com/bliki/CircuitBreaker.html
-[19]: https://github.com/alg/circuit_b
-[20]: https://github.com/wsargent/circuit_breaker
-[21]: https://github.com/soundcloud/simple_circuit_breaker
-[22]: https://github.com/wooga/circuit_breaker
+[15]: https://rubygems.org/gems/hipchat
+[16]: https://github.com/camdez
+[17]: https://github.com/tfausak
+[18]: https://github.com/OrgSync
+[19]: http://martinfowler.com/bliki/CircuitBreaker.html
+[20]: https://github.com/alg/circuit_b
+[21]: https://github.com/wsargent/circuit_breaker
+[22]: https://github.com/soundcloud/simple_circuit_breaker
+[23]: https://github.com/wooga/circuit_breaker
