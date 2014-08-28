@@ -24,17 +24,15 @@ module Stoplight
     # @see #fallback
     # @see #green?
     def run
-      sync_settings
+      Stoplight.data_store.sync(name)
 
-      if green?
-        run_code
-      else
-        if Stoplight.attempts(name).zero?
-          message = "Switching #{name} stoplight from green to red."
-          Stoplight.notifiers.each { |notifier| notifier.notify(message) }
-        end
-
-        run_fallback
+      case color
+      when DataStore::COLOR_GREEN
+        run_green
+      when DataStore::COLOR_YELLOW
+        run_yellow
+      when DataStore::COLOR_RED
+        run_red
       end
     end
 
@@ -57,7 +55,14 @@ module Stoplight
     # @param threshold [Integer]
     # @return [self]
     def with_threshold(threshold)
-      Stoplight.set_threshold(name, threshold.to_i)
+      Stoplight.data_store.set_threshold(name, threshold)
+      self
+    end
+
+    # @param timeout [Integer]
+    # @return [self]
+    def with_timeout(timeout)
+      Stoplight.data_store.set_timeout(name, timeout)
       self
     end
 
@@ -70,48 +75,73 @@ module Stoplight
       fail Error::RedLight
     end
 
-    # @return (see Stoplight.green?)
-    def green?
-      Stoplight.green?(name)
-    end
-
-    # @return (see Stoplight.red?)
-    def red?
-      !green?
-    end
-
-    # @return (see Stoplight.threshold)
+    # @return (see Stoplight::DataStore::Base#threshold)
     def threshold
-      Stoplight.threshold(name)
+      Stoplight.data_store.get_threshold(name)
+    end
+
+    # @return (see Stoplight::DataStore::Base#timeout)
+    def timeout
+      Stoplight.data_store.get_timeout(name)
+    end
+
+    # Colors
+
+    # @return (see Stoplight::DataStore::Base#get_color)
+    def color
+      Stoplight.data_store.get_color(name)
+    end
+
+    # @return (see Stoplight::DataStore::Base#green?)
+    def green?
+      Stoplight.data_store.green?(name)
+    end
+
+    # @return (see Stoplight::DataStore::Base#yellow?)
+    def yellow?
+      Stoplight.data_store.yellow?(name)
+    end
+
+    # @return (see Stoplight::DataStore::Base#red?)
+    def red?
+      Stoplight.data_store.red?(name)
     end
 
     private
+
+    def run_green
+      code.call.tap { Stoplight.data_store.clear_failures(name) }
+    rescue => error
+      handle_error(error)
+      raise
+    end
+
+    def run_yellow
+      run_green.tap { notify("Switching #{name} from red to green.") }
+    end
+
+    def run_red
+      if Stoplight.data_store.get_attempts(name).zero?
+        notify("Switching #{name} from green to red.")
+      end
+      Stoplight.data_store.record_attempt(name)
+      fallback.call
+    end
+
+    def handle_error(error)
+      if error_allowed?(error)
+        Stoplight.data_store.clear_failures(name)
+      else
+        Stoplight.data_store.record_failure(name, Failure.new(error))
+      end
+    end
 
     def error_allowed?(error)
       allowed_errors.any? { |klass| error.is_a?(klass) }
     end
 
-    def run_code
-      result = code.call
-      Stoplight.clear_failures(name)
-      result
-    rescue => error
-      if error_allowed?(error)
-        Stoplight.clear_failures(name)
-      else
-        Stoplight.record_failure(name, error)
-      end
-
-      raise
-    end
-
-    def run_fallback
-      Stoplight.record_attempt(name)
-      fallback.call
-    end
-
-    def sync_settings
-      Stoplight.set_threshold(name, threshold)
+    def notify(message)
+      Stoplight.notifiers.each { |notifier| notifier.notify(message) }
     end
   end
 end
