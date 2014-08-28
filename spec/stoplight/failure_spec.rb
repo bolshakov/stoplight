@@ -3,21 +3,47 @@
 require 'spec_helper'
 
 describe Stoplight::Failure do
-  let(:error) { double }
+  subject(:failure) { described_class.new(error, time) }
+  let(:error) { error_class.new(error_message) }
+  let(:error_class) { StandardError }
+  let(:error_message) { SecureRandom.hex }
+  let(:time) { Time.now }
 
-  subject(:failure) { described_class.new(error) }
+  describe '.from_json' do
+    subject(:result) { described_class.from_json(json) }
+    let(:json) { failure.to_json }
 
-  describe '#to_json' do
-    let(:json) { JSON.parse(result) }
+    it do
+      expect(result.error).to eq(failure.error)
+      expect(result.time).to be_within(1).of(failure.time)
+    end
+  end
 
-    subject(:result) { failure.to_json }
-
-    it 'includes the error' do
-      expect(json['error']).to eql(error.inspect)
+  describe '#initialize' do
+    it 'sets the error' do
+      expect(failure.error).to eql(error)
     end
 
-    it 'includes the time' do
-      expect(json['time']).to eql(Time.now.to_s)
+    it 'sets the time' do
+      expect(failure.time).to eql(time)
+    end
+
+    context 'without a time' do
+      let(:time) { nil }
+
+      it 'uses the default time' do
+        expect(failure.time).to be_within(1).of(Time.now)
+      end
+    end
+  end
+
+  describe '#to_json' do
+    subject(:json) { failure.to_json }
+    let(:data) { JSON.load(json) }
+
+    it 'converts to JSON' do
+      expect(data['error']).to eql(error.inspect)
+      expect(data['time']).to eql(time.inspect)
     end
   end
 end

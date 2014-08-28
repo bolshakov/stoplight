@@ -4,6 +4,9 @@ require 'json'
 
 module Stoplight
   class Failure
+    # @return [Exception]
+    attr_reader :error
+
     # @return [Time]
     attr_reader :time
 
