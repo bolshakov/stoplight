@@ -117,7 +117,7 @@ To get started, create a stoplight:
 ```
 
 Then you can run it and it will return the result of calling the block. This is
-the "green" state.
+the green state.
 
 ``` irb
 >> light.run
@@ -136,7 +136,7 @@ stoplight. That's not very interesting though. Let's create a failing stoplight:
 
 Now when you run it, the error will be recorded and passed through. After
 running it a few times, the stoplight will stop trying and fail fast. This is
-the "red" state.
+the red state.
 
 ``` irb
 >> light.run
