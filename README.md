@@ -225,7 +225,8 @@ Stoplight::Error::RedLight: example-6
 ### Custom timeout
 
 Stoplights will automatically attempt to recover after a certain amount of time.
-This timeout is customizable.
+A light in the red state for longer than the timeout will transition to the
+yellow state. This timeout is customizable.
 
 ``` irb
 >> light = Stoplight::Light.new('example-7') { fail }.
