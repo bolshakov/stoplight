@@ -1,10 +1,11 @@
 # coding: utf-8
+# rubocop:disable Metrics/ClassLength
 
 require 'json'
 
 module Stoplight
   module DataStore
-    class Redis < Base # rubocop:disable Metrics/ClassLength
+    class Redis < Base
       def initialize(redis)
         @redis = redis
       end
@@ -166,6 +167,6 @@ module Stoplight
       def normalize_timeout(timeout)
         timeout ? timeout.to_i : DEFAULT_TIMEOUT
       end
-    end # rubocop:enable Metrics/ClassLength
+    end
   end
 end
