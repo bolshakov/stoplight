@@ -1,5 +1,7 @@
 # Changelog
 
+## v0.3.0 (2014-09-11)
+
 - Allowed formatting notifications.
 - Added automatic recovery from red lights.
 - Added `Stoplight::DataStore#clear_stale` for clearing stale lights.

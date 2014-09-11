@@ -15,7 +15,7 @@ require 'stoplight/notifier/standard_error'
 
 module Stoplight
   # @return [Gem::Version]
-  VERSION = Gem::Version.new('0.2.1')
+  VERSION = Gem::Version.new('0.3.0')
 
   @data_store = DataStore::Memory.new
   @notifiers = [Notifier::StandardError.new]
