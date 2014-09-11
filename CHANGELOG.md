@@ -1,5 +1,9 @@
 # Changelog
 
+- Allowed formatting notifications.
+- Added automatic recovery from red lights.
+- Added `Stoplight::DataStore#clear_stale` for clearing stale lights.
+
 ## v0.2.1 (2014-08-20)
 
 - Forced times to be serialized as strings.
