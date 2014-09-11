@@ -5,6 +5,13 @@
 - Allowed formatting notifications.
 - Added automatic recovery from red lights.
 - Added `Stoplight::DataStore#clear_stale` for clearing stale lights.
+- Removed forwarded methods on `Stoplight` module.
+- Moved some methods from `Stoplight::DataStore::Base` to
+  `Stoplight::DataStore`.
+- Renamed `Stoplight::DataStore::Base#purge` to `#clear_stale`.
+- Renamed `Stoplight::DataStore::Base#delete` to `#clear`.
+- Prefixed data store getters with `get_`.
+- Added `Stoplight::DataStore::Base#sync`.
 
 ## v0.2.1 (2014-08-20)
 
