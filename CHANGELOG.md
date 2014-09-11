@@ -12,6 +12,8 @@
 - Renamed `Stoplight::DataStore::Base#delete` to `#clear`.
 - Prefixed data store getters with `get_`.
 - Added `Stoplight::DataStore::Base#sync`.
+- Changed `Stoplight::DataStore::Base#get_failures` to return actual failures
+  (`Stoplight::Failure`) instead of strings.
 
 ## v0.2.1 (2014-08-20)
 
