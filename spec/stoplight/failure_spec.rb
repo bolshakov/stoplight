@@ -58,11 +58,12 @@ describe Stoplight::Failure do
   describe '#to_json' do
     subject(:json) { failure.to_json }
     let(:data) { JSON.load(json) }
+    let(:time) { Time.utc(2001, 2, 3, 4, 5, 6) }
 
     it 'converts to JSON' do
       expect(data['error']['class']).to eql(error_class)
       expect(data['error']['message']).to eql(error_message)
-      expect(data['time']).to eql(time.inspect)
+      expect(data['time']).to eql('2001-02-03T04:05:06+00:00')
     end
   end
 end

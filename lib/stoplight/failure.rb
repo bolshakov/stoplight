@@ -39,7 +39,7 @@ module Stoplight
           class: error_class,
           message: error_message
         },
-        time: time.inspect
+        time: time.strftime('%Y-%m-%dT%H:%M:%S%:z')
       }.to_json(*args)
     end
   end
