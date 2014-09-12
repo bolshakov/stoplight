@@ -1,5 +1,7 @@
 # Changelog
 
+## v0.3.1 (2014-09-12)
+
 - Replaced `Stoplight::Failure#error` with `#error_class` and `#error_message`.
   Also changed the constructor to take the class and the message instead of the
   error.
