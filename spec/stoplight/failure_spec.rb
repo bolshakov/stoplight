@@ -27,8 +27,7 @@ describe Stoplight::Failure do
 
       it 'returns a self-describing invalid failure' do
         expect(result.error_class).to eq('Stoplight::Error::InvalidFailure')
-        expect(result.error_message)
-          .to eq('no implicit conversion of nil into String')
+        expect(result.error_message).to end_with('nil into String')
         expect(result.time).to be_within(1).of(Time.now)
       end
     end
