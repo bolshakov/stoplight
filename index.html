@@ -70,7 +70,7 @@
 
 <p>Add it to your Gemfile:</p>
 
-<div class="highlight highlight-rb"><pre><span class="n">gem</span> <span class="s1">'stoplight'</span><span class="p">,</span> <span class="s1">'~&gt; 0.3.0'</span>
+<div class="highlight highlight-rb"><pre><span class="n">gem</span> <span class="s1">'stoplight'</span><span class="p">,</span> <span class="s1">'~&gt; 0.3.1'</span>
 </pre></div>
 
 <p>Or install it manually:</p>
@@ -261,7 +261,8 @@ You can configure this by setting a custom threshold in seconds.</p>
 <a name="custom-timeout" class="anchor" href="#custom-timeout"><span class="octicon octicon-link"></span></a>Custom timeout</h3>
 
 <p>Stoplights will automatically attempt to recover after a certain amount of time.
-This timeout is customizable.</p>
+A light in the red state for longer than the timeout will transition to the
+yellow state. This timeout is customizable.</p>
 
 <div class="highlight highlight-irb"><pre><span class="gp">&gt;&gt; </span><span class="n">light</span> <span class="o">=</span> <span class="no">Stoplight</span><span class="o">::</span><span class="no">Light</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">'example-7'</span><span class="p">)</span> <span class="p">{</span> <span class="nb">fail</span> <span class="p">}</span><span class="o">.</span>
 <span class="go">..   with_timeout(1)</span>
