@@ -76,7 +76,7 @@ describe Stoplight::Failure do
     it 'converts to JSON' do
       expect(data['error']['class']).to eql(error_class)
       expect(data['error']['message']).to eql(error_message)
-      expect(data['time']).to eql('2001-02-03T04:05:06+00:00')
+      expect(data['time']).to eql('2001-02-03T04:05:06Z')
     end
   end
 end

@@ -1,6 +1,7 @@
 # coding: utf-8
 
 require 'json'
+require 'time'
 
 module Stoplight
   class Failure
@@ -44,7 +45,7 @@ module Stoplight
           class: error_class,
           message: error_message
         },
-        time: time.strftime('%Y-%m-%dT%H:%M:%S%:z')
+        time: time.iso8601
       }.to_json(*args)
     end
   end
