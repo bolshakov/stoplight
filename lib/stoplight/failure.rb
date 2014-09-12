@@ -13,6 +13,11 @@ module Stoplight
     # @return [Time]
     attr_reader :time
 
+    # @param error [Exception]
+    def self.create(error)
+      new(error.class.name, error.message)
+    end
+
     # @param json [String]
     def self.from_json(json)
       h = JSON.parse(json)

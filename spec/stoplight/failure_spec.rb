@@ -8,6 +8,19 @@ describe Stoplight::Failure do
   let(:error_message) { SecureRandom.hex }
   let(:time) { Time.now }
 
+  describe '.create' do
+    subject(:result) { described_class.create(error) }
+    let(:error) { error_class.new(error_message) }
+    let(:error_class) { Class.new(StandardError) }
+
+    it 'creates a failure' do
+      expect(result).to be_a(Stoplight::Failure)
+      expect(result.error_class).to eql(error.class.name)
+      expect(result.error_message).to eql(error.message)
+      expect(result.time).to be_within(1).of(Time.now)
+    end
+  end
+
   describe '.from_json' do
     subject(:result) { described_class.from_json(json) }
     let(:json) { failure.to_json }

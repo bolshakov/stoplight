@@ -131,8 +131,7 @@ module Stoplight
       if error_allowed?(error)
         Stoplight.data_store.clear_failures(name)
       else
-        failure = Failure.new(error.class.name, error.message)
-        Stoplight.data_store.record_failure(name, failure)
+        Stoplight.data_store.record_failure(name, Failure.create(error))
       end
     end
 
