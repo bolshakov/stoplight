@@ -4,32 +4,41 @@ require 'json'
 
 module Stoplight
   class Failure
-    # @return [Exception]
-    attr_reader :error
+    # @return [String]
+    attr_reader :error_class
+
+    # @return [String]
+    attr_reader :error_message
 
     # @return [Time]
     attr_reader :time
 
+    # @param json [String]
     def self.from_json(json)
       h = JSON.parse(json)
-
-      match = /#<(.+): (.+)>/.match(h['error'])
-      error = Object.const_get(match[1]).new(match[2]) if match
-
-      time = Time.parse(h['time'])
-
-      new(error, time)
+      new(
+        h['error']['class'],
+        h['error']['message'],
+        Time.parse(h['time']))
+    rescue => error
+      new(Error::InvalidFailure.name, error.message)
     end
 
-    # @param error [Exception]
-    def initialize(error, time = nil)
-      @error = error
+    # @param error_class [String]
+    # @param error_message [String]
+    # @param time [Time, nil]
+    def initialize(error_class, error_message, time = nil)
+      @error_class = error_class
+      @error_message = error_message
       @time = time || Time.now
     end
 
     def to_json(*args)
       {
-        error: @error.inspect,
+        error: {
+          class: error_class,
+          message: error_message
+        },
         time: time.inspect
       }.to_json(*args)
     end

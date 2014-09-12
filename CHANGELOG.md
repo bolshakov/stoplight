@@ -1,5 +1,9 @@
 # Changelog
 
+- Replaced `Stoplight::Failure#error` with `#error_class` and `#error_message`.
+  Also changed the constructor to take the class and the message instead of the
+  error.
+
 ## v0.3.0 (2014-09-11)
 
 - Allowed formatting notifications.
