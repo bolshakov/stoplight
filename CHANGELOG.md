@@ -1,5 +1,9 @@
 # Changelog
 
+- Updated `Stoplight::Notifier::Base#notify` to accept three parameters (the
+  light, the before color, and the after color) instead of just one parameter
+  (the message).
+
 ## v0.3.1 (2014-09-12)
 
 - Replaced `Stoplight::Failure#error` with `#error_class` and `#error_message`.

@@ -10,23 +10,31 @@ describe Stoplight::Notifier::HipChat do
   let(:options) { {} }
 
   describe '#notify' do
-    subject(:result) { notifier.notify(message) }
-    let(:message) { SecureRandom.hex }
+    subject(:result) { notifier.notify(light, from_color, to_color) }
+    let(:light) { Stoplight::Light.new(light_name, &light_code) }
+    let(:light_name) { SecureRandom.hex }
+    let(:light_code) { -> {} }
+    let(:from_color) { Stoplight::DataStore::COLOR_GREEN }
+    let(:to_color) { Stoplight::DataStore::COLOR_RED }
 
     it 'sends the message to HipChat' do
       expect(client).to receive(:[]).with(room).and_return(client)
-      expect(client).to receive(:send)
-        .with('Stoplight', "@all #{message}", anything)
+      expect(client).to receive(:send).with(
+        'Stoplight',
+        "@all Switching #{light.name} from #{from_color} to #{to_color}",
+        anything)
       result
     end
 
     context 'with a format' do
-      let(:format) { '> %s <' }
+      let(:format) { '%s %s %s' }
 
       it 'formats the message' do
         expect(client).to receive(:[]).with(room).and_return(client)
-        expect(client).to receive(:send)
-          .with('Stoplight', "> #{message} <", anything)
+        expect(client).to receive(:send).with(
+          'Stoplight',
+          "#{light.name} #{from_color} #{to_color}",
+          anything)
         result
       end
     end
