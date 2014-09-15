@@ -97,15 +97,6 @@ describe Stoplight::Light do
       end
     end
 
-    context 'with threshold' do
-      before { light.with_threshold(0) }
-
-      it 'stays red' do
-        expect(light.red?).to eql(true)
-        expect { light.run }.to raise_error(Stoplight::Error::RedLight)
-      end
-    end
-
     context 'with timeout' do
       before { light.with_timeout(-1) }
 
