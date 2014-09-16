@@ -99,7 +99,7 @@ module Stoplight
     # @param threshold [Integer]
     # @return [Boolean]
     def valid_threshold?(threshold)
-      threshold.is_a?(Integer)
+      threshold.is_a?(Integer) && threshold > 0
     end
 
     # @param timeout [Integer]

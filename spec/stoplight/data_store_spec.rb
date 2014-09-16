@@ -45,6 +45,22 @@ describe Stoplight::DataStore do
         expect { result }.to raise_error(Stoplight::Error::InvalidThreshold)
       end
     end
+
+    context 'with a negative threshold' do
+      let(:threshold) { -1 }
+
+      it 'raises an error' do
+        expect { result }.to raise_error(Stoplight::Error::InvalidThreshold)
+      end
+    end
+
+    context 'with a zero threshold' do
+      let(:threshold) { 0 }
+
+      it 'raises an error' do
+        expect { result }.to raise_error(Stoplight::Error::InvalidThreshold)
+      end
+    end
   end
 
   describe '.validate_timeout!' do

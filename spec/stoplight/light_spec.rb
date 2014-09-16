@@ -20,7 +20,7 @@ describe Stoplight::Light do
   let(:fallback) { -> { fallback_result } }
   let(:message) { SecureRandom.hex }
   let(:name) { SecureRandom.hex }
-  let(:threshold) { rand(100) }
+  let(:threshold) { 1 + rand(100) }
   let(:timeout) { rand(100) }
 
   it { expect(light.run).to eql(code_result) }
@@ -94,15 +94,6 @@ describe Stoplight::Light do
         end
         expect(light.red?).to eql(true)
         expect(light.run).to eql(fallback_result)
-      end
-    end
-
-    context 'with threshold' do
-      before { light.with_threshold(0) }
-
-      it 'stays red' do
-        expect(light.red?).to eql(true)
-        expect { light.run }.to raise_error(Stoplight::Error::RedLight)
       end
     end
 

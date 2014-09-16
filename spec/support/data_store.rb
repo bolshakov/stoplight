@@ -8,7 +8,7 @@ shared_examples_for 'a data store' do
   let(:error_class) { Class.new(StandardError) }
   let(:time) { Time.now }
   let(:state) { Stoplight::DataStore::STATES.to_a.sample }
-  let(:threshold) { rand(100) }
+  let(:threshold) { 1 + rand(100) }
   let(:timeout) { rand(100) }
 
   it { expect(data_store.names).to eql([]) }
