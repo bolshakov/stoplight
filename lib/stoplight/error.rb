@@ -22,5 +22,17 @@ module Stoplight
 
     # @return [Class]
     InvalidTimeout = Class.new(Base)
+
+    # @return [Class]
+    class BadDataStore < Base
+      # @return [Exception]
+      attr_reader :cause
+
+      # @param cause [Exception]
+      def initialize(cause)
+        super(cause.message)
+        @cause = cause
+      end
+    end
   end
 end

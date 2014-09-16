@@ -24,7 +24,7 @@ module Stoplight
     # @see #fallback
     # @see #green?
     def run
-      Stoplight.data_store.sync(name)
+      sync
 
       case color
       when DataStore::COLOR_GREEN
@@ -143,6 +143,14 @@ module Stoplight
       Stoplight.notifiers.each do |notifier|
         notifier.notify(self, from_color, to_color)
       end
+    end
+
+    def sync
+      Stoplight.data_store.sync(name)
+    rescue Error::BadDataStore => error
+      warn(error.cause)
+      Stoplight.data_store = Stoplight::DataStore::Memory.new
+      retry
     end
   end
 end

@@ -1,5 +1,7 @@
 # Changelog
 
+- Made stoplights automatically fall back to a fresh in-memory data store if the
+  primary store is unavailable.
 - Generalized `Stoplight::Notifier::StandardError` into
   `Stoplight::Notifier::IO`.
 - Changed notification format from a string to a lambda. It accepts the same

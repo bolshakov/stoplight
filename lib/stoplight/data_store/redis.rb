@@ -38,6 +38,8 @@ module Stoplight
         threshold = normalize_threshold(threshold)
         @redis.hset(DataStore.thresholds_key, name, threshold)
         nil
+      rescue ::Redis::BaseError => error
+        raise Error::BadDataStore, error
       end
 
       def get_color(name)
