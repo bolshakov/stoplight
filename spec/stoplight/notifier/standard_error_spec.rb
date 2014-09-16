@@ -24,7 +24,7 @@ describe Stoplight::Notifier::StandardError do
     end
 
     context 'with a formatter' do
-      let(:formatter) { -> (l, f, t) { "#{l.name} #{f} #{t}" } }
+      let(:formatter) { ->(l, f, t) { "#{l.name} #{f} #{t}" } }
 
       it 'formats the message' do
         result
