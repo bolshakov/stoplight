@@ -110,4 +110,47 @@ describe Stoplight::Light do
       end
     end
   end
+
+  context 'with Redis' do
+    let(:data_store) { Stoplight::DataStore::Redis.new(redis) }
+    let(:redis) { Redis.new }
+
+    before do
+      @data_store = Stoplight.data_store
+      Stoplight.data_store = data_store
+    end
+    after { Stoplight.data_store = @data_store }
+
+    context 'with a failing connection' do
+      let(:error) { Stoplight::Error::BadDataStore.new(cause) }
+      let(:cause) { Redis::BaseConnectionError.new(message) }
+      let(:message) { SecureRandom.hex }
+
+      before { allow(data_store).to receive(:sync).and_raise(error) }
+
+      before { @stderr, $stderr = $stderr, StringIO.new }
+      after { $stderr = @stderr }
+
+      it 'does not raise an error' do
+        expect { light.run }.to_not raise_error
+      end
+
+      it 'switches to an in-memory data store' do
+        light.run
+        expect(Stoplight.data_store).to_not eql(data_store)
+        expect(Stoplight.data_store).to be_a(Stoplight::DataStore::Memory)
+      end
+
+      it 'syncs the light in the new data store' do
+        expect_any_instance_of(Stoplight::DataStore::Memory)
+          .to receive(:sync).with(light.name)
+        light.run
+      end
+
+      it 'warns to STDERR' do
+        light.run
+        expect($stderr.string).to eql("#{cause}\n")
+      end
+    end
+  end
 end
