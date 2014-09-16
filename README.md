@@ -18,12 +18,14 @@ Check out [stoplight-admin][12] for controlling your stoplights.
   - [Data store](#data-store)
   - [Notifiers](#notifiers)
   - [Rails](#rails)
-- [Usage](#usage)
+- [Basic usage](#basic-usage)
   - [Custom errors](#custom-errors)
   - [Custom fallback](#custom-fallback)
   - [Custom threshold](#custom-threshold)
   - [Custom timeout](#custom-timeout)
   - [Rails](#rails-1)
+- [Advanced usage](#advanced-usage)
+  - [Locking](#locking)
 - [Credits](#credits)
 
 ## Installation
@@ -108,7 +110,7 @@ Stoplight.data_store = Stoplight::DataStore::Redis.new(...)
 Stoplight.notifiers << Stoplight::Notifier::HipChat.new(...)
 ```
 
-## Usage
+## Basic usage
 
 To get started, create a stoplight:
 
@@ -256,6 +258,27 @@ class ApplicationController < ActionController::Base
       .run
   end
 end
+```
+
+## Advanced usage
+
+### Locking
+
+Although stoplights can operate on their own, occasionally you may want to
+override the default behavior. You can lock a light in either the green or red
+state using `set_state`.
+
+``` irb
+>> light = Stoplight::Light.new('example-8') { true }
+=> #<Stoplight::Light:...>
+>> light.run
+=> true
+>> Stoplight.data_store.set_state(
+..   light.name, Stoplight::DataStore::STATE_LOCKED_RED)
+=> "locked_red"
+>> light.run
+Switching example-8 from green to red
+Stoplight::Error::RedLight: example-8
 ```
 
 ## Credits
