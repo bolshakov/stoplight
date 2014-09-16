@@ -23,6 +23,23 @@ module Stoplight
       def notify(light, from_color, to_color)
         message = @formatter.call(light, from_color, to_color)
         @client[@room].send('Stoplight', message, @options)
+      rescue *errors => error
+        raise Error::BadNotifier, error
+      end
+
+      private
+
+      def errors
+        [
+          ::HipChat::InvalidApiVersion,
+          ::HipChat::RoomMissingOwnerUserId,
+          ::HipChat::RoomNameTooLong,
+          ::HipChat::Unauthorized,
+          ::HipChat::UnknownResponseCode,
+          ::HipChat::UnknownRoom,
+          ::HipChat::UnknownUser,
+          ::HipChat::UsernameTooLong
+        ]
       end
     end
   end
