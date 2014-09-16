@@ -3,8 +3,8 @@
 require 'spec_helper'
 
 describe Stoplight::Notifier::StandardError do
-  subject(:notifier) { described_class.new(format) }
-  let(:format) { nil }
+  subject(:notifier) { described_class.new(formatter) }
+  let(:formatter) { nil }
 
   before { @stderr, $stderr = $stderr, StringIO.new }
   after { $stderr = @stderr }
@@ -23,8 +23,8 @@ describe Stoplight::Notifier::StandardError do
         .to eql("Switching #{light.name} from #{from_color} to #{to_color}\n")
     end
 
-    context 'with a format' do
-      let(:format) { '%s %s %s' }
+    context 'with a formatter' do
+      let(:formatter) { ->(l, f, t) { "#{l.name} #{f} #{t}" } }
 
       it 'formats the message' do
         result

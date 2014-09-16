@@ -3,10 +3,10 @@
 require 'spec_helper'
 
 describe Stoplight::Notifier::HipChat do
-  subject(:notifier) { described_class.new(client, room, format, options) }
+  subject(:notifier) { described_class.new(client, room, formatter, options) }
   let(:client) { double }
   let(:room) { SecureRandom.hex }
-  let(:format) { nil }
+  let(:formatter) { nil }
   let(:options) { {} }
 
   describe '#notify' do
@@ -26,8 +26,8 @@ describe Stoplight::Notifier::HipChat do
       result
     end
 
-    context 'with a format' do
-      let(:format) { '%s %s %s' }
+    context 'with a formatter' do
+      let(:formatter) { ->(l, f, t) { "#{l.name} #{f} #{t}" } }
 
       it 'formats the message' do
         expect(client).to receive(:[]).with(room).and_return(client)
