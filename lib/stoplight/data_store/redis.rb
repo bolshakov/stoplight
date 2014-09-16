@@ -34,6 +34,7 @@ module Stoplight
       end
 
       def sync(name)
+        fail ::Redis::TimeoutError
         threshold = @redis.hget(DataStore.thresholds_key, name)
         threshold = normalize_threshold(threshold)
         @redis.hset(DataStore.thresholds_key, name, threshold)
