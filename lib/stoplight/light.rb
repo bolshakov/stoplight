@@ -117,12 +117,12 @@ module Stoplight
     end
 
     def run_yellow
-      run_green.tap { notify("Switching #{name} from red to green.") }
+      run_green.tap { notify(DataStore::COLOR_RED, DataStore::COLOR_GREEN) }
     end
 
     def run_red
       if Stoplight.data_store.record_attempt(name) == 1
-        notify("Switching #{name} from green to red.")
+        notify(DataStore::COLOR_GREEN, DataStore::COLOR_RED)
       end
       fallback.call
     end
@@ -139,8 +139,10 @@ module Stoplight
       allowed_errors.any? { |klass| error.is_a?(klass) }
     end
 
-    def notify(message)
-      Stoplight.notifiers.each { |notifier| notifier.notify(message) }
+    def notify(from_color, to_color)
+      Stoplight.notifiers.each do |notifier|
+        notifier.notify(self, from_color, to_color)
+      end
     end
   end
 end
