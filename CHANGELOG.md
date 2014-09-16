@@ -1,5 +1,8 @@
 # Changelog
 
+- Updated `Stoplight::Notifier::Base#notify` to accept three parameters (the
+  light, the before color, and the after color) instead of just one parameter
+  (the message).
 - Prevented setting non-positive thresholds.
 - Removed `Stoplight::Mixin`.
 
