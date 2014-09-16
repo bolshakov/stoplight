@@ -1,5 +1,6 @@
 # Changelog
 
+- Prevented setting non-positive thresholds.
 - Removed `Stoplight::Mixin`.
 
 ## v0.3.1 (2014-09-12)
