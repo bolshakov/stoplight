@@ -19,7 +19,6 @@ Check out [stoplight-admin][12] for controlling your stoplights.
   - [Notifiers](#notifiers)
   - [Rails](#rails)
 - [Usage](#usage)
-  - [Mixin](#mixin)
   - [Custom errors](#custom-errors)
   - [Custom fallback](#custom-fallback)
   - [Custom threshold](#custom-threshold)
@@ -156,18 +155,6 @@ Stoplight::Error::RedLight: example-2
 
 When the stoplight changes from green to red, it will notify every configured
 notifier.
-
-### Mixin
-
-Since creating and running a stoplight is so common, we provide a mixin that
-makes it easy.
-
-``` irb
->> include Stoplight::Mixin
-=> Object
->> stoplight('example-3') { 1.0 / 3 }
-=> 0.3333333333333333
-```
 
 ### Custom errors
 
