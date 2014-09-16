@@ -1,5 +1,7 @@
 # Changelog
 
+- Made stoplights automatically fall back to a fresh in-memory data store if the
+  primary store is unavailable.
 - Changed notification format from a string to a lambda. It accepts the same
   parameters that the format string accepted.
 - Updated `Stoplight::Notifier::Base#notify` to accept three parameters (the
