@@ -6,7 +6,7 @@ require 'spec_helper'
 describe Stoplight::Light do
   before do
     @notifiers = Stoplight.notifiers
-    Stoplight.notifiers = []
+    Stoplight.notifiers = [Stoplight::Notifier::IO.new(StringIO.new)]
   end
   after { Stoplight.notifiers = @notifiers }
 
