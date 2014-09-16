@@ -1,5 +1,7 @@
 # Changelog
 
+- Generalized `Stoplight::Notifier::StandardError` into
+  `Stoplight::Notifier::IO`.
 - Changed notification format from a string to a lambda. It accepts the same
   parameters that the format string accepted.
 - Updated `Stoplight::Notifier::Base#notify` to accept three parameters (the

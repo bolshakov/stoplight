@@ -76,7 +76,7 @@ Stoplight sends notifications to standard error by default.
 
 ``` irb
 >> Stoplight.notifiers
-=> [#<Stoplight::Notifier::StandardError:...>]
+=> [#<Stoplight::Notifier::IO:...>]
 ```
 
 If you want to send notifications elsewhere, you'll have to set them up.
@@ -91,7 +91,7 @@ HipChat gem][15] installed before configuring Stoplight.
 >> notifier = Stoplight::Notifier::HipChat.new(hipchat, 'room')
 => #<Stoplight::Notifier::HipChat:...>
 >> Stoplight.notifiers << notifier
-=> [#<Stoplight::Notifier::StandardError:...>, #<Stoplight::Notifier::HipChat:...>]
+=> [#<Stoplight::Notifier::IO:...>, #<Stoplight::Notifier::HipChat:...>]
 ```
 
 ### Rails

@@ -46,7 +46,7 @@ describe Stoplight do
     it 'uses the default notifier' do
       expect(result).to be_an(Array)
       expect(result.size).to eql(1)
-      expect(result.first).to be_a(Stoplight::Notifier::StandardError)
+      expect(result.first).to be_a(Stoplight::Notifier::IO)
     end
 
     it 'memoizes the result' do

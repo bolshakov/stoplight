@@ -2,12 +2,10 @@
 
 require 'spec_helper'
 
-describe Stoplight::Notifier::StandardError do
-  subject(:notifier) { described_class.new(formatter) }
+describe Stoplight::Notifier::IO do
+  subject(:notifier) { described_class.new(io, formatter) }
+  let(:io) { StringIO.new }
   let(:formatter) { nil }
-
-  before { @stderr, $stderr = $stderr, StringIO.new }
-  after { $stderr = @stderr }
 
   describe '#notify' do
     subject(:result) { notifier.notify(light, from_color, to_color) }
@@ -19,7 +17,7 @@ describe Stoplight::Notifier::StandardError do
 
     it 'emits the message as a warning' do
       result
-      expect($stderr.string)
+      expect(io.string)
         .to eql("Switching #{light.name} from #{from_color} to #{to_color}\n")
     end
 
@@ -28,7 +26,7 @@ describe Stoplight::Notifier::StandardError do
 
       it 'formats the message' do
         result
-        expect($stderr.string)
+        expect(io.string)
           .to eql("#{light.name} #{from_color} #{to_color}\n")
       end
     end

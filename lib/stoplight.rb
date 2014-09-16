@@ -10,14 +10,14 @@ require 'stoplight/light'
 require 'stoplight/notifier'
 require 'stoplight/notifier/base'
 require 'stoplight/notifier/hip_chat'
-require 'stoplight/notifier/standard_error'
+require 'stoplight/notifier/io'
 
 module Stoplight
   # @return [Gem::Version]
   VERSION = Gem::Version.new('0.3.1')
 
   @data_store = DataStore::Memory.new
-  @notifiers = [Notifier::StandardError.new]
+  @notifiers = [Notifier::IO.new($stderr)]
 
   class << self
     # @return [DataStore::Base]
