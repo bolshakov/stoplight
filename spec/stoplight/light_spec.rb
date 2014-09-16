@@ -20,7 +20,7 @@ describe Stoplight::Light do
   let(:fallback) { -> { fallback_result } }
   let(:message) { SecureRandom.hex }
   let(:name) { SecureRandom.hex }
-  let(:threshold) { rand(100) }
+  let(:threshold) { 1 + rand(100) }
   let(:timeout) { rand(100) }
 
   it { expect(light.run).to eql(code_result) }
