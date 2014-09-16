@@ -41,7 +41,6 @@ module Stoplight
       case
       when state == STATE_LOCKED_GREEN then COLOR_GREEN
       when state == STATE_LOCKED_RED then COLOR_RED
-      when threshold < 1 then COLOR_RED
       when failures.size < threshold then COLOR_GREEN
       when Time.now - failures.last.time > timeout then COLOR_YELLOW
       else COLOR_RED
