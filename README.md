@@ -6,6 +6,8 @@
 [![Quality status][8]][9]
 [![Dependency status][10]][11]
 
+<img align="right" alt="Stoplight icon" src="//i.imgur.com/tiuOfY9.png">
+
 Traffic control for code. An implementation of the circuit breaker pattern in
 Ruby.
 
