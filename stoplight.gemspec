@@ -4,7 +4,10 @@ Gem::Specification.new do |spec|
   spec.name = 'stoplight'
   spec.version = '0.3.1' # Stoplight::VERSION
   spec.summary = 'Traffic control for code.'
-  spec.description = spec.summary
+  spec.description = <<-TXT.gsub(/^ +/, '')
+    Traffic control for code. An implementation of the circuit breaker pattern
+    in Ruby.
+  TXT
   spec.homepage = 'http://orgsync.github.io/stoplight'
   spec.authors = ['Cameron Desautels', 'Taylor Fausak']
   spec.email = %w(camdez@gmail.com taylor@fausak.me)
