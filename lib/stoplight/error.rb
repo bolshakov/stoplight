@@ -34,5 +34,17 @@ module Stoplight
         @cause = cause
       end
     end
+
+    # @return [Class]
+    class BadNotifier < Base
+      # @return [Exception]
+      attr_reader :cause
+
+      # @param cause [Exception]
+      def initialize(cause)
+        super(cause.message)
+        @cause = cause
+      end
+    end
   end
 end

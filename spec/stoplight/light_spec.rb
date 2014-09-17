@@ -153,4 +153,54 @@ describe Stoplight::Light do
       end
     end
   end
+
+  context 'with HipChat' do
+    let(:notifier) { Stoplight::Notifier::HipChat.new(client, room_name) }
+    let(:client) { double(HipChat::Client) }
+    let(:room_name) { SecureRandom.hex }
+    let(:room) { double(HipChat::Room) }
+
+    before do
+      @notifiers = Stoplight.notifiers
+      Stoplight.notifiers = [notifier]
+      allow(client).to receive(:[]).with(room_name).and_return(room)
+    end
+
+    after { Stoplight.notifiers = @notifiers }
+
+    context 'with a failing client' do
+      subject(:result) do
+        begin
+          light.run
+        rescue Stoplight::Error::RedLight
+          nil
+        end
+      end
+
+      let(:error_class) { HipChat::Unauthorized }
+
+      before do
+        Stoplight.data_store.set_state(
+          light.name, Stoplight::DataStore::STATE_LOCKED_RED)
+        allow(room).to receive(:send).with(
+          'Stoplight',
+          /\A@all /,
+          hash_including(color: 'red')
+        ).and_raise(error)
+        @stderr = $stderr
+        $stderr = StringIO.new
+      end
+
+      after { $stderr = @stderr }
+
+      it 'does not raise an error' do
+        expect { result }.to_not raise_error
+      end
+
+      it 'warns to STDERR' do
+        result
+        expect($stderr.string).to eql("#{error}\n")
+      end
+    end
+  end
 end

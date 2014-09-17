@@ -19,6 +19,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'benchmark-ips', '~> 2.0'
   spec.add_development_dependency 'coveralls', '~> 0.7'
   spec.add_development_dependency 'fakeredis', '~> 0.5'
+  spec.add_development_dependency 'hipchat', '~> 1.3'
   spec.add_development_dependency 'rake', '~> 10.3'
   spec.add_development_dependency 'rspec', '~> 3.1'
   spec.add_development_dependency 'rubocop', '~> 0.26'

@@ -38,5 +38,37 @@ describe Stoplight::Notifier::HipChat do
         result
       end
     end
+
+    context 'failing' do
+      let(:error) { HipChat::UnknownResponseCode.new(message) }
+      let(:message) { SecureRandom.hex }
+
+      before do
+        allow(client).to receive(:[]).with(room).and_return(client)
+        allow(client).to receive(:send).and_raise(error)
+      end
+
+      it 'reraises the error' do
+        expect { result }.to raise_error(Stoplight::Error::BadNotifier)
+      end
+
+      it 'sets the message' do
+        begin
+          result
+          expect(false).to be(true)
+        rescue Stoplight::Error::BadNotifier => e
+          expect(e.message).to eql(message)
+        end
+      end
+
+      it 'sets the cause' do
+        begin
+          result
+          expect(false).to be(true)
+        rescue Stoplight::Error::BadNotifier => e
+          expect(e.cause).to eql(error)
+        end
+      end
+    end
   end
 end
