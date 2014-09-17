@@ -1,8 +1,5 @@
 # coding: utf-8
 
-lib = File.expand_path('../lib', __FILE__)
-$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-
 Gem::Specification.new do |spec|
   spec.name = 'stoplight'
   spec.version = '0.3.1' # Stoplight::VERSION
@@ -13,10 +10,9 @@ Gem::Specification.new do |spec|
   spec.email = %w(camdez@gmail.com taylor@fausak.me)
   spec.license = 'MIT'
 
-  spec.require_path = 'lib'
+  spec.files = %w(CHANGELOG.md CONTRIBUTING.md LICENSE.md README.md) +
+    Dir.glob(File.join(spec.require_path, '**', '*.rb'))
   spec.test_files = Dir.glob(File.join('spec', '**', '*.rb'))
-  spec.files = Dir.glob(File.join(spec.require_path, '**', '*.rb')) +
-    spec.test_files + %w(CHANGELOG.md LICENSE.md README.md)
 
   spec.required_ruby_version = '>= 1.9.3'
 
