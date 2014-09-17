@@ -141,7 +141,11 @@ module Stoplight
 
     def notify(from_color, to_color)
       Stoplight.notifiers.each do |notifier|
-        notifier.notify(self, from_color, to_color)
+        begin
+          notifier.notify(self, from_color, to_color)
+        rescue Error::BadNotifier => error
+          warn(error.cause)
+        end
       end
     end
 
