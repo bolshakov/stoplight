@@ -8,7 +8,7 @@ Gem::Specification.new do |spec|
   spec.version = '0.3.1' # Stoplight::VERSION
   spec.summary = 'Traffic control for code.'
   spec.description = spec.summary
-  spec.homepage = 'https://github.com/orgsync/stoplight'
+  spec.homepage = 'http://orgsync.github.io/stoplight'
   spec.authors = ['Cameron Desautels', 'Taylor Fausak']
   spec.email = %w(camdez@gmail.com taylor@fausak.me)
   spec.license = 'MIT'
