@@ -281,6 +281,11 @@ Switching example-8 from green to red
 Stoplight::Error::RedLight: example-8
 ```
 
+**Code in locked red lights may still run under certain conditions!** If you
+have configured a custom data store and that data store fails, Stoplight will
+switch over to using a blank in-memory data store. That means you will lose the
+locked state of any stoplights.
+
 ## Credits
 
 Stoplight is brought to you by [@camdez][16] and [@tfausak][17] from
