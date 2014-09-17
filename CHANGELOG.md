@@ -1,5 +1,7 @@
 # Changelog
 
+- Made stoplights handle failing notifiers by logging the failure to standard
+  error.
 - Made stoplights automatically fall back to a fresh in-memory data store if the
   primary store is unavailable.
 - Generalized `Stoplight::Notifier::StandardError` into
