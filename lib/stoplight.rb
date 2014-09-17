@@ -14,7 +14,7 @@ require 'stoplight/notifier/io'
 
 module Stoplight
   # @return [Gem::Version]
-  VERSION = Gem::Version.new('0.3.1')
+  VERSION = Gem::Version.new('0.4.0')
 
   @data_store = DataStore::Memory.new
   @notifiers = [Notifier::IO.new($stderr)]

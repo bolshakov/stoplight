@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |spec|
   spec.name = 'stoplight'
-  spec.version = '0.3.1' # Stoplight::VERSION
+  spec.version = '0.4.0' # Stoplight::VERSION
   spec.summary = 'Traffic control for code.'
   spec.description = <<-TXT.gsub(/^ +/, '')
     Traffic control for code. An implementation of the circuit breaker pattern

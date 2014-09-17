@@ -1,5 +1,7 @@
 # Changelog
 
+## v0.4.0 (2014-09-17)
+
 - Made stoplights handle failing notifiers by logging the failure to standard
   error.
 - Made stoplights automatically fall back to a fresh in-memory data store if the
