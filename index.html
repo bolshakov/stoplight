@@ -37,6 +37,8 @@
 <a href="https://codeclimate.com/github/orgsync/stoplight"><img src="https://codeclimate.com/github/orgsync/stoplight/badges/gpa.svg" alt="Quality status"></a>
 <a href="https://gemnasium.com/orgsync/stoplight"><img src="https://gemnasium.com/orgsync/stoplight.svg" alt="Dependency status"></a></p>
 
+<p><img align="right" alt="Stoplight icon" src="https://i.imgur.com/tiuOfY9.png"></p>
+
 <p>An implementation of the circuit breaker pattern in Ruby.</p>
 
 <p>Check out <a href="https://github.com/orgsync/stoplight-admin">stoplight-admin</a> for controlling your stoplights.</p>
@@ -53,15 +55,21 @@
 </ul>
 </li>
 <li>
-<a href="#usage">Usage</a>
+<a href="#basic-usage">Basic usage</a>
 
 <ul>
-<li><a href="#mixin">Mixin</a></li>
 <li><a href="#custom-errors">Custom errors</a></li>
 <li><a href="#custom-fallback">Custom fallback</a></li>
 <li><a href="#custom-threshold">Custom threshold</a></li>
 <li><a href="#custom-timeout">Custom timeout</a></li>
 <li><a href="#rails-1">Rails</a></li>
+</ul>
+</li>
+<li>
+<a href="#advanced-usage">Advanced usage</a>
+
+<ul>
+<li><a href="#locking">Locking</a></li>
 </ul>
 </li>
 <li><a href="#credits">Credits</a></li>
@@ -70,7 +78,7 @@
 
 <p>Add it to your Gemfile:</p>
 
-<div class="highlight highlight-rb"><pre><span class="n">gem</span> <span class="s1">'stoplight'</span><span class="p">,</span> <span class="s1">'~&gt; 0.3.1'</span>
+<div class="highlight highlight-rb"><pre><span class="n">gem</span> <span class="s1">'stoplight'</span><span class="p">,</span> <span class="s1">'~&gt; 0.4.0'</span>
 </pre></div>
 
 <p>Or install it manually:</p>
@@ -114,7 +122,7 @@ gem</a> installed before configuring Stoplight.</p>
 <p>Stoplight sends notifications to standard error by default.</p>
 
 <div class="highlight highlight-irb"><pre><span class="gp">&gt;&gt; </span><span class="no">Stoplight</span><span class="o">.</span><span class="n">notifiers</span>
-<span class="go">=&gt; [#&lt;Stoplight::Notifier::StandardError:...&gt;]</span>
+<span class="go">=&gt; [#&lt;Stoplight::Notifier::IO:...&gt;]</span>
 </pre></div>
 
 <p>If you want to send notifications elsewhere, you'll have to set them up.
@@ -128,7 +136,7 @@ HipChat gem</a> installed before configuring Stoplight.</p>
 <span class="gp">&gt;&gt; </span><span class="n">notifier</span> <span class="o">=</span> <span class="no">Stoplight</span><span class="o">::</span><span class="no">Notifier</span><span class="o">::</span><span class="no">HipChat</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">hipchat</span><span class="p">,</span> <span class="s1">'room'</span><span class="p">)</span>
 <span class="go">=&gt; #&lt;Stoplight::Notifier::HipChat:...&gt;</span>
 <span class="gp">&gt;&gt; </span><span class="no">Stoplight</span><span class="o">.</span><span class="n">notifiers</span> <span class="o">&lt;&lt;</span> <span class="n">notifier</span>
-<span class="go">=&gt; [#&lt;Stoplight::Notifier::StandardError:...&gt;, #&lt;Stoplight::Notifier::HipChat:...&gt;]</span>
+<span class="go">=&gt; [#&lt;Stoplight::Notifier::IO:...&gt;, #&lt;Stoplight::Notifier::HipChat:...&gt;]</span>
 </pre></div>
 
 <h3>
@@ -146,7 +154,7 @@ Stoplight:</p>
 </pre></div>
 
 <h2>
-<a name="usage" class="anchor" href="#usage"><span class="octicon octicon-link"></span></a>Usage</h2>
+<a name="basic-usage" class="anchor" href="#basic-usage"><span class="octicon octicon-link"></span></a>Basic usage</h2>
 
 <p>To get started, create a stoplight:</p>
 
@@ -189,18 +197,6 @@ the red state.</p>
 
 <p>When the stoplight changes from green to red, it will notify every configured
 notifier.</p>
-
-<h3>
-<a name="mixin" class="anchor" href="#mixin"><span class="octicon octicon-link"></span></a>Mixin</h3>
-
-<p>Since creating and running a stoplight is so common, we provide a mixin that
-makes it easy.</p>
-
-<div class="highlight highlight-irb"><pre><span class="gp">&gt;&gt; </span><span class="kp">include</span> <span class="no">Stoplight</span><span class="o">::</span><span class="no">Mixin</span>
-<span class="go">=&gt; Object</span>
-<span class="gp">&gt;&gt; </span><span class="n">stoplight</span><span class="p">(</span><span class="s1">'example-3'</span><span class="p">)</span> <span class="p">{</span> <span class="mi">1</span><span class="o">.</span><span class="mi">0</span> <span class="o">/</span> <span class="mi">3</span> <span class="p">}</span>
-<span class="go">=&gt; 0.3333333333333333</span>
-</pre></div>
 
 <h3>
 <a name="custom-errors" class="anchor" href="#custom-errors"><span class="octicon octicon-link"></span></a>Custom errors</h3>
@@ -303,6 +299,33 @@ example configuration:</p>
   <span class="k">end</span>
 <span class="k">end</span>
 </pre></div>
+
+<h2>
+<a name="advanced-usage" class="anchor" href="#advanced-usage"><span class="octicon octicon-link"></span></a>Advanced usage</h2>
+
+<h3>
+<a name="locking" class="anchor" href="#locking"><span class="octicon octicon-link"></span></a>Locking</h3>
+
+<p>Although stoplights can operate on their own, occasionally you may want to
+override the default behavior. You can lock a light in either the green or red
+state using <code>set_state</code>.</p>
+
+<div class="highlight highlight-irb"><pre><span class="gp">&gt;&gt; </span><span class="n">light</span> <span class="o">=</span> <span class="no">Stoplight</span><span class="o">::</span><span class="no">Light</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">'example-8'</span><span class="p">)</span> <span class="p">{</span> <span class="kp">true</span> <span class="p">}</span>
+<span class="go">=&gt; #&lt;Stoplight::Light:...&gt;</span>
+<span class="gp">&gt;&gt; </span><span class="n">light</span><span class="o">.</span><span class="n">run</span>
+<span class="go">=&gt; true</span>
+<span class="gp">&gt;&gt; </span><span class="no">Stoplight</span><span class="o">.</span><span class="n">data_store</span><span class="o">.</span><span class="n">set_state</span><span class="p">(</span>
+<span class="go">..   light.name, Stoplight::DataStore::STATE_LOCKED_RED)</span>
+<span class="go">=&gt; "locked_red"</span>
+<span class="gp">&gt;&gt; </span><span class="n">light</span><span class="o">.</span><span class="n">run</span>
+<span class="go">Switching example-8 from green to red</span>
+<span class="go">Stoplight::Error::RedLight: example-8</span>
+</pre></div>
+
+<p><strong>Code in locked red lights may still run under certain conditions!</strong> If you
+have configured a custom data store and that data store fails, Stoplight will
+switch over to using a blank in-memory data store. That means you will lose the
+locked state of any stoplights.</p>
 
 <h2>
 <a name="credits" class="anchor" href="#credits"><span class="octicon octicon-link"></span></a>Credits</h2>
