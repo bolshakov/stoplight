@@ -22,6 +22,11 @@ module Stoplight
         fail NotImplementedError
       end
 
+      # @param _name [String]
+      def greenify(_name)
+        fail NotImplementedError
+      end
+
       # @group Colors
 
       # @param name [String]

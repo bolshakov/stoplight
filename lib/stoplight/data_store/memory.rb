@@ -29,6 +29,11 @@ module Stoplight
         set_threshold(name, get_threshold(name))
       end
 
+      def greenify(name)
+        clear_attempts(name)
+        clear_failures(name)
+      end
+
       def get_color(name)
         state = get_state(name)
         threshold = get_threshold(name)

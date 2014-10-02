@@ -38,6 +38,13 @@ module Stoplight
         raise Error::BadDataStore, error
       end
 
+      def greenify(name)
+        @redis.pipelined do
+          clear_attempts(name)
+          clear_failures(name)
+        end
+      end
+
       def get_color(name)
         DataStore.colorize(*colorize_args(name))
       end

@@ -10,6 +10,7 @@ describe Stoplight::DataStore::Base do
     clear_stale
     clear
     sync
+    greenify
     green?
     yellow?
     red?

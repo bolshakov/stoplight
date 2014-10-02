@@ -110,10 +110,7 @@ module Stoplight
     private
 
     def run_green
-      code.call.tap do
-        Stoplight.data_store.clear_attempts(name)
-        Stoplight.data_store.clear_failures(name)
-      end
+      code.call.tap { Stoplight.data_store.greenify(name) }
     rescue => error
       handle_error(error)
       raise
@@ -132,8 +129,7 @@ module Stoplight
 
     def handle_error(error)
       if error_allowed?(error)
-        Stoplight.data_store.clear_attempts(name)
-        Stoplight.data_store.clear_failures(name)
+        Stoplight.data_store.greenify(name)
       else
         Stoplight.data_store.record_failure(name, Failure.create(error))
       end
