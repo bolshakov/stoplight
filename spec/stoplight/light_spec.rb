@@ -111,6 +111,28 @@ describe Stoplight::Light do
     end
   end
 
+  context 'conditionally failing' do
+    let(:code_result) { fail error if @fail }
+    let(:name) { 'failing' }
+
+    it 'clears the attempts' do
+      @fail = true
+      light.threshold.succ.times do
+        begin
+          light.run
+        rescue error_class, Stoplight::Error::RedLight
+          nil
+        end
+      end
+
+      @fail = false
+      Stoplight.data_store.set_timeout(light.name, 0)
+      light.run
+
+      expect(Stoplight.data_store.get_attempts(light.name)).to eq(0)
+    end
+  end
+
   context 'with Redis' do
     let(:data_store) { Stoplight::DataStore::Redis.new(redis) }
     let(:redis) { Redis.new }
