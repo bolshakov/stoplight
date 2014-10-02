@@ -15,7 +15,6 @@ module Stoplight
         names
           .select { |name| get_failures(name).empty? }
           .each { |name| clear(name) }
-        nil
       end
 
       def clear(name)
@@ -28,7 +27,6 @@ module Stoplight
 
       def sync(name)
         set_threshold(name, get_threshold(name))
-        nil
       end
 
       def get_color(name)
@@ -49,7 +47,6 @@ module Stoplight
 
       def clear_attempts(name)
         attempts.delete(name)
-        nil
       end
 
       def get_failures(name)
@@ -65,7 +62,6 @@ module Stoplight
 
       def clear_failures(name)
         @data.delete(DataStore.failures_key(name))
-        nil
       end
 
       def get_state(name)
@@ -79,7 +75,6 @@ module Stoplight
 
       def clear_state(name)
         states.delete(name)
-        nil
       end
 
       def get_threshold(name)
@@ -93,7 +88,6 @@ module Stoplight
 
       def clear_threshold(name)
         thresholds.delete(name)
-        nil
       end
 
       def get_timeout(name)
@@ -107,7 +101,6 @@ module Stoplight
 
       def clear_timeout(name)
         timeouts.delete(name)
-        nil
       end
 
       private

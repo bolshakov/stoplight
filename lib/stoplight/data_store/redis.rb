@@ -18,7 +18,6 @@ module Stoplight
         names
           .select { |name| get_failures(name).empty? }
           .each { |name| clear(name) }
-        nil
       end
 
       def clear(name)
@@ -29,15 +28,12 @@ module Stoplight
           clear_threshold(name)
           clear_timeout(name)
         end
-
-        nil
       end
 
       def sync(name)
         threshold = @redis.hget(DataStore.thresholds_key, name)
         threshold = normalize_threshold(threshold)
         @redis.hset(DataStore.thresholds_key, name, threshold)
-        nil
       rescue ::Redis::BaseError => error
         raise Error::BadDataStore, error
       end
@@ -56,7 +52,6 @@ module Stoplight
 
       def clear_attempts(name)
         @redis.hdel(DataStore.attempts_key, name)
-        nil
       end
 
       def get_failures(name)
@@ -71,7 +66,6 @@ module Stoplight
 
       def clear_failures(name)
         @redis.del(DataStore.failures_key(name))
-        nil
       end
 
       def get_state(name)
@@ -86,7 +80,6 @@ module Stoplight
 
       def clear_state(name)
         @redis.hdel(DataStore.states_key, name)
-        nil
       end
 
       def get_threshold(name)
@@ -101,7 +94,6 @@ module Stoplight
 
       def clear_threshold(name)
         @redis.hdel(DataStore.thresholds_key, name)
-        nil
       end
 
       def get_timeout(name)
@@ -116,7 +108,6 @@ module Stoplight
 
       def clear_timeout(name)
         @redis.hdel(DataStore.timeouts_key, name)
-        nil
       end
 
       private

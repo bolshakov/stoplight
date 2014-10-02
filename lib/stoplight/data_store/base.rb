@@ -8,19 +8,16 @@ module Stoplight
         fail NotImplementedError
       end
 
-      # @return [nil]
       def clear_stale
         fail NotImplementedError
       end
 
       # @param _name [String]
-      # @return [nil]
       def clear(_name)
         fail NotImplementedError
       end
 
       # @param _name [String]
-      # @return [nil]
       def sync(_name)
         fail NotImplementedError
       end
@@ -72,7 +69,6 @@ module Stoplight
       end
 
       # @param _name [String]
-      # @return [nil]
       def clear_attempts(_name)
         fail NotImplementedError
       end
@@ -93,7 +89,6 @@ module Stoplight
       end
 
       # @param _name [String]
-      # @return [nil]
       def clear_failures(_name)
         fail NotImplementedError
       end
@@ -114,7 +109,6 @@ module Stoplight
       end
 
       # @param _name [String]
-      # @return [nil]
       def clear_state(_name)
         fail NotImplementedError
       end
@@ -135,7 +129,6 @@ module Stoplight
       end
 
       # @param _name [String]
-      # @return [nil]
       def clear_threshold(_name)
         fail NotImplementedError
       end
@@ -156,7 +149,6 @@ module Stoplight
       end
 
       # @param _name [String]
-      # @return [nil]
       def clear_timeout(_name)
         fail NotImplementedError
       end
