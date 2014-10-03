@@ -1,5 +1,7 @@
 # Changelog
 
+- Fixed a bug that caused green to red notifications to sometimes not be sent.
+
 ## v0.4.0 (2014-09-17)
 
 - Made stoplights handle failing notifiers by logging the failure to standard
