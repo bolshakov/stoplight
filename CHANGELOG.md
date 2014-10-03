@@ -1,5 +1,7 @@
 # Changelog
 
+## v0.4.1 (2014-10-03)
+
 - Fixed a bug that caused green to red notifications to sometimes not be sent.
 
 ## v0.4.0 (2014-09-17)

@@ -33,7 +33,7 @@ Check out [stoplight-admin][12] for controlling your stoplights.
 Add it to your Gemfile:
 
 ``` rb
-gem 'stoplight', '~> 0.4.0'
+gem 'stoplight', '~> 0.4.1'
 ```
 
 Or install it manually:
