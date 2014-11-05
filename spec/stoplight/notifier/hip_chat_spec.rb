@@ -53,21 +53,25 @@ describe Stoplight::Notifier::HipChat do
       end
 
       it 'sets the message' do
-        begin
-          result
-          expect(false).to be(true)
-        rescue Stoplight::Error::BadNotifier => e
-          expect(e.message).to eql(message)
-        end
+        rescued =
+          begin
+            result
+          rescue Stoplight::Error::BadNotifier => e
+            expect(e.message).to eql(message)
+            true
+          end
+        expect(rescued).to eql(true)
       end
 
       it 'sets the cause' do
-        begin
-          result
-          expect(false).to be(true)
-        rescue Stoplight::Error::BadNotifier => e
-          expect(e.cause).to eql(error)
-        end
+        rescued =
+          begin
+            result
+          rescue Stoplight::Error::BadNotifier => e
+            expect(e.cause).to eql(error)
+            true
+          end
+        expect(rescued).to eql(true)
       end
     end
   end

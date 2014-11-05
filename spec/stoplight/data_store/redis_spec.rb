@@ -21,21 +21,25 @@ describe Stoplight::DataStore::Redis do
     end
 
     it 'sets the message' do
-      begin
-        data_store.sync(name)
-        expect(false).to be(true)
-      rescue Stoplight::Error::BadDataStore => e
-        expect(e.message).to eql(message)
-      end
+      rescued =
+        begin
+          data_store.sync(name)
+        rescue Stoplight::Error::BadDataStore => e
+          expect(e.message).to eql(message)
+          true
+        end
+      expect(rescued).to eql(true)
     end
 
     it 'sets the cause' do
-      begin
-        data_store.sync(name)
-        expect(false).to be(true)
-      rescue Stoplight::Error::BadDataStore => e
-        expect(e.cause).to eql(error)
-      end
+      rescued =
+        begin
+          data_store.sync(name)
+        rescue Stoplight::Error::BadDataStore => e
+          expect(e.cause).to eql(error)
+          true
+        end
+      expect(rescued).to eql(true)
     end
   end
 end
