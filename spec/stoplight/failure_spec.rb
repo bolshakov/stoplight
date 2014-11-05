@@ -14,10 +14,12 @@ describe Stoplight::Failure do
     let(:error_class) { Class.new(StandardError) }
 
     it 'creates a failure' do
-      expect(result).to be_a(Stoplight::Failure)
-      expect(result.error_class).to eql(error.class.name)
-      expect(result.error_message).to eql(error.message)
-      expect(result.time).to be_within(1).of(Time.now)
+      Timecop.freeze do
+        expect(result).to be_a(Stoplight::Failure)
+        expect(result.error_class).to eql(error.class.name)
+        expect(result.error_message).to eql(error.message)
+        expect(result.time).to eql(Time.now)
+      end
     end
   end
 
@@ -26,9 +28,16 @@ describe Stoplight::Failure do
     let(:json) { failure.to_json }
 
     it 'can be round-tripped' do
-      expect(result.error_class).to eq(failure.error_class)
-      expect(result.error_message).to eq(failure.error_message)
-      expect(result.time).to be_within(1).of(failure.time)
+      Timecop.freeze do
+        expect(result.error_class).to eq(failure.error_class)
+        expect(result.error_message).to eq(failure.error_message)
+
+        # JSON doesn't support sub-second precision
+        t = failure.time
+        failure_time = Time.new(
+          t.year, t.month, t.day, t.hour, t.min, t.sec, t.utc_offset)
+        expect(result.time).to eq(failure_time)
+      end
     end
 
     context 'with invalid JSON' do
@@ -39,9 +48,11 @@ describe Stoplight::Failure do
       end
 
       it 'returns a self-describing invalid failure' do
-        expect(result.error_class).to eq('Stoplight::Error::InvalidFailure')
-        expect(result.error_message).to end_with('nil into String')
-        expect(result.time).to be_within(1).of(Time.now)
+        Timecop.freeze do
+          expect(result.error_class).to eq('Stoplight::Error::InvalidFailure')
+          expect(result.error_message).to end_with('nil into String')
+          expect(result.time).to eql(Time.now)
+        end
       end
     end
   end
@@ -63,7 +74,9 @@ describe Stoplight::Failure do
       let(:time) { nil }
 
       it 'uses the default time' do
-        expect(failure.time).to be_within(1).of(Time.now)
+        Timecop.freeze do
+          expect(failure.time).to eql(Time.now)
+        end
       end
     end
   end
