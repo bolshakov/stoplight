@@ -63,12 +63,14 @@ describe Stoplight::Light do
     let(:code_result) { fail error }
 
     it 'switches to red' do
-      light.threshold.times do
-        expect(light.green?).to eql(true)
-        expect { light.run }.to raise_error(error_class)
+      Timecop.freeze do
+        light.threshold.times do
+          expect(light.green?).to eql(true)
+          expect { light.run }.to raise_error(error_class)
+        end
+        expect(light.red?).to eql(true)
+        expect { light.run }.to raise_error(Stoplight::Error::RedLight)
       end
-      expect(light.red?).to eql(true)
-      expect { light.run }.to raise_error(Stoplight::Error::RedLight)
     end
 
     context 'with allowed errors' do
@@ -88,12 +90,14 @@ describe Stoplight::Light do
       before { light.with_fallback(&fallback) }
 
       it 'calls the fallback' do
-        light.threshold.times do
-          expect(light.green?).to eql(true)
-          expect { light.run }.to raise_error(error_class)
+        Timecop.freeze do
+          light.threshold.times do
+            expect(light.green?).to eql(true)
+            expect { light.run }.to raise_error(error_class)
+          end
+          expect(light.red?).to eql(true)
+          expect(light.run).to eql(fallback_result)
         end
-        expect(light.red?).to eql(true)
-        expect(light.run).to eql(fallback_result)
       end
     end
 
