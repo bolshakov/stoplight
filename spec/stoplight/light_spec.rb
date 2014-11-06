@@ -120,6 +120,8 @@ describe Stoplight::Light do
     let(:name) { 'failing' }
 
     it 'clears the attempts' do
+      light.with_timeout(-1)
+
       @fail = true
       light.threshold.succ.times do
         begin
@@ -130,9 +132,7 @@ describe Stoplight::Light do
       end
 
       @fail = false
-      Stoplight.data_store.set_timeout(light.name, 0)
       light.run
-
       expect(Stoplight.data_store.get_attempts(light.name)).to eq(0)
     end
   end
