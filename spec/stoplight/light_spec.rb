@@ -236,16 +236,17 @@ describe Stoplight::Light do
       subject(:result) do
         begin
           light.run
-        rescue Stoplight::Error::RedLight
+        rescue ZeroDivisionError
           nil
         end
       end
 
+      let(:code_result) { 1 / 0 }
       let(:error_class) { HipChat::Unauthorized }
+      let(:threshold) { 1 }
 
       before do
-        Stoplight.data_store.set_state(
-          light.name, Stoplight::DataStore::STATE_LOCKED_RED)
+        light.with_threshold(threshold)
         allow(room).to receive(:send).with(
           'Stoplight',
           /\A@all /,
