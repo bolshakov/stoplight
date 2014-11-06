@@ -19,7 +19,7 @@ shared_examples_for 'a data store' do
   it { expect(data_store.get_attempts(name)).to eql(Stoplight::DataStore::DEFAULT_ATTEMPTS) }
   it { expect(data_store.record_attempt(name)).to eql(1) }
   it { expect(data_store.get_failures(name)).to eql(Stoplight::DataStore::DEFAULT_FAILURES) }
-  it { expect(data_store.record_failure(name, failure)).to eql(failure) }
+  it { expect(data_store.record_failure(name, failure)).to eql(1) }
   it { expect(data_store.get_state(name)).to eql(Stoplight::DataStore::DEFAULT_STATE) }
   it { expect(data_store.set_state(name, state)).to eql(state) }
   it { expect(data_store.get_threshold(name)).to eql(Stoplight::DataStore::DEFAULT_THRESHOLD) }

@@ -5,4 +5,4 @@ AllCops:
 Documentation:
   Enabled: false
 Metrics/ClassLength:
-  Max: 107
+  Max: 108

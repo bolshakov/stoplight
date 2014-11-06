@@ -129,9 +129,7 @@ module Stoplight
     end
 
     def run_red
-      if Stoplight.data_store.record_attempt(name) == 1
-        notify(DataStore::COLOR_GREEN, DataStore::COLOR_RED)
-      end
+      Stoplight.data_store.record_attempt(name)
       fallback.call
     end
 
@@ -139,7 +137,10 @@ module Stoplight
       if error_allowed?(error)
         Stoplight.data_store.greenify(name)
       else
-        Stoplight.data_store.record_failure(name, Failure.create(error))
+        size = Stoplight.data_store.record_failure(name, Failure.create(error))
+        if size == threshold
+          notify(DataStore::COLOR_GREEN, DataStore::COLOR_RED)
+        end
       end
     end
 

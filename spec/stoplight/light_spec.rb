@@ -4,9 +4,10 @@
 require 'spec_helper'
 
 describe Stoplight::Light do
+  let(:io) { StringIO.new }
   before do
     @notifiers = Stoplight.notifiers
-    Stoplight.notifiers = [Stoplight::Notifier::IO.new(StringIO.new)]
+    Stoplight.notifiers = [Stoplight::Notifier::IO.new(io)]
   end
   after { Stoplight.notifiers = @notifiers }
 
@@ -159,6 +160,18 @@ describe Stoplight::Light do
       @fail = false
       light.run
       expect(Stoplight.data_store.get_attempts(light.name)).to eq(0)
+    end
+
+    it 'notifies when switching from green to red' do
+      @fail = true
+      light.threshold.times do
+        begin
+          light.run
+        rescue error_class
+          nil
+        end
+      end
+      expect(io.string).to eql("Switching failing from green to red\n")
     end
   end
 

@@ -88,7 +88,7 @@ module Stoplight
 
       # @param _name [String]
       # @param _failure [Failure]
-      # @return [Failure]
+      # @return [Integer]
       def record_failure(_name, _failure)
         fail NotImplementedError
       end

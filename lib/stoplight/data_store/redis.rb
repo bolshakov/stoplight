@@ -68,7 +68,6 @@ module Stoplight
       def record_failure(name, failure)
         DataStore.validate_failure!(failure)
         @redis.rpush(DataStore.failures_key(name), failure.to_json)
-        failure
       end
 
       def clear_failures(name)

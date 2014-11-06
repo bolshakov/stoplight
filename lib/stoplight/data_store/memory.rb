@@ -62,7 +62,7 @@ module Stoplight
         DataStore.validate_failure!(failure)
         @data[DataStore.failures_key(name)] ||= DEFAULT_FAILURES.dup
         @data[DataStore.failures_key(name)].push(failure)
-        failure
+        @data[DataStore.failures_key(name)].size
       end
 
       def clear_failures(name)
