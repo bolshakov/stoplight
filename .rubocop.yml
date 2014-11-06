@@ -4,3 +4,5 @@ AllCops:
   - vendor/**/*
 Documentation:
   Enabled: false
+Metrics/ClassLength:
+  Max: 107

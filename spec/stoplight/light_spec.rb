@@ -59,6 +59,31 @@ describe Stoplight::Light do
     expect(light.timeout).to eql(timeout)
   end
 
+  context 'returning a basic object' do
+    let(:code_result) { BasicObject.new }
+
+    it 'does not raise an error' do
+      expect { light.run }.to_not raise_error
+    end
+
+    context do
+      let(:code_result) { @fail ? (fail error) : BasicObject.new }
+
+      it 'does not raise an error' do
+        Timecop.freeze do
+          @fail = true
+          light.with_timeout(-1)
+          light.threshold.times do
+            expect { light.run }.to raise_error(error_class)
+          end
+          expect(light.yellow?).to eql(true)
+          @fail = false
+          expect { light.run }.to_not raise_error
+        end
+      end
+    end
+  end
+
   context 'failing' do
     let(:code_result) { fail error }
 

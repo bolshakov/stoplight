@@ -110,14 +110,22 @@ module Stoplight
     private
 
     def run_green
-      code.call.tap { Stoplight.data_store.greenify(name) }
-    rescue => error
-      handle_error(error)
-      raise
+      result =
+        begin
+          code.call
+        rescue => error
+          handle_error(error)
+          raise
+        end
+
+      Stoplight.data_store.greenify(name)
+      result
     end
 
     def run_yellow
-      run_green.tap { notify(DataStore::COLOR_RED, DataStore::COLOR_GREEN) }
+      result = run_green
+      notify(DataStore::COLOR_RED, DataStore::COLOR_GREEN)
+      result
     end
 
     def run_red
