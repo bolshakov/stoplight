@@ -1,5 +1,10 @@
 # Changelog
 
+- Made stoplights notify immediately when switching from green to red instead of
+  on the first time running after switching.
+- Updated the notifiers to accept and optional failure parameter.
+- Made the `sync` action on data stores return the threshold.
+
 ## v0.4.1 (2014-10-03)
 
 - Fixed a bug that caused green to red notifications to sometimes not be sent.
