@@ -18,6 +18,7 @@ module Stoplight
       end
 
       # @param _name [String]
+      # @return [Integer]
       def sync(_name)
         fail NotImplementedError
       end

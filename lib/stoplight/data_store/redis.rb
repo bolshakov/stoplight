@@ -34,6 +34,7 @@ module Stoplight
         threshold = @redis.hget(DataStore.thresholds_key, name)
         threshold = normalize_threshold(threshold)
         @redis.hset(DataStore.thresholds_key, name, threshold)
+        threshold
       rescue ::Redis::BaseError => error
         raise Error::BadDataStore, error
       end

@@ -12,6 +12,7 @@ shared_examples_for 'a data store' do
   let(:timeout) { rand(100) }
 
   it { expect(data_store.names).to eql([]) }
+  it { expect(data_store.sync(name)).to eql(Stoplight::DataStore::DEFAULT_THRESHOLD) }
   it { expect(data_store.get_color(name)).to eql(Stoplight::DataStore::COLOR_GREEN) }
   it { expect(data_store.green?(name)).to eql(true) }
   it { expect(data_store.yellow?(name)).to eql(false) }

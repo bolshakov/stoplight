@@ -24,7 +24,7 @@ module Stoplight
     # @see #fallback
     # @see #green?
     def run
-      sync
+      @threshold = sync
 
       case color
       when DataStore::COLOR_GREEN
@@ -138,7 +138,7 @@ module Stoplight
         Stoplight.data_store.greenify(name)
       else
         size = Stoplight.data_store.record_failure(name, Failure.create(error))
-        if size == threshold
+        if size == @threshold
           notify(DataStore::COLOR_GREEN, DataStore::COLOR_RED)
         end
       end
