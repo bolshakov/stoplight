@@ -10,12 +10,16 @@ describe Stoplight::Notifier::HipChat do
   let(:options) { {} }
 
   describe '#notify' do
-    subject(:result) { notifier.notify(light, from_color, to_color) }
+    subject(:result) { notifier.notify(light, from_color, to_color, failure) }
     let(:light) { Stoplight::Light.new(light_name, &light_code) }
     let(:light_name) { SecureRandom.hex }
     let(:light_code) { -> {} }
     let(:from_color) { Stoplight::DataStore::COLOR_GREEN }
     let(:to_color) { Stoplight::DataStore::COLOR_RED }
+    let(:failure) { nil }
+    let(:error) { error_class.new(error_message) }
+    let(:error_class) { StandardError }
+    let(:error_message) { SecureRandom.hex }
 
     it 'sends the message to HipChat' do
       expect(client).to receive(:[]).with(room).and_return(client)
@@ -26,16 +30,43 @@ describe Stoplight::Notifier::HipChat do
       result
     end
 
+    context 'with a failure' do
+      let(:failure) { Stoplight::Failure.create(error) }
+
+      it 'sends the message to HipChat' do
+        expect(client).to receive(:[]).with(room).and_return(client)
+        expect(client).to receive(:send).with(
+          'Stoplight',
+          "@all Switching #{light.name} from #{from_color} to #{to_color} " \
+            "because #{error_class} #{error_message}",
+          anything)
+        result
+      end
+    end
+
     context 'with a formatter' do
-      let(:formatter) { ->(l, f, t) { "#{l.name} #{f} #{t}" } }
+      let(:formatter) { ->(l, f, t, e) { "#{l.name} #{f} #{t} #{e}" } }
 
       it 'formats the message' do
         expect(client).to receive(:[]).with(room).and_return(client)
         expect(client).to receive(:send).with(
           'Stoplight',
-          "#{light.name} #{from_color} #{to_color}",
+          "#{light.name} #{from_color} #{to_color} ",
           anything)
         result
+      end
+
+      context 'with a failure' do
+        let(:failure) { Stoplight::Failure.create(error) }
+
+        it 'formats the message' do
+          expect(client).to receive(:[]).with(room).and_return(client)
+          expect(client).to receive(:send).with(
+            'Stoplight',
+            "#{light.name} #{from_color} #{to_color} #{failure}",
+            anything)
+          result
+        end
       end
     end
 

@@ -137,9 +137,10 @@ module Stoplight
       if error_allowed?(error)
         Stoplight.data_store.greenify(name)
       else
-        size = Stoplight.data_store.record_failure(name, Failure.create(error))
+        failure = Failure.create(error)
+        size = Stoplight.data_store.record_failure(name, failure)
         if size == @threshold
-          notify(DataStore::COLOR_GREEN, DataStore::COLOR_RED)
+          notify(DataStore::COLOR_GREEN, DataStore::COLOR_RED, failure)
         end
       end
     end
@@ -148,10 +149,10 @@ module Stoplight
       allowed_errors.any? { |klass| error.is_a?(klass) }
     end
 
-    def notify(from_color, to_color)
+    def notify(from_color, to_color, failure = nil)
       Stoplight.notifiers.each do |notifier|
         begin
-          notifier.notify(self, from_color, to_color)
+          notifier.notify(self, from_color, to_color, failure)
         rescue Error::BadNotifier => error
           warn(error.cause)
         end

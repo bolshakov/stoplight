@@ -171,7 +171,9 @@ describe Stoplight::Light do
           nil
         end
       end
-      expect(io.string).to eql("Switching failing from green to red\n")
+      expect(io.string).to eql(
+        'Switching failing from green to red ' \
+          "because #{error_class.name} #{message}\n")
     end
   end
 

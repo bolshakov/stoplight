@@ -6,7 +6,8 @@ module Stoplight
       # @param _light [Light]
       # @param _from_color [String]
       # @param _to_color [String]
-      def notify(_light, _from_color, _to_color)
+      # @param _failure [Failure, nil]
+      def notify(_light, _from_color, _to_color, _failure)
         fail NotImplementedError
       end
     end

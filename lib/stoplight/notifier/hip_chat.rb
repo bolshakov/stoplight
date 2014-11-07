@@ -4,8 +4,16 @@ module Stoplight
   module Notifier
     # @note hipchat ~> 1.3.0
     class HipChat < Base
-      DEFAULT_FORMATTER = lambda do |light, from_color, to_color|
-        "@all Switching #{light.name} from #{from_color} to #{to_color}"
+      DEFAULT_FORMATTER = lambda do |light, from_color, to_color, failure|
+        words = [
+          '@all', 'Switching', light.name, 'from', from_color, 'to', to_color
+        ]
+
+        if failure
+          words += ['because', failure.error_class, failure.error_message]
+        end
+
+        words.join(' ')
       end
       DEFAULT_OPTIONS = { color: 'red', message_format: 'text', notify: true }
 
@@ -20,8 +28,8 @@ module Stoplight
         @options = DEFAULT_OPTIONS.merge(options)
       end
 
-      def notify(light, from_color, to_color)
-        message = @formatter.call(light, from_color, to_color)
+      def notify(light, from_color, to_color, failure)
+        message = @formatter.call(light, from_color, to_color, failure)
         @client[@room].send('Stoplight', message, @options)
       rescue *errors => error
         raise Error::BadNotifier, error
