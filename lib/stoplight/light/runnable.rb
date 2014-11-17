@@ -27,15 +27,17 @@ module Stoplight
       private
 
       def run_green
-        run_code(on_failure: lambda do |size, error|
+        on_failure = lambda do |size, error|
           notify(Color::GREEN, Color::RED, error) if size == threshold
-        end)
+        end
+        run_code(nil, on_failure)
       end
 
       def run_yellow
-        run_code(on_success: lambda do |failures|
+        on_success = lambda do |failures|
           notify(Color::RED, Color::GREEN) unless failures.empty?
-        end)
+        end
+        run_code(on_success, nil)
       end
 
       def run_red
@@ -43,7 +45,7 @@ module Stoplight
         fallback.call(nil)
       end
 
-      def run_code(on_success: nil, on_failure: nil)
+      def run_code(on_success, on_failure)
         result = code.call
         failures = clear_failures
         on_success.call(failures) if on_success
@@ -61,11 +63,11 @@ module Stoplight
       end
 
       def clear_failures
-        safely(default: []) { data_store.clear_failures(self) }
+        safely([]) { data_store.clear_failures(self) }
       end
 
       def failures_and_state
-        safely(default: [[], State::UNLOCKED]) { data_store.get_all(self) }
+        safely([[], State::UNLOCKED]) { data_store.get_all(self) }
       end
 
       def notify(from_color, to_color, error = nil)
@@ -76,10 +78,10 @@ module Stoplight
 
       def record_failure(error)
         failure = Failure.from_error(error)
-        safely(default: 0) { data_store.record_failure(self, failure) }
+        safely(0) { data_store.record_failure(self, failure) }
       end
 
-      def safely(default: nil, &code)
+      def safely(default = nil, &code)
         return code.call if data_store == Default::DATA_STORE
 
         self.class.new("#{name}-safely", &code)
