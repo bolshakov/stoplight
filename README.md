@@ -33,7 +33,7 @@ Check out [stoplight-admin][12] for controlling your stoplights.
 Add it to your Gemfile:
 
 ``` rb
-gem 'stoplight', '~> 0.4.1'
+gem 'stoplight', '~> 0.5.0-alpha'
 ```
 
 Or install it manually:
@@ -41,8 +41,6 @@ Or install it manually:
 ``` sh
 $ gem install stoplight
 ```
-
-This project uses [Semantic Versioning][13].
 
 ## Setup
 
@@ -53,22 +51,22 @@ Stoplight uses an in-memory data store out of the box.
 ``` irb
 >> require 'stoplight'
 => true
->> Stoplight.data_store
+>> Stoplight::Light.default_data_store
 => #<Stoplight::DataStore::Memory:...>
 ```
 
 If you want to use a persistent data store, you'll have to set it up. Currently
 the only supported persistent data store is Redis. Make sure you have [the Redis
-gem][14] installed before configuring Stoplight.
+gem][13] installed before configuring Stoplight.
 
 ``` irb
 >> require 'redis'
 => true
->> redis = Redis.new(url: 'redis://127.0.0.1:6379/0')
-=> #<Redis:...>
+>> redis = Redis.new
+=> #<Redis client ...>
 >> data_store = Stoplight::DataStore::Redis.new(redis)
 => #<Stoplight::DataStore::Redis:...>
->> Stoplight.data_store = data_store
+>> Stoplight::Light.default_data_store = data_store
 => #<Stoplight::DataStore::Redis:...>
 ```
 
@@ -77,22 +75,22 @@ gem][14] installed before configuring Stoplight.
 Stoplight sends notifications to standard error by default.
 
 ``` irb
->> Stoplight.notifiers
+>> Stoplight::Light.default_notifiers
 => [#<Stoplight::Notifier::IO:...>]
 ```
 
 If you want to send notifications elsewhere, you'll have to set them up.
 Currently the only other supported notifier is HipChat. Make sure you have [the
-HipChat gem][15] installed before configuring Stoplight.
+HipChat gem][14] installed before configuring Stoplight.
 
 ``` irb
 >> require 'hipchat'
 => true
->> hipchat = HipChat::Client.new('token')
+>> hip_chat = HipChat::Client.new('token')
 => #<HipChat::Client:...>
->> notifier = Stoplight::Notifier::HipChat.new(hipchat, 'room')
+>> notifier = Stoplight::Notifier::HipChat.new(hip_chat, 'room')
 => #<Stoplight::Notifier::HipChat:...>
->> Stoplight.notifiers << notifier
+>> Stoplight::Light.default_notifiers += [notifier]
 => [#<Stoplight::Notifier::IO:...>, #<Stoplight::Notifier::HipChat:...>]
 ```
 
@@ -106,8 +104,8 @@ Stoplight:
 ``` rb
 # config/initializers/stoplight.rb
 require 'stoplight'
-Stoplight.data_store = Stoplight::DataStore::Redis.new(...)
-Stoplight.notifiers << Stoplight::Notifier::HipChat.new(...)
+Stoplight::Light.default_data_store = Stoplight::DataStore::Redis.new(...)
+Stoplight::Light.default_notifiers += [Stoplight::Notifier::HipChat.new(...)]
 ```
 
 ## Basic usage
@@ -125,8 +123,8 @@ the green state.
 ``` irb
 >> light.run
 => 3.142857142857143
->> light.green?
-=> true
+>> light.color
+=> "green"
 ```
 
 If everything goes well, you shouldn't even be able to tell that you're using a
@@ -147,12 +145,12 @@ ZeroDivisionError: divided by 0
 >> light.run
 ZeroDivisionError: divided by 0
 >> light.run
+Switching example-2 from green to red because ZeroDivisionError divided by 0
 ZeroDivisionError: divided by 0
 >> light.run
-Switching example-2 from green to red.
 Stoplight::Error::RedLight: example-2
->> light.red?
-=> true
+>> light.color
+=> "red"
 ```
 
 When the stoplight changes from green to red, it will notify every configured
@@ -165,7 +163,7 @@ these are handled elsewhere in your stack and don't represent real failures. A
 good example is `ActiveRecord::RecordNotFound`.
 
 ``` irb
->> light = Stoplight::Light.new('example-4') { User.find(123) }.
+>> light = Stoplight::Light.new('example-3') { User.find(123) }.
 ..   with_allowed_errors([ActiveRecord::RecordNotFound])
 => #<Stoplight::Light:...>
 >> light.run
@@ -174,28 +172,34 @@ ActiveRecord::RecordNotFound: Couldn't find User with ID=123
 ActiveRecord::RecordNotFound: Couldn't find User with ID=123
 >> light.run
 ActiveRecord::RecordNotFound: Couldn't find User with ID=123
->> light.green?
-=> true
+>> light.color
+=> "green"
 ```
 
 ### Custom fallback
 
-Instead of raising a `Stoplight::Error::RedLight` error when in the red state,
-you can provide a block to be run. This is useful when there's a good default
-value for the block.
+By default, stoplights will re-raise errors when they're green. When they're
+red, they'll raise a `Stoplight::Error::RedLight` error. You can provide a
+fallback that will be called in both of these cases. It will be passed the error
+if the light was green.
 
 ``` irb
->> light = Stoplight::Light.new('example-5') { fail }.
-..   with_fallback { [] }
-=> #<Stoplight::Light:...>
+>> light = Stoplight::Light.new('example-4') { 1 / 0 }.
+..   with_fallback { |e| p e; 'default' }
+=> #<Stoplight::Light:..>
 >> light.run
-RuntimeError:
+#<ZeroDivisionError: divided by 0>
+=> "default"
 >> light.run
-RuntimeError:
+#<ZeroDivisionError: divided by 0>
+=> "default"
 >> light.run
-RuntimeError:
+Switching example-4 from green to red because ZeroDivisionError divided by 0
+#<ZeroDivisionError: divided by 0>
+=> "default"
 >> light.run
-=> []
+nil
+=> "default"
 ```
 
 ### Custom threshold
@@ -204,13 +208,14 @@ Some bits of code might be allowed to fail more or less frequently than others.
 You can configure this by setting a custom threshold in seconds.
 
 ``` irb
->> light = Stoplight::Light.new('example-6') { fail }.
+>> light = Stoplight::Light.new('example-5') { fail }.
 ..   with_threshold(1)
 => #<Stoplight::Light:...>
 >> light.run
+Switching example-5 from green to red because RuntimeError
 RuntimeError:
 >> light.run
-Stoplight::Error::RedLight: example-6
+Stoplight::Error::RedLight: example-5
 ```
 
 ### Custom timeout
@@ -220,7 +225,7 @@ A light in the red state for longer than the timeout will transition to the
 yellow state. This timeout is customizable.
 
 ``` irb
->> light = Stoplight::Light.new('example-7') { fail }.
+>> light = Stoplight::Light.new('example-6') { fail }.
 ..   with_timeout(1)
 => #<Stoplight::Light:...>
 >> light.run
@@ -228,14 +233,12 @@ RuntimeError:
 >> light.run
 RuntimeError:
 >> light.run
+Switching example-6 from green to red because RuntimeError
 RuntimeError:
->> light.run
-Switching example-7 from green to red.
-Stoplight::Error::RedLight: example-7
 >> sleep(1)
 => 1
->> light.yellow?
-=> true
+>> light.color
+=> "yellow"
 >> light.run
 RuntimeError:
 ```
@@ -254,7 +257,10 @@ class ApplicationController < ActionController::Base
   def stoplight(&block)
     Stoplight::Light.new("#{params[:controller]}##{params[:action]}", &block)
       .with_allowed_errors([ActiveRecord::RecordNotFound])
-      .with_fallback { render(nothing: true, status: :service_unavailable) }
+      .with_fallback do |error|
+        Rails.logger.error(error)
+        render(nothing: true, status: :service_unavailable)
+      end
       .run
   end
 end
@@ -269,16 +275,14 @@ override the default behavior. You can lock a light in either the green or red
 state using `set_state`.
 
 ``` irb
->> light = Stoplight::Light.new('example-8') { true }
-=> #<Stoplight::Light:...>
+>> light = Stoplight::Light.new('example-7') { true }
+=> #<Stoplight::Light:..>
 >> light.run
 => true
->> Stoplight.data_store.set_state(
-..   light.name, Stoplight::DataStore::STATE_LOCKED_RED)
+>> light.data_store.set_state(light, Stoplight::State::LOCKED_RED)
 => "locked_red"
 >> light.run
-Switching example-8 from green to red
-Stoplight::Error::RedLight: example-8
+Stoplight::Error::RedLight: example-7
 ```
 
 **Code in locked red lights may still run under certain conditions!** If you
@@ -288,13 +292,13 @@ locked state of any stoplights.
 
 ## Credits
 
-Stoplight is brought to you by [@camdez][16] and [@tfausak][17] from
-[@OrgSync][18]. We were inspired by Martin Fowler's [CircuitBreaker][19]
+Stoplight is brought to you by [@camdez][15] and [@tfausak][16] from
+[@OrgSync][17]. We were inspired by Martin Fowler's [CircuitBreaker][18]
 article.
 
 If this gem isn't cutting it for you, there are a few alternatives, including:
-[circuit_b][20], [circuit_breaker][21], [simple_circuit_breaker][22], and
-[ya_circuit_breaker][23].
+[circuit_b][19], [circuit_breaker][20], [simple_circuit_breaker][21], and
+[ya_circuit_breaker][22].
 
 [1]: https://github.com/orgsync/stoplight
 [2]: https://badge.fury.io/rb/stoplight.svg
@@ -308,14 +312,13 @@ If this gem isn't cutting it for you, there are a few alternatives, including:
 [10]: https://gemnasium.com/orgsync/stoplight.svg
 [11]: https://gemnasium.com/orgsync/stoplight
 [12]: https://github.com/orgsync/stoplight-admin
-[13]: http://semver.org/spec/v2.0.0.html
-[14]: https://rubygems.org/gems/redis
-[15]: https://rubygems.org/gems/hipchat
-[16]: https://github.com/camdez
-[17]: https://github.com/tfausak
-[18]: https://github.com/OrgSync
-[19]: http://martinfowler.com/bliki/CircuitBreaker.html
-[20]: https://github.com/alg/circuit_b
-[21]: https://github.com/wsargent/circuit_breaker
-[22]: https://github.com/soundcloud/simple_circuit_breaker
-[23]: https://github.com/wooga/circuit_breaker
+[13]: https://rubygems.org/gems/redis
+[14]: https://rubygems.org/gems/hipchat
+[15]: https://github.com/camdez
+[16]: https://github.com/tfausak
+[17]: https://github.com/OrgSync
+[18]: http://martinfowler.com/bliki/CircuitBreaker.html
+[19]: https://github.com/alg/circuit_b
+[20]: https://github.com/wsargent/circuit_breaker
+[21]: https://github.com/soundcloud/simple_circuit_breaker
+[22]: https://github.com/wooga/circuit_breaker
