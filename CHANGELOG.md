@@ -1,9 +1,17 @@
 # Changelog
 
-- Made stoplights notify immediately when switching from green to red instead of
-  on the first time running after switching.
-- Updated the notifiers to accept and optional failure parameter.
-- Made the `sync` action on data stores return the threshold.
+This project uses [Semantic Versioning][1].
+
+- Data stores and notifiers can be configured on a per-stoplight basis. This
+  allows stoplights to use stoplights internally.
+- Stoplights use stoplights internally to wrap calls to data stores and
+  notifiers. This means they gracefully handle either going down.
+- Data stores only store failures and states. Also failures are stored in a ring
+  buffer. This drastically reduces the amount of data stored.
+- Stoplights will use the fallback (if it's given) when they fail while they're
+  green. This means they won't re-raise exceptions if you provide a fallback.
+- Stoplights pass the error to their notifiers when transitioning from green to
+  red.
 
 ## v0.4.1 (2014-10-03)
 
@@ -67,3 +75,5 @@
 ## v0.1.0 (2014-08-12)
 
 - Initial release.
+
+[1]: http://semver.org/spec/v2.0.0.html
