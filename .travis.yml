@@ -1,3 +1,4 @@
+install: bundle install --retry 3 # travis-ci/travis-ci#2821
 language: ruby
 notifications:
   email: false
