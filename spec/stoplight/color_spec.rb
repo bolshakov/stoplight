@@ -1,40 +1,39 @@
 # coding: utf-8
 
-require 'minitest/spec'
-require 'stoplight'
+require 'spec_helper'
 
 describe Stoplight::Color do
   it 'is a module' do
-    Stoplight::Color.must_be_kind_of(Module)
+    expect(described_class).to be_a(Module)
   end
 
   describe '::GREEN' do
     it 'is a string' do
-      Stoplight::Color::GREEN.must_be_kind_of(String)
+      expect(Stoplight::Color::GREEN).to be_a(String)
     end
 
     it 'is frozen' do
-      Stoplight::Color::GREEN.frozen?.must_equal(true)
+      expect(Stoplight::Color::GREEN).to be_frozen
     end
   end
 
   describe '::YELLOW' do
     it 'is a string' do
-      Stoplight::Color::YELLOW.must_be_kind_of(String)
+      expect(Stoplight::Color::YELLOW).to be_a(String)
     end
 
     it 'is frozen' do
-      Stoplight::Color::YELLOW.frozen?.must_equal(true)
+      expect(Stoplight::Color::YELLOW).to be_frozen
     end
   end
 
   describe '::RED' do
     it 'is a string' do
-      Stoplight::Color::RED.must_be_kind_of(String)
+      expect(Stoplight::Color::RED).to be_a(String)
     end
 
     it 'is frozen' do
-      Stoplight::Color::RED.frozen?.must_equal(true)
+      expect(Stoplight::Color::RED).to be_frozen
     end
   end
 end

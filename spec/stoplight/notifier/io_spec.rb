@@ -1,35 +1,33 @@
 # coding: utf-8
 
-require 'minitest/spec'
-require 'stoplight'
+require 'spec_helper'
 
 describe Stoplight::Notifier::IO do
   it 'is a class' do
-    Stoplight::Notifier::IO.must_be_kind_of(Module)
+    expect(described_class).to be_a(Module)
   end
 
   it 'is a subclass of Base' do
-    Stoplight::Notifier::IO.must_be(:<, Stoplight::Notifier::Base)
+    expect(described_class).to be < Stoplight::Notifier::Base
   end
 
   describe '#formatter' do
     it 'is initially the default' do
-      assert_equal(
-        Stoplight::Notifier::IO.new(nil).formatter,
-        Stoplight::Default::FORMATTER)
+      expect(described_class.new(nil).formatter)
+        .to eql(Stoplight::Default::FORMATTER)
     end
 
     it 'reads the formatter' do
       formatter = proc {}
-      assert_equal(
-        Stoplight::Notifier::IO.new(nil, formatter).formatter, formatter)
+      expect(described_class.new(nil, formatter).formatter)
+        .to eql(formatter)
     end
   end
 
   describe '#io' do
     it 'reads the IO' do
       io = StringIO.new
-      Stoplight::Notifier::IO.new(io).io.must_equal(io)
+      expect(described_class.new(io).io).to eql(io)
     end
   end
 
@@ -39,26 +37,26 @@ describe Stoplight::Notifier::IO do
     let(:code) { -> {} }
     let(:from_color) { Stoplight::Color::GREEN }
     let(:to_color) { Stoplight::Color::RED }
-    let(:notifier) { Stoplight::Notifier::IO.new(io) }
+    let(:notifier) { described_class.new(io) }
     let(:io) { StringIO.new }
 
     it 'returns the message' do
       error = nil
-      notifier.notify(light, from_color, to_color, error).must_equal(
-        notifier.formatter.call(light, from_color, to_color, error))
+      expect(notifier.notify(light, from_color, to_color, error))
+        .to eql(notifier.formatter.call(light, from_color, to_color, error))
     end
 
     it 'returns the message with an error' do
       error = ZeroDivisionError.new('divided by 0')
-      notifier.notify(light, from_color, to_color, error).must_equal(
-        notifier.formatter.call(light, from_color, to_color, error))
+      expect(notifier.notify(light, from_color, to_color, error))
+        .to eql(notifier.formatter.call(light, from_color, to_color, error))
     end
 
     it 'writes the message' do
       error = nil
       notifier.notify(light, from_color, to_color, error)
-      io.string.must_equal(
-        notifier.formatter.call(light, from_color, to_color, error) + "\n")
+      expect(io.string)
+        .to eql(notifier.formatter.call(light, from_color, to_color, error) + "\n")
     end
   end
 end

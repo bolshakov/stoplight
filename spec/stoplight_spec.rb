@@ -1,10 +1,9 @@
 # coding: utf-8
 
-require 'minitest/spec'
-require 'stoplight'
+require 'spec_helper'
 
 describe Stoplight do
   it 'is a module' do
-    Stoplight.must_be_kind_of(Module)
+    expect(described_class).to be_a(Module)
   end
 end

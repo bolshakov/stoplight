@@ -17,7 +17,10 @@ Gem::Specification.new do |gem|
   gem.required_ruby_version = '>= 1.9.3'
 
   gem.add_development_dependency 'benchmark-ips', '~> 2.1'
+  gem.add_development_dependency 'coveralls', '~> 0.7'
   gem.add_development_dependency 'fakeredis', '~> 0.5'
   gem.add_development_dependency 'hipchat', '~> 1.4'
   gem.add_development_dependency 'redis', '~> 3.1'
+  gem.add_development_dependency 'rspec', '~> 3.1'
+  gem.add_development_dependency 'timecop', '~> 0.7'
 end

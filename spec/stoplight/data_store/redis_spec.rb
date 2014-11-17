@@ -1,57 +1,58 @@
 # coding: utf-8
 
+require 'spec_helper'
 require 'fakeredis'
-require 'minitest/spec'
-require 'stoplight'
 
 describe Stoplight::DataStore::Redis do
-  let(:data_store) { Stoplight::DataStore::Redis.new(redis) }
+  let(:data_store) { described_class.new(redis) }
   let(:redis) { Redis.new }
   let(:light) { Stoplight::Light.new(name) {} }
   let(:name) { ('a'..'z').to_a.shuffle.join }
 
+  before { Redis::Connection::Memory.reset_all_databases }
+
   it 'is a class' do
-    Stoplight::DataStore::Redis.must_be_kind_of(Class)
+    expect(described_class).to be_a(Class)
   end
 
   it 'is a subclass of Base' do
-    Stoplight::DataStore::Redis.must_be(:<, Stoplight::DataStore::Base)
+    expect(described_class).to be < Stoplight::DataStore::Base
   end
 
   describe '#get_all' do
     it 'returns the failures and the state' do
       failures, state = data_store.get_all(light)
-      failures.must_equal([])
-      state.must_equal(Stoplight::State::UNLOCKED)
+      expect(failures).to eql([])
+      expect(state).to eql(Stoplight::State::UNLOCKED)
     end
   end
 
   describe '#get_failures' do
     it 'is initially empty' do
-      data_store.get_failures(light).must_equal([])
+      expect(data_store.get_failures(light)).to eql([])
     end
 
     it 'handles invalid JSON' do
-      redis.keys.size.must_equal(0)
+      expect(redis.keys.size).to eql(0)
       failure = Stoplight::Failure.new('class', 'message', Time.new)
       data_store.record_failure(light, failure)
-      redis.keys.size.must_equal(1)
+      expect(redis.keys.size).to eql(1)
       redis.lset(redis.keys.first, 0, 'invalid JSON')
       light.with_error_notifier { |_error| }
-      data_store.get_failures(light).size.must_equal(1)
+      expect(data_store.get_failures(light).size).to eql(1)
     end
   end
 
   describe '#record_failure' do
     it 'returns the number of failures' do
       failure = Stoplight::Failure.new('class', 'message', Time.new)
-      data_store.record_failure(light, failure).must_equal(1)
+      expect(data_store.record_failure(light, failure)).to eql(1)
     end
 
     it 'persists the failure' do
       failure = Stoplight::Failure.new('class', 'message', Time.new)
       data_store.record_failure(light, failure)
-      data_store.get_failures(light).must_equal([failure])
+      expect(data_store.get_failures(light)).to eq([failure])
     end
 
     it 'stores more recent failures at the head' do
@@ -59,7 +60,7 @@ describe Stoplight::DataStore::Redis do
       data_store.record_failure(light, failure_1)
       failure_2 = Stoplight::Failure.new('class', 'message 2', Time.new)
       data_store.record_failure(light, failure_2)
-      data_store.get_failures(light).must_equal([failure_2, failure_1])
+      expect(data_store.get_failures(light)).to eq([failure_2, failure_1])
     end
 
     it 'limits the number of stored failures' do
@@ -68,7 +69,7 @@ describe Stoplight::DataStore::Redis do
       data_store.record_failure(light, failure_1)
       failure_2 = Stoplight::Failure.new('class', 'message 2', Time.new)
       data_store.record_failure(light, failure_2)
-      data_store.get_failures(light).must_equal([failure_2])
+      expect(data_store.get_failures(light)).to eq([failure_2])
     end
   end
 
@@ -76,33 +77,33 @@ describe Stoplight::DataStore::Redis do
     it 'returns the failures' do
       failure = Stoplight::Failure.new('class', 'message', Time.new)
       data_store.record_failure(light, failure)
-      data_store.clear_failures(light).must_equal([failure])
+      expect(data_store.clear_failures(light)).to eq([failure])
     end
 
     it 'clears the failures' do
       failure = Stoplight::Failure.new('class', 'message', Time.new)
       data_store.record_failure(light, failure)
       data_store.clear_failures(light)
-      data_store.get_failures(light).must_equal([])
+      expect(data_store.get_failures(light)).to eql([])
     end
   end
 
   describe '#get_state' do
     it 'is initially unlocked' do
-      data_store.get_state(light).must_equal(Stoplight::State::UNLOCKED)
+      expect(data_store.get_state(light)).to eql(Stoplight::State::UNLOCKED)
     end
   end
 
   describe '#set_state' do
     it 'returns the state' do
       state = 'state'
-      data_store.set_state(light, state).must_equal(state)
+      expect(data_store.set_state(light, state)).to eql(state)
     end
 
     it 'persists the state' do
       state = 'state'
       data_store.set_state(light, state)
-      data_store.get_state(light).must_equal(state)
+      expect(data_store.get_state(light)).to eql(state)
     end
   end
 
@@ -110,14 +111,14 @@ describe Stoplight::DataStore::Redis do
     it 'returns the state' do
       state = 'state'
       data_store.set_state(light, state)
-      data_store.clear_state(light).must_equal(state)
+      expect(data_store.clear_state(light)).to eql(state)
     end
 
     it 'clears the state' do
       state = 'state'
       data_store.set_state(light, state)
       data_store.clear_state(light)
-      data_store.get_state(light).must_equal(Stoplight::State::UNLOCKED)
+      expect(data_store.get_state(light)).to eql(Stoplight::State::UNLOCKED)
     end
   end
 end
