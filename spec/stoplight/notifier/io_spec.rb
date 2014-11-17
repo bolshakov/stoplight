@@ -55,8 +55,8 @@ describe Stoplight::Notifier::IO do
     it 'writes the message' do
       error = nil
       notifier.notify(light, from_color, to_color, error)
-      expect(io.string)
-        .to eql(notifier.formatter.call(light, from_color, to_color, error) + "\n")
+      message = notifier.formatter.call(light, from_color, to_color, error)
+      expect(io.string).to eql("#{message}\n")
     end
   end
 end

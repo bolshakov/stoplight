@@ -20,7 +20,10 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency 'coveralls', '~> 0.7'
   gem.add_development_dependency 'fakeredis', '~> 0.5'
   gem.add_development_dependency 'hipchat', '~> 1.4'
+  gem.add_development_dependency 'rake', '~> 10.3'
   gem.add_development_dependency 'redis', '~> 3.1'
   gem.add_development_dependency 'rspec', '~> 3.1'
+  gem.add_development_dependency 'rubocop', '~> 0.27'
   gem.add_development_dependency 'timecop', '~> 0.7'
+  gem.add_development_dependency 'yard', '~> 0.8'
 end
