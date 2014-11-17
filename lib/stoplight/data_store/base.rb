@@ -3,6 +3,10 @@
 module Stoplight
   module DataStore
     class Base
+      def names
+        fail NotImplementedError
+      end
+
       def get_all(_light)
         fail NotImplementedError
       end

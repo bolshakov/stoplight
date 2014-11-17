@@ -6,6 +6,7 @@ describe Stoplight::DataStore::Memory do
   let(:data_store) { described_class.new }
   let(:light) { Stoplight::Light.new(name) {} }
   let(:name) { ('a'..'z').to_a.shuffle.join }
+  let(:failure) { Stoplight::Failure.new('class', 'message', Time.new) }
 
   it 'is a class' do
     expect(described_class).to be_a(Class)
@@ -13,6 +14,28 @@ describe Stoplight::DataStore::Memory do
 
   it 'is a subclass of Base' do
     expect(described_class).to be < Stoplight::DataStore::Base
+  end
+
+  describe '#names' do
+    it 'is initially empty' do
+      expect(data_store.names).to eql([])
+    end
+
+    it 'contains the name of a light with a failure' do
+      data_store.record_failure(light, failure)
+      expect(data_store.names).to eql([light.name])
+    end
+
+    it 'contains the name of a light with a set state' do
+      data_store.set_state(light, Stoplight::State::UNLOCKED)
+      expect(data_store.names).to eql([light.name])
+    end
+
+    it 'does not duplicate names' do
+      data_store.record_failure(light, failure)
+      data_store.set_state(light, Stoplight::State::UNLOCKED)
+      expect(data_store.names).to eql([light.name])
+    end
   end
 
   describe '#get_all' do
@@ -31,43 +54,37 @@ describe Stoplight::DataStore::Memory do
 
   describe '#record_failure' do
     it 'returns the number of failures' do
-      failure = Stoplight::Failure.new('class', 'message', Time.new)
       expect(data_store.record_failure(light, failure)).to eql(1)
     end
 
     it 'persists the failure' do
-      failure = Stoplight::Failure.new('class', 'message', Time.new)
       data_store.record_failure(light, failure)
       expect(data_store.get_failures(light)).to eql([failure])
     end
 
     it 'stores more recent failures at the front' do
-      failure_1 = Stoplight::Failure.new('class', 'message 1', Time.new)
-      data_store.record_failure(light, failure_1)
-      failure_2 = Stoplight::Failure.new('class', 'message 2', Time.new)
-      data_store.record_failure(light, failure_2)
-      expect(data_store.get_failures(light)).to eql([failure_2, failure_1])
+      data_store.record_failure(light, failure)
+      other = Stoplight::Failure.new('class', 'message 2', Time.new)
+      data_store.record_failure(light, other)
+      expect(data_store.get_failures(light)).to eql([other, failure])
     end
 
     it 'limits the number of stored failures' do
       light.with_threshold(1)
-      failure_1 = Stoplight::Failure.new('class', 'message 1', Time.new)
-      data_store.record_failure(light, failure_1)
-      failure_2 = Stoplight::Failure.new('class', 'message 2', Time.new)
-      data_store.record_failure(light, failure_2)
-      expect(data_store.get_failures(light)).to eql([failure_2])
+      data_store.record_failure(light, failure)
+      other = Stoplight::Failure.new('class', 'message 2', Time.new)
+      data_store.record_failure(light, other)
+      expect(data_store.get_failures(light)).to eql([other])
     end
   end
 
   describe '#clear_failures' do
     it 'returns the failures' do
-      failure = Stoplight::Failure.new('class', 'message', Time.new)
       data_store.record_failure(light, failure)
       expect(data_store.clear_failures(light)).to eql([failure])
     end
 
     it 'clears the failures' do
-      failure = Stoplight::Failure.new('class', 'message', Time.new)
       data_store.record_failure(light, failure)
       data_store.clear_failures(light)
       expect(data_store.get_failures(light)).to eql([])

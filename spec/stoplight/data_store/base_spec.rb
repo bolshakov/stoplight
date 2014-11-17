@@ -9,6 +9,12 @@ describe Stoplight::DataStore::Base do
     expect(described_class).to be_a(Class)
   end
 
+  describe '#names' do
+    it 'is not implemented' do
+      expect { data_store.names }.to raise_error(NotImplementedError)
+    end
+  end
+
   describe '#get_all' do
     it 'is not implemented' do
       expect { data_store.get_all(nil) }.to raise_error(NotImplementedError)

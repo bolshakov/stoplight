@@ -3,8 +3,22 @@
 module Stoplight
   module DataStore
     class Redis < Base
+      KEY_PREFIX = 'stoplight'.freeze
+      KEY_SEPARATOR = ':'.freeze
+
       def initialize(redis)
         @redis = redis
+      end
+
+      def names
+        state_names = @redis.hkeys(states_key)
+
+        pattern = key('failures', '*')
+        failure_names = @redis.scan_each(match: pattern).to_a.map do |key|
+          key.split(KEY_SEPARATOR).last
+        end
+
+        (state_names + failure_names).uniq
       end
 
       def get_all(light)
@@ -93,7 +107,7 @@ module Stoplight
       end
 
       def key(*pieces)
-        (['stoplight'] + pieces).join(':')
+        ([KEY_PREFIX] + pieces).join(KEY_SEPARATOR)
       end
     end
   end

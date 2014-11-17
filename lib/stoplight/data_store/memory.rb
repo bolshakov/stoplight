@@ -7,6 +7,10 @@ module Stoplight
         @data = {}
       end
 
+      def names
+        (all_failures.keys + all_states.keys).uniq
+      end
+
       def get_all(light)
         [get_failures(light), get_state(light)]
       end
