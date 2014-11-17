@@ -6,7 +6,7 @@ require 'stoplight'
 
 redis = Redis.new
 data_store = Stoplight::DataStore::Redis.new(redis)
-Stoplight.data_store = data_store
+Stoplight::Light.default_data_store = data_store
 
 Benchmark.ips do |b|
   b.report('creating lambda')    { -> {} }
