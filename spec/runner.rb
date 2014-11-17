@@ -1,0 +1,21 @@
+# coding: utf-8
+
+require 'minitest/autorun'
+require 'minitest/pride'
+
+require_relative 'stoplight_spec'
+require_relative 'stoplight/color_spec'
+require_relative 'stoplight/data_store_spec'
+require_relative 'stoplight/data_store/base_spec'
+require_relative 'stoplight/data_store/memory_spec'
+require_relative 'stoplight/data_store/redis_spec'
+require_relative 'stoplight/default_spec'
+require_relative 'stoplight/error_spec'
+require_relative 'stoplight/failure_spec'
+require_relative 'stoplight/light_spec'
+require_relative 'stoplight/light/runnable_spec'
+require_relative 'stoplight/notifier_spec'
+require_relative 'stoplight/notifier/base_spec'
+require_relative 'stoplight/notifier/hip_chat_spec'
+require_relative 'stoplight/notifier/io_spec'
+require_relative 'stoplight/state_spec'

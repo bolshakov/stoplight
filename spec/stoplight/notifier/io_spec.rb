@@ -1,59 +1,64 @@
 # coding: utf-8
 
-require 'spec_helper'
+require 'minitest/spec'
+require 'stoplight'
 
 describe Stoplight::Notifier::IO do
-  subject(:notifier) { described_class.new(io, formatter) }
-  let(:io) { StringIO.new }
-  let(:formatter) { nil }
+  it 'is a class' do
+    Stoplight::Notifier::IO.must_be_kind_of(Module)
+  end
+
+  it 'is a subclass of Base' do
+    Stoplight::Notifier::IO.must_be(:<, Stoplight::Notifier::Base)
+  end
+
+  describe '#formatter' do
+    it 'is initially the default' do
+      assert_equal(
+        Stoplight::Notifier::IO.new(nil).formatter,
+        Stoplight::Default::FORMATTER)
+    end
+
+    it 'reads the formatter' do
+      formatter = proc {}
+      assert_equal(
+        Stoplight::Notifier::IO.new(nil, formatter).formatter, formatter)
+    end
+  end
+
+  describe '#io' do
+    it 'reads the IO' do
+      io = StringIO.new
+      Stoplight::Notifier::IO.new(io).io.must_equal(io)
+    end
+  end
 
   describe '#notify' do
-    subject(:result) { notifier.notify(light, from_color, to_color, failure) }
-    let(:light) { Stoplight::Light.new(light_name, &light_code) }
-    let(:light_name) { SecureRandom.hex }
-    let(:light_code) { -> {} }
-    let(:from_color) { Stoplight::DataStore::COLOR_GREEN }
-    let(:to_color) { Stoplight::DataStore::COLOR_RED }
-    let(:failure) { nil }
-    let(:error) { error_class.new(error_message) }
-    let(:error_class) { StandardError }
-    let(:error_message) { SecureRandom.hex }
+    let(:light) { Stoplight::Light.new(name, &code) }
+    let(:name) { ('a'..'z').to_a.shuffle.join }
+    let(:code) { -> {} }
+    let(:from_color) { Stoplight::Color::GREEN }
+    let(:to_color) { Stoplight::Color::RED }
+    let(:notifier) { Stoplight::Notifier::IO.new(io) }
+    let(:io) { StringIO.new }
 
-    it 'emits the message as a warning' do
-      result
-      expect(io.string)
-        .to eql("Switching #{light.name} from #{from_color} to #{to_color}\n")
+    it 'returns the message' do
+      error = nil
+      notifier.notify(light, from_color, to_color, error).must_equal(
+        notifier.formatter.call(light, from_color, to_color, error))
     end
 
-    context 'with a failure' do
-      let(:failure) { Stoplight::Failure.create(error) }
-
-      it 'emits the message as a warning' do
-        result
-        expect(io.string).to eql(
-          "Switching #{light.name} from #{from_color} to #{to_color} " \
-            "because #{error_class} #{error_message}\n")
-      end
+    it 'returns the message with an error' do
+      error = ZeroDivisionError.new('divided by 0')
+      notifier.notify(light, from_color, to_color, error).must_equal(
+        notifier.formatter.call(light, from_color, to_color, error))
     end
 
-    context 'with a formatter' do
-      let(:formatter) { ->(l, f, t, e) { "#{l.name} #{f} #{t} #{e}" } }
-
-      it 'formats the message' do
-        result
-        expect(io.string)
-          .to eql("#{light.name} #{from_color} #{to_color} \n")
-      end
-
-      context 'with a failure' do
-        let(:failure) { Stoplight::Failure.create(error) }
-
-        it 'formats the message' do
-          result
-          expect(io.string)
-            .to eql("#{light.name} #{from_color} #{to_color} #{failure}\n")
-        end
-      end
+    it 'writes the message' do
+      error = nil
+      notifier.notify(light, from_color, to_color, error)
+      io.string.must_equal(
+        notifier.formatter.call(light, from_color, to_color, error) + "\n")
     end
   end
 end

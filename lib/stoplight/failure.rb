@@ -5,48 +5,44 @@ require 'time'
 
 module Stoplight
   class Failure
-    # @return [String]
     attr_reader :error_class
-
-    # @return [String]
     attr_reader :error_message
-
-    # @return [Time]
     attr_reader :time
 
-    # @param error [Exception]
-    def self.create(error)
-      new(error.class.name, error.message)
+    def self.from_error(error)
+      new(error.class.name, error.message, Time.new)
     end
 
-    # @param json [String]
     def self.from_json(json)
-      h = JSON.parse(json)
-      new(
-        h['error']['class'],
-        h['error']['message'],
-        Time.parse(h['time']))
-    rescue => error
-      new(Error::InvalidFailure.name, error.message)
+      object = JSON.parse(json)
+
+      error_class = object['error']['class']
+      error_message = object['error']['message']
+      time = Time.parse(object['time'])
+
+      new(error_class, error_message, time)
     end
 
-    # @param error_class [String]
-    # @param error_message [String]
-    # @param time [Time, nil]
-    def initialize(error_class, error_message, time = nil)
+    def initialize(error_class, error_message, time)
       @error_class = error_class
       @error_message = error_message
-      @time = time || Time.now
+      @time = time
     end
 
-    def to_json(*args)
-      {
+    def ==(other)
+      error_class == other.error_class &&
+        error_message == other.error_message &&
+        time == other.time
+    end
+
+    def to_json
+      JSON.generate(
         error: {
           class: error_class,
           message: error_message
         },
-        time: time.iso8601
-      }.to_json(*args)
+        time: time.strftime('%Y-%m-%dT%H:%M:%S.%N%:z')
+      )
     end
   end
 end

@@ -1,31 +1,21 @@
 # coding: utf-8
 
-Gem::Specification.new do |spec|
-  spec.name = 'stoplight'
-  spec.version = '0.4.1' # Stoplight::VERSION
-  spec.summary = 'Traffic control for code.'
-  spec.description = <<-TXT.gsub(/^ +/, '')
-    Traffic control for code. An implementation of the circuit breaker pattern
-    in Ruby.
-  TXT
-  spec.homepage = 'http://orgsync.github.io/stoplight'
-  spec.authors = ['Cameron Desautels', 'Taylor Fausak']
-  spec.email = %w(camdez@gmail.com taylor@fausak.me)
-  spec.license = 'MIT'
+Gem::Specification.new do |gem|
+  gem.name = 'stoplight'
+  gem.version = '0.0.0'
+  gem.summary = 'Traffic control for code.'
+  gem.description = 'An implementation of the circuit breaker pattern.'
+  gem.homepage = 'https://github.com/orgsync/stoplight'
+  gem.license = 'MIT'
+  gem.authors = ['Cameron Desautels', 'Taylor Fausak', 'Justin Steffy']
+  gem.email = %w(camdez@gmail.com taylor@fausak.me steffy@orgsync.com)
 
-  spec.files = %w(CHANGELOG.md CONTRIBUTING.md LICENSE.md README.md) +
-    Dir.glob(File.join(spec.require_path, '**', '*.rb'))
-  spec.test_files = Dir.glob(File.join('spec', '**', '*.rb'))
+  gem.files = Dir.glob(File.join('lib', '**', '*.rb'))
+  gem.test_files = Dir.glob(File.join('spec', '**', '*.rb'))
 
-  spec.required_ruby_version = '>= 1.9.3'
+  gem.required_ruby_version = '>= 1.9.3'
 
-  spec.add_development_dependency 'benchmark-ips', '~> 2.0'
-  spec.add_development_dependency 'coveralls', '~> 0.7'
-  spec.add_development_dependency 'fakeredis', '~> 0.5'
-  spec.add_development_dependency 'hipchat', '~> 1.3'
-  spec.add_development_dependency 'rake', '~> 10.3'
-  spec.add_development_dependency 'rspec', '~> 3.1'
-  spec.add_development_dependency 'rubocop', '~> 0.26'
-  spec.add_development_dependency 'timecop', '~> 0.7'
-  spec.add_development_dependency 'yard', '~> 0.8'
+  gem.add_development_dependency 'fakeredis', '~> 0.5'
+  gem.add_development_dependency 'hipchat', '~> 1.4'
+  gem.add_development_dependency 'redis', '~> 3.1'
 end

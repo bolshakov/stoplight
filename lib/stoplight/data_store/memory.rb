@@ -7,127 +7,48 @@ module Stoplight
         @data = {}
       end
 
-      def names
-        thresholds.keys
+      def get_all(light)
+        [get_failures(light), get_state(light)]
       end
 
-      def clear_stale
-        names
-          .select { |name| get_failures(name).empty? }
-          .each { |name| clear(name) }
+      def get_failures(light)
+        all_failures[light.name] || []
       end
 
-      def clear(name)
-        clear_attempts(name)
-        clear_failures(name)
-        clear_state(name)
-        clear_threshold(name)
-        clear_timeout(name)
+      def record_failure(light, failure)
+        failures = get_failures(light).unshift(failure).first(light.threshold)
+        all_failures[light.name] = failures
+        failures.size
       end
 
-      def sync(name)
-        set_threshold(name, get_threshold(name))
+      def clear_failures(light)
+        failures = get_failures(light)
+        all_failures.delete(light.name)
+        failures
       end
 
-      def greenify(name)
-        clear_attempts(name)
-        clear_failures(name)
+      def get_state(light)
+        all_states[light.name] || State::UNLOCKED
       end
 
-      def get_color(name)
-        state = get_state(name)
-        threshold = get_threshold(name)
-        failures = get_failures(name)
-        timeout = get_timeout(name)
-        DataStore.colorize(state, threshold, failures, timeout)
+      def set_state(light, state)
+        all_states[light.name] = state
       end
 
-      def get_attempts(name)
-        attempts[name]
-      end
-
-      def record_attempt(name)
-        attempts[name] += 1
-      end
-
-      def clear_attempts(name)
-        attempts.delete(name)
-      end
-
-      def get_failures(name)
-        @data.fetch(DataStore.failures_key(name), DEFAULT_FAILURES)
-      end
-
-      def record_failure(name, failure)
-        DataStore.validate_failure!(failure)
-        @data[DataStore.failures_key(name)] ||= DEFAULT_FAILURES.dup
-        @data[DataStore.failures_key(name)].push(failure)
-        @data[DataStore.failures_key(name)].size
-      end
-
-      def clear_failures(name)
-        @data.delete(DataStore.failures_key(name))
-      end
-
-      def get_state(name)
-        states[name]
-      end
-
-      def set_state(name, state)
-        DataStore.validate_state!(state)
-        states[name] = state
-      end
-
-      def clear_state(name)
-        states.delete(name)
-      end
-
-      def get_threshold(name)
-        thresholds[name]
-      end
-
-      def set_threshold(name, threshold)
-        DataStore.validate_threshold!(threshold)
-        thresholds[name] = threshold
-      end
-
-      def clear_threshold(name)
-        thresholds.delete(name)
-      end
-
-      def get_timeout(name)
-        timeouts[name]
-      end
-
-      def set_timeout(name, timeout)
-        DataStore.validate_timeout!(timeout)
-        timeouts[name] = timeout
-      end
-
-      def clear_timeout(name)
-        timeouts.delete(name)
+      def clear_state(light)
+        state = get_state(light)
+        all_states.delete(light.name)
+        state
       end
 
       private
 
-      # @return [Hash{String => Integer}]
-      def attempts
-        @data[DataStore.attempts_key] ||= Hash.new(DEFAULT_ATTEMPTS)
+      def all_failures
+        @data['failures'] ||= {}
       end
 
-      # @return [Hash{String => String}]
-      def states
-        @data[DataStore.states_key] ||= Hash.new(DEFAULT_STATE)
-      end
-
-      # @return [Hash{String => Integer}]
-      def thresholds
-        @data[DataStore.thresholds_key] ||= Hash.new(DEFAULT_THRESHOLD)
-      end
-
-      # @return [Hash{String => Integer}]
-      def timeouts
-        @data[DataStore.timeouts_key] ||= Hash.new(DEFAULT_TIMEOUT)
+      def all_states
+        @data['states'] ||= {}
       end
     end
   end

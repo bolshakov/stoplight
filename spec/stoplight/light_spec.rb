@@ -1,273 +1,183 @@
 # coding: utf-8
-# rubocop:disable Metrics/LineLength
 
-require 'spec_helper'
+require 'minitest/spec'
+require 'stringio'
+require 'stoplight'
 
 describe Stoplight::Light do
-  let(:io) { StringIO.new }
-  before do
-    @notifiers = Stoplight.notifiers
-    Stoplight.notifiers = [Stoplight::Notifier::IO.new(io)]
-  end
-  after { Stoplight.notifiers = @notifiers }
+  let(:light) { Stoplight::Light.new(name, &code) }
+  let(:name) { ('a'..'z').to_a.shuffle.join }
+  let(:code) { -> {} }
 
-  subject(:light) { described_class.new(name, &code) }
-  let(:allowed_errors) { [error_class] }
-  let(:code_result) { double }
-  let(:code) { -> { code_result } }
-  let(:error_class) { Class.new(StandardError) }
-  let(:error) { error_class.new(message) }
-  let(:fallback_result) { double }
-  let(:fallback) { -> { fallback_result } }
-  let(:message) { SecureRandom.hex }
-  let(:name) { SecureRandom.hex }
-  let(:threshold) { 1 + rand(100) }
-  let(:timeout) { rand(100) }
-
-  it { expect(light.run).to eql(code_result) }
-  it { expect(light.with_allowed_errors(allowed_errors)).to equal(light) }
-  it { expect(light.with_fallback(&fallback)).to equal(light) }
-  it { expect(light.with_threshold(threshold)).to equal(light) }
-  it { expect(light.with_timeout(timeout)).to equal(light) }
-  it { expect { light.fallback }.to raise_error(Stoplight::Error::RedLight) }
-  it { expect(light.allowed_errors).to eql([]) }
-  it { expect(light.code).to eql(code) }
-  it { expect(light.name).to eql(name) }
-  it { expect(light.color).to eql(Stoplight::DataStore::COLOR_GREEN) }
-  it { expect(light.green?).to eql(true) }
-  it { expect(light.yellow?).to eql(false) }
-  it { expect(light.red?).to eql(false) }
-  it { expect(light.threshold).to eql(Stoplight::DataStore::DEFAULT_THRESHOLD) }
-  it { expect(light.timeout).to eql(Stoplight::DataStore::DEFAULT_TIMEOUT) }
-
-  it 'sets the allowed errors' do
-    light.with_allowed_errors(allowed_errors)
-    expect(light.allowed_errors).to eql(allowed_errors)
+  it 'is a class' do
+    Stoplight::Light.must_be_kind_of(Class)
   end
 
-  it 'sets the fallback' do
-    light.with_fallback(&fallback)
-    expect(light.fallback).to eql(fallback)
-  end
-
-  it 'sets the threshold' do
-    light.with_threshold(threshold)
-    expect(light.threshold).to eql(threshold)
-  end
-
-  it 'sets the timeout' do
-    light.with_timeout(timeout)
-    expect(light.timeout).to eql(timeout)
-  end
-
-  context 'returning a basic object' do
-    let(:code_result) { BasicObject.new }
-
-    it 'does not raise an error' do
-      expect { light.run }.to_not raise_error
-    end
-
-    context do
-      let(:code_result) { @fail ? (fail error) : BasicObject.new }
-
-      it 'does not raise an error' do
-        Timecop.freeze do
-          @fail = true
-          light.with_timeout(-1)
-          light.threshold.times do
-            expect { light.run }.to raise_error(error_class)
-          end
-          expect(light.yellow?).to eql(true)
-          @fail = false
-          expect { light.run }.to_not raise_error
-        end
-      end
+  describe '.default_data_store' do
+    it 'is initially the default' do
+      Stoplight::Light.default_data_store
+        .must_equal(Stoplight::Default::DATA_STORE)
     end
   end
 
-  context 'failing' do
-    let(:code_result) { fail error }
+  describe '.default_data_store=' do
+    before { @default_data_store = Stoplight::Light.default_data_store }
+    after { Stoplight::Light.default_data_store = @default_data_store }
 
-    it 'switches to red' do
-      Timecop.freeze do
-        light.threshold.times do
-          expect(light.green?).to eql(true)
-          expect { light.run }.to raise_error(error_class)
-        end
-        expect(light.red?).to eql(true)
-        expect { light.run }.to raise_error(Stoplight::Error::RedLight)
-      end
-    end
-
-    context 'with allowed errors' do
-      before { light.with_allowed_errors(allowed_errors) }
-
-      it 'stays green' do
-        light.threshold.times do
-          expect(light.green?).to eql(true)
-          expect { light.run }.to raise_error(error_class)
-        end
-        expect(light.green?).to eql(true)
-        expect { light.run }.to raise_error(error_class)
-      end
-    end
-
-    context 'with fallback' do
-      before { light.with_fallback(&fallback) }
-
-      it 'calls the fallback' do
-        Timecop.freeze do
-          light.threshold.times do
-            expect(light.green?).to eql(true)
-            expect { light.run }.to raise_error(error_class)
-          end
-          expect(light.red?).to eql(true)
-          expect(light.run).to eql(fallback_result)
-        end
-      end
-    end
-
-    context 'with timeout' do
-      before { light.with_timeout(-1) }
-
-      it 'switch to yellow' do
-        light.threshold.times do
-          expect(light.green?).to eql(true)
-          expect { light.run }.to raise_error(error_class)
-        end
-        expect(light.yellow?).to eql(true)
-        expect { light.run }.to raise_error(error_class)
-      end
+    it 'sets the data store' do
+      data_store = Stoplight::DataStore::Memory.new
+      Stoplight::Light.default_data_store = data_store
+      Stoplight::Light.default_data_store.must_equal(data_store)
     end
   end
 
-  context 'conditionally failing' do
-    let(:code_result) { fail error if @fail }
-    let(:name) { 'failing' }
-
-    it 'clears the attempts' do
-      light.with_timeout(-1)
-
-      @fail = true
-      light.threshold.succ.times do
-        begin
-          light.run
-        rescue error_class, Stoplight::Error::RedLight
-          nil
-        end
-      end
-
-      @fail = false
-      light.run
-      expect(Stoplight.data_store.get_attempts(light.name)).to eq(0)
-    end
-
-    it 'notifies when switching from green to red' do
-      @fail = true
-      light.threshold.times do
-        begin
-          light.run
-        rescue error_class
-          nil
-        end
-      end
-      expect(io.string).to eql(
-        'Switching failing from green to red ' \
-          "because #{error_class.name} #{message}\n")
+  describe '.default_error_notifier' do
+    it 'is initially the default' do
+      assert_equal(
+        Stoplight::Light.default_error_notifier,
+        Stoplight::Default::ERROR_NOTIFIER)
     end
   end
 
-  context 'with Redis' do
-    let(:data_store) { Stoplight::DataStore::Redis.new(redis) }
-    let(:redis) { Redis.new }
+  describe '.default_error_notifier=' do
+    before { @default_error_notifier = Stoplight::Light.default_error_notifier }
+    after { Stoplight::Light.default_error_notifier = @default_error_notifier }
 
-    before do
-      @data_store = Stoplight.data_store
-      Stoplight.data_store = data_store
-    end
-    after { Stoplight.data_store = @data_store }
-
-    context 'with a failing connection' do
-      let(:error) { Stoplight::Error::BadDataStore.new(cause) }
-      let(:cause) { Redis::BaseConnectionError.new(message) }
-      let(:message) { SecureRandom.hex }
-
-      before { allow(data_store).to receive(:sync).and_raise(error) }
-
-      before { @stderr, $stderr = $stderr, StringIO.new }
-      after { $stderr = @stderr }
-
-      it 'does not raise an error' do
-        expect { light.run }.to_not raise_error
-      end
-
-      it 'switches to an in-memory data store' do
-        light.run
-        expect(Stoplight.data_store).to_not eql(data_store)
-        expect(Stoplight.data_store).to be_a(Stoplight::DataStore::Memory)
-      end
-
-      it 'syncs the light in the new data store' do
-        expect_any_instance_of(Stoplight::DataStore::Memory)
-          .to receive(:sync).with(light.name)
-        light.run
-      end
-
-      it 'warns to STDERR' do
-        light.run
-        expect($stderr.string).to eql("#{cause}\n")
-      end
+    it 'sets the error notifier' do
+      default_error_notifier = -> _ {}
+      Stoplight::Light.default_error_notifier = default_error_notifier
+      assert_equal(
+        Stoplight::Light.default_error_notifier, default_error_notifier)
     end
   end
 
-  context 'with HipChat' do
-    let(:notifier) { Stoplight::Notifier::HipChat.new(client, room_name) }
-    let(:client) { double(HipChat::Client) }
-    let(:room_name) { SecureRandom.hex }
-    let(:room) { double(HipChat::Room) }
-
-    before do
-      @notifiers = Stoplight.notifiers
-      Stoplight.notifiers = [notifier]
-      allow(client).to receive(:[]).with(room_name).and_return(room)
+  describe '.default_notifiers' do
+    it 'is initially the default' do
+      Stoplight::Light.default_notifiers
+        .must_equal(Stoplight::Default::NOTIFIERS)
     end
+  end
 
-    after { Stoplight.notifiers = @notifiers }
+  describe '.default_notifiers=' do
+    before { @default_notifiers = Stoplight::Light.default_notifiers }
+    after { Stoplight::Light.default_notifiers = @default_notifiers }
 
-    context 'with a failing client' do
-      subject(:result) do
-        begin
-          light.run
-        rescue ZeroDivisionError
-          nil
-        end
-      end
+    it 'sets the data store' do
+      notifiers = []
+      Stoplight::Light.default_notifiers = notifiers
+      Stoplight::Light.default_notifiers.must_equal(notifiers)
+    end
+  end
 
-      let(:code_result) { 1 / 0 }
-      let(:error_class) { HipChat::Unauthorized }
-      let(:threshold) { 1 }
+  describe '#allowed_errors' do
+    it 'is initially the default' do
+      light.allowed_errors.must_equal(Stoplight::Default::ALLOWED_ERRORS)
+    end
+  end
 
-      before do
-        light.with_threshold(threshold)
-        allow(room).to receive(:send).with(
-          'Stoplight',
-          /\A@all /,
-          hash_including(color: 'red')
-        ).and_raise(error)
-        @stderr = $stderr
-        $stderr = StringIO.new
-      end
+  describe '#code' do
+    it 'reads the code' do
+      assert_equal(light.code, code)
+    end
+  end
 
-      after { $stderr = @stderr }
+  describe '#data_store' do
+    it 'is initially the default' do
+      light.data_store.must_equal(Stoplight::Light.default_data_store)
+    end
+  end
 
-      it 'does not raise an error' do
-        expect { result }.to_not raise_error
-      end
+  describe '#error_notifier' do
+    it 'it initially the default' do
+      assert_equal(
+        light.error_notifier, Stoplight::Light.default_error_notifier)
+    end
+  end
 
-      it 'warns to STDERR' do
-        result
-        expect($stderr.string).to eql("#{error}\n")
-      end
+  describe '#fallback' do
+    it 'is initially the default' do
+      light.fallback.must_equal(Stoplight::Default::FALLBACK)
+    end
+  end
+
+  describe '#name' do
+    it 'reads the name' do
+      light.name.must_equal(name)
+    end
+  end
+
+  describe '#notifiers' do
+    it 'is initially the default' do
+      light.notifiers.must_equal(Stoplight::Light.default_notifiers)
+    end
+  end
+
+  describe '#threshold' do
+    it 'is initially the default' do
+      light.threshold.must_equal(Stoplight::Default::THRESHOLD)
+    end
+  end
+
+  describe '#timeout' do
+    it 'is initially the default' do
+      light.timeout.must_equal(Stoplight::Default::TIMEOUT)
+    end
+  end
+
+  describe '#with_allowed_errors' do
+    it 'adds the allowed errors to the default' do
+      allowed_errors = [StandardError]
+      light.with_allowed_errors(allowed_errors)
+      light.allowed_errors
+        .must_equal(Stoplight::Default::ALLOWED_ERRORS + allowed_errors)
+    end
+  end
+
+  describe '#with_data_store' do
+    it 'sets the data store' do
+      data_store = Stoplight::DataStore::Memory.new
+      light.with_data_store(data_store)
+      light.data_store.must_equal(data_store)
+    end
+  end
+
+  describe '#with_error_notifier' do
+    it 'sets the error notifier' do
+      error_notifier = -> _ {}
+      light.with_error_notifier(&error_notifier)
+      assert_equal(light.error_notifier, error_notifier)
+    end
+  end
+
+  describe '#with_fallback' do
+    it 'sets the fallback' do
+      fallback = -> _ {}
+      light.with_fallback(&fallback)
+      assert_equal(light.fallback, fallback)
+    end
+  end
+
+  describe '#with_notifiers' do
+    it 'sets the notifiers' do
+      notifiers = [Stoplight::Notifier::IO.new(StringIO.new)]
+      light.with_notifiers(notifiers)
+      light.notifiers.must_equal(notifiers)
+    end
+  end
+
+  describe '#with_threshold' do
+    it 'sets the threshold' do
+      threshold = 12
+      light.with_threshold(threshold)
+      light.threshold.must_equal(threshold)
+    end
+  end
+
+  describe '#with_timeout' do
+    it 'sets the timeout' do
+      timeout = 1.2
+      light.with_timeout(timeout)
+      light.timeout.must_equal(timeout)
     end
   end
 end

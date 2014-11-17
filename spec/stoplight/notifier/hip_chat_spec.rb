@@ -1,109 +1,97 @@
 # coding: utf-8
 
-require 'spec_helper'
+require 'hipchat'
+require 'minitest/spec'
+require 'stoplight'
 
 describe Stoplight::Notifier::HipChat do
-  subject(:notifier) { described_class.new(client, room, formatter, options) }
-  let(:client) { double }
-  let(:room) { SecureRandom.hex }
-  let(:formatter) { nil }
-  let(:options) { {} }
+  it 'is a class' do
+    Stoplight::Notifier::HipChat.must_be_kind_of(Module)
+  end
+
+  it 'is a subclass of Base' do
+    Stoplight::Notifier::HipChat.must_be(:<, Stoplight::Notifier::Base)
+  end
+
+  describe '#formatter' do
+    it 'is initially the default' do
+      assert_equal(
+        Stoplight::Notifier::HipChat.new(nil, nil).formatter,
+        Stoplight::Default::FORMATTER)
+    end
+
+    it 'reads the formatter' do
+      formatter = proc {}
+      assert_equal(
+        Stoplight::Notifier::HipChat.new(nil, nil, formatter).formatter,
+        formatter)
+    end
+  end
+
+  describe '#hip_chat' do
+    it 'reads the HipChat client' do
+      hip_chat = HipChat::Client.new('API token')
+      Stoplight::Notifier::HipChat.new(hip_chat, nil).hip_chat
+        .must_equal(hip_chat)
+    end
+  end
+
+  describe '#options' do
+    it 'is initially the default' do
+      Stoplight::Notifier::HipChat.new(nil, nil).options
+        .must_equal(Stoplight::Notifier::HipChat::DEFAULT_OPTIONS)
+    end
+
+    it 'reads the options' do
+      options = { key: :value }
+      Stoplight::Notifier::HipChat.new(nil, nil, nil, options).options
+        .must_equal(
+          Stoplight::Notifier::HipChat::DEFAULT_OPTIONS.merge(options))
+    end
+  end
+
+  describe '#room' do
+    it 'reads the room' do
+      room = 'Notifications'
+      Stoplight::Notifier::HipChat.new(nil, room).room.must_equal(room)
+    end
+  end
 
   describe '#notify' do
-    subject(:result) { notifier.notify(light, from_color, to_color, failure) }
-    let(:light) { Stoplight::Light.new(light_name, &light_code) }
-    let(:light_name) { SecureRandom.hex }
-    let(:light_code) { -> {} }
-    let(:from_color) { Stoplight::DataStore::COLOR_GREEN }
-    let(:to_color) { Stoplight::DataStore::COLOR_RED }
-    let(:failure) { nil }
-    let(:error) { error_class.new(error_message) }
-    let(:error_class) { StandardError }
-    let(:error_message) { SecureRandom.hex }
+    let(:light) { Stoplight::Light.new(name, &code) }
+    let(:name) { ('a'..'z').to_a.shuffle.join }
+    let(:code) { -> {} }
+    let(:from_color) { Stoplight::Color::GREEN }
+    let(:to_color) { Stoplight::Color::RED }
+    let(:notifier) { Stoplight::Notifier::HipChat.new(hip_chat, room) }
+    let(:hip_chat) { MiniTest::Mock.new }
+    let(:room) { ('a'..'z').to_a.shuffle.join }
 
-    it 'sends the message to HipChat' do
-      expect(client).to receive(:[]).with(room).and_return(client)
-      expect(client).to receive(:send).with(
-        'Stoplight',
-        "@all Switching #{light.name} from #{from_color} to #{to_color}",
-        anything)
-      result
-    end
-
-    context 'with a failure' do
-      let(:failure) { Stoplight::Failure.create(error) }
-
-      it 'sends the message to HipChat' do
-        expect(client).to receive(:[]).with(room).and_return(client)
-        expect(client).to receive(:send).with(
-          'Stoplight',
-          "@all Switching #{light.name} from #{from_color} to #{to_color} " \
-            "because #{error_class} #{error_message}",
-          anything)
-        result
+    before do
+      hip_chat.expect(:[], hip_chat, [room])
+      hip_chat.expect(:send, nil) do |x, y, z|
+        x == 'Stoplight' &&
+          y.is_a?(String) &&
+          z.is_a?(Hash)
       end
     end
 
-    context 'with a formatter' do
-      let(:formatter) { ->(l, f, t, e) { "#{l.name} #{f} #{t} #{e}" } }
-
-      it 'formats the message' do
-        expect(client).to receive(:[]).with(room).and_return(client)
-        expect(client).to receive(:send).with(
-          'Stoplight',
-          "#{light.name} #{from_color} #{to_color} ",
-          anything)
-        result
-      end
-
-      context 'with a failure' do
-        let(:failure) { Stoplight::Failure.create(error) }
-
-        it 'formats the message' do
-          expect(client).to receive(:[]).with(room).and_return(client)
-          expect(client).to receive(:send).with(
-            'Stoplight',
-            "#{light.name} #{from_color} #{to_color} #{failure}",
-            anything)
-          result
-        end
-      end
+    it 'returns the message' do
+      error = nil
+      notifier.notify(light, from_color, to_color, error).must_equal(
+        notifier.formatter.call(light, from_color, to_color, error))
     end
 
-    context 'failing' do
-      let(:error) { HipChat::UnknownResponseCode.new(message) }
-      let(:message) { SecureRandom.hex }
+    it 'returns the message with an error' do
+      error = ZeroDivisionError.new('divided by 0')
+      notifier.notify(light, from_color, to_color, error).must_equal(
+        notifier.formatter.call(light, from_color, to_color, error))
+    end
 
-      before do
-        allow(client).to receive(:[]).with(room).and_return(client)
-        allow(client).to receive(:send).and_raise(error)
-      end
-
-      it 'reraises the error' do
-        expect { result }.to raise_error(Stoplight::Error::BadNotifier)
-      end
-
-      it 'sets the message' do
-        rescued =
-          begin
-            result
-          rescue Stoplight::Error::BadNotifier => e
-            expect(e.message).to eql(message)
-            true
-          end
-        expect(rescued).to eql(true)
-      end
-
-      it 'sets the cause' do
-        rescued =
-          begin
-            result
-          rescue Stoplight::Error::BadNotifier => e
-            expect(e.cause).to eql(error)
-            true
-          end
-        expect(rescued).to eql(true)
-      end
+    it 'sends the message' do
+      error = nil
+      notifier.notify(light, from_color, to_color, error)
+      hip_chat.verify
     end
   end
 end

@@ -1,95 +1,93 @@
 # coding: utf-8
 
-require 'spec_helper'
+require 'json'
+require 'minitest/spec'
+require 'stoplight'
+require 'time'
 
 describe Stoplight::Failure do
-  subject(:failure) { described_class.new(error_class, error_message, time) }
-  let(:error_class) { SecureRandom.hex }
-  let(:error_message) { SecureRandom.hex }
-  let(:time) { Time.now }
+  let(:error) { ZeroDivisionError.new('divided by 0') }
+  let(:error_class) { error.class.name }
+  let(:error_message) { error.message }
+  let(:time) { Time.new(2001, 2, 3, 4, 5, 6, '+07:08') }
+  let(:json) do
+    JSON.generate(
+      error: { class: error_class, message: error_message },
+      time: time.strftime('%Y-%m-%dT%H:%M:%S.%N%:z'))
+  end
 
-  describe '.create' do
-    subject(:result) { described_class.create(error) }
-    let(:error) { error_class.new(error_message) }
-    let(:error_class) { Class.new(StandardError) }
+  it 'is a class' do
+    Stoplight::Failure.must_be_kind_of(Class)
+  end
 
+  describe '.from_error' do
     it 'creates a failure' do
-      Timecop.freeze do
-        expect(result).to be_a(Stoplight::Failure)
-        expect(result.error_class).to eql(error.class.name)
-        expect(result.error_message).to eql(error.message)
-        expect(result.time).to eql(Time.now)
-      end
+      failure = Stoplight::Failure.from_error(error)
+      failure.error_class.must_equal(error_class)
+      failure.error_message.must_equal(error_message)
+      failure.time.must_be_close_to(Time.new)
     end
   end
 
   describe '.from_json' do
-    subject(:result) { described_class.from_json(json) }
-    let(:json) { failure.to_json }
-
-    it 'can be round-tripped' do
-      Timecop.freeze do
-        expect(result.error_class).to eq(failure.error_class)
-        expect(result.error_message).to eq(failure.error_message)
-
-        # JSON doesn't support sub-second precision
-        t = failure.time
-        failure_time = Time.new(
-          t.year, t.month, t.day, t.hour, t.min, t.sec, t.utc_offset)
-        expect(result.time).to eq(failure_time)
-      end
-    end
-
-    context 'with invalid JSON' do
-      let(:json) { nil }
-
-      it 'does not raise an error' do
-        expect { result }.to_not raise_error
-      end
-
-      it 'returns a self-describing invalid failure' do
-        Timecop.freeze do
-          expect(result.error_class).to eq('Stoplight::Error::InvalidFailure')
-          expect(result.error_message).to end_with('nil into String')
-          expect(result.time).to eql(Time.now)
-        end
-      end
+    it 'parses JSON' do
+      failure = Stoplight::Failure.from_json(json)
+      failure.error_class.must_equal(error_class)
+      failure.error_message.must_equal(error_message)
+      failure.time.must_equal(time)
     end
   end
 
-  describe '#initialize' do
-    it 'sets the error class' do
-      expect(failure.error_class).to eql(error_class)
+  describe '#==' do
+    it 'is true when they are equal' do
+      failure = Stoplight::Failure.new(error_class, error_message, time)
+      other = Stoplight::Failure.new(error_class, error_message, time)
+      failure.must_equal(other)
     end
 
-    it 'sets the error message' do
-      expect(failure.error_message).to eql(error_message)
+    it 'is false when they have different error classes' do
+      failure = Stoplight::Failure.new(error_class, error_message, time)
+      other = Stoplight::Failure.new(nil, error_message, time)
+      failure.wont_equal(other)
     end
 
-    it 'sets the time' do
-      expect(failure.time).to eql(time)
+    it 'is false when they have different error messages' do
+      failure = Stoplight::Failure.new(error_class, error_message, time)
+      other = Stoplight::Failure.new(error_class, nil, time)
+      failure.wont_equal(other)
     end
 
-    context 'without a time' do
-      let(:time) { nil }
+    it 'is false when they have different times' do
+      failure = Stoplight::Failure.new(error_class, error_message, time)
+      other = Stoplight::Failure.new(error_class, error_message, nil)
+      failure.wont_equal(other)
+    end
+  end
 
-      it 'uses the default time' do
-        Timecop.freeze do
-          expect(failure.time).to eql(Time.now)
-        end
-      end
+  describe '#error_class' do
+    it 'reads the error class' do
+      Stoplight::Failure.new(error_class, nil, nil).error_class
+        .must_equal(error_class)
+    end
+  end
+
+  describe '#error_message' do
+    it 'reads the error message' do
+      Stoplight::Failure.new(nil, error_message, nil).error_message
+        .must_equal(error_message)
+    end
+  end
+
+  describe '#time' do
+    it 'reads the time' do
+      Stoplight::Failure.new(nil, nil, time).time.must_equal(time)
     end
   end
 
   describe '#to_json' do
-    subject(:json) { failure.to_json }
-    let(:data) { JSON.load(json) }
-    let(:time) { Time.utc(2001, 2, 3, 4, 5, 6) }
-
-    it 'converts to JSON' do
-      expect(data['error']['class']).to eql(error_class)
-      expect(data['error']['message']).to eql(error_message)
-      expect(data['time']).to eql('2001-02-03T04:05:06Z')
+    it 'generates JSON' do
+      Stoplight::Failure.new(error_class, error_message, time).to_json
+        .must_equal(json)
     end
   end
 end

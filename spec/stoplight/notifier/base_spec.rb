@@ -1,21 +1,17 @@
 # coding: utf-8
 
-require 'spec_helper'
+require 'minitest/spec'
+require 'stoplight'
 
 describe Stoplight::Notifier::Base do
-  subject(:notifier) { described_class.new }
+  it 'is a class' do
+    Stoplight::Notifier::Base.must_be_kind_of(Module)
+  end
 
-  %w(
-    notify
-  ).each do |method|
-    it "responds to #{method}" do
-      expect(notifier).to respond_to(method)
-    end
-
-    it "does not implement #{method}" do
-      args = [nil] * notifier.method(method).arity
-      expect { notifier.public_send(method, *args) }.to raise_error(
-        NotImplementedError)
+  describe '#notify' do
+    it 'is not implemented' do
+      -> { Stoplight::Notifier::Base.new.notify(nil, nil, nil, nil) }
+        .must_raise(NotImplementedError)
     end
   end
 end

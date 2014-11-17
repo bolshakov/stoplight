@@ -1,7 +1,4 @@
 # coding: utf-8
-# rubocop:disable Metrics/ClassLength
-
-require 'json'
 
 module Stoplight
   module DataStore
@@ -10,162 +7,93 @@ module Stoplight
         @redis = redis
       end
 
-      def names
-        @redis.hkeys(DataStore.thresholds_key)
-      end
-
-      def clear_stale
-        names
-          .select { |name| get_failures(name).empty? }
-          .each { |name| clear(name) }
-      end
-
-      def clear(name)
-        @redis.pipelined do
-          clear_attempts(name)
-          clear_failures(name)
-          clear_state(name)
-          clear_threshold(name)
-          clear_timeout(name)
+      def get_all(light)
+        failures, state = @redis.multi do
+          query_failures(light)
+          @redis.hget('stoplight:states', light.name)
         end
+
+        [
+          normalize_failures(failures, light.error_notifier),
+          normalize_state(state)
+        ]
       end
 
-      def sync(name)
-        threshold = @redis.hget(DataStore.thresholds_key, name)
-        threshold = normalize_threshold(threshold)
-        @redis.hset(DataStore.thresholds_key, name, threshold)
-        threshold
-      rescue ::Redis::BaseError => error
-        raise Error::BadDataStore, error
+      def get_failures(light)
+        normalize_failures(query_failures(light), light.error_notifier)
       end
 
-      def greenify(name)
-        @redis.pipelined do
-          clear_attempts(name)
-          clear_failures(name)
+      def record_failure(light, failure)
+        size, _ = @redis.multi do
+          @redis.lpush(failures_key(light), failure.to_json)
+          @redis.ltrim(failures_key(light), 0, light.threshold - 1)
         end
+
+        size
       end
 
-      def get_color(name)
-        DataStore.colorize(*colorize_args(name))
+      def clear_failures(light)
+        failures, _ = @redis.multi do
+          query_failures(light)
+          @redis.del(failures_key(light))
+        end
+
+        normalize_failures(failures, light.error_notifier)
       end
 
-      def get_attempts(name)
-        normalize_attempts(@redis.hget(DataStore.attempts_key, name))
+      def get_state(light)
+        query_state(light) || State::UNLOCKED
       end
 
-      def record_attempt(name)
-        @redis.hincrby(DataStore.attempts_key, name, 1)
-      end
-
-      def clear_attempts(name)
-        @redis.hdel(DataStore.attempts_key, name)
-      end
-
-      def get_failures(name)
-        normalize_failures(@redis.lrange(DataStore.failures_key(name), 0, -1))
-      end
-
-      def record_failure(name, failure)
-        DataStore.validate_failure!(failure)
-        @redis.rpush(DataStore.failures_key(name), failure.to_json)
-      end
-
-      def clear_failures(name)
-        @redis.del(DataStore.failures_key(name))
-      end
-
-      def get_state(name)
-        normalize_state(@redis.hget(DataStore.states_key, name))
-      end
-
-      def set_state(name, state)
-        DataStore.validate_state!(state)
-        @redis.hset(DataStore.states_key, name, state)
+      def set_state(light, state)
+        @redis.hset(states_key, light.name, state)
         state
       end
 
-      def clear_state(name)
-        @redis.hdel(DataStore.states_key, name)
-      end
+      def clear_state(light)
+        state, _ = @redis.multi do
+          query_state(light)
+          @redis.hdel(states_key, light.name)
+        end
 
-      def get_threshold(name)
-        normalize_threshold(@redis.hget(DataStore.thresholds_key, name))
-      end
-
-      def set_threshold(name, threshold)
-        DataStore.validate_threshold!(threshold)
-        @redis.hset(DataStore.thresholds_key, name, threshold)
-        threshold
-      end
-
-      def clear_threshold(name)
-        @redis.hdel(DataStore.thresholds_key, name)
-      end
-
-      def get_timeout(name)
-        normalize_timeout(@redis.hget(DataStore.timeouts_key, name))
-      end
-
-      def set_timeout(name, timeout)
-        DataStore.validate_timeout!(timeout)
-        @redis.hset(DataStore.timeouts_key, name, timeout)
-        timeout
-      end
-
-      def clear_timeout(name)
-        @redis.hdel(DataStore.timeouts_key, name)
+        normalize_state(state)
       end
 
       private
 
-      def colorize_args(name)
-        state, threshold, failures, timeout = @redis.pipelined do
-          @redis.hget(DataStore.states_key, name)
-          @redis.hget(DataStore.thresholds_key, name)
-          @redis.lrange(DataStore.failures_key(name), 0, -1)
-          @redis.hget(DataStore.timeouts_key, name)
+      def query_failures(light)
+        @redis.lrange(failures_key(light), 0, -1)
+      end
+
+      def normalize_failures(failures, error_notifier)
+        failures.map do |json|
+          begin
+            Failure.from_json(json)
+          rescue => error
+            error_notifier.call(error)
+            Failure.from_error(error)
+          end
         end
-        normalize_colorize_args(state, threshold, failures, timeout)
       end
 
-      def normalize_colorize_args(state, threshold, failures, timeout)
-        [
-          normalize_state(state),
-          normalize_threshold(threshold),
-          normalize_failures(failures),
-          normalize_timeout(timeout)
-        ]
+      def query_state(light)
+        @redis.hget(states_key, light.name)
       end
 
-      # @param attempts [String, nil]
-      # @return [Integer]
-      def normalize_attempts(attempts)
-        attempts ? attempts.to_i : DEFAULT_ATTEMPTS
-      end
-
-      # @param failures [Array<String>]
-      # @return [Array<Failure>]
-      def normalize_failures(failures)
-        failures.map { |json| Failure.from_json(json) }
-      end
-
-      # @param state [String, nil]
-      # @return [String]
       def normalize_state(state)
-        state || DEFAULT_STATE
+        state || State::UNLOCKED
       end
 
-      # @param threshold [String, nil]
-      # @return [Integer]
-      def normalize_threshold(threshold)
-        threshold ? threshold.to_i : DEFAULT_THRESHOLD
+      def failures_key(light)
+        key('failures', light.name)
       end
 
-      # @param timeout [String, nil]
-      # @return [Integer]
-      def normalize_timeout(timeout)
-        timeout ? timeout.to_i : DEFAULT_TIMEOUT
+      def states_key
+        key('states')
+      end
+
+      def key(*pieces)
+        (['stoplight'] + pieces).join(':')
       end
     end
   end
