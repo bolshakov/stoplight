@@ -2,6 +2,8 @@
 
 This project uses [Semantic Versioning][1].
 
+## v0.5.1 (2014-11-19)
+
 - Fixed a logic bug that incorrectly determined red lights to be yellow.
 
 ## v0.5.0 (2014-11-19)
