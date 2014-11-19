@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |gem|
   gem.name = 'stoplight'
-  gem.version = '0.5.0-alpha'
+  gem.version = '0.5.0'
   gem.summary = 'Traffic control for code.'
   gem.description = 'An implementation of the circuit breaker pattern.'
   gem.homepage = 'https://github.com/orgsync/stoplight'
