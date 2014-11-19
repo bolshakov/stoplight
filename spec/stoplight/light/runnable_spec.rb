@@ -58,6 +58,16 @@ describe Stoplight::Light::Runnable do
       subject.data_store.record_failure(subject, other)
       expect(subject.color).to eql(Stoplight::Color::YELLOW)
     end
+
+    it 'is red when the least recent failure is old' do
+      other = Stoplight::Failure.new(
+        error.class.name, error.message, Time.new - subject.timeout)
+      subject.data_store.record_failure(subject, other)
+      (subject.threshold - 1).times do
+        subject.data_store.record_failure(subject, failure)
+      end
+      expect(subject.color).to eql(Stoplight::Color::RED)
+    end
   end
 
   describe '#run' do

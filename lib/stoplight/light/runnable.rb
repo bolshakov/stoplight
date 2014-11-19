@@ -5,13 +5,13 @@ module Stoplight
     module Runnable
       def color
         failures, state = failures_and_state
-        now = Time.new
+        failure = failures.first
 
         case
         when state == State::LOCKED_GREEN then Color::GREEN
         when state == State::LOCKED_RED then Color::RED
         when failures.size < threshold then Color::GREEN
-        when failures.any? { |f| now - f.time >= timeout } then Color::YELLOW
+        when failure && Time.new - failure.time >= timeout then Color::YELLOW
         else Color::RED
         end
       end
