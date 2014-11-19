@@ -2,6 +2,8 @@
 
 This project uses [Semantic Versioning][1].
 
+## v0.5.0 (2014-11-19)
+
 - Data stores and notifiers can be configured on a per-stoplight basis. This
   allows stoplights to use stoplights internally.
 - Stoplights use stoplights internally to wrap calls to data stores and
