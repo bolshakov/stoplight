@@ -8,8 +8,8 @@
 
 <img align="right" alt="Stoplight icon" src="https://i.imgur.com/tiuOfY9.png">
 
-Traffic control for code. An implementation of the circuit breaker pattern in
-Ruby.
+Stoplight is traffic control for code. It's an implementation of the circuit
+breaker pattern in Ruby.
 
 Check out [stoplight-admin][12] for controlling your stoplights.
 
