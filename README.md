@@ -6,10 +6,10 @@
 [![Quality status][8]][9]
 [![Dependency status][10]][11]
 
-<img align="right" alt="Stoplight icon" src="https://i.imgur.com/tiuOfY9.png">
-
 Stoplight is traffic control for code. It's an implementation of the circuit
 breaker pattern in Ruby.
+
+<img align="right" alt="Stoplight icon" src="https://i.imgur.com/tiuOfY9.png">
 
 Check out [stoplight-admin][12] for controlling your stoplights.
 
