@@ -8,9 +8,9 @@ notifications:
       secure: DXcSlmn6T95WXrsAyqX58Em0A6Fx6lwWiqKBy7zIKVQjWeu2/ZB57V6dVKiewOUJssc8DU5NGvj2WAtAIbeShY0VSe70bs0abCrAFqVzB0ubmjXlaQ/FYp1Cqs21I8hOaiG8H0G0LUdp29Z/34m/APcVVYV9jbnjzjqH/ClqPjU=
     template: '%{message} (build <a href="%{build_url}">%{build_number}</a> of %{repository} on %{branch} at <a href="%{compare_url}">%{commit}</a>)'
 rvm:
-- 1.9
-- 2.0
-- 2.1
 - 2.2
+- 2.1
+- 2.0
+- 1.9
 - jruby
 - rbx-2
