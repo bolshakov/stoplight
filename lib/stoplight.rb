@@ -1,5 +1,8 @@
 # coding: utf-8
 
+module Stoplight
+end
+
 require 'stoplight/color'
 require 'stoplight/error'
 require 'stoplight/failure'
@@ -19,6 +22,3 @@ require 'stoplight/default'
 
 require 'stoplight/light/runnable'
 require 'stoplight/light'
-
-module Stoplight
-end
