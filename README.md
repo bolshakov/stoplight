@@ -296,10 +296,6 @@ Stoplight is brought to you by [@camdez][15] and [@tfausak][16] from
 [@OrgSync][17]. We were inspired by Martin Fowler's [CircuitBreaker][18]
 article.
 
-If this gem isn't cutting it for you, there are a few alternatives, including:
-[circuit_b][19], [circuit_breaker][20], [simple_circuit_breaker][21], and
-[ya_circuit_breaker][22].
-
 [1]: https://github.com/orgsync/stoplight
 [2]: https://img.shields.io/gem/v/stoplight.svg
 [3]: https://rubygems.org/gems/stoplight
@@ -318,7 +314,3 @@ If this gem isn't cutting it for you, there are a few alternatives, including:
 [16]: https://github.com/tfausak
 [17]: https://github.com/OrgSync
 [18]: http://martinfowler.com/bliki/CircuitBreaker.html
-[19]: https://github.com/alg/circuit_b
-[20]: https://github.com/wsargent/circuit_breaker
-[21]: https://github.com/soundcloud/simple_circuit_breaker
-[22]: https://github.com/wooga/circuit_breaker
