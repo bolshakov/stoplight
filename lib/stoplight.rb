@@ -3,6 +3,8 @@
 module Stoplight
 end
 
+require 'stoplight/version'
+
 require 'stoplight/color'
 require 'stoplight/error'
 require 'stoplight/failure'

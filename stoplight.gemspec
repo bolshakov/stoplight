@@ -1,8 +1,13 @@
 # coding: utf-8
 
+lib = File.expand_path('lib', File.dirname(__FILE__))
+$LOAD_PATH.push(lib) unless $LOAD_PATH.include?(lib)
+
+require 'stoplight/version'
+
 Gem::Specification.new do |gem|
   gem.name = 'stoplight'
-  gem.version = '0.5.1'
+  gem.version = Stoplight::VERSION.to_s
   gem.summary = 'Traffic control for code.'
   gem.description = 'An implementation of the circuit breaker pattern.'
   gem.homepage = 'https://github.com/orgsync/stoplight'
