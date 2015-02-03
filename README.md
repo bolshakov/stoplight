@@ -48,50 +48,50 @@ $ gem install stoplight
 
 Stoplight uses an in-memory data store out of the box.
 
-``` irb
->> require 'stoplight'
-=> true
->> Stoplight::Light.default_data_store
-=> #<Stoplight::DataStore::Memory:...>
+``` rb
+require 'stoplight'
+# => true
+Stoplight::Light.default_data_store
+# => #<Stoplight::DataStore::Memory:...>
 ```
 
 If you want to use a persistent data store, you'll have to set it up. Currently
 the only supported persistent data store is Redis. Make sure you have [the Redis
 gem][13] installed before configuring Stoplight.
 
-``` irb
->> require 'redis'
-=> true
->> redis = Redis.new
-=> #<Redis client ...>
->> data_store = Stoplight::DataStore::Redis.new(redis)
-=> #<Stoplight::DataStore::Redis:...>
->> Stoplight::Light.default_data_store = data_store
-=> #<Stoplight::DataStore::Redis:...>
+``` rb
+require 'redis'
+# => true
+redis = Redis.new
+# => #<Redis client ...>
+data_store = Stoplight::DataStore::Redis.new(redis)
+# => #<Stoplight::DataStore::Redis:...>
+Stoplight::Light.default_data_store = data_store
+# => #<Stoplight::DataStore::Redis:...>
 ```
 
 ### Notifiers
 
 Stoplight sends notifications to standard error by default.
 
-``` irb
->> Stoplight::Light.default_notifiers
-=> [#<Stoplight::Notifier::IO:...>]
+``` rb
+Stoplight::Light.default_notifiers
+# => [#<Stoplight::Notifier::IO:...>]
 ```
 
 If you want to send notifications elsewhere, you'll have to set them up.
 Currently the only other supported notifier is HipChat. Make sure you have [the
 HipChat gem][14] installed before configuring Stoplight.
 
-``` irb
->> require 'hipchat'
-=> true
->> hip_chat = HipChat::Client.new('token')
-=> #<HipChat::Client:...>
->> notifier = Stoplight::Notifier::HipChat.new(hip_chat, 'room')
-=> #<Stoplight::Notifier::HipChat:...>
->> Stoplight::Light.default_notifiers += [notifier]
-=> [#<Stoplight::Notifier::IO:...>, #<Stoplight::Notifier::HipChat:...>]
+``` rb
+require 'hipchat'
+# => true
+hip_chat = HipChat::Client.new('token')
+# => #<HipChat::Client:...>
+notifier = Stoplight::Notifier::HipChat.new(hip_chat, 'room')
+# => #<Stoplight::Notifier::HipChat:...>
+Stoplight::Light.default_notifiers += [notifier]
+# => [#<Stoplight::Notifier::IO:...>, #<Stoplight::Notifier::HipChat:...>]
 ```
 
 ### Rails
@@ -112,45 +112,45 @@ Stoplight::Light.default_notifiers += [Stoplight::Notifier::HipChat.new(...)]
 
 To get started, create a stoplight:
 
-``` irb
->> light = Stoplight::Light.new('example-1') { 22.0 / 7 }
-=> #<Stoplight::Light:...>
+``` rb
+light = Stoplight::Light.new('example-1') { 22.0 / 7 }
+# => #<Stoplight::Light:...>
 ```
 
 Then you can run it and it will return the result of calling the block. This is
 the green state.
 
-``` irb
->> light.run
-=> 3.142857142857143
->> light.color
-=> "green"
+``` rb
+light.run
+# => 3.142857142857143
+light.color
+# => "green"
 ```
 
 If everything goes well, you shouldn't even be able to tell that you're using a
 stoplight. That's not very interesting though. Let's create a failing stoplight:
 
-``` irb
->> light = Stoplight::Light.new('example-2') { 1 / 0 }
-=> #<Stoplight::Light:...>
+``` rb
+light = Stoplight::Light.new('example-2') { 1 / 0 }
+# => #<Stoplight::Light:...>
 ```
 
 Now when you run it, the error will be recorded and passed through. After
 running it a few times, the stoplight will stop trying and fail fast. This is
 the red state.
 
-``` irb
->> light.run
-ZeroDivisionError: divided by 0
->> light.run
-ZeroDivisionError: divided by 0
->> light.run
-Switching example-2 from green to red because ZeroDivisionError divided by 0
-ZeroDivisionError: divided by 0
->> light.run
-Stoplight::Error::RedLight: example-2
->> light.color
-=> "red"
+``` rb
+light.run
+# ZeroDivisionError: divided by 0
+light.run
+# ZeroDivisionError: divided by 0
+light.run
+# Switching example-2 from green to red because ZeroDivisionError divided by 0
+# ZeroDivisionError: divided by 0
+light.run
+# Stoplight::Error::RedLight: example-2
+light.color
+# => "red"
 ```
 
 When the stoplight changes from green to red, it will notify every configured
@@ -162,18 +162,18 @@ Some errors shouldn't cause your stoplight to move into the red state. Usually
 these are handled elsewhere in your stack and don't represent real failures. A
 good example is `ActiveRecord::RecordNotFound`.
 
-``` irb
->> light = Stoplight::Light.new('example-3') { User.find(123) }.
-..   with_allowed_errors([ActiveRecord::RecordNotFound])
-=> #<Stoplight::Light:...>
->> light.run
-ActiveRecord::RecordNotFound: Couldn't find User with ID=123
->> light.run
-ActiveRecord::RecordNotFound: Couldn't find User with ID=123
->> light.run
-ActiveRecord::RecordNotFound: Couldn't find User with ID=123
->> light.color
-=> "green"
+``` rb
+light = Stoplight::Light.new('example-3') { User.find(123) }
+  .with_allowed_errors([ActiveRecord::RecordNotFound])
+# => #<Stoplight::Light:...>
+light.run
+# ActiveRecord::RecordNotFound: Couldn't find User with ID=123
+light.run
+# ActiveRecord::RecordNotFound: Couldn't find User with ID=123
+light.run
+# ActiveRecord::RecordNotFound: Couldn't find User with ID=123
+light.color
+# => "green"
 ```
 
 ### Custom fallback
@@ -183,23 +183,23 @@ red, they'll raise a `Stoplight::Error::RedLight` error. You can provide a
 fallback that will be called in both of these cases. It will be passed the error
 if the light was green.
 
-``` irb
->> light = Stoplight::Light.new('example-4') { 1 / 0 }.
-..   with_fallback { |e| p e; 'default' }
-=> #<Stoplight::Light:..>
->> light.run
-#<ZeroDivisionError: divided by 0>
-=> "default"
->> light.run
-#<ZeroDivisionError: divided by 0>
-=> "default"
->> light.run
-Switching example-4 from green to red because ZeroDivisionError divided by 0
-#<ZeroDivisionError: divided by 0>
-=> "default"
->> light.run
-nil
-=> "default"
+``` rb
+light = Stoplight::Light.new('example-4') { 1 / 0 }
+  .with_fallback { |e| p e; 'default' }
+# => #<Stoplight::Light:..>
+light.run
+# #<ZeroDivisionError: divided by 0>
+# => "default"
+light.run
+# #<ZeroDivisionError: divided by 0>
+# => "default"
+light.run
+# Switching example-4 from green to red because ZeroDivisionError divided by 0
+# #<ZeroDivisionError: divided by 0>
+# => "default"
+light.run
+# nil
+# => "default"
 ```
 
 ### Custom threshold
@@ -207,15 +207,15 @@ nil
 Some bits of code might be allowed to fail more or less frequently than others.
 You can configure this by setting a custom threshold in seconds.
 
-``` irb
->> light = Stoplight::Light.new('example-5') { fail }.
-..   with_threshold(1)
-=> #<Stoplight::Light:...>
->> light.run
-Switching example-5 from green to red because RuntimeError
-RuntimeError:
->> light.run
-Stoplight::Error::RedLight: example-5
+``` rb
+light = Stoplight::Light.new('example-5') { fail }
+  .with_threshold(1)
+# => #<Stoplight::Light:...>
+light.run
+# Switching example-5 from green to red because RuntimeError
+# RuntimeError:
+light.run
+# Stoplight::Error::RedLight: example-5
 ```
 
 ### Custom timeout
@@ -224,23 +224,23 @@ Stoplights will automatically attempt to recover after a certain amount of time.
 A light in the red state for longer than the timeout will transition to the
 yellow state. This timeout is customizable.
 
-``` irb
->> light = Stoplight::Light.new('example-6') { fail }.
-..   with_timeout(1)
-=> #<Stoplight::Light:...>
->> light.run
-RuntimeError:
->> light.run
-RuntimeError:
->> light.run
-Switching example-6 from green to red because RuntimeError
-RuntimeError:
->> sleep(1)
-=> 1
->> light.color
-=> "yellow"
->> light.run
-RuntimeError:
+``` rb
+light = Stoplight::Light.new('example-6') { fail }
+  .with_timeout(1)
+# => #<Stoplight::Light:...>
+light.run
+# RuntimeError:
+light.run
+# RuntimeError:
+light.run
+# Switching example-6 from green to red because RuntimeError
+# RuntimeError:
+sleep(1)
+# => 1
+light.color
+# => "yellow"
+light.run
+# RuntimeError:
 ```
 
 Set the timeout to `-1` to disable automatic recovery.
@@ -274,15 +274,15 @@ Although stoplights can operate on their own, occasionally you may want to
 override the default behavior. You can lock a light in either the green or red
 state using `set_state`.
 
-``` irb
->> light = Stoplight::Light.new('example-7') { true }
-=> #<Stoplight::Light:..>
->> light.run
-=> true
->> light.data_store.set_state(light, Stoplight::State::LOCKED_RED)
-=> "locked_red"
->> light.run
-Stoplight::Error::RedLight: example-7
+``` rb
+light = Stoplight::Light.new('example-7') { true }
+# => #<Stoplight::Light:..>
+light.run
+# => true
+light.data_store.set_state(light, Stoplight::State::LOCKED_RED)
+# => "locked_red"
+light.run
+# Stoplight::Error::RedLight: example-7
 ```
 
 **Code in locked red lights may still run under certain conditions!** If you
