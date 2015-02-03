@@ -301,15 +301,15 @@ If this gem isn't cutting it for you, there are a few alternatives, including:
 [ya_circuit_breaker][22].
 
 [1]: https://github.com/orgsync/stoplight
-[2]: https://badge.fury.io/rb/stoplight.svg
+[2]: https://img.shields.io/gem/v/stoplight.svg
 [3]: https://rubygems.org/gems/stoplight
-[4]: https://travis-ci.org/orgsync/stoplight.svg
+[4]: https://img.shields.io/travis/orgsync/stoplight/master.svg
 [5]: https://travis-ci.org/orgsync/stoplight
-[6]: https://img.shields.io/coveralls/orgsync/stoplight.svg
+[6]: https://img.shields.io/coveralls/orgsync/stoplight/master.svg
 [7]: https://coveralls.io/r/orgsync/stoplight
-[8]: https://codeclimate.com/github/orgsync/stoplight/badges/gpa.svg
+[8]: https://img.shields.io/codeclimate/github/orgsync/stoplight.svg
 [9]: https://codeclimate.com/github/orgsync/stoplight
-[10]: https://gemnasium.com/orgsync/stoplight.svg
+[10]: https://img.shields.io/gemnasium/orgsync/stoplight.svg
 [11]: https://gemnasium.com/orgsync/stoplight
 [12]: https://github.com/orgsync/stoplight-admin
 [13]: https://rubygems.org/gems/redis
