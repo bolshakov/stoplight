@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://github.com/orgsync/stoplight">
-    <img alt="Stoplight" src="https://a.pomf.se/btfdvt.png">
+    <img alt="Stoplight" src="stoplight.png">
   </a>
 
   <br>
