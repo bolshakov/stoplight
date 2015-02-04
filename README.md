@@ -1,15 +1,31 @@
-# [Stoplight][1]
+<p align="center">
+  <a href="https://github.com/orgsync/stoplight">
+    <img alt="Stoplight" src="https://upload.wikimedia.org/wikipedia/commons/a/a4/MUTCD_W3-3.svg" width="320" height="320">
+  </a>
 
-[![Gem version][2]][3]
-[![Build status][4]][5]
-[![Coverage status][6]][7]
-[![Quality status][8]][9]
-[![Dependency status][10]][11]
+  <br>
 
-Stoplight is traffic control for code. It's an implementation of the circuit
-breaker pattern in Ruby.
+  Stoplight is traffic control for code.
+  It's an implementation of the circuit breaker pattern in Ruby.
 
-<img align="right" alt="Stoplight icon" height="320" src="https://upload.wikimedia.org/wikipedia/commons/a/a4/MUTCD_W3-3.svg" width="320">
+  <br>
+
+  <a href="https://img.shields.io/gem/v/stoplight.svg">
+    <img alt="" src="https://rubygems.org/gems/stoplight">
+  </a>
+  <a href="https://img.shields.io/travis/orgsync/stoplight/master.svg">
+    <img alt="" src="https://travis-ci.org/orgsync/stoplight">
+  </a>
+  <a href="https://img.shields.io/coveralls/orgsync/stoplight/master.svg">
+    <img alt="" src="https://coveralls.io/r/orgsync/stoplight">
+  </a>
+  <a href="https://img.shields.io/codeclimate/github/orgsync/stoplight.svg">
+    <img alt="" src="https://codeclimate.com/github/orgsync/stoplight">
+  </a>
+  <a href="https://img.shields.io/gemnasium/orgsync/stoplight.svg">
+    <img alt="" src="https://gemnasium.com/orgsync/stoplight">
+  </a>
+</p>
 
 Check out [stoplight-admin][12] for controlling your stoplights.
 
@@ -296,17 +312,6 @@ Stoplight is brought to you by [@camdez][15] and [@tfausak][16] from
 [@OrgSync][17]. We were inspired by Martin Fowler's [CircuitBreaker][18]
 article.
 
-[1]: https://github.com/orgsync/stoplight
-[2]: https://img.shields.io/gem/v/stoplight.svg
-[3]: https://rubygems.org/gems/stoplight
-[4]: https://img.shields.io/travis/orgsync/stoplight/master.svg
-[5]: https://travis-ci.org/orgsync/stoplight
-[6]: https://img.shields.io/coveralls/orgsync/stoplight/master.svg
-[7]: https://coveralls.io/r/orgsync/stoplight
-[8]: https://img.shields.io/codeclimate/github/orgsync/stoplight.svg
-[9]: https://codeclimate.com/github/orgsync/stoplight
-[10]: https://img.shields.io/gemnasium/orgsync/stoplight.svg
-[11]: https://gemnasium.com/orgsync/stoplight
 [12]: https://github.com/orgsync/stoplight-admin
 [13]: https://rubygems.org/gems/redis
 [14]: https://rubygems.org/gems/hipchat
