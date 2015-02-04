@@ -26,6 +26,8 @@
   <a href="https://gemnasium.com/orgsync/stoplight">
     <img alt="" src="https://img.shields.io/gemnasium/orgsync/stoplight.svg">
   </a>
+
+  <hr>
 </p>
 
 Check out [stoplight-admin][12] for controlling your stoplights.
