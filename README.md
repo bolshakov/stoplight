@@ -1,8 +1,9 @@
 <p align="center">
   <a href="https://github.com/orgsync/stoplight">
-    <img alt="Stoplight" src="https://a.pomf.se/ljwani.png">
+    <img alt="Stoplight" src="https://a.pomf.se/btfdvt.png">
   </a>
 
+  <br>
   <br>
 
   Stoplight is traffic control for code.
