@@ -1,17 +1,19 @@
 <p align="center">
+  <img alt="Stoplight" src="stoplight.png">
+</p>
+
+<h1 align="center">
   <a href="https://github.com/orgsync/stoplight">
-    <img alt="Stoplight" src="stoplight.png">
+    Stoplight
   </a>
+</h1>
 
-  <br>
-  <br>
-
+<p align="center">
   Stoplight is traffic control for code. It's an implementation of
   the circuit breaker pattern in Ruby.
+</p>
 
-  <br>
-  <br>
-
+<p align="center">
   <a href="https://rubygems.org/gems/stoplight">
     <img alt="" src="https://img.shields.io/gem/v/stoplight.svg">
   </a>
@@ -27,9 +29,9 @@
   <a href="https://gemnasium.com/orgsync/stoplight">
     <img alt="" src="https://img.shields.io/gemnasium/orgsync/stoplight.svg">
   </a>
-
-  <hr>
 </p>
+
+<hr>
 
 Check out [stoplight-admin][] for controlling your stoplights.
 
