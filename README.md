@@ -9,6 +9,7 @@
   It's an implementation of the circuit breaker pattern in Ruby.
 
   <br>
+  <br>
 
   <a href="https://rubygems.org/gems/stoplight">
     <img alt="" src="https://img.shields.io/gem/v/stoplight.svg">
