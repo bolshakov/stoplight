@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://github.com/orgsync/stoplight">
-    <img alt="Stoplight" src="https://a.pomf.se/hrwdsz.svg" width="762" height="354">
+    <img alt="Stoplight" src="https://a.pomf.se/ljwani.png" width="888" height="413">
   </a>
 
   <br>
