@@ -10,20 +10,20 @@
 
   <br>
 
-  <a href="https://img.shields.io/gem/v/stoplight.svg">
-    <img alt="" src="https://rubygems.org/gems/stoplight">
+  <a href="https://rubygems.org/gems/stoplight">
+    <img alt="" src="https://img.shields.io/gem/v/stoplight.svg">
   </a>
-  <a href="https://img.shields.io/travis/orgsync/stoplight/master.svg">
-    <img alt="" src="https://travis-ci.org/orgsync/stoplight">
+  <a href="https://travis-ci.org/orgsync/stoplight">
+    <img alt="" src="https://img.shields.io/travis/orgsync/stoplight/master.svg">
   </a>
-  <a href="https://img.shields.io/coveralls/orgsync/stoplight/master.svg">
-    <img alt="" src="https://coveralls.io/r/orgsync/stoplight">
+  <a href="https://coveralls.io/r/orgsync/stoplight">
+    <img alt="" src="https://img.shields.io/coveralls/orgsync/stoplight/master.svg">
   </a>
-  <a href="https://img.shields.io/codeclimate/github/orgsync/stoplight.svg">
-    <img alt="" src="https://codeclimate.com/github/orgsync/stoplight">
+  <a href="https://codeclimate.com/github/orgsync/stoplight">
+    <img alt="" src="https://img.shields.io/codeclimate/github/orgsync/stoplight.svg">
   </a>
-  <a href="https://img.shields.io/gemnasium/orgsync/stoplight.svg">
-    <img alt="" src="https://gemnasium.com/orgsync/stoplight">
+  <a href="https://gemnasium.com/orgsync/stoplight">
+    <img alt="" src="https://img.shields.io/gemnasium/orgsync/stoplight.svg">
   </a>
 </p>
 
