@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://github.com/orgsync/stoplight">
-    <img alt="Stoplight" src="https://upload.wikimedia.org/wikipedia/commons/a/a4/MUTCD_W3-3.svg" width="320" height="320">
+    <img alt="Stoplight" src="stoplight.svg" width="762" height="354">
   </a>
 
   <br>
