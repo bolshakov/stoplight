@@ -31,7 +31,7 @@
   <hr>
 </p>
 
-Check out [stoplight-admin][12] for controlling your stoplights.
+Check out [stoplight-admin][] for controlling your stoplights.
 
 - [Installation](#installation)
 - [Setup](#setup)
@@ -77,7 +77,7 @@ Stoplight::Light.default_data_store
 
 If you want to use a persistent data store, you'll have to set it up. Currently
 the only supported persistent data store is Redis. Make sure you have [the Redis
-gem][13] installed before configuring Stoplight.
+gem][] installed before configuring Stoplight.
 
 ``` rb
 require 'redis'
@@ -101,7 +101,7 @@ Stoplight::Light.default_notifiers
 
 If you want to send notifications elsewhere, you'll have to set them up.
 Currently the only other supported notifier is HipChat. Make sure you have [the
-HipChat gem][14] installed before configuring Stoplight.
+HipChat gem][] installed before configuring Stoplight.
 
 ``` rb
 require 'hipchat'
@@ -312,14 +312,14 @@ locked state of any stoplights.
 
 ## Credits
 
-Stoplight is brought to you by [@camdez][15] and [@tfausak][16] from
-[@OrgSync][17]. We were inspired by Martin Fowler's [CircuitBreaker][18]
+Stoplight is brought to you by [@camdez][] and [@tfausak][] from
+[@OrgSync][]. We were inspired by Martin Fowler's [CircuitBreaker][]
 article.
 
-[12]: https://github.com/orgsync/stoplight-admin
-[13]: https://rubygems.org/gems/redis
-[14]: https://rubygems.org/gems/hipchat
-[15]: https://github.com/camdez
-[16]: https://github.com/tfausak
-[17]: https://github.com/OrgSync
-[18]: http://martinfowler.com/bliki/CircuitBreaker.html
+[stoplight-admin]: https://github.com/orgsync/stoplight-admin
+[the redis gem]: https://rubygems.org/gems/redis
+[the hipchat gem]: https://rubygems.org/gems/hipchat
+[@camdez]: https://github.com/camdez
+[@tfausak]: https://github.com/tfausak
+[@orgsync]: https://github.com/OrgSync
+[circuitbreaker]: http://martinfowler.com/bliki/CircuitBreaker.html
