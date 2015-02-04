@@ -1,17 +1,37 @@
-# [Stoplight][1]
+<p align="center">
+  <a href="https://github.com/orgsync/stoplight">
+    <img alt="Stoplight" src="stoplight.png">
+  </a>
 
-[![Gem version][2]][3]
-[![Build status][4]][5]
-[![Coverage status][6]][7]
-[![Quality status][8]][9]
-[![Dependency status][10]][11]
+  <br>
+  <br>
 
-Stoplight is traffic control for code. It's an implementation of the circuit
-breaker pattern in Ruby.
+  Stoplight is traffic control for code. It's an implementation of
+  the circuit breaker pattern in Ruby.
 
-<img align="right" alt="Stoplight icon" height="320" src="https://upload.wikimedia.org/wikipedia/commons/a/a4/MUTCD_W3-3.svg" width="320">
+  <br>
+  <br>
 
-Check out [stoplight-admin][12] for controlling your stoplights.
+  <a href="https://rubygems.org/gems/stoplight">
+    <img alt="" src="https://img.shields.io/gem/v/stoplight.svg">
+  </a>
+  <a href="https://travis-ci.org/orgsync/stoplight">
+    <img alt="" src="https://img.shields.io/travis/orgsync/stoplight/master.svg">
+  </a>
+  <a href="https://coveralls.io/r/orgsync/stoplight">
+    <img alt="" src="https://img.shields.io/coveralls/orgsync/stoplight/master.svg">
+  </a>
+  <a href="https://codeclimate.com/github/orgsync/stoplight">
+    <img alt="" src="https://img.shields.io/codeclimate/github/orgsync/stoplight.svg">
+  </a>
+  <a href="https://gemnasium.com/orgsync/stoplight">
+    <img alt="" src="https://img.shields.io/gemnasium/orgsync/stoplight.svg">
+  </a>
+
+  <hr>
+</p>
+
+Check out [stoplight-admin][] for controlling your stoplights.
 
 - [Installation](#installation)
 - [Setup](#setup)
@@ -55,9 +75,10 @@ Stoplight::Light.default_data_store
 # => #<Stoplight::DataStore::Memory:...>
 ```
 
-If you want to use a persistent data store, you'll have to set it up. Currently
-the only supported persistent data store is Redis. Make sure you have [the Redis
-gem][13] installed before configuring Stoplight.
+If you want to use a persistent data store, you'll have to set it
+up. Currently the only supported persistent data store is Redis.
+Make sure you have [the Redis gem][] installed before configuring
+Stoplight.
 
 ``` rb
 require 'redis'
@@ -79,9 +100,10 @@ Stoplight::Light.default_notifiers
 # => [#<Stoplight::Notifier::IO:...>]
 ```
 
-If you want to send notifications elsewhere, you'll have to set them up.
-Currently the only other supported notifier is HipChat. Make sure you have [the
-HipChat gem][14] installed before configuring Stoplight.
+If you want to send notifications elsewhere, you'll have to set
+them up. Currently the only other supported notifier is HipChat.
+Make sure you have [the HipChat gem][] installed before configuring
+Stoplight.
 
 ``` rb
 require 'hipchat'
@@ -96,10 +118,10 @@ Stoplight::Light.default_notifiers += [notifier]
 
 ### Rails
 
-Stoplight is designed to work seamlessly with Rails. If you want to use the
-in-memory data store, you don't need to do anything special. If you want to use
-a persistent data store, you'll need to configure it. Create an initializer for
-Stoplight:
+Stoplight is designed to work seamlessly with Rails. If you want
+to use the in-memory data store, you don't need to do anything
+special. If you want to use a persistent data store, you'll need
+to configure it. Create an initializer for Stoplight:
 
 ``` rb
 # config/initializers/stoplight.rb
@@ -117,8 +139,8 @@ light = Stoplight::Light.new('example-1') { 22.0 / 7 }
 # => #<Stoplight::Light:...>
 ```
 
-Then you can run it and it will return the result of calling the block. This is
-the green state.
+Then you can run it and it will return the result of calling the
+block. This is the green state.
 
 ``` rb
 light.run
@@ -127,17 +149,18 @@ light.color
 # => "green"
 ```
 
-If everything goes well, you shouldn't even be able to tell that you're using a
-stoplight. That's not very interesting though. Let's create a failing stoplight:
+If everything goes well, you shouldn't even be able to tell that
+you're using a stoplight. That's not very interesting though. Let's
+create a failing stoplight:
 
 ``` rb
 light = Stoplight::Light.new('example-2') { 1 / 0 }
 # => #<Stoplight::Light:...>
 ```
 
-Now when you run it, the error will be recorded and passed through. After
-running it a few times, the stoplight will stop trying and fail fast. This is
-the red state.
+Now when you run it, the error will be recorded and passed through.
+After running it a few times, the stoplight will stop trying and
+fail fast. This is the red state.
 
 ``` rb
 light.run
@@ -153,14 +176,14 @@ light.color
 # => "red"
 ```
 
-When the stoplight changes from green to red, it will notify every configured
-notifier.
+When the stoplight changes from green to red, it will notify every
+configured notifier.
 
 ### Custom errors
 
-Some errors shouldn't cause your stoplight to move into the red state. Usually
-these are handled elsewhere in your stack and don't represent real failures. A
-good example is `ActiveRecord::RecordNotFound`.
+Some errors shouldn't cause your stoplight to move into the red
+state. Usually these are handled elsewhere in your stack and don't
+represent real failures. A good example is `ActiveRecord::RecordNotFound`.
 
 ``` rb
 light = Stoplight::Light.new('example-3') { User.find(123) }
@@ -178,10 +201,10 @@ light.color
 
 ### Custom fallback
 
-By default, stoplights will re-raise errors when they're green. When they're
-red, they'll raise a `Stoplight::Error::RedLight` error. You can provide a
-fallback that will be called in both of these cases. It will be passed the error
-if the light was green.
+By default, stoplights will re-raise errors when they're green.
+When they're red, they'll raise a `Stoplight::Error::RedLight`
+error. You can provide a fallback that will be called in both of
+these cases. It will be passed the error if the light was green.
 
 ``` rb
 light = Stoplight::Light.new('example-4') { 1 / 0 }
@@ -204,8 +227,9 @@ light.run
 
 ### Custom threshold
 
-Some bits of code might be allowed to fail more or less frequently than others.
-You can configure this by setting a custom threshold in seconds.
+Some bits of code might be allowed to fail more or less frequently
+than others. You can configure this by setting a custom threshold
+in seconds.
 
 ``` rb
 light = Stoplight::Light.new('example-5') { fail }
@@ -220,9 +244,9 @@ light.run
 
 ### Custom timeout
 
-Stoplights will automatically attempt to recover after a certain amount of time.
-A light in the red state for longer than the timeout will transition to the
-yellow state. This timeout is customizable.
+Stoplights will automatically attempt to recover after a certain
+amount of time.  A light in the red state for longer than the timeout
+will transition to the yellow state. This timeout is customizable.
 
 ``` rb
 light = Stoplight::Light.new('example-6') { fail }
@@ -247,8 +271,8 @@ Set the timeout to `-1` to disable automatic recovery.
 
 ### Rails
 
-Stoplight was designed to wrap Rails actions with minimal effort. Here's an
-example configuration:
+Stoplight was designed to wrap Rails actions with minimal effort.
+Here's an example configuration:
 
 ``` rb
 class ApplicationController < ActionController::Base
@@ -270,9 +294,9 @@ end
 
 ### Locking
 
-Although stoplights can operate on their own, occasionally you may want to
-override the default behavior. You can lock a light in either the green or red
-state using `set_state`.
+Although stoplights can operate on their own, occasionally you may
+want to override the default behavior. You can lock a light in
+either the green or red state using `set_state`.
 
 ``` rb
 light = Stoplight::Light.new('example-7') { true }
@@ -285,32 +309,21 @@ light.run
 # Stoplight::Error::RedLight: example-7
 ```
 
-**Code in locked red lights may still run under certain conditions!** If you
-have configured a custom data store and that data store fails, Stoplight will
-switch over to using a blank in-memory data store. That means you will lose the
-locked state of any stoplights.
+**Code in locked red lights may still run under certain conditions!**
+If you have configured a custom data store and that data store
+fails, Stoplight will switch over to using a blank in-memory data
+store. That means you will lose the locked state of any stoplights.
 
 ## Credits
 
-Stoplight is brought to you by [@camdez][15] and [@tfausak][16] from
-[@OrgSync][17]. We were inspired by Martin Fowler's [CircuitBreaker][18]
+Stoplight is brought to you by [@camdez][] and [@tfausak][] from
+[@OrgSync][]. We were inspired by Martin Fowler's [CircuitBreaker][]
 article.
 
-[1]: https://github.com/orgsync/stoplight
-[2]: https://img.shields.io/gem/v/stoplight.svg
-[3]: https://rubygems.org/gems/stoplight
-[4]: https://img.shields.io/travis/orgsync/stoplight/master.svg
-[5]: https://travis-ci.org/orgsync/stoplight
-[6]: https://img.shields.io/coveralls/orgsync/stoplight/master.svg
-[7]: https://coveralls.io/r/orgsync/stoplight
-[8]: https://img.shields.io/codeclimate/github/orgsync/stoplight.svg
-[9]: https://codeclimate.com/github/orgsync/stoplight
-[10]: https://img.shields.io/gemnasium/orgsync/stoplight.svg
-[11]: https://gemnasium.com/orgsync/stoplight
-[12]: https://github.com/orgsync/stoplight-admin
-[13]: https://rubygems.org/gems/redis
-[14]: https://rubygems.org/gems/hipchat
-[15]: https://github.com/camdez
-[16]: https://github.com/tfausak
-[17]: https://github.com/OrgSync
-[18]: http://martinfowler.com/bliki/CircuitBreaker.html
+[stoplight-admin]: https://github.com/orgsync/stoplight-admin
+[the redis gem]: https://rubygems.org/gems/redis
+[the hipchat gem]: https://rubygems.org/gems/hipchat
+[@camdez]: https://github.com/camdez
+[@tfausak]: https://github.com/tfausak
+[@orgsync]: https://github.com/OrgSync
+[circuitbreaker]: http://martinfowler.com/bliki/CircuitBreaker.html
