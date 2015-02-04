@@ -1,10 +1,12 @@
 <p align="center">
-  <a href="https://github.com/orgsync/stoplight">
-    <img alt="Stoplight" src="stoplight.png">
-  </a>
+  <img alt="Stoplight" src="stoplight.png">
 </p>
 
-<h1 align="center">Stoplight</h1>
+<h1 align="center">
+  <a href="https://github.com/orgsync/stoplight">
+    Stoplight
+  </a>
+</h1>
 
 <p align="center">
   Stoplight is traffic control for code. It's an implementation of
