@@ -8,7 +8,7 @@ describe Stoplight::Failure do
   let(:error_message) { error.message }
   let(:time) { Time.new(2001, 2, 3, 4, 5, 6, '+07:08') }
   let(:json) do
-    JSON.generate(
+    MultiJson.dump(
       error: { class: error_class, message: error_message },
       time: time.strftime('%Y-%m-%dT%H:%M:%S.%N%:z'))
   end
