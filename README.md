@@ -137,7 +137,7 @@ Stoplight::Light.default_notifiers += [Stoplight::Notifier::HipChat.new(...)]
 To get started, create a stoplight:
 
 ``` rb
-light = Stoplight::Light.new('example-1') { 22.0 / 7 }
+light = Stoplight('example-1') { 22.0 / 7 }
 # => #<Stoplight::Light:...>
 ```
 
@@ -156,7 +156,7 @@ you're using a stoplight. That's not very interesting though. Let's
 create a failing stoplight:
 
 ``` rb
-light = Stoplight::Light.new('example-2') { 1 / 0 }
+light = Stoplight('example-2') { 1 / 0 }
 # => #<Stoplight::Light:...>
 ```
 
@@ -188,7 +188,7 @@ state. Usually these are handled elsewhere in your stack and don't
 represent real failures. A good example is `ActiveRecord::RecordNotFound`.
 
 ``` rb
-light = Stoplight::Light.new('example-3') { User.find(123) }
+light = Stoplight('example-3') { User.find(123) }
   .with_allowed_errors([ActiveRecord::RecordNotFound])
 # => #<Stoplight::Light:...>
 light.run
@@ -209,7 +209,7 @@ error. You can provide a fallback that will be called in both of
 these cases. It will be passed the error if the light was green.
 
 ``` rb
-light = Stoplight::Light.new('example-4') { 1 / 0 }
+light = Stoplight('example-4') { 1 / 0 }
   .with_fallback { |e| p e; 'default' }
 # => #<Stoplight::Light:..>
 light.run
@@ -234,7 +234,7 @@ than others. You can configure this by setting a custom threshold
 in seconds.
 
 ``` rb
-light = Stoplight::Light.new('example-5') { fail }
+light = Stoplight('example-5') { fail }
   .with_threshold(1)
 # => #<Stoplight::Light:...>
 light.run
@@ -251,7 +251,7 @@ amount of time.  A light in the red state for longer than the timeout
 will transition to the yellow state. This timeout is customizable.
 
 ``` rb
-light = Stoplight::Light.new('example-6') { fail }
+light = Stoplight('example-6') { fail }
   .with_timeout(1)
 # => #<Stoplight::Light:...>
 light.run
@@ -281,7 +281,7 @@ class ApplicationController < ActionController::Base
   around_action :stoplight
   private
   def stoplight(&block)
-    Stoplight::Light.new("#{params[:controller]}##{params[:action]}", &block)
+    Stoplight("#{params[:controller]}##{params[:action]}", &block)
       .with_allowed_errors([ActiveRecord::RecordNotFound])
       .with_fallback do |error|
         Rails.logger.error(error)
@@ -301,7 +301,7 @@ want to override the default behavior. You can lock a light in
 either the green or red state using `set_state`.
 
 ``` rb
-light = Stoplight::Light.new('example-7') { true }
+light = Stoplight('example-7') { true }
 # => #<Stoplight::Light:..>
 light.run
 # => true
