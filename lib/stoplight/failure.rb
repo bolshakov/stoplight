@@ -1,6 +1,6 @@
 # coding: utf-8
 
-require 'json'
+require 'multi_json'
 require 'time'
 
 module Stoplight
@@ -14,7 +14,7 @@ module Stoplight
     end
 
     def self.from_json(json)
-      object = JSON.parse(json)
+      object = MultiJson.load(json)
 
       error_class = object['error']['class']
       error_message = object['error']['message']
@@ -36,7 +36,7 @@ module Stoplight
     end
 
     def to_json
-      JSON.generate(
+      MultiJson.dump(
         error: {
           class: error_class,
           message: error_message
