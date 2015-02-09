@@ -2,6 +2,8 @@
 
 This project uses [Semantic Versioning][1].
 
+- Created a convenience function for creating stoplights.
+
 ## v0.5.1 (2014-11-19)
 
 - Fixed a logic bug that incorrectly determined red lights to be yellow.
