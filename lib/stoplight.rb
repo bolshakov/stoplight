@@ -24,3 +24,7 @@ require 'stoplight/default'
 
 require 'stoplight/light/runnable'
 require 'stoplight/light'
+
+def Stoplight(name, &code) # rubocop:disable Style/MethodName
+  Stoplight::Light.new(name, &code)
+end
