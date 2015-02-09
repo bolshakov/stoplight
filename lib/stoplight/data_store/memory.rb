@@ -2,6 +2,7 @@
 
 module Stoplight
   module DataStore
+    # @see Base
     class Memory < Base
       def initialize
         @data = {}

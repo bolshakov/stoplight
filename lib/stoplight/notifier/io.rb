@@ -4,10 +4,15 @@ require 'stringio'
 
 module Stoplight
   module Notifier
+    # @see Base
     class IO < Base
+      # @return [Proc]
       attr_reader :formatter
+      # @return [::IO]
       attr_reader :io
 
+      # @param io [::IO]
+      # @param formatter [Proc, nil]
       def initialize(io, formatter = nil)
         @io = io
         @formatter = formatter || Default::FORMATTER

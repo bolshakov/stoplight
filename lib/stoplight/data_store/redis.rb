@@ -2,10 +2,12 @@
 
 module Stoplight
   module DataStore
+    # @see Base
     class Redis < Base
       KEY_PREFIX = 'stoplight'.freeze
       KEY_SEPARATOR = ':'.freeze
 
+      # @param redis [::Redis]
       def initialize(redis)
         @redis = redis
       end

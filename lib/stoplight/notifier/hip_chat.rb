@@ -2,6 +2,7 @@
 
 module Stoplight
   module Notifier
+    # @see Base
     class HipChat < Base
       DEFAULT_OPTIONS = {
         color: 'purple',
@@ -9,11 +10,22 @@ module Stoplight
         notify: true
       }.freeze
 
+      # @return [Proc]
       attr_reader :formatter
+      # @return [::HipChat::Client]
       attr_reader :hip_chat
+      # @return [Hash{Symbol => Object}]
       attr_reader :options
+      # @return [String]
       attr_reader :room
 
+      # @param hip_chat [::HipChat::Client]
+      # @param room [String]
+      # @param formatter [Proc, nil]
+      # @param options [Hash{Symbol => Object}]
+      # @option options [String] :color
+      # @option options [String] :message_format
+      # @option options [Boolean] :notify
       def initialize(hip_chat, room, formatter = nil, options = {})
         @hip_chat = hip_chat
         @room = room

@@ -3,6 +3,7 @@
 module Stoplight
   class Light
     module Runnable
+      # @return [String]
       def color
         failures, state = failures_and_state
         failure = failures.first
@@ -16,6 +17,7 @@ module Stoplight
         end
       end
 
+      # @raise [Error::RedLight]
       def run
         case color
         when Color::GREEN then run_green
