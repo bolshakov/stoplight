@@ -3,6 +3,8 @@
 This project uses [Semantic Versioning][1].
 
 - Created a convenience function for creating stoplights.
+- Created a `VERSION` constant.
+- Added YARD type documentation for public methods.
 
 ## v0.5.1 (2014-11-19)
 
