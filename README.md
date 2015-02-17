@@ -1,5 +1,5 @@
 <p align="center">
-  <img alt="Stoplight" src="stoplight.png">
+  <img alt="Stoplight" src="https://a.pomf.se/wdlzpt.svg">
 </p>
 
 <h1 align="center">
@@ -322,8 +322,6 @@ Stoplight is brought to you by [@camdez][] and [@tfausak][] from
 [@OrgSync][]. We were inspired by Martin Fowler's [CircuitBreaker][]
 article.
 
-Emoji provided free by [Emoji One][].
-
 [stoplight-admin]: https://github.com/orgsync/stoplight-admin
 [the redis gem]: https://rubygems.org/gems/redis
 [the hipchat gem]: https://rubygems.org/gems/hipchat
@@ -331,4 +329,3 @@ Emoji provided free by [Emoji One][].
 [@tfausak]: https://github.com/tfausak
 [@orgsync]: https://github.com/OrgSync
 [circuitbreaker]: http://martinfowler.com/bliki/CircuitBreaker.html
-[emoji one]: http://www.emojione.com
