@@ -13,6 +13,8 @@ Gem::Specification.new do |gem|
   gem.homepage = 'https://github.com/orgsync/stoplight'
   gem.license = 'MIT'
 
+  gem.required_ruby_version = '>= 1.9.3'
+
   {
     'Cameron Desautels' => 'camdez@gmail.com',
     'Taylor Fausak' => 'taylor@fausak.me',
@@ -25,8 +27,6 @@ Gem::Specification.new do |gem|
   gem.files = %w(CHANGELOG.md CONTRIBUTING.md LICENSE.md README.md) +
     Dir.glob(File.join('lib', '**', '*.rb'))
   gem.test_files = Dir.glob(File.join('spec', '**', '*.rb'))
-
-  gem.required_ruby_version = '>= 1.9.3'
 
   {
     'benchmark-ips' => '~> 2.1',
