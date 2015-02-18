@@ -2,7 +2,7 @@
 
 This project uses [Semantic Versioning][1].
 
-## v0.5.2 (2014-11-19)
+## v0.5.2 (2015-02-13)
 
 - Created a convenience function for creating stoplights.
 - Created a `VERSION` constant.
