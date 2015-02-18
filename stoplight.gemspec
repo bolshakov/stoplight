@@ -12,8 +12,15 @@ Gem::Specification.new do |gem|
   gem.description = 'An implementation of the circuit breaker pattern.'
   gem.homepage = 'https://github.com/orgsync/stoplight'
   gem.license = 'MIT'
-  gem.authors = ['Cameron Desautels', 'Taylor Fausak', 'Justin Steffy']
-  gem.email = %w(camdez@gmail.com taylor@fausak.me steffy@orgsync.com)
+
+  {
+    'Cameron Desautels' => 'camdez@gmail.com',
+    'Taylor Fausak' => 'taylor@fausak.me',
+    'Justin Steffy' => 'steffy@orgsync.com'
+  }.tap do |hash|
+    gem.authors = hash.keys
+    gem.email = hash.values
+  end
 
   gem.files = %w(CHANGELOG.md CONTRIBUTING.md LICENSE.md README.md) +
     Dir.glob(File.join('lib', '**', '*.rb'))
