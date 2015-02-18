@@ -21,14 +21,18 @@ Gem::Specification.new do |gem|
 
   gem.required_ruby_version = '>= 1.9.3'
 
-  gem.add_development_dependency 'benchmark-ips', '~> 2.1'
-  gem.add_development_dependency 'coveralls', '~> 0.7'
-  gem.add_development_dependency 'fakeredis', '~> 0.5'
-  gem.add_development_dependency 'hipchat', '~> 1.4'
-  gem.add_development_dependency 'rake', '~> 10.4'
-  gem.add_development_dependency 'redis', '~> 3.2'
-  gem.add_development_dependency 'rspec', '~> 3.2'
-  gem.add_development_dependency 'rubocop', '~> 0.29'
-  gem.add_development_dependency 'timecop', '~> 0.7'
-  gem.add_development_dependency 'yard', '~> 0.8'
+  {
+    'benchmark-ips' => '~> 2.1',
+    'coveralls' => '~> 0.7',
+    'fakeredis' => '~> 0.5',
+    'hipchat' => '~> 1.4',
+    'rake' => '~> 10.4',
+    'redis' => '~> 3.2',
+    'rspec' => '~> 3.2',
+    'rubocop' => '~> 0.29',
+    'timecop' => '~> 0.7',
+    'yard' => '~> 0.8'
+  }.each do |name, version|
+    gem.add_development_dependency name, version
+  end
 end
