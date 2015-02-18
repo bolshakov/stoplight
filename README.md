@@ -36,16 +36,16 @@
 Check out [stoplight-admin][] for controlling your stoplights.
 
 - [Installation](#installation)
-- [Setup](#setup)
-  - [Data store](#data-store)
-  - [Notifiers](#notifiers)
-  - [Rails](#rails)
 - [Basic usage](#basic-usage)
   - [Custom errors](#custom-errors)
   - [Custom fallback](#custom-fallback)
   - [Custom threshold](#custom-threshold)
   - [Custom timeout](#custom-timeout)
   - [Rails](#rails-1)
+- [Setup](#setup)
+  - [Data store](#data-store)
+  - [Notifiers](#notifiers)
+  - [Rails](#rails)
 - [Advanced usage](#advanced-usage)
   - [Locking](#locking)
 - [Credits](#credits)
@@ -62,74 +62,6 @@ Or install it manually:
 
 ``` sh
 $ gem install stoplight --version '~> 0.5.2'
-```
-
-## Setup
-
-### Data store
-
-Stoplight uses an in-memory data store out of the box.
-
-``` rb
-require 'stoplight'
-# => true
-Stoplight::Light.default_data_store
-# => #<Stoplight::DataStore::Memory:...>
-```
-
-If you want to use a persistent data store, you'll have to set it
-up. Currently the only supported persistent data store is Redis.
-Make sure you have [the Redis gem][] installed before configuring
-Stoplight.
-
-``` rb
-require 'redis'
-# => true
-redis = Redis.new
-# => #<Redis client ...>
-data_store = Stoplight::DataStore::Redis.new(redis)
-# => #<Stoplight::DataStore::Redis:...>
-Stoplight::Light.default_data_store = data_store
-# => #<Stoplight::DataStore::Redis:...>
-```
-
-### Notifiers
-
-Stoplight sends notifications to standard error by default.
-
-``` rb
-Stoplight::Light.default_notifiers
-# => [#<Stoplight::Notifier::IO:...>]
-```
-
-If you want to send notifications elsewhere, you'll have to set
-them up. Currently the only other supported notifier is HipChat.
-Make sure you have [the HipChat gem][] installed before configuring
-Stoplight.
-
-``` rb
-require 'hipchat'
-# => true
-hip_chat = HipChat::Client.new('token')
-# => #<HipChat::Client:...>
-notifier = Stoplight::Notifier::HipChat.new(hip_chat, 'room')
-# => #<Stoplight::Notifier::HipChat:...>
-Stoplight::Light.default_notifiers += [notifier]
-# => [#<Stoplight::Notifier::IO:...>, #<Stoplight::Notifier::HipChat:...>]
-```
-
-### Rails
-
-Stoplight is designed to work seamlessly with Rails. If you want
-to use the in-memory data store, you don't need to do anything
-special. If you want to use a persistent data store, you'll need
-to configure it. Create an initializer for Stoplight:
-
-``` rb
-# config/initializers/stoplight.rb
-require 'stoplight'
-Stoplight::Light.default_data_store = Stoplight::DataStore::Redis.new(...)
-Stoplight::Light.default_notifiers += [Stoplight::Notifier::HipChat.new(...)]
 ```
 
 ## Basic usage
@@ -290,6 +222,74 @@ class ApplicationController < ActionController::Base
       .run
   end
 end
+```
+
+## Setup
+
+### Data store
+
+Stoplight uses an in-memory data store out of the box.
+
+``` rb
+require 'stoplight'
+# => true
+Stoplight::Light.default_data_store
+# => #<Stoplight::DataStore::Memory:...>
+```
+
+If you want to use a persistent data store, you'll have to set it
+up. Currently the only supported persistent data store is Redis.
+Make sure you have [the Redis gem][] installed before configuring
+Stoplight.
+
+``` rb
+require 'redis'
+# => true
+redis = Redis.new
+# => #<Redis client ...>
+data_store = Stoplight::DataStore::Redis.new(redis)
+# => #<Stoplight::DataStore::Redis:...>
+Stoplight::Light.default_data_store = data_store
+# => #<Stoplight::DataStore::Redis:...>
+```
+
+### Notifiers
+
+Stoplight sends notifications to standard error by default.
+
+``` rb
+Stoplight::Light.default_notifiers
+# => [#<Stoplight::Notifier::IO:...>]
+```
+
+If you want to send notifications elsewhere, you'll have to set
+them up. Currently the only other supported notifier is HipChat.
+Make sure you have [the HipChat gem][] installed before configuring
+Stoplight.
+
+``` rb
+require 'hipchat'
+# => true
+hip_chat = HipChat::Client.new('token')
+# => #<HipChat::Client:...>
+notifier = Stoplight::Notifier::HipChat.new(hip_chat, 'room')
+# => #<Stoplight::Notifier::HipChat:...>
+Stoplight::Light.default_notifiers += [notifier]
+# => [#<Stoplight::Notifier::IO:...>, #<Stoplight::Notifier::HipChat:...>]
+```
+
+### Rails
+
+Stoplight is designed to work seamlessly with Rails. If you want
+to use the in-memory data store, you don't need to do anything
+special. If you want to use a persistent data store, you'll need
+to configure it. Create an initializer for Stoplight:
+
+``` rb
+# config/initializers/stoplight.rb
+require 'stoplight'
+Stoplight::Light.default_data_store = Stoplight::DataStore::Redis.new(...)
+Stoplight::Light.default_notifiers += [Stoplight::Notifier::HipChat.new(...)]
 ```
 
 ## Advanced usage
