@@ -19,10 +19,6 @@ describe Stoplight::Light::Runnable do
   let(:error_message) { random_string }
   let(:time) { Time.new }
 
-  def random_number
-    rand(1_000_000)
-  end
-
   def random_string
     ('a'..'z').to_a.shuffle.first(8).join
   end
