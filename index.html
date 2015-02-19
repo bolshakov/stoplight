@@ -1,60 +1,65 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-
   <head>
-    <meta charset='utf-8'>
+    <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <meta name="description" content="Stoplight : Traffic control for code.">
+    <title>Stoplight by orgsync</title>
 
-    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="javascripts/scale.fix.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 
-    <title>Stoplight</title>
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
   </head>
-
   <body>
+    <div class="wrapper">
+      <header>
+        <h1>Stoplight</h1>
+        <p>Traffic control for code.</p>
+        <p class="view"><a href="https://github.com/orgsync/stoplight">View the Project on GitHub <small>orgsync/stoplight</small></a></p>
+        <ul>
+          <li><a href="https://github.com/orgsync/stoplight/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/orgsync/stoplight/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/orgsync/stoplight">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <p align="center">
+  <img alt="Stoplight" src="https://a.pomf.se/wdlzpt.svg">
+</p>
 
-    <!-- HEADER -->
-    <div id="header_wrap" class="outer">
-        <header class="inner">
-          <a id="forkme_banner" href="https://github.com/orgsync/stoplight">View on GitHub</a>
+<p align="center">
+  Stoplight is traffic control for code. It's an implementation of
+  the circuit breaker pattern in Ruby.
+</p>
 
-          <h1 id="project_title">Stoplight</h1>
-          <h2 id="project_tagline">Traffic control for code.</h2>
+<p align="center">
+  <a href="https://rubygems.org/gems/stoplight">
+    <img alt="" src="https://img.shields.io/gem/v/stoplight.svg">
+  </a>
+  <a href="https://travis-ci.org/orgsync/stoplight">
+    <img alt="" src="https://img.shields.io/travis/orgsync/stoplight/master.svg">
+  </a>
+  <a href="https://coveralls.io/r/orgsync/stoplight">
+    <img alt="" src="https://img.shields.io/coveralls/orgsync/stoplight/master.svg">
+  </a>
+  <a href="https://codeclimate.com/github/orgsync/stoplight">
+    <img alt="" src="https://img.shields.io/codeclimate/github/orgsync/stoplight.svg">
+  </a>
+  <a href="https://gemnasium.com/orgsync/stoplight">
+    <img alt="" src="https://img.shields.io/gemnasium/orgsync/stoplight.svg">
+  </a>
+</p>
 
-            <section id="downloads">
-              <a class="zip_download_link" href="https://github.com/orgsync/stoplight/zipball/master">Download this project as a .zip file</a>
-              <a class="tar_download_link" href="https://github.com/orgsync/stoplight/tarball/master">Download this project as a tar.gz file</a>
-            </section>
-        </header>
-    </div>
-
-    <!-- MAIN CONTENT -->
-    <div id="main_content_wrap" class="outer">
-      <section id="main_content" class="inner">
-        <p><a href="https://rubygems.org/gems/stoplight"><img src="https://img.shields.io/gem/v/stoplight.svg" alt="Gem version"></a>
-<a href="https://travis-ci.org/orgsync/stoplight"><img src="https://img.shields.io/travis/orgsync/stoplight/master.svg" alt="Build status"></a>
-<a href="https://coveralls.io/r/orgsync/stoplight"><img src="https://img.shields.io/coveralls/orgsync/stoplight/master.svg" alt="Coverage status"></a>
-<a href="https://codeclimate.com/github/orgsync/stoplight"><img src="https://img.shields.io/codeclimate/github/orgsync/stoplight.svg" alt="Quality status"></a>
-<a href="https://gemnasium.com/orgsync/stoplight"><img src="https://img.shields.io/gemnasium/orgsync/stoplight.svg" alt="Dependency status"></a></p>
-
-<p>Stoplight is traffic control for code. It's an implementation of the circuit
-breaker pattern in Ruby.</p>
-
-<p><img align="right" alt="Stoplight icon" src="https://i.imgur.com/tiuOfY9.png"></p>
+<hr>
 
 <p>Check out <a href="https://github.com/orgsync/stoplight-admin">stoplight-admin</a> for controlling your stoplights.</p>
 
 <ul>
 <li><a href="#installation">Installation</a></li>
-<li>
-<a href="#setup">Setup</a>
-
-<ul>
-<li><a href="#data-store">Data store</a></li>
-<li><a href="#notifiers">Notifiers</a></li>
-<li><a href="#rails">Rails</a></li>
-</ul>
-</li>
 <li>
 <a href="#basic-usage">Basic usage</a>
 
@@ -63,6 +68,15 @@ breaker pattern in Ruby.</p>
 <li><a href="#custom-fallback">Custom fallback</a></li>
 <li><a href="#custom-threshold">Custom threshold</a></li>
 <li><a href="#custom-timeout">Custom timeout</a></li>
+<li><a href="#rails">Rails</a></li>
+</ul>
+</li>
+<li>
+<a href="#setup">Setup</a>
+
+<ul>
+<li><a href="#data-store">Data store</a></li>
+<li><a href="#notifiers">Notifiers</a></li>
 <li><a href="#rails-1">Rails</a></li>
 </ul>
 </li>
@@ -81,97 +95,38 @@ breaker pattern in Ruby.</p>
 
 <p>Add it to your Gemfile:</p>
 
-<div class="highlight highlight-rb"><pre><span class="pl-k">gem</span> <span class="pl-s1"><span class="pl-pds">'</span>stoplight<span class="pl-pds">'</span></span>, <span class="pl-s1"><span class="pl-pds">'</span>~&gt; 0.5.1<span class="pl-pds">'</span></span></pre></div>
+<div class="highlight highlight-rb"><pre><span class="pl-k">gem</span> <span class="pl-s1"><span class="pl-pds">'</span>stoplight<span class="pl-pds">'</span></span>, <span class="pl-s1"><span class="pl-pds">'</span>~&gt; 1.0<span class="pl-pds">'</span></span></pre></div>
 
 <p>Or install it manually:</p>
 
-<div class="highlight highlight-sh"><pre>$ gem install stoplight</pre></div>
-
-<h2>
-<a id="setup" class="anchor" href="#setup" aria-hidden="true"><span class="octicon octicon-link"></span></a>Setup</h2>
-
-<h3>
-<a id="data-store" class="anchor" href="#data-store" aria-hidden="true"><span class="octicon octicon-link"></span></a>Data store</h3>
-
-<p>Stoplight uses an in-memory data store out of the box.</p>
-
-<div class="highlight highlight-rb"><pre><span class="pl-k">require</span> <span class="pl-s1"><span class="pl-pds">'</span>stoplight<span class="pl-pds">'</span></span>
-<span class="pl-c"># =&gt; true</span>
-<span class="pl-s3">Stoplight</span>::<span class="pl-s3">Light</span>.default_data_store
-<span class="pl-c"># =&gt; #&lt;Stoplight::DataStore::Memory:...&gt;</span></pre></div>
-
-<p>If you want to use a persistent data store, you'll have to set it up. Currently
-the only supported persistent data store is Redis. Make sure you have <a href="https://rubygems.org/gems/redis">the Redis
-gem</a> installed before configuring Stoplight.</p>
-
-<div class="highlight highlight-rb"><pre><span class="pl-k">require</span> <span class="pl-s1"><span class="pl-pds">'</span>redis<span class="pl-pds">'</span></span>
-<span class="pl-c"># =&gt; true</span>
-redis <span class="pl-k">=</span> <span class="pl-s3">Redis</span>.<span class="pl-k">new</span>
-<span class="pl-c"># =&gt; #&lt;Redis client ...&gt;</span>
-data_store <span class="pl-k">=</span> <span class="pl-s3">Stoplight</span>::<span class="pl-s3">DataStore</span>::<span class="pl-s3">Redis</span>.<span class="pl-k">new</span>(redis)
-<span class="pl-c"># =&gt; #&lt;Stoplight::DataStore::Redis:...&gt;</span>
-<span class="pl-s3">Stoplight</span>::<span class="pl-s3">Light</span>.default_data_store <span class="pl-k">=</span> data_store
-<span class="pl-c"># =&gt; #&lt;Stoplight::DataStore::Redis:...&gt;</span></pre></div>
-
-<h3>
-<a id="notifiers" class="anchor" href="#notifiers" aria-hidden="true"><span class="octicon octicon-link"></span></a>Notifiers</h3>
-
-<p>Stoplight sends notifications to standard error by default.</p>
-
-<div class="highlight highlight-rb"><pre><span class="pl-s3">Stoplight</span>::<span class="pl-s3">Light</span>.default_notifiers
-<span class="pl-c"># =&gt; [#&lt;Stoplight::Notifier::IO:...&gt;]</span></pre></div>
-
-<p>If you want to send notifications elsewhere, you'll have to set them up.
-Currently the only other supported notifier is HipChat. Make sure you have <a href="https://rubygems.org/gems/hipchat">the
-HipChat gem</a> installed before configuring Stoplight.</p>
-
-<div class="highlight highlight-rb"><pre><span class="pl-k">require</span> <span class="pl-s1"><span class="pl-pds">'</span>hipchat<span class="pl-pds">'</span></span>
-<span class="pl-c"># =&gt; true</span>
-hip_chat <span class="pl-k">=</span> <span class="pl-s3">HipChat</span>::<span class="pl-s3">Client</span>.<span class="pl-k">new</span>(<span class="pl-s1"><span class="pl-pds">'</span>token<span class="pl-pds">'</span></span>)
-<span class="pl-c"># =&gt; #&lt;HipChat::Client:...&gt;</span>
-notifier <span class="pl-k">=</span> <span class="pl-s3">Stoplight</span>::<span class="pl-s3">Notifier</span>::<span class="pl-s3">HipChat</span>.<span class="pl-k">new</span>(hip_chat, <span class="pl-s1"><span class="pl-pds">'</span>room<span class="pl-pds">'</span></span>)
-<span class="pl-c"># =&gt; #&lt;Stoplight::Notifier::HipChat:...&gt;</span>
-<span class="pl-s3">Stoplight</span>::<span class="pl-s3">Light</span>.default_notifiers <span class="pl-k">+=</span> [notifier]
-<span class="pl-c"># =&gt; [#&lt;Stoplight::Notifier::IO:...&gt;, #&lt;Stoplight::Notifier::HipChat:...&gt;]</span></pre></div>
-
-<h3>
-<a id="rails" class="anchor" href="#rails" aria-hidden="true"><span class="octicon octicon-link"></span></a>Rails</h3>
-
-<p>Stoplight is designed to work seamlessly with Rails. If you want to use the
-in-memory data store, you don't need to do anything special. If you want to use
-a persistent data store, you'll need to configure it. Create an initializer for
-Stoplight:</p>
-
-<div class="highlight highlight-rb"><pre><span class="pl-c"># config/initializers/stoplight.rb</span>
-<span class="pl-k">require</span> <span class="pl-s1"><span class="pl-pds">'</span>stoplight<span class="pl-pds">'</span></span>
-<span class="pl-s3">Stoplight</span>::<span class="pl-s3">Light</span>.default_data_store <span class="pl-k">=</span> <span class="pl-s3">Stoplight</span>::<span class="pl-s3">DataStore</span>::<span class="pl-s3">Redis</span>.<span class="pl-k">new</span>(...)
-<span class="pl-s3">Stoplight</span>::<span class="pl-s3">Light</span>.default_notifiers <span class="pl-k">+=</span> [<span class="pl-s3">Stoplight</span>::<span class="pl-s3">Notifier</span>::<span class="pl-s3">HipChat</span>.<span class="pl-k">new</span>(...)]</pre></div>
+<div class="highlight highlight-sh"><pre>$ gem install stoplight --version <span class="pl-s1"><span class="pl-pds">'</span>~&gt; 1.0<span class="pl-pds">'</span></span></pre></div>
 
 <h2>
 <a id="basic-usage" class="anchor" href="#basic-usage" aria-hidden="true"><span class="octicon octicon-link"></span></a>Basic usage</h2>
 
 <p>To get started, create a stoplight:</p>
 
-<div class="highlight highlight-rb"><pre>light <span class="pl-k">=</span> <span class="pl-s3">Stoplight</span>::<span class="pl-s3">Light</span>.<span class="pl-k">new</span>(<span class="pl-s1"><span class="pl-pds">'</span>example-1<span class="pl-pds">'</span></span>) { <span class="pl-c1">22.0</span> <span class="pl-k">/</span> <span class="pl-c1">7</span> }
+<div class="highlight highlight-rb"><pre>light <span class="pl-k">=</span> <span class="pl-vo">Stoplight</span>(<span class="pl-s1"><span class="pl-pds">'</span>example-1<span class="pl-pds">'</span></span>) { <span class="pl-c1">22.0</span> <span class="pl-k">/</span> <span class="pl-c1">7</span> }
 <span class="pl-c"># =&gt; #&lt;Stoplight::Light:...&gt;</span></pre></div>
 
-<p>Then you can run it and it will return the result of calling the block. This is
-the green state.</p>
+<p>Then you can run it and it will return the result of calling the
+block. This is the green state.</p>
 
 <div class="highlight highlight-rb"><pre>light.run
 <span class="pl-c"># =&gt; 3.142857142857143</span>
 light.color
 <span class="pl-c"># =&gt; "green"</span></pre></div>
 
-<p>If everything goes well, you shouldn't even be able to tell that you're using a
-stoplight. That's not very interesting though. Let's create a failing stoplight:</p>
+<p>If everything goes well, you shouldn't even be able to tell that
+you're using a stoplight. That's not very interesting though. Let's
+create a failing stoplight:</p>
 
-<div class="highlight highlight-rb"><pre>light <span class="pl-k">=</span> <span class="pl-s3">Stoplight</span>::<span class="pl-s3">Light</span>.<span class="pl-k">new</span>(<span class="pl-s1"><span class="pl-pds">'</span>example-2<span class="pl-pds">'</span></span>) { <span class="pl-c1">1</span> <span class="pl-k">/</span> <span class="pl-c1">0</span> }
+<div class="highlight highlight-rb"><pre>light <span class="pl-k">=</span> <span class="pl-vo">Stoplight</span>(<span class="pl-s1"><span class="pl-pds">'</span>example-2<span class="pl-pds">'</span></span>) { <span class="pl-c1">1</span> <span class="pl-k">/</span> <span class="pl-c1">0</span> }
 <span class="pl-c"># =&gt; #&lt;Stoplight::Light:...&gt;</span></pre></div>
 
-<p>Now when you run it, the error will be recorded and passed through. After
-running it a few times, the stoplight will stop trying and fail fast. This is
-the red state.</p>
+<p>Now when you run it, the error will be recorded and passed through.
+After running it a few times, the stoplight will stop trying and
+fail fast. This is the red state.</p>
 
 <div class="highlight highlight-rb"><pre>light.run
 <span class="pl-c"># ZeroDivisionError: divided by 0</span>
@@ -185,17 +140,17 @@ light.run
 light.color
 <span class="pl-c"># =&gt; "red"</span></pre></div>
 
-<p>When the stoplight changes from green to red, it will notify every configured
-notifier.</p>
+<p>When the stoplight changes from green to red, it will notify every
+configured notifier.</p>
 
 <h3>
 <a id="custom-errors" class="anchor" href="#custom-errors" aria-hidden="true"><span class="octicon octicon-link"></span></a>Custom errors</h3>
 
-<p>Some errors shouldn't cause your stoplight to move into the red state. Usually
-these are handled elsewhere in your stack and don't represent real failures. A
-good example is <code>ActiveRecord::RecordNotFound</code>.</p>
+<p>Some errors shouldn't cause your stoplight to move into the red
+state. Usually these are handled elsewhere in your stack and don't
+represent real failures. A good example is <code>ActiveRecord::RecordNotFound</code>.</p>
 
-<div class="highlight highlight-rb"><pre>light <span class="pl-k">=</span> <span class="pl-s3">Stoplight</span>::<span class="pl-s3">Light</span>.<span class="pl-k">new</span>(<span class="pl-s1"><span class="pl-pds">'</span>example-3<span class="pl-pds">'</span></span>) { <span class="pl-s3">User</span>.find(<span class="pl-c1">123</span>) }
+<div class="highlight highlight-rb"><pre>light <span class="pl-k">=</span> <span class="pl-vo">Stoplight</span>(<span class="pl-s1"><span class="pl-pds">'</span>example-3<span class="pl-pds">'</span></span>) { <span class="pl-s3">User</span>.find(<span class="pl-c1">123</span>) }
   .with_allowed_errors([<span class="pl-s3">ActiveRecord</span>::<span class="pl-vo">RecordNotFound</span>])
 <span class="pl-c"># =&gt; #&lt;Stoplight::Light:...&gt;</span>
 light.run
@@ -210,12 +165,12 @@ light.color
 <h3>
 <a id="custom-fallback" class="anchor" href="#custom-fallback" aria-hidden="true"><span class="octicon octicon-link"></span></a>Custom fallback</h3>
 
-<p>By default, stoplights will re-raise errors when they're green. When they're
-red, they'll raise a <code>Stoplight::Error::RedLight</code> error. You can provide a
-fallback that will be called in both of these cases. It will be passed the error
-if the light was green.</p>
+<p>By default, stoplights will re-raise errors when they're green.
+When they're red, they'll raise a <code>Stoplight::Error::RedLight</code>
+error. You can provide a fallback that will be called in both of
+these cases. It will be passed the error if the light was green.</p>
 
-<div class="highlight highlight-rb"><pre>light <span class="pl-k">=</span> <span class="pl-s3">Stoplight</span>::<span class="pl-s3">Light</span>.<span class="pl-k">new</span>(<span class="pl-s1"><span class="pl-pds">'</span>example-4<span class="pl-pds">'</span></span>) { <span class="pl-c1">1</span> <span class="pl-k">/</span> <span class="pl-c1">0</span> }
+<div class="highlight highlight-rb"><pre>light <span class="pl-k">=</span> <span class="pl-vo">Stoplight</span>(<span class="pl-s1"><span class="pl-pds">'</span>example-4<span class="pl-pds">'</span></span>) { <span class="pl-c1">1</span> <span class="pl-k">/</span> <span class="pl-c1">0</span> }
   .with_fallback { |<span class="pl-vo">e</span>| p e; <span class="pl-s1"><span class="pl-pds">'</span>default<span class="pl-pds">'</span></span> }
 <span class="pl-c"># =&gt; #&lt;Stoplight::Light:..&gt;</span>
 light.run
@@ -235,10 +190,11 @@ light.run
 <h3>
 <a id="custom-threshold" class="anchor" href="#custom-threshold" aria-hidden="true"><span class="octicon octicon-link"></span></a>Custom threshold</h3>
 
-<p>Some bits of code might be allowed to fail more or less frequently than others.
-You can configure this by setting a custom threshold in seconds.</p>
+<p>Some bits of code might be allowed to fail more or less frequently
+than others. You can configure this by setting a custom threshold
+in seconds.</p>
 
-<div class="highlight highlight-rb"><pre>light <span class="pl-k">=</span> <span class="pl-s3">Stoplight</span>::<span class="pl-s3">Light</span>.<span class="pl-k">new</span>(<span class="pl-s1"><span class="pl-pds">'</span>example-5<span class="pl-pds">'</span></span>) { fail }
+<div class="highlight highlight-rb"><pre>light <span class="pl-k">=</span> <span class="pl-vo">Stoplight</span>(<span class="pl-s1"><span class="pl-pds">'</span>example-5<span class="pl-pds">'</span></span>) { fail }
   .with_threshold(<span class="pl-c1">1</span>)
 <span class="pl-c"># =&gt; #&lt;Stoplight::Light:...&gt;</span>
 light.run
@@ -250,11 +206,11 @@ light.run
 <h3>
 <a id="custom-timeout" class="anchor" href="#custom-timeout" aria-hidden="true"><span class="octicon octicon-link"></span></a>Custom timeout</h3>
 
-<p>Stoplights will automatically attempt to recover after a certain amount of time.
-A light in the red state for longer than the timeout will transition to the
-yellow state. This timeout is customizable.</p>
+<p>Stoplights will automatically attempt to recover after a certain
+amount of time.  A light in the red state for longer than the timeout
+will transition to the yellow state. This timeout is customizable.</p>
 
-<div class="highlight highlight-rb"><pre>light <span class="pl-k">=</span> <span class="pl-s3">Stoplight</span>::<span class="pl-s3">Light</span>.<span class="pl-k">new</span>(<span class="pl-s1"><span class="pl-pds">'</span>example-6<span class="pl-pds">'</span></span>) { fail }
+<div class="highlight highlight-rb"><pre>light <span class="pl-k">=</span> <span class="pl-vo">Stoplight</span>(<span class="pl-s1"><span class="pl-pds">'</span>example-6<span class="pl-pds">'</span></span>) { fail }
   .with_timeout(<span class="pl-c1">1</span>)
 <span class="pl-c"># =&gt; #&lt;Stoplight::Light:...&gt;</span>
 light.run
@@ -274,16 +230,16 @@ light.run
 <p>Set the timeout to <code>-1</code> to disable automatic recovery.</p>
 
 <h3>
-<a id="rails-1" class="anchor" href="#rails-1" aria-hidden="true"><span class="octicon octicon-link"></span></a>Rails</h3>
+<a id="rails" class="anchor" href="#rails" aria-hidden="true"><span class="octicon octicon-link"></span></a>Rails</h3>
 
-<p>Stoplight was designed to wrap Rails actions with minimal effort. Here's an
-example configuration:</p>
+<p>Stoplight was designed to wrap Rails actions with minimal effort.
+Here's an example configuration:</p>
 
 <div class="highlight highlight-rb"><pre><span class="pl-k">class</span> <span class="pl-en">ApplicationController<span class="pl-e"> &lt; ActionController::Base</span></span>
   around_action <span class="pl-c1">:stoplight</span>
   <span class="pl-k">private</span>
   <span class="pl-k">def</span> <span class="pl-en">stoplight</span>(<span class="pl-st">&amp;</span><span class="pl-vpf">block</span>)
-    <span class="pl-s3">Stoplight</span>::<span class="pl-s3">Light</span>.<span class="pl-k">new</span>(<span class="pl-s1"><span class="pl-pds">"</span><span class="pl-pse">#{</span><span class="pl-s2">params[<span class="pl-c1">:controller</span>]</span><span class="pl-pse"><span class="pl-s2">}</span></span>#<span class="pl-pse">#{</span><span class="pl-s2">params[<span class="pl-c1">:action</span>]</span><span class="pl-pse"><span class="pl-s2">}</span></span><span class="pl-pds">"</span></span>, <span class="pl-k">&amp;</span>block)
+    <span class="pl-vo">Stoplight</span>(<span class="pl-s1"><span class="pl-pds">"</span><span class="pl-pse">#{</span><span class="pl-s2">params[<span class="pl-c1">:controller</span>]</span><span class="pl-pse"><span class="pl-s2">}</span></span>#<span class="pl-pse">#{</span><span class="pl-s2">params[<span class="pl-c1">:action</span>]</span><span class="pl-pse"><span class="pl-s2">}</span></span><span class="pl-pds">"</span></span>, <span class="pl-k">&amp;</span>block)
       .with_allowed_errors([<span class="pl-s3">ActiveRecord</span>::<span class="pl-vo">RecordNotFound</span>])
       .with_fallback <span class="pl-k">do </span>|<span class="pl-vo">error</span>|
         <span class="pl-s3">Rails</span>.logger.error(error)
@@ -294,16 +250,78 @@ example configuration:</p>
 <span class="pl-k">end</span></pre></div>
 
 <h2>
+<a id="setup" class="anchor" href="#setup" aria-hidden="true"><span class="octicon octicon-link"></span></a>Setup</h2>
+
+<h3>
+<a id="data-store" class="anchor" href="#data-store" aria-hidden="true"><span class="octicon octicon-link"></span></a>Data store</h3>
+
+<p>Stoplight uses an in-memory data store out of the box.</p>
+
+<div class="highlight highlight-rb"><pre><span class="pl-k">require</span> <span class="pl-s1"><span class="pl-pds">'</span>stoplight<span class="pl-pds">'</span></span>
+<span class="pl-c"># =&gt; true</span>
+<span class="pl-s3">Stoplight</span>::<span class="pl-s3">Light</span>.default_data_store
+<span class="pl-c"># =&gt; #&lt;Stoplight::DataStore::Memory:...&gt;</span></pre></div>
+
+<p>If you want to use a persistent data store, you'll have to set it
+up. Currently the only supported persistent data store is Redis.
+Make sure you have <a href="https://rubygems.org/gems/redis">the Redis gem</a> installed before configuring
+Stoplight.</p>
+
+<div class="highlight highlight-rb"><pre><span class="pl-k">require</span> <span class="pl-s1"><span class="pl-pds">'</span>redis<span class="pl-pds">'</span></span>
+<span class="pl-c"># =&gt; true</span>
+redis <span class="pl-k">=</span> <span class="pl-s3">Redis</span>.<span class="pl-k">new</span>
+<span class="pl-c"># =&gt; #&lt;Redis client ...&gt;</span>
+data_store <span class="pl-k">=</span> <span class="pl-s3">Stoplight</span>::<span class="pl-s3">DataStore</span>::<span class="pl-s3">Redis</span>.<span class="pl-k">new</span>(redis)
+<span class="pl-c"># =&gt; #&lt;Stoplight::DataStore::Redis:...&gt;</span>
+<span class="pl-s3">Stoplight</span>::<span class="pl-s3">Light</span>.default_data_store <span class="pl-k">=</span> data_store
+<span class="pl-c"># =&gt; #&lt;Stoplight::DataStore::Redis:...&gt;</span></pre></div>
+
+<h3>
+<a id="notifiers" class="anchor" href="#notifiers" aria-hidden="true"><span class="octicon octicon-link"></span></a>Notifiers</h3>
+
+<p>Stoplight sends notifications to standard error by default.</p>
+
+<div class="highlight highlight-rb"><pre><span class="pl-s3">Stoplight</span>::<span class="pl-s3">Light</span>.default_notifiers
+<span class="pl-c"># =&gt; [#&lt;Stoplight::Notifier::IO:...&gt;]</span></pre></div>
+
+<p>If you want to send notifications elsewhere, you'll have to set
+them up. Currently the only other supported notifier is HipChat.
+Make sure you have <a href="https://rubygems.org/gems/hipchat">the HipChat gem</a> installed before configuring
+Stoplight.</p>
+
+<div class="highlight highlight-rb"><pre><span class="pl-k">require</span> <span class="pl-s1"><span class="pl-pds">'</span>hipchat<span class="pl-pds">'</span></span>
+<span class="pl-c"># =&gt; true</span>
+hip_chat <span class="pl-k">=</span> <span class="pl-s3">HipChat</span>::<span class="pl-s3">Client</span>.<span class="pl-k">new</span>(<span class="pl-s1"><span class="pl-pds">'</span>token<span class="pl-pds">'</span></span>)
+<span class="pl-c"># =&gt; #&lt;HipChat::Client:...&gt;</span>
+notifier <span class="pl-k">=</span> <span class="pl-s3">Stoplight</span>::<span class="pl-s3">Notifier</span>::<span class="pl-s3">HipChat</span>.<span class="pl-k">new</span>(hip_chat, <span class="pl-s1"><span class="pl-pds">'</span>room<span class="pl-pds">'</span></span>)
+<span class="pl-c"># =&gt; #&lt;Stoplight::Notifier::HipChat:...&gt;</span>
+<span class="pl-s3">Stoplight</span>::<span class="pl-s3">Light</span>.default_notifiers <span class="pl-k">+=</span> [notifier]
+<span class="pl-c"># =&gt; [#&lt;Stoplight::Notifier::IO:...&gt;, #&lt;Stoplight::Notifier::HipChat:...&gt;]</span></pre></div>
+
+<h3>
+<a id="rails-1" class="anchor" href="#rails-1" aria-hidden="true"><span class="octicon octicon-link"></span></a>Rails</h3>
+
+<p>Stoplight is designed to work seamlessly with Rails. If you want
+to use the in-memory data store, you don't need to do anything
+special. If you want to use a persistent data store, you'll need
+to configure it. Create an initializer for Stoplight:</p>
+
+<div class="highlight highlight-rb"><pre><span class="pl-c"># config/initializers/stoplight.rb</span>
+<span class="pl-k">require</span> <span class="pl-s1"><span class="pl-pds">'</span>stoplight<span class="pl-pds">'</span></span>
+<span class="pl-s3">Stoplight</span>::<span class="pl-s3">Light</span>.default_data_store <span class="pl-k">=</span> <span class="pl-s3">Stoplight</span>::<span class="pl-s3">DataStore</span>::<span class="pl-s3">Redis</span>.<span class="pl-k">new</span>(...)
+<span class="pl-s3">Stoplight</span>::<span class="pl-s3">Light</span>.default_notifiers <span class="pl-k">+=</span> [<span class="pl-s3">Stoplight</span>::<span class="pl-s3">Notifier</span>::<span class="pl-s3">HipChat</span>.<span class="pl-k">new</span>(...)]</pre></div>
+
+<h2>
 <a id="advanced-usage" class="anchor" href="#advanced-usage" aria-hidden="true"><span class="octicon octicon-link"></span></a>Advanced usage</h2>
 
 <h3>
 <a id="locking" class="anchor" href="#locking" aria-hidden="true"><span class="octicon octicon-link"></span></a>Locking</h3>
 
-<p>Although stoplights can operate on their own, occasionally you may want to
-override the default behavior. You can lock a light in either the green or red
-state using <code>set_state</code>.</p>
+<p>Although stoplights can operate on their own, occasionally you may
+want to override the default behavior. You can lock a light in
+either the green or red state using <code>set_state</code>.</p>
 
-<div class="highlight highlight-rb"><pre>light <span class="pl-k">=</span> <span class="pl-s3">Stoplight</span>::<span class="pl-s3">Light</span>.<span class="pl-k">new</span>(<span class="pl-s1"><span class="pl-pds">'</span>example-7<span class="pl-pds">'</span></span>) { <span class="pl-c1">true</span> }
+<div class="highlight highlight-rb"><pre>light <span class="pl-k">=</span> <span class="pl-vo">Stoplight</span>(<span class="pl-s1"><span class="pl-pds">'</span>example-7<span class="pl-pds">'</span></span>) { <span class="pl-c1">true</span> }
 <span class="pl-c"># =&gt; #&lt;Stoplight::Light:..&gt;</span>
 light.run
 <span class="pl-c"># =&gt; true</span>
@@ -312,10 +330,10 @@ light.data_store.set_state(light, <span class="pl-s3">Stoplight</span>::<span cl
 light.run
 <span class="pl-c"># Stoplight::Error::RedLight: example-7</span></pre></div>
 
-<p><strong>Code in locked red lights may still run under certain conditions!</strong> If you
-have configured a custom data store and that data store fails, Stoplight will
-switch over to using a blank in-memory data store. That means you will lose the
-locked state of any stoplights.</p>
+<p><strong>Code in locked red lights may still run under certain conditions!</strong>
+If you have configured a custom data store and that data store
+fails, Stoplight will switch over to using a blank in-memory data
+store. That means you will lose the locked state of any stoplights.</p>
 
 <h2>
 <a id="credits" class="anchor" href="#credits" aria-hidden="true"><span class="octicon octicon-link"></span></a>Credits</h2>
@@ -325,16 +343,11 @@ locked state of any stoplights.</p>
 article.</p>
       </section>
     </div>
-
-    <!-- FOOTER  -->
-    <div id="footer_wrap" class="outer">
-      <footer class="inner">
-        <p class="copyright">Stoplight maintained by <a href="https://github.com/orgsync">orgsync</a></p>
-        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
-      </footer>
-    </div>
-
+    <footer>
+      <p>Project maintained by <a href="https://github.com/orgsync">orgsync</a></p>
+      <p>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></p>
+    </footer>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
     
-
   </body>
 </html>
