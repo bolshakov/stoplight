@@ -74,7 +74,8 @@ light = Stoplight('example-1') { 22.0 / 7 }
 ```
 
 Then you can run it and it will return the result of calling the
-block. This is the green state.
+block. This is the green state. (The green state corresponds to the
+closed state for circuit breakers.)
 
 ``` rb
 light.run
@@ -94,7 +95,8 @@ light = Stoplight('example-2') { 1 / 0 }
 
 Now when you run it, the error will be recorded and passed through.
 After running it a few times, the stoplight will stop trying and
-fail fast. This is the red state.
+fail fast. This is the red state. (The red state corresponds to the
+open state for circuit breakers.)
 
 ``` rb
 light.run
@@ -112,6 +114,12 @@ light.color
 
 When the stoplight changes from green to red, it will notify every
 configured notifier.
+
+The stoplight will move into the yellow state after being in the
+red state for a while. (The yellow state corresponds to the half
+open state for circuit breakers.) When stoplights are yellow, they'll
+try to run their code. If it fails, they'll switch back to red. If
+it succeeds, they'll switch to green.
 
 ### Custom errors
 
@@ -179,7 +187,7 @@ light.run
 ### Custom timeout
 
 Stoplights will automatically attempt to recover after a certain
-amount of time.  A light in the red state for longer than the timeout
+amount of time. A light in the red state for longer than the timeout
 will transition to the yellow state. This timeout is customizable.
 
 ``` rb
