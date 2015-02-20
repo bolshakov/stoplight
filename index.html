@@ -110,7 +110,8 @@
 <span class="pl-c"># =&gt; #&lt;Stoplight::Light:...&gt;</span></pre></div>
 
 <p>Then you can run it and it will return the result of calling the
-block. This is the green state.</p>
+block. This is the green state. (The green state corresponds to the
+closed state for circuit breakers.)</p>
 
 <div class="highlight highlight-rb"><pre>light.run
 <span class="pl-c"># =&gt; 3.142857142857143</span>
@@ -126,7 +127,8 @@ create a failing stoplight:</p>
 
 <p>Now when you run it, the error will be recorded and passed through.
 After running it a few times, the stoplight will stop trying and
-fail fast. This is the red state.</p>
+fail fast. This is the red state. (The red state corresponds to the
+open state for circuit breakers.)</p>
 
 <div class="highlight highlight-rb"><pre>light.run
 <span class="pl-c"># ZeroDivisionError: divided by 0</span>
@@ -142,6 +144,12 @@ light.color
 
 <p>When the stoplight changes from green to red, it will notify every
 configured notifier.</p>
+
+<p>The stoplight will move into the yellow state after being in the
+red state for a while. (The yellow state corresponds to the half
+open state for circuit breakers.) When stoplights are yellow, they'll
+try to run their code. If it fails, they'll switch back to red. If
+it succeeds, they'll switch to green.</p>
 
 <h3>
 <a id="custom-errors" class="anchor" href="#custom-errors" aria-hidden="true"><span class="octicon octicon-link"></span></a>Custom errors</h3>
@@ -207,7 +215,7 @@ light.run
 <a id="custom-timeout" class="anchor" href="#custom-timeout" aria-hidden="true"><span class="octicon octicon-link"></span></a>Custom timeout</h3>
 
 <p>Stoplights will automatically attempt to recover after a certain
-amount of time.  A light in the red state for longer than the timeout
+amount of time. A light in the red state for longer than the timeout
 will transition to the yellow state. This timeout is customizable.</p>
 
 <div class="highlight highlight-rb"><pre>light <span class="pl-k">=</span> <span class="pl-vo">Stoplight</span>(<span class="pl-s1"><span class="pl-pds">'</span>example-6<span class="pl-pds">'</span></span>) { fail }
