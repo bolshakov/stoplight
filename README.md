@@ -121,7 +121,7 @@ open state for circuit breakers.) When stoplights are yellow, they'll
 try to run their code. If it fails, they'll switch back to red. If
 it succeeds, they'll switch to green.
 
-![State diagram](https://a.pomf.se/dbilke.svg)
+![State diagram](https://a.pomf.se/izizva.svg)
 
 ### Custom errors
 
