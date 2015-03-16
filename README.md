@@ -64,6 +64,11 @@ Or install it manually:
 $ gem install stoplight --version '~> 1.0'
 ```
 
+Stoplight uses [Semantic Versioning][]. Check out [the change log][] for a
+detailed list of changes.
+
+Stoplight works with all supported versions of Ruby (2.0 through 2.2).
+
 ## Basic usage
 
 To get started, create a stoplight:
@@ -332,10 +337,20 @@ Stoplight is brought to you by [@camdez][] and [@tfausak][] from
 [@OrgSync][]. We were inspired by Martin Fowler's [CircuitBreaker][]
 article.
 
+If you want to contribute to Stoplight, please read [our contribution
+guidelines][]. A [complete list of contributors][] is available on GitHub.
+
+Stoplight is licensed under [the MIT License][].
+
 [stoplight-admin]: https://github.com/orgsync/stoplight-admin
+[semantic versioning]: http://semver.org/spec/v2.0.0.html
+[the change log]: CHANGELOG.md
 [the redis gem]: https://rubygems.org/gems/redis
 [the hipchat gem]: https://rubygems.org/gems/hipchat
 [@camdez]: https://github.com/camdez
 [@tfausak]: https://github.com/tfausak
 [@orgsync]: https://github.com/OrgSync
 [circuitbreaker]: http://martinfowler.com/bliki/CircuitBreaker.html
+[our contribution guidelines]: CONTRIBUTING.md
+[complete list of contributors]: https://github.com/orgsync/stoplight/graphs/contributors
+[the mit license]: LICENSE.md
