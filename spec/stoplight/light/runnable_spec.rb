@@ -20,7 +20,7 @@ describe Stoplight::Light::Runnable do
   let(:time) { Time.new }
 
   def random_string
-    ('a'..'z').to_a.shuffle.first(8).join
+    ('a'..'z').to_a.sample(8).join
   end
 
   describe '#color' do
