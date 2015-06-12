@@ -1,6 +1,6 @@
-# Changelog
+# Change log
 
-This project uses [Semantic Versioning][1].
+Stoplight uses [Semantic Versioning][1].
 
 ## v1.0.0 (2015-02-19)
 

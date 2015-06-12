@@ -1,37 +1,15 @@
-<p align="center">
-  <img alt="Stoplight" src="https://a.pomf.se/wdlzpt.svg">
-</p>
+# [Stoplight][]
 
-<h1 align="center">
-  <a href="https://github.com/orgsync/stoplight">
-    Stoplight
-  </a>
-</h1>
+[![Version][]](https://rubygems.org/gems/stoplight)
+[![Build][]](https://travis-ci.org/orgsync/stoplight)
+[![Coverage][]](https://coveralls.io/r/orgsync/stoplight)
+[![Climate][]](https://codeclimate.com/github/orgsync/stoplight)
+[![Dependencies][]](https://gemnasium.com/orgsync/stoplight)
 
-<p align="center">
-  Stoplight is traffic control for code. It's an implementation of
-  the circuit breaker pattern in Ruby.
-</p>
+Stoplight is traffic control for code. It's an implementation of the circuit
+breaker pattern in Ruby.
 
-<p align="center">
-  <a href="https://rubygems.org/gems/stoplight">
-    <img alt="" src="https://img.shields.io/gem/v/stoplight.svg">
-  </a>
-  <a href="https://travis-ci.org/orgsync/stoplight">
-    <img alt="" src="https://img.shields.io/travis/orgsync/stoplight/master.svg">
-  </a>
-  <a href="https://coveralls.io/r/orgsync/stoplight">
-    <img alt="" src="https://img.shields.io/coveralls/orgsync/stoplight/master.svg">
-  </a>
-  <a href="https://codeclimate.com/github/orgsync/stoplight">
-    <img alt="" src="https://img.shields.io/codeclimate/github/orgsync/stoplight.svg">
-  </a>
-  <a href="https://gemnasium.com/orgsync/stoplight">
-    <img alt="" src="https://img.shields.io/gemnasium/orgsync/stoplight.svg">
-  </a>
-</p>
-
-<hr>
+---
 
 Check out [stoplight-admin][] for controlling your stoplights.
 
@@ -125,8 +103,6 @@ red state for a while. (The yellow state corresponds to the half
 open state for circuit breakers.) When stoplights are yellow, they'll
 try to run their code. If it fails, they'll switch back to red. If
 it succeeds, they'll switch to green.
-
-![State diagram](https://a.pomf.se/upkzkl.svg)
 
 ### Custom errors
 
@@ -333,15 +309,18 @@ store. That means you will lose the locked state of any stoplights.
 
 ## Credits
 
-Stoplight is brought to you by [@camdez][] and [@tfausak][] from
-[@OrgSync][]. We were inspired by Martin Fowler's [CircuitBreaker][]
-article.
-
-If you want to contribute to Stoplight, please read [our contribution
-guidelines][]. A [complete list of contributors][] is available on GitHub.
+Stoplight is brought to you by [@camdez][] and [@tfausak][] from [@OrgSync][].
+A [complete list of contributors][] is available on GitHub. We were inspired by
+Martin Fowler's [CircuitBreaker][] article.
 
 Stoplight is licensed under [the MIT License][].
 
+[stoplight]: https://github.com/orgsync/stoplight
+[version]: https://img.shields.io/gem/v/stoplight.svg?label=version&style=flat-square
+[build]: https://img.shields.io/travis/orgsync/stoplight/master.svg?label=build&style=flat-square
+[coverage]: https://img.shields.io/coveralls/orgsync/stoplight/master.svg?label=coverage&style=flat-square
+[climate]: https://img.shields.io/codeclimate/github/orgsync/stoplight.svg?label=climate&style=flat-square
+[dependencies]: https://img.shields.io/gemnasium/orgsync/stoplight.svg?label=dependencies&style=flat-square
 [stoplight-admin]: https://github.com/orgsync/stoplight-admin
 [semantic versioning]: http://semver.org/spec/v2.0.0.html
 [the change log]: CHANGELOG.md
@@ -350,7 +329,6 @@ Stoplight is licensed under [the MIT License][].
 [@camdez]: https://github.com/camdez
 [@tfausak]: https://github.com/tfausak
 [@orgsync]: https://github.com/OrgSync
-[circuitbreaker]: http://martinfowler.com/bliki/CircuitBreaker.html
-[our contribution guidelines]: CONTRIBUTING.md
 [complete list of contributors]: https://github.com/orgsync/stoplight/graphs/contributors
+[circuitbreaker]: http://martinfowler.com/bliki/CircuitBreaker.html
 [the mit license]: LICENSE.md
