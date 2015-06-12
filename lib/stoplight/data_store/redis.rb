@@ -40,7 +40,7 @@ module Stoplight
       end
 
       def record_failure(light, failure)
-        size, _ = @redis.multi do
+        size, = @redis.multi do
           @redis.lpush(failures_key(light), failure.to_json)
           @redis.ltrim(failures_key(light), 0, light.threshold - 1)
         end
@@ -49,7 +49,7 @@ module Stoplight
       end
 
       def clear_failures(light)
-        failures, _ = @redis.multi do
+        failures, = @redis.multi do
           query_failures(light)
           @redis.del(failures_key(light))
         end
@@ -67,7 +67,7 @@ module Stoplight
       end
 
       def clear_state(light)
-        state, _ = @redis.multi do
+        state, = @redis.multi do
           query_state(light)
           @redis.hdel(states_key, light.name)
         end
