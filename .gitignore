@@ -1,8 +1,8 @@
 /.bundle/
 /.yardoc/
+/Gemfile.lock
 /coverage/
 /doc/
-/Gemfile.lock
 /pkg/
 /tmp/
 /vendor/
