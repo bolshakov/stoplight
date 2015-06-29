@@ -31,6 +31,10 @@ breaker pattern in Ruby.</p>
 
 <hr>
 
+<p>Does your code use unreliable systems, like a flaky database or a
+spotty web service? Wrap those up with stoplights to prevent them
+from affecting the rest of your application down.</p>
+
 <p>Check out <a href="https://github.com/orgsync/stoplight-admin">stoplight-admin</a> for controlling your stoplights.</p>
 
 <ul>
@@ -123,13 +127,16 @@ light.color
 <span class="pl-c"># =&gt; "red"</span></pre></div>
 
 <p>When the stoplight changes from green to red, it will notify every
-configured notifier.</p>
+configured notifier. See <a href="#notifiers">the notifiers section</a> to learn more
+about notifiers.</p>
 
 <p>The stoplight will move into the yellow state after being in the
 red state for a while. (The yellow state corresponds to the half
-open state for circuit breakers.) When stoplights are yellow, they'll
-try to run their code. If it fails, they'll switch back to red. If
-it succeeds, they'll switch to green.</p>
+open state for circuit breakers.) To configure how long it takes
+to switch into the yellow state, check out <a href="#custom-timeout">the timeout section</a>
+When stoplights are yellow, they'll try to run their code. If it
+fails, they'll switch back to red. If it succeeds, they'll switch
+to green.</p>
 
 <h3>
 <a id="custom-errors" class="anchor" href="#custom-errors" aria-hidden="true"><span class="octicon octicon-link"></span></a>Custom errors</h3>
@@ -225,7 +232,9 @@ Here's an example configuration:</p>
 
 <div class="highlight highlight-rb"><pre><span class="pl-k">class</span> <span class="pl-en">ApplicationController<span class="pl-e"> &lt; ActionController::Base</span></span>
   around_action <span class="pl-c1">:stoplight</span>
+
   <span class="pl-k">private</span>
+
   <span class="pl-k">def</span> <span class="pl-en">stoplight</span>(<span class="pl-k">&amp;</span><span class="pl-smi">block</span>)
     <span class="pl-c1">Stoplight</span>(<span class="pl-s"><span class="pl-pds">"</span><span class="pl-pse">#{</span><span class="pl-s1">params[<span class="pl-c1">:controller</span>]</span><span class="pl-pse"><span class="pl-s1">}</span></span>#<span class="pl-pse">#{</span><span class="pl-s1">params[<span class="pl-c1">:action</span>]</span><span class="pl-pse"><span class="pl-s1">}</span></span><span class="pl-pds">"</span></span>, <span class="pl-k">&amp;</span>block)
       .with_allowed_errors([<span class="pl-c1">ActiveRecord</span>::<span class="pl-c1">RecordNotFound</span>])
