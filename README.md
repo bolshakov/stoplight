@@ -12,6 +12,10 @@ breaker pattern in Ruby.
 
 ---
 
+Does your code use unreliable systems, like a flaky database or a
+spotty web service? Wrap those up with stoplights to prevent them
+from affecting the rest of your application down.
+
 Check out [stoplight-admin][] for controlling your stoplights.
 
 - [Installation](#installation)
@@ -97,13 +101,16 @@ light.color
 ```
 
 When the stoplight changes from green to red, it will notify every
-configured notifier.
+configured notifier. See [the notifiers section][] to learn more
+about notifiers.
 
 The stoplight will move into the yellow state after being in the
 red state for a while. (The yellow state corresponds to the half
-open state for circuit breakers.) When stoplights are yellow, they'll
-try to run their code. If it fails, they'll switch back to red. If
-it succeeds, they'll switch to green.
+open state for circuit breakers.) To configure how long it takes
+to switch into the yellow state, check out [the timeout section][]
+When stoplights are yellow, they'll try to run their code. If it
+fails, they'll switch back to red. If it succeeds, they'll switch
+to green.
 
 ### Custom errors
 
@@ -203,7 +210,9 @@ Here's an example configuration:
 ``` rb
 class ApplicationController < ActionController::Base
   around_action :stoplight
+
   private
+
   def stoplight(&block)
     Stoplight("#{params[:controller]}##{params[:action]}", &block)
       .with_allowed_errors([ActiveRecord::RecordNotFound])
@@ -326,6 +335,8 @@ Stoplight is licensed under [the MIT License][].
 [stoplight-admin]: https://github.com/orgsync/stoplight-admin
 [semantic versioning]: http://semver.org/spec/v2.0.0.html
 [the change log]: CHANGELOG.md
+[the notifiers section]: #notifiers
+[the timeout section]: #custom-timeout
 [the redis gem]: https://rubygems.org/gems/redis
 [the hipchat gem]: https://rubygems.org/gems/hipchat
 [@camdez]: https://github.com/camdez
