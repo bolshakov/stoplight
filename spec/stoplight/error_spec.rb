@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Stoplight::Error do
+RSpec.describe Stoplight::Error do
   it 'is a module' do
     expect(described_class).to be_a(Module)
   end

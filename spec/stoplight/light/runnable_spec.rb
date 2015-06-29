@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Stoplight::Light::Runnable do
+RSpec.describe Stoplight::Light::Runnable do
   subject { Stoplight::Light.new(name, &code) }
 
   let(:code) { -> { code_result } }

@@ -3,7 +3,7 @@
 require 'spec_helper'
 require 'hipchat'
 
-describe Stoplight::Notifier::HipChat do
+RSpec.describe Stoplight::Notifier::HipChat do
   it 'is a class' do
     expect(described_class).to be_a(Module)
   end

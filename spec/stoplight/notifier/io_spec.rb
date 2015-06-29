@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Stoplight::Notifier::IO do
+RSpec.describe Stoplight::Notifier::IO do
   it 'is a class' do
     expect(described_class).to be_a(Module)
   end

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Stoplight::Failure do
+RSpec.describe Stoplight::Failure do
   let(:error) { ZeroDivisionError.new('divided by 0') }
   let(:error_class) { error.class.name }
   let(:error_message) { error.message }

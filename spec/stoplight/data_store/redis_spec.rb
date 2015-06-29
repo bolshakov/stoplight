@@ -3,7 +3,7 @@
 require 'spec_helper'
 require 'fakeredis'
 
-describe Stoplight::DataStore::Redis do
+RSpec.describe Stoplight::DataStore::Redis do
   let(:data_store) { described_class.new(redis) }
   let(:redis) { Redis.new }
   let(:light) { Stoplight::Light.new(name) {} }

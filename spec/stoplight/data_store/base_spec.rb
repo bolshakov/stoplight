@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Stoplight::DataStore::Base do
+RSpec.describe Stoplight::DataStore::Base do
   let(:data_store) { described_class.new }
 
   it 'is a class' do

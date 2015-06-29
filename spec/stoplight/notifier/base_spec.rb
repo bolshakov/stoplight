@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Stoplight::Notifier::Base do
+RSpec.describe Stoplight::Notifier::Base do
   let(:notifier) { described_class.new }
 
   it 'is a class' do

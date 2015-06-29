@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Stoplight::DataStore::Memory do
+RSpec.describe Stoplight::DataStore::Memory do
   let(:data_store) { described_class.new }
   let(:light) { Stoplight::Light.new(name) {} }
   let(:name) { ('a'..'z').to_a.shuffle.join }

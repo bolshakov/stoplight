@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Stoplight::Light do
+RSpec.describe Stoplight::Light do
   let(:light) { described_class.new(name, &code) }
   let(:name) { ('a'..'z').to_a.shuffle.join }
   let(:code) { -> {} }

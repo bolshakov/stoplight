@@ -2,13 +2,13 @@
 
 require 'spec_helper'
 
-describe Stoplight do
+RSpec.describe Stoplight do
   it 'is a module' do
     expect(described_class).to be_a(Module)
   end
 end
 
-describe 'Stoplight' do
+RSpec.describe 'Stoplight' do
   subject(:light) { Stoplight(name, &code) }
   let(:name) { ('a'..'z').to_a.shuffle.join }
   let(:code) { -> {} }
