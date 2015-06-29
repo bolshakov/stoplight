@@ -317,12 +317,12 @@ Martin Fowler's [CircuitBreaker][] article.
 Stoplight is licensed under [the MIT License][].
 
 [stoplight]: https://github.com/orgsync/stoplight
-[version]: https://img.shields.io/gem/v/stoplight.svg?label=version&style=flat-square
-[build]: https://img.shields.io/travis/orgsync/stoplight/master.svg?label=build&style=flat-square
-[grade]: https://img.shields.io/badge/grade-A-brightgreen.svg?style=flat-square
-[coverage]: https://img.shields.io/coveralls/orgsync/stoplight/master.svg?label=coverage&style=flat-square
-[climate]: https://img.shields.io/codeclimate/github/orgsync/stoplight.svg?label=climate&style=flat-square
-[dependencies]: https://img.shields.io/gemnasium/orgsync/stoplight.svg?label=dependencies&style=flat-square
+[version]: https://img.shields.io/gem/v/stoplight.svg?label=version
+[build]: https://img.shields.io/travis/orgsync/stoplight/master.svg?label=build
+[grade]: https://img.shields.io/badge/grade-A-brightgreen.svg
+[coverage]: https://img.shields.io/coveralls/orgsync/stoplight/master.svg?label=coverage
+[climate]: https://img.shields.io/codeclimate/github/orgsync/stoplight.svg?label=climate
+[dependencies]: https://img.shields.io/gemnasium/orgsync/stoplight.svg?label=dependencies
 [stoplight-admin]: https://github.com/orgsync/stoplight-admin
 [semantic versioning]: http://semver.org/spec/v2.0.0.html
 [the change log]: CHANGELOG.md
