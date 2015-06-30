@@ -31,6 +31,7 @@ Check out [stoplight-admin][] for controlling your stoplights.
   - [Rails](#rails-1)
 - [Advanced usage](#advanced-usage)
   - [Locking](#locking)
+  - [Testing](#testing)
 - [Credits](#credits)
 
 ## Installation
@@ -316,6 +317,35 @@ light.run
 If you have configured a custom data store and that data store
 fails, Stoplight will switch over to using a blank in-memory data
 store. That means you will lose the locked state of any stoplights.
+
+## Testing
+
+Stoplights typically work as expected without modification in test suites.
+However there are a few things you can do to make them behave better. If your
+stoplights are spewing messages into your test output, you can silence them
+with a couple configuration changes.
+
+``` rb
+Stoplight::Light.default_error_notifier = -> _ {}
+Stoplight::Light.default_notifiers = []
+```
+
+If your tests mysteriously fail because stoplights are the wrong color, you can
+try resetting the data store before each test case. For example, this would
+give each test case a fresh data store with RSpec.
+
+``` rb
+before(:each) do
+  Stoplight::Light.default_data_Store = Stoplight::DataStore::Memory.new
+end
+```
+
+Sometimes you may want to test stoplights directly. You can avoid resetting the
+data store by giving each stoplight a unique name.
+
+``` rb
+stoplight = Stoplight("test-#{rand}") { ... }
+```
 
 ## Credits
 
