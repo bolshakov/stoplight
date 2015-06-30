@@ -14,6 +14,7 @@ require 'stoplight/data_store'
 require 'stoplight/data_store/base'
 require 'stoplight/data_store/memory'
 require 'stoplight/data_store/redis'
+require 'stoplight/data_store/test'
 
 require 'stoplight/notifier'
 require 'stoplight/notifier/base'
