@@ -29,6 +29,7 @@ Check out [stoplight-admin][] for controlling your stoplights.
   - [Data store](#data-store)
   - [Notifiers](#notifiers)
   - [Rails](#rails-1)
+  - [Testing](#testing)
 - [Advanced usage](#advanced-usage)
   - [Locking](#locking)
 - [Credits](#credits)
@@ -291,6 +292,20 @@ to configure it. Create an initializer for Stoplight:
 require 'stoplight'
 Stoplight::Light.default_data_store = Stoplight::DataStore::Redis.new(...)
 Stoplight::Light.default_notifiers += [Stoplight::Notifier::HipChat.new(...)]
+```
+
+### Testing
+
+For testing you can use the testing datastore (`Stoplight::DataStore::Test`)
+which will always return GREEN and never lock up.
+
+``` rb
+require 'stoplight'
+if testing?
+  Stoplight::Light.default_data_store = Stoplight::DataStore::Test.new
+else
+  Stoplight::Light.default_data_store = Stoplight::DataStore::Redis.new(...)
+end
 ```
 
 ## Advanced usage
