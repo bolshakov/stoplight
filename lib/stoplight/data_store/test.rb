@@ -3,7 +3,7 @@
 module Stoplight
   module DataStore
     class Test < Memory
-      def get_state(light)
+      def get_state(*)
         # always green
         State::LOCKED_GREEN
       end
