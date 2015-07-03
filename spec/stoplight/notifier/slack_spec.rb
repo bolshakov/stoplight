@@ -10,7 +10,8 @@ RSpec.describe Stoplight::Notifier::Slack do
 
   describe '#formatter' do
     it 'is initially the default' do
-      expect(described_class.new(nil).formatter).to eql(Stoplight::Default::FORMATTER)
+      expect(described_class.new(nil).formatter)
+        .to eql(Stoplight::Default::FORMATTER)
     end
 
     it 'reads the formatter' do
