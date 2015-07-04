@@ -28,6 +28,8 @@ Check out [stoplight-admin][] for controlling your stoplights.
 - [Setup](#setup)
   - [Data store](#data-store)
   - [Notifiers](#notifiers)
+    - [HipChat](#hipchat)
+    - [Slack](#slack)
   - [Rails](#rails-1)
 - [Advanced usage](#advanced-usage)
   - [Locking](#locking)
@@ -264,10 +266,12 @@ Stoplight::Light.default_notifiers
 # => [#<Stoplight::Notifier::IO:...>]
 ```
 
-If you want to send notifications elsewhere, you'll have to set
-them up. Currently the only other supported notifier is HipChat.
-Make sure you have [the HipChat gem][] installed before configuring
-Stoplight.
+If you want to send notifications elsewhere, you'll have to set them up.
+Currently the only supported notifiers are HipChat and Slack.
+
+#### HipChat
+
+Make sure you have [the HipChat gem][] installed before configuring Stoplight.
 
 ``` rb
 require 'hipchat'
@@ -278,6 +282,21 @@ notifier = Stoplight::Notifier::HipChat.new(hip_chat, 'room')
 # => #<Stoplight::Notifier::HipChat:...>
 Stoplight::Light.default_notifiers += [notifier]
 # => [#<Stoplight::Notifier::IO:...>, #<Stoplight::Notifier::HipChat:...>]
+```
+
+#### Slack
+
+Make sure you have [the Slack gem][] installed before configuring Stoplight.
+
+``` rb
+require 'slack-notifier'
+# => true
+slack = Slack::Notifier.new('http://www.example.com/webhook-url')
+# => #<Slack::Notifier:...>
+notifier = Stoplight::Notifier::Slack.new(slack)
+# => #<Stoplight::Notifier::Slack:...>
+Stoplight::Light.default_notifiers += [notifier]
+# => [#<Stoplight::Notifier::IO:...>, #<Stoplight::Notifier::Slack:...>]
 ```
 
 ### Rails
@@ -369,6 +388,7 @@ Stoplight is licensed under [the MIT License][].
 [the timeout section]: #custom-timeout
 [the redis gem]: https://rubygems.org/gems/redis
 [the hipchat gem]: https://rubygems.org/gems/hipchat
+[the slack gem]: https://rubygems.org/gems/slack-notifier
 [@camdez]: https://github.com/camdez
 [@tfausak]: https://github.com/tfausak
 [@orgsync]: https://github.com/OrgSync
