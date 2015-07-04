@@ -2,6 +2,10 @@
 
 Stoplight uses [Semantic Versioning][1].
 
+## v1.1.0 (2015-07-04)
+
+- #71: Added Slack notifier. Thanks, @s1mplex!
+
 ## v1.0.0 (2015-02-19)
 
 - Didn't change anything.
