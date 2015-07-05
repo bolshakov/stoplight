@@ -55,7 +55,14 @@ from affecting the rest of your application down.</p>
 
 <ul>
 <li><a href="#data-store">Data store</a></li>
-<li><a href="#notifiers">Notifiers</a></li>
+<li>
+<a href="#notifiers">Notifiers</a>
+
+<ul>
+<li><a href="#hipchat">HipChat</a></li>
+<li><a href="#slack">Slack</a></li>
+</ul>
+</li>
 <li><a href="#rails-1">Rails</a></li>
 </ul>
 </li>
@@ -64,6 +71,7 @@ from affecting the rest of your application down.</p>
 
 <ul>
 <li><a href="#locking">Locking</a></li>
+<li><a href="#testing">Testing</a></li>
 </ul>
 </li>
 <li><a href="#credits">Credits</a></li>
@@ -74,11 +82,11 @@ from affecting the rest of your application down.</p>
 
 <p>Add it to your Gemfile:</p>
 
-<div class="highlight highlight-rb"><pre><span class="pl-k">gem</span> <span class="pl-s"><span class="pl-pds">'</span>stoplight<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>~&gt; 1.0<span class="pl-pds">'</span></span></pre></div>
+<div class="highlight highlight-rb"><pre><span class="pl-k">gem</span> <span class="pl-s"><span class="pl-pds">'</span>stoplight<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>~&gt; 1.1<span class="pl-pds">'</span></span></pre></div>
 
 <p>Or install it manually:</p>
 
-<div class="highlight highlight-sh"><pre>$ gem install stoplight --version <span class="pl-s"><span class="pl-pds">'</span>~&gt; 1.0<span class="pl-pds">'</span></span></pre></div>
+<div class="highlight highlight-sh"><pre>$ gem install stoplight --version <span class="pl-s"><span class="pl-pds">'</span>~&gt; 1.1<span class="pl-pds">'</span></span></pre></div>
 
 <p>Stoplight uses <a href="http://semver.org/spec/v2.0.0.html">Semantic Versioning</a>. Check out <a href="CHANGELOG.md">the change log</a> for a
 detailed list of changes.</p>
@@ -281,10 +289,13 @@ data_store <span class="pl-k">=</span> <span class="pl-c1">Stoplight</span>::<sp
 <div class="highlight highlight-rb"><pre><span class="pl-c1">Stoplight</span>::<span class="pl-c1">Light</span>.default_notifiers
 <span class="pl-c"># =&gt; [#&lt;Stoplight::Notifier::IO:...&gt;]</span></pre></div>
 
-<p>If you want to send notifications elsewhere, you'll have to set
-them up. Currently the only other supported notifier is HipChat.
-Make sure you have <a href="https://rubygems.org/gems/hipchat">the HipChat gem</a> installed before configuring
-Stoplight.</p>
+<p>If you want to send notifications elsewhere, you'll have to set them up.
+Currently the only supported notifiers are HipChat and Slack.</p>
+
+<h4>
+<a id="hipchat" class="anchor" href="#hipchat" aria-hidden="true"><span class="octicon octicon-link"></span></a>HipChat</h4>
+
+<p>Make sure you have <a href="https://rubygems.org/gems/hipchat">the HipChat gem</a> installed before configuring Stoplight.</p>
 
 <div class="highlight highlight-rb"><pre><span class="pl-k">require</span> <span class="pl-s"><span class="pl-pds">'</span>hipchat<span class="pl-pds">'</span></span>
 <span class="pl-c"># =&gt; true</span>
@@ -294,6 +305,20 @@ notifier <span class="pl-k">=</span> <span class="pl-c1">Stoplight</span>::<span
 <span class="pl-c"># =&gt; #&lt;Stoplight::Notifier::HipChat:...&gt;</span>
 <span class="pl-c1">Stoplight</span>::<span class="pl-c1">Light</span>.default_notifiers <span class="pl-k">+=</span> [notifier]
 <span class="pl-c"># =&gt; [#&lt;Stoplight::Notifier::IO:...&gt;, #&lt;Stoplight::Notifier::HipChat:...&gt;]</span></pre></div>
+
+<h4>
+<a id="slack" class="anchor" href="#slack" aria-hidden="true"><span class="octicon octicon-link"></span></a>Slack</h4>
+
+<p>Make sure you have <a href="https://rubygems.org/gems/slack-notifier">the Slack gem</a> installed before configuring Stoplight.</p>
+
+<div class="highlight highlight-rb"><pre><span class="pl-k">require</span> <span class="pl-s"><span class="pl-pds">'</span>slack-notifier<span class="pl-pds">'</span></span>
+<span class="pl-c"># =&gt; true</span>
+slack <span class="pl-k">=</span> <span class="pl-c1">Slack</span>::<span class="pl-c1">Notifier</span>.<span class="pl-k">new</span>(<span class="pl-s"><span class="pl-pds">'</span>http://www.example.com/webhook-url<span class="pl-pds">'</span></span>)
+<span class="pl-c"># =&gt; #&lt;Slack::Notifier:...&gt;</span>
+notifier <span class="pl-k">=</span> <span class="pl-c1">Stoplight</span>::<span class="pl-c1">Notifier</span>::<span class="pl-c1">Slack</span>.<span class="pl-k">new</span>(slack)
+<span class="pl-c"># =&gt; #&lt;Stoplight::Notifier::Slack:...&gt;</span>
+<span class="pl-c1">Stoplight</span>::<span class="pl-c1">Light</span>.default_notifiers <span class="pl-k">+=</span> [notifier]
+<span class="pl-c"># =&gt; [#&lt;Stoplight::Notifier::IO:...&gt;, #&lt;Stoplight::Notifier::Slack:...&gt;]</span></pre></div>
 
 <h3>
 <a id="rails-1" class="anchor" href="#rails-1" aria-hidden="true"><span class="octicon octicon-link"></span></a>Rails</h3>
@@ -331,6 +356,30 @@ light.run
 If you have configured a custom data store and that data store
 fails, Stoplight will switch over to using a blank in-memory data
 store. That means you will lose the locked state of any stoplights.</p>
+
+<h2>
+<a id="testing" class="anchor" href="#testing" aria-hidden="true"><span class="octicon octicon-link"></span></a>Testing</h2>
+
+<p>Stoplights typically work as expected without modification in test suites.
+However there are a few things you can do to make them behave better. If your
+stoplights are spewing messages into your test output, you can silence them
+with a couple configuration changes.</p>
+
+<div class="highlight highlight-rb"><pre><span class="pl-c1">Stoplight</span>::<span class="pl-c1">Light</span>.default_error_notifier <span class="pl-k">=</span> <span class="pl-k">-</span><span class="pl-k">&gt;</span> _ {}
+<span class="pl-c1">Stoplight</span>::<span class="pl-c1">Light</span>.default_notifiers <span class="pl-k">=</span> []</pre></div>
+
+<p>If your tests mysteriously fail because stoplights are the wrong color, you can
+try resetting the data store before each test case. For example, this would
+give each test case a fresh data store with RSpec.</p>
+
+<div class="highlight highlight-rb"><pre>before(<span class="pl-c1">:each</span>) <span class="pl-k">do</span>
+  <span class="pl-c1">Stoplight</span>::<span class="pl-c1">Light</span>.default_data_Store <span class="pl-k">=</span> <span class="pl-c1">Stoplight</span>::<span class="pl-c1">DataStore</span>::<span class="pl-c1">Memory</span>.<span class="pl-k">new</span>
+<span class="pl-k">end</span></pre></div>
+
+<p>Sometimes you may want to test stoplights directly. You can avoid resetting the
+data store by giving each stoplight a unique name.</p>
+
+<div class="highlight highlight-rb"><pre>stoplight <span class="pl-k">=</span> <span class="pl-c1">Stoplight</span>(<span class="pl-s"><span class="pl-pds">"</span>test-<span class="pl-pse">#{</span><span class="pl-s1">rand</span><span class="pl-pse"><span class="pl-s1">}</span></span><span class="pl-pds">"</span></span>) { ... }</pre></div>
 
 <h2>
 <a id="credits" class="anchor" href="#credits" aria-hidden="true"><span class="octicon octicon-link"></span></a>Credits</h2>
