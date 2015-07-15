@@ -1,7 +1,5 @@
 # coding: utf-8
 
-require 'stringio'
-
 module Stoplight
   module Notifier
     # @see Base
