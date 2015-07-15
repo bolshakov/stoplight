@@ -5,7 +5,7 @@ require 'hipchat'
 
 RSpec.describe Stoplight::Notifier::HipChat do
   it 'is a class' do
-    expect(described_class).to be_a(Module)
+    expect(described_class).to be_a(Class)
   end
 
   it 'is a subclass of Base' do

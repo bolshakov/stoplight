@@ -6,7 +6,7 @@ RSpec.describe Stoplight::Notifier::Base do
   let(:notifier) { described_class.new }
 
   it 'is a class' do
-    expect(described_class).to be_a(Module)
+    expect(described_class).to be_a(Class)
   end
 
   describe '#notify' do

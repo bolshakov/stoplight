@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Stoplight::Notifier::IO do
   it 'is a class' do
-    expect(described_class).to be_a(Module)
+    expect(described_class).to be_a(Class)
   end
 
   it 'is a subclass of Base' do

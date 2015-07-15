@@ -4,6 +4,10 @@ require 'spec_helper'
 require 'slack-notifier'
 
 RSpec.describe Stoplight::Notifier::Slack do
+  it 'is a class' do
+    expect(described_class).to be_a(Class)
+  end
+
   it 'is a subclass of Base' do
     expect(described_class).to be < Stoplight::Notifier::Base
   end
