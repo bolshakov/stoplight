@@ -135,6 +135,9 @@ light.color
 # => "green"
 ```
 
+The following errors are always allowed: `NoMemoryError`, `ScriptError`,
+`SecurityError`, `SignalException`, `SystemExit`, and `SystemStackError`.
+
 ### Custom fallback
 
 By default, stoplights will re-raise errors when they're green.
@@ -178,6 +181,8 @@ light.run
 # Stoplight::Error::RedLight: example-5
 ```
 
+The default threshold is `3`.
+
 ### Custom timeout
 
 Stoplights will automatically attempt to recover after a certain
@@ -203,7 +208,8 @@ light.run
 # RuntimeError:
 ```
 
-Set the timeout to `-1` to disable automatic recovery.
+The default timeout is `60` seconds. Set the timeout to `-1` to disable
+automatic recovery.
 
 ### Rails
 
