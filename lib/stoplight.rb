@@ -17,6 +17,7 @@ require 'stoplight/data_store/redis'
 
 require 'stoplight/notifier'
 require 'stoplight/notifier/base'
+require 'stoplight/notifier/generic'
 require 'stoplight/notifier/hip_chat'
 require 'stoplight/notifier/io'
 require 'stoplight/notifier/slack'

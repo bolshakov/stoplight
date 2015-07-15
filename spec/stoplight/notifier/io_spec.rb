@@ -4,24 +4,14 @@ require 'spec_helper'
 require 'stringio'
 
 RSpec.describe Stoplight::Notifier::IO do
+  it_behaves_like 'a generic notifier'
+
   it 'is a class' do
     expect(described_class).to be_a(Class)
   end
 
   it 'is a subclass of Base' do
     expect(described_class).to be < Stoplight::Notifier::Base
-  end
-
-  describe '#formatter' do
-    it 'is initially the default' do
-      expect(described_class.new(nil).formatter)
-        .to eql(Stoplight::Default::FORMATTER)
-    end
-
-    it 'reads the formatter' do
-      formatter = proc {}
-      expect(described_class.new(nil, formatter).formatter).to eql(formatter)
-    end
   end
 
   describe '#io' do
@@ -39,18 +29,6 @@ RSpec.describe Stoplight::Notifier::IO do
     let(:to_color) { Stoplight::Color::RED }
     let(:notifier) { described_class.new(io) }
     let(:io) { StringIO.new }
-
-    it 'returns the message' do
-      error = nil
-      expect(notifier.notify(light, from_color, to_color, error))
-        .to eql(notifier.formatter.call(light, from_color, to_color, error))
-    end
-
-    it 'returns the message with an error' do
-      error = ZeroDivisionError.new('divided by 0')
-      expect(notifier.notify(light, from_color, to_color, error))
-        .to eql(notifier.formatter.call(light, from_color, to_color, error))
-    end
 
     it 'writes the message' do
       error = nil

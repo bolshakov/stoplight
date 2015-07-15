@@ -4,22 +4,17 @@ module Stoplight
   module Notifier
     # @see Base
     class IO < Base
-      # @return [Proc]
-      attr_reader :formatter
-      # @return [::IO]
-      attr_reader :io
+      include Generic
 
-      # @param io [::IO]
-      # @param formatter [Proc, nil]
-      def initialize(io, formatter = nil)
-        @io = io
-        @formatter = formatter || Default::FORMATTER
+      # @return [::IO]
+      def io
+        @object
       end
 
-      def notify(light, from_color, to_color, error)
-        message = formatter.call(light, from_color, to_color, error)
+      private
+
+      def put(message)
         io.puts(message)
-        message
       end
     end
   end
