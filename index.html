@@ -33,7 +33,7 @@ breaker pattern in Ruby.</p>
 
 <p>Does your code use unreliable systems, like a flaky database or a
 spotty web service? Wrap those up with stoplights to prevent them
-from affecting the rest of your application down.</p>
+from affecting the rest of your application.</p>
 
 <p>Check out <a href="https://github.com/orgsync/stoplight-admin">stoplight-admin</a> for controlling your stoplights.</p>
 
@@ -165,6 +165,9 @@ light.run
 light.color
 <span class="pl-c"># =&gt; "green"</span></pre></div>
 
+<p>The following errors are always allowed: <code>NoMemoryError</code>, <code>ScriptError</code>,
+<code>SecurityError</code>, <code>SignalException</code>, <code>SystemExit</code>, and <code>SystemStackError</code>.</p>
+
 <h3>
 <a id="custom-fallback" class="anchor" href="#custom-fallback" aria-hidden="true"><span class="octicon octicon-link"></span></a>Custom fallback</h3>
 
@@ -206,6 +209,8 @@ light.run
 light.run
 <span class="pl-c"># Stoplight::Error::RedLight: example-5</span></pre></div>
 
+<p>The default threshold is <code>3</code>.</p>
+
 <h3>
 <a id="custom-timeout" class="anchor" href="#custom-timeout" aria-hidden="true"><span class="octicon octicon-link"></span></a>Custom timeout</h3>
 
@@ -230,7 +235,8 @@ light.color
 light.run
 <span class="pl-c"># RuntimeError:</span></pre></div>
 
-<p>Set the timeout to <code>-1</code> to disable automatic recovery.</p>
+<p>The default timeout is <code>60</code> seconds. Set the timeout to <code>-1</code> to disable
+automatic recovery.</p>
 
 <h3>
 <a id="rails" class="anchor" href="#rails" aria-hidden="true"><span class="octicon octicon-link"></span></a>Rails</h3>
