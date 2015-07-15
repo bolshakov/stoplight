@@ -14,7 +14,7 @@ breaker pattern in Ruby.
 
 Does your code use unreliable systems, like a flaky database or a
 spotty web service? Wrap those up with stoplights to prevent them
-from affecting the rest of your application down.
+from affecting the rest of your application.
 
 Check out [stoplight-admin][] for controlling your stoplights.
 
