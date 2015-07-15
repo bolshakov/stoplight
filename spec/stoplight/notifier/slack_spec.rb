@@ -24,7 +24,7 @@ RSpec.describe Stoplight::Notifier::Slack do
     end
   end
 
-  describe '#slack_notifier' do
+  describe '#slack' do
     it 'reads Slack::Notifier client' do
       slack = Slack::Notifier.new('WEBHOOK_URL')
       expect(described_class.new(slack).slack).to eql(slack)

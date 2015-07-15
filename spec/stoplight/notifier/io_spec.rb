@@ -1,6 +1,7 @@
 # coding: utf-8
 
 require 'spec_helper'
+require 'stringio'
 
 RSpec.describe Stoplight::Notifier::IO do
   it 'is a class' do
@@ -19,8 +20,7 @@ RSpec.describe Stoplight::Notifier::IO do
 
     it 'reads the formatter' do
       formatter = proc {}
-      expect(described_class.new(nil, formatter).formatter)
-        .to eql(formatter)
+      expect(described_class.new(nil, formatter).formatter).to eql(formatter)
     end
   end
 
