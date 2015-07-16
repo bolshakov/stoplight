@@ -1,6 +1,7 @@
 # coding: utf-8
 
 require 'spec_helper'
+require 'stringio'
 
 RSpec.describe Stoplight::Light do
   let(:light) { described_class.new(name, &code) }

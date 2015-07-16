@@ -2,6 +2,11 @@
 
 Stoplight uses [Semantic Versioning][1].
 
+## v1.1.1 (2015-07-16)
+
+- Introduced a generic notifier to reduce duplication between the IO and Slack
+  notifiers.
+
 ## v1.1.0 (2015-07-04)
 
 - #71: Added Slack notifier. Thanks, @s1mplex!
