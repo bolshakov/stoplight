@@ -1,4 +1,9 @@
+env: RAKE_TASK=spec
 language: ruby
+matrix:
+  include:
+  - env: RAKE_TASK=rubocop
+    rvm: '2.2'
 rvm:
 - '2.2'
 - '2.1'
@@ -6,3 +11,4 @@ rvm:
 - '1.9'
 - 'jruby'
 - 'rbx-2'
+script: bundle exec rake $RAKE_TASK
