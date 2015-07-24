@@ -40,7 +40,7 @@ Gem::Specification.new do |gem|
     'redis' => '3.2',
     'rspec' => '3.3',
     'rubocop' => '0.32',
-    'slack-notifier' => '1.2.1',
+    'slack-notifier' => '1.2',
     'timecop' => '0.7',
     'yard' => '0.8'
   }.each do |name, version|
