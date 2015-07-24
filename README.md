@@ -12,9 +12,9 @@ breaker pattern in Ruby.
 
 ---
 
-Does your code use unreliable systems, like a flaky database or a
-spotty web service? Wrap those up with stoplights to prevent them
-from affecting the rest of your application.
+Does your code use unreliable systems, like a flaky database or a spotty web
+service? Wrap calls to those up in stoplights to prevent them from affecting
+the rest of your application.
 
 Check out [stoplight-admin][] for controlling your stoplights.
 
@@ -65,9 +65,9 @@ light = Stoplight('example-1') { 22.0 / 7 }
 # => #<Stoplight::Light:...>
 ```
 
-Then you can run it and it will return the result of calling the
-block. This is the green state. (The green state corresponds to the
-closed state for circuit breakers.)
+Then you can run it and it will return the result of calling the block. This is
+the green state. (The green state corresponds to the closed state for circuit
+  breakers.)
 
 ``` rb
 light.run
@@ -76,19 +76,19 @@ light.color
 # => "green"
 ```
 
-If everything goes well, you shouldn't even be able to tell that
-you're using a stoplight. That's not very interesting though. Let's
-create a failing stoplight:
+If everything goes well, you shouldn't even be able to tell that you're using a
+stoplight. That's not very interesting though, so let's create a failing
+stoplight:
 
 ``` rb
 light = Stoplight('example-2') { 1 / 0 }
 # => #<Stoplight::Light:...>
 ```
 
-Now when you run it, the error will be recorded and passed through.
-After running it a few times, the stoplight will stop trying and
-fail fast. This is the red state. (The red state corresponds to the
-open state for circuit breakers.)
+Now when you run it, the error will be recorded and passed through. After
+running it a few times, the stoplight will stop trying and fail fast. This is
+the red state. (The red state corresponds to the open state for circuit
+  breakers.)
 
 ``` rb
 light.run
@@ -104,23 +104,21 @@ light.color
 # => "red"
 ```
 
-When the stoplight changes from green to red, it will notify every
-configured notifier. See [the notifiers section][] to learn more
-about notifiers.
+When the stoplight changes from green to red, it will notify every configured
+notifier. See [the notifiers section][] to learn more about notifiers.
 
-The stoplight will move into the yellow state after being in the
-red state for a while. (The yellow state corresponds to the half
-open state for circuit breakers.) To configure how long it takes
-to switch into the yellow state, check out [the timeout section][]
-When stoplights are yellow, they'll try to run their code. If it
-fails, they'll switch back to red. If it succeeds, they'll switch
-to green.
+The stoplight will move into the yellow state after being in the red state for
+a while. (The yellow state corresponds to the half open state for circuit
+  breakers.) To configure how long it takes to switch into the yellow state,
+  check out [the timeout section][] When stoplights are yellow, they will try
+  to run their code. If it fails, they'll switch back to red. If it succeeds,
+  they'll switch to green.
 
 ### Custom errors
 
-Some errors shouldn't cause your stoplight to move into the red
-state. Usually these are handled elsewhere in your stack and don't
-represent real failures. A good example is `ActiveRecord::RecordNotFound`.
+Some errors shouldn't cause your stoplight to move into the red state. Usually
+these are handled elsewhere in your stack and don't represent real failures. A
+good example is `ActiveRecord::RecordNotFound`.
 
 ``` rb
 light = Stoplight('example-3') { User.find(123) }
@@ -141,10 +139,10 @@ The following errors are always allowed: `NoMemoryError`, `ScriptError`,
 
 ### Custom fallback
 
-By default, stoplights will re-raise errors when they're green.
-When they're red, they'll raise a `Stoplight::Error::RedLight`
-error. You can provide a fallback that will be called in both of
-these cases. It will be passed the error if the light was green.
+By default, stoplights will re-raise errors when they're green. When they're
+red, they'll raise a `Stoplight::Error::RedLight` error. You can provide a
+fallback that will be called in both of these cases. It will be passed the
+error if the light was green.
 
 ``` rb
 light = Stoplight('example-4') { 1 / 0 }
@@ -167,8 +165,8 @@ light.run
 
 ### Custom threshold
 
-Some bits of code might be allowed to fail more or less frequently
-than others. You can configure this by setting a custom threshold.
+Some bits of code might be allowed to fail more or less frequently than others.
+You can configure this by setting a custom threshold.
 
 ``` rb
 light = Stoplight('example-5') { fail }
@@ -185,9 +183,9 @@ The default threshold is `3`.
 
 ### Custom timeout
 
-Stoplights will automatically attempt to recover after a certain
-amount of time. A light in the red state for longer than the timeout
-will transition to the yellow state. This timeout is customizable.
+Stoplights will automatically attempt to recover after a certain amount of
+time. A light in the red state for longer than the timeout will transition to
+the yellow state. This timeout is customizable.
 
 ``` rb
 light = Stoplight('example-6') { fail }
@@ -213,8 +211,8 @@ automatic recovery.
 
 ### Rails
 
-Stoplight was designed to wrap Rails actions with minimal effort.
-Here's an example configuration:
+Stoplight was designed to wrap Rails actions with minimal effort. Here's an
+example configuration:
 
 ``` rb
 class ApplicationController < ActionController::Base
@@ -247,12 +245,12 @@ Stoplight::Light.default_data_store
 # => #<Stoplight::DataStore::Memory:...>
 ```
 
-If you want to use a persistent data store, you'll have to set it
-up. Currently the only supported persistent data store is Redis.
+If you want to use a persistent data store, you'll have to set it up. Currently
+the only supported persistent data store is Redis.
 
 #### Redis
 
-Make sure you have [the Redis gem][] installed before configuring
+Make sure you have [the Redis gem][] (`~> 3.2`) installed before configuring
 Stoplight.
 
 ``` rb
@@ -280,7 +278,8 @@ Currently the only supported notifiers are HipChat and Slack.
 
 #### HipChat
 
-Make sure you have [the HipChat gem][] installed before configuring Stoplight.
+Make sure you have [the HipChat gem][] (`~> 1.5`) installed before configuring
+Stoplight.
 
 ``` rb
 require 'hipchat'
@@ -295,7 +294,8 @@ Stoplight::Light.default_notifiers += [notifier]
 
 #### Slack
 
-Make sure you have [the Slack gem][] installed before configuring Stoplight.
+Make sure you have [the Slack gem][] (`~> 1.2`) installed before configuring
+Stoplight.
 
 ``` rb
 require 'slack-notifier'
@@ -310,10 +310,10 @@ Stoplight::Light.default_notifiers += [notifier]
 
 ### Rails
 
-Stoplight is designed to work seamlessly with Rails. If you want
-to use the in-memory data store, you don't need to do anything
-special. If you want to use a persistent data store, you'll need
-to configure it. Create an initializer for Stoplight:
+Stoplight is designed to work seamlessly with Rails. If you want to use the
+in-memory data store, you don't need to do anything special. If you want to use
+a persistent data store, you'll need to configure it. Create an initializer for
+Stoplight:
 
 ``` rb
 # config/initializers/stoplight.rb
@@ -326,9 +326,9 @@ Stoplight::Light.default_notifiers += [Stoplight::Notifier::HipChat.new(...)]
 
 ### Locking
 
-Although stoplights can operate on their own, occasionally you may
-want to override the default behavior. You can lock a light in
-either the green or red state using `set_state`.
+Although stoplights can operate on their own, occasionally you may want to
+override the default behavior. You can lock a light in either the green or red
+state using `set_state`.
 
 ``` rb
 light = Stoplight('example-7') { true }
@@ -341,10 +341,16 @@ light.run
 # Stoplight::Error::RedLight: example-7
 ```
 
-**Code in locked red lights may still run under certain conditions!**
-If you have configured a custom data store and that data store
-fails, Stoplight will switch over to using a blank in-memory data
-store. That means you will lose the locked state of any stoplights.
+**Code in locked red lights may still run under certain conditions!** If you
+have configured a custom data store and that data store fails, Stoplight will
+switch over to using a blank in-memory data store. That means you will lose the
+locked state of any stoplights.
+
+You can go back to using the default behavior by unlocking the stoplight.
+
+``` rb
+light.data_store.set_state(light, Stoplight::State::UNLOCKED)
+```
 
 ## Testing
 
