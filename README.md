@@ -206,8 +206,10 @@ light.run
 # RuntimeError:
 ```
 
-The default timeout is `60` seconds. Set the timeout to `Float::INFINITY` to
-disable automatic recovery.
+The default timeout is `60` seconds. To disable automatic recovery, set the
+timeout to `Float::INFINITY`. To make automatic recovery instantaneous, set the
+timeout to `0` seconds. Note that this is not recommended, as it effectively
+replaces the red state with yellow.
 
 ### Rails
 
