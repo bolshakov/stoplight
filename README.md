@@ -168,8 +168,7 @@ light.run
 ### Custom threshold
 
 Some bits of code might be allowed to fail more or less frequently
-than others. You can configure this by setting a custom threshold
-in seconds.
+than others. You can configure this by setting a custom threshold.
 
 ``` rb
 light = Stoplight('example-5') { fail }
