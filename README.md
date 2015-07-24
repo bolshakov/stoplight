@@ -27,6 +27,7 @@ Check out [stoplight-admin][] for controlling your stoplights.
   - [Rails](#rails)
 - [Setup](#setup)
   - [Data store](#data-store)
+    - [Redis](#redis)
   - [Notifiers](#notifiers)
     - [HipChat](#hipchat)
     - [Slack](#slack)
@@ -249,6 +250,9 @@ Stoplight::Light.default_data_store
 
 If you want to use a persistent data store, you'll have to set it
 up. Currently the only supported persistent data store is Redis.
+
+#### Redis
+
 Make sure you have [the Redis gem][] installed before configuring
 Stoplight.
 
