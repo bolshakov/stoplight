@@ -354,7 +354,7 @@ You can go back to using the default behavior by unlocking the stoplight.
 light.data_store.set_state(light, Stoplight::State::UNLOCKED)
 ```
 
-## Testing
+### Testing
 
 Stoplights typically work as expected without modification in test suites.
 However there are a few things you can do to make them behave better. If your
