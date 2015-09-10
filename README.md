@@ -29,6 +29,7 @@ Check out [stoplight-admin][] for controlling your stoplights.
   - [Data store](#data-store)
     - [Redis](#redis)
   - [Notifiers](#notifiers)
+    - [Bugsnag](#bugsnag)
     - [HipChat](#hipchat)
     - [Honeybadger](#honeybadger)
     - [Slack](#slack)
@@ -278,6 +279,20 @@ Stoplight::Light.default_notifiers
 
 If you want to send notifications elsewhere, you'll have to set them up.
 
+#### Bugsnag
+
+Make sure you have [the Bugsnag gem][] (`~> 2.8`) installed before configuring
+Stoplight.
+
+``` rb
+require 'bugsnag'
+# => true
+notifier = Stoplight::Notifier::Bugsnag.new(Bugsnag)
+# => #<Stoplight::Notifier::Bugsnag:...>
+Stoplight::Light.default_notifiers += [notifier]
+# => [#<Stoplight::Notifier::IO:...>, #<Stoplight::Notifier::Bugsnag:...>]
+```
+
 #### HipChat
 
 Make sure you have [the HipChat gem][] (`~> 1.5`) installed before configuring
@@ -322,20 +337,6 @@ notifier = Stoplight::Notifier::Slack.new(slack)
 # => #<Stoplight::Notifier::Slack:...>
 Stoplight::Light.default_notifiers += [notifier]
 # => [#<Stoplight::Notifier::IO:...>, #<Stoplight::Notifier::Slack:...>]
-```
-
-#### Bugsnag
-
-Make sure you have [the Bugsnag gem][] installed before configuring
-Stoplight.
-
-``` rb
-require 'bugsnag'
-# => true
-notifier = Stoplight::Notifier::Bugsnag.new(Bugsnag)
-# => #<Stoplight::Notifier::Bugsnag:...>
-Stoplight::Light.default_notifiers += [notifier]
-# => [#<Stoplight::Notifier::IO:...>, #<Stoplight::Notifier::Bugsnag:...>]
 ```
 
 ### Rails
