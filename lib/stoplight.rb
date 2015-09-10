@@ -21,6 +21,7 @@ require 'stoplight/notifier/generic'
 require 'stoplight/notifier/hip_chat'
 require 'stoplight/notifier/io'
 require 'stoplight/notifier/slack'
+require 'stoplight/notifier/logger'
 
 require 'stoplight/default'
 
