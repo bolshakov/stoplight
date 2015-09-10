@@ -12,3 +12,4 @@ rvm:
 - 'jruby'
 - 'rbx-2'
 script: bundle exec rake $RAKE_TASK
+sudo: false
