@@ -2,6 +2,8 @@
 
 Stoplight uses [Semantic Versioning][1].
 
+- #78: Added a Bugsnag notifier. Thanks, @bolshakov!
+
 ## v1.1.1 (2015-07-16)
 
 - Introduced a generic notifier to reduce duplication between the IO and Slack
