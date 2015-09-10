@@ -21,6 +21,7 @@ require 'stoplight/notifier/generic'
 
 require 'stoplight/notifier/bugsnag'
 require 'stoplight/notifier/hip_chat'
+require 'stoplight/notifier/honeybadger'
 require 'stoplight/notifier/io'
 require 'stoplight/notifier/slack'
 

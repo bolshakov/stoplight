@@ -30,6 +30,7 @@ Check out [stoplight-admin][] for controlling your stoplights.
     - [Redis](#redis)
   - [Notifiers](#notifiers)
     - [HipChat](#hipchat)
+    - [Honeybadger](#honeybadger)
     - [Slack](#slack)
   - [Rails](#rails-1)
 - [Advanced usage](#advanced-usage)
@@ -293,6 +294,20 @@ Stoplight::Light.default_notifiers += [notifier]
 # => [#<Stoplight::Notifier::IO:...>, #<Stoplight::Notifier::HipChat:...>]
 ```
 
+#### Honeybadger
+
+Make sure you have [the Honeybadger gem][] (`~> 2.1`) installed before
+configuring Stoplight.
+
+``` rb
+require 'honeybadger'
+# => true
+notifier = Stoplight::Notifier::Honeybadger.new('api key')
+# => #<Stoplight::Notifier::Honeybadger:...>
+Stoplight::Light.default_notifiers += [notifier]
+# => [#<Stoplight::Notifier::IO:...>, #<Stoplight::Notifier::Honeybadger:...>]
+```
+
 #### Slack
 
 Make sure you have [the Slack gem][] (`~> 1.2`) installed before configuring
@@ -418,6 +433,7 @@ Stoplight is licensed under [the MIT License][].
 [the timeout section]: #custom-timeout
 [the redis gem]: https://rubygems.org/gems/redis
 [the hipchat gem]: https://rubygems.org/gems/hipchat
+[the honeybadger gem]: https://rubygems.org/gems/honeybadger
 [the slack gem]: https://rubygems.org/gems/slack-notifier
 [the bugsnag gem]: https://rubygems.org/gems/bugsnag
 [@camdez]: https://github.com/camdez

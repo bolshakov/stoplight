@@ -3,6 +3,7 @@
 Stoplight uses [Semantic Versioning][1].
 
 - #78: Added a Bugsnag notifier. Thanks, @bolshakov!
+- Added a Honeybadger notifier.
 
 ## v1.1.1 (2015-07-16)
 
