@@ -19,6 +19,7 @@ require 'stoplight/notifier'
 require 'stoplight/notifier/base'
 require 'stoplight/notifier/generic'
 require 'stoplight/notifier/hip_chat'
+require 'stoplight/notifier/honeybadger'
 require 'stoplight/notifier/io'
 require 'stoplight/notifier/slack'
 

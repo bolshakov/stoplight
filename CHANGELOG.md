@@ -2,6 +2,8 @@
 
 Stoplight uses [Semantic Versioning][1].
 
+- Added a Honeybadger notifier.
+
 ## v1.1.1 (2015-07-16)
 
 - Introduced a generic notifier to reduce duplication between the IO and Slack

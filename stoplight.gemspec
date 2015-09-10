@@ -36,6 +36,7 @@ Gem::Specification.new do |gem|
     'guard-rspec' => '4.6',
     'guard-rubocop' => '1.2',
     'hipchat' => '1.5',
+    'honeybadger' => '2.1',
     'rake' => '10.4',
     'redis' => '3.2',
     'rspec' => '3.3',
