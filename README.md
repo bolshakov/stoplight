@@ -276,7 +276,6 @@ Stoplight::Light.default_notifiers
 ```
 
 If you want to send notifications elsewhere, you'll have to set them up.
-Currently the only supported notifiers are HipChat and Slack.
 
 #### HipChat
 
@@ -308,6 +307,20 @@ notifier = Stoplight::Notifier::Slack.new(slack)
 # => #<Stoplight::Notifier::Slack:...>
 Stoplight::Light.default_notifiers += [notifier]
 # => [#<Stoplight::Notifier::IO:...>, #<Stoplight::Notifier::Slack:...>]
+```
+
+#### Bugsnag
+
+Make sure you have [the Bugsnag gem][] installed before configuring
+Stoplight.
+
+``` rb
+require 'bugsnag'
+# => true
+notifier = Stoplight::Notifier::Bugsnag.new(Bugsnag)
+# => #<Stoplight::Notifier::Bugsnag:...>
+Stoplight::Light.default_notifiers += [notifier]
+# => [#<Stoplight::Notifier::IO:...>, #<Stoplight::Notifier::Bugsnag:...>]
 ```
 
 ### Rails
@@ -406,6 +419,7 @@ Stoplight is licensed under [the MIT License][].
 [the redis gem]: https://rubygems.org/gems/redis
 [the hipchat gem]: https://rubygems.org/gems/hipchat
 [the slack gem]: https://rubygems.org/gems/slack-notifier
+[the bugsnag gem]: https://rubygems.org/gems/bugsnag
 [@camdez]: https://github.com/camdez
 [@tfausak]: https://github.com/tfausak
 [@orgsync]: https://github.com/OrgSync

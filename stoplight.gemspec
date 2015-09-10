@@ -42,7 +42,8 @@ Gem::Specification.new do |gem|
     'rubocop' => '0.32',
     'slack-notifier' => '1.2',
     'timecop' => '0.7',
-    'yard' => '0.8'
+    'yard' => '0.8',
+    'bugsnag' => '2.8'
   }.each do |name, version|
     gem.add_development_dependency(name, "~> #{version}")
   end
