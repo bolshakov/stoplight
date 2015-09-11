@@ -26,7 +26,7 @@ RSpec.describe Stoplight::Notifier::Logger do
 
   describe '#logger' do
     it 'reads the logger' do
-      logger = Logger.new(STDOUT)
+      logger = Logger.new(StringIO.new)
       expect(described_class.new(logger, nil).logger)
         .to eql(logger)
     end
