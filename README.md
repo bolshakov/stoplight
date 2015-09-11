@@ -323,6 +323,19 @@ Stoplight::Light.default_notifiers += [notifier]
 # => [#<Stoplight::Notifier::IO:...>, #<Stoplight::Notifier::Honeybadger:...>]
 ```
 
+#### Logger
+
+``` rb
+require 'logger'
+# => true
+logger = Logger.new(STDERR)
+# => #<Logger:...>
+notifier = Stoplight::Notifier::Logger.new(logger)
+# => #<Stoplight::Notifier::Logger:...>
+Stoplight::Light.default_notifiers += [notifier]
+# => [#<Stoplight::Notifier::IO:...>, #<Stoplight::Notifier::Logger:...>]
+```
+
 #### Slack
 
 Make sure you have [the Slack gem][] (`~> 1.3`) installed before configuring
@@ -350,7 +363,7 @@ Stoplight:
 # config/initializers/stoplight.rb
 require 'stoplight'
 Stoplight::Light.default_data_store = Stoplight::DataStore::Redis.new(...)
-Stoplight::Light.default_notifiers += [Stoplight::Notifier::HipChat.new(...)]
+Stoplight::Light.default_notifiers += [Stoplight::Notifier::Logger.new(Rails.logger)]
 ```
 
 ## Advanced usage
