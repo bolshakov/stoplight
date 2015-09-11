@@ -32,6 +32,7 @@ Check out [stoplight-admin][] for controlling your stoplights.
     - [Bugsnag](#bugsnag)
     - [HipChat](#hipchat)
     - [Honeybadger](#honeybadger)
+    - [Logger](#logger)
     - [Slack](#slack)
   - [Rails](#rails-1)
 - [Advanced usage](#advanced-usage)
@@ -325,6 +326,9 @@ Stoplight::Light.default_notifiers += [notifier]
 
 #### Logger
 
+Stoplight can be configured to use [the Logger class][] from the standard
+library.
+
 ``` rb
 require 'logger'
 # => true
@@ -446,10 +450,11 @@ Stoplight is licensed under [the MIT License][].
 [the notifiers section]: #notifiers
 [the timeout section]: #custom-timeout
 [the redis gem]: https://rubygems.org/gems/redis
+[the bugsnag gem]: https://rubygems.org/gems/bugsnag
 [the hipchat gem]: https://rubygems.org/gems/hipchat
 [the honeybadger gem]: https://rubygems.org/gems/honeybadger
+[the logger class]: http://ruby-doc.org/stdlib-2.2.3/libdoc/logger/rdoc/Logger.html
 [the slack gem]: https://rubygems.org/gems/slack-notifier
-[the bugsnag gem]: https://rubygems.org/gems/bugsnag
 [@camdez]: https://github.com/camdez
 [@tfausak]: https://github.com/tfausak
 [@orgsync]: https://github.com/OrgSync
