@@ -1,7 +1,14 @@
 # coding: utf-8
 
 require 'spec_helper'
-require 'hipchat'
+
+# require 'hipchat'
+module HipChat
+  class Client
+    def initialize(*)
+    end
+  end
+end
 
 RSpec.describe Stoplight::Notifier::HipChat do
   it 'is a class' do

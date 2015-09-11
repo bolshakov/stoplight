@@ -1,7 +1,14 @@
 # coding: utf-8
 
 require 'spec_helper'
-require 'slack-notifier'
+
+# require 'slack-notifier'
+module Slack
+  class Notifier
+    def initialize(*)
+    end
+  end
+end
 
 RSpec.describe Stoplight::Notifier::Slack do
   it_behaves_like 'a generic notifier'
