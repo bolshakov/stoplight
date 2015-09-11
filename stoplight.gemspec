@@ -29,10 +29,11 @@ Gem::Specification.new do |gem|
   gem.required_ruby_version = '>= 1.9.3'
 
   {
-    'benchmark-ips' => '2.2',
+    'benchmark-ips' => '2.3',
+    'bugsnag' => '2.8',
     'coveralls' => '0.8',
     'fakeredis' => '0.5',
-    'guard' => '2.12',
+    'guard' => '2.13',
     'guard-rspec' => '4.6',
     'guard-rubocop' => '1.2',
     'hipchat' => '1.5',
@@ -40,11 +41,10 @@ Gem::Specification.new do |gem|
     'rake' => '10.4',
     'redis' => '3.2',
     'rspec' => '3.3',
-    'rubocop' => '0.32',
-    'slack-notifier' => '1.2',
-    'timecop' => '0.7',
-    'yard' => '0.8',
-    'bugsnag' => '2.8'
+    'rubocop' => '0.34',
+    'slack-notifier' => '1.3',
+    'timecop' => '0.8',
+    'yard' => '0.8'
   }.each do |name, version|
     gem.add_development_dependency(name, "~> #{version}")
   end

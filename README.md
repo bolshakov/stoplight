@@ -325,7 +325,7 @@ Stoplight::Light.default_notifiers += [notifier]
 
 #### Slack
 
-Make sure you have [the Slack gem][] (`~> 1.2`) installed before configuring
+Make sure you have [the Slack gem][] (`~> 1.3`) installed before configuring
 Stoplight.
 
 ``` rb
