@@ -1,5 +1,10 @@
+# coding: utf-8
+
 require 'spec_helper'
-require 'honeybadger'
+
+# require 'honeybadger'
+module Honeybadger
+end
 
 RSpec.describe Stoplight::Notifier::Honeybadger do
   it 'is a class' do

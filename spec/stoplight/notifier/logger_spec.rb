@@ -1,6 +1,8 @@
 # coding: utf-8
 
 require 'spec_helper'
+require 'logger'
+require 'stringio'
 
 RSpec.describe Stoplight::Notifier::Logger do
   it 'is a class' do

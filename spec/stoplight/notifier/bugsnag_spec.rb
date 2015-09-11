@@ -1,7 +1,10 @@
 # coding: utf-8
 
 require 'spec_helper'
-require 'bugsnag'
+
+# require 'bugsnag'
+module Bugsnag
+end
 
 RSpec.describe Stoplight::Notifier::Bugsnag do
   StoplightStatusChange = Stoplight::Notifier::Bugsnag::StoplightStatusChange
@@ -42,7 +45,7 @@ RSpec.describe Stoplight::Notifier::Bugsnag do
 
   describe '#bugsnag' do
     it 'reads the Bugsnag client' do
-      client = ::Bugsnag
+      client = Bugsnag
       expect(described_class.new(client, nil).bugsnag)
         .to eql(client)
     end
@@ -55,7 +58,7 @@ RSpec.describe Stoplight::Notifier::Bugsnag do
     let(:from_color) { Stoplight::Color::GREEN }
     let(:to_color) { Stoplight::Color::RED }
     let(:notifier) { described_class.new(bugsnag) }
-    let(:bugsnag) { double(Bugsnag) }
+    let(:bugsnag) { Bugsnag }
 
     subject(:result) do
       notifier.notify(light, from_color, to_color, error)
