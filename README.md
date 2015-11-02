@@ -418,7 +418,7 @@ give each test case a fresh data store with RSpec.
 
 ``` rb
 before(:each) do
-  Stoplight::Light.default_data_Store = Stoplight::DataStore::Memory.new
+  Stoplight::Light.default_data_store = Stoplight::DataStore::Memory.new
 end
 ```
 
