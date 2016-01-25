@@ -11,6 +11,8 @@ module Stoplight
       SystemStackError
     ].freeze
 
+    BLACKLISTED_ERRORS = [].freeze
+
     DATA_STORE = DataStore::Memory.new
 
     ERROR_NOTIFIER = -> error { warn error }

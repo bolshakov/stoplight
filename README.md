@@ -119,6 +119,8 @@ a while. (The yellow state corresponds to the half open state for circuit
 
 ### Custom errors
 
+##### Allowed errors
+
 Some errors shouldn't cause your stoplight to move into the red state. Usually
 these are handled elsewhere in your stack and don't represent real failures. A
 good example is `ActiveRecord::RecordNotFound`.
@@ -140,6 +142,44 @@ light.color
 The following errors are always allowed: `NoMemoryError`, `ScriptError`,
 `SecurityError`, `SignalException`, `SystemExit`, and `SystemStackError`.
 
+Allowed errors take precedence over [blacklisted errors](#blacklisted-errors).
+
+##### Blacklisted errors
+
+You may want only certain errors to cause your stoplight to move into the red
+state.
+
+``` rb
+light = Stoplight('example-4') { 1 / 0 }
+  .with_blacklisted_errors([ZeroDivisionError])
+# => #<Stoplight::Light:...>
+light.run
+# ZeroDivisionError: divided by 0
+light.run
+# ZeroDivisionError: divided by 0
+light.run
+# ZeroDivisionError: divided by 0
+light.color
+# => "red"
+```
+
+This will cause all other errors to be raised normally. They won't affect the
+state of your stoplight.
+
+``` rb
+light = Stoplight('example-5') { fail }
+  .with_blacklisted_errors([ZeroDivisionError])
+# => #<Stoplight::Light:...>
+light.run
+# RuntimeError:
+light.run
+# RuntimeError:
+light.run
+# RuntimeError:
+light.color
+# => "green"
+```
+
 ### Custom fallback
 
 By default, stoplights will re-raise errors when they're green. When they're
@@ -148,7 +188,7 @@ fallback that will be called in both of these cases. It will be passed the
 error if the light was green.
 
 ``` rb
-light = Stoplight('example-4') { 1 / 0 }
+light = Stoplight('example-6') { 1 / 0 }
   .with_fallback { |e| p e; 'default' }
 # => #<Stoplight::Light:..>
 light.run
@@ -172,7 +212,7 @@ Some bits of code might be allowed to fail more or less frequently than others.
 You can configure this by setting a custom threshold.
 
 ``` rb
-light = Stoplight('example-5') { fail }
+light = Stoplight('example-7') { fail }
   .with_threshold(1)
 # => #<Stoplight::Light:...>
 light.run
@@ -191,7 +231,7 @@ time. A light in the red state for longer than the timeout will transition to
 the yellow state. This timeout is customizable.
 
 ``` rb
-light = Stoplight('example-6') { fail }
+light = Stoplight('example-8') { fail }
   .with_timeout(1)
 # => #<Stoplight::Light:...>
 light.run
@@ -379,7 +419,7 @@ override the default behavior. You can lock a light in either the green or red
 state using `set_state`.
 
 ``` rb
-light = Stoplight('example-7') { true }
+light = Stoplight('example-9') { true }
 # => #<Stoplight::Light:..>
 light.run
 # => true

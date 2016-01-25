@@ -135,6 +135,75 @@ RSpec.describe Stoplight::Light::Runnable do
           end
         end
 
+        context 'when the error is blacklisted' do
+          let(:blacklisted_errors) { [error.class] }
+
+          before { subject.with_blacklisted_errors(blacklisted_errors) }
+
+          it 'records the failure' do
+            expect(subject.data_store.get_failures(subject).size).to eql(0)
+            begin
+              subject.run
+            rescue error.class
+              nil
+            end
+            expect(subject.data_store.get_failures(subject).size).to eql(1)
+          end
+        end
+
+        context 'when the error is not blacklisted' do
+          let(:blacklisted_errors) { [RuntimeError] }
+
+          before { subject.with_blacklisted_errors(blacklisted_errors) }
+
+          it 'does not record the failure' do
+            expect(subject.data_store.get_failures(subject).size).to eql(0)
+            begin
+              subject.run
+            rescue error.class
+              nil
+            end
+            expect(subject.data_store.get_failures(subject).size).to eql(0)
+          end
+        end
+
+        context 'when the list of blacklisted errors is empty' do
+          let(:blacklisted_errors) { [] }
+
+          before { subject.with_blacklisted_errors(blacklisted_errors) }
+
+          it 'records the failure' do
+            expect(subject.data_store.get_failures(subject).size).to eql(0)
+            begin
+              subject.run
+            rescue error.class
+              nil
+            end
+            expect(subject.data_store.get_failures(subject).size).to eql(1)
+          end
+        end
+
+        context 'when the error is both allowed and blacklisted' do
+          let(:allowed_errors) { [error.class] }
+          let(:blacklisted_errors) { [error.class] }
+
+          before do
+            subject
+              .with_allowed_errors(allowed_errors)
+              .with_blacklisted_errors(blacklisted_errors)
+          end
+
+          it 'does not record the failure' do
+            expect(subject.data_store.get_failures(subject).size).to eql(0)
+            begin
+              subject.run
+            rescue error.class
+              nil
+            end
+            expect(subject.data_store.get_failures(subject).size).to eql(0)
+          end
+        end
+
         context 'with a fallback' do
           before { subject.with_fallback(&fallback) }
 

@@ -6,6 +6,8 @@ module Stoplight
 
     # @return [Array<Exception>]
     attr_reader :allowed_errors
+    # @return [Array<Exception>]
+    attr_reader :blacklisted_errors
     # @return [Proc]
     attr_reader :code
     # @return [DataStore::Base]
@@ -43,6 +45,7 @@ module Stoplight
       @code = code
 
       @allowed_errors = Default::ALLOWED_ERRORS
+      @blacklisted_errors = Default::BLACKLISTED_ERRORS
       @data_store = self.class.default_data_store
       @error_notifier = self.class.default_error_notifier
       @fallback = Default::FALLBACK
@@ -55,6 +58,13 @@ module Stoplight
     # @return [self]
     def with_allowed_errors(allowed_errors)
       @allowed_errors = Default::ALLOWED_ERRORS + allowed_errors
+      self
+    end
+
+    # @param blacklisted_errors [Array<Exception>]
+    # @return [self]
+    def with_blacklisted_errors(blacklisted_errors)
+      @blacklisted_errors = Default::BLACKLISTED_ERRORS + blacklisted_errors
       self
     end
 

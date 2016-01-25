@@ -23,6 +23,20 @@ RSpec.describe Stoplight::Default do
     end
   end
 
+  describe '::BLACKLISTED_ERRORS' do
+    it 'is an array' do
+      expect(Stoplight::Default::BLACKLISTED_ERRORS).to be_an(Array)
+    end
+
+    it 'is empty' do
+      expect(Stoplight::Default::BLACKLISTED_ERRORS).to be_empty
+    end
+
+    it 'is frozen' do
+      expect(Stoplight::Default::BLACKLISTED_ERRORS).to be_frozen
+    end
+  end
+
   describe '::DATA_STORE' do
     it 'is a data store' do
       expect(Stoplight::Default::DATA_STORE).to be_a(Stoplight::DataStore::Base)

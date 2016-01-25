@@ -73,6 +73,14 @@ RSpec.describe Stoplight::Light do
     end
   end
 
+  describe '#blacklisted_errors' do
+    it 'is initially the default' do
+      expect(light.blacklisted_errors).to eql(
+        Stoplight::Default::BLACKLISTED_ERRORS
+      )
+    end
+  end
+
   describe '#code' do
     it 'reads the code' do
       expect(light.code).to eql(code)
