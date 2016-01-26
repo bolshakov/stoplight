@@ -33,7 +33,7 @@ Gem::Specification.new do |gem|
 
   {
     'benchmark-ips' => '2.3',
-    'bugsnag' => '2.8',
+    'bugsnag' => '3.0',
     'coveralls' => '0.8',
     'fakeredis' => '0.5',
     'guard' => '2.13',
