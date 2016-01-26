@@ -119,7 +119,7 @@ a while. (The yellow state corresponds to the half open state for circuit
 
 ### Custom errors
 
-##### Allowed errors
+##### Whitelisted errors
 
 Some errors shouldn't cause your stoplight to move into the red state. Usually
 these are handled elsewhere in your stack and don't represent real failures. A
@@ -127,7 +127,7 @@ good example is `ActiveRecord::RecordNotFound`.
 
 ``` rb
 light = Stoplight('example-3') { User.find(123) }
-  .with_allowed_errors([ActiveRecord::RecordNotFound])
+  .with_whitelisted_errors([ActiveRecord::RecordNotFound])
 # => #<Stoplight::Light:...>
 light.run
 # ActiveRecord::RecordNotFound: Couldn't find User with ID=123
@@ -139,10 +139,10 @@ light.color
 # => "green"
 ```
 
-The following errors are always allowed: `NoMemoryError`, `ScriptError`,
+The following errors are always whitelisted: `NoMemoryError`, `ScriptError`,
 `SecurityError`, `SignalException`, `SystemExit`, and `SystemStackError`.
 
-Allowed errors take precedence over [blacklisted errors](#blacklisted-errors).
+Whitelisted errors take precedence over [blacklisted errors](#blacklisted-errors).
 
 ##### Blacklisted errors
 
@@ -267,7 +267,7 @@ class ApplicationController < ActionController::Base
 
   def stoplight(&block)
     Stoplight("#{params[:controller]}##{params[:action]}", &block)
-      .with_allowed_errors([ActiveRecord::RecordNotFound])
+      .with_whitelisted_errors([ActiveRecord::RecordNotFound])
       .with_fallback do |error|
         Rails.logger.error(error)
         render(nothing: true, status: :service_unavailable)

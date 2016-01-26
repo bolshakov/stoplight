@@ -2,7 +2,7 @@
 
 module Stoplight
   module Default
-    ALLOWED_ERRORS = [
+    WHITELISTED_ERRORS = [
       NoMemoryError,
       ScriptError,
       SecurityError,

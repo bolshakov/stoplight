@@ -119,10 +119,10 @@ RSpec.describe Stoplight::Light::Runnable do
           expect(io.string).to_not eql('')
         end
 
-        context 'when the error is allowed' do
-          let(:allowed_errors) { [error.class] }
+        context 'when the error is whitelisted' do
+          let(:whitelisted_errors) { [error.class] }
 
-          before { subject.with_allowed_errors(allowed_errors) }
+          before { subject.with_whitelisted_errors(whitelisted_errors) }
 
           it 'does not record the failure' do
             expect(subject.data_store.get_failures(subject).size).to eql(0)
@@ -183,13 +183,13 @@ RSpec.describe Stoplight::Light::Runnable do
           end
         end
 
-        context 'when the error is both allowed and blacklisted' do
-          let(:allowed_errors) { [error.class] }
+        context 'when the error is both whitelisted and blacklisted' do
+          let(:whitelisted_errors) { [error.class] }
           let(:blacklisted_errors) { [error.class] }
 
           before do
             subject
-              .with_allowed_errors(allowed_errors)
+              .with_whitelisted_errors(whitelisted_errors)
               .with_blacklisted_errors(blacklisted_errors)
           end
 
