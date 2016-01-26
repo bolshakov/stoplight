@@ -1,4 +1,5 @@
 env: RAKE_TASK=spec
+cache: bundler
 language: ruby
 matrix:
   include:
