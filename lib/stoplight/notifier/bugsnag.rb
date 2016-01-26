@@ -6,7 +6,7 @@ module Stoplight
     class Bugsnag < Base
       DEFAULT_OPTIONS = {
         severity: 'info'
-      }
+      }.freeze
 
       StoplightStatusChange = Class.new(Error::Base)
 

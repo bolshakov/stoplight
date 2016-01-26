@@ -13,7 +13,7 @@ module Stoplight
 
     DATA_STORE = DataStore::Memory.new
 
-    ERROR_NOTIFIER = -> error { warn error }
+    ERROR_NOTIFIER = -> (error) { warn error }
 
     FALLBACK = nil
 

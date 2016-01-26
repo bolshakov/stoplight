@@ -42,7 +42,7 @@ RSpec.describe Stoplight::Light do
     after { described_class.default_error_notifier = @default_error_notifier }
 
     it 'sets the error notifier' do
-      default_error_notifier = -> _ {}
+      default_error_notifier = -> (_) {}
       described_class.default_error_notifier = default_error_notifier
       expect(described_class.default_error_notifier)
         .to eql(default_error_notifier)
@@ -141,7 +141,7 @@ RSpec.describe Stoplight::Light do
 
   describe '#with_error_notifier' do
     it 'sets the error notifier' do
-      error_notifier = -> _ {}
+      error_notifier = -> (_) {}
       light.with_error_notifier(&error_notifier)
       expect(light.error_notifier).to eql(error_notifier)
     end
@@ -149,7 +149,7 @@ RSpec.describe Stoplight::Light do
 
   describe '#with_fallback' do
     it 'sets the fallback' do
-      fallback = -> _ {}
+      fallback = -> (_) {}
       light.with_fallback(&fallback)
       expect(light.fallback).to eql(fallback)
     end

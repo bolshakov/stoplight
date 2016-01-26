@@ -8,7 +8,7 @@ RSpec.describe Stoplight::Light::Runnable do
 
   let(:code) { -> { code_result } }
   let(:code_result) { random_string }
-  let(:fallback) { -> _ { fallback_result } }
+  let(:fallback) { -> (_) { fallback_result } }
   let(:fallback_result) { random_string }
   let(:name) { random_string }
 
@@ -154,7 +154,7 @@ RSpec.describe Stoplight::Light::Runnable do
 
       context 'when the data store is failing' do
         let(:data_store) { Object.new }
-        let(:error_notifier) { -> _ {} }
+        let(:error_notifier) { -> (_) {} }
 
         before do
           subject
