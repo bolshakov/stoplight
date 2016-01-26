@@ -61,7 +61,7 @@ module Stoplight
       self
     end
 
-    alias_method :with_allowed_errors, :with_whitelisted_errors
+    alias with_allowed_errors with_whitelisted_errors
 
     # @param blacklisted_errors [Array<Exception>]
     # @return [self]
