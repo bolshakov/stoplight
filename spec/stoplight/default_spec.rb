@@ -7,19 +7,33 @@ RSpec.describe Stoplight::Default do
     expect(described_class).to be_a(Module)
   end
 
-  describe '::ALLOWED_ERRORS' do
+  describe '::WHITELISTED_ERRORS' do
     it 'is an array' do
-      expect(Stoplight::Default::ALLOWED_ERRORS).to be_an(Array)
+      expect(Stoplight::Default::WHITELISTED_ERRORS).to be_an(Array)
     end
 
     it 'contains exception classes' do
-      Stoplight::Default::ALLOWED_ERRORS.each do |allowed_error|
-        expect(allowed_error).to be < Exception
+      Stoplight::Default::WHITELISTED_ERRORS.each do |whitelisted_error|
+        expect(whitelisted_error).to be < Exception
       end
     end
 
     it 'is frozen' do
-      expect(Stoplight::Default::ALLOWED_ERRORS).to be_frozen
+      expect(Stoplight::Default::WHITELISTED_ERRORS).to be_frozen
+    end
+  end
+
+  describe '::BLACKLISTED_ERRORS' do
+    it 'is an array' do
+      expect(Stoplight::Default::BLACKLISTED_ERRORS).to be_an(Array)
+    end
+
+    it 'is empty' do
+      expect(Stoplight::Default::BLACKLISTED_ERRORS).to be_empty
+    end
+
+    it 'is frozen' do
+      expect(Stoplight::Default::BLACKLISTED_ERRORS).to be_frozen
     end
   end
 

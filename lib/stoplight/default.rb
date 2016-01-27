@@ -2,7 +2,7 @@
 
 module Stoplight
   module Default
-    ALLOWED_ERRORS = [
+    WHITELISTED_ERRORS = [
       NoMemoryError,
       ScriptError,
       SecurityError,
@@ -10,6 +10,8 @@ module Stoplight
       SystemExit,
       SystemStackError
     ].freeze
+
+    BLACKLISTED_ERRORS = [].freeze
 
     DATA_STORE = DataStore::Memory.new
 

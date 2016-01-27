@@ -56,8 +56,14 @@ module Stoplight
         handle_error(error, on_failure)
       end
 
+      def not_blacklisted_error?(error)
+        blacklisted_errors.length > 0 &&
+          blacklisted_errors.none? { |klass| error.is_a?(klass) }
+      end
+
       def handle_error(error, on_failure)
-        fail error if allowed_errors.any? { |klass| error.is_a?(klass) }
+        fail error if whitelisted_errors.any? { |klass| error.is_a?(klass) }
+        fail error if not_blacklisted_error?(error)
         size = record_failure(error)
         on_failure.call(size, error) if on_failure
         fail error unless fallback
