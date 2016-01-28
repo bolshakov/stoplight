@@ -45,13 +45,13 @@ Check out [stoplight-admin][] for controlling your stoplights.
 Add it to your Gemfile:
 
 ``` rb
-gem 'stoplight', '~> 1.1'
+gem 'stoplight'
 ```
 
 Or install it manually:
 
 ``` sh
-$ gem install stoplight --version '~> 1.1'
+$ gem install stoplight
 ```
 
 Stoplight uses [Semantic Versioning][]. Check out [the change log][] for a
