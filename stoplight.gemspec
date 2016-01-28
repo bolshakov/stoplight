@@ -29,7 +29,7 @@ Gem::Specification.new do |gem|
   ) + Dir.glob(File.join('lib', '**', '*.rb'))
   gem.test_files = Dir.glob(File.join('spec', '**', '*.rb'))
 
-  gem.required_ruby_version = '>= 1.9.3'
+  gem.required_ruby_version = '>= 2'
 
   {
     'benchmark-ips' => '2.3',
