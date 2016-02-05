@@ -44,7 +44,7 @@ Gem::Specification.new do |gem|
     'rake' => '10.4',
     'redis' => '3.2',
     'rspec' => '3.3',
-    'rubocop' => '0.36.0',
+    'rubocop' => '0.37.0',
     'slack-notifier' => '1.3',
     'timecop' => '0.8',
     'yard' => '0.8'
