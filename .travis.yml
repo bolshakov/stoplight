@@ -2,7 +2,7 @@ addons:
   apt:
     packages:
     - libgmp-dev
-env: RAKE_TASK=spec
+env: JRUBY_OPTS=--debug RAKE_TASK=spec
 cache: bundler
 language: ruby
 matrix:
