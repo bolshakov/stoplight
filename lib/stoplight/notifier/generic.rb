@@ -2,7 +2,7 @@
 
 module Stoplight
   module Notifier
-    module Generic
+    module Generic # rubocop:disable Style/Documentation
       # @return [Proc]
       attr_reader :formatter
 

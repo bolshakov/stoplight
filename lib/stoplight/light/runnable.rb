@@ -2,7 +2,7 @@
 
 module Stoplight
   class Light
-    module Runnable
+    module Runnable # rubocop:disable Style/Documentation
       # @return [String]
       def color
         failures, state = failures_and_state

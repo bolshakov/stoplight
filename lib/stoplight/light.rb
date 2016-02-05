@@ -1,7 +1,7 @@
 # coding: utf-8
 
 module Stoplight
-  class Light
+  class Light # rubocop:disable Style/Documentation
     include Runnable
 
     # @return [Array<Exception>]
