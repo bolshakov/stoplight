@@ -91,7 +91,7 @@ RSpec.describe Stoplight::Light::Runnable do
       end
 
       context 'when the code is failing' do
-        let(:code_result) { fail error }
+        let(:code_result) { raise error }
 
         it 're-raises the error' do
           expect { subject.run }.to raise_error(error.class)

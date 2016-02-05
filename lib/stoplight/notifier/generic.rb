@@ -23,7 +23,7 @@ module Stoplight
       private
 
       def put(_message)
-        fail NotImplementedError
+        raise NotImplementedError
       end
     end
   end

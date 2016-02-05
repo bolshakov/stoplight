@@ -43,7 +43,7 @@ module Stoplight
       end
 
       def run_red
-        fail Error::RedLight, name unless fallback
+        raise Error::RedLight, name unless fallback
         fallback.call(nil)
       end
 
@@ -62,11 +62,11 @@ module Stoplight
       end
 
       def handle_error(error, on_failure)
-        fail error if whitelisted_errors.any? { |klass| error.is_a?(klass) }
-        fail error if not_blacklisted_error?(error)
+        raise error if whitelisted_errors.any? { |klass| error.is_a?(klass) }
+        raise error if not_blacklisted_error?(error)
         size = record_failure(error)
         on_failure.call(size, error) if on_failure
-        fail error unless fallback
+        raise error unless fallback
         fallback.call(error)
       end
 
