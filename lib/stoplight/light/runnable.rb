@@ -57,7 +57,7 @@ module Stoplight
       end
 
       def not_blacklisted_error?(error)
-        blacklisted_errors.length > 0 &&
+        !blacklisted_errors.empty? &&
           blacklisted_errors.none? { |klass| error.is_a?(klass) }
       end
 
