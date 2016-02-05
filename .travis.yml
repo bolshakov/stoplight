@@ -1,3 +1,7 @@
+addons:
+  apt:
+    packages:
+    - libgmp-dev
 env: RAKE_TASK=spec
 cache: bundler
 language: ruby
