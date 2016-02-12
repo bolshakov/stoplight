@@ -8,7 +8,7 @@ RSpec.describe Stoplight::Light::Runnable do
 
   let(:code) { -> { code_result } }
   let(:code_result) { random_string }
-  let(:fallback) { -> _ { fallback_result } }
+  let(:fallback) { -> (_) { fallback_result } }
   let(:fallback_result) { random_string }
   let(:name) { random_string }
 
@@ -91,7 +91,7 @@ RSpec.describe Stoplight::Light::Runnable do
       end
 
       context 'when the code is failing' do
-        let(:code_result) { fail error }
+        let(:code_result) { raise error }
 
         it 're-raises the error' do
           expect { subject.run }.to raise_error(error.class)
@@ -119,10 +119,79 @@ RSpec.describe Stoplight::Light::Runnable do
           expect(io.string).to_not eql('')
         end
 
-        context 'when the error is allowed' do
-          let(:allowed_errors) { [error.class] }
+        context 'when the error is whitelisted' do
+          let(:whitelisted_errors) { [error.class] }
 
-          before { subject.with_allowed_errors(allowed_errors) }
+          before { subject.with_whitelisted_errors(whitelisted_errors) }
+
+          it 'does not record the failure' do
+            expect(subject.data_store.get_failures(subject).size).to eql(0)
+            begin
+              subject.run
+            rescue error.class
+              nil
+            end
+            expect(subject.data_store.get_failures(subject).size).to eql(0)
+          end
+        end
+
+        context 'when the error is blacklisted' do
+          let(:blacklisted_errors) { [error.class] }
+
+          before { subject.with_blacklisted_errors(blacklisted_errors) }
+
+          it 'records the failure' do
+            expect(subject.data_store.get_failures(subject).size).to eql(0)
+            begin
+              subject.run
+            rescue error.class
+              nil
+            end
+            expect(subject.data_store.get_failures(subject).size).to eql(1)
+          end
+        end
+
+        context 'when the error is not blacklisted' do
+          let(:blacklisted_errors) { [RuntimeError] }
+
+          before { subject.with_blacklisted_errors(blacklisted_errors) }
+
+          it 'does not record the failure' do
+            expect(subject.data_store.get_failures(subject).size).to eql(0)
+            begin
+              subject.run
+            rescue error.class
+              nil
+            end
+            expect(subject.data_store.get_failures(subject).size).to eql(0)
+          end
+        end
+
+        context 'when the list of blacklisted errors is empty' do
+          let(:blacklisted_errors) { [] }
+
+          before { subject.with_blacklisted_errors(blacklisted_errors) }
+
+          it 'records the failure' do
+            expect(subject.data_store.get_failures(subject).size).to eql(0)
+            begin
+              subject.run
+            rescue error.class
+              nil
+            end
+            expect(subject.data_store.get_failures(subject).size).to eql(1)
+          end
+        end
+
+        context 'when the error is both whitelisted and blacklisted' do
+          let(:whitelisted_errors) { [error.class] }
+          let(:blacklisted_errors) { [error.class] }
+
+          before do
+            subject
+              .with_whitelisted_errors(whitelisted_errors)
+              .with_blacklisted_errors(blacklisted_errors)
+          end
 
           it 'does not record the failure' do
             expect(subject.data_store.get_failures(subject).size).to eql(0)
@@ -154,7 +223,7 @@ RSpec.describe Stoplight::Light::Runnable do
 
       context 'when the data store is failing' do
         let(:data_store) { Object.new }
-        let(:error_notifier) { -> _ {} }
+        let(:error_notifier) { -> (_) {} }
 
         before do
           subject

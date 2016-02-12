@@ -1,6 +1,6 @@
 # coding: utf-8
 
-module Stoplight
+module Stoplight # rubocop:disable Style/Documentation
 end
 
 require 'stoplight/version'

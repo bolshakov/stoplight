@@ -1,15 +1,20 @@
-env: RAKE_TASK=spec
+addons:
+  apt:
+    packages:
+    - libgmp-dev
+env: JRUBY_OPTS=--debug RAKE_TASK=spec
+cache: bundler
 language: ruby
 matrix:
   include:
   - env: RAKE_TASK=rubocop
-    rvm: '2.2'
+    rvm: '2.3'
 rvm:
+- '2.3'
 - '2.2'
 - '2.1'
 - '2.0'
-- '1.9'
-- 'jruby'
+- 'jruby-9'
 - 'rbx-2'
 script: bundle exec rake $RAKE_TASK
 sudo: false

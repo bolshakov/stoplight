@@ -22,17 +22,20 @@ Gem::Specification.new do |gem|
     gem.email = hash.values
   end
 
-  gem.files = %w(CHANGELOG.md LICENSE.md README.md) +
-    Dir.glob(File.join('lib', '**', '*.rb'))
+  gem.files = %w(
+    CHANGELOG.md
+    LICENSE.md
+    README.md
+  ) + Dir.glob(File.join('lib', '**', '*.rb'))
   gem.test_files = Dir.glob(File.join('spec', '**', '*.rb'))
 
-  gem.required_ruby_version = '>= 1.9.3'
+  gem.required_ruby_version = '>= 2'
 
   gem.add_dependency 'concurrent-ruby'
 
   {
     'benchmark-ips' => '2.3',
-    'bugsnag' => '2.8',
+    'bugsnag' => '3.0',
     'coveralls' => '0.8',
     'fakeredis' => '0.5',
     'guard' => '2.13',
@@ -43,10 +46,9 @@ Gem::Specification.new do |gem|
     'rake' => '10.4',
     'redis' => '3.2',
     'rspec' => '3.3',
-    'rubocop' => '0.34',
+    'rubocop' => '0.37.0',
     'slack-notifier' => '1.3',
-    'timecop' => '0.8',
-    'yard' => '0.8'
+    'timecop' => '0.8'
   }.each do |name, version|
     gem.add_development_dependency(name, "~> #{version}")
   end

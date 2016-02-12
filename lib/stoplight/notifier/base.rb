@@ -10,7 +10,7 @@ module Stoplight
       # @param _error [Exception, nil]
       # @return [String]
       def notify(_light, _from_color, _to_color, _error)
-        fail NotImplementedError
+        raise NotImplementedError
       end
     end
   end

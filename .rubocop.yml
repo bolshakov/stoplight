@@ -1,7 +1,0 @@
-AllCops:
-  DisplayCopNames: true
-  Exclude:
-  - tmp/**/*
-  - vendor/**/*
-Style/Documentation:
-  Enabled: false

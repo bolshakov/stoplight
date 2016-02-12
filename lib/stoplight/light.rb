@@ -1,11 +1,13 @@
 # coding: utf-8
 
 module Stoplight
-  class Light
+  class Light # rubocop:disable Style/Documentation
     include Runnable
 
     # @return [Array<Exception>]
-    attr_reader :allowed_errors
+    attr_reader :whitelisted_errors
+    # @return [Array<Exception>]
+    attr_reader :blacklisted_errors
     # @return [Proc]
     attr_reader :code
     # @return [DataStore::Base]
@@ -42,7 +44,8 @@ module Stoplight
       @name = name
       @code = code
 
-      @allowed_errors = Default::ALLOWED_ERRORS
+      @whitelisted_errors = Default::WHITELISTED_ERRORS
+      @blacklisted_errors = Default::BLACKLISTED_ERRORS
       @data_store = self.class.default_data_store
       @error_notifier = self.class.default_error_notifier
       @fallback = Default::FALLBACK
@@ -51,10 +54,19 @@ module Stoplight
       @timeout = Default::TIMEOUT
     end
 
-    # @param allowed_errors [Array<Exception>]
+    # @param whitelisted_errors [Array<Exception>]
     # @return [self]
-    def with_allowed_errors(allowed_errors)
-      @allowed_errors = Default::ALLOWED_ERRORS + allowed_errors
+    def with_whitelisted_errors(whitelisted_errors)
+      @whitelisted_errors = Default::WHITELISTED_ERRORS + whitelisted_errors
+      self
+    end
+
+    alias with_allowed_errors with_whitelisted_errors
+
+    # @param blacklisted_errors [Array<Exception>]
+    # @return [self]
+    def with_blacklisted_errors(blacklisted_errors)
+      @blacklisted_errors = Default::BLACKLISTED_ERRORS + blacklisted_errors
       self
     end
 

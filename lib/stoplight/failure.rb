@@ -4,7 +4,7 @@ require 'json'
 require 'time'
 
 module Stoplight
-  class Failure
+  class Failure # rubocop:disable Style/Documentation
     # @return [String]
     attr_reader :error_class
     # @return [String]

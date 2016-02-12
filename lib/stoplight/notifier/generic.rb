@@ -2,7 +2,7 @@
 
 module Stoplight
   module Notifier
-    module Generic
+    module Generic # rubocop:disable Style/Documentation
       # @return [Proc]
       attr_reader :formatter
 
@@ -23,7 +23,7 @@ module Stoplight
       private
 
       def put(_message)
-        fail NotImplementedError
+        raise NotImplementedError
       end
     end
   end

@@ -2,7 +2,7 @@
 
 module Stoplight
   class Light
-    module Runnable
+    module Runnable # rubocop:disable Style/Documentation
       # @return [String]
       def color
         failures, state = failures_and_state
@@ -43,7 +43,7 @@ module Stoplight
       end
 
       def run_red
-        fail Error::RedLight, name unless fallback
+        raise Error::RedLight, name unless fallback
         fallback.call(nil)
       end
 
@@ -56,11 +56,17 @@ module Stoplight
         handle_error(error, on_failure)
       end
 
+      def not_blacklisted_error?(error)
+        !blacklisted_errors.empty? &&
+          blacklisted_errors.none? { |klass| error.is_a?(klass) }
+      end
+
       def handle_error(error, on_failure)
-        fail error if allowed_errors.any? { |klass| error.is_a?(klass) }
+        raise error if whitelisted_errors.any? { |klass| error.is_a?(klass) }
+        raise error if not_blacklisted_error?(error)
         size = record_failure(error)
         on_failure.call(size, error) if on_failure
-        fail error unless fallback
+        raise error unless fallback
         fallback.call(error)
       end
 
@@ -84,9 +90,11 @@ module Stoplight
       end
 
       def safely(default = nil, &code)
-        return code.call if data_store == Default::DATA_STORE
+        return yield if data_store == Default::DATA_STORE
 
-        self.class.new("#{name}-safely", &code)
+        self
+          .class
+          .new("#{name}-safely", &code)
           .with_data_store(Default::DATA_STORE)
           .with_fallback do |error|
             error_notifier.call(error) if error
