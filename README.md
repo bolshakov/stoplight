@@ -478,27 +478,27 @@ Martin Fowler's [CircuitBreaker][] article.
 
 Stoplight is licensed under [the MIT License][].
 
-[stoplight]: https://github.com/orgsync/stoplight
-[version]: https://img.shields.io/gem/v/stoplight.svg?label=version
-[build]: https://img.shields.io/travis/orgsync/stoplight/master.svg?label=build
-[grade]: https://img.shields.io/badge/grade-A-brightgreen.svg
-[coverage]: https://img.shields.io/coveralls/orgsync/stoplight/master.svg?label=coverage
-[climate]: https://img.shields.io/codeclimate/github/orgsync/stoplight.svg?label=climate
-[dependencies]: https://img.shields.io/gemnasium/orgsync/stoplight.svg?label=dependencies
+[Stoplight]: https://github.com/orgsync/stoplight
+[Version]: https://img.shields.io/gem/v/stoplight.svg?label=version
+[Build]: https://img.shields.io/travis/orgsync/stoplight/master.svg?label=build
+[Grade]: https://img.shields.io/badge/grade-A-brightgreen.svg
+[Coverage]: https://img.shields.io/coveralls/orgsync/stoplight/master.svg?label=coverage
+[Climate]: https://img.shields.io/codeclimate/github/orgsync/stoplight.svg?label=climate
+[Dependencies]: https://img.shields.io/gemnasium/orgsync/stoplight.svg?label=dependencies
 [stoplight-admin]: https://github.com/orgsync/stoplight-admin
-[semantic versioning]: http://semver.org/spec/v2.0.0.html
+[Semantic Versioning]: http://semver.org/spec/v2.0.0.html
 [the change log]: CHANGELOG.md
 [the notifiers section]: #notifiers
 [the timeout section]: #custom-timeout
-[the redis gem]: https://rubygems.org/gems/redis
-[the bugsnag gem]: https://rubygems.org/gems/bugsnag
-[the hipchat gem]: https://rubygems.org/gems/hipchat
-[the honeybadger gem]: https://rubygems.org/gems/honeybadger
-[the logger class]: http://ruby-doc.org/stdlib-2.2.3/libdoc/logger/rdoc/Logger.html
-[the slack gem]: https://rubygems.org/gems/slack-notifier
+[the Redis gem]: https://rubygems.org/gems/redis
+[the Bugsnag gem]: https://rubygems.org/gems/bugsnag
+[the HipChat gem]: https://rubygems.org/gems/hipchat
+[the Honeybadger gem]: https://rubygems.org/gems/honeybadger
+[the Logger class]: http://ruby-doc.org/stdlib-2.2.3/libdoc/logger/rdoc/Logger.html
+[the Slack gem]: https://rubygems.org/gems/slack-notifier
 [@camdez]: https://github.com/camdez
 [@tfausak]: https://github.com/tfausak
 [@orgsync]: https://github.com/OrgSync
 [complete list of contributors]: https://github.com/orgsync/stoplight/graphs/contributors
-[circuitbreaker]: http://martinfowler.com/bliki/CircuitBreaker.html
-[the mit license]: LICENSE.md
+[CircuitBreaker]: http://martinfowler.com/bliki/CircuitBreaker.html
+[the MIT license]: LICENSE.md
