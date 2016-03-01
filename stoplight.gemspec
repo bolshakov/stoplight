@@ -31,6 +31,8 @@ Gem::Specification.new do |gem|
 
   gem.required_ruby_version = '>= 2'
 
+  gem.add_dependency 'concurrent-ruby'
+
   {
     'benchmark-ips' => '2.3',
     'bugsnag' => '3.0',

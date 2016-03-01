@@ -1,11 +1,16 @@
 # coding: utf-8
 
+require 'concurrent/map'
+require 'monitor'
+
 module Stoplight
   module DataStore
     # @see Base
     class Memory < Base
       def initialize
-        @data = {}
+        @failures = Concurrent::Map.new { [] }
+        @states   = Concurrent::Map.new { State::UNLOCKED }
+        @lock = Monitor.new
       end
 
       def names
@@ -17,23 +22,23 @@ module Stoplight
       end
 
       def get_failures(light)
-        all_failures[light.name] || []
+        all_failures[light.name]
       end
 
       def record_failure(light, failure)
-        failures = get_failures(light).unshift(failure).first(light.threshold)
-        all_failures[light.name] = failures
-        failures.size
+        @lock.synchronize do
+          failures = get_failures(light).first(light.threshold-1).unshift(failure)
+          all_failures[light.name] = failures
+          failures.size
+        end
       end
 
       def clear_failures(light)
-        failures = get_failures(light)
         all_failures.delete(light.name)
-        failures
       end
 
       def get_state(light)
-        all_states[light.name] || State::UNLOCKED
+        all_states[light.name]
       end
 
       def set_state(light, state)
@@ -41,19 +46,17 @@ module Stoplight
       end
 
       def clear_state(light)
-        state = get_state(light)
         all_states.delete(light.name)
-        state
       end
 
       private
 
       def all_failures
-        @data['failures'] ||= {}
+        @failures
       end
 
       def all_states
-        @data['states'] ||= {}
+        @states
       end
     end
   end
