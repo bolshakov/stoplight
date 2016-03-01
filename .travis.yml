@@ -8,7 +8,7 @@ language: ruby
 matrix:
   include:
   - env: RAKE_TASK=rubocop
-    rvm: '2.3'
+    rvm: '2.3.0'
 rvm:
 - '2.3.0'
 - '2.2'
