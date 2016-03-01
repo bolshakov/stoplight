@@ -352,7 +352,7 @@ Stoplight::Light.default_notifiers += [notifier]
 
 #### Honeybadger
 
-Make sure you have [the Honeybadger gem][] (`~> 2.1`) installed before
+Make sure you have [the Honeybadger gem][] (`~> 2.5`) installed before
 configuring Stoplight.
 
 ``` rb
