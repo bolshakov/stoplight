@@ -1,11 +1,11 @@
 # [Stoplight][]
 
-[![Version][]](https://rubygems.org/gems/stoplight)
-[![Build][]](https://travis-ci.org/orgsync/stoplight)
-[![Coverage][]](https://coveralls.io/r/orgsync/stoplight)
-[![Grade][]](http://www.libgrader.com/libraries/ruby/stoplight)
-[![Climate][]](https://codeclimate.com/github/orgsync/stoplight)
-[![Dependencies][]](https://gemnasium.com/orgsync/stoplight)
+[![Version badge][]][version]
+[![Build badge][]][build]
+[![Coverage badge][]][coverage]
+[![Grade badge][]][grade]
+[![Climate badge][]][climate]
+[![Dependencies badge][]][dependencies]
 
 Stoplight is traffic control for code. It's an implementation of the circuit
 breaker pattern in Ruby.
@@ -479,12 +479,18 @@ Martin Fowler's [CircuitBreaker][] article.
 Stoplight is licensed under [the MIT License][].
 
 [Stoplight]: https://github.com/orgsync/stoplight
-[Version]: https://img.shields.io/gem/v/stoplight.svg?label=version
-[Build]: https://img.shields.io/travis/orgsync/stoplight/master.svg?label=build
-[Grade]: https://img.shields.io/badge/grade-A-brightgreen.svg
-[Coverage]: https://img.shields.io/coveralls/orgsync/stoplight/master.svg?label=coverage
-[Climate]: https://img.shields.io/codeclimate/github/orgsync/stoplight.svg?label=climate
-[Dependencies]: https://img.shields.io/gemnasium/orgsync/stoplight.svg?label=dependencies
+[Version badge]: https://img.shields.io/gem/v/stoplight.svg?label=version
+[version]: https://rubygems.org/gems/stoplight
+[Build badge]: https://img.shields.io/travis/orgsync/stoplight/master.svg?label=build
+[build]: https://travis-ci.org/orgsync/stoplight
+[Coverage badge]: https://img.shields.io/coveralls/orgsync/stoplight/master.svg?label=coverage
+[coverage]: https://coveralls.io/r/orgsync/stoplight
+[Grade badge]: https://img.shields.io/badge/grade-A-brightgreen.svg
+[grade]: http://www.libgrader.com/libraries/ruby/stoplight
+[Climate badge]: https://img.shields.io/codeclimate/github/orgsync/stoplight.svg?label=climate
+[climate]: https://codeclimate.com/github/orgsync/stoplight
+[Dependencies badge]: https://img.shields.io/gemnasium/orgsync/stoplight.svg?label=dependencies
+[dependencies]: https://gemnasium.com/orgsync/stoplight
 [stoplight-admin]: https://github.com/orgsync/stoplight-admin
 [Semantic Versioning]: http://semver.org/spec/v2.0.0.html
 [the change log]: CHANGELOG.md
