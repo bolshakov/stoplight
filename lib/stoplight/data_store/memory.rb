@@ -1,7 +1,6 @@
 # coding: utf-8
 
-require 'concurrent/map'
-require 'monitor'
+require 'concurrent'
 
 module Stoplight
   module DataStore
