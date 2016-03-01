@@ -64,7 +64,7 @@ Stoplight works with all supported versions of Ruby (2.0 through 2.3).
 To get started, create a stoplight:
 
 ``` rb
-light = Stoplight('example-1') { 22.0 / 7 }
+light = Stoplight('example-pi') { 22.0 / 7 }
 # => #<Stoplight::Light:...>
 ```
 
@@ -84,7 +84,7 @@ stoplight. That's not very interesting though, so let's create a failing
 stoplight:
 
 ``` rb
-light = Stoplight('example-2') { 1 / 0 }
+light = Stoplight('example-zero') { 1 / 0 }
 # => #<Stoplight::Light:...>
 ```
 
@@ -99,10 +99,10 @@ light.run
 light.run
 # ZeroDivisionError: divided by 0
 light.run
-# Switching example-2 from green to red because ZeroDivisionError divided by 0
+# Switching example-zero from green to red because ZeroDivisionError divided by 0
 # ZeroDivisionError: divided by 0
 light.run
-# Stoplight::Error::RedLight: example-2
+# Stoplight::Error::RedLight: example-zero
 light.color
 # => "red"
 ```
@@ -119,14 +119,14 @@ a while. (The yellow state corresponds to the half open state for circuit
 
 ### Custom errors
 
-##### Whitelisted errors
+#### Whitelisted errors
 
 Some errors shouldn't cause your stoplight to move into the red state. Usually
 these are handled elsewhere in your stack and don't represent real failures. A
 good example is `ActiveRecord::RecordNotFound`.
 
 ``` rb
-light = Stoplight('example-3') { User.find(123) }
+light = Stoplight('example-not-found') { User.find(123) }
   .with_whitelisted_errors([ActiveRecord::RecordNotFound])
 # => #<Stoplight::Light:...>
 light.run
@@ -144,13 +144,13 @@ The following errors are always whitelisted: `NoMemoryError`, `ScriptError`,
 
 Whitelisted errors take precedence over [blacklisted errors](#blacklisted-errors).
 
-##### Blacklisted errors
+#### Blacklisted errors
 
 You may want only certain errors to cause your stoplight to move into the red
 state.
 
 ``` rb
-light = Stoplight('example-4') { 1 / 0 }
+light = Stoplight('example-blacklist-zero') { 1 / 0 }
   .with_blacklisted_errors([ZeroDivisionError])
 # => #<Stoplight::Light:...>
 light.run
@@ -158,6 +158,7 @@ light.run
 light.run
 # ZeroDivisionError: divided by 0
 light.run
+# Switching example-blacklist-zero from green to red because ZeroDivisionError divided by 0
 # ZeroDivisionError: divided by 0
 light.color
 # => "red"
@@ -167,7 +168,7 @@ This will cause all other errors to be raised normally. They won't affect the
 state of your stoplight.
 
 ``` rb
-light = Stoplight('example-5') { fail }
+light = Stoplight('example-blacklist-fail') { fail }
   .with_blacklisted_errors([ZeroDivisionError])
 # => #<Stoplight::Light:...>
 light.run
@@ -188,7 +189,7 @@ fallback that will be called in both of these cases. It will be passed the
 error if the light was green.
 
 ``` rb
-light = Stoplight('example-6') { 1 / 0 }
+light = Stoplight('example-fallback') { 1 / 0 }
   .with_fallback { |e| p e; 'default' }
 # => #<Stoplight::Light:..>
 light.run
@@ -198,7 +199,7 @@ light.run
 # #<ZeroDivisionError: divided by 0>
 # => "default"
 light.run
-# Switching example-4 from green to red because ZeroDivisionError divided by 0
+# Switching example-fallback from green to red because ZeroDivisionError divided by 0
 # #<ZeroDivisionError: divided by 0>
 # => "default"
 light.run
@@ -212,14 +213,14 @@ Some bits of code might be allowed to fail more or less frequently than others.
 You can configure this by setting a custom threshold.
 
 ``` rb
-light = Stoplight('example-7') { fail }
+light = Stoplight('example-threshold') { fail }
   .with_threshold(1)
 # => #<Stoplight::Light:...>
 light.run
-# Switching example-5 from green to red because RuntimeError
+# Switching example-threshold from green to red because RuntimeError
 # RuntimeError:
 light.run
-# Stoplight::Error::RedLight: example-5
+# Stoplight::Error::RedLight: example-threshold
 ```
 
 The default threshold is `3`.
@@ -231,7 +232,7 @@ time. A light in the red state for longer than the timeout will transition to
 the yellow state. This timeout is customizable.
 
 ``` rb
-light = Stoplight('example-8') { fail }
+light = Stoplight('example-timeout') { fail }
   .with_timeout(1)
 # => #<Stoplight::Light:...>
 light.run
@@ -239,7 +240,7 @@ light.run
 light.run
 # RuntimeError:
 light.run
-# Switching example-6 from green to red because RuntimeError
+# Switching example-timeout from green to red because RuntimeError
 # RuntimeError:
 sleep(1)
 # => 1
@@ -419,14 +420,14 @@ override the default behavior. You can lock a light in either the green or red
 state using `set_state`.
 
 ``` rb
-light = Stoplight('example-9') { true }
+light = Stoplight('example-locked') { true }
 # => #<Stoplight::Light:..>
 light.run
 # => true
 light.data_store.set_state(light, Stoplight::State::LOCKED_RED)
 # => "locked_red"
 light.run
-# Stoplight::Error::RedLight: example-7
+# Stoplight::Error::RedLight: example-locked
 ```
 
 **Code in locked red lights may still run under certain conditions!** If you
