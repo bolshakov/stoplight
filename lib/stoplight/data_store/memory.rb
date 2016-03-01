@@ -9,7 +9,7 @@ module Stoplight
     class Memory < Base
       def initialize
         @failures = Concurrent::Map.new { [] }
-        @states   = Concurrent::Map.new { State::UNLOCKED }
+        @states = Concurrent::Map.new { State::UNLOCKED }
         @lock = Monitor.new
       end
 
@@ -27,7 +27,8 @@ module Stoplight
 
       def record_failure(light, failure)
         @lock.synchronize do
-          failures = get_failures(light).first(light.threshold-1).unshift(failure)
+          n = light.threshold - 1
+          failures = get_failures(light).first(n).unshift(failure)
           all_failures[light.name] = failures
           failures.size
         end
