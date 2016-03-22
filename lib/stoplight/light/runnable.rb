@@ -52,7 +52,7 @@ module Stoplight
         failures = clear_failures
         on_success.call(failures) if on_success
         result
-      rescue => error
+      rescue *[StandardError].concat(blacklisted_errors) => error
         handle_error(error, on_failure)
       end
 
