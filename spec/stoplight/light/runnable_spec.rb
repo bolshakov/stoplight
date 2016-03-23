@@ -169,7 +169,8 @@ RSpec.describe Stoplight::Light::Runnable do
         end
 
         context 'when the error is not blacklisted' do
-          let(:blacklisted_errors) { [RuntimeError] }
+          let(:error_class) { Class.new(Exception) }
+          let(:blacklisted_errors) { [] }
 
           before { subject.with_blacklisted_errors(blacklisted_errors) }
 

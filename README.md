@@ -125,6 +125,9 @@ Some errors shouldn't cause your stoplight to move into the red state. Usually
 these are handled elsewhere in your stack and don't represent real failures. A
 good example is `ActiveRecord::RecordNotFound`.
 
+By default all errors that inherit from StandardError will be caught by stoplight. 
+To ignore specific errors add them to the whitelist.
+
 ``` rb
 light = Stoplight('example-not-found') { User.find(123) }
   .with_whitelisted_errors([ActiveRecord::RecordNotFound])
@@ -139,27 +142,26 @@ light.color
 # => "green"
 ```
 
-The following errors are always whitelisted: `NoMemoryError`, `ScriptError`,
-`SecurityError`, `SignalException`, `SystemExit`, and `SystemStackError`.
-
 Whitelisted errors take precedence over [blacklisted errors](#blacklisted-errors).
 
 #### Blacklisted errors
 
-You may want only certain errors to cause your stoplight to move into the red
-state.
+By default errors that inherit from `Exception`, other than `StandardError`, are not caught by Stoplight. This is because
+this would catch errors like `Interrupt`, when Ctrl-C is hit, and `NoMemoryError`. Never the less
+there may be times when you need Stoplight to catch a child of `Exception`, to do so add it to
+the blacklist.
 
 ``` rb
 light = Stoplight('example-blacklist-zero') { 1 / 0 }
-  .with_blacklisted_errors([ZeroDivisionError])
+  .with_blacklisted_errors([SystemExit])
 # => #<Stoplight::Light:...>
 light.run
-# ZeroDivisionError: divided by 0
+# SystemExit: divided by 0
 light.run
-# ZeroDivisionError: divided by 0
+# SystemExit: divided by 0
 light.run
 # Switching example-blacklist-zero from green to red because ZeroDivisionError divided by 0
-# ZeroDivisionError: divided by 0
+# SystemExit: divided by 0
 light.color
 # => "red"
 ```
