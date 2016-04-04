@@ -92,9 +92,9 @@ RSpec.describe Stoplight::Default do
     end
   end
 
-  describe '::TIMEOUT' do
+  describe '::COOL_OFF_TIME' do
     it 'is a float' do
-      expect(Stoplight::Default::TIMEOUT).to be_a(Float)
+      expect(Stoplight::Default::COOL_OFF_TIME).to be_a(Float)
     end
   end
 end

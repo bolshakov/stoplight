@@ -23,7 +23,7 @@ module Stoplight
     # @return [Fixnum]
     attr_reader :threshold
     # @return [Float]
-    attr_reader :timeout
+    attr_reader :cool_off_time
 
     class << self
       # @return [DataStore::Base]
@@ -51,7 +51,7 @@ module Stoplight
       @fallback = Default::FALLBACK
       @notifiers = self.class.default_notifiers
       @threshold = Default::THRESHOLD
-      @timeout = Default::TIMEOUT
+      @cool_off_time = Default::COOL_OFF_TIME
     end
 
     # @param whitelisted_errors [Array<Exception>]
@@ -105,11 +105,14 @@ module Stoplight
       self
     end
 
-    # @param timeout [Float]
+    # @param cool_off_time [Float]
     # @return [self]
-    def with_timeout(timeout)
-      @timeout = timeout
+    def with_cool_off_time(cool_off_time)
+      @cool_off_time = cool_off_time
       self
     end
+
+    # @deprecated use `with_cool_off_time` instead
+    alias with_timeout with_cool_off_time
   end
 end
