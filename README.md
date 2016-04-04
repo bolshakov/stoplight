@@ -125,7 +125,7 @@ Some errors shouldn't cause your stoplight to move into the red state. Usually
 these are handled elsewhere in your stack and don't represent real failures. A
 good example is `ActiveRecord::RecordNotFound`.
 
-By default all errors that inherit from StandardError will be caught by stoplight. 
+By default all errors that inherit from `StandardError` will be caught by stoplight. 
 To ignore specific errors add them to the whitelist.
 
 ``` rb
