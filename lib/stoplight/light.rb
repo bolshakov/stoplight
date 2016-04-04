@@ -24,6 +24,8 @@ module Stoplight
     attr_reader :threshold
     # @return [Float]
     attr_reader :timeout
+    # @return [Proc]
+    attr_reader :error_handler
 
     class << self
       # @return [DataStore::Base]
@@ -109,6 +111,13 @@ module Stoplight
     # @return [self]
     def with_timeout(timeout)
       @timeout = timeout
+      self
+    end
+
+    # @param error_handler [Proc]
+    # @return [self]
+    def with_error_handler(error_handler)
+      @error_handler = error_handler
       self
     end
   end
