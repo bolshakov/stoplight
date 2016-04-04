@@ -4,7 +4,9 @@ module Stoplight
   module Default
     WHITELISTED_ERRORS = [].freeze
 
-    BLACKLISTED_ERRORS = [StandardError].freeze
+    BLACKLISTED_ERRORS = [
+      StandardError
+    ].freeze
 
     DATA_STORE = DataStore::Memory.new
 
