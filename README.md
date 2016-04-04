@@ -126,9 +126,6 @@ Some errors shouldn't cause your stoplight to move into the red state. Usually
 these are handled elsewhere in your stack and don't represent real failures. A
 good example is `ActiveRecord::RecordNotFound`.
 
-By default all errors that inherit from StandardError will be caught by stoplight. 
-To ignore specific errors add them to the whitelist.
-
 ``` rb
 light = Stoplight('example-not-found') { User.find(123) }
   .with_whitelisted_errors([ActiveRecord::RecordNotFound])
@@ -143,26 +140,27 @@ light.color
 # => "green"
 ```
 
+The following errors are always whitelisted: `NoMemoryError`, `SignalException`,
+`Interrupt`, and `SystemExit`.
+
 Whitelisted errors take precedence over [blacklisted errors](#blacklisted-errors).
 
 #### Blacklisted errors
 
-By default errors that inherit from `Exception`, other than `StandardError`, are not caught by Stoplight. This is because
-this would catch errors like `Interrupt`, when Ctrl-C is hit, and `NoMemoryError`. Never the less
-there may be times when you need Stoplight to catch a child of `Exception`, to do so add it to
-the blacklist.
+You may want only certain errors to cause your stoplight to move into the red
+state.
 
 ``` rb
 light = Stoplight('example-blacklist-zero') { 1 / 0 }
-  .with_blacklisted_errors([SystemExit])
+  .with_blacklisted_errors([ZeroDivisionError])
 # => #<Stoplight::Light:...>
 light.run
-# SystemExit: divided by 0
+# ZeroDivisionError: divided by 0
 light.run
-# SystemExit: divided by 0
+# ZeroDivisionError: divided by 0
 light.run
 # Switching example-blacklist-zero from green to red because ZeroDivisionError divided by 0
-# SystemExit: divided by 0
+# ZeroDivisionError: divided by 0
 light.color
 # => "red"
 ```
@@ -257,6 +255,32 @@ The default timeout is `60` seconds. To disable automatic recovery, set the
 timeout to `Float::INFINITY`. To make automatic recovery instantaneous, set the
 timeout to `0` seconds. Note that this is not recommended, as it effectively
 replaces the red state with yellow.
+
+### Custom error handler
+
+Stoplight defaults to using the whitelisted_errors and the blacklisted_errors 
+to handle errors. If you have a custom strategy pass a `Proc` or a callable to 
+`with_error_handler`. When called it passes error, whitelist, and blacklist as
+keyword args. To act as a whitelist re-raise the error, otherwise do nothing 
+to ask as a blacklist.
+
+``` rb
+light = Stoplight('example-custom-error-handler') { fail }
+  .with_error_handler -> (error:, whitelisted_errors:, blacklisted_errors:) do
+    if error !== RuntimeError
+      raise error
+    end
+  end
+# => #<Stoplight::Light:...>
+light.run
+# RuntimeError:
+light.run
+# RuntimeError:
+light.run
+# RuntimeError:
+light.color
+# => "green"
+```
 
 ### Rails
 
