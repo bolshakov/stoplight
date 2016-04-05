@@ -47,17 +47,26 @@ module Stoplight
         fallback.call(nil)
       end
 
+      module AllExceptionsExceptOnesWeMustNotRescue
+        # These exceptions are dangerous to rescue as rescuing them
+        # would interfere with things we should not interfere with.
+        AVOID_RESCUING = [NoMemoryError, SignalException, Interrupt, SystemExit]
+
+        def self.===(exception)
+          AVOID_RESCUING.none? { |ar| ar === exception }
+        end
+      end
+
       def run_code(on_success, on_failure)
         result = code.call
         failures = clear_failures
         on_success.call(failures) if on_success
         result
-      rescue Exception => error # rubocop:disable Lint/RescueException
+      rescue AllExceptionsExceptOnesWeMustNotRescue, error_handler => error
         handle_error(error, on_failure)
       end
 
       def handle_error(error, on_failure)
-        error_handler.call(error)
         size = record_failure(error)
         on_failure.call(size, error) if on_failure
         raise error unless fallback

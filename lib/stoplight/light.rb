@@ -54,7 +54,11 @@ module Stoplight
     # @param error_handler [Proc]
     # @return [self]
     def with_error_handler(error_handler)
-      @error_handler = error_handler
+      @error_handler = Module.new.instance_eval do
+        define_method(:===) do |error|
+          error_handler.call(error)
+        end
+      end
       self
     end
 

@@ -3,13 +3,7 @@
 module Stoplight
   module Default
     ERROR_HANDLER = lambda do |error|
-      classes = [
-        Interrupt,
-        NoMemoryError,
-        SignalException,
-        SystemExit
-      ]
-      raise error if classes.any? { |klass| error.is_a?(klass) }
+      false
     end
 
     DATA_STORE = DataStore::Memory.new
