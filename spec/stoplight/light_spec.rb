@@ -67,22 +67,6 @@ RSpec.describe Stoplight::Light do
     end
   end
 
-  describe '#whitelisted_errors' do
-    it 'is initially the default' do
-      expect(light.whitelisted_errors).to eql(
-        Stoplight::Default::WHITELISTED_ERRORS
-      )
-    end
-  end
-
-  describe '#blacklisted_errors' do
-    it 'is initially the default' do
-      expect(light.blacklisted_errors).to eql(
-        Stoplight::Default::BLACKLISTED_ERRORS
-      )
-    end
-  end
-
   describe '#code' do
     it 'reads the code' do
       expect(light.code).to eql(code)
@@ -92,6 +76,12 @@ RSpec.describe Stoplight::Light do
   describe '#data_store' do
     it 'is initially the default' do
       expect(light.data_store).to eql(described_class.default_data_store)
+    end
+  end
+
+  describe '#error_handler' do
+    it 'it initially the default' do
+      expect(light.error_handler).to eql(Stoplight::Default::ERROR_HANDLER)
     end
   end
 
@@ -132,38 +122,19 @@ RSpec.describe Stoplight::Light do
     end
   end
 
-  describe '#with_whitelisted_errors' do
-    it 'adds the whitelisted errors to the default' do
-      whitelisted_errors = [StandardError]
-      light.with_whitelisted_errors(whitelisted_errors)
-      expect(light.whitelisted_errors)
-        .to eql(Stoplight::Default::WHITELISTED_ERRORS + whitelisted_errors)
-    end
-  end
-
-  describe '#with_allowed_errors' do
-    it 'sets whitelisted_errors' do
-      allowed_errors = [StandardError]
-      light.with_allowed_errors(allowed_errors)
-      expect(light.whitelisted_errors)
-        .to eql(Stoplight::Default::WHITELISTED_ERRORS + allowed_errors)
-    end
-  end
-
-  describe '#with_blacklisted_errors' do
-    it 'adds the blacklisted errors to the default' do
-      blacklisted_errors = [StandardError]
-      light.with_blacklisted_errors(blacklisted_errors)
-      expect(light.blacklisted_errors)
-        .to eql(Stoplight::Default::BLACKLISTED_ERRORS + blacklisted_errors)
-    end
-  end
-
   describe '#with_data_store' do
     it 'sets the data store' do
       data_store = Stoplight::DataStore::Memory.new
       light.with_data_store(data_store)
       expect(light.data_store).to eql(data_store)
+    end
+  end
+
+  describe '#with_error_handler' do
+    it 'sets the error handler' do
+      error_handler = -> (_, _) {}
+      light.with_error_handler(&error_handler)
+      expect(light.error_handler).to eql(error_handler)
     end
   end
 

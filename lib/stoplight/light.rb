@@ -4,14 +4,12 @@ module Stoplight
   class Light # rubocop:disable Style/Documentation
     include Runnable
 
-    # @return [Array<Exception>]
-    attr_reader :whitelisted_errors
-    # @return [Array<Exception>]
-    attr_reader :blacklisted_errors
     # @return [Proc]
     attr_reader :code
     # @return [DataStore::Base]
     attr_reader :data_store
+    # @return [Proc]
+    attr_reader :error_handler
     # @return [Proc]
     attr_reader :error_notifier
     # @return [Proc, nil]
@@ -44,9 +42,8 @@ module Stoplight
       @name = name
       @code = code
 
-      @whitelisted_errors = Default::WHITELISTED_ERRORS
-      @blacklisted_errors = Default::BLACKLISTED_ERRORS
       @data_store = self.class.default_data_store
+      @error_handler = Default::ERROR_HANDLER
       @error_notifier = self.class.default_error_notifier
       @fallback = Default::FALLBACK
       @notifiers = self.class.default_notifiers
@@ -54,26 +51,18 @@ module Stoplight
       @timeout = Default::TIMEOUT
     end
 
-    # @param whitelisted_errors [Array<Exception>]
-    # @return [self]
-    def with_whitelisted_errors(whitelisted_errors)
-      @whitelisted_errors = Default::WHITELISTED_ERRORS + whitelisted_errors
-      self
-    end
-
-    alias with_allowed_errors with_whitelisted_errors
-
-    # @param blacklisted_errors [Array<Exception>]
-    # @return [self]
-    def with_blacklisted_errors(blacklisted_errors)
-      @blacklisted_errors = Default::BLACKLISTED_ERRORS + blacklisted_errors
-      self
-    end
-
     # @param data_store [DataStore::Base]
     # @return [self]
     def with_data_store(data_store)
       @data_store = data_store
+      self
+    end
+
+    # @yieldparam error [Exception]
+    # @yieldparam handle [Proc]
+    # @return [self]
+    def with_error_handler(&error_handler)
+      @error_handler = error_handler
       self
     end
 

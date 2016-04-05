@@ -2,18 +2,9 @@
 
 module Stoplight
   module Default
-    WHITELISTED_ERRORS = [
-      NoMemoryError,
-      ScriptError,
-      SecurityError,
-      SignalException,
-      SystemExit,
-      SystemStackError
-    ].freeze
-
-    BLACKLISTED_ERRORS = [].freeze
-
     DATA_STORE = DataStore::Memory.new
+
+    ERROR_HANDLER = -> (error, handler) { handler.call(error) }
 
     ERROR_NOTIFIER = -> (error) { warn error }
 

@@ -119,105 +119,34 @@ RSpec.describe Stoplight::Light::Runnable do
           expect(io.string).to_not eql('')
         end
 
-        context 'when the error is whitelisted' do
-          let(:whitelisted_errors) { [error.class] }
-
-          before { subject.with_whitelisted_errors(whitelisted_errors) }
-
-          it 'does not record the failure' do
-            expect(subject.data_store.get_failures(subject).size).to eql(0)
+        context 'with an error handler' do
+          let(:result) do
             begin
               subject.run
+              expect(false).to be(true)
             rescue error.class
-              nil
+              expect(true).to be(true)
             end
-            expect(subject.data_store.get_failures(subject).size).to eql(0)
-          end
-        end
-
-        context 'when the error is blacklisted' do
-          let(:blacklisted_errors) { [error.class] }
-
-          before { subject.with_blacklisted_errors(blacklisted_errors) }
-
-          it 'records the failure' do
-            expect(subject.data_store.get_failures(subject).size).to eql(0)
-            begin
-              subject.run
-            rescue error.class
-              nil
-            end
-            expect(subject.data_store.get_failures(subject).size).to eql(1)
-          end
-        end
-
-        context 'when the error is a blacklisted of Exception class' do
-          let(:error_class) { Class.new(Exception) }
-          let(:blacklisted_errors) { [error.class] }
-
-          before { subject.with_blacklisted_errors(blacklisted_errors) }
-
-          it 'records the failure' do
-            expect(subject.data_store.get_failures(subject).size).to eql(0)
-            begin
-              subject.run
-            rescue error.class
-              nil
-            end
-            expect(subject.data_store.get_failures(subject).size).to eql(1)
-          end
-        end
-
-        context 'when the error is not blacklisted' do
-          let(:blacklisted_errors) { [RuntimeError] }
-
-          before { subject.with_blacklisted_errors(blacklisted_errors) }
-
-          it 'does not record the failure' do
-            expect(subject.data_store.get_failures(subject).size).to eql(0)
-            begin
-              subject.run
-            rescue error.class
-              nil
-            end
-            expect(subject.data_store.get_failures(subject).size).to eql(0)
-          end
-        end
-
-        context 'when the list of blacklisted errors is empty' do
-          let(:blacklisted_errors) { [] }
-
-          before { subject.with_blacklisted_errors(blacklisted_errors) }
-
-          it 'records the failure' do
-            expect(subject.data_store.get_failures(subject).size).to eql(0)
-            begin
-              subject.run
-            rescue error.class
-              nil
-            end
-            expect(subject.data_store.get_failures(subject).size).to eql(1)
-          end
-        end
-
-        context 'when the error is both whitelisted and blacklisted' do
-          let(:whitelisted_errors) { [error.class] }
-          let(:blacklisted_errors) { [error.class] }
-
-          before do
-            subject
-              .with_whitelisted_errors(whitelisted_errors)
-              .with_blacklisted_errors(blacklisted_errors)
           end
 
-          it 'does not record the failure' do
-            expect(subject.data_store.get_failures(subject).size).to eql(0)
-            begin
-              subject.run
-            rescue error.class
-              nil
-            end
-            expect(subject.data_store.get_failures(subject).size).to eql(0)
+          it 'records the failure when the handler does nothing' do
+            subject.with_error_handler { |_error, _handler| }
+            expect { result }
+              .to change { subject.data_store.get_failures(subject).size }
+              .by(1)
+          end
+
+          it 'records the failure when the handler calls handle' do
+            subject.with_error_handler { |error, handle| handle.call(error) }
+            expect { result }
+              .to change { subject.data_store.get_failures(subject).size }
+              .by(1)
+          end
+
+          it 'does not record the failure when the handler raises' do
+            subject.with_error_handler { |error, _handle| raise error }
+            expect { result }
+              .to_not change { subject.data_store.get_failures(subject).size }
           end
         end
 
