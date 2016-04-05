@@ -165,6 +165,30 @@ RSpec.describe Stoplight::Light do
   end
 
   describe '#error_handler' do
+    context 'with custom error_handler' do
+      let(:error) { NotImplementedError }
+
+      it "ignores the error" do
+        light.with_error_handler -> (e){ e == error }
+        expect {
+          begin
+            raise error
+          rescue light.error_handler
+          end
+        }.to raise_error(error)
+      end
+
+      it "rescues the error" do
+        light.with_error_handler -> (e){ e != error }
+        expect {
+          begin
+            raise error
+          rescue light.error_handler
+          end
+        }.to_not raise_error(error)
+      end
+    end
+
     it "rescues a StandardError" do
       expect {
         begin
