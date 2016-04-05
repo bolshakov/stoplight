@@ -124,13 +124,14 @@ these are handled elsewhere in your stack and don't represent real failures. A
 good example is `ActiveRecord::RecordNotFound`.
 
 To prevent some errors from changing the state of your stoplight, you can
-provide a custom `Proc` that will be called with the error. It should either
-re-raise the error or do nothing.
+provide a custom `Proc` that will be called with the error. If you return `false`
+stoplight will ignore the error. If you return `true` stoplight will consider
+the error towards moving into the red state.
 
 ``` rb
 light = Stoplight('example-not-found') { User.find(123) }
   .with_error_handler(lambda do |error|
-    raise error unless error.is_a?(ActiveRecord::RecordNotFound)
+    false return error.is_a?(ActiveRecord::RecordNotFound)
   end)
 # => #<Stoplight::Light:...>
 light.run
