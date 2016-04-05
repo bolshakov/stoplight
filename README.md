@@ -323,7 +323,7 @@ If you want to send notifications elsewhere, you'll have to set them up.
 
 #### Bugsnag
 
-Make sure you have [the Bugsnag gem][] (`~> 2.8`) installed before configuring
+Make sure you have [the Bugsnag gem][] (`~> 4.0`) installed before configuring
 Stoplight.
 
 ``` rb
