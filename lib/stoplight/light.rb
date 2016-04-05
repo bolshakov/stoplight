@@ -53,16 +53,28 @@ module Stoplight
 
     # @param error_handler [Proc]
     # @return [self]
-    def with_error_handler(error_handler)
+    def with_error_handler(error_handler) # rubocop:disable Metrics/MethodLength
       m = Module.new
       (class << m; self; end).instance_eval do
         define_method(:===) do |error|
-          Default::AllExceptionsExceptOnesWeMustNotRescue === error
-            && error_handler.call(error)
+          handler = ErrorHandler.new
+          error_handler.call(error, handler)
+          # rubocop:disable Style/CaseEquality
+          no_dangerous_error = Default::AVOID_RESCUING.none? { |a| a === error }
+          # rubocop:enable Style/CaseEquality
+          no_dangerous_error && handler.handle_error == error
         end
       end
       @error_handler = m
       self
+    end
+
+    class ErrorHandler # rubocop:disable Style/Documentation
+      attr_reader :handle_error
+
+      def handle(error)
+        @handle_error = error
+      end
     end
 
     # @param data_store [DataStore::Base]

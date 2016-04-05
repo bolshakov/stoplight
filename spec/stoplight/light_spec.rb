@@ -165,37 +165,37 @@ RSpec.describe Stoplight::Light do
   end
 
   describe '#error_handler' do
+    # rubocop:disable Lint/HandleExceptions
     context 'with custom error_handler' do
       let(:error) { NotImplementedError }
-
       it 'ignores the error' do
-        light.with_error_handler -> (e) { e == error }
+        light.with_error_handler -> (e, _) { e == error }
         expect do
           begin
             raise error
-          rescue light.error_handler # rubocop:disable Style/Documentation
+          rescue light.error_handler
           end
         end.to raise_error(error)
       end
 
       it 'rescues the error' do
-        light.with_error_handler -> (e) { e != error }
+        light.with_error_handler -> (e, handler) { handler.handle(e) }
         expect do
           begin
             raise error
-          rescue light.error_handler # rubocop:disable Style/Documentation
+          rescue light.error_handler
           end
-        end.to_not raise_error(error)
+        end.to_not raise_error
       end
     end
 
     it 'rescues a StandardError' do
-      expect {
+      expect do
         begin
           raise StandardError
-        rescue light.error_handler # rubocop:disable Style/Documentation
+        rescue light.error_handler
         end
-      }.not_to raise_error
+      end.not_to raise_error
     end
 
     it 'rescues an Exception' do
@@ -207,7 +207,7 @@ RSpec.describe Stoplight::Light do
       end.not_to raise_error
     end
 
-    Stoplight::Default::AllExceptionsExceptOnesWeMustNotRescue::AVOID_RESCUING.each do |klass| # rubocop:disable Style/Documentation
+    Stoplight::Default::AVOID_RESCUING.each do |klass|
       exception = if klass == SignalException
                     SignalException.new('INT')
                   else
@@ -218,10 +218,11 @@ RSpec.describe Stoplight::Light do
         expect do
           begin
             raise exception
-          rescue light.error_handler # rubocop:disable Style/Documentation
+          rescue light.error_handler
           end
         end.to raise_error(klass)
       end
     end
+    # rubocop:enable Lint/HandleExceptions
   end
 end
