@@ -14,7 +14,7 @@ RSpec.describe Stoplight::Default do
 
     it 'contains exception classes' do
       Stoplight::Default::WHITELISTED_ERRORS.each do |whitelisted_error|
-        expect(whitelisted_error).to be < Exception
+        expect(whitelisted_error).to be < StandardError
       end
     end
 
@@ -26,10 +26,6 @@ RSpec.describe Stoplight::Default do
   describe '::BLACKLISTED_ERRORS' do
     it 'is an array' do
       expect(Stoplight::Default::BLACKLISTED_ERRORS).to be_an(Array)
-    end
-
-    it 'is empty' do
-      expect(Stoplight::Default::BLACKLISTED_ERRORS).to be_empty
     end
 
     it 'is frozen' do

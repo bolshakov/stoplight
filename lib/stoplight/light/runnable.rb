@@ -52,7 +52,7 @@ module Stoplight
         failures = clear_failures
         on_success.call(failures) if on_success
         result
-      rescue *[StandardError].concat(blacklisted_errors) => error
+      rescue Default::AllExceptionsExceptOnesWeMustNotRescue => error
         handle_error(error, on_failure)
       end
 
@@ -62,8 +62,13 @@ module Stoplight
       end
 
       def handle_error(error, on_failure)
-        raise error if whitelisted_errors.any? { |klass| error.is_a?(klass) }
-        raise error if not_blacklisted_error?(error)
+        default_error_handler = -> (error:, **_) do
+          raise error if whitelisted_errors.any? { |klass| error.is_a?(klass) }
+          raise error if not_blacklisted_error?(error)
+        end
+        (error_handler || default_error_handler).call(error:              error,
+                                                      whitelisted_errors: whitelisted_errors,
+                                                      blacklisted_errors: blacklisted_errors)
         size = record_failure(error)
         on_failure.call(size, error) if on_failure
         raise error unless fallback

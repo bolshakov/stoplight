@@ -24,6 +24,7 @@ Check out [stoplight-admin][] for controlling your stoplights.
   - [Custom fallback](#custom-fallback)
   - [Custom threshold](#custom-threshold)
   - [Custom timeout](#custom-timeout)
+  - [Custom error handler](#custom-error-handler)
   - [Rails](#rails)
 - [Setup](#setup)
   - [Data store](#data-store)
@@ -139,8 +140,8 @@ light.color
 # => "green"
 ```
 
-The following errors are always whitelisted: `NoMemoryError`, `ScriptError`,
-`SecurityError`, `SignalException`, `SystemExit`, and `SystemStackError`.
+The following errors are always whitelisted: `NoMemoryError`, `SignalException`,
+`Interrupt`, and `SystemExit`.
 
 Whitelisted errors take precedence over [blacklisted errors](#blacklisted-errors).
 
@@ -254,6 +255,32 @@ The default timeout is `60` seconds. To disable automatic recovery, set the
 timeout to `Float::INFINITY`. To make automatic recovery instantaneous, set the
 timeout to `0` seconds. Note that this is not recommended, as it effectively
 replaces the red state with yellow.
+
+### Custom error handler
+
+Stoplight defaults to using the whitelisted_errors and the blacklisted_errors 
+to handle errors. If you have a custom strategy pass a `Proc` or a callable to 
+`with_error_handler`. When called it passes error, whitelist, and blacklist as
+keyword args. To act as a whitelist re-raise the error, otherwise do nothing 
+to ask as a blacklist.
+
+``` rb
+light = Stoplight('example-custom-error-handler') { fail }
+  .with_error_handler -> (error:, whitelisted_errors:, blacklisted_errors:) do
+    if error !== RuntimeError
+      raise error
+    end
+  end
+# => #<Stoplight::Light:...>
+light.run
+# RuntimeError:
+light.run
+# RuntimeError:
+light.run
+# RuntimeError:
+light.color
+# => "green"
+```
 
 ### Rails
 

@@ -151,23 +151,6 @@ RSpec.describe Stoplight::Light::Runnable do
           end
         end
 
-        context 'when the error is a blacklisted of Exception class' do
-          let(:error_class) { Class.new(Exception) }
-          let(:blacklisted_errors) { [error.class] }
-
-          before { subject.with_blacklisted_errors(blacklisted_errors) }
-
-          it 'records the failure' do
-            expect(subject.data_store.get_failures(subject).size).to eql(0)
-            begin
-              subject.run
-            rescue error.class
-              nil
-            end
-            expect(subject.data_store.get_failures(subject).size).to eql(1)
-          end
-        end
-
         context 'when the error is not blacklisted' do
           let(:blacklisted_errors) { [RuntimeError] }
 
@@ -218,6 +201,54 @@ RSpec.describe Stoplight::Light::Runnable do
               nil
             end
             expect(subject.data_store.get_failures(subject).size).to eql(0)
+          end
+        end
+
+        context 'when using user provided error handler' do
+          let(:whitelisted_errors) { [error.class] }
+          let(:blacklisted_errors) { [error.class] }
+          let(:error_handler){double("error_handlers")}
+
+          before do
+            subject
+              .with_error_handler(error_handler)
+              .with_whitelisted_errors(whitelisted_errors)
+              .with_blacklisted_errors(blacklisted_errors)
+          end
+
+          it 'does record the failure' do
+            allow(error_handler).to receive(:call) do |error:, **args|
+              raise error
+            end
+            expect(subject.data_store.get_failures(subject).size).to eql(0)
+            begin
+              subject.run
+            rescue error.class
+              nil
+            end
+            expect(subject.data_store.get_failures(subject).size).to eql(0)
+          end
+
+          it 'sends the correct arguments to custom error handler' do
+            expect(error_handler).to receive(:call).with(error:              error,
+                                                         blacklisted_errors: blacklisted_errors,
+                                                         whitelisted_errors: whitelisted_errors)
+            begin
+              subject.run
+            rescue error.class
+              nil
+            end
+          end
+
+          it 'does not record the failure' do
+            allow(error_handler).to receive(:call).and_return(true)
+            expect(subject.data_store.get_failures(subject).size).to eql(0)
+            begin
+              subject.run
+            rescue error.class
+              nil
+            end
+            expect(subject.data_store.get_failures(subject).size).to eql(1)
           end
         end
 

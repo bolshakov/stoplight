@@ -2,14 +2,7 @@
 
 module Stoplight
   module Default
-    WHITELISTED_ERRORS = [
-      NoMemoryError,
-      ScriptError,
-      SecurityError,
-      SignalException,
-      SystemExit,
-      SystemStackError
-    ].freeze
+    WHITELISTED_ERRORS = [].freeze
 
     BLACKLISTED_ERRORS = [].freeze
 
@@ -32,5 +25,16 @@ module Stoplight
     THRESHOLD = 3
 
     TIMEOUT = 60.0
+
+    # Taken from rspec-support
+    module AllExceptionsExceptOnesWeMustNotRescue
+      # These exceptions are dangerous to rescue as rescuing them
+      # would interfere with things we should not interfere with.
+      AVOID_RESCUING = [NoMemoryError, SignalException, Interrupt, SystemExit]
+
+      def self.===(exception)
+        AVOID_RESCUING.none? { |ar| ar === exception }
+      end
+    end
   end
 end

@@ -206,4 +206,12 @@ RSpec.describe Stoplight::Light do
       expect(light.timeout).to eql(timeout)
     end
   end
+
+  describe '#with_error_handler' do
+    it 'sets the error handler' do
+      error_handler = -> () {  }
+      light.with_error_handler(error_handler)
+      expect(light.error_handler).to eql(error_handler)
+    end
+  end
 end
