@@ -168,59 +168,59 @@ RSpec.describe Stoplight::Light do
     context 'with custom error_handler' do
       let(:error) { NotImplementedError }
 
-      it "ignores the error" do
-        light.with_error_handler -> (e){ e == error }
-        expect {
+      it 'ignores the error' do
+        light.with_error_handler -> (e) { e == error }
+        expect do
           begin
             raise error
-          rescue light.error_handler
+          rescue light.error_handler # rubocop:disable Style/Documentation
           end
-        }.to raise_error(error)
+        end.to raise_error(error)
       end
 
-      it "rescues the error" do
-        light.with_error_handler -> (e){ e != error }
-        expect {
+      it 'rescues the error' do
+        light.with_error_handler -> (e) { e != error }
+        expect do
           begin
             raise error
-          rescue light.error_handler
+          rescue light.error_handler # rubocop:disable Style/Documentation
           end
-        }.to_not raise_error(error)
+        end.to_not raise_error(error)
       end
     end
 
-    it "rescues a StandardError" do
+    it 'rescues a StandardError' do
       expect {
         begin
           raise StandardError
-        rescue light.error_handler
+        rescue light.error_handler # rubocop:disable Style/Documentation
         end
       }.not_to raise_error
     end
 
     it 'rescues an Exception' do
-      expect {
+      expect do
         begin
           raise Exception
         rescue light.error_handler
         end
-      }.not_to raise_error
+      end.not_to raise_error
     end
 
-    Stoplight::Default::AllExceptionsExceptOnesWeMustNotRescue::AVOID_RESCUING.each do |klass|
+    Stoplight::Default::AllExceptionsExceptOnesWeMustNotRescue::AVOID_RESCUING.each do |klass| # rubocop:disable Style/Documentation
       exception = if klass == SignalException
-                    SignalException.new("INT")
+                    SignalException.new('INT')
                   else
                     klass
                   end
 
       it "does not rescue a #{klass}" do
-        expect {
+        expect do
           begin
             raise exception
-          rescue light.error_handler
+          rescue light.error_handler # rubocop:disable Style/Documentation
           end
-        }.to raise_error(klass)
+        end.to raise_error(klass)
       end
     end
   end

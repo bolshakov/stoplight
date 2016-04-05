@@ -57,7 +57,8 @@ module Stoplight
       m = Module.new
       (class << m; self; end).instance_eval do
         define_method(:===) do |error|
-          Default::AllExceptionsExceptOnesWeMustNotRescue === error && error_handler.call(error)
+          Default::AllExceptionsExceptOnesWeMustNotRescue === error
+            && error_handler.call(error)
         end
       end
       @error_handler = m
