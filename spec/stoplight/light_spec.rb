@@ -163,4 +163,41 @@ RSpec.describe Stoplight::Light do
       expect(light.timeout).to eql(timeout)
     end
   end
+
+  describe '#error_handler' do
+    it "rescues a StandardError" do
+      expect {
+        begin
+          raise StandardError
+        rescue light.error_handler
+        end
+      }.not_to raise_error
+    end
+
+    it 'rescues an Exception' do
+      expect {
+        begin
+          raise Exception
+        rescue light.error_handler
+        end
+      }.not_to raise_error
+    end
+
+    Stoplight::Default::AllExceptionsExceptOnesWeMustNotRescue::AVOID_RESCUING.each do |klass|
+      exception = if klass == SignalException
+                    SignalException.new("INT")
+                  else
+                    klass
+                  end
+
+      it "does not rescue a #{klass}" do
+        expect {
+          begin
+            raise exception
+          rescue light.error_handler
+          end
+        }.to raise_error(klass)
+      end
+    end
+  end
 end

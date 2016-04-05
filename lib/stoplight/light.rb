@@ -42,7 +42,7 @@ module Stoplight
       @name = name
       @code = code
 
-      @error_handler = Default::ERROR_HANDLER
+      with_error_handler(Default::ERROR_HANDLER)
       @data_store = self.class.default_data_store
       @error_notifier = self.class.default_error_notifier
       @fallback = Default::FALLBACK
@@ -54,11 +54,13 @@ module Stoplight
     # @param error_handler [Proc]
     # @return [self]
     def with_error_handler(error_handler)
-      @error_handler = Module.new.instance_eval do
+      m = Module.new
+      (class << m; self; end).instance_eval do
         define_method(:===) do |error|
-          error_handler.call(error)
+          Default::AllExceptionsExceptOnesWeMustNotRescue === error && error_handler.call(error)
         end
       end
+      @error_handler = m
       self
     end
 

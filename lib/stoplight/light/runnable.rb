@@ -47,22 +47,12 @@ module Stoplight
         fallback.call(nil)
       end
 
-      module AllExceptionsExceptOnesWeMustNotRescue
-        # These exceptions are dangerous to rescue as rescuing them
-        # would interfere with things we should not interfere with.
-        AVOID_RESCUING = [NoMemoryError, SignalException, Interrupt, SystemExit]
-
-        def self.===(exception)
-          AVOID_RESCUING.none? { |ar| ar === exception }
-        end
-      end
-
       def run_code(on_success, on_failure)
         result = code.call
         failures = clear_failures
         on_success.call(failures) if on_success
         result
-      rescue AllExceptionsExceptOnesWeMustNotRescue, error_handler => error
+      rescue error_handler => error
         handle_error(error, on_failure)
       end
 
