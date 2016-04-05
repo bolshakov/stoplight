@@ -57,12 +57,21 @@ module Stoplight
       m = Module.new
       (class << m; self; end).instance_eval do
         define_method(:===) do |error|
-          Default::AllExceptionsExceptOnesWeMustNotRescue === error
-            && error_handler.call(error)
+          handler = ErrorHandler.new
+          error_handler.call(error, handler)
+          Default::AVOID_RESCUING.none? { |ar| ar === error } && handler.handle_error == error
         end
       end
       @error_handler = m
       self
+    end
+
+    class ErrorHandler
+      attr_reader :handle_error
+
+      def handle(error)
+        @handle_error = error
+      end
     end
 
     # @param data_store [DataStore::Base]

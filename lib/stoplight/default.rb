@@ -2,24 +2,18 @@
 
 module Stoplight
   module Default
-    ERROR_HANDLER = lambda do |_error|
-      true
+    ERROR_HANDLER = lambda do |error, handler|
+      handler.handle(error)
     end
 
-    module AllExceptionsExceptOnesWeMustNotRescue # rubocop:disable Style/Documentation
-      # These exceptions are dangerous to rescue as rescuing them
-      # would interfere with things we should not interfere with.
-      AVOID_RESCUING = [
-        NoMemoryError,
-        SignalException,
-        Interrupt,
-        SystemExit
-      ].freeze
-
-      def self.===(exception)
-        AVOID_RESCUING.none? { |ar| ar === exception } # rubocop:disable Style/Documentation
-      end
-    end
+    # These exceptions are dangerous to rescue as rescuing them
+    # would interfere with things we should not interfere with.
+    AVOID_RESCUING = [
+      NoMemoryError,
+      SignalException,
+      Interrupt,
+      SystemExit
+    ].freeze
 
     DATA_STORE = DataStore::Memory.new
 

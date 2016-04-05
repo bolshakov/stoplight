@@ -169,7 +169,7 @@ RSpec.describe Stoplight::Light do
       let(:error) { NotImplementedError }
 
       it 'ignores the error' do
-        light.with_error_handler -> (e) { e == error }
+        light.with_error_handler -> (e, _) { e == error }
         expect do
           begin
             raise error
@@ -179,13 +179,13 @@ RSpec.describe Stoplight::Light do
       end
 
       it 'rescues the error' do
-        light.with_error_handler -> (e) { e != error }
+        light.with_error_handler -> (e, handler) { handler.handle(e) }
         expect do
           begin
             raise error
           rescue light.error_handler # rubocop:disable Style/Documentation
           end
-        end.to_not raise_error(error)
+        end.to_not raise_error
       end
     end
 
@@ -207,7 +207,7 @@ RSpec.describe Stoplight::Light do
       end.not_to raise_error
     end
 
-    Stoplight::Default::AllExceptionsExceptOnesWeMustNotRescue::AVOID_RESCUING.each do |klass| # rubocop:disable Style/Documentation
+    Stoplight::Default::AVOID_RESCUING.each do |klass|
       exception = if klass == SignalException
                     SignalException.new('INT')
                   else
