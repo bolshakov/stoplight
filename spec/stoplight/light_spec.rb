@@ -67,22 +67,6 @@ RSpec.describe Stoplight::Light do
     end
   end
 
-  describe '#whitelisted_errors' do
-    it 'is initially the default' do
-      expect(light.whitelisted_errors).to eql(
-        Stoplight::Default::WHITELISTED_ERRORS
-      )
-    end
-  end
-
-  describe '#blacklisted_errors' do
-    it 'is initially the default' do
-      expect(light.blacklisted_errors).to eql(
-        Stoplight::Default::BLACKLISTED_ERRORS
-      )
-    end
-  end
-
   describe '#code' do
     it 'reads the code' do
       expect(light.code).to eql(code)
@@ -129,33 +113,6 @@ RSpec.describe Stoplight::Light do
   describe '#timeout' do
     it 'is initially the default' do
       expect(light.timeout).to eql(Stoplight::Default::TIMEOUT)
-    end
-  end
-
-  describe '#with_whitelisted_errors' do
-    it 'adds the whitelisted errors to the default' do
-      whitelisted_errors = [StandardError]
-      light.with_whitelisted_errors(whitelisted_errors)
-      expect(light.whitelisted_errors)
-        .to eql(Stoplight::Default::WHITELISTED_ERRORS + whitelisted_errors)
-    end
-  end
-
-  describe '#with_allowed_errors' do
-    it 'sets whitelisted_errors' do
-      allowed_errors = [StandardError]
-      light.with_allowed_errors(allowed_errors)
-      expect(light.whitelisted_errors)
-        .to eql(Stoplight::Default::WHITELISTED_ERRORS + allowed_errors)
-    end
-  end
-
-  describe '#with_blacklisted_errors' do
-    it 'adds the blacklisted errors to the default' do
-      blacklisted_errors = [StandardError]
-      light.with_blacklisted_errors(blacklisted_errors)
-      expect(light.blacklisted_errors)
-        .to eql(Stoplight::Default::BLACKLISTED_ERRORS + blacklisted_errors)
     end
   end
 

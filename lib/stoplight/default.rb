@@ -2,16 +2,15 @@
 
 module Stoplight
   module Default
-    WHITELISTED_ERRORS = [
-      NoMemoryError,
-      ScriptError,
-      SecurityError,
-      SignalException,
-      SystemExit,
-      SystemStackError
-    ].freeze
-
-    BLACKLISTED_ERRORS = [].freeze
+    ERROR_HANDLER = lambda do |error|
+      classes = [
+        Interrupt,
+        NoMemoryError,
+        SignalException,
+        SystemExit
+      ]
+      raise error if classes.any? { |klass| error.is_a?(klass) }
+    end
 
     DATA_STORE = DataStore::Memory.new
 
