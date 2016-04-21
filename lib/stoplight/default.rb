@@ -15,6 +15,12 @@ module Stoplight
       SystemExit
     ].freeze
 
+    module AllExceptionsExceptOnesWeMustNotRescue
+      def self.===(exception)
+        AVOID_RESCUING.none? { |ar| ar === exception }
+      end
+    end
+
     DATA_STORE = DataStore::Memory.new
 
     ERROR_NOTIFIER = -> (error) { warn error }
