@@ -54,8 +54,7 @@ module Stoplight
     # @param error_handler [Proc]
     # @return [self]
     def with_error_handler(error_handler) # rubocop:disable Metrics/MethodLength
-      m = Module.new
-      (class << m; self; end).instance_eval do
+      (@error_handler = Module.new).singleton_class.class_eval do
         define_method(:===) do |error|
           handler = ErrorHandler.new
           error_handler.call(error, handler)
@@ -65,7 +64,6 @@ module Stoplight
           no_dangerous_error && handler.handle_error == error
         end
       end
-      @error_handler = m
       self
     end
 
