@@ -67,22 +67,6 @@ RSpec.describe Stoplight::Light do
     end
   end
 
-  describe '#whitelisted_errors' do
-    it 'is initially the default' do
-      expect(light.whitelisted_errors).to eql(
-        Stoplight::Default::WHITELISTED_ERRORS
-      )
-    end
-  end
-
-  describe '#blacklisted_errors' do
-    it 'is initially the default' do
-      expect(light.blacklisted_errors).to eql(
-        Stoplight::Default::BLACKLISTED_ERRORS
-      )
-    end
-  end
-
   describe '#code' do
     it 'reads the code' do
       expect(light.code).to eql(code)
@@ -132,33 +116,6 @@ RSpec.describe Stoplight::Light do
     end
   end
 
-  describe '#with_whitelisted_errors' do
-    it 'adds the whitelisted errors to the default' do
-      whitelisted_errors = [StandardError]
-      light.with_whitelisted_errors(whitelisted_errors)
-      expect(light.whitelisted_errors)
-        .to eql(Stoplight::Default::WHITELISTED_ERRORS + whitelisted_errors)
-    end
-  end
-
-  describe '#with_allowed_errors' do
-    it 'sets whitelisted_errors' do
-      allowed_errors = [StandardError]
-      light.with_allowed_errors(allowed_errors)
-      expect(light.whitelisted_errors)
-        .to eql(Stoplight::Default::WHITELISTED_ERRORS + allowed_errors)
-    end
-  end
-
-  describe '#with_blacklisted_errors' do
-    it 'adds the blacklisted errors to the default' do
-      blacklisted_errors = [StandardError]
-      light.with_blacklisted_errors(blacklisted_errors)
-      expect(light.blacklisted_errors)
-        .to eql(Stoplight::Default::BLACKLISTED_ERRORS + blacklisted_errors)
-    end
-  end
-
   describe '#with_data_store' do
     it 'sets the data store' do
       data_store = Stoplight::DataStore::Memory.new
@@ -205,5 +162,67 @@ RSpec.describe Stoplight::Light do
       light.with_timeout(timeout)
       expect(light.timeout).to eql(timeout)
     end
+  end
+
+  describe '#error_handler' do
+    # rubocop:disable Lint/HandleExceptions
+    context 'with custom error_handler' do
+      let(:error) { NotImplementedError }
+      it 'ignores the error' do
+        light.with_error_handler -> (e, _) { e == error }
+        expect do
+          begin
+            raise error
+          rescue light.error_handler
+          end
+        end.to raise_error(error)
+      end
+
+      it 'rescues the error' do
+        light.with_error_handler -> (e, handler) { handler.handle(e) }
+        expect do
+          begin
+            raise error
+          rescue light.error_handler
+          end
+        end.to_not raise_error
+      end
+    end
+
+    it 'rescues a StandardError' do
+      expect do
+        begin
+          raise StandardError
+        rescue light.error_handler
+        end
+      end.not_to raise_error
+    end
+
+    it 'rescues an Exception' do
+      expect do
+        begin
+          raise Exception
+        rescue light.error_handler
+        end
+      end.not_to raise_error
+    end
+
+    Stoplight::Default::AVOID_RESCUING.each do |klass|
+      exception = if klass == SignalException
+                    SignalException.new('INT')
+                  else
+                    klass
+                  end
+
+      it "does not rescue a #{klass}" do
+        expect do
+          begin
+            raise exception
+          rescue light.error_handler
+          end
+        end.to raise_error(klass)
+      end
+    end
+    # rubocop:enable Lint/HandleExceptions
   end
 end

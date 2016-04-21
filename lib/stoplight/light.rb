@@ -4,10 +4,8 @@ module Stoplight
   class Light # rubocop:disable Style/Documentation
     include Runnable
 
-    # @return [Array<Exception>]
-    attr_reader :whitelisted_errors
-    # @return [Array<Exception>]
-    attr_reader :blacklisted_errors
+    # @return [Proc]
+    attr_reader :error_handler
     # @return [Proc]
     attr_reader :code
     # @return [DataStore::Base]
@@ -44,8 +42,7 @@ module Stoplight
       @name = name
       @code = code
 
-      @whitelisted_errors = Default::WHITELISTED_ERRORS
-      @blacklisted_errors = Default::BLACKLISTED_ERRORS
+      with_error_handler(Default::ERROR_HANDLER)
       @data_store = self.class.default_data_store
       @error_notifier = self.class.default_error_notifier
       @fallback = Default::FALLBACK
@@ -54,20 +51,28 @@ module Stoplight
       @timeout = Default::TIMEOUT
     end
 
-    # @param whitelisted_errors [Array<Exception>]
+    # @param error_handler [Proc]
     # @return [self]
-    def with_whitelisted_errors(whitelisted_errors)
-      @whitelisted_errors = Default::WHITELISTED_ERRORS + whitelisted_errors
+    def with_error_handler(error_handler) # rubocop:disable Metrics/MethodLength
+      (@error_handler = Module.new).singleton_class.class_eval do
+        define_method(:===) do |error|
+          handler = ErrorHandler.new
+          error_handler.call(error, handler)
+          # rubocop:disable Style/CaseEquality
+          no_dangerous_error = Default::AVOID_RESCUING.none? { |a| a === error }
+          # rubocop:enable Style/CaseEquality
+          no_dangerous_error && handler.handle_error == error
+        end
+      end
       self
     end
 
-    alias with_allowed_errors with_whitelisted_errors
+    class ErrorHandler # rubocop:disable Style/Documentation
+      attr_reader :handle_error
 
-    # @param blacklisted_errors [Array<Exception>]
-    # @return [self]
-    def with_blacklisted_errors(blacklisted_errors)
-      @blacklisted_errors = Default::BLACKLISTED_ERRORS + blacklisted_errors
-      self
+      def handle(error)
+        @handle_error = error
+      end
     end
 
     # @param data_store [DataStore::Base]
