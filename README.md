@@ -119,15 +119,20 @@ a while. (The yellow state corresponds to the half open state for circuit
 
 ### Custom errors
 
-#### Whitelisted errors
-
 Some errors shouldn't cause your stoplight to move into the red state. Usually
 these are handled elsewhere in your stack and don't represent real failures. A
 good example is `ActiveRecord::RecordNotFound`.
 
+To prevent some errors from changing the state of your stoplight, you can
+provide a custom `Proc` that will be called with the error. The `Proc` is
+passed an error and a handler. To send a signal to stoplight about this error
+call `handler#handle(error)`.
+
 ``` rb
 light = Stoplight('example-not-found') { User.find(123) }
-  .with_whitelisted_errors([ActiveRecord::RecordNotFound])
+  .with_error_handler(lambda do |error, handler|
+    handler.handle(error) unless error.is_a?(ActiveRecord::RecordNotFound)
+  end)
 # => #<Stoplight::Light:...>
 light.run
 # ActiveRecord::RecordNotFound: Couldn't find User with ID=123
@@ -135,48 +140,6 @@ light.run
 # ActiveRecord::RecordNotFound: Couldn't find User with ID=123
 light.run
 # ActiveRecord::RecordNotFound: Couldn't find User with ID=123
-light.color
-# => "green"
-```
-
-The following errors are always whitelisted: `NoMemoryError`, `ScriptError`,
-`SecurityError`, `SignalException`, `SystemExit`, and `SystemStackError`.
-
-Whitelisted errors take precedence over [blacklisted errors](#blacklisted-errors).
-
-#### Blacklisted errors
-
-You may want only certain errors to cause your stoplight to move into the red
-state.
-
-``` rb
-light = Stoplight('example-blacklist-zero') { 1 / 0 }
-  .with_blacklisted_errors([ZeroDivisionError])
-# => #<Stoplight::Light:...>
-light.run
-# ZeroDivisionError: divided by 0
-light.run
-# ZeroDivisionError: divided by 0
-light.run
-# Switching example-blacklist-zero from green to red because ZeroDivisionError divided by 0
-# ZeroDivisionError: divided by 0
-light.color
-# => "red"
-```
-
-This will cause all other errors to be raised normally. They won't affect the
-state of your stoplight.
-
-``` rb
-light = Stoplight('example-blacklist-fail') { fail }
-  .with_blacklisted_errors([ZeroDivisionError])
-# => #<Stoplight::Light:...>
-light.run
-# RuntimeError:
-light.run
-# RuntimeError:
-light.run
-# RuntimeError:
 light.color
 # => "green"
 ```
@@ -268,7 +231,6 @@ class ApplicationController < ActionController::Base
 
   def stoplight(&block)
     Stoplight("#{params[:controller]}##{params[:action]}", &block)
-      .with_whitelisted_errors([ActiveRecord::RecordNotFound])
       .with_fallback do |error|
         Rails.logger.error(error)
         render(nothing: true, status: :service_unavailable)

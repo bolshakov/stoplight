@@ -2,16 +2,24 @@
 
 module Stoplight
   module Default
-    WHITELISTED_ERRORS = [
+    ERROR_HANDLER = lambda do |error, handler|
+      handler.handle(error)
+    end
+
+    # These exceptions are dangerous to rescue as rescuing them
+    # would interfere with things we should not interfere with.
+    AVOID_RESCUING = [
       NoMemoryError,
-      ScriptError,
-      SecurityError,
       SignalException,
-      SystemExit,
-      SystemStackError
+      Interrupt,
+      SystemExit
     ].freeze
 
-    BLACKLISTED_ERRORS = [].freeze
+    module AllExceptionsExceptOnesWeMustNotRescue
+      def self.===(exception)
+        AVOID_RESCUING.none? { |ar| ar === exception }
+      end
+    end
 
     DATA_STORE = DataStore::Memory.new
 
