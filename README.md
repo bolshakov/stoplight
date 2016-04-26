@@ -57,7 +57,7 @@ $ gem install stoplight
 Stoplight uses [Semantic Versioning][]. Check out [the change log][] for a
 detailed list of changes.
 
-Stoplight works with all supported versions of Ruby (2.0 through 2.3).
+Stoplight works with all supported versions of Ruby (2.1 through 2.3).
 
 ## Basic usage
 
