@@ -112,10 +112,10 @@ notifier. See [the notifiers section][] to learn more about notifiers.
 
 The stoplight will move into the yellow state after being in the red state for
 a while. (The yellow state corresponds to the half open state for circuit
-  breakers.) To configure how long it takes to switch into the yellow state,
-  check out [the cool off time section][] When stoplights are yellow, they will try
-  to run their code. If it fails, they'll switch back to red. If it succeeds,
-  they'll switch to green.
+breakers.) To configure how long it takes to switch into the yellow state,
+check out [the cool off time section][] When stoplights are yellow, they will
+try to run their code. If it fails, they'll switch back to red. If it succeeds,
+they'll switch to green.
 
 ### Custom errors
 
@@ -196,8 +196,8 @@ The default threshold is `3`.
 ### Custom cool off time
 
 Stoplights will automatically attempt to recover after a certain amount of
-time. A light in the red state for longer than the cool of period will transition to
-the yellow state. This cool off time is customizable.
+time. A light in the red state for longer than the cool of period will
+transition to the yellow state. This cool off time is customizable.
 
 ``` rb
 light = Stoplight('example-cool-off') { fail }
@@ -218,10 +218,10 @@ light.run
 # RuntimeError:
 ```
 
-The default cool off time is `60` seconds. To disable automatic recovery, set the
-cool off to `Float::INFINITY`. To make automatic recovery instantaneous, set the
-cool off to `0` seconds. Note that this is not recommended, as it effectively
-replaces the red state with yellow.
+The default cool off time is `60` seconds. To disable automatic recovery, set
+the cool off to `Float::INFINITY`. To make automatic recovery instantaneous,
+set the cool off to `0` seconds. Note that this is not recommended, as it
+effectively replaces the red state with yellow.
 
 ### Rails
 
