@@ -124,19 +124,27 @@ these are handled elsewhere in your stack and don't represent real failures. A
 good example is `ActiveRecord::RecordNotFound`.
 
 To prevent some errors from changing the state of your stoplight, you can
-provide a custom `Proc` that will be called with the error and a handler
+provide a custom block that will be called with the error and a handler
 `Proc`. It can do one of three things:
 
-1.  Do nothing.
+1.  Re-raise the error. This causes Stoplight to ignore the error. Do this for
+    errors like `ActiveRecord::RecordNotFound` that don't represent real
+    failures.
 
-2.  Call the handler with the error.
+2.  Call the handler with the error. This is the default behavior. Stoplight
+    will only ignore the error if it shouldn't have been caught in the first
+    place. See `Stoplight::Error::AVOID_RESCUING` for a list of errors that
+    will be ignored.
 
-3.  Re-raise the error.
+3.  Do nothing. This is **not recommended**. Doing nothing causes Stoplight to
+    never ignore the error. That means a `NoMemoryError` could change the color
+    of your stoplights.
 
 ``` rb
 light = Stoplight('example-not-found') { User.find(123) }
-  .with_error_handler do |error, handler|
-    handler.call(error) unless error.is_a?(ActiveRecord::RecordNotFound)
+  .with_error_handler do |error, handle|
+    raise error if error.is_a?(ActiveRecord::RecordNotFound)
+    handle.call(error)
   end
 # => #<Stoplight::Light:...>
 light.run
