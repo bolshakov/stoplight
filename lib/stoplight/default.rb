@@ -2,6 +2,8 @@
 
 module Stoplight
   module Default
+    COOL_OFF_TIME = 60.0
+
     DATA_STORE = DataStore::Memory.new
 
     ERROR_HANDLER = -> (error, handler) { handler.call(error) }
@@ -21,7 +23,5 @@ module Stoplight
     ].freeze
 
     THRESHOLD = 3
-
-    COOL_OFF_TIME = 60.0
   end
 end

@@ -7,6 +7,12 @@ RSpec.describe Stoplight::Default do
     expect(described_class).to be_a(Module)
   end
 
+  describe '::COOL_OFF_TIME' do
+    it 'is a float' do
+      expect(Stoplight::Default::COOL_OFF_TIME).to be_a(Float)
+    end
+  end
+
   describe '::DATA_STORE' do
     it 'is a data store' do
       expect(Stoplight::Default::DATA_STORE).to be_a(Stoplight::DataStore::Base)
@@ -69,12 +75,6 @@ RSpec.describe Stoplight::Default do
   describe '::THRESHOLD' do
     it 'is an integer' do
       expect(Stoplight::Default::THRESHOLD).to be_a(Fixnum)
-    end
-  end
-
-  describe '::COOL_OFF_TIME' do
-    it 'is a float' do
-      expect(Stoplight::Default::COOL_OFF_TIME).to be_a(Float)
     end
   end
 end

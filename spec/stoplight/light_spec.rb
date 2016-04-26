@@ -73,6 +73,12 @@ RSpec.describe Stoplight::Light do
     end
   end
 
+  describe '#cool_off_time' do
+    it 'is initially the default' do
+      expect(light.cool_off_time).to eql(Stoplight::Default::COOL_OFF_TIME)
+    end
+  end
+
   describe '#data_store' do
     it 'is initially the default' do
       expect(light.data_store).to eql(described_class.default_data_store)
@@ -116,9 +122,11 @@ RSpec.describe Stoplight::Light do
     end
   end
 
-  describe '#cool_off_time' do
-    it 'is initially the default' do
-      expect(light.cool_off_time).to eql(Stoplight::Default::COOL_OFF_TIME)
+  describe '#with_cool_off_time' do
+    it 'sets the cool off time' do
+      cool_off_time = 1.2
+      light.with_cool_off_time(cool_off_time)
+      expect(light.cool_off_time).to eql(cool_off_time)
     end
   end
 
@@ -167,14 +175,6 @@ RSpec.describe Stoplight::Light do
       threshold = 12
       light.with_threshold(threshold)
       expect(light.threshold).to eql(threshold)
-    end
-  end
-
-  describe '#with_cool_off_time' do
-    it 'sets the cool off time' do
-      cool_off_time = 1.2
-      light.with_cool_off_time(cool_off_time)
-      expect(light.cool_off_time).to eql(cool_off_time)
     end
   end
 
