@@ -177,12 +177,4 @@ RSpec.describe Stoplight::Light do
       expect(light.threshold).to eql(threshold)
     end
   end
-
-  describe '#with_timeout' do
-    it 'sets the cool off time' do
-      cool_off_time = 1.2
-      light.with_timeout(cool_off_time)
-      expect(light.cool_off_time).to eql(cool_off_time)
-    end
-  end
 end
