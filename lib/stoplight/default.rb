@@ -31,6 +31,6 @@ module Stoplight
 
     THRESHOLD = 3
 
-    TIMEOUT = 60.0
+    COOL_OFF_TIME = 60.0
   end
 end

@@ -126,9 +126,9 @@ RSpec.describe Stoplight::Light do
     end
   end
 
-  describe '#timeout' do
+  describe '#cool_off_time' do
     it 'is initially the default' do
-      expect(light.timeout).to eql(Stoplight::Default::TIMEOUT)
+      expect(light.cool_off_time).to eql(Stoplight::Default::COOL_OFF_TIME)
     end
   end
 
@@ -199,11 +199,19 @@ RSpec.describe Stoplight::Light do
     end
   end
 
+  describe '#with_cool_off_time' do
+    it 'sets the cool off time' do
+      cool_off_time = 1.2
+      light.with_cool_off_time(cool_off_time)
+      expect(light.cool_off_time).to eql(cool_off_time)
+    end
+  end
+
   describe '#with_timeout' do
-    it 'sets the timeout' do
-      timeout = 1.2
-      light.with_timeout(timeout)
-      expect(light.timeout).to eql(timeout)
+    it 'sets the cool off time' do
+      cool_off_time = 1.2
+      light.with_timeout(cool_off_time)
+      expect(light.cool_off_time).to eql(cool_off_time)
     end
   end
 end

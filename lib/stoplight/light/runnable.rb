@@ -12,7 +12,8 @@ module Stoplight
         when state == State::LOCKED_GREEN then Color::GREEN
         when state == State::LOCKED_RED then Color::RED
         when failures.size < threshold then Color::GREEN
-        when failure && Time.new - failure.time >= timeout then Color::YELLOW
+        when failure && Time.new - failure.time >= cool_off_time
+          Color::YELLOW
         else Color::RED
         end
       end

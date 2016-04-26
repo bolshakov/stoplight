@@ -23,7 +23,7 @@ Check out [stoplight-admin][] for controlling your stoplights.
   - [Custom errors](#custom-errors)
   - [Custom fallback](#custom-fallback)
   - [Custom threshold](#custom-threshold)
-  - [Custom timeout](#custom-timeout)
+  - [Custom cool off time](#custom-cool-off-time)
   - [Rails](#rails)
 - [Setup](#setup)
   - [Data store](#data-store)
@@ -113,7 +113,7 @@ notifier. See [the notifiers section][] to learn more about notifiers.
 The stoplight will move into the yellow state after being in the red state for
 a while. (The yellow state corresponds to the half open state for circuit
   breakers.) To configure how long it takes to switch into the yellow state,
-  check out [the timeout section][] When stoplights are yellow, they will try
+  check out [the cool off time section][] When stoplights are yellow, they will try
   to run their code. If it fails, they'll switch back to red. If it succeeds,
   they'll switch to green.
 
@@ -225,22 +225,22 @@ light.run
 
 The default threshold is `3`.
 
-### Custom timeout
+### Custom cool off time
 
 Stoplights will automatically attempt to recover after a certain amount of
-time. A light in the red state for longer than the timeout will transition to
-the yellow state. This timeout is customizable.
+time. A light in the red state for longer than the cool of period will transition to
+the yellow state. This cool off time is customizable.
 
 ``` rb
-light = Stoplight('example-timeout') { fail }
-  .with_timeout(1)
+light = Stoplight('example-cool-off') { fail }
+  .with_cool_off_time(1)
 # => #<Stoplight::Light:...>
 light.run
 # RuntimeError:
 light.run
 # RuntimeError:
 light.run
-# Switching example-timeout from green to red because RuntimeError
+# Switching example-cool-off from green to red because RuntimeError
 # RuntimeError:
 sleep(1)
 # => 1
@@ -250,9 +250,9 @@ light.run
 # RuntimeError:
 ```
 
-The default timeout is `60` seconds. To disable automatic recovery, set the
-timeout to `Float::INFINITY`. To make automatic recovery instantaneous, set the
-timeout to `0` seconds. Note that this is not recommended, as it effectively
+The default cool off time is `60` seconds. To disable automatic recovery, set the
+cool off to `Float::INFINITY`. To make automatic recovery instantaneous, set the
+cool off to `0` seconds. Note that this is not recommended, as it effectively
 replaces the red state with yellow.
 
 ### Rails
@@ -495,7 +495,7 @@ Stoplight is licensed under [the MIT License][].
 [Semantic Versioning]: http://semver.org/spec/v2.0.0.html
 [the change log]: CHANGELOG.md
 [the notifiers section]: #notifiers
-[the timeout section]: #custom-timeout
+[the cool off time section]: #custom-cool-off-time
 [the Redis gem]: https://rubygems.org/gems/redis
 [the Bugsnag gem]: https://rubygems.org/gems/bugsnag
 [the HipChat gem]: https://rubygems.org/gems/hipchat

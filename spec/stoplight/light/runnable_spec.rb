@@ -51,14 +51,14 @@ RSpec.describe Stoplight::Light::Runnable do
         subject.data_store.record_failure(subject, failure)
       end
       other = Stoplight::Failure.new(
-        error.class.name, error.message, Time.new - subject.timeout)
+        error.class.name, error.message, Time.new - subject.cool_off_time)
       subject.data_store.record_failure(subject, other)
       expect(subject.color).to eql(Stoplight::Color::YELLOW)
     end
 
     it 'is red when the least recent failure is old' do
       other = Stoplight::Failure.new(
-        error.class.name, error.message, Time.new - subject.timeout)
+        error.class.name, error.message, Time.new - subject.cool_off_time)
       subject.data_store.record_failure(subject, other)
       (subject.threshold - 1).times do
         subject.data_store.record_failure(subject, failure)
@@ -271,7 +271,7 @@ RSpec.describe Stoplight::Light::Runnable do
         end
 
         other = Stoplight::Failure.new(
-          error.class.name, error.message, time - subject.timeout)
+          error.class.name, error.message, time - subject.cool_off_time)
         subject.data_store.record_failure(subject, other)
       end
 
