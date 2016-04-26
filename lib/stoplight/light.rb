@@ -100,8 +100,5 @@ module Stoplight
       @threshold = threshold
       self
     end
-
-    # @deprecated use `with_cool_off_time` instead
-    alias with_timeout with_cool_off_time
   end
 end
