@@ -32,14 +32,14 @@ module Stoplight
         on_failure = lambda do |size, error|
           notify(Color::GREEN, Color::RED, error) if size == threshold
         end
-        run_code(nil, on_failure)
+        run_code(Color::GREEN, nil, on_failure)
       end
 
       def run_yellow
         on_success = lambda do |failures|
           notify(Color::RED, Color::GREEN) unless failures.empty?
         end
-        run_code(on_success, nil)
+        run_code(Color::YELLOW, on_success, nil)
       end
 
       def run_red
@@ -47,12 +47,12 @@ module Stoplight
         fallback.call(nil)
       end
 
-      def run_code(on_success, on_failure)
+      def run_code(initial_color, on_success, on_failure)
         result = code.call
       rescue Exception => error # rubocop:disable Lint/RescueException
         handle_error(error, on_failure)
       else
-        failures = clear_failures
+        failures = initial_color == color ? clear_failures : []
         on_success.call(failures) if on_success
         result
       end
