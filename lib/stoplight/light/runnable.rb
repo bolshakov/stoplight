@@ -8,11 +8,10 @@ module Stoplight
         failures, state = failures_and_state
         failure = failures.first
 
-        case
-        when state == State::LOCKED_GREEN then Color::GREEN
-        when state == State::LOCKED_RED then Color::RED
-        when failures.size < threshold then Color::GREEN
-        when failure && Time.now - failure.time >= cool_off_time
+        if state == State::LOCKED_GREEN then Color::GREEN
+        elsif state == State::LOCKED_RED then Color::RED
+        elsif failures.size < threshold then Color::GREEN
+        elsif failure && Time.now - failure.time >= cool_off_time
           Color::YELLOW
         else Color::RED
         end
