@@ -49,11 +49,12 @@ module Stoplight
 
       def run_code(on_success, on_failure)
         result = code.call
+      rescue Exception => error # rubocop:disable Lint/RescueException
+        handle_error(error, on_failure)
+      else
         failures = clear_failures
         on_success.call(failures) if on_success
         result
-      rescue Exception => error # rubocop:disable Lint/RescueException
-        handle_error(error, on_failure)
       end
 
       def handle_error(error, on_failure)
