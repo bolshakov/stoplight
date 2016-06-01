@@ -10,7 +10,8 @@ RSpec.describe Stoplight::Failure do
   let(:json) do
     JSON.generate(
       error: { class: error_class, message: error_message },
-      time: time.strftime('%Y-%m-%dT%H:%M:%S.%N%:z'))
+      time: time.strftime('%Y-%m-%dT%H:%M:%S.%N%:z')
+    )
   end
 
   it 'is a class' do

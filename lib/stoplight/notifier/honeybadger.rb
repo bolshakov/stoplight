@@ -34,7 +34,8 @@ module Stoplight
         h = options.merge(
           api_key: api_key,
           error_message: message,
-          backtrace: (error.backtrace if error))
+          backtrace: (error.backtrace if error)
+        )
         ::Honeybadger.notify(h)
         message
       end

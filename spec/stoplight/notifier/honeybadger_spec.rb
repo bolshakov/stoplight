@@ -18,7 +18,8 @@ RSpec.describe Stoplight::Notifier::Honeybadger do
   describe '#formatter' do
     it 'is initially the default' do
       expect(described_class.new(nil).formatter).to eql(
-        Stoplight::Default::FORMATTER)
+        Stoplight::Default::FORMATTER
+      )
     end
 
     it 'reads the formatter' do
@@ -30,13 +31,15 @@ RSpec.describe Stoplight::Notifier::Honeybadger do
   describe '#options' do
     it 'is initially the default' do
       expect(described_class.new(nil).options).to eql(
-        Stoplight::Notifier::Honeybadger::DEFAULT_OPTIONS)
+        Stoplight::Notifier::Honeybadger::DEFAULT_OPTIONS
+      )
     end
 
     it 'reads the options' do
       options = { key: :value }
       expect(described_class.new(nil, nil, options).options).to eql(
-        Stoplight::Notifier::Honeybadger::DEFAULT_OPTIONS.merge(options))
+        Stoplight::Notifier::Honeybadger::DEFAULT_OPTIONS.merge(options)
+      )
     end
   end
 
@@ -57,23 +60,29 @@ RSpec.describe Stoplight::Notifier::Honeybadger do
       error = nil
       message = notifier.formatter.call(light, from_color, to_color, error)
       expect(notifier.notify(light, from_color, to_color, error)).to eql(
-        message)
+        message
+      )
       expect(Honeybadger).to have_received(:notify).with(
         hash_including(
           api_key: api_key,
-          error_message: message))
+          error_message: message
+        )
+      )
     end
 
     it 'returns the message with an error' do
       error = ZeroDivisionError.new('divided by 0')
       message = notifier.formatter.call(light, from_color, to_color, error)
       expect(notifier.notify(light, from_color, to_color, error)).to eql(
-        message)
+        message
+      )
       expect(Honeybadger).to have_received(:notify).with(
         hash_including(
           api_key: api_key,
           error_message: message,
-          backtrace: error.backtrace))
+          backtrace: error.backtrace
+        )
+      )
     end
   end
 end
