@@ -33,6 +33,7 @@ Check out [stoplight-admin][] for controlling your stoplights.
     - [HipChat](#hipchat)
     - [Honeybadger](#honeybadger)
     - [Logger](#logger)
+    - [Sentry](#sentry)
     - [Slack](#slack)
   - [Rails](#rails-1)
 - [Advanced usage](#advanced-usage)
@@ -356,6 +357,22 @@ Stoplight::Light.default_notifiers += [notifier]
 # => [#<Stoplight::Notifier::IO:...>, #<Stoplight::Notifier::Logger:...>]
 ```
 
+#### Sentry
+
+Make sure you have [the Sentry gem][] (`~> 1.2`) installed before configuring
+Stoplight.
+
+``` rb
+require 'sentry-raven'
+# => true
+configuration = Raven::Configuration.new
+# => #<Raven::Configuration:...>
+notifier = Stoplight::Notifier::Raven.new(configuration)
+# => #<Stoplight::Notifier::Raven:...>
+Stoplight::Light.default_notifiers += [notifier]
+# => [#<Stoplight::Notifier::IO:...>, #<Stoplight::Notifier::Raven:...>]
+```
+
 #### Slack
 
 Make sure you have [the Slack gem][] (`~> 1.3`) installed before configuring
@@ -476,6 +493,7 @@ Stoplight is licensed under [the MIT License][].
 [the HipChat gem]: https://rubygems.org/gems/hipchat
 [the Honeybadger gem]: https://rubygems.org/gems/honeybadger
 [the Logger class]: http://ruby-doc.org/stdlib-2.2.3/libdoc/logger/rdoc/Logger.html
+[the Sentry gem]: https://rubygems.org/gems/sentry-raven
 [the Slack gem]: https://rubygems.org/gems/slack-notifier
 [@camdez]: https://github.com/camdez
 [@tfausak]: https://github.com/tfausak
