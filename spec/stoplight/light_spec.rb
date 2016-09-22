@@ -177,4 +177,12 @@ RSpec.describe Stoplight::Light do
       expect(light.threshold).to eql(threshold)
     end
   end
+
+  describe '#with_timeout' do
+    it 'sets the timeout' do
+      timeout = 3
+      light.with_timeout(timeout)
+      expect(light.timeout).to eq(timeout)
+    end
+  end
 end

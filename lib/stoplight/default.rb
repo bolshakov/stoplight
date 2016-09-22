@@ -23,5 +23,7 @@ module Stoplight
     ].freeze
 
     THRESHOLD = 3
+
+    TIMEOUT = 1000
   end
 end

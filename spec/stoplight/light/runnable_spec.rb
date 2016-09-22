@@ -167,6 +167,16 @@ RSpec.describe Stoplight::Light::Runnable do
             expect(subject.run).to eql(fallback_result)
           end
         end
+
+        context 'when timeout is reached' do
+          let(:code) { -> { sleep 1 } }
+
+          before { subject.with_timeout(0.1).with_fallback(&fallback) }
+
+          it 'runs the fallback' do
+            expect(subject.run).to eql(fallback_result)
+          end
+        end
       end
 
       context 'when the data store is failing' do
