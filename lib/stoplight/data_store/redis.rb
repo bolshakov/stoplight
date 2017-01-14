@@ -26,7 +26,7 @@ module Stoplight
       def get_all(light)
         failures, state = @redis.multi do
           query_failures(light)
-          @redis.hget('stoplight:states', light.name)
+          @redis.hget(states_key, light.name)
         end
 
         [
