@@ -48,12 +48,18 @@ module Stoplight
       end
 
       def run_code(on_success, on_failure)
-        result = code.call
+        result = execute_with_timeout { code.call }
         failures = clear_failures
         on_success.call(failures) if on_success
         result
       rescue Exception => error # rubocop:disable Lint/RescueException
         handle_error(error, on_failure)
+      end
+
+      def execute_with_timeout
+        Timeout.timeout(timeout) do
+          yield
+        end
       end
 
       def handle_error(error, on_failure)
