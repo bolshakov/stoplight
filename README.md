@@ -35,6 +35,7 @@ Check out [stoplight-admin][] for controlling your stoplights.
     - [Sentry](#sentry)
     - [Slack](#slack)
   - [Rails](#rails-1)
+  - [Testing](#testing)
 - [Advanced usage](#advanced-usage)
   - [Locking](#locking)
   - [Testing](#testing)
@@ -400,6 +401,20 @@ Stoplight:
 require 'stoplight'
 Stoplight::Light.default_data_store = Stoplight::DataStore::Redis.new(...)
 Stoplight::Light.default_notifiers += [Stoplight::Notifier::Logger.new(Rails.logger)]
+```
+
+### Testing
+
+For testing you can use the testing datastore (`Stoplight::DataStore::Test`)
+which will always return GREEN and never lock up.
+
+``` rb
+require 'stoplight'
+if testing?
+  Stoplight::Light.default_data_store = Stoplight::DataStore::Test.new
+else
+  Stoplight::Light.default_data_store = Stoplight::DataStore::Redis.new(...)
+end
 ```
 
 ## Advanced usage
