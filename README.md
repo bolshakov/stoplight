@@ -3,7 +3,6 @@
 [![Version badge][]][version]
 [![Build badge][]][build]
 [![Coverage badge][]][coverage]
-[![Grade badge][]][grade]
 [![Climate badge][]][climate]
 [![Dependencies badge][]][dependencies]
 
@@ -477,8 +476,6 @@ Stoplight is licensed under [the MIT License][].
 [build]: https://travis-ci.org/orgsync/stoplight
 [Coverage badge]: https://img.shields.io/coveralls/orgsync/stoplight/master.svg?label=coverage
 [coverage]: https://coveralls.io/r/orgsync/stoplight
-[Grade badge]: https://img.shields.io/badge/grade-A-brightgreen.svg
-[grade]: http://www.libgrader.com/libraries/ruby/stoplight
 [Climate badge]: https://img.shields.io/codeclimate/github/orgsync/stoplight.svg?label=climate
 [climate]: https://codeclimate.com/github/orgsync/stoplight
 [Dependencies badge]: https://img.shields.io/gemnasium/orgsync/stoplight.svg?label=dependencies
