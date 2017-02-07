@@ -5,6 +5,8 @@ require 'time'
 
 module Stoplight
   class Failure # rubocop:disable Style/Documentation
+    TIME_FORMAT = '%Y-%m-%dT%H:%M:%S.%N%:z'.freeze
+
     # @return [String]
     attr_reader :error_class
     # @return [String]
@@ -24,9 +26,10 @@ module Stoplight
     # @raise [ArgumentError]
     def self.from_json(json)
       object = JSON.parse(json)
+      error_object = object['error']
 
-      error_class = object['error']['class']
-      error_message = object['error']['message']
+      error_class = error_object['class']
+      error_message = error_object['message']
       time = Time.parse(object['time'])
 
       new(error_class, error_message, time)
@@ -56,7 +59,7 @@ module Stoplight
           class: error_class,
           message: error_message
         },
-        time: time.strftime('%Y-%m-%dT%H:%M:%S.%N%:z')
+        time: time.strftime(TIME_FORMAT)
       )
     end
   end

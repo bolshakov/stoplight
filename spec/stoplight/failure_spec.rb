@@ -90,4 +90,14 @@ RSpec.describe Stoplight::Failure do
         .to eql(json)
     end
   end
+
+  describe '::TIME_FORMAT' do
+    it 'is a string' do
+      expect(described_class::TIME_FORMAT).to be_a(String)
+    end
+
+    it 'is frozen' do
+      expect(described_class::TIME_FORMAT).to be_frozen
+    end
+  end
 end
