@@ -26,6 +26,7 @@ require 'stoplight/notifier/io'
 require 'stoplight/notifier/logger'
 require 'stoplight/notifier/raven'
 require 'stoplight/notifier/slack'
+require 'stoplight/notifier/data_dog_service_check'
 
 require 'stoplight/default'
 
