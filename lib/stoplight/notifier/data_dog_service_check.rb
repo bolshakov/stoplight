@@ -18,7 +18,7 @@ module Stoplight
       # @return [Object]
       attr_reader :dog
       # @return [String]
-      attr_reader :check
+      attr_reader :prefix
       # @return [String]
       attr_reader :host_name
 
