@@ -42,7 +42,11 @@ module Stoplight
         @options = @options.merge({message: formatter.call(light, from_color, to_color, error)})
         if light.color == Color::GREEN
           status = 0
+        elsif light.color == Color::YELLOW
+          status = 1
         elsif light.color == Color::RED
+          status = 2
+        else
           status = 3
         end
         options[:timestamp] = options[:timestamp].to_i
