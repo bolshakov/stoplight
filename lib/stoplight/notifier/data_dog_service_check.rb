@@ -29,9 +29,9 @@ module Stoplight
       # @param options [Hash{Symbol => Object}]
       # @option options [Time] :timestamp
       # @option options [Hash] :tags
-      def initialize(api_key, check, host_name, formatter = nil, options = nil)
+      def initialize(api_key, prefix = '', host_name, formatter = nil, options = nil)
         @api_key = api_key
-        @check = check
+        @prefix = prefix
         @host_name = host_name
         @formatter = formatter || Default::FORMATTER
         @options = DEFAULT_OPTIONS.merge(options)
@@ -39,13 +39,14 @@ module Stoplight
       end
 
       def notify(light, from_color, to_color, error)
-        @options = @options.merge(message: formatter.call(light, from_color, to_color, error))
+        @options = @options.merge({message: formatter.call(light, from_color, to_color, error)})
         if light.color == Color::GREEN
           status = 0
         elsif light.color == Color::RED
           status = 3
         end
         options[:timestamp] = options[:timestamp].to_i
+        check = @prefix.empty? ? 'stoplight.' + light.name : prefix + '.' + light.name
         dog.service_check(check, host_name, status, options)
       end
     end
