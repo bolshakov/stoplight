@@ -29,7 +29,7 @@ module Stoplight
       # @param options [Hash{Symbol => Object}]
       # @option options [Time] :timestamp
       # @option options [Hash] :tags
-      def initialize(api_key, prefix = '', host_name, formatter = nil, options = nil)
+      def initialize(api_key, host_name, prefix = '', formatter = nil, options = nil)
         @api_key = api_key
         @prefix = prefix
         @host_name = host_name
