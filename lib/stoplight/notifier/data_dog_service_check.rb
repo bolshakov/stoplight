@@ -32,7 +32,7 @@ module Stoplight
       def initialize(api_key, host, prefix, formatter = nil, options = nil)
         @api_key = api_key
         @prefix = prefix
-        @host= host
+        @host = host
         @formatter = formatter || Default::FORMATTER
         @options = DEFAULT_OPTIONS.merge(options)
         @dog = Dogapi::Client.new(api_key)
