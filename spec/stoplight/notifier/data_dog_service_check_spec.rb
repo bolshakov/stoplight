@@ -11,8 +11,8 @@ module Dogapi
 end
 
 RSpec.describe Stoplight::Notifier::DataDogServiceCheck do
-  $prefix = 'stoplight'
-  $host = 'myhostname'
+  prefix = 'stoplight'
+  host = 'myhostname'
   it 'is a class' do
     expect(described_class).to be_a(Class)
   end
@@ -23,27 +23,31 @@ RSpec.describe Stoplight::Notifier::DataDogServiceCheck do
 
   describe '#formatter' do
     it 'is initially the default' do
-      expect(described_class.new(nil, $host, $prefix).formatter).to eql(
+      expect(described_class.new(nil, host, prefix).formatter).to eql(
         Stoplight::Default::FORMATTER
       )
     end
 
     it 'reads the formatter' do
       formatter = proc {}
-      expect(described_class.new(nil, $host, $prefix, formatter).formatter).to eql(formatter)
+      expect(described_class
+        .new(nil, host, prefix, formatter).formatter)
+        .to eql(formatter)
     end
   end
 
   describe '#options' do
     it 'is intiially the default' do
-      expect(described_class.new(nil, $host, $prefix).options).to eql(
+      expect(described_class.new(nil, host, prefix).options).to eql(
         Stoplight::Notifier::DataDogServiceCheck::DEFAULT_OPTIONS
       )
     end
 
     it 'reads the options' do
       options = { key: :value }
-      expect(described_class.new(nil, $host, $prefix, nil, options).options).to eql(
+      expect(described_class
+        .new(nil, host, prefix, nil, options).options)
+        .to eql(
         Stoplight::Notifier::DataDogServiceCheck::DEFAULT_OPTIONS.merge(options)
       )
     end
@@ -52,20 +56,20 @@ RSpec.describe Stoplight::Notifier::DataDogServiceCheck do
   describe '#dogapi' do
     it 'reads the Dogapi client' do
       dogapi = Dogapi::Client.new('API token')
-      expect(described_class.new(dogapi, $host, $prefix).dogapi)
+      expect(described_class.new(dogapi, host, prefix).dogapi)
         .to eql(dogapi)
     end
   end
 
   describe '#host' do
     it 'reads the host' do
-      expect(described_class.new(nil, $host, $prefix).host).to eql($host)
+      expect(described_class.new(nil, host, prefix).host).to eql(host)
     end
   end
 
   describe '#prefix' do
     it 'reads the prefix' do
-      expect(described_class.new(nil, $host, $prefix).prefix).to eql($prefix)
+      expect(described_class.new(nil, host, prefix).prefix).to eql(prefix)
     end
   end
 
@@ -73,10 +77,10 @@ RSpec.describe Stoplight::Notifier::DataDogServiceCheck do
     let(:light) { Stoplight::Light.new(name, &code) }
     let(:name) { ('a'..'z').to_a.shuffle.join }
     let(:code) { -> {} }
-    let(:notifier) { described_class.new(nil, $host, $prefix) }
+    let(:notifier) { described_class.new(nil, host, prefix) }
 
     it 'returns the prefix combined with the stoplight name' do
-      expect(notifier.check(light)).to eql($prefix + '.' + name)
+      expect(notifier.check(light)).to eql(prefix + '.' + name)
     end
   end
 
@@ -84,13 +88,13 @@ RSpec.describe Stoplight::Notifier::DataDogServiceCheck do
     let(:light) { Stoplight::Light.new(name, &code) }
     let(:name) { ('a'..'z').to_a.shuffle.join }
     let(:code) { -> {} }
-    let(:notifier) { described_class.new(nil, $host, $prefix) }
+    let(:notifier) { described_class.new(nil, host, prefix) }
 
     it 'returns 0 for a working stoplight' do
       expect(notifier.get_status(light.color)).to eql(0)
     end
 
-    context "after the stoplight is red" do
+    context 'after the stoplight is red' do
       let(:light) { Stoplight::Light.new(name, &code).with_threshold(0) }
       let(:code) { -> { 0/0 } }
       it 'returns 2 for a broken stoplight' do
@@ -105,7 +109,7 @@ RSpec.describe Stoplight::Notifier::DataDogServiceCheck do
     let(:code) { -> {} }
     let(:from_color) { Stoplight::Color::GREEN }
     let(:to_color) { Stoplight::Color::RED }
-    let(:notifier) { described_class.new(dogapi, $host, $prefix) }
+    let(:notifier) { described_class.new(dogapi, host, prefix) }
     let(:dogapi) { double(Dogapi::Client) }
     let(:api_key) { ('a'..'z').to_a.shuffle.join }
 
