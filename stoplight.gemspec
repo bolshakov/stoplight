@@ -44,6 +44,7 @@ Gem::Specification.new do |gem|
     'fakeredis' => '0.5',
     'hipchat' => '1.5',
     'honeybadger' => '2.5',
+    'dogapi' => '1.25.0',
     'sentry-raven' => '1.2',
     'rake' => '11.1',
     'redis' => '3.2',
