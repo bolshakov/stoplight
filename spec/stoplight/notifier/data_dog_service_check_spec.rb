@@ -48,8 +48,8 @@ RSpec.describe Stoplight::Notifier::DataDogServiceCheck do
       expect(described_class
         .new(nil, host, prefix, nil, options).options)
         .to eql(
-        Stoplight::Notifier::DataDogServiceCheck::DEFAULT_OPTIONS.merge(options)
-      )
+          Stoplight::Notifier::DataDogServiceCheck::DEFAULT_OPTIONS.merge(options)
+        )
     end
   end
 
