@@ -20,7 +20,7 @@ module Stoplight
       # @return [String]
       attr_reader :prefix
       # @return [String]
-      attr_reader :host_name
+      attr_reader :host
 
       # @param api_key [String]
       # @param check [String]
@@ -29,10 +29,10 @@ module Stoplight
       # @param options [Hash{Symbol => Object}]
       # @option options [Time] :timestamp
       # @option options [Hash] :tags
-      def initialize(api_key, host_name, prefix, formatter = nil, options = nil)
+      def initialize(api_key, host, prefix, formatter = nil, options = nil)
         @api_key = api_key
         @prefix = prefix
-        @host_name = host_name
+        @host= host
         @formatter = formatter || Default::FORMATTER
         @options = DEFAULT_OPTIONS.merge(options)
         @dog = Dogapi::Client.new(api_key)
@@ -40,15 +40,19 @@ module Stoplight
 
       def notify(light, from_color, to_color, error)
         message = formatter.call(light, from_color, to_color, error)
-        options[:timestamp] = options[:timestamp].to_i
         opts = options.merge(
-          message: message)
-        check = prefix.gsub(/\.$/,'') + '.' + light.name
-        dog.service_check(check, host_name, get_status(light.color), opts)
+          message: message,
+          timestamp: options[:timestamp].to_i
+        )
+        dog.service_check(check(light), host, get_status(light.color), opts)
+      end
+
+      def check(light)
+        prefix.gsub(/\.$/, '') + '.' + light.name
       end
 
       def get_status(color)
-        case light.color
+        case color
         when Color::GREEN then 0
         when Color::YELLOW then 1
         when Color::RED then 2
