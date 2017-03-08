@@ -96,7 +96,7 @@ RSpec.describe Stoplight::Notifier::DataDogServiceCheck do
 
     context 'after the stoplight is red' do
       let(:light) { Stoplight::Light.new(name, &code).with_threshold(0) }
-      let(:code) { -> { 0/0 } }
+      let(:code) { -> { 0 / 0 } }
       it 'returns 2 for a broken stoplight' do
         expect(notifier.get_status(light.color)).to eql(2)
       end
