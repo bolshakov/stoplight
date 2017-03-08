@@ -52,9 +52,8 @@ module Stoplight
       def get_status(color)
         case color
         when Color::GREEN then 0
-        when Color::YELLOW then 1
         when Color::RED then 2
-        else 3
+        else 1
         end
       end
     end
