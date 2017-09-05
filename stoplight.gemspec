@@ -32,12 +32,6 @@ Gem::Specification.new do |gem|
   gem.required_ruby_version = '>= 2.1'
 
   {
-    'concurrent-ruby' => '1.0'
-  }.each do |name, version|
-    gem.add_dependency(name, "~> #{version}")
-  end
-
-  {
     'benchmark-ips' => '2.3',
     'bugsnag' => '4.0',
     'coveralls' => '0.8',
