@@ -16,8 +16,9 @@ module Stoplight
         state_names = @redis.hkeys(states_key)
 
         pattern = key('failures', '*')
+        prefix_regex = /^#{key('failures', '')}/
         failure_names = @redis.scan_each(match: pattern).to_a.map do |key|
-          key.split(KEY_SEPARATOR).last
+          key.sub(prefix_regex, '')
         end
 
         (state_names + failure_names).uniq
