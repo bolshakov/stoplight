@@ -36,6 +36,12 @@ RSpec.describe Stoplight::DataStore::Memory do
       data_store.set_state(light, Stoplight::State::UNLOCKED)
       expect(data_store.names).to eql([light.name])
     end
+
+    it 'supports names containing colons' do
+      light = Stoplight::Light.new('http://api.example.com/some/action')
+      data_store.record_failure(light, failure)
+      expect(data_store.names).to eql([light.name])
+    end
   end
 
   describe '#get_all' do
