@@ -34,6 +34,7 @@ Check out [stoplight-admin][] for controlling your stoplights.
     - [Logger](#logger)
     - [Sentry](#sentry)
     - [Slack](#slack)
+    - [Pagerduty](#pagerduty)
   - [Rails](#rails-1)
 - [Advanced usage](#advanced-usage)
   - [Locking](#locking)
@@ -388,6 +389,22 @@ Stoplight::Light.default_notifiers += [notifier]
 # => [#<Stoplight::Notifier::IO:...>, #<Stoplight::Notifier::Slack:...>]
 ```
 
+#### Pagerduty
+
+Make sure you have [the Pagerduty gem][] (`~> 2.1`) installed before configuring
+Stoplight.
+
+``` rb
+require 'pagerduty'
+# => true
+pagerduty = Pagerduty.new('http://www.example.com/webhook-url')
+# => #<Pagerduty:...>
+notifier = Stoplight::Notifier::Pagerduty.new(pagerduty)
+# => #<Stoplight::Notifier::Pagerduty:...>
+Stoplight::Light.default_notifiers += [notifier]
+# => [#<Stoplight::Notifier::IO:...>, #<Stoplight::Notifier::Pagerduty:...>]
+```
+
 ### Rails
 
 Stoplight is designed to work seamlessly with Rails. If you want to use the
@@ -492,6 +509,7 @@ Stoplight is licensed under [the MIT License][].
 [the Logger class]: http://ruby-doc.org/stdlib-2.2.3/libdoc/logger/rdoc/Logger.html
 [the Sentry gem]: https://rubygems.org/gems/sentry-raven
 [the Slack gem]: https://rubygems.org/gems/slack-notifier
+[the Pagerduty gem]: https://rubygems.org/gems/pagerduty
 [@camdez]: https://github.com/camdez
 [@tfausak]: https://github.com/tfausak
 [@orgsync]: https://github.com/OrgSync

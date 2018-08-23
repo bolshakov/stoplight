@@ -37,6 +37,7 @@ Gem::Specification.new do |gem|
     'coveralls' => '0.8',
     'fakeredis' => '0.5',
     'hipchat' => '1.5',
+    'pagerduty' => '2.1.1',
     'honeybadger' => '2.5',
     'sentry-raven' => '1.2',
     'rake' => '11.1',
