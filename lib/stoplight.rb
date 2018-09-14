@@ -1,8 +1,4 @@
 # coding: utf-8
-
-module Stoplight # rubocop:disable Style/Documentation
-end
-
 require 'stoplight/version'
 
 require 'stoplight/color'
@@ -32,7 +28,13 @@ require 'stoplight/default'
 require 'stoplight/light/runnable'
 require 'stoplight/light'
 
-# @see Stoplight::Light#initialize
-def Stoplight(name, &code) # rubocop:disable Style/MethodName
-  Stoplight::Light.new(name, &code)
+module Stoplight # rubocop:disable Style/Documentation
+  module_function
+
+  # @see Stoplight::Light#initialize
+  def Stoplight(name, &code) # rubocop:disable Style/MethodName
+    Light.new(name, &code)
+  end
 end
+
+include Stoplight
