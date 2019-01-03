@@ -204,7 +204,7 @@ The default threshold is `3`.
 ### Custom cool off time
 
 Stoplights will automatically attempt to recover after a certain amount of
-time. A light in the red state for longer than the cool of period will
+time. A light in the red state for longer than the cool off period will
 transition to the yellow state. This cool off time is customizable.
 
 ``` rb
