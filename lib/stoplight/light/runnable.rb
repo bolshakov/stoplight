@@ -29,8 +29,14 @@ module Stoplight
       private
 
       def run_green
-        on_failure = lambda do |size, error|
-          notify(Color::GREEN, Color::RED, error) if size == threshold
+        on_failure = lambda do |size, error, previous_light_color|
+          # The light may have gone red while we were waiting for the
+          # response, this means that we would have already notified
+          # about the change, we shouldn't do that more than once
+          # so only trigger the notifcation if we are still green
+          if size == threshold && previous_light_color == Color::GREEN
+            notify(Color::GREEN, Color::RED, error)
+          end
         end
         run_code(nil, on_failure)
       end
@@ -53,13 +59,13 @@ module Stoplight
         on_success.call(failures) if on_success
         result
       rescue Exception => error # rubocop:disable Lint/RescueException
-        handle_error(error, on_failure)
+        handle_error(error, on_failure, color)
       end
 
-      def handle_error(error, on_failure)
+      def handle_error(error, on_failure, previous_light_color)
         error_handler.call(error, Error::HANDLER)
         size = record_failure(error)
-        on_failure.call(size, error) if on_failure
+        on_failure.call(size, error, previous_light_color) if on_failure
         raise error unless fallback
         fallback.call(error)
       end
