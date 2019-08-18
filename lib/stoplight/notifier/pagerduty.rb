@@ -6,7 +6,7 @@ module Stoplight
     class Pagerduty < Base
       include Generic
 
-      # @return [::Slack::Notifier]
+      # @return [::Pagerduty]
       def pagerduty
         @object
       end

@@ -37,13 +37,13 @@ Gem::Specification.new do |gem|
     'coveralls' => '0.8',
     'fakeredis' => '0.5',
     'hipchat' => '1.5',
-    'pagerduty' => '2.1.1',
     'honeybadger' => '2.5',
-    'sentry-raven' => '1.2',
+    'pagerduty' => '2.1.1',
     'rake' => '11.1',
     'redis' => '3.2',
     'rspec' => '3.3',
     'rubocop' => '0.40.0',
+    'sentry-raven' => '1.2',
     'slack-notifier' => '1.3',
     'timecop' => '0.8'
   }.each do |name, version|
