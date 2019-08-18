@@ -2,11 +2,11 @@
 
 require 'spec_helper'
 
-# require 'bugsnag'
-module Bugsnag
+# require 'rollbar'
+module Rollbar
 end
 
-RSpec.describe Stoplight::Notifier::Bugsnag do
+RSpec.describe Stoplight::Notifier::Rollbar do
   it 'is a class' do
     expect(described_class).to be_a(Class)
   end
@@ -31,20 +31,20 @@ RSpec.describe Stoplight::Notifier::Bugsnag do
   describe '#options' do
     it 'is initially the default' do
       expect(described_class.new(nil, nil).options)
-        .to eql(Stoplight::Notifier::Bugsnag::DEFAULT_OPTIONS)
+        .to eql(Stoplight::Notifier::Rollbar::DEFAULT_OPTIONS)
     end
 
     it 'reads the options' do
       options = { key: :value }
       expect(described_class.new(nil, nil, options).options)
-        .to eql(Stoplight::Notifier::Bugsnag::DEFAULT_OPTIONS.merge(options))
+        .to eql(Stoplight::Notifier::Rollbar::DEFAULT_OPTIONS.merge(options))
     end
   end
 
-  describe '#bugsnag' do
-    it 'reads the Bugsnag client' do
-      client = Bugsnag
-      expect(described_class.new(client, nil).bugsnag)
+  describe '#rollbar' do
+    it 'reads the Rollbar client' do
+      client = Rollbar
+      expect(described_class.new(client, nil).rollbar)
         .to eql(client)
     end
   end
@@ -55,8 +55,8 @@ RSpec.describe Stoplight::Notifier::Bugsnag do
     let(:code) { -> {} }
     let(:from_color) { Stoplight::Color::GREEN }
     let(:to_color) { Stoplight::Color::RED }
-    let(:notifier) { described_class.new(bugsnag) }
-    let(:bugsnag) { Bugsnag }
+    let(:notifier) { described_class.new(rollbar) }
+    let(:rollbar) { Rollbar }
 
     subject(:result) do
       notifier.notify(light, from_color, to_color, error)
@@ -64,7 +64,7 @@ RSpec.describe Stoplight::Notifier::Bugsnag do
 
     before do
       status_change = described_class::StoplightStatusChange.new(message)
-      expect(bugsnag).to receive(:notify).with(status_change, severity: 'info')
+      expect(rollbar).to receive(:info).with(status_change)
     end
 
     context 'when no error given' do
