@@ -74,7 +74,7 @@ RSpec.describe Stoplight::Default do
 
   describe '::THRESHOLD' do
     it 'is an integer' do
-      expect(Stoplight::Default::THRESHOLD).to be_a(Fixnum)
+      expect(Stoplight::Default::THRESHOLD).to be_a(Integer)
     end
   end
 end
