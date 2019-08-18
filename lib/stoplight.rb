@@ -27,6 +27,7 @@ require 'stoplight/notifier/logger'
 require 'stoplight/notifier/rollbar'
 require 'stoplight/notifier/raven'
 require 'stoplight/notifier/slack'
+require 'stoplight/notifier/pagerduty'
 
 require 'stoplight/default'
 
