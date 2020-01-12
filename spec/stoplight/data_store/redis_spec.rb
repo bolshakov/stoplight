@@ -65,9 +65,9 @@ RSpec.describe Stoplight::DataStore::Redis do
       expect(redis.keys.size).to eql(0)
       data_store.record_failure(light, failure)
       expect(redis.keys.size).to eql(1)
-      redis.lset(redis.keys.first, 0, 'invalid JSON')
+      redis.zadd(redis.keys.first, Time.now.to_i, 'invalid JSON')
       light.with_error_notifier { |_error| }
-      expect(data_store.get_failures(light).size).to eql(1)
+      expect(data_store.get_failures(light).size).to eql(2)
     end
   end
 
