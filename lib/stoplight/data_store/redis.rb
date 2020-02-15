@@ -40,23 +40,14 @@ module Stoplight
         normalize_failures(query_failures(light), light.error_notifier)
       end
 
-      WINDOW_SIZE = Float::INFINITY
-
-      #  TODO: time in utc
-      #  TODO: investigate warnings
-      #  TODO: tests with different window sizes
       def record_failure(light, failure)
-        # @redis.lpush(failures_key(light), failure.to_json)
-        # @redis.ltrim(failures_key(light), 0, light.threshold - 1)
         failures_key = failures_key(light)
 
         _, size, = @redis.multi do
           @redis.zadd(failures_key, failure.time.to_i, failure.to_json)
           @redis.zcard(failures_key)
-          # keep at most WINDOW_SIZE old errors
-          @redis.zremrangebyscore(failures_key, 0, Time.new.to_i - WINDOW_SIZE)
-          # keep at most threshold errors
-          @redis.zremrangebyrank(failures_key, 0, -light.threshold - 1)
+
+          remove_old_failures(light, failure)
         end
 
         size
@@ -90,6 +81,14 @@ module Stoplight
       end
 
       private
+
+      def remove_old_failures(light, failure)
+        failures_key = failures_key(light)
+        window_to_remove = failure.time.to_i - light.window_size
+
+        @redis.zremrangebyscore(failures_key, 0, window_to_remove)
+        @redis.zremrangebyrank(failures_key, 0, -light.threshold - 1)
+      end
 
       def query_failures(light)
         @redis.zrange(failures_key(light), 0, -1)
