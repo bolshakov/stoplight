@@ -75,6 +75,14 @@ RSpec.describe Stoplight::DataStore::Memory do
       expect(data_store.get_failures(light)).to eql([other, failure])
     end
 
+    it 'limits the errors behind the window size' do
+      light.with_window_size(3)
+      data_store.record_failure(light, failure)
+      other = Stoplight::Failure.new('class', 'message 2', Time.new + 8)
+      data_store.record_failure(light, other)
+      expect(data_store.get_failures(light)).to eq([other])
+    end
+
     it 'limits the number of stored failures' do
       light.with_threshold(1)
       data_store.record_failure(light, failure)
