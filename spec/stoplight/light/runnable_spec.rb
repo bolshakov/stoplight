@@ -152,6 +152,55 @@ RSpec.describe Stoplight::Light::Runnable do
           end
         end
 
+        context 'with a window size and 5 as threshold' do
+          before do
+            subject
+              .with_threshold(5)
+              .with_window_size(window_size)
+          end
+
+          context 'when it fails in 2 mins intervals exceeding the threshold' do
+            let(:failures_interval) { 120 }
+            let(:current_time) { Time.now }
+
+            before do
+              subject.threshold.times do |i|
+                Timecop.freeze(current_time + i * failures_interval) do
+                  begin
+                    subject.run
+                  rescue error.class
+                    nil
+                  end
+                end
+              end
+            end
+
+            context 'when the windows size is default' do
+              let(:window_size) { Stoplight::Default::WINDOW_SIZE }
+
+              it 'turns the light to red regardless failure times' do
+                expect(subject.color).to eql(Stoplight::Color::RED)
+              end
+
+              it 'keeps all 5 failures recorded' do
+                expect(subject.data_store.get_failures(subject).size).to eql(5)
+              end
+            end
+
+            context 'when the windows size is set to 4 minutes' do
+              let(:window_size) { 240 }
+
+              it 'keeps the green light' do
+                expect(subject.color).to eql(Stoplight::Color::GREEN)
+              end
+
+              it 'keeps 2 out of 5 failures recorded' do
+                expect(subject.data_store.get_failures(subject).size).to eql(2)
+              end
+            end
+          end
+        end
+
         context 'with a fallback' do
           before { subject.with_fallback(&fallback) }
 
