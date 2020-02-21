@@ -203,6 +203,32 @@ light.run
 
 The default threshold is `3`.
 
+### Custom window size
+
+By default, all recorded failures regardless the time these happens will count to reach
+the threshold(hence to turn the light to red). In case if needed, a window size can be set,
+meaning you can control how many errors per period of time will count to reach the red
+state.
+
+``` rb
+window_size_in_seconds = 2
+
+light = Stoplight('example-threshold') { 1 / 0 }
+  .with_window_size(window_size_in_seconds)
+  .with_threshold(1)
+# => #<Stoplight::Light:...>
+
+light.run
+# #<ZeroDivisionError: divided by 0>
+# => "default"
+sleep(3)
+light.run
+# #<ZeroDivisionError: divided by 0>
+# => "default"
+```
+
+The default window size is infinity, so all failures counts.
+
 ### Custom cool off time
 
 Stoplights will automatically attempt to recover after a certain amount of
