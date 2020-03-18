@@ -52,6 +52,10 @@ module Stoplight
         synchronize { @states.delete(light.name) }
       end
 
+      def legacy_key_format?(_light)
+        false
+      end
+
       private
 
       def remove_old_failures(light, failure)

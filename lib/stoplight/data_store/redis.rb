@@ -4,6 +4,10 @@ module Stoplight
   module DataStore
     # @see Base
     class Redis < Base
+      require 'stoplight/data_store/redis/legacy_key_format_support'
+
+      prepend LegacyKeyFormatSupport
+
       KEY_PREFIX = 'stoplight'.freeze
       KEY_SEPARATOR = ':'.freeze
 

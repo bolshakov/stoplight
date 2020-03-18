@@ -104,9 +104,13 @@ module Stoplight
       self
     end
 
-    # @param threshold [Float]
+    # @param window_size [Integer]
     # @return [self]
     def with_window_size(window_size)
+      if data_store.legacy_key_format?(self)
+        raise ArgumentError, 'not supported'
+      end
+
       @window_size = window_size
       self
     end

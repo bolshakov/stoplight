@@ -72,36 +72,71 @@ RSpec.describe Stoplight::DataStore::Redis do
   end
 
   describe '#record_failure' do
-    it 'returns the number of failures' do
-      expect(data_store.record_failure(light, failure)).to eql(1)
+    context 'when using legacy key format' do
+      let(:old_failure) { Stoplight::Failure.new('class', 'old message', Time.new) }
+
+      before do
+        key = data_store.__send__(:failures_key, light)
+        redis.lpush(key, old_failure.to_json)
+      end
+
+      it 'returns the number of failures' do
+        expect(data_store.record_failure(light, failure)).to eql(2)
+      end
+
+      it 'persists the failure' do
+        data_store.record_failure(light, failure)
+        expect(data_store.get_failures(light)).to eq([failure, old_failure])
+      end
+
+      it 'stores more recent failures at the head' do
+        data_store.record_failure(light, failure)
+        other = Stoplight::Failure.new('class', 'message 2', Time.new)
+        data_store.record_failure(light, other)
+        expect(data_store.get_failures(light)).to eq([other, failure, old_failure])
+      end
+
+      it 'limits the number of stored failures' do
+        light.with_threshold(1)
+        data_store.record_failure(light, failure)
+        other = Stoplight::Failure.new('class', 'message 2', Time.new)
+        data_store.record_failure(light, other)
+        expect(data_store.get_failures(light)).to eq([other])
+      end
     end
 
-    it 'persists the failure' do
-      data_store.record_failure(light, failure)
-      expect(data_store.get_failures(light)).to eq([failure])
-    end
+    context 'when using new format' do
+      it 'returns the number of failures' do
+        expect(data_store.record_failure(light, failure)).to eql(1)
+      end
 
-    it 'stores more recent failures at the head' do
-      data_store.record_failure(light, failure)
-      other = Stoplight::Failure.new('class', 'message 2', Time.new)
-      data_store.record_failure(light, other)
-      expect(data_store.get_failures(light)).to eq([other, failure])
-    end
+      it 'persists the failure' do
+        data_store.record_failure(light, failure)
+        expect(data_store.get_failures(light)).to eq([failure])
+      end
 
-    it 'limits the errors behind the window size' do
-      light.with_window_size(3)
-      data_store.record_failure(light, failure)
-      other = Stoplight::Failure.new('class', 'message 2', Time.new + 8)
-      data_store.record_failure(light, other)
-      expect(data_store.get_failures(light)).to eq([other])
-    end
+      it 'stores more recent failures at the head' do
+        data_store.record_failure(light, failure)
+        other = Stoplight::Failure.new('class', 'message 2', Time.new)
+        data_store.record_failure(light, other)
+        expect(data_store.get_failures(light)).to eq([other, failure])
+      end
 
-    it 'limits the number of stored failures' do
-      light.with_threshold(1)
-      data_store.record_failure(light, failure)
-      other = Stoplight::Failure.new('class', 'message 2', Time.new)
-      data_store.record_failure(light, other)
-      expect(data_store.get_failures(light)).to eq([other])
+      it 'limits the errors behind the window size' do
+        light.with_window_size(3)
+        data_store.record_failure(light, failure)
+        other = Stoplight::Failure.new('class', 'message 2', Time.new + 8)
+        data_store.record_failure(light, other)
+        expect(data_store.get_failures(light)).to eq([other])
+      end
+
+      it 'limits the number of stored failures' do
+        light.with_threshold(1)
+        data_store.record_failure(light, failure)
+        other = Stoplight::Failure.new('class', 'message 2', Time.new)
+        data_store.record_failure(light, other)
+        expect(data_store.get_failures(light)).to eq([other])
+      end
     end
   end
 
