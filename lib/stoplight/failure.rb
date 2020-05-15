@@ -53,13 +53,16 @@ module Stoplight
     end
 
     # @return [String]
-    def to_json
+    def to_json(options = nil)
       JSON.generate(
-        error: {
-          class: error_class,
-          message: error_message
+        {
+          error: {
+            class: error_class,
+            message: error_message
+          },
+          time: time.strftime(TIME_FORMAT)
         },
-        time: time.strftime(TIME_FORMAT)
+        options
       )
     end
   end
