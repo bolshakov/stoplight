@@ -52,6 +52,7 @@ module Stoplight
         time == other.time
     end
 
+    # @param options [Object, nil]
     # @return [String]
     def to_json(options = nil)
       JSON.generate(
