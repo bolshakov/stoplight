@@ -89,6 +89,11 @@ RSpec.describe Stoplight::Failure do
       expect(described_class.new(error_class, error_message, time).to_json)
         .to eql(json)
     end
+
+    it 'generates JSON with options' do
+      expect(described_class.new(error_class, error_message, time).to_json({}))
+        .to eql(json)
+    end
   end
 
   describe '::TIME_FORMAT' do
