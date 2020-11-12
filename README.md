@@ -501,18 +501,18 @@ Martin Fowler's [CircuitBreaker][] article.
 
 Stoplight is licensed under [the MIT License][].
 
-[Stoplight]: https://github.com/orgsync/stoplight
+[Stoplight]: https://github.com/CampusLabs/stoplight
 [Version badge]: https://img.shields.io/gem/v/stoplight.svg?label=version
 [version]: https://rubygems.org/gems/stoplight
-[Build badge]: https://img.shields.io/travis/orgsync/stoplight/master.svg?label=build
-[build]: https://travis-ci.org/orgsync/stoplight
+[Build badge]: https://img.shields.io/travis/CampusLabs/stoplight/master.svg?label=build
+[build]: https://travis-ci.org/CampusLabs/stoplight
 [Coverage badge]: https://img.shields.io/coveralls/orgsync/stoplight/master.svg?label=coverage
 [coverage]: https://coveralls.io/r/orgsync/stoplight
 [Climate badge]: https://img.shields.io/codeclimate/github/orgsync/stoplight.svg?label=climate
 [climate]: https://codeclimate.com/github/orgsync/stoplight
 [Dependencies badge]: https://img.shields.io/gemnasium/orgsync/stoplight.svg?label=dependencies
 [dependencies]: https://gemnasium.com/orgsync/stoplight
-[stoplight-admin]: https://github.com/orgsync/stoplight-admin
+[stoplight-admin]: https://github.com/CampusLabs/stoplight-admin
 [Semantic Versioning]: http://semver.org/spec/v2.0.0.html
 [the change log]: CHANGELOG.md
 [the notifiers section]: #notifiers
@@ -529,6 +529,6 @@ Stoplight is licensed under [the MIT License][].
 [@camdez]: https://github.com/camdez
 [@tfausak]: https://github.com/tfausak
 [@orgsync]: https://github.com/OrgSync
-[complete list of contributors]: https://github.com/orgsync/stoplight/graphs/contributors
+[complete list of contributors]: https://github.com/CampusLabs/stoplight/graphs/contributors
 [CircuitBreaker]: http://martinfowler.com/bliki/CircuitBreaker.html
 [the MIT license]: LICENSE.md
