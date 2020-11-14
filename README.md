@@ -4,7 +4,6 @@
 [![Build badge][]][build]
 [![Coverage badge][]][coverage]
 [![Climate badge][]][climate]
-[![Dependencies badge][]][dependencies]
 
 Stoplight is traffic control for code. It's an implementation of the circuit
 breaker pattern in Ruby.
@@ -495,24 +494,22 @@ stoplight = Stoplight("test-#{rand}") { ... }
 
 ## Credits
 
-Stoplight is brought to you by [@camdez][] and [@tfausak][] from [@OrgSync][].
-A [complete list of contributors][] is available on GitHub. We were inspired by
-Martin Fowler's [CircuitBreaker][] article.
+Stoplight is brought to you by [@camdez][] and [@tfausak][] from [@OrgSync][]. [@bolshakov][] is the current 
+maintainer of the gem. A [complete list of contributors][] is available on GitHub. We were inspired by
+Martin Fowler's [CircuitBreaker][] article. 
 
 Stoplight is licensed under [the MIT License][].
 
-[Stoplight]: https://github.com/orgsync/stoplight
+[Stoplight]: https://github.com/bolshakov/stoplight
 [Version badge]: https://img.shields.io/gem/v/stoplight.svg?label=version
 [version]: https://rubygems.org/gems/stoplight
-[Build badge]: https://img.shields.io/travis/orgsync/stoplight/master.svg?label=build
-[build]: https://travis-ci.org/orgsync/stoplight
-[Coverage badge]: https://img.shields.io/coveralls/orgsync/stoplight/master.svg?label=coverage
-[coverage]: https://coveralls.io/r/orgsync/stoplight
-[Climate badge]: https://img.shields.io/codeclimate/github/orgsync/stoplight.svg?label=climate
-[climate]: https://codeclimate.com/github/orgsync/stoplight
-[Dependencies badge]: https://img.shields.io/gemnasium/orgsync/stoplight.svg?label=dependencies
-[dependencies]: https://gemnasium.com/orgsync/stoplight
-[stoplight-admin]: https://github.com/orgsync/stoplight-admin
+[Build badge]: https://github.com/bolshakov/stoplight/workflows/Ruby/badge.svg
+[build]: https://github.com/bolshakov/stoplight/actions?query=branch%3Amaster
+[Coverage badge]: https://img.shields.io/coveralls/bolshakov/stoplight/master.svg?label=coverage
+[coverage]: https://coveralls.io/r/bolshakov/stoplight
+[Climate badge]: https://img.shields.io/codeclimate/github/bolshakov/stoplight.svg?label=climate
+[climate]: https://codeclimate.com/github/bolshakov/stoplight
+[stoplight-admin]: https://github.com/bolshakov/stoplight-admin
 [Semantic Versioning]: http://semver.org/spec/v2.0.0.html
 [the change log]: CHANGELOG.md
 [the notifiers section]: #notifiers
@@ -529,6 +526,7 @@ Stoplight is licensed under [the MIT License][].
 [@camdez]: https://github.com/camdez
 [@tfausak]: https://github.com/tfausak
 [@orgsync]: https://github.com/OrgSync
-[complete list of contributors]: https://github.com/orgsync/stoplight/graphs/contributors
+[@bolshakov]: https://github.com/bolshakov
+[complete list of contributors]: https://github.com/bolshakov/stoplight/graphs/contributors
 [CircuitBreaker]: http://martinfowler.com/bliki/CircuitBreaker.html
 [the MIT license]: LICENSE.md
