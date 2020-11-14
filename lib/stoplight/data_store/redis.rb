@@ -29,7 +29,7 @@ module Stoplight
       end
 
       def get_all(light)
-        failures, state = @redis.multi do
+        _, failures, state = @redis.multi do
           query_failures(light)
           @redis.hget(states_key, light.name)
         end
@@ -57,8 +57,30 @@ module Stoplight
         size
       end
 
-      def clear_failures(light)
+      def migrate_failures(light)
         failures, = @redis.multi do
+          @redis.lrange(failures_key(light), 0, -1)
+          @redis.del(failures_key(light))
+        end
+
+        normalize_failures(failures, light.error_notifier).each do |failure|
+          @redis.zadd(failures_key(light), failure.time.to_i, failure.to_json)
+        end
+      end
+
+      # @param light [Stoplight::Light]
+      # @param failure [Stoplight::Failure]
+      def record_failure_without_threshold(light, failure)
+        size, = @redis.multi do
+          @redis.lpush(failures_key(light), failure.to_json)
+          @redis.ltrim(failures_key(light), 0, light.threshold - 1)
+        end
+
+        size
+      end
+
+      def clear_failures(light)
+        _, failures, = @redis.multi do
           query_failures(light)
           @redis.del(failures_key(light))
         end
@@ -82,6 +104,13 @@ module Stoplight
         end
 
         normalize_state(state)
+      end
+
+      # @param light [Stoplight::Light]
+      # @return [Boolean]
+      def legacy_key_format?(light)
+        failures_key = failures_key(light)
+        @redis.type(failures_key) == 'list'
       end
 
       private

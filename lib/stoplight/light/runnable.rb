@@ -3,6 +3,8 @@
 module Stoplight
   class Light
     module Runnable # rubocop:disable Style/Documentation
+      prepend LegacyKeyFormatSupport
+
       # @return [String]
       def color
         failures, state = failures_and_state

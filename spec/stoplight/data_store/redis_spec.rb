@@ -20,6 +20,15 @@ RSpec.describe Stoplight::DataStore::Redis do
     expect(described_class).to be < Stoplight::DataStore::Base
   end
 
+  shared_context 'legacy light format' do
+    let(:old_failure) { Stoplight::Failure.new('class', 'old message', Time.new) }
+
+    before do
+      key = data_store.__send__(:failures_key, light)
+      redis.lpush(key, old_failure.to_json)
+    end
+  end
+
   describe '#names' do
     it 'is initially empty' do
       expect(data_store.names).to eql([])
@@ -49,6 +58,16 @@ RSpec.describe Stoplight::DataStore::Redis do
   end
 
   describe '#get_all' do
+    context 'when a light uses legacy format' do
+      include_context 'legacy light format'
+
+      it 'returns the failures and the state' do
+        failures, state = data_store.get_all(light)
+        expect(failures).to eql([])
+        expect(state).to eql(Stoplight::State::UNLOCKED)
+      end
+    end
+
     it 'returns the failures and the state' do
       failures, state = data_store.get_all(light)
       expect(failures).to eql([])

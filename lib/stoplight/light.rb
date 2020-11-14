@@ -54,6 +54,11 @@ module Stoplight
       @window_size = Default::WINDOW_SIZE
     end
 
+    # @return [Boolean]
+    def legacy_key_format?
+      @legacy_key_format
+    end
+
     # @param cool_off_time [Float]
     # @return [self]
     def with_cool_off_time(cool_off_time)
