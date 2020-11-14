@@ -507,7 +507,7 @@ Stoplight is licensed under [the MIT License][].
 [build]: https://github.com/bolshakov/stoplight/actions?query=branch%3Amaster
 [Coverage badge]: https://img.shields.io/coveralls/bolshakov/stoplight/master.svg?label=coverage
 [coverage]: https://coveralls.io/r/bolshakov/stoplight
-[Climate badge]: https://img.shields.io/codeclimate/github/bolshakov/stoplight.svg?label=climate
+[Climate badge]: https://api.codeclimate.com/v1/badges/3451c2d281ffa345441a/maintainability
 [climate]: https://codeclimate.com/github/bolshakov/stoplight
 [stoplight-admin]: https://github.com/bolshakov/stoplight-admin
 [Semantic Versioning]: http://semver.org/spec/v2.0.0.html
