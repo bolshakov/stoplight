@@ -1,11 +1,11 @@
-# coding: utf-8
+# frozen_string_literal: true
 
 require 'json'
 require 'time'
 
 module Stoplight
   class Failure # rubocop:disable Style/Documentation
-    TIME_FORMAT = '%Y-%m-%dT%H:%M:%S.%N%:z'.freeze
+    TIME_FORMAT = '%Y-%m-%dT%H:%M:%S.%N%:z'
 
     # @return [String]
     attr_reader :error_class

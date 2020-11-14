@@ -1,4 +1,4 @@
-# coding: utf-8
+# frozen_string_literal: true
 
 module Stoplight
   VERSION = Gem::Version.new('2.2.1')

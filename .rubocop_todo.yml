@@ -54,14 +54,3 @@ Style/EmptyMethod:
     - 'spec/stoplight/notifier/hip_chat_spec.rb'
     - 'spec/stoplight/notifier/slack_spec.rb'
 
-# Offense count: 54
-# Cop supports --auto-correct.
-Style/Encoding:
-  Enabled: false
-
-# Offense count: 56
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: always, always_true, never
-Style/FrozenStringLiteralComment:
-  Enabled: false

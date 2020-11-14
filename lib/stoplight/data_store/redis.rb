@@ -1,11 +1,11 @@
-# coding: utf-8
+# frozen_string_literal: true
 
 module Stoplight
   module DataStore
     # @see Base
     class Redis < Base
-      KEY_PREFIX = 'stoplight'.freeze
-      KEY_SEPARATOR = ':'.freeze
+      KEY_PREFIX = 'stoplight'
+      KEY_SEPARATOR = ':'
 
       # @param redis [::Redis]
       def initialize(redis)
