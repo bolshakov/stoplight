@@ -21,8 +21,3 @@ Layout/SpaceInLambdaLiteral:
     - 'lib/stoplight/default.rb'
     - 'spec/stoplight/light/runnable_spec.rb'
     - 'spec/stoplight/light_spec.rb'
-
-# Offense count: 1
-Lint/AmbiguousBlockAssociation:
-  Exclude:
-    - 'spec/stoplight/light/runnable_spec.rb'

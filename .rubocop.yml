@@ -10,3 +10,7 @@ Metrics/BlockLength:
 
 Lint/MissingSuper:
   Enabled: false
+
+Lint/AmbiguousBlockAssociation:
+  Exclude:
+    - 'spec/**/*'
