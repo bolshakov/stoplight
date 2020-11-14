@@ -5,8 +5,7 @@ require 'spec_helper'
 # require 'hipchat'
 module HipChat
   class Client
-    def initialize(*)
-    end
+    def initialize(*); end
   end
 end
 

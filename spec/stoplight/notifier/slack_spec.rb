@@ -5,8 +5,7 @@ require 'spec_helper'
 # require 'slack-notifier'
 module Slack
   class Notifier
-    def initialize(*)
-    end
+    def initialize(*); end
   end
 end
 

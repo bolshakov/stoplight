@@ -44,13 +44,3 @@ Naming/RescuedExceptionsVariableName:
   Exclude:
     - 'lib/stoplight/data_store/redis.rb'
     - 'lib/stoplight/light/runnable.rb'
-
-# Offense count: 2
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: compact, expanded
-Style/EmptyMethod:
-  Exclude:
-    - 'spec/stoplight/notifier/hip_chat_spec.rb'
-    - 'spec/stoplight/notifier/slack_spec.rb'
-
