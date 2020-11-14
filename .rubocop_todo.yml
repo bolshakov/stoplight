@@ -65,10 +65,3 @@ Style/Encoding:
 # SupportedStyles: always, always_true, never
 Style/FrozenStringLiteralComment:
   Enabled: false
-
-# Offense count: 2
-# Cop supports --auto-correct.
-Style/RedundantBegin:
-  Exclude:
-    - 'lib/stoplight/data_store/redis.rb'
-    - 'spec/stoplight/light/runnable_spec.rb'

@@ -123,12 +123,10 @@ RSpec.describe Stoplight::Light::Runnable do
 
         context 'with an error handler' do
           let(:result) do
-            begin
-              subject.run
-              expect(false).to be(true)
-            rescue error.class
-              expect(true).to be(true)
-            end
+            subject.run
+            expect(false).to be(true)
+          rescue error.class
+            expect(true).to be(true)
           end
 
           it 'records the failure when the handler does nothing' do
