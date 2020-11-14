@@ -37,7 +37,7 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency('hipchat', '~> 1.5')
   gem.add_development_dependency('honeybadger', '~> 2.5')
   gem.add_development_dependency('pagerduty', '~> 2.1.1')
-  gem.add_development_dependency('rake', '~> 11.1')
+  gem.add_development_dependency('rake', '~> 13.0')
   gem.add_development_dependency('redis', '~> 3.2')
   gem.add_development_dependency('rspec', '~> 3.3')
   gem.add_development_dependency('rubocop', '~> 1.0.0')
