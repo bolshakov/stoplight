@@ -72,11 +72,3 @@ Style/RedundantBegin:
   Exclude:
     - 'lib/stoplight/data_store/redis.rb'
     - 'spec/stoplight/light/runnable_spec.rb'
-
-# Offense count: 1
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: implicit, explicit
-Style/RescueStandardError:
-  Exclude:
-    - 'lib/stoplight/data_store/redis.rb'

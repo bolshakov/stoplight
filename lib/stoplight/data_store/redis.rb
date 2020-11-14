@@ -86,7 +86,7 @@ module Stoplight
         failures.map do |json|
           begin
             Failure.from_json(json)
-          rescue => error
+          rescue StandardError => error
             error_notifier.call(error)
             Failure.from_error(error)
           end
