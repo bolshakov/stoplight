@@ -1,0 +1,14 @@
+AllCops:
+  TargetRubyVersion: 2.5
+
+Metrics/BlockLength:
+  Exclude:
+    - 'spec/**/*'
+    - 'stoplight.gemspec'
+
+Lint/MissingSuper:
+  Enabled: false
+
+Lint/AmbiguousBlockAssociation:
+  Exclude:
+    - 'spec/**/*'

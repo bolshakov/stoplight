@@ -1,12 +1,11 @@
-# coding: utf-8
+# frozen_string_literal: true
 
 require 'spec_helper'
 
 # require 'hipchat'
 module HipChat
   class Client
-    def initialize(*)
-    end
+    def initialize(*); end
   end
 end
 

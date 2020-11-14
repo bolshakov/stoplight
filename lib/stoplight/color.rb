@@ -1,9 +1,9 @@
-# coding: utf-8
+# frozen_string_literal: true
 
 module Stoplight
   module Color
-    GREEN = 'green'.freeze
-    YELLOW = 'yellow'.freeze
-    RED = 'red'.freeze
+    GREEN = 'green'
+    YELLOW = 'yellow'
+    RED = 'red'
   end
 end

@@ -1,11 +1,11 @@
-# coding: utf-8
+# frozen_string_literal: true
 
 module Stoplight
   module DataStore
     # @see Base
     class Redis < Base
-      KEY_PREFIX = 'stoplight'.freeze
-      KEY_SEPARATOR = ':'.freeze
+      KEY_PREFIX = 'stoplight'
+      KEY_SEPARATOR = ':'
 
       # @param redis [::Redis]
       def initialize(redis)
@@ -84,12 +84,10 @@ module Stoplight
 
       def normalize_failures(failures, error_notifier)
         failures.map do |json|
-          begin
-            Failure.from_json(json)
-          rescue => error
-            error_notifier.call(error)
-            Failure.from_error(error)
-          end
+          Failure.from_json(json)
+        rescue StandardError => e
+          error_notifier.call(e)
+          Failure.from_error(e)
         end
       end
 

@@ -1,4 +1,4 @@
-# coding: utf-8
+# frozen_string_literal: true
 
 module Stoplight
   module Notifier
@@ -30,7 +30,7 @@ module Stoplight
 
         h = options.merge(
           configuration: configuration,
-          backtrace: (error.backtrace if error)
+          backtrace: error&.backtrace
         )
         ::Raven.capture_message(message, h)
         message
