@@ -1,0 +1,9 @@
+inherit_from: .rubocop_todo.yml
+
+AllCops:
+  TargetRubyVersion: 2.5
+
+Metrics/BlockLength:
+  Exclude:
+    - 'spec/**/*'
+    - 'stoplight.gemspec'
