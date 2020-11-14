@@ -31,23 +31,18 @@ Gem::Specification.new do |gem|
 
   gem.required_ruby_version = '>= 2.5'
 
-  {
-    'benchmark-ips' => '2.3',
-    'bugsnag' => '4.0',
-    'coveralls' => '0.8',
-    'fakeredis' => '0.5',
-    'hipchat' => '1.5',
-    'honeybadger' => '2.5',
-    'pagerduty' => '2.1.1',
-    'rake' => '11.1',
-    'redis' => '3.2',
-    'rspec' => '3.3',
-    'sentry-raven' => '1.2',
-    'slack-notifier' => '1.3',
-    'timecop' => '0.8'
-  }.each do |name, version|
-    gem.add_development_dependency(name, "~> #{version}")
-  end
-
+  gem.add_development_dependency('benchmark-ips', '~> 2.3')
+  gem.add_development_dependency('bugsnag', '~> 4.0')
+  gem.add_development_dependency('coveralls', '~> 0.8')
+  gem.add_development_dependency('fakeredis', '~> 0.5')
+  gem.add_development_dependency('hipchat', '~> 1.5')
+  gem.add_development_dependency('honeybadger', '~> 2.5')
+  gem.add_development_dependency('pagerduty', '~> 2.1.1')
+  gem.add_development_dependency('rake', '~> 11.1')
+  gem.add_development_dependency('redis', '~> 3.2')
+  gem.add_development_dependency('rspec', '~> 3.3')
   gem.add_development_dependency('rubocop', '~> 1.0.0')
+  gem.add_development_dependency('sentry-raven', '~> 1.2')
+  gem.add_development_dependency('slack-notifier', '~> 1.3')
+  gem.add_development_dependency('timecop', '~> 0.8')
 end
