@@ -6,9 +6,9 @@ module Stoplight
 
     DATA_STORE = DataStore::Memory.new
 
-    ERROR_HANDLER = -> (error, handler) { handler.call(error) }
+    ERROR_HANDLER = ->(error, handler) { handler.call(error) }
 
-    ERROR_NOTIFIER = -> (error) { warn error }
+    ERROR_NOTIFIER = ->(error) { warn error }
 
     FALLBACK = nil
 

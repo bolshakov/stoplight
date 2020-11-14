@@ -11,13 +11,3 @@
 Layout/EmptyLineAfterGuardClause:
   Exclude:
     - 'lib/stoplight/light/runnable.rb'
-
-# Offense count: 8
-# Cop supports --auto-correct.
-# Configuration parameters: EnforcedStyle.
-# SupportedStyles: require_no_space, require_space
-Layout/SpaceInLambdaLiteral:
-  Exclude:
-    - 'lib/stoplight/default.rb'
-    - 'spec/stoplight/light/runnable_spec.rb'
-    - 'spec/stoplight/light_spec.rb'
