@@ -30,7 +30,7 @@ module Stoplight
 
         h = options.merge(
           configuration: configuration,
-          backtrace: (error.backtrace if error)
+          backtrace: error&.backtrace
         )
         ::Raven.capture_message(message, h)
         message

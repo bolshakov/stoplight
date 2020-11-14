@@ -80,13 +80,3 @@ Style/RedundantBegin:
 Style/RescueStandardError:
   Exclude:
     - 'lib/stoplight/data_store/redis.rb'
-
-# Offense count: 4
-# Cop supports --auto-correct.
-# Configuration parameters: ConvertCodeThatCanStartToReturnNil, AllowedMethods.
-# AllowedMethods: present?, blank?, presence, try, try!
-Style/SafeNavigation:
-  Exclude:
-    - 'lib/stoplight/light/runnable.rb'
-    - 'lib/stoplight/notifier/honeybadger.rb'
-    - 'lib/stoplight/notifier/raven.rb'

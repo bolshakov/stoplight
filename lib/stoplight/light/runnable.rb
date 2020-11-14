@@ -50,7 +50,7 @@ module Stoplight
       def run_code(on_success, on_failure)
         result = code.call
         failures = clear_failures
-        on_success.call(failures) if on_success
+        on_success&.call(failures)
         result
       rescue Exception => error # rubocop:disable Lint/RescueException
         handle_error(error, on_failure)
@@ -59,7 +59,7 @@ module Stoplight
       def handle_error(error, on_failure)
         error_handler.call(error, Error::HANDLER)
         size = record_failure(error)
-        on_failure.call(size, error) if on_failure
+        on_failure&.call(size, error)
         raise error unless fallback
         fallback.call(error)
       end
