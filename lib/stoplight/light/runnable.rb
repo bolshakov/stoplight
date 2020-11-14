@@ -44,6 +44,7 @@ module Stoplight
 
       def run_red
         raise Error::RedLight, name unless fallback
+
         fallback.call(nil)
       end
 
@@ -61,6 +62,7 @@ module Stoplight
         size = record_failure(error)
         on_failure&.call(size, error)
         raise error unless fallback
+
         fallback.call(error)
       end
 
