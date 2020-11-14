@@ -85,9 +85,9 @@ module Stoplight
       def normalize_failures(failures, error_notifier)
         failures.map do |json|
           Failure.from_json(json)
-        rescue StandardError => error
-          error_notifier.call(error)
-          Failure.from_error(error)
+        rescue StandardError => e
+          error_notifier.call(e)
+          Failure.from_error(e)
         end
       end
 

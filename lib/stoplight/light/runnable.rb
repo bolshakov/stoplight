@@ -52,8 +52,8 @@ module Stoplight
         failures = clear_failures
         on_success&.call(failures)
         result
-      rescue Exception => error # rubocop:disable Lint/RescueException
-        handle_error(error, on_failure)
+      rescue Exception => e # rubocop:disable Lint/RescueException
+        handle_error(e, on_failure)
       end
 
       def handle_error(error, on_failure)
