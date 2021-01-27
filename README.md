@@ -501,7 +501,7 @@ Martin Fowler's [CircuitBreaker][] article.
 
 Stoplight is licensed under [the MIT License][].
 
-[Stoplight]: https://github.com/orgsync/stoplight
+[Stoplight]: https://github.com/bolshakov/stoplight
 [Version badge]: https://img.shields.io/gem/v/stoplight.svg?label=version
 [version]: https://rubygems.org/gems/stoplight
 [Build badge]: https://img.shields.io/travis/orgsync/stoplight/master.svg?label=build
