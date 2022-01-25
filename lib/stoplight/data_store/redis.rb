@@ -25,9 +25,9 @@ module Stoplight
       end
 
       def get_all(light)
-        failures, state = @redis.multi do
-          query_failures(light)
-          @redis.hget(states_key, light.name)
+        failures, state = @redis.multi do |transaction|
+          query_failures(light, transaction: transaction)
+          transaction.hget(states_key, light.name)
         end
 
         [
@@ -41,18 +41,18 @@ module Stoplight
       end
 
       def record_failure(light, failure)
-        size, = @redis.multi do
-          @redis.lpush(failures_key(light), failure.to_json)
-          @redis.ltrim(failures_key(light), 0, light.threshold - 1)
+        size, = @redis.multi do |transaction|
+          transaction.lpush(failures_key(light), failure.to_json)
+          transaction.ltrim(failures_key(light), 0, light.threshold - 1)
         end
 
         size
       end
 
       def clear_failures(light)
-        failures, = @redis.multi do
-          query_failures(light)
-          @redis.del(failures_key(light))
+        failures, = @redis.multi do |transaction|
+          query_failures(light, transaction: transaction)
+          transaction.del(failures_key(light))
         end
 
         normalize_failures(failures, light.error_notifier)
@@ -68,9 +68,9 @@ module Stoplight
       end
 
       def clear_state(light)
-        state, = @redis.multi do
-          query_state(light)
-          @redis.hdel(states_key, light.name)
+        state, = @redis.multi do |transaction|
+          query_state(light, transaction: transaction)
+          transaction.hdel(states_key, light.name)
         end
 
         normalize_state(state)
@@ -78,8 +78,8 @@ module Stoplight
 
       private
 
-      def query_failures(light)
-        @redis.lrange(failures_key(light), 0, -1)
+      def query_failures(light, transaction: @redis)
+        transaction.lrange(failures_key(light), 0, -1)
       end
 
       def normalize_failures(failures, error_notifier)
@@ -91,8 +91,8 @@ module Stoplight
         end
       end
 
-      def query_state(light)
-        @redis.hget(states_key, light.name)
+      def query_state(light, transaction: @redis)
+        transaction.hget(states_key, light.name)
       end
 
       def normalize_state(state)
