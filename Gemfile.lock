@@ -45,7 +45,7 @@ GEM
     rake (13.0.1)
     redis (3.3.5)
     regexp_parser (1.8.2)
-    rexml (3.2.4)
+    rexml (3.2.5)
     rspec (3.9.0)
       rspec-core (~> 3.9.0)
       rspec-expectations (~> 3.9.0)
