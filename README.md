@@ -28,7 +28,6 @@ Check out [stoplight-admin][] for controlling your stoplights.
     - [Redis](#redis)
   - [Notifiers](#notifiers)
     - [Bugsnag](#bugsnag)
-    - [HipChat](#hipchat)
     - [Honeybadger](#honeybadger)
     - [Logger](#logger)
     - [Pagerduty](#pagerduty)
@@ -311,22 +310,6 @@ Stoplight::Light.default_notifiers += [notifier]
 # => [#<Stoplight::Notifier::IO:...>, #<Stoplight::Notifier::Bugsnag:...>]
 ```
 
-#### HipChat
-
-Make sure you have [the HipChat gem][] (`~> 1.5`) installed before configuring
-Stoplight.
-
-``` rb
-require 'hipchat'
-# => true
-hip_chat = HipChat::Client.new('token')
-# => #<HipChat::Client:...>
-notifier = Stoplight::Notifier::HipChat.new(hip_chat, 'room')
-# => #<Stoplight::Notifier::HipChat:...>
-Stoplight::Light.default_notifiers += [notifier]
-# => [#<Stoplight::Notifier::IO:...>, #<Stoplight::Notifier::HipChat:...>]
-```
-
 #### Honeybadger
 
 Make sure you have [the Honeybadger gem][] (`~> 2.5`) installed before
@@ -516,7 +499,6 @@ Stoplight is licensed under [the MIT License][].
 [the cool off time section]: #custom-cool-off-time
 [the Redis gem]: https://rubygems.org/gems/redis
 [the Bugsnag gem]: https://rubygems.org/gems/bugsnag
-[the HipChat gem]: https://rubygems.org/gems/hipchat
 [the Honeybadger gem]: https://rubygems.org/gems/honeybadger
 [the Logger class]: http://ruby-doc.org/stdlib-2.2.3/libdoc/logger/rdoc/Logger.html
 [the Rollbar gem]: https://rubygems.org/gems/rollbar
