@@ -34,7 +34,6 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency('benchmark-ips', '~> 2.3')
   gem.add_development_dependency('bugsnag', '~> 4.0')
   gem.add_development_dependency('fakeredis', '~> 0.5')
-  gem.add_development_dependency('hipchat', '~> 1.5')
   gem.add_development_dependency('honeybadger', '~> 2.5')
   gem.add_development_dependency('pagerduty', '~> 2.1.1')
   gem.add_development_dependency('rake', '~> 13.0')
