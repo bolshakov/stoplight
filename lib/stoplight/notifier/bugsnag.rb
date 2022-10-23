@@ -29,7 +29,7 @@ module Stoplight
 
       def notify(light, from_color, to_color, error)
         message = formatter.call(light, from_color, to_color, error)
-        bugsnag.notify(StoplightStatusChange.new(message), options)
+        bugsnag.notify(StoplightStatusChange.new(message), **options)
         message
       end
     end
