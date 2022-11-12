@@ -109,6 +109,42 @@ RSpec.describe Stoplight::Light::Runnable do
           expect(subject.data_store.get_failures(subject).size).to eql(1)
         end
 
+        context 'when we did not send notifications yet' do
+          before do
+            allow(subject.data_store).to receive(:check_services_correlation).and_return(false)
+          end
+
+          it 'notifies when transitioning to red' do
+            subject.threshold.times do
+              expect(io.string).to eql('')
+              begin
+                subject.run
+              rescue error.class
+                nil
+              end
+            end
+            expect(io.string).to_not eql('')
+          end
+        end
+
+        context 'when we already sent notifications' do
+          before do
+            allow(subject.data_store).to receive(:check_services_correlation).and_return(true)
+          end
+
+          it 'does not send new notifications' do
+            subject.threshold.times do
+              expect(io.string).to eql('')
+              begin
+                subject.run
+              rescue error.class
+                nil
+              end
+            end
+            expect(io.string).to eql('')
+          end
+        end
+
         it 'notifies when transitioning to red' do
           subject.threshold.times do
             expect(io.string).to eql('')

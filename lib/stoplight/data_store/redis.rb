@@ -6,6 +6,7 @@ module Stoplight
     class Redis < Base
       KEY_PREFIX = 'stoplight'
       KEY_SEPARATOR = ':'
+      DEFAULT_JITTER = 1
 
       # @param redis [::Redis]
       def initialize(redis)
@@ -76,6 +77,15 @@ module Stoplight
         normalize_state(state)
       end
 
+      def check_services_correlation(light)
+        correlation_flag, = @redis.multi do |transaction|
+          transaction.exists?(correlation_flag_key(light))
+          transaction.setex(correlation_flag_key(light), 1, 'locked')
+        end
+
+        correlation_flag
+      end
+
       private
 
       def query_failures(light, transaction: @redis)
@@ -97,6 +107,14 @@ module Stoplight
 
       def normalize_state(state)
         state || State::UNLOCKED
+      end
+
+      def jitter
+        DEFAULT_JITTER
+      end
+
+      def correlation_flag_key(light)
+        key('correlation-flag', light.name, light.color)
       end
 
       def failures_key(light)

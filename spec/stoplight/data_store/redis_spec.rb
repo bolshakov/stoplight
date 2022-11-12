@@ -1,16 +1,17 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
-require 'fakeredis'
+# require 'fakeredis'
+require 'mock_redis'
 
 RSpec.describe Stoplight::DataStore::Redis do
   let(:data_store) { described_class.new(redis) }
-  let(:redis) { Redis.new }
+  let(:redis) { MockRedis.new }
   let(:light) { Stoplight::Light.new(name) {} }
   let(:name) { ('a'..'z').to_a.shuffle.join }
   let(:failure) { Stoplight::Failure.new('class', 'message', Time.new) }
 
-  before { Redis::Connection::Memory.reset_all_databases }
+  # before { Redis::Connection::Memory.reset_all_databases }
 
   it 'is a class' do
     expect(described_class).to be_a(Class)
@@ -141,6 +142,36 @@ RSpec.describe Stoplight::DataStore::Redis do
       data_store.set_state(light, state)
       data_store.clear_state(light)
       expect(data_store.get_state(light)).to eql(Stoplight::State::UNLOCKED)
+    end
+  end
+
+  describe '#check_services_correlation' do
+    let(:correlation_flag_namespace) { 'stoplight:correlation-flag' }
+
+    context 'correlation flag was not set' do
+      it 'returns false' do
+        expect(data_store.check_services_correlation(light)).to be_falsey
+      end
+
+      it 'records key to redis' do
+        data_store.check_services_correlation(light)
+
+        expect(redis.keys.first).to include correlation_flag_namespace
+        expect(redis.keys.first).to include light.color
+        expect(redis.keys.size).to eq 1
+      end
+    end
+
+    context 'correlation flag was already set' do
+      before { data_store.check_services_correlation(light) }
+
+      it 'returns true' do
+        expect(data_store.check_services_correlation(light)).to be_truthy
+      end
+
+      it 'does not record key to redis' do
+        expect(redis.keys.size).to eq 1
+      end
     end
   end
 end

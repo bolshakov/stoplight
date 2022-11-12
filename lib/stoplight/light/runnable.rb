@@ -30,7 +30,7 @@ module Stoplight
 
       def run_green
         on_failure = lambda do |size, error|
-          notify(Color::GREEN, Color::RED, error) if size == threshold
+          notify(Color::GREEN, Color::RED, error) if !already_notified? && size == threshold
         end
         run_code(nil, on_failure)
       end
@@ -64,6 +64,10 @@ module Stoplight
         raise error unless fallback
 
         fallback.call(error)
+      end
+
+      def already_notified?
+        safely { data_store.check_services_correlation(self) }
       end
 
       def clear_failures
