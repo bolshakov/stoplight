@@ -49,6 +49,11 @@ module Stoplight
       def clear_state(light)
         synchronize { @states.delete(light.name) }
       end
+
+      # We only need this method if we do not share memory with other service instances
+      def check_services_correlation(_light)
+        false
+      end
     end
   end
 end

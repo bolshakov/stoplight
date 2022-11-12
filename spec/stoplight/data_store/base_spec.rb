@@ -61,4 +61,11 @@ RSpec.describe Stoplight::DataStore::Base do
         .to raise_error(NotImplementedError)
     end
   end
+
+  describe '#check_services_correlation' do
+    it 'is not implemented' do
+      expect { data_store.check_services_correlation(nil) }
+        .to raise_error(NotImplementedError)
+    end
+  end
 end

@@ -52,6 +52,12 @@ module Stoplight
       def clear_state(_light)
         raise NotImplementedError
       end
+
+      # @param _light [Light]
+      # @return [Boolean]
+      def check_services_correlation(_light)
+        raise NotImplementedError
+      end
     end
   end
 end

@@ -130,4 +130,10 @@ RSpec.describe Stoplight::DataStore::Memory do
       expect(data_store.get_state(light)).to eql(Stoplight::State::UNLOCKED)
     end
   end
+
+  describe '#check_services_correlation' do
+    it 'returns false' do
+      expect(data_store.check_services_correlation(light)).to be_falsey
+    end
+  end
 end
