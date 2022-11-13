@@ -132,8 +132,18 @@ RSpec.describe Stoplight::DataStore::Memory do
   end
 
   describe '#check_services_correlation' do
-    it 'returns false' do
-      expect(data_store.check_services_correlation(light)).to be_falsey
+    context 'correlation flag was not set or was set long ago' do
+      it 'returns false' do
+        expect(data_store.check_services_correlation(light)).to be_falsey
+      end
+    end
+
+    context 'correlation flag was set not long ago' do
+      before { data_store.check_services_correlation(light) }
+
+      it 'returns true' do
+        expect(data_store.check_services_correlation(light)).to be_truthy
+      end
     end
   end
 end

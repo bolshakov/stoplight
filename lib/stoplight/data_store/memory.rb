@@ -7,10 +7,12 @@ module Stoplight
     # @see Base
     class Memory < Base
       include MonitorMixin
+      DEFAULT_JITTER = 1
 
       def initialize
         @failures = Hash.new { |h, k| h[k] = [] }
         @states = Hash.new { |h, k| h[k] = State::UNLOCKED }
+        @correlation_flags = Hash.new { |h, k| h[k] = [] }
         super() # MonitorMixin
       end
 
@@ -50,9 +52,35 @@ module Stoplight
         synchronize { @states.delete(light.name) }
       end
 
-      # We only need this method if we do not share memory with other service instances
-      def check_services_correlation(_light)
-        false
+      def check_services_correlation(light)
+        synchronize do
+          flag = get_setex(@correlation_flags[light.name])
+          @correlation_flags[light.name] = setex('locked', DEFAULT_JITTER)
+
+          flag.nil? ? false : true
+        end
+      end
+
+      private
+
+      def get_setex(value_array)
+        synchronize do
+          return if value_array.nil? || value_array.empty?
+
+          value, time_diff, value_created_at = value_array
+          if value_created_at + time_diff > Time.now.to_i
+            value
+          else
+            value_array = []
+            nil
+          end
+        end
+      end
+
+      def setex(value, expiration_time_diff)
+        synchronize do
+          [value, expiration_time_diff, Time.now.to_i]
+        end
       end
     end
   end
