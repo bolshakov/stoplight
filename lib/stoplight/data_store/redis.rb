@@ -6,11 +6,12 @@ module Stoplight
     class Redis < Base
       KEY_PREFIX = 'stoplight'
       KEY_SEPARATOR = ':'
-      DEFAULT_JITTER = 1
+      NOTIFIERS_LOCK_TTL = 1
 
       # @param redis [::Redis]
-      def initialize(redis)
+      def initialize(redis, notifiers_lock_ttl: NOTIFIERS_LOCK_TTL)
         @redis = redis
+        @notifiers_lock_ttl = notifiers_lock_ttl
       end
 
       def names
@@ -80,7 +81,7 @@ module Stoplight
       def notification_lock(light)
         lock, = @redis.multi do |transaction|
           transaction.exists?(notification_lock_key(light))
-          transaction.setex(notification_lock_key(light), DEFAULT_JITTER, 'locked')
+          transaction.setex(notification_lock_key(light), @notifiers_lock_ttl, 'locked')
         end
 
         lock
