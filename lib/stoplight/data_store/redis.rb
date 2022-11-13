@@ -80,7 +80,7 @@ module Stoplight
       def check_services_correlation(light)
         correlation_flag, = @redis.multi do |transaction|
           transaction.exists?(correlation_flag_key(light))
-          transaction.setex(correlation_flag_key(light), 1, 'locked')
+          transaction.setex(correlation_flag_key(light), DEFAULT_JITTER, 'locked')
         end
 
         correlation_flag
@@ -107,10 +107,6 @@ module Stoplight
 
       def normalize_state(state)
         state || State::UNLOCKED
-      end
-
-      def jitter
-        DEFAULT_JITTER
       end
 
       def correlation_flag_key(light)
