@@ -7,13 +7,13 @@ module Stoplight
     # @see Base
     class Memory < Base
       include MonitorMixin
-      NOTIFIERS_LOCK_TTL = 1
+      LOCK_TTL = 1
 
-      def initialize(notifiers_lock_ttl: NOTIFIERS_LOCK_TTL)
+      def initialize(lock_ttl: LOCK_TTL)
         @failures = Hash.new { |h, k| h[k] = [] }
         @states = Hash.new { |h, k| h[k] = State::UNLOCKED }
         @notification_locks = Hash.new { |h, k| h[k] = [] }
-        @notifiers_lock_ttl = notifiers_lock_ttl
+        @lock_ttl = lock_ttl
         super() # MonitorMixin
       end
 
@@ -56,7 +56,7 @@ module Stoplight
       def notification_lock(light)
         synchronize do
           lock = get_setex(@notification_locks[light.name])
-          @notification_locks[light.name] = setex(1, @notifiers_lock_ttl)
+          @notification_locks[light.name] = setex(1, @lock_ttl)
 
           lock.nil? ? false : true
         end
