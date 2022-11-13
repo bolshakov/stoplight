@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
-# require 'fakeredis'
 require 'mock_redis'
 
 RSpec.describe Stoplight::DataStore::Redis do
@@ -10,8 +9,6 @@ RSpec.describe Stoplight::DataStore::Redis do
   let(:light) { Stoplight::Light.new(name) {} }
   let(:name) { ('a'..'z').to_a.shuffle.join }
   let(:failure) { Stoplight::Failure.new('class', 'message', Time.new) }
-
-  # before { Redis::Connection::Memory.reset_all_databases }
 
   it 'is a class' do
     expect(described_class).to be_a(Class)
