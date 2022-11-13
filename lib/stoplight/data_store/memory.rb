@@ -12,7 +12,7 @@ module Stoplight
       def initialize
         @failures = Hash.new { |h, k| h[k] = [] }
         @states = Hash.new { |h, k| h[k] = State::UNLOCKED }
-        @correlation_flags = Hash.new { |h, k| h[k] = [] }
+        @notification_locks = Hash.new { |h, k| h[k] = [] }
         super() # MonitorMixin
       end
 
@@ -52,12 +52,12 @@ module Stoplight
         synchronize { @states.delete(light.name) }
       end
 
-      def check_services_correlation(light)
+      def notification_optimistic_lock(light)
         synchronize do
-          flag = get_setex(@correlation_flags[light.name])
-          @correlation_flags[light.name] = setex('locked', DEFAULT_JITTER)
+          lock = get_setex(@notification_locks[light.name])
+          @notification_locks[light.name] = setex(1, DEFAULT_JITTER)
 
-          flag.nil? ? false : true
+          lock.nil? ? false : true
         end
       end
 

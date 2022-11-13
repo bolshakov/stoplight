@@ -55,7 +55,7 @@ module Stoplight
 
       # @param _light [Light]
       # @return [Boolean]
-      def check_services_correlation(_light)
+      def notification_optimistic_lock(_light)
         raise NotImplementedError
       end
     end

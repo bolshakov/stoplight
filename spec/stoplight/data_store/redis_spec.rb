@@ -142,28 +142,28 @@ RSpec.describe Stoplight::DataStore::Redis do
     end
   end
 
-  describe '#check_services_correlation' do
-    let(:correlation_flag_namespace) { 'stoplight:correlation-flag' }
+  describe '#notification_optimistic_lock' do
+    let(:notification_lock_namespace) { 'stoplight:notification_lock' }
 
-    context 'correlation flag was not set' do
+    context 'notification lock was not set' do
       it 'returns false' do
-        expect(data_store.check_services_correlation(light)).to be_falsey
+        expect(data_store.notification_optimistic_lock(light)).to be_falsey
       end
 
       it 'records key to redis' do
-        data_store.check_services_correlation(light)
+        data_store.notification_optimistic_lock(light)
 
-        expect(redis.keys.first).to include correlation_flag_namespace
+        expect(redis.keys.first).to include notification_lock_namespace
         expect(redis.keys.first).to include light.color
         expect(redis.keys.size).to eq 1
       end
     end
 
-    context 'correlation flag was already set' do
-      before { data_store.check_services_correlation(light) }
+    context 'notification_optimistic_lock was already set' do
+      before { data_store.notification_optimistic_lock(light) }
 
       it 'returns true' do
-        expect(data_store.check_services_correlation(light)).to be_truthy
+        expect(data_store.notification_optimistic_lock(light)).to be_truthy
       end
 
       it 'does not record key to redis' do

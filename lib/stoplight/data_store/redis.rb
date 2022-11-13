@@ -77,13 +77,13 @@ module Stoplight
         normalize_state(state)
       end
 
-      def check_services_correlation(light)
-        correlation_flag, = @redis.multi do |transaction|
-          transaction.exists?(correlation_flag_key(light))
-          transaction.setex(correlation_flag_key(light), DEFAULT_JITTER, 'locked')
+      def notification_optimistic_lock(light)
+        lock, = @redis.multi do |transaction|
+          transaction.exists?(notification_lock_key(light))
+          transaction.setex(notification_lock_key(light), DEFAULT_JITTER, 'locked')
         end
 
-        correlation_flag
+        lock
       end
 
       private
@@ -109,12 +109,12 @@ module Stoplight
         state || State::UNLOCKED
       end
 
-      def correlation_flag_key(light)
-        key('correlation-flag', light.name, light.color)
-      end
-
       def failures_key(light)
         key('failures', light.name)
+      end
+
+      def notification_lock_key(light)
+        key('notification_lock', light.name, light.color)
       end
 
       def states_key

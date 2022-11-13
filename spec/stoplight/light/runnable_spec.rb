@@ -111,7 +111,7 @@ RSpec.describe Stoplight::Light::Runnable do
 
         context 'when we did not send notifications yet' do
           before do
-            allow(subject.data_store).to receive(:check_services_correlation).and_return(false)
+            allow(subject.data_store).to receive(:notification_optimistic_lock).and_return(false)
           end
 
           it 'notifies when transitioning to red' do
@@ -129,7 +129,7 @@ RSpec.describe Stoplight::Light::Runnable do
 
         context 'when we already sent notifications' do
           before do
-            allow(subject.data_store).to receive(:check_services_correlation).and_return(true)
+            allow(subject.data_store).to receive(:notification_optimistic_lock).and_return(true)
           end
 
           it 'does not send new notifications' do

@@ -131,18 +131,18 @@ RSpec.describe Stoplight::DataStore::Memory do
     end
   end
 
-  describe '#check_services_correlation' do
-    context 'correlation flag was not set or was set long ago' do
+  describe '#notification_optimistic_lock' do
+    context 'notification lock was not set or was set long ago' do
       it 'returns false' do
-        expect(data_store.check_services_correlation(light)).to be_falsey
+        expect(data_store.notification_optimistic_lock(light)).to be_falsey
       end
     end
 
-    context 'correlation flag was set not long ago' do
-      before { data_store.check_services_correlation(light) }
+    context 'notification lock was set not long ago' do
+      before { data_store.notification_optimistic_lock(light) }
 
       it 'returns true' do
-        expect(data_store.check_services_correlation(light)).to be_truthy
+        expect(data_store.notification_optimistic_lock(light)).to be_truthy
       end
     end
   end
