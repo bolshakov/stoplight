@@ -52,7 +52,7 @@ module Stoplight
         synchronize { @states.delete(light.name) }
       end
 
-      def notification_optimistic_lock(light)
+      def notification_lock(light)
         synchronize do
           lock = get_setex(@notification_locks[light.name])
           @notification_locks[light.name] = setex(1, DEFAULT_JITTER)

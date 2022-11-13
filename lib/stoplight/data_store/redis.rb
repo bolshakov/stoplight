@@ -77,7 +77,7 @@ module Stoplight
         normalize_state(state)
       end
 
-      def notification_optimistic_lock(light)
+      def notification_lock(light)
         lock, = @redis.multi do |transaction|
           transaction.exists?(notification_lock_key(light))
           transaction.setex(notification_lock_key(light), DEFAULT_JITTER, 'locked')

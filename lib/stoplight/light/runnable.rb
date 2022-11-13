@@ -67,7 +67,7 @@ module Stoplight
       end
 
       def already_notified?
-        safely { data_store.notification_optimistic_lock(self) }
+        safely { data_store.notification_lock(self) }
       end
 
       def clear_failures

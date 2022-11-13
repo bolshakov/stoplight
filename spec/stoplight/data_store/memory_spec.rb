@@ -131,18 +131,18 @@ RSpec.describe Stoplight::DataStore::Memory do
     end
   end
 
-  describe '#notification_optimistic_lock' do
+  describe '#notification_lock' do
     context 'notification lock was not set or was set long ago' do
       it 'returns false' do
-        expect(data_store.notification_optimistic_lock(light)).to be_falsey
+        expect(data_store.notification_lock(light)).to be_falsey
       end
     end
 
     context 'notification lock was set not long ago' do
-      before { data_store.notification_optimistic_lock(light) }
+      before { data_store.notification_lock(light) }
 
       it 'returns true' do
-        expect(data_store.notification_optimistic_lock(light)).to be_truthy
+        expect(data_store.notification_lock(light)).to be_truthy
       end
     end
   end
