@@ -8,6 +8,7 @@ module Stoplight
     class Memory < Base
       include MonitorMixin
       LOCK_TTL = 1
+      LOCKED_STATUS = 1
 
       def initialize(lock_ttl: LOCK_TTL)
         @failures = Hash.new { |h, k| h[k] = [] }
@@ -56,7 +57,7 @@ module Stoplight
       def notification_lock(light)
         synchronize do
           lock = get_setex(@notification_locks[light.name])
-          @notification_locks[light.name] = setex(1, @lock_ttl)
+          @notification_locks[light.name] = setex(LOCKED_STATUS, @lock_ttl)
 
           lock.nil? ? false : true
         end
