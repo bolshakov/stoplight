@@ -56,8 +56,8 @@ module Stoplight
 
       def notification_lock(light)
         synchronize do
-          lock = get_setex(@notification_locks[light.name])
-          @notification_locks[light.name] = setex(LOCKED_STATUS, @lock_ttl)
+          lock = get_setex(@notification_locks, light.name)
+          setex(@notification_locks, light.name, LOCKED_STATUS, @lock_ttl)
 
           lock.nil? ? false : true
         end
@@ -65,24 +65,29 @@ module Stoplight
 
       private
 
-      def get_setex(value_array)
+      def get_setex(hash, key)
         synchronize do
-          return if value_array.nil? || value_array.empty?
+          with_cleanup(hash, key) do |h, k|
+            value_array = h[k]
+            return if value_array.nil? || value_array.empty?
 
-          value, time_diff, value_created_at = value_array
-          if value_created_at + time_diff > Time.now.to_i
-            value
-          else
-            value_array = []
-            nil
+            value, time_diff, value_created_at = value_array
+            value_created_at + time_diff > Time.now.to_i ? [value, false] : [nil, true]
           end
         end
       end
 
-      def setex(value, expiration_time_diff)
+      def with_cleanup(hash, key)
         synchronize do
-          [value, expiration_time_diff, Time.now.to_i]
+          block_call_result, garbage = yield(hash, key)
+          hash.delete(key) if garbage
+
+          block_call_result
         end
+      end
+
+      def setex(hash, key, value, expiration_time_diff)
+        synchronize { hash[key] = [value, expiration_time_diff, Time.now.to_i] }
       end
     end
   end
