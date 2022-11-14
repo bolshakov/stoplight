@@ -67,7 +67,7 @@ module Stoplight
       end
 
       def already_notified?
-        safely { data_store.notification_lock_exists?(self) }
+        safely(false) { data_store.notification_lock_exists?(self) }
       end
 
       def clear_failures
