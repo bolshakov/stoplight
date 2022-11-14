@@ -54,7 +54,7 @@ module Stoplight
         synchronize { @states.delete(light.name) }
       end
 
-      def notification_lock(light)
+      def notification_lock_exists?(light)
         synchronize do
           lock = get_setex(@notification_locks, light.name)
           setex(@notification_locks, light.name, LOCKED_STATUS, @lock_ttl)

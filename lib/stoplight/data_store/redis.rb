@@ -79,7 +79,7 @@ module Stoplight
         normalize_state(state)
       end
 
-      def notification_lock(light)
+      def notification_lock_exists?(light)
         lock, = @redis.multi do |transaction|
           transaction.exists?(notification_lock_key(light))
           transaction.setex(notification_lock_key(light), @lock_ttl, LOCKED_STATUS)
