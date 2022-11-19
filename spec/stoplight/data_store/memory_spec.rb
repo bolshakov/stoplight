@@ -132,14 +132,20 @@ RSpec.describe Stoplight::DataStore::Memory do
   end
 
   describe '#notification_lock_exists?' do
-    context 'notification lock was not set or was set long ago' do
+    let(:read_write_lock) { instance_double('Concurrent::ReentrantReadWriteLock.new') }
+
+    before { allow(Concurrent::ReentrantReadWriteLock).to receive(:new).and_return(read_write_lock) }
+
+    context 'no other threads contesting the lock' do
+      before { allow(read_write_lock).to receive(:try_write_lock).and_return(true) }
+
       it 'returns false' do
         expect(data_store.notification_lock_exists?(light)).to be_falsey
       end
     end
 
-    context 'notification lock was set not long ago' do
-      before { data_store.notification_lock_exists?(light) }
+    context 'another thread already acquired the lock' do
+      before { allow(read_write_lock).to receive(:try_write_lock).and_return(false) }
 
       it 'returns true' do
         expect(data_store.notification_lock_exists?(light)).to be_truthy

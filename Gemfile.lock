@@ -2,6 +2,7 @@ PATH
   remote: .
   specs:
     stoplight (3.0.0)
+      concurrent-ruby (~> 1.1)
 
 GEM
   remote: https://rubygems.org/
@@ -9,6 +10,7 @@ GEM
     ast (2.4.1)
     benchmark-ips (2.7.2)
     bugsnag (4.2.1)
+    concurrent-ruby (1.1.10)
     diff-lcs (1.5.0)
     docile (1.4.0)
     fakeredis (0.8.0)

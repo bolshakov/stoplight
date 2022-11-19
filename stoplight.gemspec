@@ -31,6 +31,7 @@ Gem::Specification.new do |gem|
 
   gem.required_ruby_version = '>= 2.6'
 
+  gem.add_dependency('concurrent-ruby', '~> 1.1')
   gem.add_development_dependency('benchmark-ips', '~> 2.3')
   gem.add_development_dependency('bugsnag', '~> 4.0')
   gem.add_development_dependency('fakeredis', '~> 0.8')
