@@ -30,9 +30,15 @@ module Stoplight
 
       def run_green
         on_failure = lambda do |size, error|
-          notify(Color::GREEN, Color::RED, error) if size == threshold && !already_notified?
+          # Always check if we already sent a notification last with #!already_notified? method call.
+          # Otherwise you will not send any notification.
+          notify(Color::GREEN, Color::RED, error) if failures_threshold_breached?(size, threshold) && !already_notified?
         end
         run_code(nil, on_failure)
+      end
+
+      def failures_threshold_breached?(current_failures_count, max_errors_threshold)
+        current_failures_count == max_errors_threshold
       end
 
       def run_yellow
