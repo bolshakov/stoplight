@@ -7,10 +7,9 @@ module Stoplight
     # @see Base
     class Memory < Base
       include MonitorMixin
-      LOCK_TTL = 1
       LOCKED_STATUS = 1
 
-      def initialize(_lock_ttl: LOCK_TTL)
+      def initialize
         @failures = Hash.new { |h, k| h[k] = [] }
         @states = Hash.new { |h, k| h[k] = State::UNLOCKED }
         @notification_locks = {}

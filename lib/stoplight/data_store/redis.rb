@@ -6,13 +6,11 @@ module Stoplight
     class Redis < Base # rubocop:disable Metrics/ClassLength
       KEY_PREFIX = 'stoplight'
       KEY_SEPARATOR = ':'
-      LOCK_TTL = 1
       LOCKED_STATUS = 1
 
       # @param redis [::Redis]
-      def initialize(redis, lock_ttl: LOCK_TTL)
+      def initialize(redis)
         @redis = redis
-        @lock_ttl = lock_ttl
         @redis.smembers(notification_locks_collection_key).each { |key| @redis.del(key) }
       end
 
