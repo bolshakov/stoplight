@@ -62,9 +62,16 @@ RSpec.describe Stoplight::DataStore::Base do
     end
   end
 
-  describe '#notification_lock_exists?' do
+  describe '#with_notification_lock' do
     it 'is not implemented' do
-      expect { data_store.notification_lock_exists?(nil) }
+      expect { data_store.with_notification_lock(nil) }
+        .to raise_error(NotImplementedError)
+    end
+  end
+
+  describe '#with_lock_cleanup' do
+    it 'is not implemented' do
+      expect { data_store.with_lock_cleanup(nil) }
         .to raise_error(NotImplementedError)
     end
   end
