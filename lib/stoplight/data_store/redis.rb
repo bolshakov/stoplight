@@ -79,17 +79,33 @@ module Stoplight
         normalize_state(state)
       end
 
-      def with_notification_lock(light)
-        yield if @redlock.lock(notification_lock_key(light), 1_000)
-      end
+      def with_notification_lock(light, from_color, to_color)
+        @redlock.lock(notification_lock_key(light), 2_000) do |acquired|
+          next unless acquired
 
-      def with_lock_cleanup(light)
-        @redlock.unlock(notification_lock_key(light))
+          if last_notification(light) != [from_color, to_color]
+            set_last_notification(light, from_color, to_color)
 
-        yield
+            yield
+          end
+        end
       end
 
       private
+
+      # @param light [Stoplight::Light]
+      # @return [Array, nil]
+      def last_notification(light)
+        @redis.get(last_notification_key(light))&.split('->')
+      end
+
+      # @param light [Stoplight::Light]
+      # @param from_color [String]
+      # @param to_color [String]
+      # @return [void]
+      def set_last_notification(light, from_color, to_color)
+        @redis.set(last_notification_key(light), [from_color, to_color].join('->'))
+      end
 
       def query_failures(light, transaction: @redis)
         transaction.lrange(failures_key(light), 0, -1)
@@ -118,6 +134,10 @@ module Stoplight
 
       def notification_lock_key(light)
         key('notification_lock', light.name)
+      end
+
+      def last_notification_key(light)
+        key('last_notification', light.name)
       end
 
       def states_key

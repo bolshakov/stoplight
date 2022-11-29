@@ -54,16 +54,11 @@ module Stoplight
       end
 
       # @param _light [Light]
+      # @param _from_color [String]
+      # @param _to_color [String]
       # @yield _block
       # @return [Void]
-      def with_notification_lock(_light, &_block)
-        raise NotImplementedError
-      end
-
-      # @param _light [Light]
-      # @yield _block
-      # @return [Void]
-      def with_lock_cleanup(_light, &_block)
+      def with_notification_lock(_light, _from_color, _to_color, &_block)
         raise NotImplementedError
       end
     end

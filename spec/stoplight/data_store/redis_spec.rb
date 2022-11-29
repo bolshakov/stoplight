@@ -146,30 +146,56 @@ RSpec.describe Stoplight::DataStore::Redis do
   describe '#with_notification_lock' do
     let(:lock_key) { "stoplight:notification_lock:#{name}" }
 
-    context 'notification lock was not yet set' do
-      it 'yields passed block' do
-        expect(redlock).to receive(:lock).with(lock_key, 1_000).and_return({})
-
-        expect { |b| data_store.with_notification_lock(light, &b) }.to yield_control
-      end
-    end
-
-    context 'notification lock was already set' do
+    context 'notification lock is already acquired by another participant' do
       it 'does not yield passed block' do
-        expect(redlock).to receive(:lock).with(lock_key, 1_000).and_return(false)
+        expect(redlock).to receive(:lock).with(lock_key, 2_000).and_yield(false)
 
-        expect { |b| data_store.with_notification_lock(light, &b) }.to_not yield_control
+        expect do |b|
+          data_store.with_notification_lock(light, Stoplight::Color::GREEN, Stoplight::Color::RED, &b)
+        end.not_to yield_control
       end
     end
-  end
 
-  describe '#with_lock_cleanup' do
-    let(:lock_key) { "stoplight:notification_lock:#{name}" }
+    context 'notification lock is not yet acquired by another participant' do
+      before do
+        allow(redlock).to receive(:lock).with(lock_key, 2_000).and_yield(true)
+      end
 
-    it 'yields passed block' do
-      expect(redlock).to receive(:unlock).with(lock_key)
+      context 'when notification is already sent' do
+        before do
+          data_store.with_notification_lock(light, Stoplight::Color::GREEN, Stoplight::Color::RED) {}
+        end
 
-      expect { |b| data_store.with_lock_cleanup(light, &b) }.to yield_control
+        it 'does not yield passed block' do
+          expect do |b|
+            data_store.with_notification_lock(light, Stoplight::Color::GREEN, Stoplight::Color::RED, &b)
+          end.not_to yield_control
+        end
+      end
+
+      context 'when notification is not already sent' do
+        before do
+          data_store.with_notification_lock(light, Stoplight::Color::GREEN, Stoplight::Color::RED) {}
+        end
+
+        it 'yields passed block' do
+          expect do |b|
+            data_store.with_notification_lock(light, Stoplight::Color::RED, Stoplight::Color::GREEN, &b)
+          end.to yield_control
+        end
+      end
+    end
+
+    context 'notification lock is already acquired by another participant' do
+      before do
+        allow(redlock).to receive(:lock).with(lock_key, 2_000).and_yield(false)
+      end
+
+      it 'does not yield passed block' do
+        expect do |b|
+          data_store.with_notification_lock(light, Stoplight::Color::GREEN, Stoplight::Color::RED, &b)
+        end.not_to yield_control
+      end
     end
   end
 end

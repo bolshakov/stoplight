@@ -7,12 +7,12 @@ module Stoplight
     # @see Base
     class Memory < Base
       include MonitorMixin
-      LOCKED_STATUS = 1
+      KEY_SEPARATOR = ':'
 
       def initialize
         @failures = Hash.new { |h, k| h[k] = [] }
         @states = Hash.new { |h, k| h[k] = State::UNLOCKED }
-        @notification_locks = {}
+        @last_notifications = {}
         super() # MonitorMixin
       end
 
@@ -52,20 +52,28 @@ module Stoplight
         synchronize { @states.delete(light.name) }
       end
 
-      def with_notification_lock(light)
+      def with_notification_lock(light, from_color, to_color)
         synchronize do
-          return if @notification_locks[light.name] == LOCKED_STATUS
+          if last_notification(light) != [from_color, to_color]
+            set_last_notification(light, from_color, to_color)
 
-          @notification_locks[light.name] = LOCKED_STATUS
-          yield
+            yield
+          end
         end
       end
 
-      def with_lock_cleanup(light)
-        synchronize do
-          @notification_locks.delete(light.name)
-          yield
-        end
+      # @param light [Stoplight::Light]
+      # @return [Array, nil]
+      def last_notification(light)
+        @last_notifications[light.name]
+      end
+
+      # @param light [Stoplight::Light]
+      # @param from_color [String]
+      # @param to_color [String]
+      # @return [void]
+      def set_last_notification(light, from_color, to_color)
+        @last_notifications[light.name] = [from_color, to_color]
       end
     end
   end

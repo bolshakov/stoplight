@@ -132,30 +132,28 @@ RSpec.describe Stoplight::DataStore::Memory do
   end
 
   describe '#with_notification_lock' do
-    context 'notification lock was not yet set' do
-      it 'yields passed block' do
-        expect { |b| data_store.with_notification_lock(light, &b) }.to yield_control
+    context 'when notification is already sent' do
+      before do
+        data_store.with_notification_lock(light, Stoplight::Color::GREEN, Stoplight::Color::RED) {}
       end
-    end
-
-    context 'notification lock was already set' do
-      before { data_store.with_notification_lock(light) {} }
 
       it 'does not yield passed block' do
-        expect { |b| data_store.with_notification_lock(light, &b) }.to_not yield_control
+        expect do |b|
+          data_store.with_notification_lock(light, Stoplight::Color::GREEN, Stoplight::Color::RED, &b)
+        end.not_to yield_control
       end
     end
-  end
 
-  describe '#with_lock_cleanup' do
-    it 'removes notification lock' do
-      data_store.with_lock_cleanup(light) {}
+    context 'when notification is not already sent' do
+      before do
+        data_store.with_notification_lock(light, Stoplight::Color::GREEN, Stoplight::Color::RED) {}
+      end
 
-      expect { |b| data_store.with_notification_lock(light, &b) }.to yield_control
-    end
-
-    it 'yields passed block' do
-      expect { |b| data_store.with_lock_cleanup(light, &b) }.to yield_control
+      it 'yields passed block' do
+        expect do |b|
+          data_store.with_notification_lock(light, Stoplight::Color::RED, Stoplight::Color::GREEN, &b)
+        end.to yield_control
+      end
     end
   end
 end
