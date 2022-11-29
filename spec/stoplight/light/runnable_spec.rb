@@ -110,10 +110,6 @@ RSpec.describe Stoplight::Light::Runnable do
         end
 
         context 'when we did not send notifications yet' do
-          before do
-            allow(subject.data_store).to receive(:notification_lock_exists?).and_return(false)
-          end
-
           it 'notifies when transitioning to red' do
             subject.threshold.times do
               expect(io.string).to eql('')
@@ -128,9 +124,7 @@ RSpec.describe Stoplight::Light::Runnable do
         end
 
         context 'when we already sent notifications' do
-          before do
-            allow(subject.data_store).to receive(:notification_lock_exists?).and_return(true)
-          end
+          before { subject.data_store.with_notification_lock(subject) {} }
 
           it 'does not send new notifications' do
             subject.threshold.times do
@@ -243,6 +237,12 @@ RSpec.describe Stoplight::Light::Runnable do
 
       it 'runs the code' do
         expect(subject.run).to eql(code_result)
+      end
+
+      it 'performs notification locks cleanup' do
+        expect(subject.data_store).to receive(:with_lock_cleanup).with(subject)
+
+        subject.run
       end
 
       it 'notifies when transitioning to green' do

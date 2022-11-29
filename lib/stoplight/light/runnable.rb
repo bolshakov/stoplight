@@ -30,9 +30,7 @@ module Stoplight
 
       def run_green
         on_failure = lambda do |size, error|
-          # Always place `#!already_notified?` check last.
-          # Otherwise, you might not send any notifications or send duplicate notifications.
-          notify(Color::GREEN, Color::RED, error) if failures_threshold_breached?(size, threshold) && !already_notified?
+          execute_once { notify(Color::GREEN, Color::RED, error) } if failures_threshold_breached?(size, threshold)
         end
         run_code(nil, on_failure)
       end
@@ -43,7 +41,7 @@ module Stoplight
 
       def run_yellow
         on_success = lambda do |failures|
-          notify(Color::RED, Color::GREEN) unless failures.empty?
+          with_cleanup { notify(Color::RED, Color::GREEN) } unless failures.empty?
         end
         run_code(on_success, nil)
       end
@@ -72,8 +70,12 @@ module Stoplight
         fallback.call(error)
       end
 
-      def already_notified?
-        safely(false) { data_store.notification_lock_exists?(self) }
+      def execute_once(&block)
+        safely { data_store.with_notification_lock(self) { block.call } }
+      end
+
+      def with_cleanup(&block)
+        safely { data_store.with_lock_cleanup(self) { block.call } }
       end
 
       def clear_failures
