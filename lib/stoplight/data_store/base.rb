@@ -54,12 +54,6 @@ module Stoplight
       end
 
       # @param _light [Light]
-      # @return [Boolean]
-      def notification_lock_exists?(_light)
-        raise NotImplementedError
-      end
-
-      # @param _light [Light]
       # @yield _block
       # @return [Void]
       def with_notification_lock(_light, &_block)
