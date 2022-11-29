@@ -134,7 +134,7 @@ RSpec.describe Stoplight::DataStore::Memory do
   describe '#with_notification_lock' do
     context 'notification lock was not yet set' do
       it 'yields passed block' do
-        expect { |b| data_store.with_lock_cleanup(light, &b) }.to yield_control
+        expect { |b| data_store.with_notification_lock(light, &b) }.to yield_control
       end
     end
 
