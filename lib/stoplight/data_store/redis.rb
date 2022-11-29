@@ -3,7 +3,7 @@
 module Stoplight
   module DataStore
     # @see Base
-    class Redis < Base # rubocop:disable Metrics/ClassLength
+    class Redis < Base
       KEY_PREFIX = 'stoplight'
       KEY_SEPARATOR = ':'
       LOCKED_STATUS = 1
