@@ -4,8 +4,9 @@ require 'spec_helper'
 require 'mock_redis'
 
 RSpec.describe Stoplight::DataStore::Redis do
-  let(:data_store) { described_class.new(redis) }
+  let(:data_store) { described_class.new(redis, redlock: redlock) }
   let(:redis) { MockRedis.new }
+  let(:redlock) { instance_double(Redlock::Client) }
   let(:light) { Stoplight::Light.new(name) {} }
   let(:name) { ('a'..'z').to_a.shuffle.join }
   let(:failure) { Stoplight::Failure.new('class', 'message', Time.new) }
@@ -16,22 +17,6 @@ RSpec.describe Stoplight::DataStore::Redis do
 
   it 'is a subclass of Base' do
     expect(described_class).to be < Stoplight::DataStore::Base
-  end
-
-  describe 'on initialization' do
-    let(:notification_collection_namespace) { 'stoplight:notification_locks' }
-    let(:notification_locks_namespace) { 'stoplight:notification_lock' }
-    let(:test_light_name) { 'test-light' }
-
-    before do
-      redis.set("#{notification_locks_namespace}:#{test_light_name}", 1)
-      redis.sadd(notification_collection_namespace, "#{notification_locks_namespace}:#{test_light_name}")
-      described_class.new(redis)
-    end
-
-    it 'cleans up notification locks collection' do
-      expect(redis.get("#{notification_locks_namespace}:#{test_light_name}")).to be_nil
-    end
   end
 
   describe '#names' do
@@ -159,60 +144,31 @@ RSpec.describe Stoplight::DataStore::Redis do
   end
 
   describe '#with_notification_lock' do
-    let(:notification_locks_namespace) { 'stoplight:notification_lock' }
-    let(:notification_collection_namespace) { 'stoplight:notification_locks' }
+    let(:lock_key) { "stoplight:notification_lock:#{name}" }
 
     context 'notification lock was not yet set' do
       it 'yields passed block' do
+        expect(redlock).to receive(:lock).with(lock_key, 1_000).and_return({})
+
         expect { |b| data_store.with_notification_lock(light, &b) }.to yield_control
-      end
-
-      it 'sets notification lock key' do
-        data_store.with_notification_lock(light) {}
-
-        expect(redis.get("#{notification_locks_namespace}:#{light.name}")).to eq '1'
-      end
-
-      it 'adds lock to notification locks collection' do
-        data_store.with_notification_lock(light) {}
-
-        expect(redis.smembers(notification_collection_namespace))
-          .to include "#{notification_locks_namespace}:#{light.name}"
       end
     end
 
     context 'notification lock was already set' do
-      before { redis.set("#{notification_locks_namespace}:#{light.name}", 1) }
-
       it 'does not yield passed block' do
+        expect(redlock).to receive(:lock).with(lock_key, 1_000).and_return(false)
+
         expect { |b| data_store.with_notification_lock(light, &b) }.to_not yield_control
       end
     end
   end
 
   describe '#with_lock_cleanup' do
-    let(:notification_locks_namespace) { 'stoplight:notification_lock' }
-    let(:notification_collection_namespace) { 'stoplight:notification_locks' }
-
-    before do
-      redis.set("#{notification_locks_namespace}:#{light.name}", 1)
-      redis.sadd(notification_collection_namespace, "#{notification_locks_namespace}:#{light.name}")
-    end
-
-    it 'removes notification lock' do
-      data_store.with_lock_cleanup(light) {}
-
-      expect(redis.exists?("#{notification_locks_namespace}:#{light.name}")).to be_falsey
-    end
-
-    it 'removes lock from notification locks collection' do
-      data_store.with_lock_cleanup(light) {}
-
-      expect(redis.smembers(notification_collection_namespace))
-        .to_not include "#{notification_locks_namespace}:#{light.name}"
-    end
+    let(:lock_key) { "stoplight:notification_lock:#{name}" }
 
     it 'yields passed block' do
+      expect(redlock).to receive(:unlock).with(lock_key)
+
       expect { |b| data_store.with_lock_cleanup(light, &b) }.to yield_control
     end
   end

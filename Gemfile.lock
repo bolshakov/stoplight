@@ -2,6 +2,7 @@ PATH
   remote: .
   specs:
     stoplight (3.0.0)
+      redlock
 
 GEM
   remote: https://rubygems.org/
@@ -28,6 +29,8 @@ GEM
     rainbow (3.0.0)
     rake (13.0.1)
     redis (4.8.0)
+    redlock (1.3.2)
+      redis (>= 3.0.0, < 6.0)
     regexp_parser (1.8.2)
     rexml (3.2.5)
     rspec (3.11.0)

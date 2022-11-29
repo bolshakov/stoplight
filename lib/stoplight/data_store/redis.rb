@@ -1,17 +1,18 @@
 # frozen_string_literal: true
 
+require 'redlock'
+
 module Stoplight
   module DataStore
     # @see Base
     class Redis < Base
       KEY_PREFIX = 'stoplight'
       KEY_SEPARATOR = ':'
-      LOCKED_STATUS = 1
 
       # @param redis [::Redis]
-      def initialize(redis)
+      def initialize(redis, redlock: Redlock::Client.new([redis]))
         @redis = redis
-        @redis.smembers(notification_locks_collection_key).each { |key| @redis.del(key) }
+        @redlock = redlock
       end
 
       def names
@@ -79,19 +80,11 @@ module Stoplight
       end
 
       def with_notification_lock(light)
-        lock_was_just_set, = @redis.multi do |transaction|
-          transaction.setnx(notification_lock_key(light), LOCKED_STATUS)
-          transaction.sadd(notification_locks_collection_key, notification_lock_key(light))
-        end
-
-        yield if lock_was_just_set
+        yield if @redlock.lock(notification_lock_key(light), 1_000)
       end
 
       def with_lock_cleanup(light)
-        @redis.multi do |transaction|
-          transaction.del(notification_lock_key(light))
-          transaction.srem(notification_locks_collection_key, notification_lock_key(light))
-        end
+        @redlock.unlock(notification_lock_key(light))
 
         yield
       end
@@ -125,10 +118,6 @@ module Stoplight
 
       def notification_lock_key(light)
         key('notification_lock', light.name)
-      end
-
-      def notification_locks_collection_key
-        key('notification_locks')
       end
 
       def states_key
