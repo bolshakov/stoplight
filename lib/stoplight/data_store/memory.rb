@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'monitor'
-require 'concurrent-ruby'
 
 module Stoplight
   module DataStore
@@ -14,7 +13,7 @@ module Stoplight
       def initialize(_lock_ttl: LOCK_TTL)
         @failures = Hash.new { |h, k| h[k] = [] }
         @states = Hash.new { |h, k| h[k] = State::UNLOCKED }
-        @notification_locks = Hash.new { |h, k| h[k] = Concurrent::ReentrantReadWriteLock.new }
+        @notification_locks = {}
         super() # MonitorMixin
       end
 
@@ -54,8 +53,20 @@ module Stoplight
         synchronize { @states.delete(light.name) }
       end
 
-      def notification_lock_exists?(light)
-        !@notification_locks[light.name].try_write_lock
+      def with_notification_lock(light)
+        synchronize do
+          return if @notification_locks[light.name] == LOCKED_STATUS
+
+          @notification_locks[light.name] = LOCKED_STATUS
+          yield
+        end
+      end
+
+      def with_lock_cleanup(light)
+        synchronize do
+          @notification_locks.delete(light.name)
+          yield
+        end
       end
     end
   end

@@ -131,25 +131,31 @@ RSpec.describe Stoplight::DataStore::Memory do
     end
   end
 
-  describe '#notification_lock_exists?' do
-    let(:read_write_lock) { instance_double('Concurrent::ReentrantReadWriteLock.new') }
-
-    before { allow(Concurrent::ReentrantReadWriteLock).to receive(:new).and_return(read_write_lock) }
-
-    context 'no other threads contesting the lock' do
-      before { allow(read_write_lock).to receive(:try_write_lock).and_return(true) }
-
-      it 'returns false' do
-        expect(data_store.notification_lock_exists?(light)).to be_falsey
+  describe '#with_notification_lock' do
+    context 'notification lock was not yet set' do
+      it 'yields passed block' do
+        expect { |b| data_store.with_lock_cleanup(light, &b) }.to yield_control
       end
     end
 
-    context 'another thread already acquired the lock' do
-      before { allow(read_write_lock).to receive(:try_write_lock).and_return(false) }
+    context 'notification lock was already set' do
+      before { data_store.with_notification_lock(light) {} }
 
-      it 'returns true' do
-        expect(data_store.notification_lock_exists?(light)).to be_truthy
+      it 'does not yield passed block' do
+        expect { |b| data_store.with_notification_lock(light, &b) }.to_not yield_control
       end
+    end
+  end
+
+  describe '#with_lock_cleanup' do
+    it 'removes notification lock' do
+      data_store.with_lock_cleanup(light) {}
+
+      expect { |b| data_store.with_notification_lock(light, &b) }.to yield_control
+    end
+
+    it 'yields passed block' do
+      expect { |b| data_store.with_lock_cleanup(light, &b) }.to yield_control
     end
   end
 end
