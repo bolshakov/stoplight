@@ -3,7 +3,7 @@
 module Stoplight
   module DataStore
     # @see Base
-    class Redis < Base
+    class Redis < Base # rubocop:disable Metrics/ClassLength
       KEY_PREFIX = 'stoplight'
       KEY_SEPARATOR = ':'
       LOCK_TTL = 1
@@ -13,6 +13,7 @@ module Stoplight
       def initialize(redis, lock_ttl: LOCK_TTL)
         @redis = redis
         @lock_ttl = lock_ttl
+        @redis.smembers(notification_locks_collection_key).each { |key| @redis.del(key) }
       end
 
       def names
@@ -79,13 +80,22 @@ module Stoplight
         normalize_state(state)
       end
 
-      def notification_lock_exists?(light)
-        lock, = @redis.multi do |transaction|
-          transaction.exists?(notification_lock_key(light))
-          transaction.setex(notification_lock_key(light), @lock_ttl, LOCKED_STATUS)
+      def with_notification_lock(light)
+        lock_was_just_set, = @redis.multi do |transaction|
+          transaction.setnx(notification_lock_key(light), LOCKED_STATUS)
+          transaction.sadd(notification_locks_collection_key, notification_lock_key(light))
         end
 
-        lock
+        yield if lock_was_just_set
+      end
+
+      def with_lock_cleanup(light)
+        @redis.multi do |transaction|
+          transaction.del(notification_lock_key(light))
+          transaction.srem(notification_locks_collection_key, notification_lock_key(light))
+        end
+
+        yield
       end
 
       private
@@ -116,7 +126,11 @@ module Stoplight
       end
 
       def notification_lock_key(light)
-        key('notification_lock', light.name, light.color)
+        key('notification_lock', light.name)
+      end
+
+      def notification_locks_collection_key
+        key('notification_locks')
       end
 
       def states_key
