@@ -79,10 +79,10 @@ module Stoplight
         normalize_state(state)
       end
 
-      def with_notification_lock(light, from_color, to_color)
-        @redlock.lock(notification_lock_key(light), 2_000) do |acquired|
-          next unless acquired
+      LOCK_TTL = 2_000 # milliseconds
 
+      def with_notification_lock(light, from_color, to_color)
+        @redlock.lock(notification_lock_key(light), LOCK_TTL) do
           if last_notification(light) != [from_color, to_color]
             set_last_notification(light, from_color, to_color)
 
