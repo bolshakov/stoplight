@@ -2,7 +2,7 @@ PATH
   remote: .
   specs:
     stoplight (3.0.0)
-      redlock
+      redlock (~> 1.0)
 
 GEM
   remote: https://rubygems.org/

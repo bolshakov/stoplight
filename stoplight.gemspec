@@ -31,7 +31,7 @@ Gem::Specification.new do |gem|
 
   gem.required_ruby_version = '>= 2.6'
 
-  gem.add_dependency 'redlock'
+  gem.add_dependency 'redlock', "~> 1.0"
 
   gem.add_development_dependency('benchmark-ips', '~> 2.3')
   gem.add_development_dependency('bugsnag', '~> 4.0')
