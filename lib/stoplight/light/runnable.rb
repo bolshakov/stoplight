@@ -30,9 +30,13 @@ module Stoplight
 
       def run_green
         on_failure = lambda do |size, error|
-          notify(Color::GREEN, Color::RED, error) if size == threshold
+          notify(Color::GREEN, Color::RED, error) if failures_threshold_breached?(size, threshold)
         end
         run_code(nil, on_failure)
+      end
+
+      def failures_threshold_breached?(current_failures_count, max_errors_threshold)
+        current_failures_count == max_errors_threshold
       end
 
       def run_yellow
@@ -75,8 +79,10 @@ module Stoplight
       end
 
       def notify(from_color, to_color, error = nil)
-        notifiers.each do |notifier|
-          safely { notifier.notify(self, from_color, to_color, error) }
+        data_store.with_notification_lock(self, from_color, to_color) do
+          notifiers.each do |notifier|
+            safely { notifier.notify(self, from_color, to_color, error) }
+          end
         end
       end
 

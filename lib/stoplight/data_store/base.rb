@@ -52,6 +52,15 @@ module Stoplight
       def clear_state(_light)
         raise NotImplementedError
       end
+
+      # @param _light [Light]
+      # @param _from_color [String]
+      # @param _to_color [String]
+      # @yield _block
+      # @return [Void]
+      def with_notification_lock(_light, _from_color, _to_color, &_block)
+        raise NotImplementedError
+      end
     end
   end
 end

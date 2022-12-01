@@ -1,16 +1,15 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
-require 'fakeredis'
+require 'mock_redis'
 
 RSpec.describe Stoplight::DataStore::Redis do
-  let(:data_store) { described_class.new(redis) }
-  let(:redis) { Redis.new }
+  let(:data_store) { described_class.new(redis, redlock: redlock) }
+  let(:redis) { MockRedis.new }
+  let(:redlock) { instance_double(Redlock::Client) }
   let(:light) { Stoplight::Light.new(name) {} }
   let(:name) { ('a'..'z').to_a.shuffle.join }
   let(:failure) { Stoplight::Failure.new('class', 'message', Time.new) }
-
-  before { Redis::Connection::Memory.reset_all_databases }
 
   it 'is a class' do
     expect(described_class).to be_a(Class)
@@ -141,6 +140,38 @@ RSpec.describe Stoplight::DataStore::Redis do
       data_store.set_state(light, state)
       data_store.clear_state(light)
       expect(data_store.get_state(light)).to eql(Stoplight::State::UNLOCKED)
+    end
+  end
+
+  describe '#with_notification_lock' do
+    let(:lock_key) { "stoplight:notification_lock:#{name}" }
+
+    before do
+      allow(redlock).to receive(:lock).with(lock_key, 2_000).and_yield
+    end
+
+    context 'when notification is already sent' do
+      before do
+        data_store.with_notification_lock(light, Stoplight::Color::GREEN, Stoplight::Color::RED) {}
+      end
+
+      it 'does not yield passed block' do
+        expect do |b|
+          data_store.with_notification_lock(light, Stoplight::Color::GREEN, Stoplight::Color::RED, &b)
+        end.not_to yield_control
+      end
+    end
+
+    context 'when notification is not already sent' do
+      before do
+        data_store.with_notification_lock(light, Stoplight::Color::GREEN, Stoplight::Color::RED) {}
+      end
+
+      it 'yields passed block' do
+        expect do |b|
+          data_store.with_notification_lock(light, Stoplight::Color::RED, Stoplight::Color::GREEN, &b)
+        end.to yield_control
+      end
     end
   end
 end

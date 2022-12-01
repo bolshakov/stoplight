@@ -61,4 +61,11 @@ RSpec.describe Stoplight::DataStore::Base do
         .to raise_error(NotImplementedError)
     end
   end
+
+  describe '#with_notification_lock' do
+    it 'is not implemented' do
+      expect { data_store.with_notification_lock(nil, nil, nil) }
+        .to raise_error(NotImplementedError)
+    end
+  end
 end
