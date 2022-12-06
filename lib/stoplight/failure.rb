@@ -2,6 +2,7 @@
 
 require 'json'
 require 'time'
+require 'securerandom'
 
 module Stoplight
   class Failure # rubocop:disable Style/Documentation
@@ -13,6 +14,8 @@ module Stoplight
     attr_reader :error_message
     # @return [Time]
     attr_reader :time
+    # @return [String]
+    attr_reader :uuid
 
     # @param error [Exception]
     # @return (see #initialize)
@@ -31,17 +34,20 @@ module Stoplight
       error_class = error_object['class']
       error_message = error_object['message']
       time = Time.parse(object['time'])
+      uuid = object['uuid']
 
-      new(error_class, error_message, time)
+      new(error_class, error_message, time, uuid)
     end
 
     # @param error_class [String]
     # @param error_message [String]
     # @param time [Time]
-    def initialize(error_class, error_message, time)
+    # @param uuid [String]
+    def initialize(error_class, error_message, time, uuid = SecureRandom.uuid)
       @error_class = error_class
       @error_message = error_message
       @time = time
+      @uuid = uuid
     end
 
     # @param other [Failure]
@@ -61,7 +67,7 @@ module Stoplight
             class: error_class,
             message: error_message
           },
-          time: time.strftime(TIME_FORMAT)
+          time: time.strftime(TIME_FORMAT), uuid: uuid
         },
         options
       )

@@ -7,10 +7,12 @@ RSpec.describe Stoplight::Failure do
   let(:error_class) { error.class.name }
   let(:error_message) { error.message }
   let(:time) { Time.new(2001, 2, 3, 4, 5, 6, '+07:08') }
+  let(:uuid) { SecureRandom.uuid }
   let(:json) do
     JSON.generate(
       error: { class: error_class, message: error_message },
-      time: time.strftime('%Y-%m-%dT%H:%M:%S.%N%:z')
+      time: time.strftime('%Y-%m-%dT%H:%M:%S.%N%:z'),
+      uuid: uuid
     )
   end
 
@@ -35,6 +37,7 @@ RSpec.describe Stoplight::Failure do
       expect(failure.error_class).to eql(error_class)
       expect(failure.error_message).to eql(error_message)
       expect(failure.time).to eql(time)
+      expect(failure.uuid).to eql(uuid)
     end
   end
 
@@ -85,14 +88,22 @@ RSpec.describe Stoplight::Failure do
   end
 
   describe '#to_json' do
-    it 'generates JSON' do
-      expect(described_class.new(error_class, error_message, time).to_json)
-        .to eql(json)
+    let(:failure) { described_class.new(error_class, error_message, time, uuid) }
+
+    context 'without options' do
+      subject(:serialized_failure) { failure.to_json }
+
+      it 'generates JSON' do
+        expect(serialized_failure).to eql(json)
+      end
     end
 
-    it 'generates JSON with options' do
-      expect(described_class.new(error_class, error_message, time).to_json({}))
-        .to eql(json)
+    context 'without options' do
+      subject(:serialized_failure) { failure.to_json({}) }
+
+      it 'generates JSON' do
+        expect(serialized_failure).to eql(json)
+      end
     end
   end
 
