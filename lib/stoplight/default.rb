@@ -6,6 +6,8 @@ module Stoplight
 
     DATA_STORE = DataStore::Memory.new
 
+    Strategy = Strategy::Vintage
+
     ERROR_HANDLER = ->(error, handler) { handler.call(error) }
 
     ERROR_NOTIFIER = ->(error) { warn error }

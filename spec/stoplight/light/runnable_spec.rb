@@ -30,30 +30,30 @@ RSpec.describe Stoplight::Light::Runnable do
     end
 
     it 'is green when locked green' do
-      subject.data_store.set_state(subject, Stoplight::State::LOCKED_GREEN)
+      subject.strategy.set_state(subject, Stoplight::State::LOCKED_GREEN)
       expect(subject.color).to eql(Stoplight::Color::GREEN)
     end
 
     it 'is red when locked red' do
-      subject.data_store.set_state(subject, Stoplight::State::LOCKED_RED)
+      subject.strategy.set_state(subject, Stoplight::State::LOCKED_RED)
       expect(subject.color).to eql(Stoplight::Color::RED)
     end
 
     it 'is red when there are many failures' do
       subject.threshold.times do
-        subject.data_store.record_failure(subject, failure)
+        subject.strategy.record_failure(subject, failure)
       end
       expect(subject.color).to eql(Stoplight::Color::RED)
     end
 
     it 'is yellow when the most recent failure is old' do
       (subject.threshold - 1).times do
-        subject.data_store.record_failure(subject, failure)
+        subject.strategy.record_failure(subject, failure)
       end
       other = Stoplight::Failure.new(
         error.class.name, error.message, Time.new - subject.cool_off_time
       )
-      subject.data_store.record_failure(subject, other)
+      subject.strategy.record_failure(subject, other)
       expect(subject.color).to eql(Stoplight::Color::YELLOW)
     end
 
@@ -61,9 +61,9 @@ RSpec.describe Stoplight::Light::Runnable do
       other = Stoplight::Failure.new(
         error.class.name, error.message, Time.new - subject.cool_off_time
       )
-      subject.data_store.record_failure(subject, other)
+      subject.strategy.record_failure(subject, other)
       (subject.threshold - 1).times do
-        subject.data_store.record_failure(subject, failure)
+        subject.strategy.record_failure(subject, failure)
       end
       expect(subject.color).to eql(Stoplight::Color::RED)
     end
@@ -77,18 +77,18 @@ RSpec.describe Stoplight::Light::Runnable do
     before { subject.with_notifiers(notifiers) }
 
     context 'when the light is green' do
-      before { subject.data_store.clear_failures(subject) }
+      before { subject.strategy.clear_failures(subject) }
 
       it 'runs the code' do
         expect(subject.run).to eql(code_result)
       end
 
       context 'with some failures' do
-        before { subject.data_store.record_failure(subject, failure) }
+        before { subject.strategy.record_failure(subject, failure) }
 
         it 'clears the failures' do
           subject.run
-          expect(subject.data_store.get_failures(subject).size).to eql(0)
+          expect(subject.strategy.get_failures(subject).size).to eql(0)
         end
       end
 
@@ -100,13 +100,13 @@ RSpec.describe Stoplight::Light::Runnable do
         end
 
         it 'records the failure' do
-          expect(subject.data_store.get_failures(subject).size).to eql(0)
+          expect(subject.strategy.get_failures(subject).size).to eql(0)
           begin
             subject.run
           rescue error.class
             nil
           end
-          expect(subject.data_store.get_failures(subject).size).to eql(1)
+          expect(subject.strategy.get_failures(subject).size).to eql(1)
         end
 
         context 'when we did not send notifications yet' do
@@ -125,7 +125,7 @@ RSpec.describe Stoplight::Light::Runnable do
 
         context 'when we already sent notifications' do
           before do
-            subject.data_store.with_notification_lock(subject, Stoplight::Color::GREEN, Stoplight::Color::RED) {}
+            subject.strategy.with_notification_lock(subject, Stoplight::Color::GREEN, Stoplight::Color::RED) {}
           end
 
           it 'does not send new notifications' do
@@ -164,21 +164,21 @@ RSpec.describe Stoplight::Light::Runnable do
           it 'records the failure when the handler does nothing' do
             subject.with_error_handler { |_error, _handler| }
             expect { result }
-              .to change { subject.data_store.get_failures(subject).size }
+              .to change { subject.strategy.get_failures(subject).size }
               .by(1)
           end
 
           it 'records the failure when the handler calls handle' do
             subject.with_error_handler { |error, handle| handle.call(error) }
             expect { result }
-              .to change { subject.data_store.get_failures(subject).size }
+              .to change { subject.strategy.get_failures(subject).size }
               .by(1)
           end
 
           it 'does not record the failure when the handler raises' do
             subject.with_error_handler { |error, _handle| raise error }
             expect { result }
-              .to_not change { subject.data_store.get_failures(subject).size }
+              .to_not change { subject.strategy.get_failures(subject).size }
           end
         end
 
@@ -228,13 +228,13 @@ RSpec.describe Stoplight::Light::Runnable do
     context 'when the light is yellow' do
       before do
         (subject.threshold - 1).times do
-          subject.data_store.record_failure(subject, failure)
+          subject.strategy.record_failure(subject, failure)
         end
 
         other = Stoplight::Failure.new(
           error.class.name, error.message, time - subject.cool_off_time
         )
-        subject.data_store.record_failure(subject, other)
+        subject.strategy.record_failure(subject, other)
       end
 
       it 'runs the code' do
@@ -251,7 +251,7 @@ RSpec.describe Stoplight::Light::Runnable do
     context 'when the light is red' do
       before do
         subject.threshold.times do
-          subject.data_store.record_failure(subject, failure)
+          subject.strategy.record_failure(subject, failure)
         end
       end
 

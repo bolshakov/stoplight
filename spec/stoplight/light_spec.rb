@@ -81,7 +81,7 @@ RSpec.describe Stoplight::Light do
 
   describe '#data_store' do
     it 'is initially the default' do
-      expect(light.data_store).to eql(described_class.default_data_store)
+      expect(light.strategy.data_store).to eql(described_class.default_data_store)
     end
   end
 
@@ -131,10 +131,11 @@ RSpec.describe Stoplight::Light do
   end
 
   describe '#with_data_store' do
-    it 'sets the data store' do
+    it 'sets strategy' do
       data_store = Stoplight::DataStore::Memory.new
       light.with_data_store(data_store)
-      expect(light.data_store).to eql(data_store)
+      expect(light.strategy).to be_kind_of(Stoplight::Default::Strategy)
+      expect(light.strategy.data_store).to eql(data_store)
     end
   end
 

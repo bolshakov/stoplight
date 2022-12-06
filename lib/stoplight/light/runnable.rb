@@ -71,15 +71,15 @@ module Stoplight
       end
 
       def clear_failures
-        safely([]) { data_store.clear_failures(self) }
+        safely([]) { strategy.clear_failures(self) }
       end
 
       def failures_and_state
-        safely([[], State::UNLOCKED]) { data_store.get_all(self) }
+        safely([[], State::UNLOCKED]) { strategy.get_all(self) }
       end
 
       def notify(from_color, to_color, error = nil)
-        data_store.with_notification_lock(self, from_color, to_color) do
+        strategy.with_notification_lock(self, from_color, to_color) do
           notifiers.each do |notifier|
             safely { notifier.notify(self, from_color, to_color, error) }
           end
@@ -88,11 +88,11 @@ module Stoplight
 
       def record_failure(error)
         failure = Failure.from_error(error)
-        safely(0) { data_store.record_failure(self, failure) }
+        safely(0) { strategy.record_failure(self, failure) }
       end
 
       def safely(default = nil, &code)
-        return yield if data_store == Default::DATA_STORE
+        return yield if strategy.data_store == Default::DATA_STORE
 
         self
           .class
