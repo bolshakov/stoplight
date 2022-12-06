@@ -27,9 +27,9 @@ module Stoplight
         (state_names + failure_names).uniq
       end
 
-      def get_all(light)
+      def get_all(light, window: nil)
         failures, state = @redis.multi do |transaction|
-          query_failures(light, transaction: transaction)
+          query_failures(light, transaction: transaction, window: window)
           transaction.hget(states_key, light.name)
         end
 
@@ -39,22 +39,26 @@ module Stoplight
         ]
       end
 
-      def get_failures(light)
-        normalize_failures(query_failures(light), light.error_notifier)
+      def get_failures(light, window: nil)
+        normalize_failures(query_failures(light, window: window), light.error_notifier)
       end
 
-      def record_failure(light, failure)
-        size, = @redis.multi do |transaction|
-          transaction.lpush(failures_key(light), failure.to_json)
-          transaction.ltrim(failures_key(light), 0, light.threshold - 1)
+      def record_failure(light, failure, window: nil)
+        *, size = @redis.multi do |transaction|
+          failures_key(light).then do |failures_key|
+            transaction.zadd(failures_key, failure.time.to_f, failure.to_json)
+            transaction.zremrangebyrank(failures_key, 0, -light.threshold - 1)
+            transaction.zremrangebyscore(failures_key, 0, window_starts(window)) if window
+            transaction.zcard(failures_key)
+          end
         end
 
         size
       end
 
-      def clear_failures(light)
+      def clear_failures(light, window: nil)
         failures, = @redis.multi do |transaction|
-          query_failures(light, transaction: transaction)
+          query_failures(light, transaction: transaction, window: window)
           transaction.del(failures_key(light))
         end
 
@@ -107,8 +111,9 @@ module Stoplight
         @redis.set(last_notification_key(light), [from_color, to_color].join('->'))
       end
 
-      def query_failures(light, transaction: @redis)
-        transaction.lrange(failures_key(light), 0, -1)
+      def query_failures(light, window:, transaction: @redis)
+        to = window ? window_starts(window) : -1
+        transaction.zrange(failures_key(light), 0, to)
       end
 
       def normalize_failures(failures, error_notifier)
@@ -146,6 +151,10 @@ module Stoplight
 
       def key(*pieces)
         ([KEY_PREFIX] + pieces).join(KEY_SEPARATOR)
+      end
+
+      def window_starts(window)
+        (Time.now - window).to_f
       end
     end
   end
