@@ -6,8 +6,8 @@ module Stoplight
   module DataStore
     # @see Base
     class Redis < Base
-      KEY_PREFIX = 'stoplight'
       KEY_SEPARATOR = ':'
+      KEY_PREFIX = %w[stoplight v4].join(KEY_SEPARATOR)
 
       # @param redis [::Redis]
       def initialize(redis, redlock: Redlock::Client.new([redis]))

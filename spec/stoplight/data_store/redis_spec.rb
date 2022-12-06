@@ -144,7 +144,7 @@ RSpec.describe Stoplight::DataStore::Redis do
   end
 
   describe '#with_notification_lock' do
-    let(:lock_key) { "stoplight:notification_lock:#{name}" }
+    let(:lock_key) { "stoplight:v4:notification_lock:#{name}" }
 
     before do
       allow(redlock).to receive(:lock).with(lock_key, 2_000).and_yield
