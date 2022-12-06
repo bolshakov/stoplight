@@ -23,6 +23,10 @@ module Stoplight
       def_delegator :data_store, :get_all
       def_delegator :data_store, :get_failures
       def_delegator :data_store, :record_failure
+
+      def_delegator :data_store, :clear_state
+      def_delegator :data_store, :get_state
+      def_delegator :data_store, :names
       def_delegator :data_store, :set_state
       def_delegator :data_store, :with_notification_lock
     end

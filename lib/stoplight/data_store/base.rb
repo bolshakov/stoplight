@@ -10,27 +10,31 @@ module Stoplight
       end
 
       # @param _light [Light]
+      # @param window [Integer, nil]
       # @return [Array(Array<Failure>, String)]
-      def get_all(_light)
+      def get_all(_light, window: nil)
         raise NotImplementedError
       end
 
       # @param _light [Light]
+      # @param window [Integer, nil]
       # @return [Array<Failure>]
-      def get_failures(_light)
+      def get_failures(_light, window: nil)
         raise NotImplementedError
       end
 
       # @param _light [Light]
       # @param _failure [Failure]
+      # @param window [Integer, nil]
       # @return [Fixnum]
-      def record_failure(_light, _failure)
+      def record_failure(_light, _failure, window: nil)
         raise NotImplementedError
       end
 
       # @param _light [Light]
+      # @param window [Integer, nil]
       # @return [Array<Failure>]
-      def clear_failures(_light)
+      def clear_failures(_light, window: nil)
         raise NotImplementedError
       end
 
