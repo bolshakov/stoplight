@@ -4,6 +4,7 @@ require 'simplecov'
 
 require 'stoplight'
 require 'timecop'
+require_relative 'support/data_store/base'
 
 Timecop.safe_mode = true
 

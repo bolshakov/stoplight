@@ -1,5 +1,5 @@
 AllCops:
-  TargetRubyVersion: 2.6
+  TargetRubyVersion: 2.7
 
 Metrics/BlockLength:
   Exclude:
@@ -16,3 +16,7 @@ Lint/AmbiguousBlockAssociation:
 Metrics/ClassLength:
   Enabled: true
   Max: 110
+
+Layout/BlockAlignment:
+  Exclude:
+    - 'spec/support/**/*'

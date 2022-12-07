@@ -29,9 +29,9 @@ Gem::Specification.new do |gem|
   ] + Dir.glob(File.join('lib', '**', '*.rb'))
   gem.test_files = Dir.glob(File.join('spec', '**', '*.rb'))
 
-  gem.required_ruby_version = '>= 2.6'
+  gem.required_ruby_version = '>= 2.7'
 
-  gem.add_dependency 'redlock', "~> 1.0"
+  gem.add_dependency 'redlock', '~> 1.0'
 
   gem.add_development_dependency('benchmark-ips', '~> 2.3')
   gem.add_development_dependency('bugsnag', '~> 4.0')
