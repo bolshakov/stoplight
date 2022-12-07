@@ -11,7 +11,7 @@ module Stoplight
       # @!attribute data_store
       #   @return [Stoplight::DataStore::Base]
       attr_reader :data_store
-      private :data_store
+      # private :data_store
 
       # @param data_store [Stoplight::DataStore::Base]
       def initialize(data_store)

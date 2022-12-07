@@ -12,23 +12,10 @@ module Stoplight
     class Vintage < Base
       extend Forwardable
 
-      attr_reader :data_store
-
-      # @param data_store [Stoplight::DataStore::Base]
-      def initialize(data_store)
-        @data_store = data_store
-      end
-
       def_delegator :data_store, :clear_failures
       def_delegator :data_store, :get_all
       def_delegator :data_store, :get_failures
       def_delegator :data_store, :record_failure
-
-      def_delegator :data_store, :clear_state
-      def_delegator :data_store, :get_state
-      def_delegator :data_store, :names
-      def_delegator :data_store, :set_state
-      def_delegator :data_store, :with_notification_lock
     end
   end
 end

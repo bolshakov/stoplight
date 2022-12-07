@@ -17,6 +17,7 @@ require 'stoplight/data_store/redis'
 
 require 'stoplight/strategy/base'
 require 'stoplight/strategy/vintage'
+require 'stoplight/strategy/running_window'
 
 require 'stoplight/notifier'
 require 'stoplight/notifier/base'
