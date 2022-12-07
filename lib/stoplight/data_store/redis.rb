@@ -112,8 +112,8 @@ module Stoplight
       end
 
       def query_failures(light, window:, transaction: @redis)
-        to = window ? window_starts(window) : -1
-        transaction.zrange(failures_key(light), 0, to)
+        from = window ? window_starts(window) : 0
+        transaction.zrange(failures_key(light), '+inf', from, rev: true, by_score: true)
       end
 
       def normalize_failures(failures, error_notifier)

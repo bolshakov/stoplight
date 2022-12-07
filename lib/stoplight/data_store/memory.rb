@@ -88,11 +88,12 @@ module Stoplight
       private
 
       def query_failures(light, window:)
+        failures = @failures[light.name].sort_by(&:time).reverse
         if window
           window_start = Time.now - window
-          @failures[light.name].select { |x| x.time >= window_start }
+          failures.select { |x| x.time >= window_start }
         else
-          @failures[light.name]
+          failures
         end
       end
     end

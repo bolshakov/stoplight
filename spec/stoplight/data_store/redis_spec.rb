@@ -20,48 +20,12 @@ RSpec.describe Stoplight::DataStore::Redis do
     expect(described_class).to be < Stoplight::DataStore::Base
   end
 
-  describe '#names' do
-    it 'is initially empty' do
-      expect(data_store.names).to eql([])
-    end
+  it_behaves_like 'Stoplight::DataStore::Base#names'
 
-    it 'contains the name of a light with a failure' do
-      data_store.record_failure(light, failure)
-      expect(data_store.names).to eql([light.name])
-    end
+  it_behaves_like 'Stoplight::DataStore::Base#get_all'
 
-    it 'contains the name of a light with a set state' do
-      data_store.set_state(light, Stoplight::State::UNLOCKED)
-      expect(data_store.names).to eql([light.name])
-    end
-
-    it 'does not duplicate names' do
-      data_store.record_failure(light, failure)
-      data_store.set_state(light, Stoplight::State::UNLOCKED)
-      expect(data_store.names).to eql([light.name])
-    end
-
-    it 'supports names containing colons' do
-      light = Stoplight::Light.new('http://api.example.com/some/action')
-      data_store.record_failure(light, failure)
-      expect(data_store.names).to eql([light.name])
-    end
-  end
-
-  describe '#get_all' do
-    it 'returns the failures and the state' do
-      failures, state = data_store.get_all(light)
-      expect(failures).to eql([])
-      expect(state).to eql(Stoplight::State::UNLOCKED)
-    end
-  end
-
-  describe '#get_failures' do
+  it_behaves_like 'Stoplight::DataStore::Base#get_failures' do
     shared_examples '#get_failures' do
-      it 'is initially empty' do
-        expect(data_store.get_failures(light, window: window)).to eql([])
-      end
-
       it 'handles invalid JSON' do
         expect(failure).to receive(:to_json).and_return('invalid JSON')
 
@@ -75,75 +39,16 @@ RSpec.describe Stoplight::DataStore::Redis do
       let(:window) { nil }
 
       include_examples '#get_failures'
-
-      it 'returns failures' do
-        data_store.record_failure(light, failure)
-
-        expect(data_store.get_failures(light)).to contain_exactly(failure)
-      end
     end
 
     context 'with window' do
       let(:window) { 3600 }
 
       include_examples '#get_failures'
-
-      it 'returns failures withing given window' do
-        data_store.record_failure(light, failure, window: window)
-        old_failure = Stoplight::Failure.new('class', 'old failure', Time.new - window - 1)
-        data_store.record_failure(light, old_failure, window: window)
-
-        expect(data_store.get_failures(light, window: window)).to contain_exactly(failure)
-      end
     end
   end
 
-  describe '#record_failure' do
-    shared_examples '#record_failure' do
-      it 'returns the number of failures' do
-        expect(data_store.record_failure(light, failure, window: window)).to eql(1)
-      end
-
-      it 'persists the failure' do
-        data_store.record_failure(light, failure)
-        expect(data_store.get_failures(light)).to contain_exactly(failure)
-      end
-
-      it 'stores more recent failures at the head' do
-        data_store.record_failure(light, failure, window: window)
-        other = Stoplight::Failure.new('class', 'message 2', Time.new - 10)
-        data_store.record_failure(light, other, window: window)
-        expect(data_store.get_failures(light, window: window)).to eq([other, failure])
-      end
-
-      it 'limits the number of stored failures' do
-        light.with_threshold(1)
-        data_store.record_failure(light, failure, window: window)
-        other = Stoplight::Failure.new('class', 'message 2', Time.new - 10)
-        data_store.record_failure(light, other, window: window)
-        expect(data_store.get_failures(light, window: window)).to contain_exactly(failure)
-      end
-    end
-
-    context 'without a window' do
-      let(:window) { nil }
-
-      include_examples '#record_failure'
-    end
-
-    context 'with a window' do
-      let(:window) { 3600 }
-
-      include_examples '#record_failure'
-
-      it 'stores failures only withing window length' do
-        data_store.record_failure(light, failure, window: window)
-        other = Stoplight::Failure.new('class', 'message 2', Time.new - window - 1)
-        data_store.record_failure(light, other, window: window)
-        expect(data_store.get_failures(light, window: window)).to contain_exactly(failure)
-      end
-    end
-  end
+  it_behaves_like 'Stoplight::DataStore::Base#record_failures'
 
   describe '#clear_failures' do
     it 'returns the failures' do
