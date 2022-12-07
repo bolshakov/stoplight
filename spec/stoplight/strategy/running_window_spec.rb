@@ -62,30 +62,42 @@ RSpec.describe Stoplight::Strategy::RunningWindow do
       end
 
       context 'when there are many failures' do
+        def failures
+          strategy.get_failures(light)
+        end
+
         let(:another_failure) { Stoplight::Failure.new('class', 'message 2', Time.new - 10) }
 
         it 'stores more recent failures at the head' do
           strategy.record_failure(light, failure)
           strategy.record_failure(light, another_failure)
 
-          expect(strategy.get_failures(light)).to eq([another_failure, failure])
+          expect(failures).to eq([another_failure, failure])
         end
 
-        it 'limits the number of stored failures' do
-          light.with_threshold(1)
-          strategy.record_failure(light, another_failure)
-          strategy.record_failure(light, failure)
+        describe 'threshold' do
+          let(:one_another_failure) { Stoplight::Failure.new('class', 'message 2', Time.new - 20) }
 
-          expect(strategy.get_failures(light)).to contain_exactly(failure)
+          it 'limits the number of stored failures' do
+            light.with_threshold(1)
+            strategy.record_failure(light, one_another_failure)
+            strategy.record_failure(light, another_failure)
+            expect(failures).to contain_exactly(another_failure)
+
+            strategy.record_failure(light, failure)
+
+            expect(failures).to contain_exactly(failure)
+          end
         end
 
-        context 'when failure happened outside of the window' do
+        describe 'running window' do
           let(:another_failure) { Stoplight::Failure.new('class', 'message 2', Time.new - window - 1) }
 
           it 'stores failures only withing window length' do
             strategy.record_failure(light, failure)
             strategy.record_failure(light, another_failure)
-            expect(strategy.get_failures(light)).to contain_exactly(failure)
+
+            expect(failures).to contain_exactly(failure)
           end
         end
       end

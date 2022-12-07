@@ -55,6 +55,10 @@ RSpec.describe Stoplight::Strategy::Vintage do
     describe '#record_failure' do
       let(:failure) { Stoplight::Failure.new('class', 'message', Time.new) }
 
+      def failures
+        strategy.get_failures(light)
+      end
+
       it 'returns the number of failures' do
         expect(strategy.record_failure(light, failure)).to eql(1)
       end
@@ -66,15 +70,22 @@ RSpec.describe Stoplight::Strategy::Vintage do
           strategy.record_failure(light, failure)
           strategy.record_failure(light, another_failure)
 
-          expect(strategy.get_failures(light)).to eq([another_failure, failure])
+          expect(failures).to eq([another_failure, failure])
         end
 
-        it 'limits the number of stored failures' do
-          light.with_threshold(1)
-          strategy.record_failure(light, another_failure)
-          strategy.record_failure(light, failure)
+        describe 'threshold' do
+          let(:one_another_failure) { Stoplight::Failure.new('class', 'message 2', Time.new - 20) }
 
-          expect(strategy.get_failures(light)).to contain_exactly(failure)
+          it 'limits the number of stored failures' do
+            light.with_threshold(1)
+            strategy.record_failure(light, one_another_failure)
+            strategy.record_failure(light, another_failure)
+            expect(failures).to contain_exactly(another_failure)
+
+            strategy.record_failure(light, failure)
+
+            expect(failures).to contain_exactly(failure)
+          end
         end
       end
     end
