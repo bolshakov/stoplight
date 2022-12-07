@@ -20,24 +20,33 @@ module Stoplight
         synchronize { @failures.keys | @states.keys }
       end
 
-      def get_all(light)
-        synchronize { [@failures[light.name], @states[light.name]] }
-      end
-
-      def get_failures(light)
-        synchronize { @failures[light.name] }
-      end
-
-      def record_failure(light, failure)
+      def get_all(light, window: nil)
         synchronize do
-          n = light.threshold - 1
-          @failures[light.name] = @failures[light.name].first(n)
-          @failures[light.name].unshift(failure).size
+          [
+            query_failures(light, window: window),
+            @states[light.name]
+          ]
         end
       end
 
-      def clear_failures(light)
-        synchronize { @failures.delete(light.name) }
+      def get_failures(light, window: nil)
+        synchronize { query_failures(light, window: window) }
+      end
+
+      def record_failure(light, failure, window: nil)
+        synchronize do
+          @failures[light.name].unshift(failure)
+          @failures[light.name] = query_failures(light, window: window).first(light.threshold)
+          @failures[light.name].size
+        end
+      end
+
+      def clear_failures(light, window: nil)
+        synchronize do
+          query_failures(light, window: window).tap do
+            @failures.delete(light.name)
+          end
+        end
       end
 
       def get_state(light)
@@ -74,6 +83,17 @@ module Stoplight
       # @return [void]
       def set_last_notification(light, from_color, to_color)
         @last_notifications[light.name] = [from_color, to_color]
+      end
+
+      private
+
+      def query_failures(light, window:)
+        if window
+          window_start = Time.now - window
+          @failures[light.name].select { |x| x.time >= window_start }
+        else
+          @failures[light.name]
+        end
       end
     end
   end
