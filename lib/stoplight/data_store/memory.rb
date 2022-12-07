@@ -20,15 +20,15 @@ module Stoplight
         synchronize { @failures.keys | @states.keys }
       end
 
-      def get_all(light)
+      def get_all(light, window: nil)
         synchronize { [@failures[light.name], @states[light.name]] }
       end
 
-      def get_failures(light)
+      def get_failures(light, window: nil)
         synchronize { @failures[light.name] }
       end
 
-      def record_failure(light, failure)
+      def record_failure(light, failure, window: nil)
         synchronize do
           n = light.threshold - 1
           @failures[light.name] = @failures[light.name].first(n)
@@ -36,7 +36,7 @@ module Stoplight
         end
       end
 
-      def clear_failures(light)
+      def clear_failures(light, window: nil)
         synchronize { @failures.delete(light.name) }
       end
 
