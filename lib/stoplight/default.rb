@@ -2,6 +2,8 @@
 
 module Stoplight
   module Default
+    Strategy = Stoplight::Strategy::Vintage
+
     COOL_OFF_TIME = 60.0
 
     DATA_STORE = DataStore::Memory.new

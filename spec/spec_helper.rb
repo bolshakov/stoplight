@@ -5,6 +5,8 @@ require 'simplecov'
 require 'stoplight'
 require 'timecop'
 require_relative 'support/data_store/base'
+require_relative 'support/strategy//base'
+require_relative 'support/strategy//vintage'
 
 Timecop.safe_mode = true
 

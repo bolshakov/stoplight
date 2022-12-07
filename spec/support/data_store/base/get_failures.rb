@@ -6,7 +6,7 @@ RSpec.shared_examples 'Stoplight::DataStore::Base#get_failures' do
       expect(data_store.get_failures(light, window: window)).to eql([])
     end
 
-    it 'handles invalid JSON' do
+    it 'returns failures' do
       expect { data_store.record_failure(light, failure, window: window) }
         .to change { data_store.get_failures(light, window: window) }
         .from(be_empty)

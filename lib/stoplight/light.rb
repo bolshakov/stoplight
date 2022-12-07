@@ -8,8 +8,8 @@ module Stoplight
     attr_reader :code
     # @return [Float]
     attr_reader :cool_off_time
-    # @return [DataStore::Base]
-    attr_reader :data_store
+    # @return [Strategy::Base]
+    attr_reader :strategy
     # @return [Proc]
     attr_reader :error_handler
     # @return [Proc]
@@ -30,11 +30,14 @@ module Stoplight
       attr_accessor :default_error_notifier
       # @return [Array<Notifier::Base>]
       attr_accessor :default_notifiers
+      # @return [Class<Stoplight::Strategy::Vintage>]
+      attr_accessor :default_strategy
     end
 
     @default_data_store = Default::DATA_STORE
     @default_error_notifier = Default::ERROR_NOTIFIER
     @default_notifiers = Default::NOTIFIERS
+    @default_strategy = Default::Strategy
 
     # @param name [String]
     # @yield []
@@ -42,13 +45,14 @@ module Stoplight
       @name = name
       @code = code
 
-      @cool_off_time = Default::COOL_OFF_TIME
-      @data_store = self.class.default_data_store
-      @error_handler = Default::ERROR_HANDLER
-      @error_notifier = self.class.default_error_notifier
-      @fallback = Default::FALLBACK
-      @notifiers = self.class.default_notifiers
-      @threshold = Default::THRESHOLD
+      @strategy_class = self.class.default_strategy
+      with_cool_off_time(Default::COOL_OFF_TIME)
+      with_data_store(self.class.default_data_store)
+      with_error_handler(&Default::ERROR_HANDLER)
+      with_error_notifier(&self.class.default_error_notifier)
+      with_fallback(&Default::FALLBACK)
+      with_notifiers(self.class.default_notifiers)
+      with_threshold(Default::THRESHOLD)
     end
 
     # @param cool_off_time [Float]
@@ -61,7 +65,7 @@ module Stoplight
     # @param data_store [DataStore::Base]
     # @return [self]
     def with_data_store(data_store)
-      @data_store = data_store
+      @strategy = @strategy_class.new(data_store)
       self
     end
 
