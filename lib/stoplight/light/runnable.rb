@@ -28,11 +28,10 @@ module Stoplight
       end
 
       def lock(color)
-        raise Error::IncorrectColor unless Color::LOCKABLE_COLORS.include?(color)
-
         state = case color
                 when Color::RED then State::LOCKED_RED
                 when Color::GREEN then State::LOCKED_GREEN
+                else raise Error::IncorrectColor
                 end
 
         safely { data_store.set_state(self, state) }

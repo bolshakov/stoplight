@@ -36,22 +36,4 @@ RSpec.describe Stoplight::Color do
       expect(Stoplight::Color::RED).to be_frozen
     end
   end
-
-  describe '::LOCKABLE_COLORS' do
-    it 'is an array' do
-      expect(Stoplight::Color::LOCKABLE_COLORS).to be_a(Array)
-    end
-
-    it 'is frozen' do
-      expect(Stoplight::Color::LOCKABLE_COLORS).to be_frozen
-    end
-
-    it 'includes green color' do
-      expect(Stoplight::Color::LOCKABLE_COLORS).to include(Stoplight::Color::GREEN)
-    end
-
-    it 'includes red color' do
-      expect(Stoplight::Color::LOCKABLE_COLORS).to include(Stoplight::Color::RED)
-    end
-  end
 end
