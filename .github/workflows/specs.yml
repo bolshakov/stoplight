@@ -10,6 +10,17 @@ jobs:
         ruby: ['2.7', '3.0', '3.1' ]
     name: ${{ matrix.ruby }}
 
+    services:
+      redis:
+        image: redis
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
     steps:
       - uses: actions/checkout@v3
       - name: Set up ruby
@@ -23,6 +34,8 @@ jobs:
           bundle install --jobs 4 --retry 3
       - name: Test
         run: bundle exec rake spec
+        env:
+          STOPLIGHT_REDIS_URL: "redis://127.0.0.1:6379/0"
       - name: Coveralls
         uses: coverallsapp/github-action@v1.1.2
         with:

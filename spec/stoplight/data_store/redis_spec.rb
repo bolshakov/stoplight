@@ -1,11 +1,9 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
-require 'mock_redis'
 
-RSpec.describe Stoplight::DataStore::Redis do
+RSpec.describe Stoplight::DataStore::Redis, :redis do
   let(:data_store) { described_class.new(redis, redlock: redlock) }
-  let(:redis) { MockRedis.new }
   let(:redlock) { instance_double(Redlock::Client) }
   let(:light) { Stoplight::Light.new(name) {} }
   let(:name) { ('a'..'z').to_a.shuffle.join }
