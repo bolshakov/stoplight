@@ -13,7 +13,8 @@ module Stoplight
         elsif failures.size < threshold then Color::GREEN
         elsif failure && Time.now - failure.time >= cool_off_time
           Color::YELLOW
-        else Color::RED
+        else
+          Color::RED
         end
       end
 
@@ -24,6 +25,21 @@ module Stoplight
         when Color::YELLOW then run_yellow
         else run_red
         end
+      end
+
+      def lock(color)
+        raise Error::IncorrectColor unless Color::LOCKABLE_COLORS.include?(color)
+
+        state = case color
+                when Color::RED then State::LOCKED_RED
+                when Color::GREEN then State::LOCKED_GREEN
+                end
+
+        safely { data_store.set_state(self, state) }
+      end
+
+      def unlock
+        safely { data_store.set_state(self, Stoplight::State::UNLOCKED) }
       end
 
       private
