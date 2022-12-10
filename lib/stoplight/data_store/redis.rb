@@ -6,8 +6,8 @@ module Stoplight
   module DataStore
     # @see Base
     class Redis < Base
-      KEY_PREFIX = 'stoplight'
       KEY_SEPARATOR = ':'
+      KEY_PREFIX = %w[stoplight v4].join(KEY_SEPARATOR)
 
       # @param redis [::Redis]
       def initialize(redis, redlock: Redlock::Client.new([redis]))
@@ -44,9 +44,12 @@ module Stoplight
       end
 
       def record_failure(light, failure)
-        size, = @redis.multi do |transaction|
-          transaction.lpush(failures_key(light), failure.to_json)
-          transaction.ltrim(failures_key(light), 0, light.threshold - 1)
+        *, size = @redis.multi do |transaction|
+          failures_key = failures_key(light)
+
+          transaction.zadd(failures_key, failure.time.to_i, failure.to_json)
+          remove_outdated_failures(light, failure.time, transaction: transaction)
+          transaction.zcard(failures_key)
         end
 
         size
@@ -94,6 +97,17 @@ module Stoplight
       private
 
       # @param light [Stoplight::Light]
+      # @param time [Time]
+      def remove_outdated_failures(light, time, transaction: @redis)
+        failures_key = failures_key(light)
+
+        # Remove all errors happened before the window start
+        transaction.zremrangebyscore(failures_key, 0, time.to_i - light.window_size)
+        # Keep at most +light.threshold+ number of errors
+        transaction.zremrangebyrank(failures_key, 0, -light.threshold - 1)
+      end
+
+      # @param light [Stoplight::Light]
       # @return [Array, nil]
       def last_notification(light)
         @redis.get(last_notification_key(light))&.split('->')
@@ -108,7 +122,9 @@ module Stoplight
       end
 
       def query_failures(light, transaction: @redis)
-        transaction.lrange(failures_key(light), 0, -1)
+        window_start = Time.now.to_i - light.window_size
+
+        transaction.zrange(failures_key(light), Float::INFINITY, window_start, rev: true, by_score: true)
       end
 
       def normalize_failures(failures, error_notifier)

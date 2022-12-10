@@ -7,7 +7,7 @@ RSpec.describe Stoplight::DataStore::Redis, :redis do
   let(:redlock) { instance_double(Redlock::Client) }
   let(:light) { Stoplight::Light.new(name) {} }
   let(:name) { ('a'..'z').to_a.shuffle.join }
-  let(:failure) { Stoplight::Failure.new('class', 'message', Time.new) }
+  let(:failure) { Stoplight::Failure.new('class', 'message', Time.new - 60) }
   let(:other) { Stoplight::Failure.new('class', 'message 2', Time.new) }
 
   it_behaves_like 'Stoplight::DataStore::Base'
@@ -23,12 +23,12 @@ RSpec.describe Stoplight::DataStore::Redis, :redis do
     context 'when JSON is invalid' do
       before do
         light.with_error_notifier { |_error| }
-
-        data_store.record_failure(light, failure)
       end
 
       it 'handles it without an error' do
-        expect { redis.lset(redis.keys.first, 0, 'invalid JSON') }
+        expect(failure).to receive(:to_json).and_return('invalid JSON')
+
+        expect { data_store.record_failure(light, failure) }
           .to change { data_store.get_failures(light) }
           .to([have_attributes(error_class: 'JSON::ParserError')])
       end
@@ -36,7 +36,7 @@ RSpec.describe Stoplight::DataStore::Redis, :redis do
   end
 
   it_behaves_like 'Stoplight::DataStore::Base#with_notification_lock' do
-    let(:lock_key) { "stoplight:notification_lock:#{name}" }
+    let(:lock_key) { "stoplight:v4:notification_lock:#{name}" }
 
     before do
       allow(redlock).to receive(:lock).with(lock_key, 2_000).and_yield
