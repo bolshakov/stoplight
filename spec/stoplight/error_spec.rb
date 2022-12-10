@@ -17,6 +17,16 @@ RSpec.describe Stoplight::Error do
     end
   end
 
+  describe '::IncorrectColor' do
+    it 'is a class' do
+      expect(Stoplight::Error::IncorrectColor).to be_a(Class)
+    end
+
+    it 'is a subclass of StandardError' do
+      expect(Stoplight::Error::IncorrectColor).to be < StandardError
+    end
+  end
+
   describe '::RedLight' do
     it 'is a class' do
       expect(Stoplight::Error::RedLight).to be_a(Class)
