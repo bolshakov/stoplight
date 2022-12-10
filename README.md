@@ -403,15 +403,16 @@ Stoplight::Light.default_notifiers += [Stoplight::Notifier::Logger.new(Rails.log
 ### Locking
 
 Although stoplights can operate on their own, occasionally you may want to
-override the default behavior. You can lock a light in either the green or red
-state using `set_state`.
+override the default behavior. You can lock a light using `Stoplight::Light#lock(color)`.
+Color should be either `green` or `red`.
+You can also use constants, provided by Stoplight: `Stoplight::Color::RED` and `Stoplight::Color::Green`.
 
 ``` rb
 light = Stoplight('example-locked') { true }
 # => #<Stoplight::Light:..>
 light.run
 # => true
-light.data_store.set_state(light, Stoplight::State::LOCKED_RED)
+light.lock(Stoplight::Color::RED)
 # => "locked_red"
 light.run
 # Stoplight::Error::RedLight: example-locked
@@ -422,10 +423,10 @@ have configured a custom data store and that data store fails, Stoplight will
 switch over to using a blank in-memory data store. That means you will lose the
 locked state of any stoplights.
 
-You can go back to using the default behavior by unlocking the stoplight.
+You can go back to using the default behavior by unlocking the stoplight using `Stoplight::Light#unlock`.
 
 ``` rb
-light.data_store.set_state(light, Stoplight::State::UNLOCKED)
+light.unlock
 ```
 
 ### Testing
