@@ -122,6 +122,12 @@ RSpec.describe Stoplight::Light do
     end
   end
 
+  describe '#window_size' do
+    it 'is initially the default' do
+      expect(light.window_size).to eql(Stoplight::Default::WINDOW_SIZE)
+    end
+  end
+
   describe '#with_cool_off_time' do
     it 'sets the cool off time' do
       cool_off_time = 1.2
@@ -175,6 +181,18 @@ RSpec.describe Stoplight::Light do
       threshold = 12
       light.with_threshold(threshold)
       expect(light.threshold).to eql(threshold)
+    end
+  end
+
+  describe '#with_window_size' do
+    let(:window_size) { 300 }
+
+    it 'sets the window_size' do
+      expect do
+        light.with_window_size(window_size)
+      end.to change { light.window_size }
+        .from(Stoplight::Default::WINDOW_SIZE)
+        .to eql(window_size)
     end
   end
 end
