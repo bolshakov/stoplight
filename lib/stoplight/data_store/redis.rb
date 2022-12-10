@@ -27,7 +27,7 @@ module Stoplight
         (state_names + failure_names).uniq
       end
 
-      def get_all(light)
+      def get_all(light, window: nil)
         failures, state = @redis.multi do |transaction|
           query_failures(light, transaction: transaction)
           transaction.hget(states_key, light.name)
@@ -39,11 +39,11 @@ module Stoplight
         ]
       end
 
-      def get_failures(light)
+      def get_failures(light, window: nil)
         normalize_failures(query_failures(light), light.error_notifier)
       end
 
-      def record_failure(light, failure)
+      def record_failure(light, failure, window: nil)
         size, = @redis.multi do |transaction|
           transaction.lpush(failures_key(light), failure.to_json)
           transaction.ltrim(failures_key(light), 0, light.threshold - 1)
@@ -52,7 +52,7 @@ module Stoplight
         size
       end
 
-      def clear_failures(light)
+      def clear_failures(light, window: nil)
         failures, = @redis.multi do |transaction|
           query_failures(light, transaction: transaction)
           transaction.del(failures_key(light))
