@@ -19,14 +19,8 @@ require 'stoplight/notifier'
 require 'stoplight/notifier/base'
 require 'stoplight/notifier/generic'
 
-require 'stoplight/notifier/bugsnag'
-require 'stoplight/notifier/honeybadger'
 require 'stoplight/notifier/io'
 require 'stoplight/notifier/logger'
-require 'stoplight/notifier/pagerduty'
-require 'stoplight/notifier/raven'
-require 'stoplight/notifier/rollbar'
-require 'stoplight/notifier/slack'
 
 require 'stoplight/default'
 

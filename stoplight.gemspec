@@ -34,19 +34,14 @@ Gem::Specification.new do |gem|
   gem.add_dependency 'redlock', '~> 1.0'
 
   gem.add_development_dependency('benchmark-ips', '~> 2.3')
-  gem.add_development_dependency('bugsnag', '~> 4.0')
   gem.add_development_dependency('database_cleaner-redis', '~> 2.0')
   gem.add_development_dependency('debug')
   gem.add_development_dependency('fakeredis', '~> 0.8')
-  gem.add_development_dependency('honeybadger', '~> 2.5')
-  gem.add_development_dependency('pagerduty', '~> 2.1.1')
   gem.add_development_dependency('rake', '~> 13.0')
   gem.add_development_dependency('redis', '~> 4.1')
   gem.add_development_dependency('rspec', '~> 3.11')
   gem.add_development_dependency('rubocop', '~> 1.0.0')
-  gem.add_development_dependency('sentry-raven', '~> 1.2')
   gem.add_development_dependency('simplecov', '~> 0.21')
   gem.add_development_dependency('simplecov-lcov', '~> 0.8')
-  gem.add_development_dependency('slack-notifier', '~> 1.3')
   gem.add_development_dependency('timecop', '~> 0.9')
 end
