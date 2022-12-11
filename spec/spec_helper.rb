@@ -5,6 +5,7 @@ require 'simplecov'
 require 'stoplight'
 require 'timecop'
 require_relative 'support/data_store/base'
+require_relative 'support/light/runnable'
 require_relative 'support/database_cleaner'
 
 Timecop.safe_mode = true
