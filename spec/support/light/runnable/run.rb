@@ -157,15 +157,13 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
   end
 
   context 'when the light is yellow' do
-    before do
-      (light.threshold - 1).times do
-        light.data_store.record_failure(light, failure)
-      end
+    let(:failure) { Stoplight::Failure.new(error.class.name, error.message, Time.new - light.cool_off_time) }
+    let(:failure2) { Stoplight::Failure.new(error.class.name, error.message, Time.new - light.cool_off_time - 10) }
 
-      other = Stoplight::Failure.new(
-        error.class.name, error.message, time - light.cool_off_time
-      )
-      light.data_store.record_failure(light, other)
+    before do
+      light.with_threshold(2)
+      light.data_store.record_failure(light, failure2)
+      light.data_store.record_failure(light, failure)
     end
 
     it 'runs the code' do
@@ -173,17 +171,22 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
     end
 
     it 'notifies when transitioning to green' do
-      expect(io.string).to eql('')
-      light.run
-      expect(io.string).to_not eql('')
+      expect { light.run }
+        .to change(io, :string)
+        .from(be_empty)
+        .to(/Switching \w+ from red to green/)
     end
   end
 
   context 'when the light is red' do
+    let(:other) do
+      Stoplight::Failure.new(error.class.name, error.message, Time.new - light.cool_off_time)
+    end
+
     before do
-      light.threshold.times do
-        light.data_store.record_failure(light, failure)
-      end
+      light.with_threshold(2)
+      light.data_store.record_failure(light, other)
+      light.data_store.record_failure(light, failure)
     end
 
     it 'raises an error' do
@@ -191,13 +194,9 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
     end
 
     it 'uses the name as the error message' do
-      e =
-        begin
-          light.run
-        rescue Stoplight::Error::RedLight => e
-          e
-        end
-      expect(e.message).to eql(light.name)
+      expect do
+        light.run
+      end.to raise_error(Stoplight::Error::RedLight, light.name)
     end
 
     context 'with a fallback' do
