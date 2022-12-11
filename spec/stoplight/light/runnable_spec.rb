@@ -34,4 +34,11 @@ RSpec.describe Stoplight::Light::Runnable, :redis do
     it_behaves_like 'Stoplight::Light::Runnable#color'
     it_behaves_like 'Stoplight::Light::Runnable#run'
   end
+
+  context 'with redis data store', :redis do
+    let(:data_store) { Stoplight::DataStore::Redis.new(redis) }
+
+    it_behaves_like 'Stoplight::Light::Runnable#color'
+    it_behaves_like 'Stoplight::Light::Runnable#run'
+  end
 end
