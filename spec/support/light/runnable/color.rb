@@ -26,31 +26,32 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#color' do
   end
 
   context 'when there are many failures' do
+    let(:anther) { Stoplight::Failure.new(error.class.name, error.message, time - 10) }
+
+    before do
+      light.with_threshold(2)
+      light.data_store.record_failure(light, failure)
+    end
+
     it 'turns red' do
       expect do
-        light.threshold.times do
-          light.data_store.record_failure(light, failure)
-        end
+        light.data_store.record_failure(light, anther)
       end.to change(light, :color).to be(Stoplight::Color::RED)
     end
   end
 
   context 'when the most recent failure is old' do
-    let(:other) do
-      Stoplight::Failure.new(
-        error.class.name, error.message, Time.new - light.cool_off_time
-      )
-    end
+    let(:failure) { Stoplight::Failure.new(error.class.name, error.message, Time.new - light.cool_off_time) }
+    let(:failure2) { Stoplight::Failure.new(error.class.name, error.message, Time.new - light.cool_off_time - 10) }
 
     before do
-      (light.threshold - 1).times do
-        light.data_store.record_failure(light, failure)
-      end
+      light.with_threshold(2)
+      light.data_store.record_failure(light, failure2)
     end
 
     it 'turns yellow' do
       expect do
-        light.data_store.record_failure(light, other)
+        light.data_store.record_failure(light, failure)
       end.to change(light, :color).to be(Stoplight::Color::YELLOW)
     end
   end
@@ -61,14 +62,13 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#color' do
     end
 
     before do
+      light.with_threshold(2)
       light.data_store.record_failure(light, other)
     end
 
     it 'is red when the least recent failure is old' do
       expect do
-        (light.threshold - 1).times do
-          light.data_store.record_failure(light, failure)
-        end
+        light.data_store.record_failure(light, failure)
       end.to change(light, :color).to be(Stoplight::Color::RED)
     end
   end
