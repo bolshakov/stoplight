@@ -47,4 +47,24 @@ RSpec.describe Stoplight::Notifier::Generic do
   it 'is a module' do
     expect(described_class).to be_a(Module)
   end
+
+  describe '#notify' do
+    let(:light) { Stoplight::Light.new(name) {} }
+    let(:name) { ('a'..'z').to_a.shuffle.join }
+    let(:from_color) { Stoplight::Color::GREEN }
+    let(:to_color) { Stoplight::Color::RED }
+    let(:notifier) { notifier_class.new(double.as_null_object) }
+    let(:error) { nil }
+    let(:notifier_class) do
+      Class.new do
+        include Stoplight::Notifier::Generic
+      end
+    end
+
+    it 'has to implement the #put method' do
+      expect do
+        notifier.notify(light, from_color, to_color, error)
+      end.to raise_error(NotImplementedError)
+    end
+  end
 end
