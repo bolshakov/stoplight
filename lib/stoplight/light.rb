@@ -5,8 +5,6 @@ module Stoplight
     include Lockable
     include Runnable
 
-    # @return [Proc]
-    attr_reader :code
     # @return [Float]
     attr_reader :cool_off_time
     # @return [DataStore::Base]
@@ -41,10 +39,8 @@ module Stoplight
 
     # @param name [String]
     # @yield []
-    def initialize(name, &code)
+    def initialize(name)
       @name = name
-      @code = code
-
       @cool_off_time = Default::COOL_OFF_TIME
       @data_store = self.class.default_data_store
       @error_handler = Default::ERROR_HANDLER

@@ -29,6 +29,6 @@ require 'stoplight/light/runnable'
 require 'stoplight/light'
 
 # @see Stoplight::Light#initialize
-def Stoplight(name, &code) # rubocop:disable Naming/MethodName
-  Stoplight::Light.new(name, &code)
+def Stoplight(name) # rubocop:disable Naming/MethodName
+  Stoplight::Light.new(name)
 end

@@ -19,32 +19,32 @@ module Stoplight
       end
 
       # @raise [Error::RedLight]
-      def run
+      def run(&code)
         case color
-        when Color::GREEN then run_green
-        when Color::YELLOW then run_yellow
+        when Color::GREEN then run_green(&code)
+        when Color::YELLOW then run_yellow(&code)
         else run_red
         end
       end
 
       private
 
-      def run_green
+      def run_green(&code)
         on_failure = lambda do |size, error|
           notify(Color::GREEN, Color::RED, error) if failures_threshold_breached?(size, threshold)
         end
-        run_code(nil, on_failure)
+        run_code(nil, on_failure, &code)
       end
 
       def failures_threshold_breached?(current_failures_count, max_errors_threshold)
         current_failures_count == max_errors_threshold
       end
 
-      def run_yellow
+      def run_yellow(&code)
         on_success = lambda do |failures|
           notify(Color::RED, Color::GREEN) unless failures.empty?
         end
-        run_code(on_success, nil)
+        run_code(on_success, nil, &code)
       end
 
       def run_red
@@ -53,7 +53,7 @@ module Stoplight
         fallback.call(nil)
       end
 
-      def run_code(on_success, on_failure)
+      def run_code(on_success, on_failure, &code)
         result = code.call
         failures = clear_failures
         on_success&.call(failures)
@@ -97,13 +97,13 @@ module Stoplight
 
         self
           .class
-          .new("#{name}-safely", &code)
+          .new("#{name}-safely")
           .with_data_store(Default::DATA_STORE)
           .with_fallback do |error|
             error_notifier.call(error) if error
             default
           end
-          .run
+          .run(&code)
       end
     end
   end

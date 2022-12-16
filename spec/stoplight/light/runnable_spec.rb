@@ -4,7 +4,7 @@ require 'spec_helper'
 require 'stringio'
 
 RSpec.describe Stoplight::Light::Runnable, :redis do
-  subject(:light) { Stoplight::Light.new(name, &code) }
+  subject(:light) { Stoplight::Light.new(name) }
 
   let(:code) { -> { code_result } }
   let(:code_result) { random_string }
