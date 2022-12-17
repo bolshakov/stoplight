@@ -6,8 +6,7 @@ module Stoplight
     # Light can be locked in either a State::LOCKED_RED or State::LOCKED_GREEN state.
     # By locking the light, you force it always to run code with the chosen light color.
     #
-    # ==== Examples
-    #
+    # @example
     #   light = Stoplight('example-locked') { true }
     #   # => #<Stoplight::Light:..>
     #   light.run
@@ -15,12 +14,22 @@ module Stoplight
     #   light.lock(Stoplight::Color::RED)
     #   # => "locked_red"
     #   light.run
-    #   # Stoplight::Error::RedLight: example-locked
+    #   # => Stoplight::Error::RedLight: example-locked
     #   light.unlock
     #   # => "unlocked"
     #   light.run
     #   # => true
     module Lockable
+      # Locks light in either State::LOCKED_RED or State::LOCKED_GREEN
+      #
+      # @example
+      #   light = Stoplight('example-locked') { true }
+      #   # => #<Stoplight::Light:..>
+      #   light.lock(Stoplight::Color::RED)
+      #   # => "locked_red"
+      #
+      # @param color [String] should be either Color::RED or Color::GREEN
+      # @return [String] returns either State::LOCKED_RED or State::LOCKED_GREEN
       def lock(color)
         state = case color
                 when Color::RED then State::LOCKED_RED
@@ -31,6 +40,16 @@ module Stoplight
         safely { data_store.set_state(self, state) }
       end
 
+      # Unlocks light and sets it's state to State::UNLOCKED
+      # @example
+      #   light = Stoplight('example-locked') { true }
+      #   # => #<Stoplight::Light:..>
+      #   light.lock(Stoplight::Color::RED)
+      #   # => "locked_red"
+      #   light.unlock
+      #   # => "unlocked"
+      #
+      # @return [String] State::UNLOCKED
       def unlock
         safely { data_store.set_state(self, Stoplight::State::UNLOCKED) }
       end
