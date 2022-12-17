@@ -23,5 +23,7 @@ module Stoplight
     ].freeze
 
     THRESHOLD = 3
+
+    WINDOW_SIZE = Float::INFINITY
   end
 end

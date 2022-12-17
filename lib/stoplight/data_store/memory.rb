@@ -21,18 +21,23 @@ module Stoplight
       end
 
       def get_all(light)
-        synchronize { [@failures[light.name], @states[light.name]] }
+        synchronize { [query_failures(light), @states[light.name]] }
       end
 
       def get_failures(light)
-        synchronize { @failures[light.name] }
+        synchronize { query_failures(light) }
       end
 
       def record_failure(light, failure)
         synchronize do
-          n = light.threshold - 1
-          @failures[light.name] = @failures[light.name].first(n)
-          @failures[light.name].unshift(failure).size
+          light_name = light.name
+
+          # Keep at most +light.threshold+ number of errors
+          @failures[light_name] = @failures[light_name].first(light.threshold - 1)
+          @failures[light_name].unshift(failure)
+          # Remove all errors happened before the window start
+          @failures[light_name] = query_failures(light, failure.time)
+          @failures[light_name].size
         end
       end
 
@@ -62,6 +67,8 @@ module Stoplight
         end
       end
 
+      private
+
       # @param light [Stoplight::Light]
       # @return [Array, nil]
       def last_notification(light)
@@ -74,6 +81,14 @@ module Stoplight
       # @return [void]
       def set_last_notification(light, from_color, to_color)
         @last_notifications[light.name] = [from_color, to_color]
+      end
+
+      # @param light [Stoplight::Light]
+      # @return [<Stoplight::Failure>]
+      def query_failures(light, time = Time.now)
+        @failures[light.name].select do |failure|
+          failure.time.to_i > time.to_i - light.window_size
+        end
       end
     end
   end
