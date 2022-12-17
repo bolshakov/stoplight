@@ -35,6 +35,7 @@ Check out [stoplight-admin][] for controlling your stoplights.
 - [Advanced usage](#advanced-usage)
   - [Locking](#locking)
   - [Testing](#testing)
+- [Maintenance policy][#maintenance-policy]
 - [Credits](#credits)
 
 ## Installation
@@ -429,6 +430,11 @@ data store by giving each stoplight a unique name.
 ``` rb
 stoplight = Stoplight("test-#{rand}") { ... }
 ```
+
+## Maintenance policy
+
+We support the last three minor ruby versions. Currently, they're: `2.7.x`, `3.0.x`, and `3.1.x`.
+We support the current stable Redis version (`7.0`) and the latest release of the previous major version (`6.2.8`)
 
 ## Credits
 
