@@ -4,6 +4,17 @@ require 'redlock'
 
 module Stoplight
   module DataStore
+    # == Errors
+    # All errors are stored in the sorted set where keys are serialized errors and
+    # values (Redis uses "score" term) contain integer representations of the time
+    # when an error happened.
+    #
+    # This data structure enables us to query errors that happened within a specific
+    # period. We use this feature to support +window_size+ option.
+    #
+    # To avoid uncontrolled memory consumption, we keep at most +light.threshold+ number
+    # of errors happened within last +light.window_size+ seconds (by default infinity).
+    #
     # @see Base
     class Redis < Base
       KEY_SEPARATOR = ':'
@@ -43,6 +54,7 @@ module Stoplight
         normalize_failures(query_failures(light), light.error_notifier)
       end
 
+      # Saves a new failure to the errors HSet and cleans up outdated errors.
       def record_failure(light, failure)
         *, size = @redis.multi do |transaction|
           failures_key = failures_key(light)
@@ -144,6 +156,10 @@ module Stoplight
         state || State::UNLOCKED
       end
 
+      # We store a list of failures happened in the  +light+ in this key
+      #
+      # @param light [Stoplight::Light]
+      # @return [String]
       def failures_key(light)
         key('failures', light.name)
       end

@@ -30,11 +30,12 @@ module Stoplight
 
       def record_failure(light, failure)
         synchronize do
-          n = light.threshold - 1
           light_name = light.name
 
-          @failures[light_name] = @failures[light_name].first(n)
+          # Keep at most +light.threshold+ number of errors
+          @failures[light_name] = @failures[light_name].first(light.threshold - 1)
           @failures[light_name].unshift(failure)
+          # Remove all errors happened before the window start
           @failures[light_name] = query_failures(light, failure.time)
           @failures[light_name].size
         end
