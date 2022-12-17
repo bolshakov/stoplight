@@ -2,6 +2,7 @@
 
 module Stoplight
   class Light # rubocop:disable Style/Documentation
+    include Lockable
     include Runnable
 
     # @return [Proc]
