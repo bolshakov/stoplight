@@ -43,6 +43,7 @@ module Stoplight
       end
 
       # Unlocks light and sets it's state to State::UNLOCKED
+      #
       # @example
       #   light = Stoplight('example-locked') { true }
       #   # => #<Stoplight::Light:..>
