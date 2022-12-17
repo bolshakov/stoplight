@@ -3,8 +3,11 @@
 require 'spec_helper'
 require 'logger'
 require 'stringio'
+require 'stoplight/rspec'
 
 RSpec.describe Stoplight::Notifier::Logger do
+  it_behaves_like 'a generic notifier'
+
   it 'is a class' do
     expect(described_class).to be_a(Class)
   end

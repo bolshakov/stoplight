@@ -5,6 +5,7 @@ Metrics/BlockLength:
   Exclude:
     - 'spec/**/*'
     - 'stoplight.gemspec'
+    - 'lib/stoplight/rspec/**/*'
 
 Lint/MissingSuper:
   Enabled: false
@@ -12,6 +13,7 @@ Lint/MissingSuper:
 Lint/AmbiguousBlockAssociation:
   Exclude:
     - 'spec/**/*'
+    - 'lib/stoplight/rspec/**/*'
 
 Metrics/ClassLength:
   Enabled: true
@@ -20,3 +22,4 @@ Metrics/ClassLength:
 Layout/BlockAlignment:
   Exclude:
     - 'spec/support/**/*'
+    - 'lib/stoplight/rspec/**/*'
