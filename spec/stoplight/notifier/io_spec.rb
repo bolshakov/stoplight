@@ -2,6 +2,7 @@
 
 require 'spec_helper'
 require 'stringio'
+require 'stoplight/rspec'
 
 RSpec.describe Stoplight::Notifier::IO do
   it_behaves_like 'a generic notifier'

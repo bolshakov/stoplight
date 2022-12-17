@@ -27,13 +27,10 @@ Check out [stoplight-admin][] for controlling your stoplights.
   - [Data store](#data-store)
     - [Redis](#redis)
   - [Notifiers](#notifiers)
-    - [Bugsnag](#bugsnag)
-    - [Honeybadger](#honeybadger)
+    - [IO](#io)
     - [Logger](#logger)
-    - [Pagerduty](#pagerduty)
-    - [Rollbar](#rollbar)
-    - [Sentry](#sentry)
-    - [Slack](#slack)
+    - [Community-supported notifiers](#community-supported-notifiers)
+    - [How to implement your own notifier?](#how-to-implement-your-own-notifier)
   - [Rails](#rails-1)
 - [Advanced usage](#advanced-usage)
   - [Locking](#locking)
@@ -296,32 +293,20 @@ Stoplight::Light.default_notifiers
 
 If you want to send notifications elsewhere, you'll have to set them up.
 
-#### Bugsnag
+#### IO
 
-Make sure you have [the Bugsnag gem][] (`~> 4.0`) installed before configuring
-Stoplight.
-
-``` rb
-require 'bugsnag'
-# => true
-notifier = Stoplight::Notifier::Bugsnag.new(Bugsnag)
-# => #<Stoplight::Notifier::Bugsnag:...>
-Stoplight::Light.default_notifiers += [notifier]
-# => [#<Stoplight::Notifier::IO:...>, #<Stoplight::Notifier::Bugsnag:...>]
-```
-
-#### Honeybadger
-
-Make sure you have [the Honeybadger gem][] (`~> 2.5`) installed before
-configuring Stoplight.
+Stoplight can notify not only into STDOUT, but into any IO object. You can configure 
+the `Stoplight::Notifier::IO` notifier for that.
 
 ``` rb
-require 'honeybadger'
-# => true
-notifier = Stoplight::Notifier::Honeybadger.new('api key')
-# => #<Stoplight::Notifier::Honeybadger:...>
+require 'stringio'
+
+io = StringIO.new
+# => #<StringIO:...>
+notifier = Stoplight::Notifier::IO.new(io)
+# => #<Stoplight::Notifier::Logger:...>
 Stoplight::Light.default_notifiers += [notifier]
-# => [#<Stoplight::Notifier::IO:...>, #<Stoplight::Notifier::Honeybadger:...>]
+# => [#<Stoplight::Notifier::IO:...>  
 ```
 
 #### Logger
@@ -340,66 +325,36 @@ Stoplight::Light.default_notifiers += [notifier]
 # => [#<Stoplight::Notifier::IO:...>, #<Stoplight::Notifier::Logger:...>]
 ```
 
-#### Pagerduty
+#### Community-supported notifiers
 
-Make sure you have [the Pagerduty gem][] (`~> 2.1`) installed before configuring
-Stoplight.
+Unfortunately, there aren't any so far. You you want to implement one, the 
+following section contains all the required information.
 
-``` rb
-require 'pagerduty'
-# => true
-pagerduty = Pagerduty.new('http://www.example.com/webhook-url')
-# => #<Pagerduty:...>
-notifier = Stoplight::Notifier::Pagerduty.new(pagerduty)
-# => #<Stoplight::Notifier::Pagerduty:...>
-Stoplight::Light.default_notifiers += [notifier]
-# => [#<Stoplight::Notifier::IO:...>, #<Stoplight::Notifier::Pagerduty:...>]
+Pull requests to update this section are welcome.
+
+#### How to implement your own notifier?
+
+A notifier has to implement the `Stoplight::Notifier::Base` interface:
+
+```ruby
+def notify(light, from_color, to_color, error)
+  raise NotImplementedError
+end
 ```
 
-#### Rollbar
+For convenience, you can use the `Stoplight::Notifier::Generic` module. It takes care of
+the message formatting, and you have to implement only the `put` method, which takes message sting as an argument:
 
-Make sure you have [the Rollbar gem][] (`~> 2.0`) installed before configuring
-Stoplight.
-
-``` rb
-require 'rollbar'
-# => true
-notifier = Stoplight::Notifier::Rollbar.new(Rollbar)
-# => #<Stoplight::Notifier::Rollbar:...>
-Stoplight::Light.default_notifiers += [notifier]
-# => [#<Stoplight::Notifier::IO:...>, #<Stoplight::Notifier::Rollbar:...>]
-```
-
-#### Sentry
-
-Make sure you have [the Sentry gem][] (`~> 1.2`) installed before configuring
-Stoplight.
-
-``` rb
-require 'sentry-raven'
-# => true
-configuration = Raven::Configuration.new
-# => #<Raven::Configuration:...>
-notifier = Stoplight::Notifier::Raven.new(configuration)
-# => #<Stoplight::Notifier::Raven:...>
-Stoplight::Light.default_notifiers += [notifier]
-# => [#<Stoplight::Notifier::IO:...>, #<Stoplight::Notifier::Raven:...>]
-```
-
-#### Slack
-
-Make sure you have [the Slack gem][] (`~> 1.3`) installed before configuring
-Stoplight.
-
-``` rb
-require 'slack-notifier'
-# => true
-slack = Slack::Notifier.new('http://www.example.com/webhook-url')
-# => #<Slack::Notifier:...>
-notifier = Stoplight::Notifier::Slack.new(slack)
-# => #<Stoplight::Notifier::Slack:...>
-Stoplight::Light.default_notifiers += [notifier]
-# => [#<Stoplight::Notifier::IO:...>, #<Stoplight::Notifier::Slack:...>]
+```ruby 
+class IO < Stoplight::Notifier::Base
+  include Generic
+   
+  private
+    
+  def put(message)
+    @object.puts(message)
+  end
+end
 ```
 
 ### Rails
