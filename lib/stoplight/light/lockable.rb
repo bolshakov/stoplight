@@ -29,7 +29,7 @@ module Stoplight
       #   # => "locked_red"
       #
       # @param color [String] should be either Color::RED or Color::GREEN
-      # @return [String] returns either State::LOCKED_RED or State::LOCKED_GREEN
+      # @return [Stoplight::Light] returns locked light
       def lock(color)
         state = case color
                 when Color::RED then State::LOCKED_RED
@@ -38,6 +38,8 @@ module Stoplight
                 end
 
         safely { data_store.set_state(self, state) }
+
+        self
       end
 
       # Unlocks light and sets it's state to State::UNLOCKED
@@ -49,9 +51,11 @@ module Stoplight
       #   light.unlock
       #   # => "unlocked"
       #
-      # @return [String] State::UNLOCKED
+      # @return [Stoplight::Light] returns unlocked light
       def unlock
         safely { data_store.set_state(self, Stoplight::State::UNLOCKED) }
+
+        self
       end
     end
   end

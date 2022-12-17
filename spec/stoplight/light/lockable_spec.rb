@@ -14,7 +14,13 @@ RSpec.describe Stoplight::Light::Lockable do
   end
 
   describe '#lock' do
+    let(:color) { Stoplight::Color::GREEN }
+
     context 'with correct color' do
+      it 'returns the light' do
+        expect(light.lock(color)).to be_a Stoplight::Light
+      end
+
       context 'with green color' do
         let(:color) { Stoplight::Color::GREEN }
 
@@ -52,6 +58,10 @@ RSpec.describe Stoplight::Light::Lockable do
   end
 
   describe '#unlock' do
+    it 'returns the light' do
+      expect(light.unlock).to be_a Stoplight::Light
+    end
+
     context 'with locked green light' do
       before { light.lock(Stoplight::Color::GREEN) }
 
