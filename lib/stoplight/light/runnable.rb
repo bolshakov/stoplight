@@ -13,7 +13,8 @@ module Stoplight
         elsif failures.size < threshold then Color::GREEN
         elsif failure && Time.now - failure.time >= cool_off_time
           Color::YELLOW
-        else Color::RED
+        else
+          Color::RED
         end
       end
 
