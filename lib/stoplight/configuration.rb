@@ -11,6 +11,8 @@ module Stoplight
     def_delegator :light, :with_error_handler
     def_delegator :light, :with_error_notifier
     def_delegator :light, :with_fallback
+    def_delegator :light, :color
+    def_delegator :light, :run
 
     # @!attribute name
     #   @return [String]
@@ -68,6 +70,7 @@ module Stoplight
     def with_name(name)
       copy(name: name)
     end
+    private :with_name
 
     # @param data_store [DataStore::Base]
     # @return [Stoplight::Configuration]
