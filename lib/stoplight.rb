@@ -24,6 +24,7 @@ require 'stoplight/notifier/logger'
 
 require 'stoplight/default'
 
+require 'stoplight/configuration'
 require 'stoplight/light/lockable'
 require 'stoplight/light/runnable'
 require 'stoplight/light'
