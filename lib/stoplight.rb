@@ -31,5 +31,9 @@ require 'stoplight/light'
 
 # @see Stoplight::Light#initialize
 def Stoplight(name, &code) # rubocop:disable Naming/MethodName
-  Stoplight::Light.new(name, &code)
+  if block_given?
+    Stoplight::Light.new(name, &code)
+  else
+    Stoplight::Configuration.new(name)
+  end
 end

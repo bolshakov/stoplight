@@ -26,9 +26,8 @@ RSpec.describe 'Stoplight' do
     subject(:light) { Stoplight(name) }
 
     it 'creates a stoplight' do
-      expect(light).to be_a(Stoplight::Light)
+      expect(light).to be_a(Stoplight::Configuration)
       expect(light.name).to eql(name)
-      expect(light.code).to be_nil
     end
   end
 end
