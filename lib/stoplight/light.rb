@@ -52,9 +52,10 @@ module Stoplight
 
     # @param configuration [Stoplight::Configuration]
     # @yield []
-    def initialize(name, configuration = Configuration.new(name))
+    def initialize(name, configuration = Configuration.new(name), &code)
       @configuration = configuration
       @name = name
+      @code = code
       @error_handler = Default::ERROR_HANDLER
       @fallback = Default::FALLBACK
       @error_notifier = self.class.default_error_notifier

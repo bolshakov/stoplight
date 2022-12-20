@@ -4,14 +4,6 @@ require 'spec_helper'
 require 'stringio'
 
 RSpec.describe Stoplight::Light::Runnable, :redis do
-  subject(:light) { Stoplight::Light.new(name) }
-
-  let(:code) { -> { code_result } }
-  let(:code_result) { random_string }
-  let(:fallback) { ->(_) { fallback_result } }
-  let(:fallback_result) { random_string }
-  let(:name) { random_string }
-
   let(:failure) do
     Stoplight::Failure.new(error.class.name, error.message, time)
   end

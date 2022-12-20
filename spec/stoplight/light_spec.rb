@@ -4,8 +4,9 @@ require 'spec_helper'
 require 'stringio'
 
 RSpec.describe Stoplight::Light do
-  let(:light) { described_class.new(name) }
+  let(:light) { described_class.new(name, &code) }
   let(:name) { ('a'..'z').to_a.shuffle.join }
+  let(:code) { -> {} }
 
   it 'is a class' do
     expect(described_class).to be_a(Class)
@@ -63,6 +64,12 @@ RSpec.describe Stoplight::Light do
       notifiers = []
       described_class.default_notifiers = notifiers
       expect(described_class.default_notifiers).to eql(notifiers)
+    end
+  end
+
+  describe '#code' do
+    it 'reads the code' do
+      expect(light.code).to eql(code)
     end
   end
 

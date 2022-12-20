@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe Stoplight::DataStore::Redis, :redis do
   let(:data_store) { described_class.new(redis, redlock: redlock) }
   let(:redlock) { instance_double(Redlock::Client) }
-  let(:light) { Stoplight::Light.new(name) }
+  let(:light) { Stoplight::Light.new(name) {} }
   let(:name) { ('a'..'z').to_a.shuffle.join }
   let(:failure) { Stoplight::Failure.new('class', 'message', Time.new - 60) }
   let(:other) { Stoplight::Failure.new('class', 'message 2', Time.new) }
