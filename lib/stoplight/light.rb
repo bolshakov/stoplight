@@ -47,8 +47,8 @@ module Stoplight
     # @return [Proc]
     attr_reader :error_notifier
     # @return [Stoplight::Configuration]
+    # @api private
     attr_reader :configuration
-    private :configuration
 
     # @param configuration [Stoplight::Configuration]
     # @yield []

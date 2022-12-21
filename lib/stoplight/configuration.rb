@@ -13,6 +13,8 @@ module Stoplight
     def_delegator :light, :with_fallback
     def_delegator :light, :color
     def_delegator :light, :run
+    def_delegator :light, :lock
+    def_delegator :light, :unlock
 
     # @!attribute name
     #   @return [String]
@@ -105,7 +107,7 @@ module Stoplight
     private
 
     def light
-      Light.new(name)
+      Light.new(name, self)
     end
 
     # @param cool_off_time [Float]
