@@ -354,8 +354,9 @@ Stoplight::Light.default_notifiers += [notifier]
 
 #### Community-supported notifiers
 
-Unfortunately, there aren't any so far. You you want to implement one, the 
-following section contains all the required information.
+* [stoplight-sentry]
+
+You you want to implement your own notifier, the following section contains all the required information.
 
 Pull requests to update this section are welcome.
 
@@ -500,3 +501,4 @@ Stoplight is licensed under [the MIT License][].
 [complete list of contributors]: https://github.com/bolshakov/stoplight/graphs/contributors
 [CircuitBreaker]: http://martinfowler.com/bliki/CircuitBreaker.html
 [the MIT license]: LICENSE.md
+[stoplight-sentry]: https://github.com/bolshakov/stoplight-sentry
