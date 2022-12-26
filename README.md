@@ -414,7 +414,7 @@ light = Stoplight('example-locked') { true }
 light.run
 # => true
 light.lock(Stoplight::Color::RED)
-# => "locked_red"
+# => #<Stoplight::Light:..>
 light.run
 # Stoplight::Error::RedLight: example-locked
 ```
@@ -428,6 +428,7 @@ You can go back to using the default behavior by unlocking the stoplight using `
 
 ``` rb
 light.unlock
+# => #<Stoplight::Light:..>
 ```
 
 ### Testing

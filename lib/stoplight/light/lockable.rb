@@ -12,11 +12,11 @@ module Stoplight
     #   light.run
     #   # => true
     #   light.lock(Stoplight::Color::RED)
-    #   # => "locked_red"
+    #   # => #<Stoplight::Light:..>
     #   light.run
     #   # => Stoplight::Error::RedLight: example-locked
     #   light.unlock
-    #   # => "unlocked"
+    #   # => #<Stoplight::Light:..>
     #   light.run
     #   # => true
     module Lockable
@@ -26,7 +26,7 @@ module Stoplight
       #   light = Stoplight('example-locked') { true }
       #   # => #<Stoplight::Light:..>
       #   light.lock(Stoplight::Color::RED)
-      #   # => "locked_red"
+      #   # => #<Stoplight::Light:..>
       #
       # @param color [String] should be either Color::RED or Color::GREEN
       # @return [Stoplight::Light] returns locked light
@@ -50,7 +50,7 @@ module Stoplight
       #   light.lock(Stoplight::Color::RED)
       #   # => "locked_red"
       #   light.unlock
-      #   # => "unlocked"
+      #   # => #<Stoplight::Light:..>
       #
       # @return [Stoplight::Light] returns unlocked light
       def unlock
