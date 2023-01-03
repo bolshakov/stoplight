@@ -52,7 +52,7 @@ module Stoplight
 
     # @param name [String]
     def initialize(
-      name,
+      name:,
       cool_off_time: Default::COOL_OFF_TIME,
       threshold: Default::THRESHOLD,
       window_size: Default::WINDOW_SIZE,
@@ -67,41 +67,34 @@ module Stoplight
       @window_size = window_size
     end
 
-    # @param name [String]
-    # @return [Stoplight::Configuration]
-    def with_name(name)
-      copy(name: name)
-    end
-    private :with_name
-
     # @param data_store [DataStore::Base]
     # @return [Stoplight::Configuration]
     def with_data_store(data_store)
-      copy(data_store: data_store)
+      with(data_store: data_store)
     end
 
     # @param cool_off_time [Float]
     # @return [Stoplight::Configuration]
     def with_cool_off_time(cool_off_time)
-      copy(cool_off_time: cool_off_time)
+      with(cool_off_time: cool_off_time)
     end
 
     # @param threshold [Fixnum]
     # @return [Stoplight::Configuration]
     def with_threshold(threshold)
-      copy(threshold: threshold)
+      with(threshold: threshold)
     end
 
     # @param window_size [Integer]
     # @return [Stoplight::Configuration]
     def with_window_size(window_size)
-      copy(window_size: window_size)
+      with(window_size: window_size)
     end
 
     # @param notifiers [Array<Notifier::Base>]
     # @return [Stoplight::Configuration]
     def with_notifiers(notifiers)
-      copy(notifiers: notifiers)
+      with(notifiers: notifiers)
     end
 
     private
@@ -114,7 +107,7 @@ module Stoplight
     # @param threshold [Fixnum]
     # @param window_size [Integer]
     # @return [Stoplight::Configuration]
-    def copy(
+    def with(
       name: self.name,
       cool_off_time: self.cool_off_time,
       threshold: self.threshold,
@@ -123,7 +116,7 @@ module Stoplight
       notifiers: self.notifiers
     )
       Configuration.new(
-        name,
+        name: name,
         data_store: data_store,
         notifiers: notifiers,
         cool_off_time: cool_off_time,

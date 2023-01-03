@@ -34,6 +34,6 @@ def Stoplight(name, &code) # rubocop:disable Naming/MethodName
   if block_given?
     Stoplight::Light.new(name, &code)
   else
-    Stoplight::Configuration.new(name)
+    Stoplight::Configuration.new(name: name)
   end
 end

@@ -4,7 +4,7 @@ require 'spec_helper'
 require 'securerandom'
 
 RSpec.describe Stoplight::Configuration do
-  subject(:configuration) { described_class.new(name) }
+  subject(:configuration) { described_class.new(name: name) }
 
   let(:name) { SecureRandom.uuid }
 

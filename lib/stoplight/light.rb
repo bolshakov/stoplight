@@ -52,7 +52,7 @@ module Stoplight
 
     # @param configuration [Stoplight::Configuration]
     # @yield []
-    def initialize(name, configuration = Configuration.new(name), &code)
+    def initialize(name, configuration = Configuration.new(name: name), &code)
       @configuration = configuration
       @name = name
       @code = code
