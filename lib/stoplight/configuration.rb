@@ -1,128 +1,126 @@
 # frozen_string_literal: true
 
-require 'forwardable'
-
 module Stoplight
-  # An immutable +Stoplight::Light+ configuration object that could be
-  # shared between different lights.
+  # A +Stoplight::Light+ configuration object.
   class Configuration
-    extend Forwardable
+    class << self
+      alias __new_without_defaults__ new
 
-    def_delegator :light, :with_error_handler
-    def_delegator :light, :with_error_notifier
-    def_delegator :light, :with_fallback
-    def_delegator :light, :color
-    def_delegator :light, :run
-    def_delegator :light, :lock
-    def_delegator :light, :unlock
+      # It overrides the +Configuration.new+ to inject default settings
+      # @see +Stoplight::Configuration#initialize+
+      def new(**settings)
+        __new_without_defaults__(
+          **default_settings.merge(settings)
+        )
+      end
 
-    # @!attribute name
+      private
+
+      # @return [Hash]
+      def default_settings
+        {
+          cool_off_time: Default::COOL_OFF_TIME,
+          data_store: Stoplight.default_data_store,
+          error_notifier: Stoplight.default_error_notifier,
+          notifiers: Stoplight.default_notifiers,
+          threshold: Default::THRESHOLD,
+          window_size: Default::WINDOW_SIZE
+        }
+      end
+    end
+
+    # @!attribute [r] name
     #   @return [String]
     attr_reader :name
 
-    # @!attribute data_store
+    # @!attribute [r] cool_off_time
+    #   @return [Numeric]
+    attr_reader :cool_off_time
+
+    # @!attribute [r] data_store
     #   @return [Stoplight::DataStore::Base]
     attr_reader :data_store
 
-    # @!attribute cool_off_time
-    #   @return [Fixnum]
-    attr_reader :cool_off_time
+    # @!attribute [r] error_notifier
+    #   # @return [StandardError => void]
+    attr_reader :error_notifier
 
-    # @!attribute threshold
-    #   @return [Integer]
-    attr_reader :threshold
-
-    # @!attribute window_size
-    #   @return [Float]
-    attr_reader :window_size
-
-    # @!attribute notifiers
+    # @!attribute [r] notifiers
     #   # @return [Array<Notifier::Base>]
     attr_reader :notifiers
 
-    class << self
-      # @return [DataStore::Base]
-      attr_accessor :default_data_store
-      # @return [Array<Notifier::Base>]
-      attr_accessor :default_notifiers
-    end
+    # @!attribute [r] threshold
+    #   @return [Numeric]
+    attr_reader :threshold
 
-    @default_data_store = Default::DATA_STORE
-    @default_notifiers = Default::NOTIFIERS
+    # @!attribute [r] window_size
+    #   @return [Numeric]
+    attr_reader :window_size
 
     # @param name [String]
-    def initialize(
-      name:,
-      cool_off_time: Default::COOL_OFF_TIME,
-      threshold: Default::THRESHOLD,
-      window_size: Default::WINDOW_SIZE,
-      data_store: self.class.default_data_store,
-      notifiers: self.class.default_notifiers
-    )
+    # @param cool_off_time [Numeric]
+    # @param data_store [Stoplight::DataStore::Base]
+    # @param error_notifier [Proc]
+    # @param notifiers [Stoplight::Notifier::Base]
+    # @param threshold [Numeric]
+    # @param window_size [Numeric]
+    def initialize(name:, cool_off_time:, data_store:, error_notifier:, notifiers:, threshold:, window_size:)
       @name = name
-      @data_store = data_store
-      @notifiers = notifiers
       @cool_off_time = cool_off_time
+      @data_store = data_store
+      @error_notifier = error_notifier
+      @notifiers = notifiers
       @threshold = threshold
       @window_size = window_size
     end
 
-    # @param data_store [DataStore::Base]
-    # @return [Stoplight::Configuration]
-    def with_data_store(data_store)
-      with(data_store: data_store)
+    # @param other [any]
+    # @return [Boolean]
+    def ==(other)
+      other.is_a?(self.class) && settings == other.settings
     end
 
-    # @param cool_off_time [Float]
-    # @return [Stoplight::Configuration]
-    def with_cool_off_time(cool_off_time)
-      with(cool_off_time: cool_off_time)
-    end
-
-    # @param threshold [Fixnum]
-    # @return [Stoplight::Configuration]
-    def with_threshold(threshold)
-      with(threshold: threshold)
-    end
-
-    # @param window_size [Integer]
-    # @return [Stoplight::Configuration]
-    def with_window_size(window_size)
-      with(window_size: window_size)
-    end
-
-    # @param notifiers [Array<Notifier::Base>]
-    # @return [Stoplight::Configuration]
-    def with_notifiers(notifiers)
-      with(notifiers: notifiers)
-    end
-
-    private
-
-    def light
-      Light.new(name, self)
-    end
-
-    # @param cool_off_time [Float]
-    # @param threshold [Fixnum]
-    # @param window_size [Integer]
+    # @param cool_off_time [Numeric]
+    # @param data_store [Stoplight::DataStore::Base]
+    # @param error_notifier [Proc]
+    # @param name [String]
+    # @param notifiers [Stoplight::Notifier::Base]
+    # @param threshold [Numeric]
+    # @param window_size [Numeric]
     # @return [Stoplight::Configuration]
     def with(
-      name: self.name,
       cool_off_time: self.cool_off_time,
-      threshold: self.threshold,
-      window_size: self.window_size,
       data_store: self.data_store,
-      notifiers: self.notifiers
+      error_notifier: self.error_notifier,
+      name: self.name,
+      notifiers: self.notifiers,
+      threshold: self.threshold,
+      window_size: self.window_size
     )
       Configuration.new(
-        name: name,
-        data_store: data_store,
-        notifiers: notifiers,
         cool_off_time: cool_off_time,
+        data_store: data_store,
+        error_notifier: error_notifier,
+        name: name,
+        notifiers: notifiers,
         threshold: threshold,
         window_size: window_size
       )
+    end
+
+    protected
+
+    # @return [Hash]
+    def settings
+      {
+        cool_off_time: cool_off_time,
+        data_store: data_store,
+        error_notifier: error_notifier,
+        name: name,
+        notifiers: notifiers,
+        threshold: threshold,
+        window_size: window_size
+      }
     end
   end
 end

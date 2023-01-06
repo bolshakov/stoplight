@@ -8,33 +8,31 @@ module Stoplight
     extend Deprecated
     include Lockable
     include Runnable
+    include Configurable
 
-    # @!attribute data_store
+    # @!attribute [r] data_store
     #   @return [Stoplight::DataStore::Base]
     def_delegator :configuration, :data_store
 
-    # @!attribute threshold
+    # @!attribute [r] threshold
     #   @return [Integer]
     def_delegator :configuration, :threshold
 
-    # @!attribute cool_off_time
+    # @!attribute [r] cool_off_time
     #   @return [Fixnum]
     def_delegator :configuration, :cool_off_time
 
-    # @!attribute window_size
+    # @!attribute [r] window_size
     #   @return [Float]
     def_delegator :configuration, :window_size
 
-    # @!attribute notifiers
+    # @!attribute [r] notifiers
     #   # @return [Array<Notifier::Base>]
     def_delegator :configuration, :notifiers
 
-    class << self
-      # @return [Proc]
-      attr_accessor :default_error_notifier
-    end
-
-    @default_error_notifier = Default::ERROR_NOTIFIER
+    # @!attribute [r] error_notifier
+    #   # @return [Proc]
+    def_delegator :configuration, :error_notifier
 
     # @return [String]
     attr_reader :name
@@ -44,35 +42,44 @@ module Stoplight
     attr_reader :error_handler
     # @return [Proc, nil]
     attr_reader :fallback
-    # @return [Proc]
-    attr_reader :error_notifier
     # @return [Stoplight::Configuration]
     # @api private
     attr_reader :configuration
 
+    class << self
+      alias __new_with_configuration__ new
+
+      # It overrides the +Light.new+ method to support an old and a new
+      # way of instantiation.
+      #
+      # @overload new(name, &code)
+      #   @param name [String]
+      #   @return [Stoplight::Light]
+      # @overload new(name, configuration)
+      #   @param name [String]
+      #   @param configuration [Stoplight::Configuration]
+      #   @return [Stoplight::Light]
+      #
+      def new(name, configuration = nil, &code)
+        if configuration
+          __new_with_configuration__(name, configuration, &code)
+        else
+          # Those legacy calls should be deprecated
+          # TODO: deprecate Light.new
+          Builder.with(name: name).build(&code)
+        end
+      end
+    end
+
+    # @param name [String]
     # @param configuration [Stoplight::Configuration]
     # @yield []
-    def initialize(name, configuration = Configuration.new(name: name), &code)
+    def initialize(name, configuration, &code)
       @configuration = configuration
       @name = name
       @code = code
       @error_handler = Default::ERROR_HANDLER
       @fallback = Default::FALLBACK
-      @error_notifier = self.class.default_error_notifier
-    end
-
-    # @param cool_off_time [Float]
-    # @return [self]
-    def with_cool_off_time(cool_off_time)
-      @configuration = configuration.with_cool_off_time(cool_off_time)
-      self
-    end
-
-    # @param data_store [DataStore::Base]
-    # @return [self]
-    def with_data_store(data_store)
-      @configuration = configuration.with_data_store(data_store)
-      self
     end
 
     # @yieldparam error [Exception]
@@ -83,13 +90,6 @@ module Stoplight
       self
     end
 
-    # @yieldparam error [Exception]
-    # @return [self]
-    def with_error_notifier(&error_notifier)
-      @error_notifier = error_notifier
-      self
-    end
-
     # @yieldparam error [Exception, nil]
     # @return [self]
     def with_fallback(&fallback)
@@ -97,24 +97,10 @@ module Stoplight
       self
     end
 
-    # @param notifiers [Array<Notifier::Base>]
-    # @return [self]
-    def with_notifiers(notifiers)
-      @configuration = configuration.with_notifiers(notifiers)
-      self
-    end
+    private
 
-    # @param threshold [Fixnum]
-    # @return [self]
-    def with_threshold(threshold)
-      @configuration = configuration.with_threshold(threshold)
-      self
-    end
-
-    # @param window_size [Integer]
-    # @return [self]
-    def with_window_size(window_size)
-      @configuration = configuration.with_window_size(window_size)
+    def with(configuration:)
+      @configuration = configuration
       self
     end
   end
