@@ -64,8 +64,8 @@ module Stoplight
         if configuration
           __new_with_configuration__(name, configuration, &code)
         else
-          # Those legacy calls should be deprecated
-          # TODO: deprecate Light.new
+          warn '[DEPRECATED] Instantiating `Stoplight::Light` is deprecated. ' \
+            'Please use `Stoplight()` method instead.'
           Builder.with(name: name).build(&code)
         end
       end
