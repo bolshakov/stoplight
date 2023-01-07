@@ -108,9 +108,7 @@ module Stoplight
       def safely(default = nil, &code)
         return yield if data_store == Default::DATA_STORE
 
-        self
-          .class
-          .new("#{name}-safely")
+        Stoplight("#{name}-safely")
           .with_data_store(Default::DATA_STORE)
           .with_fallback do |error|
             error_notifier.call(error) if error
