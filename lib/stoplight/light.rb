@@ -1,72 +1,88 @@
 # frozen_string_literal: true
 
+require 'stoplight/light/deprecated'
+
 module Stoplight
-  class Light # rubocop:disable Style/Documentation
+  #
+  # @api private use +Stoplight()+ method instead
+  class Light
+    extend Forwardable
+    extend Deprecated
     include Lockable
     include Runnable
+    include Configurable
 
-    # @return [Proc]
-    attr_reader :code
-    # @return [Float]
-    attr_reader :cool_off_time
-    # @return [DataStore::Base]
-    attr_reader :data_store
-    # @return [Proc]
-    attr_reader :error_handler
-    # @return [Proc]
-    attr_reader :error_notifier
-    # @return [Proc, nil]
-    attr_reader :fallback
+    # @!attribute [r] data_store
+    #   @return [Stoplight::DataStore::Base]
+    def_delegator :configuration, :data_store
+
+    # @!attribute [r] threshold
+    #   @return [Integer]
+    def_delegator :configuration, :threshold
+
+    # @!attribute [r] cool_off_time
+    #   @return [Fixnum]
+    def_delegator :configuration, :cool_off_time
+
+    # @!attribute [r] window_size
+    #   @return [Float]
+    def_delegator :configuration, :window_size
+
+    # @!attribute [r] notifiers
+    #   # @return [Array<Notifier::Base>]
+    def_delegator :configuration, :notifiers
+
+    # @!attribute [r] error_notifier
+    #   # @return [Proc]
+    def_delegator :configuration, :error_notifier
+
     # @return [String]
     attr_reader :name
-    # @return [Array<Notifier::Base>]
-    attr_reader :notifiers
-    # @return [Fixnum]
-    attr_reader :threshold
-    # @return [Float]
-    attr_reader :window_size
+    # @return [Proc]
+    attr_reader :code
+    # @return [Proc]
+    attr_reader :error_handler
+    # @return [Proc, nil]
+    attr_reader :fallback
+    # @return [Stoplight::Configuration]
+    # @api private
+    attr_reader :configuration
 
     class << self
-      # @return [DataStore::Base]
-      attr_accessor :default_data_store
-      # @return [Proc]
-      attr_accessor :default_error_notifier
-      # @return [Array<Notifier::Base>]
-      attr_accessor :default_notifiers
-    end
+      alias __new_with_configuration__ new
 
-    @default_data_store = Default::DATA_STORE
-    @default_error_notifier = Default::ERROR_NOTIFIER
-    @default_notifiers = Default::NOTIFIERS
+      # It overrides the +Light.new+ method to support an old and a new
+      # way of instantiation.
+      #
+      # @overload new(name, &code)
+      #   @param name [String]
+      #   @return [Stoplight::Light]
+      #
+      # @overload new(name, configuration)
+      #   @param name [String]
+      #   @param configuration [Stoplight::Configuration]
+      #   @return [Stoplight::Light]
+      #
+      def new(name, configuration = nil, &code)
+        if configuration
+          __new_with_configuration__(name, configuration, &code)
+        else
+          warn '[DEPRECATED] Instantiating `Stoplight::Light` is deprecated. ' \
+            'Please use `Stoplight()` method instead.'
+          Builder.with(name: name).build(&code)
+        end
+      end
+    end
 
     # @param name [String]
+    # @param configuration [Stoplight::Configuration]
     # @yield []
-    def initialize(name, &code)
+    def initialize(name, configuration, &code)
+      @configuration = configuration
       @name = name
       @code = code
-
-      @cool_off_time = Default::COOL_OFF_TIME
-      @data_store = self.class.default_data_store
       @error_handler = Default::ERROR_HANDLER
-      @error_notifier = self.class.default_error_notifier
       @fallback = Default::FALLBACK
-      @notifiers = self.class.default_notifiers
-      @threshold = Default::THRESHOLD
-      @window_size = Default::WINDOW_SIZE
-    end
-
-    # @param cool_off_time [Float]
-    # @return [self]
-    def with_cool_off_time(cool_off_time)
-      @cool_off_time = cool_off_time
-      self
-    end
-
-    # @param data_store [DataStore::Base]
-    # @return [self]
-    def with_data_store(data_store)
-      @data_store = data_store
-      self
     end
 
     # @yieldparam error [Exception]
@@ -77,13 +93,6 @@ module Stoplight
       self
     end
 
-    # @yieldparam error [Exception]
-    # @return [self]
-    def with_error_notifier(&error_notifier)
-      @error_notifier = error_notifier
-      self
-    end
-
     # @yieldparam error [Exception, nil]
     # @return [self]
     def with_fallback(&fallback)
@@ -91,24 +100,10 @@ module Stoplight
       self
     end
 
-    # @param notifiers [Array<Notifier::Base>]
-    # @return [self]
-    def with_notifiers(notifiers)
-      @notifiers = notifiers
-      self
-    end
+    private
 
-    # @param threshold [Fixnum]
-    # @return [self]
-    def with_threshold(threshold)
-      @threshold = threshold
-      self
-    end
-
-    # @param window_size [Integer]
-    # @return [self]
-    def with_window_size(window_size)
-      @window_size = window_size
+    def reconfigure(configuration)
+      @configuration = configuration
       self
     end
   end

@@ -1,6 +1,10 @@
 # frozen_string_literal: true
 
 RSpec.shared_examples 'Stoplight::Light::Runnable#color' do
+  subject(:light) { Stoplight::Light.new(name) }
+
+  let(:name) { random_string }
+
   it 'is initially green' do
     expect(light.color).to eql(Stoplight::Color::GREEN)
   end

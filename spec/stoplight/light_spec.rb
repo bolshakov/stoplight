@@ -128,22 +128,6 @@ RSpec.describe Stoplight::Light do
     end
   end
 
-  describe '#with_cool_off_time' do
-    it 'sets the cool off time' do
-      cool_off_time = 1.2
-      light.with_cool_off_time(cool_off_time)
-      expect(light.cool_off_time).to eql(cool_off_time)
-    end
-  end
-
-  describe '#with_data_store' do
-    it 'sets the data store' do
-      data_store = Stoplight::DataStore::Memory.new
-      light.with_data_store(data_store)
-      expect(light.data_store).to eql(data_store)
-    end
-  end
-
   describe '#with_error_handler' do
     it 'sets the error handler' do
       error_handler = ->(_, _) {}
@@ -168,31 +152,5 @@ RSpec.describe Stoplight::Light do
     end
   end
 
-  describe '#with_notifiers' do
-    it 'sets the notifiers' do
-      notifiers = [Stoplight::Notifier::IO.new(StringIO.new)]
-      light.with_notifiers(notifiers)
-      expect(light.notifiers).to eql(notifiers)
-    end
-  end
-
-  describe '#with_threshold' do
-    it 'sets the threshold' do
-      threshold = 12
-      light.with_threshold(threshold)
-      expect(light.threshold).to eql(threshold)
-    end
-  end
-
-  describe '#with_window_size' do
-    let(:window_size) { 300 }
-
-    it 'sets the window_size' do
-      expect do
-        light.with_window_size(window_size)
-      end.to change { light.window_size }
-        .from(Stoplight::Default::WINDOW_SIZE)
-        .to eql(window_size)
-    end
-  end
+  it_behaves_like Stoplight::Configurable
 end

@@ -1,24 +1,29 @@
 # frozen_string_literal: true
 
 RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
+  let(:code) { -> { code_result } }
+  let(:code_result) { random_string }
+  let(:fallback) { ->(_) { fallback_result } }
+  let(:fallback_result) { random_string }
+  let(:name) { random_string }
   let(:notifiers) { [notifier] }
   let(:notifier) { Stoplight::Notifier::IO.new(io) }
   let(:io) { StringIO.new }
 
   before { light.with_notifiers(notifiers) }
 
-  context 'when the light is green' do
+  shared_examples 'when the light is green' do
     before { light.data_store.clear_failures(light) }
 
     it 'runs the code' do
-      expect(light.run).to eql(code_result)
+      expect(run).to eql(code_result)
     end
 
     context 'with some failures' do
       before { light.data_store.record_failure(light, failure) }
 
       it 'clears the failures' do
-        light.run
+        run
         expect(light.data_store.get_failures(light).size).to eql(0)
       end
     end
@@ -27,13 +32,13 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
       let(:code_result) { raise error }
 
       it 're-raises the error' do
-        expect { light.run }.to raise_error(error.class)
+        expect { run }.to raise_error(error.class)
       end
 
       it 'records the failure' do
         expect(light.data_store.get_failures(light).size).to eql(0)
         begin
-          light.run
+          run
         rescue error.class
           nil
         end
@@ -45,7 +50,7 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
           light.threshold.times do
             expect(io.string).to eql('')
             begin
-              light.run
+              run
             rescue error.class
               nil
             end
@@ -63,7 +68,7 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
           light.threshold.times do
             expect(io.string).to eql('')
             begin
-              light.run
+              run
             rescue error.class
               nil
             end
@@ -76,7 +81,7 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
         light.threshold.times do
           expect(io.string).to eql('')
           begin
-            light.run
+            run
           rescue error.class
             nil
           end
@@ -86,7 +91,7 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
 
       context 'with an error handler' do
         let(:result) do
-          light.run
+          run
           expect(false).to be(true)
         rescue error.class
           expect(true).to be(true)
@@ -117,7 +122,7 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
         before { light.with_fallback(&fallback) }
 
         it 'runs the fallback' do
-          expect(light.run).to eql(fallback_result)
+          expect(run).to eql(fallback_result)
         end
 
         it 'passes the error to the fallback' do
@@ -125,7 +130,7 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
             expect(e).to eql(error)
             fallback_result
           end
-          expect(light.run).to eql(fallback_result)
+          expect(run).to eql(fallback_result)
         end
       end
     end
@@ -141,7 +146,7 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
       end
 
       it 'runs the code' do
-        expect(light.run).to eql(code_result)
+        expect(run).to eql(code_result)
       end
 
       it 'notifies about the error' do
@@ -150,13 +155,13 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
           has_notified = true
           expect(e).to eq(error)
         end
-        light.run
+        run
         expect(has_notified).to eql(true)
       end
     end
   end
 
-  context 'when the light is yellow' do
+  shared_examples 'when the light is yellow' do
     let(:failure) { Stoplight::Failure.new(error.class.name, error.message, Time.new - light.cool_off_time) }
     let(:failure2) { Stoplight::Failure.new(error.class.name, error.message, Time.new - light.cool_off_time - 10) }
 
@@ -167,18 +172,18 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
     end
 
     it 'runs the code' do
-      expect(light.run).to eql(code_result)
+      expect(run).to eql(code_result)
     end
 
     it 'notifies when transitioning to green' do
-      expect { light.run }
+      expect { run }
         .to change(io, :string)
         .from(be_empty)
         .to(/Switching \w+ from red to green/)
     end
   end
 
-  context 'when the light is red' do
+  shared_examples 'when the light is red' do
     let(:other) do
       Stoplight::Failure.new(error.class.name, error.message, Time.new - light.cool_off_time)
     end
@@ -190,12 +195,12 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
     end
 
     it 'raises an error' do
-      expect { light.run }.to raise_error(Stoplight::Error::RedLight)
+      expect { run }.to raise_error(Stoplight::Error::RedLight)
     end
 
     it 'uses the name as the error message' do
       expect do
-        light.run
+        run
       end.to raise_error(Stoplight::Error::RedLight, light.name)
     end
 
@@ -203,7 +208,7 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
       before { light.with_fallback(&fallback) }
 
       it 'runs the fallback' do
-        expect(light.run).to eql(fallback_result)
+        expect(run).to eql(fallback_result)
       end
 
       it 'does not pass anything to the fallback' do
@@ -211,8 +216,32 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
           expect(e).to eql(nil)
           fallback_result
         end
-        expect(light.run).to eql(fallback_result)
+        expect(run).to eql(fallback_result)
       end
     end
+  end
+
+  context 'with code block' do
+    subject(:light) { Stoplight::Light.new(name) }
+
+    def run
+      light.run(&code)
+    end
+
+    it_behaves_like 'when the light is green'
+    it_behaves_like 'when the light is yellow'
+    it_behaves_like 'when the light is red'
+  end
+
+  context 'without code block' do
+    subject(:light) { Stoplight::Light.new(name, &code) }
+
+    def run
+      light.run
+    end
+
+    it_behaves_like 'when the light is green'
+    it_behaves_like 'when the light is yellow'
+    it_behaves_like 'when the light is red'
   end
 end

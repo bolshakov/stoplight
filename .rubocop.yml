@@ -21,3 +21,7 @@ Layout/BlockAlignment:
   Exclude:
     - 'spec/support/**/*'
     - 'lib/stoplight/rspec/**/*'
+
+Metrics/ParameterLists:
+  Exclude:
+    - 'lib/stoplight/configuration.rb'
