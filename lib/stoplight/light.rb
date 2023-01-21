@@ -3,7 +3,9 @@
 require 'stoplight/light/deprecated'
 
 module Stoplight
-  class Light # rubocop:disable Style/Documentation
+  #
+  # @api private use +Stoplight()+ method instead
+  class Light
     extend Forwardable
     extend Deprecated
     include Lockable
@@ -55,6 +57,7 @@ module Stoplight
       # @overload new(name, &code)
       #   @param name [String]
       #   @return [Stoplight::Light]
+      #
       # @overload new(name, configuration)
       #   @param name [String]
       #   @param configuration [Stoplight::Configuration]

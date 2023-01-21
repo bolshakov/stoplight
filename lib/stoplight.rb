@@ -50,7 +50,7 @@ require 'stoplight/light/lockable'
 require 'stoplight/light/runnable'
 require 'stoplight/light'
 
-# @see Stoplight::Light#initialize
+# @see Stoplight::Builder
 def Stoplight(name, &code) # rubocop:disable Naming/MethodName
   if block_given?
     warn '[DEPRECATED] Calling `Stoplight("name") { ... }` with a code block is deprecated. ' \

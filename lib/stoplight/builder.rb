@@ -7,6 +7,21 @@ module Stoplight
   # immutable, so it's safe to pass an instance of this builder
   # across the code.
   #
+  # @example
+  #   circuit_breaker = Stoplight('http_api')
+  #     .with_data_store(data_store)
+  #     .with_cool_off_time(60)
+  #     .with_threshold(5)
+  #     .with_window_size(3600)
+  #     .with_notifiers(notifiers)
+  #     .with_error_notifier(error_notifier) #=> <#Stoplight::Builder ..>
+  #
+  # It's safe to pass this +circuit_breaker+ around your code like this:
+  #
+  #     def call(circuit_breaker)
+  #       circuit_breaker.run { call_api }
+  #     end
+  #
   # @api private use +Stoplight()+ method instead
   class Builder
     include Configurable

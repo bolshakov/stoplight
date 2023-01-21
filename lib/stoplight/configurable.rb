@@ -2,9 +2,9 @@
 
 module Stoplight
   # @api private
-  # @abstract define +#with+ method
+  # @abstract include the module and define +#reconfigure+ method
   module Configurable
-    # @!attribute configuration
+    # @!attribute [r] configuration
     #   @return [Stoplight::Configuration]
     attr_reader :configuration
 
