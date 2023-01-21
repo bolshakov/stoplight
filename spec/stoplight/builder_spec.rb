@@ -114,7 +114,7 @@ RSpec.describe Stoplight::Builder do
       end
     end
 
-    describe '#lock, #unlock, #color' do
+    describe '#lock' do
       context 'when the light is not locked' do
         it 'locks the light' do
           expect { builder.lock(Stoplight::Color::RED) }
@@ -129,7 +129,29 @@ RSpec.describe Stoplight::Builder do
           builder.lock(Stoplight::Color::RED)
         end
 
-        it 'locks the light' do
+        it 'does not change the light' do
+          expect { builder.lock(Stoplight::Color::RED) }
+            .not_to change(builder, :color)
+            .from(Stoplight::Color::RED)
+        end
+      end
+    end
+
+    describe '#unlock' do
+      context 'when the light is not locked' do
+        it 'does nothing' do
+          expect { builder.unlock }
+            .not_to change(builder, :color)
+            .from(Stoplight::Color::GREEN)
+        end
+      end
+
+      context 'when the light is locked' do
+        before do
+          builder.lock(Stoplight::Color::RED)
+        end
+
+        it 'unlocks the light' do
           expect { builder.unlock }
             .to change(builder, :color)
             .from(Stoplight::Color::RED)

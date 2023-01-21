@@ -99,7 +99,7 @@ module Stoplight
 
     private
 
-    def with(configuration:)
+    def reconfigure(configuration)
       @configuration = configuration
       self
     end

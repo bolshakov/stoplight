@@ -9,12 +9,16 @@ RSpec.describe Stoplight::Configurable do
     let(:configurable_class) do
       Class.new do
         include Stoplight::Configurable
+
+        def configuration
+          Stoplight::Configuration.new(name: 'foo')
+        end
       end
     end
 
     it 'raises NotImplementedError' do
       expect do
-        configurable.with(configuration: nil)
+        configurable.with_data_store(nil)
       end.to raise_error(NotImplementedError)
     end
   end
