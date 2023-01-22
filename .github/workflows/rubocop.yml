@@ -1,7 +1,19 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
 # pulled from repo
 name: "Rubocop"
 
-on: push
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    # The branches below must be a subset of the branches above
+    branches: [ "master" ]
+  schedule:
+    - cron: '24 20 * * 4'
 
 jobs:
   rubocop:
@@ -11,18 +23,18 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     # If running on a self-hosted runner, check it meets the requirements
     # listed at https://github.com/ruby/setup-ruby#using-self-hosted-runners
     - name: Set up Ruby
-      uses: ruby/setup-ruby@v1
+      uses: ruby/setup-ruby@ee2113536afb7f793eed4ce60e8d3b26db912da4 # v1.127.0
       with:
         ruby-version: 3.1.2
 
     # This step is not necessary if you add the gem to your Gemfile
     - name: Install Code Scanning integration
-      run: bundle add code-scanning-rubocop --version 0.4.0 --skip-install
+      run: bundle add code-scanning-rubocop --version 0.6.1 --skip-install
 
     - name: Install dependencies
       run: bundle install
@@ -35,6 +47,6 @@ jobs:
         "
 
     - name: Upload Sarif output
-      uses: github/codeql-action/upload-sarif@v1
+      uses: github/codeql-action/upload-sarif@v2
       with:
         sarif_file: rubocop.sarif
