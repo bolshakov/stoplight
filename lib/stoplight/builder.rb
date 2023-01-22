@@ -24,7 +24,7 @@ module Stoplight
   #
   # @api private use +Stoplight()+ method instead
   class Builder
-    include Configurable
+    include CircuitBreaker
     extend Forwardable
 
     def_delegator :build, :with_error_handler
