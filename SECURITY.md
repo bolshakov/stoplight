@@ -2,7 +2,7 @@
 
 ## Supported Versions
 
-You can expect to receive security fixes for the latest major version only.
+You can expect to receive security fixes for the latest minor version only.
 
 | Version | Supported          |
 | ------- | ------------------ |
