@@ -6,6 +6,7 @@ module Stoplight
   module Configurable
     # @!attribute [r] configuration
     #   @return [Stoplight::Configuration]
+    #   @api private
     attr_reader :configuration
 
     # Configures data store to be used with this circuit breaker
