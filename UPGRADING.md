@@ -72,8 +72,8 @@ light.color
 The old interface is deprecated. To update to the next major version, you will need to switch to a new syntax.
  
 ```diff
-- Stoplight('example') { 1 / 0}.run
-+ Stoplight('example').run { 1 / 0} 
+- Stoplight('example') { 1 / 0 }.run
++ Stoplight('example').run { 1 / 0 } 
 ```
 
 ### Stoplight::Light becomes private
