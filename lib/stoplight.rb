@@ -44,13 +44,14 @@ module Stoplight # rubocop:disable Style/Documentation
 end
 
 require 'stoplight/configurable'
+require 'stoplight/circuit_breaker'
 require 'stoplight/builder'
 require 'stoplight/configuration'
 require 'stoplight/light/lockable'
 require 'stoplight/light/runnable'
 require 'stoplight/light'
 
-# @see Stoplight::Builder
+# @return [Stoplight::CircuitBreaker]
 def Stoplight(name, &code) # rubocop:disable Naming/MethodName
   if block_given?
     warn '[DEPRECATED] Calling `Stoplight("name") { ... }` with a code block is deprecated. ' \

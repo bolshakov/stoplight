@@ -8,9 +8,9 @@ module Stoplight
   class Light
     extend Forwardable
     extend Deprecated
+    include CircuitBreaker
     include Lockable
     include Runnable
-    include Configurable
 
     # @!attribute [r] data_store
     #   @return [Stoplight::DataStore::Base]
@@ -87,14 +87,14 @@ module Stoplight
 
     # @yieldparam error [Exception]
     # @yieldparam handle [Proc]
-    # @return [self]
+    # @return [Stoplight::CircuitBreaker]
     def with_error_handler(&error_handler)
       @error_handler = error_handler
       self
     end
 
     # @yieldparam error [Exception, nil]
-    # @return [self]
+    # @return [Stoplight::CircuitBreaker]
     def with_fallback(&fallback)
       @fallback = fallback
       self
