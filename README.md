@@ -19,56 +19,57 @@ the rest of your application.
 Check out [stoplight-admin][] for controlling your stoplights.
 
 - [Installation](#installation)
-- [Basic usage](#basic-usage)
-  - [Custom errors](#custom-errors)
-  - [Custom fallback](#custom-fallback)
-  - [Custom threshold](#custom-threshold)
-  - [Custom cool off time](#custom-cool-off-time)
+- [Basic Usage](#basic-usage)
+  - [Custom Errors](#custom-errors)
+  - [Custom Fallback](#custom-fallback)
+  - [Custom Threshold](#custom-threshold)
+  - [Custom Window Size](#custom-window-size)
+  - [Custom Cool Off Time](#custom-cool-off-time)
   - [Rails](#rails)
 - [Setup](#setup)
-  - [Data store](#data-store)
+  - [Data Store](#data-store)
     - [Redis](#redis)
   - [Notifiers](#notifiers)
     - [IO](#io)
     - [Logger](#logger)
-    - [Community-supported notifiers](#community-supported-notifiers)
-    - [How to implement your own notifier?](#how-to-implement-your-own-notifier)
+    - [Community-supported Notifiers](#community-supported-notifiers)
+    - [How to Implement Your Own Notifier?](#how-to-implement-your-own-notifier)
   - [Rails](#rails-1)
-- [Advanced usage](#advanced-usage)
+- [Advanced Usage](#advanced-usage)
   - [Locking](#locking)
   - [Testing](#testing)
-- [Maintenance policy][#maintenance-policy]
+- [Maintenance Policy][#maintenance-policy]
 - [Credits](#credits)
 
 ## Installation
 
 Add it to your Gemfile:
 
-``` rb
+```ruby
 gem 'stoplight'
 ```
 
 Or install it manually:
 
-``` sh
+```sh
 $ gem install stoplight
 ```
 
 Stoplight uses [Semantic Versioning][]. Check out [the change log][] for a
 detailed list of changes.
 
-## Basic usage
+## Basic Usage
 
 To get started, create a stoplight:
 
-``` rb
+```ruby
 light = Stoplight('example-pi')
 ```
 
 Then you can run it with a block of code and it will return the result of calling the block. This is
 the green state. (The green state corresponds to the closed state for circuit breakers.)
 
-``` rb
+```ruby
 light.run { 22.0 / 7 }
 # => 3.142857142857143
 light.color
@@ -83,7 +84,7 @@ running it a few times, the stoplight will stop trying and fail fast. This is
 the red state. (The red state corresponds to the open state for circuit
 breakers.)
 
-``` rb
+```ruby
 light = Stoplight('example-zero')
 # => #<Stoplight::CircuitBreaker:...>
 light.run { 1 / 0 }
@@ -99,7 +100,7 @@ light.color
 # => "red"
 ```
 
-When the stoplight changes from green to red, it will notify every configured
+When the Stoplight changes from green to red, it will notify every configured
 notifier. See [the notifiers section][] to learn more about notifiers.
 
 The stoplight will move into the yellow state after being in the red state for
@@ -109,7 +110,7 @@ check out [the cool off time section][] When stoplights are yellow, they will
 try to run their code. If it fails, they'll switch back to red. If it succeeds,
 they'll switch to green.
 
-### Custom errors
+### Custom Errors
 
 Some errors shouldn't cause your stoplight to move into the red state. Usually
 these are handled elsewhere in your stack and don't represent real failures. A
@@ -132,11 +133,14 @@ provide a custom block that will be called with the error and a handler
     never ignore the error. That means a `NoMemoryError` could change the color
     of your stoplights.
 
-``` rb
+```ruby
 light = Stoplight('example-not-found')
   .with_error_handler do |error, handle|
-    raise error if error.is_a?(ActiveRecord::RecordNotFound)
-    handle.call(error)
+    if error.is_a?(ActiveRecord::RecordNotFound)
+      raise error
+    else      
+      handle.call(error)
+    end
   end
 # => #<Stoplight::CircuitBreaker:...>
 light.run { User.find(123) }
@@ -149,14 +153,14 @@ light.color
 # => "green"
 ```
 
-### Custom fallback
+### Custom Fallback
 
 By default, stoplights will re-raise errors when they're green. When they're
 red, they'll raise a `Stoplight::Error::RedLight` error. You can provide a
 fallback that will be called in both of these cases. It will be passed the
 error if the light was green.
 
-``` rb
+```ruby
 light = Stoplight('example-fallback')
   .with_fallback { |e| p e; 'default' }
 # => #<Stoplight::CircuitBreaker:..>
@@ -175,12 +179,12 @@ light.run { 1 / 0 }
 # => "default"
 ```
 
-### Custom threshold
+### Custom Threshold
 
 Some bits of code might be allowed to fail more or less frequently than others.
 You can configure this by setting a custom threshold.
 
-``` rb
+```ruby
 light = Stoplight('example-threshold')
   .with_threshold(1)
 # => #<Stoplight::CircuitBreaker:...>
@@ -193,39 +197,47 @@ light.run { fail }
 
 The default threshold is `3`.
 
-### Custom window size
+### Custom Window Size
 
 By default, all recorded failures, regardless of the time these happen, will count to reach
 the threshold (hence turning the light to red). If needed, a window size can be set,
 meaning you can control how many errors per period of time will count to reach the red
 state.
 
- ``` rb
+By default, every recorded failure contributes to reaching the threshold, regardless of when it occurs, 
+causing the stoplight to turn red. By configuring a custom window size, you control how errors are 
+counted within a specified time frame. Here's how it works:
+
+Let's say you set the window size to 2 seconds:
+
+ ```ruby
 window_size_in_seconds = 2
 
 light = Stoplight('example-threshold')
   .with_window_size(window_size_in_seconds)
-  .with_threshold(1)
- # => #<Stoplight::CircuitBreaker:...>
+  .with_threshold(1) #=> #<Stoplight::CircuitBreaker:...>
 
-light.run { 1 / 0 }
-# #<ZeroDivisionError: divided by 0>
-# => "default"
+light.run { 1 / 0 } #=> #<ZeroDivisionError: divided by 0>
 sleep(3)
 light.run { 1 / 0 }
-# #<ZeroDivisionError: divided by 0>
-# => "default"
  ```
+
+Without the window size configuration, the second `light.run { 1 / 0 }` call will result in a
+`Stoplight::Error::RedLight` exception being raised, as the stoplight transitions to the red state 
+after the first call. With a sliding window of 2 seconds, only the errors that occur within the latest
+2 seconds are considered. The first error causes the stoplight to turn red, but after 3 seconds 
+(when the second error occurs), the window has shifted, and the stoplight switches to green state 
+causing the error to raise again. This provides a way to focus on the most recent errors.
 
 The default window size is infinity, so all failures counts.
 
-### Custom cool off time
+### Custom Cool Off Time
 
 Stoplights will automatically attempt to recover after a certain amount of
 time. A light in the red state for longer than the cool off period will
 transition to the yellow state. This cool off time is customizable.
 
-``` rb
+```ruby
 light = Stoplight('example-cool-off')
   .with_cool_off_time(1)
 # => #<Stoplight::CircuitBreaker:...>
@@ -254,7 +266,7 @@ effectively replaces the red state with yellow.
 Stoplight was designed to wrap Rails actions with minimal effort. Here's an
 example configuration:
 
-``` rb
+```ruby
 class ApplicationController < ActionController::Base
   around_action :stoplight
 
@@ -277,7 +289,7 @@ end
 
 Stoplight uses an in-memory data store out of the box.
 
-``` rb
+```ruby
 require 'stoplight'
 # => true
 Stoplight.default_data_store
@@ -289,10 +301,9 @@ the only supported persistent data store is Redis.
 
 #### Redis
 
-Make sure you have [the Redis gem][] (`~> 3.2`) installed before configuring
-Stoplight.
+Make sure you have [the Redis gem][] installed before configuring Stoplight.
 
-``` rb
+```ruby
 require 'redis'
 # => true
 redis = Redis.new
@@ -319,15 +330,15 @@ If you want to send notifications elsewhere, you'll have to set them up.
 Stoplight can notify not only into STDOUT, but into any IO object. You can configure 
 the `Stoplight::Notifier::IO` notifier for that.
 
-``` rb
+```ruby
 require 'stringio'
 
 io = StringIO.new
 # => #<StringIO:...>
 notifier = Stoplight::Notifier::IO.new(io)
-# => #<Stoplight::Notifier::Logger:...>
+# => #<Stoplight::Notifier::IO:...>
 Stoplight.default_notifiers += [notifier]
-# => [#<Stoplight::Notifier::IO:...>  
+# => [#<Stoplight::Notifier::IO:...>, #<Stoplight::Notifier::IO:...>]
 ```
 
 #### Logger
@@ -335,7 +346,7 @@ Stoplight.default_notifiers += [notifier]
 Stoplight can be configured to use [the Logger class][] from the standard
 library.
 
-``` rb
+```ruby
 require 'logger'
 # => true
 logger = Logger.new(STDERR)
@@ -346,7 +357,7 @@ Stoplight.default_notifiers += [notifier]
 # => [#<Stoplight::Notifier::IO:...>, #<Stoplight::Notifier::Logger:...>]
 ```
 
-#### Community-supported notifiers
+#### Community-supported Notifiers
 
 * [stoplight-sentry]
 
@@ -386,7 +397,7 @@ in-memory data store, you don't need to do anything special. If you want to use
 a persistent data store, you'll need to configure it. Create an initializer for
 Stoplight:
 
-``` rb
+```ruby
 # config/initializers/stoplight.rb
 require 'stoplight'
 Stoplight.default_data_store = Stoplight::DataStore::Redis.new(...)
@@ -401,14 +412,14 @@ Although stoplights can operate on their own, occasionally you may want to
 override the default behavior. You can lock a light using `#lock(color)` method.
 Color should be either `Stoplight::Color::GREEN` or ``Stoplight::Color::RED``.
 
-``` rb
+```ruby
 light = Stoplight('example-locked')
 # => #<Stoplight::CircuitBreaker:..>
 light.run { true }
 # => true
 light.lock(Stoplight::Color::RED)
 # => #<Stoplight::CircuitBreaker:..>
-light.run { true }
+light.run { true } 
 # Stoplight::Error::RedLight: example-locked
 ```
 
@@ -419,7 +430,7 @@ locked state of any stoplights.
 
 You can go back to using the default behavior by unlocking the stoplight using `#unlock`.
 
-``` rb
+```ruby
 light.unlock
 # => #<Stoplight::CircuitBreaker:..>
 ```
@@ -431,7 +442,7 @@ However there are a few things you can do to make them behave better. If your
 stoplights are spewing messages into your test output, you can silence them
 with a couple configuration changes.
 
-``` rb
+```ruby
 Stoplight.default_error_notifier = -> _ {}
 Stoplight.default_notifiers = []
 ```
@@ -440,7 +451,7 @@ If your tests mysteriously fail because stoplights are the wrong color, you can
 try resetting the data store before each test case. For example, this would
 give each test case a fresh data store with RSpec.
 
-``` rb
+```ruby
 before(:each) do
   Stoplight.default_data_store = Stoplight::DataStore::Memory.new
 end
@@ -449,14 +460,15 @@ end
 Sometimes you may want to test stoplights directly. You can avoid resetting the
 data store by giving each stoplight a unique name.
 
-``` rb
+```ruby
 stoplight = Stoplight("test-#{rand}")
 ```
 
-## Maintenance policy
+## Maintenance Policy
 
-We support the last three minor ruby versions. Currently, they're: `2.7.x`, `3.0.x`, and `3.1.x`.
-We support the current stable Redis version (`7.0`) and the latest release of the previous major version (`6.2.8`)
+Stoplight supports the latest three minor versions of Ruby, which currently are: `3.0.x`, `3.1.x`, and `3.2.x`. Changing
+the minimum supported Ruby version is not considered a breaking change.
+We support the current stable Redis version (`7.2`) and the latest release of the previous major version (`6.2.9`)
 
 ## Credits
 

@@ -1,6 +1,6 @@
 ## Stoplight 4.0
 
-### Notifiers have been dropped
+### Notifiers have dropped!
 
 With this release, we've officially moved all third-party notifiers out of Stoplight.
 The only notifiers that remain to be in the Stoplight distribution are:
@@ -25,7 +25,7 @@ We've taken this decision for the following technical reasons:
 Unfortunately, we cannot support all the possible notifiers. 
 
 * All the notifiers relying on third-party services have been dropped.
-* We implemented the Sentry notifier as an external [stoplight-sentry] gem.
+* We implemented the Sentry notifier as an external [stoplight-sentry] gem. You can use it as a reference implementation.
 * We added a [Community-supported notifiers] section and encourage you to contribute by adding your notifiers.
 
 #### All right! What should I change in my code immediately after upgrading?
@@ -69,7 +69,8 @@ light.color
 
 #### So, what does this mean for me?
 
-The old interface is deprecated. To update to the next major version, you will need to switch to a new syntax.
+Stoplight 4.0 supports both an old and a new interface. However, the old interface is deprecated. To 
+update to Stoplight 5.0, you will need to switch to the new syntax.
  
 ```diff
 - Stoplight('example') { 1 / 0 }.run
@@ -78,18 +79,18 @@ The old interface is deprecated. To update to the next major version, you will n
 
 ### Stoplight::Light becomes private
 
-This class has always considered private but some people preferred to use `Stoplight::Light#new` instead of 
+This class has always considered private but some developers preferred to use `Stoplight::Light#new` instead of 
 `Stoplight()`. In the next major release the use of `Stoplight::Light#new` will be forbidden. 
 
 #### Why was this decision made?
 
-We want to provide a simple, concise Stoplight interface. Having a single interface guarantees users 
+We want to provide a simple, concise Stoplight interface. Having a single public interface guarantees users 
 use it the right way.
 
 #### So, what does this mean for me?
 
-Any use of `Stoplight::Light` outside of Stoplight itself is deprecated. To update to the next major version, you 
-will need to change a few things:
+Any use of `Stoplight::Light` outside of Stoplight itself is deprecated in Stoplight 4.0. To update to the 
+next major version (Stoplight 5.0), you will need to change a few things:
 
 ```diff
 - Stoplight::Light.default_data_store = data_store
@@ -110,12 +111,32 @@ In case you prefer to check types in your specs, you may need to switch it from 
 to `Stoplight::CircuitBreaker`. The `Stoplight::CircuitBreaker` abstract module considered the only public interface. 
 
 Under the hood, we use two slightly different implementations to provide a smooth transition to the new interface 
-and to make it possible to pass Stoplight as a dependency.   
+and to make it possible to pass Stoplight as a dependency.
 
+#### All right! What should I change in my code immediately after upgrading?
 
+You might encounter a few deprecation warnings, but you do not need to changes anything in your code in this release. 
+
+### Change in Redis Data Structures
+
+Redis Data store in Stoplight 4.0 uses a new data structure under the hood. 
+
+#### Why was this decision made?
+
+This decision was made to enable the implementation of error counting using a [sliding window] approach. This feature 
+allows Stoplight to count only errors that have occurred recently.
+
+#### So, what does this mean for me?
+
+After upgrading to this version, Stoplight will not be aware of errors that occurred before the update.
+
+#### All right! What should I change in my code immediately after upgrading?
+
+Nothing. Stoplight will function as usual.
 
 [stoplight-sentry]: https://github.com/bolshakov/stoplight-sentry
 [Community-supported notifiers]: https://github.com/bolshakov/stoplight/tree/master#community-supported-notifiers
 [How to implement your own notifier?]: https://github.com/bolshakov/stoplight/tree/master#how-to-implement-your-own-notifier
 [dropped notifiers]: https://github.com/bolshakov/stoplight/tree/v3.0.1/lib/stoplight/notifier
 [without passing an empty block]: https://github.com/bolshakov/stoplight-admin/blob/9c9848eb94410e46b20972548f0863db224cb6da/lib/sinatra/stoplight_admin.rb#L30
+[sliding window]: https://github.com/bolshakov/stoplight#custom-window-size

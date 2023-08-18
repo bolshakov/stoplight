@@ -29,19 +29,7 @@ Gem::Specification.new do |gem|
   ] + Dir.glob(File.join('lib', '**', '*.rb'))
   gem.test_files = Dir.glob(File.join('spec', '**', '*.rb'))
 
-  gem.required_ruby_version = '>= 2.7'
+  gem.required_ruby_version = '>= 3.0.6'
 
   gem.add_dependency 'redlock', '~> 1.0'
-
-  gem.add_development_dependency('benchmark-ips', '~> 2.3')
-  gem.add_development_dependency('database_cleaner-redis', '~> 2.0')
-  gem.add_development_dependency('debug')
-  gem.add_development_dependency('fakeredis', '~> 0.8')
-  gem.add_development_dependency('rake', '~> 13.0')
-  gem.add_development_dependency('redis', '~> 4.1')
-  gem.add_development_dependency('rspec', '~> 3.11')
-  gem.add_development_dependency('rubocop', '~> 1.0.0')
-  gem.add_development_dependency('simplecov', '~> 0.21')
-  gem.add_development_dependency('simplecov-lcov', '~> 0.8')
-  gem.add_development_dependency('timecop', '~> 0.9')
 end
