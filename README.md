@@ -35,7 +35,7 @@ Check out [stoplight-admin][] for controlling your stoplights.
 - [Advanced Usage](#advanced-usage)
   - [Locking](#locking)
   - [Testing](#testing)
-- [Maintenance Policy][#maintenance-policy]
+- [Maintenance Policy](#maintenance-policy)
 - [Credits](#credits)
 
 ## Installation
