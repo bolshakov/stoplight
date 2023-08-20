@@ -21,6 +21,14 @@ RSpec.describe Stoplight::CircuitBreaker do
     expect { circuit_breaker.color }.to raise_error(NotImplementedError)
   end
 
+  specify '#state' do
+    expect { circuit_breaker.state }.to raise_error(NotImplementedError)
+  end
+
+  specify '#name' do
+    expect { circuit_breaker.name }.to raise_error(NotImplementedError)
+  end
+
   specify '#run' do
     expect { circuit_breaker.run {} }.to raise_error(NotImplementedError)
   end

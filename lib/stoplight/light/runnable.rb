@@ -4,6 +4,12 @@ module Stoplight
   class Light
     module Runnable # rubocop:disable Style/Documentation
       # @return [String]
+      def state
+        _, state = failures_and_state
+        state
+      end
+
+      # @return [String]
       def color
         failures, state = failures_and_state
         failure = failures.first

@@ -30,6 +30,8 @@ module Stoplight
     def_delegator :build, :with_error_handler
     def_delegator :build, :with_fallback
     def_delegator :build, :color
+    def_delegator :build, :name
+    def_delegator :build, :state
     def_delegator :build, :run
     def_delegator :build, :lock
     def_delegator :build, :unlock

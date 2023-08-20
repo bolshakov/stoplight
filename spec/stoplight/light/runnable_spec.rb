@@ -23,6 +23,7 @@ RSpec.describe Stoplight::Light::Runnable, :redis do
   context 'with memory data store' do
     let(:data_store) { Stoplight::DataStore::Memory.new }
 
+    it_behaves_like 'Stoplight::Light::Runnable#state'
     it_behaves_like 'Stoplight::Light::Runnable#color'
     it_behaves_like 'Stoplight::Light::Runnable#run'
   end
@@ -30,6 +31,7 @@ RSpec.describe Stoplight::Light::Runnable, :redis do
   context 'with redis data store', :redis do
     let(:data_store) { Stoplight::DataStore::Redis.new(redis) }
 
+    it_behaves_like 'Stoplight::Light::Runnable#state'
     it_behaves_like 'Stoplight::Light::Runnable#color'
     it_behaves_like 'Stoplight::Light::Runnable#run'
   end
