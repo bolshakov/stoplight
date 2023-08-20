@@ -39,6 +39,16 @@ module Stoplight
       raise NotImplementedError
     end
 
+    # @return [String] one of +locked_green+, +locked_red+, and +unlocked+
+    def state
+      raise NotImplementedError
+    end
+
+    # @return [String] the light's name
+    def name
+      raise NotImplementedError
+    end
+
     # Returns current color:
     #   * +Stoplight::Color::GREEN+ -- circuit breaker is closed
     #   * +Stoplight::Color::RED+ -- circuit breaker is open
