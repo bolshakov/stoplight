@@ -8,7 +8,7 @@ group :development do
   gem 'benchmark-ips', '~> 2.3'
   gem 'database_cleaner-redis', '~> 2.0'
   gem 'debug'
-  gem 'fakeredis', '~> 0.8'
+  gem 'fakeredis', '~> 0.9'
   gem 'rake', '~> 13.0'
   gem 'redis', '~> 4.1'
   gem 'rspec', '~> 3.11'
