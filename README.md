@@ -9,6 +9,10 @@ Stoplight is traffic control for code. It's an implementation of the circuit
 breaker pattern in Ruby.
 
 ---
+
+:warning:️ You're currently browsing the documentation for Stoplight 4.x. If you're looking for
+the documentation of the previous version 3.x, you can find it [here](https://github.com/bolshakov/stoplight/tree/release/v3.x).
+
 Does your code use unreliable systems, like a flaky database or a spotty web
 service? Wrap calls to those up in stoplights to prevent them from affecting
 the rest of your application.
