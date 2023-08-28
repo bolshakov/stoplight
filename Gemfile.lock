@@ -75,7 +75,7 @@ GEM
     simplecov-html (0.12.3)
     simplecov-lcov (0.8.0)
     simplecov_json_formatter (0.1.4)
-    timecop (0.9.5)
+    timecop (0.9.8)
     unicode-display_width (2.4.2)
 
 PLATFORMS
