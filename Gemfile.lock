@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    stoplight (3.0.1)
+    stoplight (3.0.2)
       redlock (~> 1.0)
 
 GEM
