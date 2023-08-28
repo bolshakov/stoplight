@@ -52,7 +52,18 @@ module Stoplight
         fallback.call(nil)
       end
 
+      MISSING_BLOCK_ERROR = <<~ERROR
+        Oops! An error occurred while executing the `Stoplight#run` method. This happened because you
+        didn't pass a code block to the `Stoplight()` function. You can fix this issue this way:
+
+          Stoplight('test-light') { ... }.run
+
+        For more details and examples, please refer to the documentation https://github.com/bolshakov/stoplight/tree/release/v3.x
+      ERROR
+
       def run_code(on_success, on_failure)
+        raise ArgumentError, MISSING_BLOCK_ERROR unless code
+
         result = code.call
         failures = clear_failures
         on_success&.call(failures)

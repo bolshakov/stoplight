@@ -285,5 +285,13 @@ RSpec.describe Stoplight::Light::Runnable do
         end
       end
     end
+
+    context 'when the code block is missing' do
+      subject { Stoplight::Light.new(name) }
+
+      it 'raises an ArgumentError error' do
+        expect { subject.run }.to raise_error(ArgumentError)
+      end
+    end
   end
 end
