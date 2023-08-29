@@ -15,8 +15,10 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
   shared_examples 'when the light is green' do
     before { light.data_store.clear_failures(light) }
 
-    it 'runs the code' do
+    it 'runs the code and remembers light name' do
       expect(run).to eql(code_result)
+
+      expect(data_store.names).to include(name)
     end
 
     context 'with some failures' do
@@ -171,8 +173,10 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
       light.data_store.record_failure(light, failure)
     end
 
-    it 'runs the code' do
+    it 'runs the code and remembers light name' do
       expect(run).to eql(code_result)
+
+      expect(data_store.names).to include(name)
     end
 
     it 'notifies when transitioning to green' do
@@ -194,8 +198,10 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
       light.data_store.record_failure(light, failure)
     end
 
-    it 'raises an error' do
+    it 'raises an error and remembers light`s name' do
       expect { run }.to raise_error(Stoplight::Error::RedLight)
+
+      expect(data_store.names).to include(name)
     end
 
     it 'uses the name as the error message' do

@@ -4,21 +4,51 @@ require 'redlock'
 
 module Stoplight
   module DataStore
-    # == Errors
-    # All errors are stored in the sorted set where keys are serialized errors and
-    # values (Redis uses "score" term) contain integer representations of the time
-    # when an error happened.
+    # Data Schema
     #
-    # This data structure enables us to query errors that happened within a specific
-    # period. We use this feature to support +window_size+ option.
+    # This documentation explains the data schema used for managing failures, states, and usage time
+    # in the Stoplight version 4 implementation.
     #
-    # To avoid uncontrolled memory consumption, we keep at most +light.threshold+ number
-    # of errors happened within last +light.window_size+ seconds (by default infinity).
+    # 1. "stoplight:v4:failures:{light-name}" -- Failures
+    #
+    # For each light, its failures are stored in a Sorted Set with the following structure:
+    #   - Key: Serialized exception
+    #   - Score: Integer representation of the time when the error occurred
+    #
+    # This data structure enables efficient querying of errors within specific time periods,
+    # supporting the use of the +window_size+ option.
+    #
+    # To prevent uncontrolled memory usage, the system retains a maximum of +light.threshold+
+    # errors that occurred within the last +light.window_size+ seconds (default: infinity).
+    #
+    # 2. "stoplight:v4:states" -- States
+    #
+    # Light states are stored in a Hash with the following attributes:
+    #   - Key: Light's name
+    #   - Value: Light's state (from the +Stoplight::States+ set)
+    #
+    # The state value is updated whenever a light is locked or unlocked.
+    #
+    # 3. "stoplight:v4:last_used_at" -- Last Usage Time
+    #
+    # The time of a light's last usage is stored in this Sorted Set:
+    #   - Key: Light's name
+    #   - Score: Integer representation of the last usage time
+    #
+    # This information helps track when a specific light was last used
+    #
+    # Note: Replace "{light-name}" with the actual name of the light in the keys.
+    #
+    # Example:
+    #   "stoplight:v4:failures:traffic-light-1"
+    #   "stoplight:v4:states"
+    #   "stoplight:v4:last_used_at"
     #
     # @see Base
     class Redis < Base
       KEY_SEPARATOR = ':'
       KEY_PREFIX = %w[stoplight v4].join(KEY_SEPARATOR)
+      LIGHT_EXPIRATION_TIME = 7 * 24 * 60 * 60
 
       # @param redis [::Redis]
       def initialize(redis, redlock: Redlock::Client.new([redis]))
@@ -26,16 +56,15 @@ module Stoplight
         @redlock = redlock
       end
 
-      def names
-        state_names = @redis.hkeys(states_key)
-
-        pattern = key('failures', '*')
-        prefix_regex = /^#{key('failures', '')}/
-        failure_names = @redis.scan_each(match: pattern).to_a.map do |key|
-          key.sub(prefix_regex, '')
-        end
-
-        (state_names + failure_names).uniq
+      # @overload names()
+      #   @return [Array<String>]
+      #
+      # @overload names()
+      #   @param used_after [Time]
+      #   @return [Array<String>]
+      #
+      def names(used_after: Time.now - LIGHT_EXPIRATION_TIME)
+        @redis.zrange(last_used_at_key, used_after.to_i, '+inf', by_score: true)
       end
 
       def get_all(light)
@@ -106,6 +135,14 @@ module Stoplight
         end
       end
 
+      # The last usage time of the light
+      # @param light [Stoplight::Light]
+      # @param time [Time]
+      # @return [void]
+      def set_last_used_at(light, time)
+        @redis.zadd(last_used_at_key, time.to_i, light.name)
+      end
+
       private
 
       # @param light [Stoplight::Light]
@@ -162,6 +199,13 @@ module Stoplight
       # @return [String]
       def failures_key(light)
         key('failures', light.name)
+      end
+
+      # We store a time when the +light+ was used the last time in this key
+      #
+      # @return [String]
+      def last_used_at_key
+        key('last_used_at')
       end
 
       def notification_lock_key(light)

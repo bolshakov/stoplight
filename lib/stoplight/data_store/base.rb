@@ -4,8 +4,14 @@ module Stoplight
   module DataStore
     # @abstract
     class Base
-      # @return [Array<String>]
-      def names
+      # @overload names()
+      #   @return [Array<String>]
+      #
+      # @overload names()
+      #   @param used_after [Time]
+      #   @return [Array<String>]
+      #
+      def names(used_after:)
         raise NotImplementedError
       end
 
