@@ -9,7 +9,7 @@ GEM
   specs:
     ast (2.4.2)
     base64 (0.1.1)
-    benchmark-ips (2.7.2)
+    benchmark-ips (2.12.0)
     database_cleaner-core (2.0.1)
     database_cleaner-redis (2.0.0)
       database_cleaner-core (~> 2.0.0)
@@ -82,7 +82,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  benchmark-ips (~> 2.3)
+  benchmark-ips (~> 2.12)
   database_cleaner-redis (~> 2.0)
   debug
   fakeredis (~> 0.9)
