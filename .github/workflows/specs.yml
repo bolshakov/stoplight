@@ -28,11 +28,7 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby }}
-      - name: Install dependencies
-        run: |
-          gem install bundler --force --version=2.2.31
-          bundler --version
-          bundle install --jobs 4 --retry 3 --deployment
+          bundler-cache: true # install and cache gems
       - name: Test
         run: bundle exec rake spec
         env:
