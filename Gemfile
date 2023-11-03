@@ -9,7 +9,7 @@ group :development do
   gem 'database_cleaner-redis', '~> 2.0'
   gem 'debug'
   gem 'fakeredis', '~> 0.9'
-  gem 'rake', '~> 13.0'
+  gem 'rake', '~> 13.1'
   gem 'redis', '~> 4.8'
   gem 'rspec', '~> 3.12'
   gem 'rubocop', '~> 1.57.1'
