@@ -31,5 +31,5 @@ Gem::Specification.new do |gem|
 
   gem.required_ruby_version = '>= 3.0.6'
 
-  gem.add_dependency 'redlock', '~> 1.0'
+  gem.add_dependency 'redlock', '>= 1', '< 3'
 end
