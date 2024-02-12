@@ -11,7 +11,7 @@ group :development do
   gem 'fakeredis', '~> 0.9'
   gem 'rake', '~> 13.1'
   gem 'redis', '~> 4.8'
-  gem 'rspec', '~> 3.12'
+  gem 'rspec', '~> 3.13'
   gem 'rubocop', '~> 1.57.2'
   gem 'simplecov', '~> 0.22'
   gem 'simplecov-lcov', '~> 0.8'
