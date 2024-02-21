@@ -5,25 +5,23 @@ RSpec.shared_examples 'Stoplight::DataStore::Base#names' do
     expect(data_store.names).to eql([])
   end
 
-  it 'contains the name of a light with a failure' do
-    data_store.record_failure(light, failure)
+  it 'contains a recently used light' do
+    data_store.set_last_used_at(light, Time.now)
+
     expect(data_store.names).to eql([light.name])
   end
 
-  it 'contains the name of a light with a set state' do
-    data_store.set_state(light, Stoplight::State::UNLOCKED)
-    expect(data_store.names).to eql([light.name])
-  end
+  it 'ignores light used long time ago' do
+    usage_time = Time.now - 100
+    data_store.set_last_used_at(light, usage_time)
 
-  it 'does not duplicate names' do
-    data_store.record_failure(light, failure)
-    data_store.set_state(light, Stoplight::State::UNLOCKED)
-    expect(data_store.names).to eql([light.name])
+    expect(data_store.names(used_after: usage_time + 1)).to be_empty
   end
 
   it 'supports names containing colons' do
     light = Stoplight::Light.new('http://api.example.com/some/action')
-    data_store.record_failure(light, failure)
+    data_store.set_last_used_at(light, Time.now)
+
     expect(data_store.names).to eql([light.name])
   end
 end
