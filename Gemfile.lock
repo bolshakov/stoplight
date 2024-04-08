@@ -34,7 +34,7 @@ GEM
       stringio
     racc (1.7.1)
     rainbow (3.1.1)
-    rake (13.1.0)
+    rake (13.2.1)
     rdoc (6.6.2)
       psych (>= 4.0.0)
     redis (4.8.1)
@@ -90,7 +90,7 @@ DEPENDENCIES
   database_cleaner-redis (~> 2.0)
   debug
   fakeredis (~> 0.9)
-  rake (~> 13.1)
+  rake (~> 13.2)
   redis (~> 4.8)
   rspec (~> 3.13)
   rubocop (~> 1.57.2)
