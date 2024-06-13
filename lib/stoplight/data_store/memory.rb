@@ -4,20 +4,45 @@ require 'monitor'
 
 module Stoplight
   module DataStore
+    # Memory Data Store
+    #
+    # The Memory Data Store uses a hash-based approach to manage light data. It is suitable
+    # for scenarios where persistence is not required, and data can be stored and managed
+    # within the application's memory.
+    #
+    # Attributes:
+    #   - @failures: Hash to store failures for each light.
+    #   - @states: Hash to store the state of each light.
+    #   - @last_used_at: Hash to store the last usage time for each light.
+    #   - @last_notifications: Hash to store the last notification information for each light.
+    #
     # @see Base
     class Memory < Base
       include MonitorMixin
       KEY_SEPARATOR = ':'
+      LIGHT_EXPIRATION_TIME = 7 * 24 * 60 * 60
 
       def initialize
         @failures = Hash.new { |h, k| h[k] = [] }
         @states = Hash.new { |h, k| h[k] = State::UNLOCKED }
+        @last_used_at = Hash.new { |h, k| h[k] = Time.now - LIGHT_EXPIRATION_TIME - 1 }
         @last_notifications = {}
         super() # MonitorMixin
       end
 
-      def names
-        synchronize { @failures.keys | @states.keys }
+      # @overload names()
+      #   @return [Array<String>]
+      #
+      # @overload names()
+      #   @param used_after [Time]
+      #   @return [Array<String>]
+      #
+      def names(used_after: Time.now - LIGHT_EXPIRATION_TIME)
+        synchronize do
+          @last_used_at
+            .select { |_, time| time > used_after }
+            .keys
+        end
       end
 
       def get_all(light)
@@ -65,6 +90,10 @@ module Stoplight
             yield
           end
         end
+      end
+
+      def set_last_used_at(light, time)
+        synchronize { @last_used_at[light.name] = time }
       end
 
       private

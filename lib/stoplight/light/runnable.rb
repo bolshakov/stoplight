@@ -27,6 +27,8 @@ module Stoplight
       # @raise [Error::RedLight]
       def run(&code)
         code = validate_code(&code)
+        record_last_usage
+
         case color
         when Color::GREEN then run_green(&code)
         when Color::YELLOW then run_yellow(&code)
@@ -35,6 +37,10 @@ module Stoplight
       end
 
       private
+
+      def record_last_usage
+        data_store.set_last_used_at(self, Time.now)
+      end
 
       def validate_code(&code)
         raise ArgumentError, <<~ERROR if block_given? && self.code
