@@ -5,7 +5,7 @@ source 'https://rubygems.org'
 gemspec
 
 group :development do
-  gem 'benchmark-ips', '~> 2.13'
+  gem 'benchmark-ips', '~> 2.14'
   gem 'database_cleaner-redis', '~> 2.0'
   gem 'debug'
   gem 'fakeredis', '~> 0.9'
