@@ -8,7 +8,7 @@ GEM
   remote: https://rubygems.org/
   specs:
     ast (2.4.2)
-    benchmark-ips (2.13.0)
+    benchmark-ips (2.14.0)
     database_cleaner-core (2.0.1)
     database_cleaner-redis (2.0.0)
       database_cleaner-core (~> 2.0.0)
@@ -84,7 +84,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  benchmark-ips (~> 2.13)
+  benchmark-ips (~> 2.14)
   database_cleaner-redis (~> 2.0)
   debug
   fakeredis (~> 0.9)
