@@ -56,7 +56,7 @@ GEM
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.13.0)
     rspec-support (3.13.0)
-    rubocop (1.66.1)
+    rubocop (1.67.0)
       json (~> 2.3)
       language_server-protocol (>= 3.17.0)
       parallel (~> 1.10)
@@ -78,7 +78,7 @@ GEM
     simplecov_json_formatter (0.1.4)
     stringio (3.1.1)
     timecop (0.9.8)
-    unicode-display_width (2.5.0)
+    unicode-display_width (2.6.0)
 
 PLATFORMS
   ruby
@@ -91,7 +91,7 @@ DEPENDENCIES
   rake (~> 13.2)
   redis (~> 4.8)
   rspec (~> 3.13)
-  rubocop (~> 1.66.1)
+  rubocop (~> 1.67.0)
   simplecov (~> 0.22)
   simplecov-lcov (~> 0.8)
   stoplight!
