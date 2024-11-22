@@ -11,7 +11,7 @@ RSpec.describe Stoplight::DataStore::Base do
 
   describe '#names' do
     it 'is not implemented' do
-      expect { data_store.names }.to raise_error(NotImplementedError)
+      expect { data_store.names(used_after: Time.now) }.to raise_error(NotImplementedError)
     end
   end
 
