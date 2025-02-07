@@ -42,7 +42,7 @@ module Stoplight
       end
 
       def clear_failures(light)
-        synchronize { @failures.delete(light.name) }
+        synchronize { @failures.delete(light.name) || [] }
       end
 
       def get_state(light)
