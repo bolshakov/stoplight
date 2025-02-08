@@ -1,16 +1,35 @@
-name: Specs
+name: 🚦Stoplight
 
-on: [push]
+on:
+  pull_request:
+  push:
+    branches: [ master ]
 
 jobs:
-  test:
+  rubocop:
+    name: Rubocop 👮
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.3.4
+          bundler-cache: true
+
+      - name: Lint code for consistent style
+        run: bundle exec rubocop -f github
+
+
+  spec:
+    name: Specs on Ruby ${{ matrix.ruby }} with Redis ${{ matrix.redis }} 💚
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        ruby: ['3.0', '3.1', '3.2']
-        redis: ['6.2', '7.2']
-    name: Ruby ${{ matrix.ruby }}, Redis ${{ matrix.redis }}
-
+        ruby: [ '3.0', '3.1', '3.2' ]
+        redis: [ '6.2', '7.2' ]
     services:
       redis:
         image: redis:${{ matrix.redis }}
@@ -21,15 +40,17 @@ jobs:
           --health-retries 5
         ports:
           - 6379:6379
-
     steps:
-      - uses: actions/checkout@v3
-      - name: Set up ruby
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby }}
-          bundler-cache: true # install and cache gems
-      - name: Test
+          bundler-cache: true
+
+      - name: Run Tests
         run: bundle exec rake spec
         env:
           STOPLIGHT_REDIS_URL: "redis://127.0.0.1:6379/0"
@@ -39,9 +60,8 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           flag-name: ruby-${{ matrix.ruby }}
           parallel: true
-
   finish:
-    needs: test
+    needs: spec
     runs-on: ubuntu-latest
     steps:
       - name: Coveralls Finished
