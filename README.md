@@ -361,6 +361,7 @@ Stoplight.default_notifiers += [notifier]
 #### Community-supported Notifiers
 
 * [stoplight-sentry]
+* [stoplight-honeybadger](https://github.com/qoqa/stoplight-honeybadger)
 
 You you want to implement your own notifier, the following section contains all the required information.
 
