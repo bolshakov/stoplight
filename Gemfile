@@ -12,7 +12,7 @@ group :development do
   gem 'rake', '~> 13.2'
   gem 'redis', '~> 4.8'
   gem 'rspec', '~> 3.13'
-  gem 'rubocop', '~> 1.72.1'
+  gem 'rubocop', '~> 1.73.2'
   gem 'simplecov', '~> 0.22'
   gem 'simplecov-lcov', '~> 0.8'
   gem 'timecop', '~> 0.9'
