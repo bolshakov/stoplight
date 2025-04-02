@@ -1,13 +1,10 @@
 # frozen_string_literal: true
 
-require 'stoplight/light/deprecated'
-
 module Stoplight
   #
   # @api private use +Stoplight()+ method instead
   class Light
     extend Forwardable
-    extend Deprecated
     include CircuitBreaker
     include Lockable
     include Runnable

@@ -6,6 +6,27 @@ RSpec.describe Stoplight do
   it 'is a module' do
     expect(described_class).to be_a(Module)
   end
+
+  describe '.default_notifiers' do
+    it 'is initially the default' do
+      expect(described_class.default_notifiers)
+        .to eql(Stoplight::Default::NOTIFIERS)
+    end
+  end
+
+  describe '.default_data_store' do
+    it 'is initially the default' do
+      expect(described_class.default_data_store)
+        .to eql(Stoplight::Default::DATA_STORE)
+    end
+  end
+
+  describe '.default_error_notifier' do
+    it 'is initially the default' do
+      expect(described_class.default_error_notifier)
+        .to eql(Stoplight::Default::ERROR_NOTIFIER)
+    end
+  end
 end
 
 RSpec.describe 'Stoplight' do

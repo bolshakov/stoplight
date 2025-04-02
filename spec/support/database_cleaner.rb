@@ -9,12 +9,12 @@ DatabaseCleaner.strategy = cleaning_strategy
 RSpec.shared_context :redis, :redis do
   let(:redis) { Redis.new(url: ENV.fetch('STOPLIGHT_REDIS_URL', 'redis://127.0.0.1:6379/0')) }
 
-  before(:suite) do
+  before do
     DatabaseCleaner[:redis].db = redis
     DatabaseCleaner.clean_with(:deletion)
   end
 
-  around(:each) do |example|
+  around do |example|
     DatabaseCleaner.cleaning do
       example.run
     end

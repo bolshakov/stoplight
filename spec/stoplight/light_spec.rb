@@ -12,61 +12,6 @@ RSpec.describe Stoplight::Light do
     expect(described_class).to be_a(Class)
   end
 
-  describe '.default_data_store' do
-    it 'is initially the default' do
-      expect(described_class.default_data_store)
-        .to eql(Stoplight::Default::DATA_STORE)
-    end
-  end
-
-  describe '.default_data_store=' do
-    before { @default_data_store = described_class.default_data_store }
-    after { described_class.default_data_store = @default_data_store }
-
-    it 'sets the data store' do
-      data_store = Stoplight::DataStore::Memory.new
-      described_class.default_data_store = data_store
-      expect(described_class.default_data_store).to eql(data_store)
-    end
-  end
-
-  describe '.default_error_notifier' do
-    it 'is initially the default' do
-      expect(described_class.default_error_notifier)
-        .to eql(Stoplight::Default::ERROR_NOTIFIER)
-    end
-  end
-
-  describe '.default_error_notifier=' do
-    before { @default_error_notifier = described_class.default_error_notifier }
-    after { described_class.default_error_notifier = @default_error_notifier }
-
-    it 'sets the error notifier' do
-      default_error_notifier = ->(_) {}
-      described_class.default_error_notifier = default_error_notifier
-      expect(described_class.default_error_notifier)
-        .to eql(default_error_notifier)
-    end
-  end
-
-  describe '.default_notifiers' do
-    it 'is initially the default' do
-      expect(described_class.default_notifiers)
-        .to eql(Stoplight::Default::NOTIFIERS)
-    end
-  end
-
-  describe '.default_notifiers=' do
-    before { @default_notifiers = described_class.default_notifiers }
-    after { described_class.default_notifiers = @default_notifiers }
-
-    it 'sets the data store' do
-      notifiers = []
-      described_class.default_notifiers = notifiers
-      expect(described_class.default_notifiers).to eql(notifiers)
-    end
-  end
-
   describe '#cool_off_time' do
     it 'is initially the default' do
       expect(light.cool_off_time).to eql(Stoplight::Default::COOL_OFF_TIME)
@@ -75,7 +20,7 @@ RSpec.describe Stoplight::Light do
 
   describe '#data_store' do
     it 'is initially the default' do
-      expect(light.data_store).to eql(described_class.default_data_store)
+      expect(light.data_store).to eql(Stoplight.default_data_store)
     end
   end
 
@@ -88,7 +33,7 @@ RSpec.describe Stoplight::Light do
   describe '#error_notifier' do
     it 'it initially the default' do
       expect(light.error_notifier)
-        .to eql(described_class.default_error_notifier)
+        .to eql(Stoplight.default_error_notifier)
     end
   end
 
@@ -106,7 +51,7 @@ RSpec.describe Stoplight::Light do
 
   describe '#notifiers' do
     it 'is initially the default' do
-      expect(light.notifiers).to eql(described_class.default_notifiers)
+      expect(light.notifiers).to eql(Stoplight.default_notifiers)
     end
   end
 
