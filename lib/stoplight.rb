@@ -43,7 +43,6 @@ module Stoplight # rubocop:disable Style/Documentation
   @default_error_notifier = Default::ERROR_NOTIFIER
 end
 
-require 'stoplight/configurable'
 require 'stoplight/circuit_breaker'
 require 'stoplight/builder'
 require 'stoplight/configuration'

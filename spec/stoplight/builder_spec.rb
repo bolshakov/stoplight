@@ -147,7 +147,7 @@ RSpec.describe Stoplight::Builder do
     end
   end
 
-  it_behaves_like Stoplight::Configurable do
-    let(:configurable) { described_class.new(configuration) }
+  it_behaves_like Stoplight::CircuitBreaker do
+    let(:circuit_breaker) { described_class.new(configuration) }
   end
 end
