@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
+  subject(:light) { Stoplight::Light.new(name) }
+
   let(:code) { -> { code_result } }
   let(:code_result) { random_string }
   let(:fallback) { ->(_) { fallback_result } }
@@ -12,7 +14,11 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
 
   before { light.with_notifiers(notifiers) }
 
-  shared_examples 'when the light is green' do
+  def run
+    light.run(&code)
+  end
+
+  context 'when the light is green' do
     before { light.data_store.clear_failures(light) }
 
     it 'runs the code' do
@@ -161,7 +167,7 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
     end
   end
 
-  shared_examples 'when the light is yellow' do
+  context 'when the light is yellow' do
     let(:failure) { Stoplight::Failure.new(error.class.name, error.message, Time.new - light.cool_off_time) }
     let(:failure2) { Stoplight::Failure.new(error.class.name, error.message, Time.new - light.cool_off_time - 10) }
 
@@ -183,7 +189,7 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
     end
   end
 
-  shared_examples 'when the light is red' do
+  context 'when the light is red' do
     let(:other) do
       Stoplight::Failure.new(error.class.name, error.message, Time.new - light.cool_off_time)
     end
@@ -219,29 +225,5 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
         expect(run).to eql(fallback_result)
       end
     end
-  end
-
-  context 'with code block' do
-    subject(:light) { Stoplight::Light.new(name) }
-
-    def run
-      light.run(&code)
-    end
-
-    it_behaves_like 'when the light is green'
-    it_behaves_like 'when the light is yellow'
-    it_behaves_like 'when the light is red'
-  end
-
-  context 'without code block' do
-    subject(:light) { Stoplight::Light.new(name, &code) }
-
-    def run
-      light.run
-    end
-
-    it_behaves_like 'when the light is green'
-    it_behaves_like 'when the light is yellow'
-    it_behaves_like 'when the light is red'
   end
 end

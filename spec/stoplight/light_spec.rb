@@ -67,12 +67,6 @@ RSpec.describe Stoplight::Light do
     end
   end
 
-  describe '#code' do
-    it 'reads the code' do
-      expect(light.code).to eql(code)
-    end
-  end
-
   describe '#cool_off_time' do
     it 'is initially the default' do
       expect(light.cool_off_time).to eql(Stoplight::Default::COOL_OFF_TIME)

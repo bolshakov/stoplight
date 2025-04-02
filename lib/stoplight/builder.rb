@@ -51,8 +51,8 @@ module Stoplight
     end
 
     # @return [Stoplight::Light]
-    def build(&code)
-      Light.new(configuration.name, configuration, &code)
+    def build
+      Light.new(configuration.name, configuration)
     end
 
     # @param other [any]

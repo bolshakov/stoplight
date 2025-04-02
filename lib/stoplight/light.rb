@@ -39,8 +39,6 @@ module Stoplight
     # @return [String]
     attr_reader :name
     # @return [Proc]
-    attr_reader :code
-    # @return [Proc]
     attr_reader :error_handler
     # @return [Proc, nil]
     attr_reader :fallback
@@ -65,7 +63,7 @@ module Stoplight
       #
       def new(name, configuration = nil, &code)
         if configuration
-          __new_with_configuration__(name, configuration, &code)
+          __new_with_configuration__(name, configuration)
         else
           warn '[DEPRECATED] Instantiating `Stoplight::Light` is deprecated. ' \
             'Please use `Stoplight()` method instead.'
@@ -77,10 +75,9 @@ module Stoplight
     # @param name [String]
     # @param configuration [Stoplight::Configuration]
     # @yield []
-    def initialize(name, configuration, &code)
+    def initialize(name, configuration)
       @configuration = configuration
       @name = name
-      @code = code
       @error_handler = Default::ERROR_HANDLER
       @fallback = Default::FALLBACK
     end
