@@ -46,32 +46,6 @@ module Stoplight
     # @api private
     attr_reader :configuration
 
-    class << self
-      alias __new_with_configuration__ new
-
-      # It overrides the +Light.new+ method to support an old and a new
-      # way of instantiation.
-      #
-      # @overload new(name, &code)
-      #   @param name [String]
-      #   @return [Stoplight::Light]
-      #
-      # @overload new(name, configuration)
-      #   @param name [String]
-      #   @param configuration [Stoplight::Configuration]
-      #   @return [Stoplight::Light]
-      #
-      def new(name, configuration = nil, &code)
-        if configuration
-          __new_with_configuration__(name, configuration)
-        else
-          warn '[DEPRECATED] Instantiating `Stoplight::Light` is deprecated. ' \
-            'Please use `Stoplight()` method instead.'
-          Builder.with(name: name).build(&code)
-        end
-      end
-    end
-
     # @param name [String]
     # @param configuration [Stoplight::Configuration]
     # @yield []

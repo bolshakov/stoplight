@@ -4,7 +4,7 @@ require 'spec_helper'
 require 'stringio'
 
 RSpec.describe Stoplight::Light do
-  let(:light) { described_class.new(name, &code) }
+  let(:light) { Stoplight(name).build }
   let(:name) { ('a'..'z').to_a.shuffle.join }
   let(:code) { -> {} }
 
@@ -146,5 +146,7 @@ RSpec.describe Stoplight::Light do
     end
   end
 
-  it_behaves_like Stoplight::Configurable
+  it_behaves_like Stoplight::Configurable do
+    let(:configurable) { described_class.new('foo', configuration) }
+  end
 end

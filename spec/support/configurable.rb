@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.shared_examples Stoplight::Configurable do
-  let(:configurable) { described_class.new(configuration) }
-
   let(:configuration) do
     Stoplight::Configuration.new(
       name: name,

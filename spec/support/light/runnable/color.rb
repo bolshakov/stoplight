@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
 RSpec.shared_examples 'Stoplight::Light::Runnable#color' do
-  subject(:light) { Stoplight::Light.new(name) }
+  subject(:light) { Stoplight(name).build }
 
   let(:name) { random_string }
+  let(:data_store) { light.configuration.data_store }
 
   it 'is initially green' do
     expect(light.color).to eql(Stoplight::Color::GREEN)
@@ -11,7 +12,7 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#color' do
 
   context 'when its locked green' do
     before do
-      light.data_store.set_state(light, Stoplight::State::LOCKED_GREEN)
+      data_store.set_state(light, Stoplight::State::LOCKED_GREEN)
     end
 
     it 'is green' do
@@ -21,7 +22,7 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#color' do
 
   context 'when its locked red' do
     before do
-      light.data_store.set_state(light, Stoplight::State::LOCKED_RED)
+      data_store.set_state(light, Stoplight::State::LOCKED_RED)
     end
 
     it 'is red' do
@@ -34,12 +35,12 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#color' do
 
     before do
       light.with_threshold(2)
-      light.data_store.record_failure(light, failure)
+      data_store.record_failure(light, failure)
     end
 
     it 'turns red' do
       expect do
-        light.data_store.record_failure(light, anther)
+        data_store.record_failure(light, anther)
       end.to change(light, :color).to be(Stoplight::Color::RED)
     end
   end
@@ -50,12 +51,12 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#color' do
 
     before do
       light.with_threshold(2)
-      light.data_store.record_failure(light, failure2)
+      data_store.record_failure(light, failure2)
     end
 
     it 'turns yellow' do
       expect do
-        light.data_store.record_failure(light, failure)
+        data_store.record_failure(light, failure)
       end.to change(light, :color).to be(Stoplight::Color::YELLOW)
     end
   end
@@ -67,12 +68,12 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#color' do
 
     before do
       light.with_threshold(2)
-      light.data_store.record_failure(light, other)
+      data_store.record_failure(light, other)
     end
 
     it 'is red when the least recent failure is old' do
       expect do
-        light.data_store.record_failure(light, failure)
+        data_store.record_failure(light, failure)
       end.to change(light, :color).to be(Stoplight::Color::RED)
     end
   end
