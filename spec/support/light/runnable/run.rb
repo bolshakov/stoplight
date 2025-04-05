@@ -97,35 +97,6 @@ end
         expect(io.string).to_not eql('')
       end
 
-      context 'with an error handler' do
-        let(:result) do
-          run
-          expect(false).to be(true)
-        rescue error.class
-          expect(true).to be(true)
-        end
-
-        it 'records the failure when the handler does nothing' do
-          light.with_error_handler { |_error, _handler| }
-          expect { result }
-            .to change { light.configuration.data_store.get_failures(light).size }
-            .by(1)
-        end
-
-        it 'records the failure when the handler calls handle' do
-          light.with_error_handler { |error, handle| handle.call(error) }
-          expect { result }
-            .to change { light.configuration.data_store.get_failures(light).size }
-            .by(1)
-        end
-
-        it 'does not record the failure when the handler raises' do
-          light.with_error_handler { |error, _handle| raise error }
-          expect { result }
-            .to_not change { light.configuration.data_store.get_failures(light).size }
-        end
-      end
-
       context 'with a fallback' do
         it 'runs the fallback' do
           expect(run(fallback)).to eql(fallback_result)

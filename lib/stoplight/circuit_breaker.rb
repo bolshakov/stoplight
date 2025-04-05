@@ -122,27 +122,6 @@ module Stoplight
       reconfigure(configuration.with(skipped_errors: skipped_errors))
     end
 
-    # Configures a custom proc that allows you not to handle an error
-    # with Stoplight.
-    #
-    # @example
-    #   light = Stoplight('example')
-    #     .with_error_handler do |error, handler|
-    #       raise error if error.is_a?(ActiveRecord::RecordNotFound)
-    #       handle.call(error)
-    #     end
-    #   light.run { User.find(123) }
-    #
-    # In the example above, the +ActiveRecord::RecordNotFound+ doesn't
-    # move the circuit breaker into the red state.
-    #
-    # @yieldparam error [Exception]
-    # @yieldparam handle [Proc]
-    # @return [Stoplight::CircuitBreaker]
-    def with_error_handler(&error_handler)
-      raise NotImplementedError
-    end
-
     # @return [String] one of +locked_green+, +locked_red+, and +unlocked+
     def state
       raise NotImplementedError

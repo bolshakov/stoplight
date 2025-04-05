@@ -9,10 +9,6 @@ RSpec.describe Stoplight::CircuitBreaker do
     Class.new { include Stoplight::CircuitBreaker }
   end
 
-  specify '#with_error_handler' do
-    expect { circuit_breaker.with_error_handler {} }.to raise_error(NotImplementedError)
-  end
-
   specify '#color' do
     expect { circuit_breaker.color }.to raise_error(NotImplementedError)
   end

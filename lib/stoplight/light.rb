@@ -50,14 +50,6 @@ module Stoplight
       @error_handler = Default::ERROR_HANDLER
     end
 
-    # @yieldparam error [Exception]
-    # @yieldparam handle [Proc]
-    # @return [Stoplight::CircuitBreaker]
-    def with_error_handler(&error_handler)
-      @error_handler = error_handler
-      self
-    end
-
     private
 
     def reconfigure(configuration)
