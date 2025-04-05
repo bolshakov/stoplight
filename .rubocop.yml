@@ -25,3 +25,6 @@ Layout/BlockAlignment:
 Metrics/ParameterLists:
   Exclude:
     - 'lib/stoplight/configuration.rb'
+
+Style/CaseEquality:
+  Enabled: false

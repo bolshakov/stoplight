@@ -117,14 +117,8 @@ module Stoplight
       skipped_errors: self.skipped_errors
     )
       Configuration.new(
-        cool_off_time: cool_off_time,
-        data_store: data_store,
-        error_notifier: error_notifier,
-        name: name,
-        notifiers: notifiers,
-        threshold: threshold,
-        window_size: window_size,
-        tracked_errors: tracked_errors,
+        cool_off_time: cool_off_time, data_store: data_store, error_notifier: error_notifier, name: name,
+        notifiers: notifiers, threshold: threshold, window_size: window_size, tracked_errors: tracked_errors,
         skipped_errors: skipped_errors
       )
     end
@@ -134,14 +128,8 @@ module Stoplight
     # @return [Hash]
     def settings
       {
-        cool_off_time: cool_off_time,
-        data_store: data_store,
-        error_notifier: error_notifier,
-        name: name,
-        notifiers: notifiers,
-        threshold: threshold,
-        window_size: window_size,
-        tracked_errors: tracked_errors,
+        cool_off_time: cool_off_time, data_store: data_store, error_notifier: error_notifier, name: name,
+        notifiers: notifiers, threshold: threshold, window_size: window_size, tracked_errors: tracked_errors,
         skipped_errors: skipped_errors
       }
     end
