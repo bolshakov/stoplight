@@ -26,7 +26,7 @@ module Stoplight
           threshold: Default::THRESHOLD,
           window_size: Default::WINDOW_SIZE,
           tracked_errors: Default::TRACKED_ERRORS,
-          skipped_errors: Default::SKIPPED_ERRORS,
+          skipped_errors: Default::SKIPPED_ERRORS
         }
       end
     end
@@ -76,7 +76,8 @@ module Stoplight
     # @param window_size [Numeric]
     # @param tracked_errors [Array<StandardError>]
     # @param skipped_errors [Array<Exception>]
-    def initialize(name:, cool_off_time:, data_store:, error_notifier:, notifiers:, threshold:, window_size:, tracked_errors:, skipped_errors:)
+    def initialize(name:, cool_off_time:, data_store:, error_notifier:, notifiers:, threshold:, window_size:,
+                   tracked_errors:, skipped_errors:)
       @name = name
       @cool_off_time = cool_off_time
       @data_store = data_store
@@ -141,7 +142,7 @@ module Stoplight
         threshold: threshold,
         window_size: window_size,
         tracked_errors: tracked_errors,
-        skipped_errors: skipped_errors,
+        skipped_errors: skipped_errors
       }
     end
   end

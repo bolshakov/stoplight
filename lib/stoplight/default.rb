@@ -29,7 +29,7 @@ module Stoplight
       SecurityError,
       SignalException,
       SystemExit,
-      SystemStackError,
+      SystemStackError
     ].freeze
   end
 end

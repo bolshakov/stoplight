@@ -85,7 +85,8 @@ RSpec.shared_examples Stoplight::CircuitBreaker do
     end
 
     it 'configures skipped errors' do
-      expect(with_attribute.configuration.skipped_errors).to contain_exactly(*skipped_errors, *Stoplight::Default::SKIPPED_ERRORS)
+      expect(with_attribute.configuration.skipped_errors).to contain_exactly(*skipped_errors,
+                                                                             *Stoplight::Default::SKIPPED_ERRORS)
     end
   end
 end

@@ -51,6 +51,76 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
         expect(light.configuration.data_store.get_failures(light).size).to eql(1)
       end
 
+      context 'when error is not in the list of tracked errors' do
+        let(:light) { super().with_tracked_errors(KeyError) }
+
+        it 'does not record the failure' do
+          expect do
+            run
+          rescue error.class
+            nil
+          end.not_to change {
+            light.configuration.data_store.get_failures(light).size
+          }.from(0)
+        end
+      end
+
+      context 'when error is the list of tracked errors and in the list of skipped errors' do
+        let(:light) { super().with_tracked_errors(error.class).with_skipped_errors(error.class) }
+
+        it 'does not record the failure' do
+          expect do
+            run
+          rescue error.class
+            nil
+          end.not_to change {
+            light.configuration.data_store.get_failures(light).size
+          }.from(0)
+        end
+      end
+
+      context 'when error is in the list of tracked errors' do
+        let(:light) { super().with_tracked_errors(KeyError, error.class) }
+
+        it 'records the failure' do
+          expect do
+            run
+          rescue error.class
+            nil
+          end.to change {
+            light.configuration.data_store.get_failures(light).size
+          }.by(1)
+        end
+      end
+
+      context 'when error is in the list of skipped errors' do
+        let(:light) { super().with_skipped_errors(KeyError, error.class) }
+
+        it 'does not record the failure' do
+          expect do
+            run
+          rescue error.class
+            nil
+          end.not_to change {
+            light.configuration.data_store.get_failures(light).size
+          }.from(0)
+        end
+      end
+
+      context 'when error is not in the list of skipped errors' do
+        let(:light) { super().with_skipped_errors(KeyError) }
+
+        it 'records the failure' do
+          expect do
+            run
+          rescue error.class
+            nil
+          end.to change {
+            light.configuration.data_store.get_failures(light).size
+          }.by(1)
+        end
+      end
+
       context 'when we did not send notifications yet' do
         it 'notifies when transitioning to red' do
           light.threshold.times do
