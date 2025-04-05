@@ -83,6 +83,45 @@ module Stoplight
       reconfigure(configuration.with(error_notifier: error_notifier))
     end
 
+    # Configures a custom list of tracked errors that counts toward the threshold.
+    #
+    # @example
+    #   light = Stoplight('example')
+    #     .with_tracked_errors(TimeoutError, NetworkError)
+    #   light.run { call_external_service }
+    #
+    # In the example above, the +TimeoutError+ and +NetworkError+ exceptions
+    # will be counted towards the threshold for moving the circuit breaker into the red state.
+    # If not configured, the default tracked error is +StandardError+.
+    #
+    # @param tracked_errors [Array<StandardError>]
+    # @return [Stoplight::CircuitBreaker]
+    def with_tracked_errors(*tracked_errors)
+      reconfigure(configuration.with(tracked_errors: tracked_errors.dup.freeze))
+    end
+
+    # Configures a custom list of skipped errors that do not count toward the threshold.
+    # Typically, such errors does not represent a real failure and handled somewhere else
+    # in the code.
+    #
+    # @example
+    #   light = Stoplight('example')
+    #    .with_skipped_errors(ActiveRecord::RecordNotFound)
+    #   light.run { User.find(123) }
+    #
+    # In the example above, the +ActiveRecord::RecordNotFound+ doesn't
+    # move the circuit breaker into the red state.
+    #
+    # The list of skipped errors is always complemented by the default
+    # skipped errors: +NoMemoryError+, +ScriptError+, +SecurityError+, etc.
+    # @see +Stoplight::Default::SKIPPED_ERRORS+
+    #
+    # @param skipped_errors [Array<Exception>]
+    # @return [Stoplight::CircuitBreaker]
+    def with_skipped_errors(*skipped_errors)
+      reconfigure(configuration.with(skipped_errors: skipped_errors))
+    end
+
     # Configures a custom proc that allows you not to handle an error
     # with Stoplight.
     #

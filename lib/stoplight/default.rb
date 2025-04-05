@@ -23,5 +23,15 @@ module Stoplight
     THRESHOLD = 3
 
     WINDOW_SIZE = Float::INFINITY
+
+    TRACKED_ERRORS = [StandardError].freeze
+    SKIPPED_ERRORS = [
+      NoMemoryError,
+      ScriptError,
+      SecurityError,
+      SignalException,
+      SystemExit,
+      SystemStackError,
+    ].freeze
   end
 end

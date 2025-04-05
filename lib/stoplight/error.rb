@@ -12,7 +12,7 @@ module Stoplight
       SecurityError,
       SignalException,
       SystemExit,
-      SystemStackError
+      SystemStackError,
     ].freeze
 
     Base = Class.new(StandardError)
