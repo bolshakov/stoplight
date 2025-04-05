@@ -84,7 +84,7 @@ module Stoplight
     # @param data_store [Stoplight::DataStore::Base]
     # @param error_notifier [Proc]
     # @param name [String]
-    # @param notifiers [Stoplight::Notifier::Base]
+    # @param notifiers [Array<Stoplight::Notifier::Base>]
     # @param threshold [Numeric]
     # @param window_size [Numeric]
     # @return [Stoplight::Configuration]

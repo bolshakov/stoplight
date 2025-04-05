@@ -29,6 +29,8 @@ module Stoplight
 
     def_delegator :build, :with_error_handler
     def_delegator :build, :with_fallback
+    def_delegator :build, :fallback
+    def_delegator :build, :error_handler
     def_delegator :build, :color
     def_delegator :build, :name
     def_delegator :build, :state
@@ -51,8 +53,8 @@ module Stoplight
     end
 
     # @return [Stoplight::Light]
-    def build(&code)
-      Light.new(configuration.name, configuration, &code)
+    def build
+      Light.new(configuration.name, configuration)
     end
 
     # @param other [any]

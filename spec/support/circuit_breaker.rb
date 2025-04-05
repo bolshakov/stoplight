@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.shared_examples Stoplight::Configurable do
-  let(:configurable) { described_class.new(configuration) }
-
+RSpec.shared_examples Stoplight::CircuitBreaker do
   let(:configuration) do
     Stoplight::Configuration.new(
       name: name,
@@ -17,7 +15,7 @@ RSpec.shared_examples Stoplight::Configurable do
 
   shared_examples 'configurable attribute' do |attribute|
     subject(:with_attribute) do
-      configurable.__send__("with_#{attribute}", __send__(attribute))
+      circuit_breaker.__send__("with_#{attribute}", __send__(attribute))
     end
 
     it "configures #{attribute}" do
@@ -59,7 +57,7 @@ RSpec.shared_examples Stoplight::Configurable do
     let(:error_notifier) { ->(x) { x } }
 
     subject(:with_attribute) do
-      configurable.with_error_notifier(&error_notifier)
+      circuit_breaker.with_error_notifier(&error_notifier)
     end
 
     it 'configures error notifier' do

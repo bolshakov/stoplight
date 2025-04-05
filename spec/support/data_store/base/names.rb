@@ -22,7 +22,7 @@ RSpec.shared_examples 'Stoplight::DataStore::Base#names' do
   end
 
   it 'supports names containing colons' do
-    light = Stoplight::Light.new('http://api.example.com/some/action')
+    light = Stoplight('http://api.example.com/some/action').build
     data_store.record_failure(light, failure)
     expect(data_store.names).to eql([light.name])
   end

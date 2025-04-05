@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
+  subject(:light) { Stoplight(name).build }
+
   let(:code) { -> { code_result } }
   let(:code_result) { random_string }
   let(:fallback) { ->(_) { fallback_result } }
@@ -12,19 +14,23 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
 
   before { light.with_notifiers(notifiers) }
 
-  shared_examples 'when the light is green' do
-    before { light.data_store.clear_failures(light) }
+  def run
+    light.run(&code)
+  end
+
+  context 'when the light is green' do
+    before { light.configuration.data_store.clear_failures(light) }
 
     it 'runs the code' do
       expect(run).to eql(code_result)
     end
 
     context 'with some failures' do
-      before { light.data_store.record_failure(light, failure) }
+      before { light.configuration.data_store.record_failure(light, failure) }
 
       it 'clears the failures' do
         run
-        expect(light.data_store.get_failures(light).size).to eql(0)
+        expect(light.configuration.data_store.get_failures(light).size).to eql(0)
       end
     end
 
@@ -36,13 +42,13 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
       end
 
       it 'records the failure' do
-        expect(light.data_store.get_failures(light).size).to eql(0)
+        expect(light.configuration.data_store.get_failures(light).size).to eql(0)
         begin
           run
         rescue error.class
           nil
         end
-        expect(light.data_store.get_failures(light).size).to eql(1)
+        expect(light.configuration.data_store.get_failures(light).size).to eql(1)
       end
 
       context 'when we did not send notifications yet' do
@@ -61,7 +67,9 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
 
       context 'when we already sent notifications' do
         before do
-          light.data_store.with_notification_lock(light, Stoplight::Color::GREEN, Stoplight::Color::RED) {}
+          light.configuration.data_store.with_notification_lock(light, Stoplight::Color::GREEN,
+                                                                Stoplight::Color::RED) do
+end
         end
 
         it 'does not send new notifications' do
@@ -100,21 +108,21 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
         it 'records the failure when the handler does nothing' do
           light.with_error_handler { |_error, _handler| }
           expect { result }
-            .to change { light.data_store.get_failures(light).size }
+            .to change { light.configuration.data_store.get_failures(light).size }
             .by(1)
         end
 
         it 'records the failure when the handler calls handle' do
           light.with_error_handler { |error, handle| handle.call(error) }
           expect { result }
-            .to change { light.data_store.get_failures(light).size }
+            .to change { light.configuration.data_store.get_failures(light).size }
             .by(1)
         end
 
         it 'does not record the failure when the handler raises' do
           light.with_error_handler { |error, _handle| raise error }
           expect { result }
-            .to_not change { light.data_store.get_failures(light).size }
+            .to_not change { light.configuration.data_store.get_failures(light).size }
         end
       end
 
@@ -161,14 +169,14 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
     end
   end
 
-  shared_examples 'when the light is yellow' do
+  context 'when the light is yellow' do
     let(:failure) { Stoplight::Failure.new(error.class.name, error.message, Time.new - light.cool_off_time) }
     let(:failure2) { Stoplight::Failure.new(error.class.name, error.message, Time.new - light.cool_off_time - 10) }
 
     before do
       light.with_threshold(2)
-      light.data_store.record_failure(light, failure2)
-      light.data_store.record_failure(light, failure)
+      light.configuration.data_store.record_failure(light, failure2)
+      light.configuration.data_store.record_failure(light, failure)
     end
 
     it 'runs the code' do
@@ -183,15 +191,15 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
     end
   end
 
-  shared_examples 'when the light is red' do
+  context 'when the light is red' do
     let(:other) do
       Stoplight::Failure.new(error.class.name, error.message, Time.new - light.cool_off_time)
     end
 
     before do
       light.with_threshold(2)
-      light.data_store.record_failure(light, other)
-      light.data_store.record_failure(light, failure)
+      light.configuration.data_store.record_failure(light, other)
+      light.configuration.data_store.record_failure(light, failure)
     end
 
     it 'raises an error' do
@@ -219,29 +227,5 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
         expect(run).to eql(fallback_result)
       end
     end
-  end
-
-  context 'with code block' do
-    subject(:light) { Stoplight::Light.new(name) }
-
-    def run
-      light.run(&code)
-    end
-
-    it_behaves_like 'when the light is green'
-    it_behaves_like 'when the light is yellow'
-    it_behaves_like 'when the light is red'
-  end
-
-  context 'without code block' do
-    subject(:light) { Stoplight::Light.new(name, &code) }
-
-    def run
-      light.run
-    end
-
-    it_behaves_like 'when the light is green'
-    it_behaves_like 'when the light is yellow'
-    it_behaves_like 'when the light is red'
   end
 end

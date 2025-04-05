@@ -26,7 +26,10 @@ module Stoplight
 
       # @raise [Error::RedLight]
       def run(&code)
-        code = validate_code(&code)
+        raise ArgumentError, <<~ERROR unless block_given?
+          nothing to run. Please, pass a block into `Light#run`
+        ERROR
+
         case color
         when Color::GREEN then run_green(&code)
         when Color::YELLOW then run_yellow(&code)
@@ -35,18 +38,6 @@ module Stoplight
       end
 
       private
-
-      def validate_code(&code)
-        raise ArgumentError, <<~ERROR if block_given? && self.code
-          passing code block into both `Light.new` and `Light#run` is not allowed
-        ERROR
-
-        raise ArgumentError, <<~ERROR unless block_given? || self.code
-          nothing to run. Please, pass a block into `Light#run`
-        ERROR
-
-        code || self.code
-      end
 
       def run_green(&code)
         on_failure = lambda do |size, error|

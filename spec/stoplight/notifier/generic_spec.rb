@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe Stoplight::Notifier::Generic do
-  let(:light) { Stoplight::Light.new(name) {} }
+  let(:light) { Stoplight(name).build }
   let(:name) { ('a'..'z').to_a.shuffle.join }
   let(:from_color) { Stoplight::Color::GREEN }
   let(:to_color) { Stoplight::Color::RED }

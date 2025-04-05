@@ -43,7 +43,6 @@ module Stoplight # rubocop:disable Style/Documentation
   @default_error_notifier = Default::ERROR_NOTIFIER
 end
 
-require 'stoplight/configurable'
 require 'stoplight/circuit_breaker'
 require 'stoplight/builder'
 require 'stoplight/configuration'
@@ -52,12 +51,6 @@ require 'stoplight/light/runnable'
 require 'stoplight/light'
 
 # @return [Stoplight::CircuitBreaker]
-def Stoplight(name, &code) # rubocop:disable Naming/MethodName
-  if block_given?
-    warn '[DEPRECATED] Calling `Stoplight("name") { ... }` with a code block is deprecated. ' \
-      'Please pass code block to the run method `Stoplight("name").run { ... }` method instead.'
-    Stoplight::Builder.with(name: name).build(&code)
-  else
-    Stoplight::Builder.with(name: name)
-  end
+def Stoplight(name) # rubocop:disable Naming/MethodName
+  Stoplight::Builder.with(name: name)
 end

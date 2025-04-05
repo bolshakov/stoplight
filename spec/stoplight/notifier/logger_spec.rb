@@ -38,9 +38,8 @@ RSpec.describe Stoplight::Notifier::Logger do
   end
 
   describe '#notify' do
-    let(:light) { Stoplight::Light.new(name, &code) }
+    let(:light) { Stoplight(name).build }
     let(:name) { ('a'..'z').to_a.shuffle.join }
-    let(:code) { -> {} }
     let(:from_color) { Stoplight::Color::GREEN }
     let(:to_color) { Stoplight::Color::RED }
     let(:notifier) { described_class.new(Logger.new(io)) }

@@ -46,27 +46,13 @@ RSpec.describe Stoplight::Builder do
   end
 
   describe '.build' do
+    subject(:light) { builder.build }
+
     let(:builder) { described_class.new(configuration) }
     let(:configuration) { instance_double(Stoplight::Configuration, name: name) }
 
-    context 'with code' do
-      subject(:light) { builder.build(&code) }
-
-      let(:code) { -> { 42 } }
-
-      it 'builds new light' do
-        expect(light.configuration).to eq(configuration)
-        expect(light.code).to eq(code)
-      end
-    end
-
-    context 'without code' do
-      subject(:light) { builder.build }
-
-      it 'builds new light' do
-        expect(light.configuration).to eq(configuration)
-        expect(light.code).to eq(nil)
-      end
+    it 'builds new light' do
+      expect(light.configuration).to eq(configuration)
     end
   end
 
@@ -161,5 +147,7 @@ RSpec.describe Stoplight::Builder do
     end
   end
 
-  it_behaves_like Stoplight::Configurable
+  it_behaves_like Stoplight::CircuitBreaker do
+    let(:circuit_breaker) { described_class.new(configuration) }
+  end
 end
