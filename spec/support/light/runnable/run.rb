@@ -14,8 +14,8 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
 
   before { light.with_notifiers(notifiers) }
 
-  def run
-    light.run(&code)
+  def run(fallback = nil)
+    light.run(fallback, &code)
   end
 
   context 'when the light is green' do
@@ -127,18 +127,12 @@ end
       end
 
       context 'with a fallback' do
-        before { light.with_fallback(&fallback) }
-
         it 'runs the fallback' do
-          expect(run).to eql(fallback_result)
+          expect(run(fallback)).to eql(fallback_result)
         end
 
         it 'passes the error to the fallback' do
-          light.with_fallback do |e|
-            expect(e).to eql(error)
-            fallback_result
-          end
-          expect(run).to eql(fallback_result)
+          expect(run(->(e) { e&.message || fallback_result })).to eql(error.message)
         end
       end
     end
@@ -213,18 +207,10 @@ end
     end
 
     context 'with a fallback' do
-      before { light.with_fallback(&fallback) }
+      let(:fallback) { ->(error) { error || fallback_result } }
 
       it 'runs the fallback' do
-        expect(run).to eql(fallback_result)
-      end
-
-      it 'does not pass anything to the fallback' do
-        light.with_fallback do |e|
-          expect(e).to eql(nil)
-          fallback_result
-        end
-        expect(run).to eql(fallback_result)
+        expect(run(fallback)).to eql(fallback_result)
       end
     end
   end

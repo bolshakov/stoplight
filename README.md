@@ -162,20 +162,20 @@ fallback that will be called in both of these cases. It will be passed the
 error if the light was green.
 
 ```ruby
+fallback = ->(e) {  e; 'default' }
 light = Stoplight('example-fallback')
-  .with_fallback { |e| p e; 'default' }
 # => #<Stoplight::CircuitBreaker:..>
-light.run { 1 / 0 }
+light.run(fallback) { 1 / 0 }
 # #<ZeroDivisionError: divided by 0>
 # => "default"
-light.run { 1 / 0 }
+light.run(fallback) { 1 / 0 }
 # #<ZeroDivisionError: divided by 0>
 # => "default"
-light.run { 1 / 0 }
+light.run(fallback) { 1 / 0 }
 # Switching example-fallback from green to red because ZeroDivisionError divided by 0
 # #<ZeroDivisionError: divided by 0>
 # => "default"
-light.run { 1 / 0 }
+light.run(fallback) { 1 / 0 }
 # nil
 # => "default"
 ```

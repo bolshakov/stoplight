@@ -24,55 +24,55 @@ module Stoplight
         end
       end
 
+      # @param fallback [#call, nil] (nil) a fallback block to be called when the light is red
       # @raise [Error::RedLight]
-      def run(&code)
-        raise ArgumentError, <<~ERROR unless block_given?
-          nothing to run. Please, pass a block into `Light#run`
-        ERROR
+      def run(fallback = nil, &code)
+        raise ArgumentError, 'nothing to run. Please, pass a block into `Light#run`' unless block_given?
 
         case color
-        when Color::GREEN then run_green(&code)
-        when Color::YELLOW then run_yellow(&code)
-        else run_red
+        when Color::GREEN then run_green(fallback, &code)
+        when Color::YELLOW then run_yellow(fallback, &code)
+        else run_red(fallback)
         end
       end
 
       private
 
-      def run_green(&code)
+      def run_green(fallback, &code)
         on_failure = lambda do |size, error|
           notify(Color::GREEN, Color::RED, error) if failures_threshold_breached?(size, threshold)
         end
-        run_code(nil, on_failure, &code)
+        run_code(nil, on_failure, fallback, &code)
       end
 
       def failures_threshold_breached?(current_failures_count, max_errors_threshold)
         current_failures_count == max_errors_threshold
       end
 
-      def run_yellow(&code)
+      def run_yellow(fallback, &code)
         on_success = lambda do |failures|
           notify(Color::RED, Color::GREEN) unless failures.empty?
         end
-        run_code(on_success, nil, &code)
+        run_code(on_success, nil, fallback, &code)
       end
 
-      def run_red
+      # @param fallback [#call, nil]
+      def run_red(fallback)
         raise Error::RedLight, name unless fallback
 
         fallback.call(nil)
       end
 
-      def run_code(on_success, on_failure, &code)
+      def run_code(on_success, on_failure, fallback, &code)
         result = code.call
         failures = clear_failures
         on_success&.call(failures)
         result
       rescue Exception => e # rubocop:disable Lint/RescueException
-        handle_error(e, on_failure)
+        handle_error(e, on_failure, fallback)
       end
 
-      def handle_error(error, on_failure)
+      def handle_error(error, on_failure, fallback)
         error_handler.call(error, Error::HANDLER)
         size = record_failure(error)
         on_failure&.call(size, error)
@@ -105,13 +105,14 @@ module Stoplight
       def safely(default = nil, &code)
         return yield if data_store == Default::DATA_STORE
 
+        fallback = proc do |error|
+          error_notifier.call(error) if error
+          default
+        end
+
         Stoplight("#{name}-safely")
           .with_data_store(Default::DATA_STORE)
-          .with_fallback do |error|
-            error_notifier.call(error) if error
-            default
-          end
-          .run(&code)
+          .run(fallback, &code)
       end
     end
   end

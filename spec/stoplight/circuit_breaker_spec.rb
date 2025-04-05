@@ -13,10 +13,6 @@ RSpec.describe Stoplight::CircuitBreaker do
     expect { circuit_breaker.with_error_handler {} }.to raise_error(NotImplementedError)
   end
 
-  specify '#with_fallback' do
-    expect { circuit_breaker.with_fallback {} }.to raise_error(NotImplementedError)
-  end
-
   specify '#color' do
     expect { circuit_breaker.color }.to raise_error(NotImplementedError)
   end

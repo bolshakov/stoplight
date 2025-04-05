@@ -104,19 +104,6 @@ module Stoplight
       raise NotImplementedError
     end
 
-    # Configures light with the given fallback block
-    #
-    # @example
-    #   light = Stoplight('example')
-    #   light.with_fallback { |error| e.is_a?()ZeroDivisionError) ? 0 : nil }
-    #   light.run { 1 / 0} #=> 0
-    #
-    # @yieldparam error [Exception, nil]
-    # @return [Stoplight::CircuitBreaker]
-    def with_fallback(&fallback)
-      raise NotImplementedError
-    end
-
     # @return [String] one of +locked_green+, +locked_red+, and +unlocked+
     def state
       raise NotImplementedError
@@ -147,9 +134,14 @@ module Stoplight
     #   light = Stoplight('example')
     #   light.run { 2/0 }
     #
+    # @example Running with fallback
+    #   light = Stoplight('example')
+    #   light.run(->(error) { 0 }) { 1 / 0 } #=> 0
+    #
+    # @param fallback [Proc, nil] (nil) fallback code to run if the circuit breaker is open
     # @raise [Stoplight::Error::RedLight]
     # @return [any]
-    def run(&code)
+    def run(fallback = nil, &code)
       raise NotImplementedError
     end
 

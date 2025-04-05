@@ -39,12 +39,6 @@ RSpec.describe Stoplight::Default do
     end
   end
 
-  describe '::FALLBACK' do
-    it 'is nil' do
-      expect(Stoplight::Default::FALLBACK).to eql(nil)
-    end
-  end
-
   describe '::FORMATTER' do
     it 'is a proc' do
       expect(Stoplight::Default::FORMATTER).to be_a(Proc)

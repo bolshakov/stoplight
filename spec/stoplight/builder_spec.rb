@@ -81,17 +81,6 @@ RSpec.describe Stoplight::Builder do
       end
     end
 
-    describe '#with_fallback' do
-      subject(:light) { builder.with_fallback(&fallback) }
-
-      let(:fallback) { ->(error) {} }
-
-      it 'returns an instance of the Light class with this configuration set' do
-        expect(light.configuration).to be(configuration)
-        expect(light.fallback).to eq(fallback)
-      end
-    end
-
     describe '#run' do
       it 'yields the block' do
         expect do |code|
