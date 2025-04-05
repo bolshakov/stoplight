@@ -47,10 +47,4 @@ RSpec.describe 'Stoplight' do
       expect(light.name).to eql(name)
     end
   end
-
-  describe '#error_handler' do
-    it 'it initially the default' do
-      expect(light.error_handler).to eql(Stoplight::Default::ERROR_HANDLER)
-    end
-  end
 end

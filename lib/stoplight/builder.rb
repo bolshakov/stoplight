@@ -27,7 +27,6 @@ module Stoplight
     include CircuitBreaker
     extend Forwardable
 
-    def_delegator :build, :error_handler
     def_delegator :build, :color
     def_delegator :build, :name
     def_delegator :build, :state

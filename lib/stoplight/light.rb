@@ -35,8 +35,6 @@ module Stoplight
 
     # @return [String]
     attr_reader :name
-    # @return [Proc]
-    attr_reader :error_handler
     # @return [Stoplight::Configuration]
     # @api private
     attr_reader :configuration
@@ -47,7 +45,6 @@ module Stoplight
     def initialize(name, configuration)
       @configuration = configuration
       @name = name
-      @error_handler = Default::ERROR_HANDLER
     end
 
     private

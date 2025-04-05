@@ -73,12 +73,16 @@ module Stoplight
       end
 
       def handle_error(error, on_failure, fallback)
-        error_handler.call(error, Error::HANDLER)
+        error_handler(error)
         size = record_failure(error)
         on_failure&.call(size, error)
         raise error unless fallback
 
         fallback.call(error)
+      end
+
+      def error_handler(error)
+        Error::HANDLER.call(error)
       end
 
       def clear_failures
