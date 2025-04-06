@@ -121,15 +121,5 @@ module Stoplight
     def with_skipped_errors(*skipped_errors)
       reconfigure(config.with(skipped_errors: skipped_errors))
     end
-
-    # @return [String] one of +locked_green+, +locked_red+, and +unlocked+
-    def state
-      raise NotImplementedError
-    end
-
-    # @return [String] the light's name
-    def name
-      raise NotImplementedError
-    end
   end
 end
