@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Stoplight
-  class Light
+  class Light < CircuitBreaker
     # The Lockable module implements the behavior of locking and unlocking the light.
     # Light can be locked in either a State::LOCKED_RED or State::LOCKED_GREEN state.
     # By locking the light, you force it always to run code with the chosen light color.

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.shared_examples Stoplight::CircuitBreaker do
+RSpec.shared_examples Stoplight::Light::Configurable do
   let(:config) do
     Stoplight::Config.new(
       name: name,
@@ -15,7 +15,7 @@ RSpec.shared_examples Stoplight::CircuitBreaker do
 
   shared_examples 'configurable attribute' do |attribute|
     subject(:with_attribute) do
-      circuit_breaker.__send__("with_#{attribute}", __send__(attribute))
+      light.__send__("with_#{attribute}", __send__(attribute))
     end
 
     it "configures #{attribute}" do
@@ -57,7 +57,7 @@ RSpec.shared_examples Stoplight::CircuitBreaker do
     let(:error_notifier) { ->(x) { x } }
 
     subject(:with_attribute) do
-      circuit_breaker.with_error_notifier(&error_notifier)
+      light.with_error_notifier(&error_notifier)
     end
 
     it 'configures error notifier' do
@@ -69,7 +69,7 @@ RSpec.shared_examples Stoplight::CircuitBreaker do
     let(:tracked_errors) { [RuntimeError, KeyError] }
 
     subject(:with_attribute) do
-      circuit_breaker.with_tracked_errors(*tracked_errors)
+      light.with_tracked_errors(*tracked_errors)
     end
 
     it 'configures tracked errors' do
@@ -81,7 +81,7 @@ RSpec.shared_examples Stoplight::CircuitBreaker do
     let(:skipped_errors) { [RuntimeError, KeyError] }
 
     subject(:with_attribute) do
-      circuit_breaker.with_skipped_errors(*skipped_errors)
+      light.with_skipped_errors(*skipped_errors)
     end
 
     it 'configures skipped errors' do
