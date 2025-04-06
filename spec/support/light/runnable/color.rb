@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.shared_examples 'Stoplight::Light::Runnable#color' do
-  let(:light) { super().build }
-
   let(:name) { random_string }
 
   it { expect(light.configuration.data_store).to eq(data_store) }

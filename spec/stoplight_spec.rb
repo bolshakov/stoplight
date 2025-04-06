@@ -35,7 +35,7 @@ RSpec.describe 'Stoplight' do
   let(:name) { ('a'..'z').to_a.shuffle.join }
 
   it 'creates a stoplight' do
-    expect(light).to eq(Stoplight::Builder.with(name: name))
+    expect(light).to eq(Stoplight::Light.with(name: name))
   end
 
   it 'is a class' do

@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe Stoplight::Light::Lockable do
-  subject(:light) { Stoplight(name).build }
+  subject(:light) { Stoplight(name) }
 
   let(:code) { -> { code_result } }
   let(:code_result) { random_string }
