@@ -111,6 +111,30 @@ check out [the cool off time section][] When stoplights are yellow, they will
 try to run their code. If it fails, they'll switch back to red. If it succeeds,
 they'll switch to green.
 
+By default, stoplights re-raise errors when they're green. When they're
+red, they raise a `Stoplight::Error::RedLight` error. You can provide a
+fallback that will be called in both of these cases. It will be passed with an instance of the
+error if the light was green.
+
+```ruby
+fallback = ->(e) {  e; 'default' }
+light = Stoplight('example-fallback')
+# => #<Stoplight::CircuitBreaker:..>
+light.run(fallback) { 1 / 0 } # passes an instance of error into fallback
+# #<ZeroDivisionError: divided by 0>
+# => "default"
+light.run(fallback) { 1 / 0 } # passes an instance of error into fallback
+# #<ZeroDivisionError: divided by 0>
+# => "default"
+light.run(fallback) { 1 / 0 } # passes an instance of error into fallback
+# Switching example-fallback from green to red because ZeroDivisionError divided by 0
+# #<ZeroDivisionError: divided by 0>
+# => "default"
+light.run(fallback) { 1 / 0 } # passes `nil` to into fallback, since there is no error
+# nil
+# => "default"
+```
+
 ### Error Handling
 
 Stoplight needs to determine which errors should change the light's state 
@@ -200,32 +224,6 @@ light = Stoplight('flexible-matching')
 
 This allows for complex error classification based on error properties 
 beyond just their class.
-
-### Custom Fallback
-
-By default, stoplights will re-raise errors when they're green. When they're
-red, they'll raise a `Stoplight::Error::RedLight` error. You can provide a
-fallback that will be called in both of these cases. It will be passed the
-error if the light was green.
-
-```ruby
-fallback = ->(e) {  e; 'default' }
-light = Stoplight('example-fallback')
-# => #<Stoplight::CircuitBreaker:..>
-light.run(fallback) { 1 / 0 }
-# #<ZeroDivisionError: divided by 0>
-# => "default"
-light.run(fallback) { 1 / 0 }
-# #<ZeroDivisionError: divided by 0>
-# => "default"
-light.run(fallback) { 1 / 0 }
-# Switching example-fallback from green to red because ZeroDivisionError divided by 0
-# #<ZeroDivisionError: divided by 0>
-# => "default"
-light.run(fallback) { 1 / 0 }
-# nil
-# => "default"
-```
 
 ### Custom Threshold
 
@@ -322,11 +320,7 @@ class ApplicationController < ActionController::Base
 
   def stoplight(&block)
     Stoplight("#{params[:controller]}##{params[:action]}")
-      .with_fallback do |error|
-        Rails.logger.error(error)
-        render(nothing: true, status: :service_unavailable)
-      end
-      .run(&block)
+      .run(-> { render(nothing: true, status: :service_unavailable) }, &block)
   end
 end
 ```
