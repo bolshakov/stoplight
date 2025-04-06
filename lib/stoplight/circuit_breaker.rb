@@ -131,19 +131,5 @@ module Stoplight
     def name
       raise NotImplementedError
     end
-
-    # Returns current color:
-    #   * +Stoplight::Color::GREEN+ -- circuit breaker is closed
-    #   * +Stoplight::Color::RED+ -- circuit breaker is open
-    #   * +Stoplight::Color::YELLOW+ -- circuit breaker is half-open
-    #
-    # @example
-    #   light = Stoplight('example')
-    #   light.color #=> Color::GREEN
-    #
-    # @return [String] returns current light color
-    def color
-      raise NotImplementedError
-    end
   end
 end
