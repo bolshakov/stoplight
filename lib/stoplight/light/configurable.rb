@@ -6,30 +6,6 @@ module Stoplight
     module Configurable
       extend Forwardable
 
-      # @!attribute [r] data_store
-      #   @return [Stoplight::DataStore::Base]
-      def_delegator :config, :data_store
-
-      # @!attribute [r] threshold
-      #   @return [Integer]
-      def_delegator :config, :threshold
-
-      # @!attribute [r] cool_off_time
-      #   @return [Fixnum]
-      def_delegator :config, :cool_off_time
-
-      # @!attribute [r] window_size
-      #   @return [Float]
-      def_delegator :config, :window_size
-
-      # @!attribute [r] notifiers
-      #   # @return [Array<Notifier::Base>]
-      def_delegator :config, :notifiers
-
-      # @!attribute [r] error_notifier
-      #   # @return [Proc]
-      def_delegator :config, :error_notifier
-
       # @!attribute [r] name
       #   @return [String]
       def_delegator :config, :name

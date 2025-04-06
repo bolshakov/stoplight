@@ -1,13 +1,15 @@
 # frozen_string_literal: true
 
 RSpec.shared_examples 'Stoplight::DataStore::Base#get_failures' do
+  let(:config) { light.config }
+
   it 'is initially empty' do
-    expect(data_store.get_failures(light)).to eql([])
+    expect(data_store.get_failures(config)).to eql([])
   end
 
   it 'handles invalid JSON' do
-    expect { data_store.record_failure(light, failure) }
-      .to change { data_store.get_failures(light) }
+    expect { data_store.record_failure(config, failure) }
+      .to change { data_store.get_failures(config) }
       .from(be_empty)
       .to(contain_exactly(failure))
   end
@@ -18,12 +20,12 @@ RSpec.shared_examples 'Stoplight::DataStore::Base#get_failures' do
     let(:light) { super().with_window_size(window_size) }
 
     before do
-      data_store.record_failure(light, failure)
-      data_store.record_failure(light, older_failure)
+      data_store.record_failure(config, failure)
+      data_store.record_failure(config, older_failure)
     end
 
     it 'returns failures withing given window' do
-      expect(data_store.get_failures(light)).to contain_exactly(failure)
+      expect(data_store.get_failures(config)).to contain_exactly(failure)
     end
   end
 end

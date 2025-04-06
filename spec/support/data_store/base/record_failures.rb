@@ -1,28 +1,30 @@
 # frozen_string_literal: true
 
 RSpec.shared_examples 'Stoplight::DataStore::Base#record_failure' do
+  let(:config) { light.config }
+
   it 'returns the number of failures' do
-    expect(data_store.record_failure(light, failure)).to eql(1)
+    expect(data_store.record_failure(config, failure)).to eql(1)
   end
 
   context 'when there is an error' do
     before do
-      data_store.record_failure(light, failure)
+      data_store.record_failure(config, failure)
     end
 
     it 'persists the failure' do
-      expect(data_store.get_failures(light)).to eq([failure])
+      expect(data_store.get_failures(config)).to eq([failure])
     end
   end
 
   context 'when there is are several errors' do
     before do
-      data_store.record_failure(light, failure)
-      data_store.record_failure(light, other)
+      data_store.record_failure(config, failure)
+      data_store.record_failure(config, other)
     end
 
     it 'stores more recent failures at the head' do
-      expect(data_store.get_failures(light)).to eq([other, failure])
+      expect(data_store.get_failures(config)).to eq([other, failure])
     end
   end
 
@@ -31,13 +33,13 @@ RSpec.shared_examples 'Stoplight::DataStore::Base#record_failure' do
       let(:light) { super().with_threshold(1) }
 
       before do
-        data_store.record_failure(light, failure)
+        data_store.record_failure(config, failure)
       end
 
       it 'limits the number of stored failures' do
         expect do
-          data_store.record_failure(light, other)
-        end.to change { data_store.get_failures(light) }
+          data_store.record_failure(config, other)
+        end.to change { data_store.get_failures(config) }
           .from([failure])
           .to([other])
       end
@@ -55,11 +57,11 @@ RSpec.shared_examples 'Stoplight::DataStore::Base#record_failure' do
       let(:older_failure) { Stoplight::Failure.new('class', 'message 3', Time.new - window_size - 1) }
 
       it 'stores failures only withing window length' do
-        data_store.record_failure(light, failure)
-        data_store.record_failure(light, other)
-        data_store.record_failure(light, older_failure)
+        data_store.record_failure(config, failure)
+        data_store.record_failure(config, other)
+        data_store.record_failure(config, older_failure)
 
-        expect(data_store.get_failures(light)).to eq([other, failure])
+        expect(data_store.get_failures(config)).to eq([other, failure])
       end
     end
 
