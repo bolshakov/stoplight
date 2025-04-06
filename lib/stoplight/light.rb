@@ -33,18 +33,19 @@ module Stoplight
     #   # @return [Proc]
     def_delegator :configuration, :error_notifier
 
-    # @return [String]
-    attr_reader :name
+
+    # @!attribute [r] name
+    #   @return [String]
+    def_delegator :configuration, :name
+
     # @return [Stoplight::Configuration]
     # @api private
     attr_reader :configuration
 
-    # @param name [String]
     # @param configuration [Stoplight::Configuration]
     # @yield []
-    def initialize(name, configuration)
+    def initialize(configuration)
       @configuration = configuration
-      @name = name
     end
 
     private
