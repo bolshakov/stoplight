@@ -20,8 +20,4 @@ RSpec.describe Stoplight::CircuitBreaker do
   specify '#name' do
     expect { circuit_breaker.name }.to raise_error(NotImplementedError)
   end
-
-  specify '#run' do
-    expect { circuit_breaker.run {} }.to raise_error(NotImplementedError)
-  end
 end

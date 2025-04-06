@@ -145,22 +145,5 @@ module Stoplight
     def color
       raise NotImplementedError
     end
-
-    # Runs the given block of code with this circuit breaker
-    #
-    # @example
-    #   light = Stoplight('example')
-    #   light.run { 2/0 }
-    #
-    # @example Running with fallback
-    #   light = Stoplight('example')
-    #   light.run(->(error) { 0 }) { 1 / 0 } #=> 0
-    #
-    # @param fallback [Proc, nil] (nil) fallback code to run if the circuit breaker is open
-    # @raise [Stoplight::Error::RedLight]
-    # @return [any]
-    def run(fallback = nil, &code)
-      raise NotImplementedError
-    end
   end
 end
