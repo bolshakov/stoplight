@@ -24,7 +24,19 @@ module Stoplight
         end
       end
 
-      # @param fallback [#call, nil] (nil) a fallback block to be called when the light is red
+      # Runs the given block of code with this circuit breaker
+      #
+      # @example
+      #   light = Stoplight('example')
+      #   light.run { 2/0 }
+      #
+      # @example Running with fallback
+      #   light = Stoplight('example')
+      #   light.run(->(error) { 0 }) { 1 / 0 } #=> 0
+      #
+      # @param fallback [Proc, nil] (nil) fallback code to run if the circuit breaker is open
+      # @raise [Stoplight::Error::RedLight]
+      # @return [any]
       # @raise [Error::RedLight]
       def run(fallback = nil, &code)
         raise ArgumentError, 'nothing to run. Please, pass a block into `Light#run`' unless block_given?
