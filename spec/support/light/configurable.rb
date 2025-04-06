@@ -2,7 +2,7 @@
 
 RSpec.shared_examples Stoplight::Light::Configurable do
   let(:config) do
-    Stoplight::Config.new(
+    Stoplight::Light::Config.new(
       name: name,
       data_store: Stoplight.default_data_store,
       notifiers: Stoplight.default_notifiers,
