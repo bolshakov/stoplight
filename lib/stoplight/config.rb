@@ -2,12 +2,12 @@
 
 module Stoplight
   # A +Stoplight::Light+ configuration object.
-  class Configuration
+  class Config
     class << self
       alias __new_without_defaults__ new
 
-      # It overrides the +Configuration.new+ to inject default settings
-      # @see +Stoplight::Configuration#initialize+
+      # It overrides the +Config.new+ to inject default settings
+      # @see +Stoplight::Config#initialize+
       def new(**settings)
         __new_without_defaults__(
           **default_settings.merge(settings)
@@ -104,7 +104,7 @@ module Stoplight
     # @param window_size [Numeric]
     # @param tracked_errors [Array<StandardError>]
     # @param skipped_errors [Array<Exception>]
-    # @return [Stoplight::Configuration]
+    # @return [Stoplight::Config]
     def with(
       cool_off_time: self.cool_off_time,
       data_store: self.data_store,
@@ -116,7 +116,7 @@ module Stoplight
       tracked_errors: self.tracked_errors,
       skipped_errors: self.skipped_errors
     )
-      Configuration.new(
+      Config.new(
         cool_off_time: cool_off_time, data_store: data_store, error_notifier: error_notifier, name: name,
         notifiers: notifiers, threshold: threshold, window_size: window_size, tracked_errors: tracked_errors,
         skipped_errors: skipped_errors

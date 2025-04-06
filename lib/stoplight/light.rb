@@ -11,60 +11,60 @@ module Stoplight
 
     # @!attribute [r] data_store
     #   @return [Stoplight::DataStore::Base]
-    def_delegator :configuration, :data_store
+    def_delegator :config, :data_store
 
     # @!attribute [r] threshold
     #   @return [Integer]
-    def_delegator :configuration, :threshold
+    def_delegator :config, :threshold
 
     # @!attribute [r] cool_off_time
     #   @return [Fixnum]
-    def_delegator :configuration, :cool_off_time
+    def_delegator :config, :cool_off_time
 
     # @!attribute [r] window_size
     #   @return [Float]
-    def_delegator :configuration, :window_size
+    def_delegator :config, :window_size
 
     # @!attribute [r] notifiers
     #   # @return [Array<Notifier::Base>]
-    def_delegator :configuration, :notifiers
+    def_delegator :config, :notifiers
 
     # @!attribute [r] error_notifier
     #   # @return [Proc]
-    def_delegator :configuration, :error_notifier
+    def_delegator :config, :error_notifier
 
     # @!attribute [r] name
     #   @return [String]
-    def_delegator :configuration, :name
+    def_delegator :config, :name
 
-    # @return [Stoplight::Configuration]
+    # @return [Stoplight::Config]
     # @api private
-    attr_reader :configuration
+    attr_reader :config
 
     class << self
       # @param settings [Hash]
       #   @see +Stoplight::Configuration#initialize+
       # @return [Stoplight::Light]
       def with(**settings)
-        new Configuration.new(**settings)
+        new Config.new(**settings)
       end
     end
 
-    # @param configuration [Stoplight::Configuration]
-    def initialize(configuration)
-      @configuration = configuration
+    # @param config [Stoplight::Config]
+    def initialize(config)
+      @config = config
     end
 
     # @param other [any]
     # @return [Boolean]
     def ==(other)
-      other.is_a?(self.class) && configuration == other.configuration
+      other.is_a?(self.class) && config == other.config
     end
 
     private
 
-    def reconfigure(configuration)
-      self.class.new(configuration)
+    def reconfigure(config)
+      self.class.new(config)
     end
   end
 end

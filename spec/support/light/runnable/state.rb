@@ -3,7 +3,7 @@
 RSpec.shared_examples 'Stoplight::Light::Runnable#state' do
   let(:name) { random_string }
 
-  it { expect(light.configuration.data_store).to eq(data_store) }
+  it { expect(light.config.data_store).to eq(data_store) }
 
   it 'is initially unlocked' do
     expect(light.state).to eql(Stoplight::State::UNLOCKED)

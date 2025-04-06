@@ -44,7 +44,7 @@ module Stoplight # rubocop:disable Style/Documentation
 end
 
 require 'stoplight/circuit_breaker'
-require 'stoplight/configuration'
+require 'stoplight/config'
 require 'stoplight/light/lockable'
 require 'stoplight/light/runnable'
 require 'stoplight/light'

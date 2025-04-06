@@ -3,7 +3,7 @@
 RSpec.shared_examples 'Stoplight::Light::Runnable#color' do
   let(:name) { random_string }
 
-  it { expect(light.configuration.data_store).to eq(data_store) }
+  it { expect(light.config.data_store).to eq(data_store) }
 
   it 'is initially green' do
     expect(light.color).to eql(Stoplight::Color::GREEN)
