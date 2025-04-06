@@ -162,29 +162,5 @@ module Stoplight
     def run(fallback = nil, &code)
       raise NotImplementedError
     end
-
-    # Locks light in either +State::LOCKED_RED+ or +State::LOCKED_GREEN+
-    #
-    # @example
-    #   light = Stoplight('example-locked')
-    #   light.lock(Stoplight::Color::RED)
-    #
-    # @param color [String] should be either +Color::RED+ or +Color::GREEN+
-    # @return [Stoplight::CircuitBreaker] returns locked circuit breaker
-    def lock(color)
-      raise NotImplementedError
-    end
-
-    # Unlocks light and sets it's state to State::UNLOCKED
-    #
-    # @example
-    #   light = Stoplight('example-locked')
-    #   light.lock(Stoplight::Color::RED)
-    #   light.unlock
-    #
-    # @return [Stoplight::CircuitBreaker] returns unlocked circuit breaker
-    def unlock
-      raise NotImplementedError
-    end
   end
 end

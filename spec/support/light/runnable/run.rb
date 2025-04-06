@@ -138,7 +138,7 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
       context 'when we already sent notifications' do
         before do
           light.config.data_store.with_notification_lock(light, Stoplight::Color::GREEN,
-                                                                Stoplight::Color::RED) do
+                                                         Stoplight::Color::RED) do
 end
         end
 
