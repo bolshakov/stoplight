@@ -24,12 +24,4 @@ RSpec.describe Stoplight::CircuitBreaker do
   specify '#run' do
     expect { circuit_breaker.run {} }.to raise_error(NotImplementedError)
   end
-
-  specify '#lock' do
-    expect { circuit_breaker.lock('red') }.to raise_error(NotImplementedError)
-  end
-
-  specify '#unlock' do
-    expect { circuit_breaker.unlock }.to raise_error(NotImplementedError)
-  end
 end
