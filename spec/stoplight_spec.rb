@@ -47,32 +47,4 @@ RSpec.describe 'Stoplight' do
       expect(light.name).to eql(name)
     end
   end
-
-  describe '#fallback' do
-    it 'is initially the default' do
-      expect(light.fallback).to eql(Stoplight::Default::FALLBACK)
-    end
-  end
-
-  describe '#error_handler' do
-    it 'it initially the default' do
-      expect(light.error_handler).to eql(Stoplight::Default::ERROR_HANDLER)
-    end
-  end
-
-  describe '#with_error_handler' do
-    it 'sets the error handler' do
-      error_handler = ->(_, _) {}
-      with_error_handler = light.with_error_handler(&error_handler)
-      expect(with_error_handler.error_handler).to eql(error_handler)
-    end
-  end
-
-  describe '#with_fallback' do
-    it 'sets the fallback' do
-      fallback = ->(_) {}
-      with_fallback = light.with_fallback(&fallback)
-      expect(with_fallback.fallback).to eql(fallback)
-    end
-  end
 end

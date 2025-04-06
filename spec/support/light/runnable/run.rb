@@ -14,8 +14,8 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
 
   before { light.with_notifiers(notifiers) }
 
-  def run
-    light.run(&code)
+  def run(fallback = nil)
+    light.run(fallback, &code)
   end
 
   context 'when the light is green' do
@@ -49,6 +49,76 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
           nil
         end
         expect(light.configuration.data_store.get_failures(light).size).to eql(1)
+      end
+
+      context 'when error is not in the list of tracked errors' do
+        let(:light) { super().with_tracked_errors(KeyError) }
+
+        it 'does not record the failure' do
+          expect do
+            run
+          rescue error.class
+            nil
+          end.not_to change {
+            light.configuration.data_store.get_failures(light).size
+          }.from(0)
+        end
+      end
+
+      context 'when error is the list of tracked errors and in the list of skipped errors' do
+        let(:light) { super().with_tracked_errors(error.class).with_skipped_errors(error.class) }
+
+        it 'does not record the failure' do
+          expect do
+            run
+          rescue error.class
+            nil
+          end.not_to change {
+            light.configuration.data_store.get_failures(light).size
+          }.from(0)
+        end
+      end
+
+      context 'when error is in the list of tracked errors' do
+        let(:light) { super().with_tracked_errors(KeyError, error.class) }
+
+        it 'records the failure' do
+          expect do
+            run
+          rescue error.class
+            nil
+          end.to change {
+            light.configuration.data_store.get_failures(light).size
+          }.by(1)
+        end
+      end
+
+      context 'when error is in the list of skipped errors' do
+        let(:light) { super().with_skipped_errors(KeyError, error.class) }
+
+        it 'does not record the failure' do
+          expect do
+            run
+          rescue error.class
+            nil
+          end.not_to change {
+            light.configuration.data_store.get_failures(light).size
+          }.from(0)
+        end
+      end
+
+      context 'when error is not in the list of skipped errors' do
+        let(:light) { super().with_skipped_errors(KeyError) }
+
+        it 'records the failure' do
+          expect do
+            run
+          rescue error.class
+            nil
+          end.to change {
+            light.configuration.data_store.get_failures(light).size
+          }.by(1)
+        end
       end
 
       context 'when we did not send notifications yet' do
@@ -97,48 +167,13 @@ end
         expect(io.string).to_not eql('')
       end
 
-      context 'with an error handler' do
-        let(:result) do
-          run
-          expect(false).to be(true)
-        rescue error.class
-          expect(true).to be(true)
-        end
-
-        it 'records the failure when the handler does nothing' do
-          light.with_error_handler { |_error, _handler| }
-          expect { result }
-            .to change { light.configuration.data_store.get_failures(light).size }
-            .by(1)
-        end
-
-        it 'records the failure when the handler calls handle' do
-          light.with_error_handler { |error, handle| handle.call(error) }
-          expect { result }
-            .to change { light.configuration.data_store.get_failures(light).size }
-            .by(1)
-        end
-
-        it 'does not record the failure when the handler raises' do
-          light.with_error_handler { |error, _handle| raise error }
-          expect { result }
-            .to_not change { light.configuration.data_store.get_failures(light).size }
-        end
-      end
-
       context 'with a fallback' do
-        before { light.with_fallback(&fallback) }
-
         it 'runs the fallback' do
-          expect(run).to eql(fallback_result)
+          expect(run(fallback)).to eql(fallback_result)
         end
 
         it 'passes the error to the fallback' do
-          light.with_fallback do |e|
-            expect(e).to eql(error)
-            fallback_result
-          end
-          expect(run).to eql(fallback_result)
+          expect(run(->(e) { e&.message || fallback_result })).to eql(error.message)
         end
       end
     end
@@ -213,18 +248,10 @@ end
     end
 
     context 'with a fallback' do
-      before { light.with_fallback(&fallback) }
+      let(:fallback) { ->(error) { error || fallback_result } }
 
       it 'runs the fallback' do
-        expect(run).to eql(fallback_result)
-      end
-
-      it 'does not pass anything to the fallback' do
-        light.with_fallback do |e|
-          expect(e).to eql(nil)
-          fallback_result
-        end
-        expect(run).to eql(fallback_result)
+        expect(run(fallback)).to eql(fallback_result)
       end
     end
   end

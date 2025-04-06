@@ -64,4 +64,29 @@ RSpec.shared_examples Stoplight::CircuitBreaker do
       expect(with_attribute.configuration.error_notifier).to eq(error_notifier)
     end
   end
+
+  describe '#with_tracked_errors' do
+    let(:tracked_errors) { [RuntimeError, KeyError] }
+
+    subject(:with_attribute) do
+      circuit_breaker.with_tracked_errors(*tracked_errors)
+    end
+
+    it 'configures tracked errors' do
+      expect(with_attribute.configuration.tracked_errors).to contain_exactly(*tracked_errors)
+    end
+  end
+
+  describe '#with_skipped_errors' do
+    let(:skipped_errors) { [RuntimeError, KeyError] }
+
+    subject(:with_attribute) do
+      circuit_breaker.with_skipped_errors(*skipped_errors)
+    end
+
+    it 'configures skipped errors' do
+      expect(with_attribute.configuration.skipped_errors).to contain_exactly(*skipped_errors,
+                                                                             *Stoplight::Default::SKIPPED_ERRORS)
+    end
+  end
 end

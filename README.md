@@ -111,48 +111,95 @@ check out [the cool off time section][] When stoplights are yellow, they will
 try to run their code. If it fails, they'll switch back to red. If it succeeds,
 they'll switch to green.
 
-### Custom Errors
+### Error Handling
 
-Some errors shouldn't cause your stoplight to move into the red state. Usually
-these are handled elsewhere in your stack and don't represent real failures. A
-good example is `ActiveRecord::RecordNotFound`.
+Stoplight needs to determine which errors should change the light's state 
+and which shouldn't. For this purpose, Stoplight provides two 
+methods: `with_tracked_errors` and `with_skipped_errors`.
 
-To prevent some errors from changing the state of your stoplight, you can
-provide a custom block that will be called with the error and a handler
-`Proc`. It can do one of three things:
+#### Default Behavior
 
-1.  Re-raise the error. This causes Stoplight to ignore the error. Do this for
-    errors like `ActiveRecord::RecordNotFound` that don't represent real
-    failures.
+By default, Stoplight tracks all `StandardError` exceptions, but automatically 
+skips the following errors:
 
-2.  Call the handler with the error. This is the default behavior. Stoplight
-    will only ignore the error if it shouldn't have been caught in the first
-    place. See `Stoplight::Error::AVOID_RESCUING` for a list of errors that
-    will be ignored.
+```
+NoMemoryError,
+ScriptError,
+SecurityError,
+SignalException,
+SystemExit,
+SystemStackError
+```
 
-3.  Do nothing. This is **not recommended**. Doing nothing causes Stoplight to
-    never ignore the error. That means a `NoMemoryError` could change the color
-    of your stoplights.
+#### Custom Error Configuration
+
+Some errors shouldn't cause your Stoplight to move into the red state. Usually 
+these are handled elsewhere in your stack and don't represent real failures. 
+A good example is `ActiveRecord::RecordNotFound`. 
+
+To prevent specific errors from changing the state of your stoplight, use `#with_skipped_errors`:
 
 ```ruby
 light = Stoplight('example-not-found')
-  .with_error_handler do |error, handle|
-    if error.is_a?(ActiveRecord::RecordNotFound)
-      raise error
-    else      
-      handle.call(error)
-    end
-  end
-# => #<Stoplight::CircuitBreaker:...>
+  .with_skipped_errors(ActiveRecord::RecordNotFound)
+# => #<Stoplight::Light:...>
+
 light.run { User.find(123) }
 # ActiveRecord::RecordNotFound: Couldn't find User with ID=123
 light.run { User.find(123) }
 # ActiveRecord::RecordNotFound: Couldn't find User with ID=123
 light.run { User.find(123) }
 # ActiveRecord::RecordNotFound: Couldn't find User with ID=123
+
 light.color
 # => "green"
 ```
+
+You can add multiple errors to skip:
+
+```ruby
+light = Stoplight('example-custom')
+  .with_skipped_errors(
+    ActiveRecord::RecordNotFound, 
+    ActiveRecord::RecordInvalid,
+    ValidationError
+  )
+```
+
+To explicitly specify which errors should be tracked (those that will 
+change the light's state), use `#with_tracked_errors`:
+
+```ruby
+light = Stoplight('example-api')
+  .with_tracked_errors(
+    NetworkError,
+    Timeout::Error,
+    ApiRateLimitError
+  )
+```
+
+#### Interaction Between Tracked and Skipped Errors
+
+When both `#with_tracked_errors` and `#with_skipped_errors` are used:
+
+* Errors in the `skipped_errors` list take precedence - they will never change the light's color
+* Errors in the `tracked_errors` list will be counted toward changing the light from green to yellow to red
+* Errors in neither list will follow the default behavior (tracked unless they're in the built-in skip list)
+
+#### Advanced Usage: Triple Equals Operator
+
+Both methods use triple equals operator (`===`) for comparison, allowing for flexible error matching:
+
+```ruby
+light = Stoplight('flexible-matching')
+  .with_tracked_errors(
+    ->(e) { e.is_a?(ApiError) && e.status >= 500 },
+    ->(e) { e.message.include?("rate limit exceeded") }
+  )
+```
+
+This allows for complex error classification based on error properties 
+beyond just their class.
 
 ### Custom Fallback
 
@@ -162,20 +209,20 @@ fallback that will be called in both of these cases. It will be passed the
 error if the light was green.
 
 ```ruby
+fallback = ->(e) {  e; 'default' }
 light = Stoplight('example-fallback')
-  .with_fallback { |e| p e; 'default' }
 # => #<Stoplight::CircuitBreaker:..>
-light.run { 1 / 0 }
+light.run(fallback) { 1 / 0 }
 # #<ZeroDivisionError: divided by 0>
 # => "default"
-light.run { 1 / 0 }
+light.run(fallback) { 1 / 0 }
 # #<ZeroDivisionError: divided by 0>
 # => "default"
-light.run { 1 / 0 }
+light.run(fallback) { 1 / 0 }
 # Switching example-fallback from green to red because ZeroDivisionError divided by 0
 # #<ZeroDivisionError: divided by 0>
 # => "default"
-light.run { 1 / 0 }
+light.run(fallback) { 1 / 0 }
 # nil
 # => "default"
 ```

@@ -19,16 +19,6 @@ RSpec.describe Stoplight::Default do
     end
   end
 
-  describe '::ERROR_HANDLER' do
-    it 'is a proc' do
-      expect(Stoplight::Default::ERROR_HANDLER).to be_a(Proc)
-    end
-
-    it 'has an arity of 2' do
-      expect(Stoplight::Default::ERROR_HANDLER.arity).to eql(2)
-    end
-  end
-
   describe '::ERROR_NOTIFIER' do
     it 'is a proc' do
       expect(Stoplight::Default::ERROR_NOTIFIER).to be_a(Proc)
@@ -36,12 +26,6 @@ RSpec.describe Stoplight::Default do
 
     it 'has an arity of 1' do
       expect(Stoplight::Default::ERROR_NOTIFIER.arity).to eql(1)
-    end
-  end
-
-  describe '::FALLBACK' do
-    it 'is nil' do
-      expect(Stoplight::Default::FALLBACK).to eql(nil)
     end
   end
 

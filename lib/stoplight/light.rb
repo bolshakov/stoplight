@@ -35,10 +35,6 @@ module Stoplight
 
     # @return [String]
     attr_reader :name
-    # @return [Proc]
-    attr_reader :error_handler
-    # @return [Proc, nil]
-    attr_reader :fallback
     # @return [Stoplight::Configuration]
     # @api private
     attr_reader :configuration
@@ -49,23 +45,6 @@ module Stoplight
     def initialize(name, configuration)
       @configuration = configuration
       @name = name
-      @error_handler = Default::ERROR_HANDLER
-      @fallback = Default::FALLBACK
-    end
-
-    # @yieldparam error [Exception]
-    # @yieldparam handle [Proc]
-    # @return [Stoplight::CircuitBreaker]
-    def with_error_handler(&error_handler)
-      @error_handler = error_handler
-      self
-    end
-
-    # @yieldparam error [Exception, nil]
-    # @return [Stoplight::CircuitBreaker]
-    def with_fallback(&fallback)
-      @fallback = fallback
-      self
     end
 
     private

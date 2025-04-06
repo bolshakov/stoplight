@@ -6,11 +6,7 @@ module Stoplight
 
     DATA_STORE = DataStore::Memory.new
 
-    ERROR_HANDLER = ->(error, handler) { handler.call(error) }
-
     ERROR_NOTIFIER = ->(error) { warn error }
-
-    FALLBACK = nil
 
     FORMATTER = lambda do |light, from_color, to_color, error|
       words = ['Switching', light.name, 'from', from_color, 'to', to_color]
@@ -25,5 +21,15 @@ module Stoplight
     THRESHOLD = 3
 
     WINDOW_SIZE = Float::INFINITY
+
+    TRACKED_ERRORS = [StandardError].freeze
+    SKIPPED_ERRORS = [
+      NoMemoryError,
+      ScriptError,
+      SecurityError,
+      SignalException,
+      SystemExit,
+      SystemStackError
+    ].freeze
   end
 end

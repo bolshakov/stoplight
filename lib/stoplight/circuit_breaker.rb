@@ -83,38 +83,43 @@ module Stoplight
       reconfigure(configuration.with(error_notifier: error_notifier))
     end
 
-    # Configures a custom proc that allows you not to handle an error
-    # with Stoplight.
+    # Configures a custom list of tracked errors that counts toward the threshold.
     #
     # @example
     #   light = Stoplight('example')
-    #     .with_error_handler do |error, handler|
-    #       raise error if error.is_a?(ActiveRecord::RecordNotFound)
-    #       handle.call(error)
-    #     end
+    #     .with_tracked_errors(TimeoutError, NetworkError)
+    #   light.run { call_external_service }
+    #
+    # In the example above, the +TimeoutError+ and +NetworkError+ exceptions
+    # will be counted towards the threshold for moving the circuit breaker into the red state.
+    # If not configured, the default tracked error is +StandardError+.
+    #
+    # @param tracked_errors [Array<StandardError>]
+    # @return [Stoplight::CircuitBreaker]
+    def with_tracked_errors(*tracked_errors)
+      reconfigure(configuration.with(tracked_errors: tracked_errors.dup.freeze))
+    end
+
+    # Configures a custom list of skipped errors that do not count toward the threshold.
+    # Typically, such errors does not represent a real failure and handled somewhere else
+    # in the code.
+    #
+    # @example
+    #   light = Stoplight('example')
+    #    .with_skipped_errors(ActiveRecord::RecordNotFound)
     #   light.run { User.find(123) }
     #
     # In the example above, the +ActiveRecord::RecordNotFound+ doesn't
     # move the circuit breaker into the red state.
     #
-    # @yieldparam error [Exception]
-    # @yieldparam handle [Proc]
-    # @return [Stoplight::CircuitBreaker]
-    def with_error_handler(&error_handler)
-      raise NotImplementedError
-    end
-
-    # Configures light with the given fallback block
+    # The list of skipped errors is always complemented by the default
+    # skipped errors: +NoMemoryError+, +ScriptError+, +SecurityError+, etc.
+    # @see +Stoplight::Default::SKIPPED_ERRORS+
     #
-    # @example
-    #   light = Stoplight('example')
-    #   light.with_fallback { |error| e.is_a?()ZeroDivisionError) ? 0 : nil }
-    #   light.run { 1 / 0} #=> 0
-    #
-    # @yieldparam error [Exception, nil]
+    # @param skipped_errors [Array<Exception>]
     # @return [Stoplight::CircuitBreaker]
-    def with_fallback(&fallback)
-      raise NotImplementedError
+    def with_skipped_errors(*skipped_errors)
+      reconfigure(configuration.with(skipped_errors: skipped_errors))
     end
 
     # @return [String] one of +locked_green+, +locked_red+, and +unlocked+
@@ -147,9 +152,14 @@ module Stoplight
     #   light = Stoplight('example')
     #   light.run { 2/0 }
     #
+    # @example Running with fallback
+    #   light = Stoplight('example')
+    #   light.run(->(error) { 0 }) { 1 / 0 } #=> 0
+    #
+    # @param fallback [Proc, nil] (nil) fallback code to run if the circuit breaker is open
     # @raise [Stoplight::Error::RedLight]
     # @return [any]
-    def run(&code)
+    def run(fallback = nil, &code)
       raise NotImplementedError
     end
 

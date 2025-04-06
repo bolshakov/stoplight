@@ -24,7 +24,9 @@ module Stoplight
           error_notifier: Stoplight.default_error_notifier,
           notifiers: Stoplight.default_notifiers,
           threshold: Default::THRESHOLD,
-          window_size: Default::WINDOW_SIZE
+          window_size: Default::WINDOW_SIZE,
+          tracked_errors: Default::TRACKED_ERRORS,
+          skipped_errors: Default::SKIPPED_ERRORS
         }
       end
     end
@@ -57,6 +59,14 @@ module Stoplight
     #   @return [Numeric]
     attr_reader :window_size
 
+    # @!attribute [r] tracked_errors
+    #   @return [Set<StandardError>]
+    attr_reader :tracked_errors
+
+    # @!attribute [r] skipped_errors
+    #  @return [Set<Exception>]
+    attr_reader :skipped_errors
+
     # @param name [String]
     # @param cool_off_time [Numeric]
     # @param data_store [Stoplight::DataStore::Base]
@@ -64,7 +74,10 @@ module Stoplight
     # @param notifiers [Stoplight::Notifier::Base]
     # @param threshold [Numeric]
     # @param window_size [Numeric]
-    def initialize(name:, cool_off_time:, data_store:, error_notifier:, notifiers:, threshold:, window_size:)
+    # @param tracked_errors [Array<StandardError>]
+    # @param skipped_errors [Array<Exception>]
+    def initialize(name:, cool_off_time:, data_store:, error_notifier:, notifiers:, threshold:, window_size:,
+                   tracked_errors:, skipped_errors:)
       @name = name
       @cool_off_time = cool_off_time
       @data_store = data_store
@@ -72,6 +85,8 @@ module Stoplight
       @notifiers = notifiers
       @threshold = threshold
       @window_size = window_size
+      @tracked_errors = Set.new(tracked_errors)
+      @skipped_errors = Set.new(skipped_errors + Stoplight::Default::SKIPPED_ERRORS)
     end
 
     # @param other [any]
@@ -87,6 +102,8 @@ module Stoplight
     # @param notifiers [Array<Stoplight::Notifier::Base>]
     # @param threshold [Numeric]
     # @param window_size [Numeric]
+    # @param tracked_errors [Array<StandardError>]
+    # @param skipped_errors [Array<Exception>]
     # @return [Stoplight::Configuration]
     def with(
       cool_off_time: self.cool_off_time,
@@ -95,16 +112,14 @@ module Stoplight
       name: self.name,
       notifiers: self.notifiers,
       threshold: self.threshold,
-      window_size: self.window_size
+      window_size: self.window_size,
+      tracked_errors: self.tracked_errors,
+      skipped_errors: self.skipped_errors
     )
       Configuration.new(
-        cool_off_time: cool_off_time,
-        data_store: data_store,
-        error_notifier: error_notifier,
-        name: name,
-        notifiers: notifiers,
-        threshold: threshold,
-        window_size: window_size
+        cool_off_time: cool_off_time, data_store: data_store, error_notifier: error_notifier, name: name,
+        notifiers: notifiers, threshold: threshold, window_size: window_size, tracked_errors: tracked_errors,
+        skipped_errors: skipped_errors
       )
     end
 
@@ -113,13 +128,9 @@ module Stoplight
     # @return [Hash]
     def settings
       {
-        cool_off_time: cool_off_time,
-        data_store: data_store,
-        error_notifier: error_notifier,
-        name: name,
-        notifiers: notifiers,
-        threshold: threshold,
-        window_size: window_size
+        cool_off_time: cool_off_time, data_store: data_store, error_notifier: error_notifier, name: name,
+        notifiers: notifiers, threshold: threshold, window_size: window_size, tracked_errors: tracked_errors,
+        skipped_errors: skipped_errors
       }
     end
   end
