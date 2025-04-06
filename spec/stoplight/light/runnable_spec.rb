@@ -16,9 +16,7 @@ RSpec.describe Stoplight::Light::Runnable, :redis do
     ('a'..'z').to_a.sample(8).join
   end
 
-  before do
-    light.with_data_store(data_store)
-  end
+  let(:light) { Stoplight(name).with_data_store(data_store) }
 
   context 'with memory data store' do
     let(:data_store) { Stoplight::DataStore::Memory.new }

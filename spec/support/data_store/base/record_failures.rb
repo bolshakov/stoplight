@@ -28,9 +28,9 @@ RSpec.shared_examples 'Stoplight::DataStore::Base#record_failure' do
 
   shared_examples 'with_threshold' do
     context 'when the number of errors is bigger then threshold' do
-      before do
-        light.with_threshold(1)
+      let(:light) { super().with_threshold(1) }
 
+      before do
         data_store.record_failure(light, failure)
       end
 
@@ -49,9 +49,7 @@ RSpec.shared_examples 'Stoplight::DataStore::Base#record_failure' do
   context 'with window_size' do
     let(:window_size) { 3600 }
 
-    before do
-      light.with_window_size(window_size)
-    end
+    let(:light) { super().with_window_size(window_size) }
 
     context 'when error is outside of the window' do
       let(:older_failure) { Stoplight::Failure.new('class', 'message 3', Time.new - window_size - 1) }

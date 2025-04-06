@@ -1,10 +1,11 @@
 # frozen_string_literal: true
 
 RSpec.shared_examples 'Stoplight::Light::Runnable#color' do
-  subject(:light) { Stoplight(name).build }
+  let(:light) { super().build }
 
   let(:name) { random_string }
-  let(:data_store) { light.configuration.data_store }
+
+  it { expect(light.configuration.data_store).to eq(data_store) }
 
   it 'is initially green' do
     expect(light.color).to eql(Stoplight::Color::GREEN)
@@ -32,9 +33,9 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#color' do
 
   context 'when there are many failures' do
     let(:anther) { Stoplight::Failure.new(error.class.name, error.message, time - 10) }
+    let(:light) { super().with_threshold(2) }
 
     before do
-      light.with_threshold(2)
       data_store.record_failure(light, failure)
     end
 
@@ -48,9 +49,9 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#color' do
   context 'when the most recent failure is old' do
     let(:failure) { Stoplight::Failure.new(error.class.name, error.message, Time.new - light.cool_off_time) }
     let(:failure2) { Stoplight::Failure.new(error.class.name, error.message, Time.new - light.cool_off_time - 10) }
+    let(:light) { super().with_threshold(2) }
 
     before do
-      light.with_threshold(2)
       data_store.record_failure(light, failure2)
     end
 
@@ -65,9 +66,9 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#color' do
     let(:other) do
       Stoplight::Failure.new(error.class.name, error.message, Time.new - light.cool_off_time)
     end
+    let(:light) { super().with_threshold(2) }
 
     before do
-      light.with_threshold(2)
       data_store.record_failure(light, other)
     end
 

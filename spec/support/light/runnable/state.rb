@@ -1,10 +1,9 @@
 # frozen_string_literal: true
 
 RSpec.shared_examples 'Stoplight::Light::Runnable#state' do
-  subject(:light) { Stoplight(name).build }
-
   let(:name) { random_string }
-  let(:data_store) { light.configuration.data_store }
+
+  it { expect(light.configuration.data_store).to eq(data_store) }
 
   it 'is initially unlocked' do
     expect(light.state).to eql(Stoplight::State::UNLOCKED)
