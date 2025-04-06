@@ -8,15 +8,6 @@ module Stoplight
     include Lockable
     include Runnable
 
-    class << self
-      # @param settings [Hash]
-      #   @see +Stoplight::Config#initialize+
-      # @return [Stoplight::Light]
-      def with(**settings)
-        new Config.new(**settings)
-      end
-    end
-
     # @!attribute [r] config
     #   @return [Stoplight::Config]
     #   @api private

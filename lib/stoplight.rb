@@ -52,5 +52,6 @@ require 'stoplight/light'
 
 # @return [Stoplight::CircuitBreaker]
 def Stoplight(name) # rubocop:disable Naming/MethodName
-  Stoplight::Light.with(name: name)
+  config = Stoplight::Light::Config.new(name: name)
+  Stoplight::Light.new(config)
 end
