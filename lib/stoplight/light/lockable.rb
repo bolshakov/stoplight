@@ -35,7 +35,7 @@ module Stoplight
                 else raise Error::IncorrectColor
                 end
 
-        safely { data_store.set_state(self, state) }
+        safely { config.data_store.set_state(config, state) }
 
         self
       end
@@ -49,7 +49,7 @@ module Stoplight
       #
       # @return [Stoplight::CircuitBreaker] returns unlocked circuit breaker
       def unlock
-        safely { data_store.set_state(self, Stoplight::State::UNLOCKED) }
+        safely { config.data_store.set_state(config, Stoplight::State::UNLOCKED) }
 
         self
       end

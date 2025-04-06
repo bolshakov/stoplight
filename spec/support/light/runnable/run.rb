@@ -11,26 +11,27 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
   let(:notifiers) { [notifier] }
   let(:notifier) { Stoplight::Notifier::IO.new(io) }
   let(:io) { StringIO.new }
+  let(:config) { light.config }
 
   def run(fallback = nil)
     light.run(fallback, &code)
   end
 
-  it { expect(light.config.data_store).to eq(data_store) }
+  it { expect(config.data_store).to eq(data_store) }
 
   context 'when the light is green' do
-    before { light.config.data_store.clear_failures(light) }
+    before { config.data_store.clear_failures(config) }
 
     it 'runs the code' do
       expect(run).to eql(code_result)
     end
 
     context 'with some failures' do
-      before { light.config.data_store.record_failure(light, failure) }
+      before { config.data_store.record_failure(config, failure) }
 
       it 'clears the failures' do
         run
-        expect(light.config.data_store.get_failures(light).size).to eql(0)
+        expect(config.data_store.get_failures(config).size).to eql(0)
       end
     end
 
@@ -42,13 +43,13 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
       end
 
       it 'records the failure' do
-        expect(light.config.data_store.get_failures(light).size).to eql(0)
+        expect(config.data_store.get_failures(config).size).to eql(0)
         begin
           run
         rescue error.class
           nil
         end
-        expect(light.config.data_store.get_failures(light).size).to eql(1)
+        expect(config.data_store.get_failures(config).size).to eql(1)
       end
 
       context 'when error is not in the list of tracked errors' do
@@ -60,7 +61,7 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
           rescue error.class
             nil
           end.not_to change {
-            light.config.data_store.get_failures(light).size
+            config.data_store.get_failures(config).size
           }.from(0)
         end
       end
@@ -74,7 +75,7 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
           rescue error.class
             nil
           end.not_to change {
-            light.config.data_store.get_failures(light).size
+            config.data_store.get_failures(config).size
           }.from(0)
         end
       end
@@ -88,7 +89,7 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
           rescue error.class
             nil
           end.to change {
-            light.config.data_store.get_failures(light).size
+            config.data_store.get_failures(config).size
           }.by(1)
         end
       end
@@ -102,7 +103,7 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
           rescue error.class
             nil
           end.not_to change {
-            light.config.data_store.get_failures(light).size
+            light.config.data_store.get_failures(config).size
           }.from(0)
         end
       end
@@ -116,14 +117,14 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
           rescue error.class
             nil
           end.to change {
-            light.config.data_store.get_failures(light).size
+            config.data_store.get_failures(config).size
           }.by(1)
         end
       end
 
       context 'when we did not send notifications yet' do
         it 'notifies when transitioning to red' do
-          light.threshold.times do
+          config.threshold.times do
             expect(io.string).to eql('')
             begin
               run
@@ -137,13 +138,13 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
 
       context 'when we already sent notifications' do
         before do
-          light.config.data_store.with_notification_lock(light, Stoplight::Color::GREEN,
-                                                         Stoplight::Color::RED) do
+          config.data_store.with_notification_lock(light, Stoplight::Color::GREEN,
+                                                   Stoplight::Color::RED) do
 end
         end
 
         it 'does not send new notifications' do
-          light.threshold.times do
+          config.threshold.times do
             expect(io.string).to eql('')
             begin
               run
@@ -156,7 +157,7 @@ end
       end
 
       it 'notifies when transitioning to red' do
-        light.threshold.times do
+        config.threshold.times do
           expect(io.string).to eql('')
           begin
             run
@@ -187,7 +188,7 @@ end
       end
 
       before do
-        allow(light.config.data_store).to receive(:clear_failures) { raise error }
+        allow(config.data_store).to receive(:clear_failures) { raise error }
       end
 
       it 'runs the code' do
@@ -203,13 +204,13 @@ end
   end
 
   context 'when the light is yellow' do
-    let(:failure) { Stoplight::Failure.new(error.class.name, error.message, Time.new - light.cool_off_time) }
-    let(:failure2) { Stoplight::Failure.new(error.class.name, error.message, Time.new - light.cool_off_time - 10) }
+    let(:failure) { Stoplight::Failure.new(error.class.name, error.message, Time.new - config.cool_off_time) }
+    let(:failure2) { Stoplight::Failure.new(error.class.name, error.message, Time.new - config.cool_off_time - 10) }
     let(:light) { super().with_threshold(2) }
 
     before do
-      light.config.data_store.record_failure(light, failure2)
-      light.config.data_store.record_failure(light, failure)
+      config.data_store.record_failure(config, failure2)
+      config.data_store.record_failure(config, failure)
     end
 
     it 'runs the code' do
@@ -226,13 +227,13 @@ end
 
   context 'when the light is red' do
     let(:other) do
-      Stoplight::Failure.new(error.class.name, error.message, Time.new - light.cool_off_time)
+      Stoplight::Failure.new(error.class.name, error.message, Time.new - config.cool_off_time)
     end
     let(:light) { super().with_threshold(2) }
 
     before do
-      light.config.data_store.record_failure(light, other)
-      light.config.data_store.record_failure(light, failure)
+      config.data_store.record_failure(config, other)
+      config.data_store.record_failure(config, failure)
     end
 
     it 'raises an error' do

@@ -20,47 +20,47 @@ module Stoplight
         synchronize { @failures.keys | @states.keys }
       end
 
-      def get_all(light)
-        synchronize { [query_failures(light), @states[light.name]] }
+      def get_all(config)
+        synchronize { [query_failures(config), @states[config.name]] }
       end
 
-      def get_failures(light)
-        synchronize { query_failures(light) }
+      def get_failures(config)
+        synchronize { query_failures(config) }
       end
 
-      def record_failure(light, failure)
+      def record_failure(config, failure)
         synchronize do
-          light_name = light.name
+          light_name = config.name
 
-          # Keep at most +light.threshold+ number of errors
-          @failures[light_name] = @failures[light_name].first(light.threshold - 1)
+          # Keep at most +config.threshold+ number of errors
+          @failures[light_name] = @failures[light_name].first(config.threshold - 1)
           @failures[light_name].unshift(failure)
           # Remove all errors happened before the window start
-          @failures[light_name] = query_failures(light, failure.time)
+          @failures[light_name] = query_failures(config, failure.time)
           @failures[light_name].size
         end
       end
 
-      def clear_failures(light)
-        synchronize { @failures.delete(light.name) || [] }
+      def clear_failures(config)
+        synchronize { @failures.delete(config.name) || [] }
       end
 
-      def get_state(light)
-        synchronize { @states[light.name] }
+      def get_state(config)
+        synchronize { @states[config.name] }
       end
 
-      def set_state(light, state)
-        synchronize { @states[light.name] = state }
+      def set_state(config, state)
+        synchronize { @states[config.name] = state }
       end
 
-      def clear_state(light)
-        synchronize { @states.delete(light.name) }
+      def clear_state(config)
+        synchronize { @states.delete(config.name) }
       end
 
-      def with_notification_lock(light, from_color, to_color)
+      def with_notification_lock(config, from_color, to_color)
         synchronize do
-          if last_notification(light) != [from_color, to_color]
-            set_last_notification(light, from_color, to_color)
+          if last_notification(config) != [from_color, to_color]
+            set_last_notification(config, from_color, to_color)
 
             yield
           end
@@ -69,25 +69,25 @@ module Stoplight
 
       private
 
-      # @param light [Stoplight::Light]
+      # @param config [Stoplight::Config]
       # @return [Array, nil]
-      def last_notification(light)
-        @last_notifications[light.name]
+      def last_notification(config)
+        @last_notifications[config.name]
       end
 
-      # @param light [Stoplight::Light]
+      # @param config [Stoplight::Config]
       # @param from_color [String]
       # @param to_color [String]
       # @return [void]
-      def set_last_notification(light, from_color, to_color)
-        @last_notifications[light.name] = [from_color, to_color]
+      def set_last_notification(config, from_color, to_color)
+        @last_notifications[config.name] = [from_color, to_color]
       end
 
-      # @param light [Stoplight::Light]
+      # @param config [Stoplight::Config]
       # @return [<Stoplight::Failure>]
-      def query_failures(light, time = Time.now)
-        @failures[light.name].select do |failure|
-          failure.time.to_i > time.to_i - light.window_size
+      def query_failures(config, time = Time.now)
+        @failures[config.name].select do |failure|
+          failure.time.to_i > time.to_i - config.window_size
         end
       end
     end

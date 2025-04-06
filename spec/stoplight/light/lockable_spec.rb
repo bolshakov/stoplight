@@ -3,8 +3,9 @@
 require 'spec_helper'
 
 RSpec.describe Stoplight::Light::Lockable do
-  subject(:light) { Stoplight(name) }
+  subject(:light) { Stoplight::Light.new(config) }
 
+  let(:config) { Stoplight::Config.new(name: name) }
   let(:code) { -> { code_result } }
   let(:code_result) { random_string }
   let(:name) { random_string }
@@ -25,7 +26,7 @@ RSpec.describe Stoplight::Light::Lockable do
         let(:color) { Stoplight::Color::GREEN }
 
         it 'locks green color' do
-          expect(light.data_store).to receive(:set_state).with(light, Stoplight::State::LOCKED_GREEN)
+          expect(config.data_store).to receive(:set_state).with(config, Stoplight::State::LOCKED_GREEN)
 
           light.lock(color)
         end
@@ -35,7 +36,7 @@ RSpec.describe Stoplight::Light::Lockable do
         let(:color) { Stoplight::Color::RED }
 
         it 'locks red color' do
-          expect(light.data_store).to receive(:set_state).with(light, Stoplight::State::LOCKED_RED)
+          expect(config.data_store).to receive(:set_state).with(config, Stoplight::State::LOCKED_RED)
 
           light.lock(color)
         end
@@ -50,7 +51,7 @@ RSpec.describe Stoplight::Light::Lockable do
       end
 
       it 'does not lock color' do
-        expect(light.data_store).to_not receive(:set_state)
+        expect(config.data_store).to_not receive(:set_state)
 
         suppress(Stoplight::Error::IncorrectColor) { light.lock(color) }
       end
@@ -66,7 +67,7 @@ RSpec.describe Stoplight::Light::Lockable do
       before { light.lock(Stoplight::Color::GREEN) }
 
       it 'unlocks light' do
-        expect(light.data_store).to receive(:set_state).with(light, Stoplight::State::UNLOCKED)
+        expect(config.data_store).to receive(:set_state).with(config, Stoplight::State::UNLOCKED)
 
         light.unlock
       end
@@ -76,7 +77,7 @@ RSpec.describe Stoplight::Light::Lockable do
       before { light.lock(Stoplight::Color::RED) }
 
       it 'unlocks light' do
-        expect(light.data_store).to receive(:set_state).with(light, Stoplight::State::UNLOCKED)
+        expect(config.data_store).to receive(:set_state).with(config, Stoplight::State::UNLOCKED)
 
         light.unlock
       end
@@ -84,7 +85,7 @@ RSpec.describe Stoplight::Light::Lockable do
 
     context 'with unlocked light' do
       it 'unlocks light' do
-        expect(light.data_store).to receive(:set_state).with(light, Stoplight::State::UNLOCKED)
+        expect(config.data_store).to receive(:set_state).with(config, Stoplight::State::UNLOCKED)
 
         light.unlock
       end

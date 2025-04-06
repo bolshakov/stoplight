@@ -1,9 +1,11 @@
 # frozen_string_literal: true
 
 RSpec.shared_examples 'Stoplight::DataStore::Base#get_all' do
+  let(:config) { light.config }
+
   context 'when there are no errors' do
     it 'returns the failures and the state' do
-      failures, state = data_store.get_all(light)
+      failures, state = data_store.get_all(config)
 
       expect(failures).to eql([])
       expect(state).to eql(Stoplight::State::UNLOCKED)
@@ -12,11 +14,11 @@ RSpec.shared_examples 'Stoplight::DataStore::Base#get_all' do
 
   context 'when there are errors' do
     before do
-      data_store.record_failure(light, failure)
+      data_store.record_failure(config, failure)
     end
 
     it 'returns the failures and the state' do
-      failures, state = data_store.get_all(light)
+      failures, state = data_store.get_all(config)
 
       expect(failures).to eq([failure])
       expect(state).to eql(Stoplight::State::UNLOCKED)
@@ -29,12 +31,12 @@ RSpec.shared_examples 'Stoplight::DataStore::Base#get_all' do
     let(:light) { super().with_window_size(window_size) }
 
     before do
-      data_store.record_failure(light, older_failure)
-      data_store.record_failure(light, failure)
+      data_store.record_failure(config, older_failure)
+      data_store.record_failure(config, failure)
     end
 
     it 'returns the failures within window and the state' do
-      failures, state = data_store.get_all(light)
+      failures, state = data_store.get_all(config)
 
       expect(failures).to contain_exactly(failure)
       expect(state).to eql(Stoplight::State::UNLOCKED)
