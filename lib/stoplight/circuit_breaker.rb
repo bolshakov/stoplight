@@ -186,13 +186,5 @@ module Stoplight
     def unlock
       raise NotImplementedError
     end
-
-    private
-
-    # @param [Stoplight::Config]
-    # @return [Stoplight::CircuitBreaker]
-    def reconfigure(_configuration)
-      raise NotImplementedError, "#{self.class.name}#reconfigure is not implemented"
-    end
   end
 end
