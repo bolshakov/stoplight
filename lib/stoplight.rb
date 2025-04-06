@@ -45,6 +45,7 @@ end
 
 require 'stoplight/circuit_breaker'
 require 'stoplight/config'
+require 'stoplight/light/configurable'
 require 'stoplight/light/lockable'
 require 'stoplight/light/runnable'
 require 'stoplight/light'

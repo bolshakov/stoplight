@@ -44,8 +44,7 @@ RSpec.describe Stoplight::Light do
     end
   end
 
-  it_behaves_like Stoplight::CircuitBreaker do
-    let(:light) { Stoplight(name) }
-    let(:circuit_breaker) { described_class.new(config) }
+  it_behaves_like Stoplight::Light::Configurable do
+    let(:light) { described_class.new(config) }
   end
 end

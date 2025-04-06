@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Stoplight
-  class Light
+  class Light < CircuitBreaker
     module Runnable # rubocop:disable Style/Documentation
       # @return [String]
       def state
