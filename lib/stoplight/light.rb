@@ -64,8 +64,7 @@ module Stoplight
     private
 
     def reconfigure(configuration)
-      @configuration = configuration
-      self
+      self.class.new(configuration)
     end
   end
 end

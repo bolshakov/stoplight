@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
-  subject(:light) { Stoplight(name).build }
+  let(:light) { super().with_notifiers(notifiers).build }
 
   let(:code) { -> { code_result } }
   let(:code_result) { random_string }
@@ -12,11 +12,11 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
   let(:notifier) { Stoplight::Notifier::IO.new(io) }
   let(:io) { StringIO.new }
 
-  before { light.with_notifiers(notifiers) }
-
   def run(fallback = nil)
     light.run(fallback, &code)
   end
+
+  it { expect(light.configuration.data_store).to eq(data_store) }
 
   context 'when the light is green' do
     before { light.configuration.data_store.clear_failures(light) }
@@ -179,27 +179,25 @@ end
     end
 
     context 'when the data store is failing' do
-      let(:error_notifier) { ->(_) {} }
       let(:error) { StandardError.new('something went wrong') }
+      let(:light) do
+        super().with_error_notifier do |e|
+          @yielded_error = e
+        end
+      end
 
       before do
-        expect(data_store).to receive(:clear_failures) { raise error }
-
-        light.with_error_notifier(&error_notifier)
+        allow(light.configuration.data_store).to receive(:clear_failures) { raise error }
       end
 
       it 'runs the code' do
         expect(run).to eql(code_result)
       end
 
-      it 'notifies about the error' do
-        has_notified = false
-        light.with_error_notifier do |e|
-          has_notified = true
-          expect(e).to eq(error)
-        end
+      fit 'notifies about the error' do
+        expect(@yielded_error).to be(nil)
         run
-        expect(has_notified).to eql(true)
+        expect(@yielded_error).to eql(error)
       end
     end
   end
@@ -207,9 +205,9 @@ end
   context 'when the light is yellow' do
     let(:failure) { Stoplight::Failure.new(error.class.name, error.message, Time.new - light.cool_off_time) }
     let(:failure2) { Stoplight::Failure.new(error.class.name, error.message, Time.new - light.cool_off_time - 10) }
+    let(:light) { super().with_threshold(2) }
 
     before do
-      light.with_threshold(2)
       light.configuration.data_store.record_failure(light, failure2)
       light.configuration.data_store.record_failure(light, failure)
     end
@@ -230,9 +228,9 @@ end
     let(:other) do
       Stoplight::Failure.new(error.class.name, error.message, Time.new - light.cool_off_time)
     end
+    let(:light) { super().with_threshold(2) }
 
     before do
-      light.with_threshold(2)
       light.configuration.data_store.record_failure(light, other)
       light.configuration.data_store.record_failure(light, failure)
     end
