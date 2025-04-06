@@ -20,7 +20,7 @@ RSpec.shared_examples 'a generic notifier' do
   end
 
   describe '#notify' do
-    let(:light) { Stoplight(name).build }
+    let(:light) { Stoplight(name) }
     let(:name) { ('a'..'z').to_a.shuffle.join }
     let(:from_color) { Stoplight::Color::GREEN }
     let(:to_color) { Stoplight::Color::RED }

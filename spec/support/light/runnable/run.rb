@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
-  let(:light) { super().with_notifiers(notifiers).build }
+  let(:light) { super().with_notifiers(notifiers) }
 
   let(:code) { -> { code_result } }
   let(:code_result) { random_string }
