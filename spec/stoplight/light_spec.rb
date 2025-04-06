@@ -7,12 +7,12 @@ RSpec.describe Stoplight::Light do
 
   describe '.with' do
     context 'with only name' do
-      subject(:configuration) { light.configuration }
+      subject(:config) { light.config }
 
       let(:light) { described_class.with(name: name) }
 
       it 'sets configuration to default values' do
-        expect(configuration).to have_attributes(
+        expect(config).to have_attributes(
           name: name,
           data_store: Stoplight.default_data_store,
           notifiers: Stoplight.default_notifiers,
@@ -24,7 +24,7 @@ RSpec.describe Stoplight::Light do
     end
 
     context 'with configured parameters' do
-      subject(:configuration) { light.configuration }
+      subject(:config) { light.config }
 
       let(:light) { described_class.with(**configured_parameters) }
       let(:configured_parameters) do
@@ -39,13 +39,13 @@ RSpec.describe Stoplight::Light do
       end
 
       it 'sets configuration parameters' do
-        expect(configuration).to have_attributes(**configured_parameters)
+        expect(config).to have_attributes(**configured_parameters)
       end
     end
   end
 
   it_behaves_like Stoplight::CircuitBreaker do
     let(:light) { Stoplight(name) }
-    let(:circuit_breaker) { described_class.new(configuration) }
+    let(:circuit_breaker) { described_class.new(config) }
   end
 end

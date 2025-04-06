@@ -83,8 +83,8 @@ module Stoplight
       end
 
       def handle_error?(error)
-        skip = configuration.skipped_errors.any? { |klass| klass === error }
-        track = configuration.tracked_errors.any? { |klass| klass === error }
+        skip = config.skipped_errors.any? { |klass| klass === error }
+        track = config.tracked_errors.any? { |klass| klass === error }
 
         !skip && track
       end

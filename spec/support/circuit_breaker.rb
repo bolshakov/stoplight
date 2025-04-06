@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 RSpec.shared_examples Stoplight::CircuitBreaker do
-  let(:configuration) do
-    Stoplight::Configuration.new(
+  let(:config) do
+    Stoplight::Config.new(
       name: name,
       data_store: Stoplight.default_data_store,
       notifiers: Stoplight.default_notifiers,
@@ -19,7 +19,7 @@ RSpec.shared_examples Stoplight::CircuitBreaker do
     end
 
     it "configures #{attribute}" do
-      expect(with_attribute.configuration.__send__(attribute)).to eq(__send__(attribute))
+      expect(with_attribute.config.__send__(attribute)).to eq(__send__(attribute))
     end
   end
 
@@ -61,7 +61,7 @@ RSpec.shared_examples Stoplight::CircuitBreaker do
     end
 
     it 'configures error notifier' do
-      expect(with_attribute.configuration.error_notifier).to eq(error_notifier)
+      expect(with_attribute.config.error_notifier).to eq(error_notifier)
     end
   end
 
@@ -73,7 +73,7 @@ RSpec.shared_examples Stoplight::CircuitBreaker do
     end
 
     it 'configures tracked errors' do
-      expect(with_attribute.configuration.tracked_errors).to contain_exactly(*tracked_errors)
+      expect(with_attribute.config.tracked_errors).to contain_exactly(*tracked_errors)
     end
   end
 
@@ -85,7 +85,7 @@ RSpec.shared_examples Stoplight::CircuitBreaker do
     end
 
     it 'configures skipped errors' do
-      expect(with_attribute.configuration.skipped_errors).to contain_exactly(*skipped_errors,
+      expect(with_attribute.config.skipped_errors).to contain_exactly(*skipped_errors,
                                                                              *Stoplight::Default::SKIPPED_ERRORS)
     end
   end

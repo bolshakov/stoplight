@@ -3,10 +3,10 @@
 module Stoplight
   # @abstract include the module and define +#reconfigure+ method
   module CircuitBreaker
-    # @!attribute [r] configuration
-    #   @return [Stoplight::Configuration]
+    # @!attribute [r] config
+    #   @return [Stoplight::Config]
     #   @api private
-    attr_reader :configuration
+    attr_reader :config
 
     # Configures data store to be used with this circuit breaker
     #
@@ -17,7 +17,7 @@ module Stoplight
     # @param data_store [DataStore::Base]
     # @return [Stoplight::CircuitBreaker]
     def with_data_store(data_store)
-      reconfigure(configuration.with(data_store: data_store))
+      reconfigure(config.with(data_store: data_store))
     end
 
     # Configures cool off time. Stoplight automatically tries to recover
@@ -30,7 +30,7 @@ module Stoplight
     # @param cool_off_time [Numeric] number of seconds
     # @return [Stoplight::CircuitBreaker]
     def with_cool_off_time(cool_off_time)
-      reconfigure(configuration.with(cool_off_time: cool_off_time))
+      reconfigure(config.with(cool_off_time: cool_off_time))
     end
 
     # Configures custom threshold. After this number of failures Stoplight
@@ -43,7 +43,7 @@ module Stoplight
     # @param threshold [Numeric]
     # @return [Stoplight::CircuitBreaker]
     def with_threshold(threshold)
-      reconfigure(configuration.with(threshold: threshold))
+      reconfigure(config.with(threshold: threshold))
     end
 
     # Configures custom window size which Stoplight uses to count failures. For example,
@@ -59,7 +59,7 @@ module Stoplight
     # @param window_size [Numeric] number of seconds
     # @return [Stoplight::CircuitBreaker]
     def with_window_size(window_size)
-      reconfigure(configuration.with(window_size: window_size))
+      reconfigure(config.with(window_size: window_size))
     end
 
     # Configures custom notifier
@@ -73,14 +73,14 @@ module Stoplight
     # @param notifiers [Array<Notifier::Base>]
     # @return [Stoplight::CircuitBreaker]
     def with_notifiers(notifiers)
-      reconfigure(configuration.with(notifiers: notifiers))
+      reconfigure(config.with(notifiers: notifiers))
     end
 
     # @param error_notifier [Proc]
     # @return [Stoplight::CircuitBreaker]
     # @api private
     def with_error_notifier(&error_notifier)
-      reconfigure(configuration.with(error_notifier: error_notifier))
+      reconfigure(config.with(error_notifier: error_notifier))
     end
 
     # Configures a custom list of tracked errors that counts toward the threshold.
@@ -97,7 +97,7 @@ module Stoplight
     # @param tracked_errors [Array<StandardError>]
     # @return [Stoplight::CircuitBreaker]
     def with_tracked_errors(*tracked_errors)
-      reconfigure(configuration.with(tracked_errors: tracked_errors.dup.freeze))
+      reconfigure(config.with(tracked_errors: tracked_errors.dup.freeze))
     end
 
     # Configures a custom list of skipped errors that do not count toward the threshold.
@@ -119,7 +119,7 @@ module Stoplight
     # @param skipped_errors [Array<Exception>]
     # @return [Stoplight::CircuitBreaker]
     def with_skipped_errors(*skipped_errors)
-      reconfigure(configuration.with(skipped_errors: skipped_errors))
+      reconfigure(config.with(skipped_errors: skipped_errors))
     end
 
     # @return [String] one of +locked_green+, +locked_red+, and +unlocked+
@@ -189,7 +189,7 @@ module Stoplight
 
     private
 
-    # @param [Stoplight::Configuration]
+    # @param [Stoplight::Config]
     # @return [Stoplight::CircuitBreaker]
     def reconfigure(_configuration)
       raise NotImplementedError, "#{self.class.name}#reconfigure is not implemented"

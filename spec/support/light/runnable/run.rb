@@ -16,21 +16,21 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
     light.run(fallback, &code)
   end
 
-  it { expect(light.configuration.data_store).to eq(data_store) }
+  it { expect(light.config.data_store).to eq(data_store) }
 
   context 'when the light is green' do
-    before { light.configuration.data_store.clear_failures(light) }
+    before { light.config.data_store.clear_failures(light) }
 
     it 'runs the code' do
       expect(run).to eql(code_result)
     end
 
     context 'with some failures' do
-      before { light.configuration.data_store.record_failure(light, failure) }
+      before { light.config.data_store.record_failure(light, failure) }
 
       it 'clears the failures' do
         run
-        expect(light.configuration.data_store.get_failures(light).size).to eql(0)
+        expect(light.config.data_store.get_failures(light).size).to eql(0)
       end
     end
 
@@ -42,13 +42,13 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
       end
 
       it 'records the failure' do
-        expect(light.configuration.data_store.get_failures(light).size).to eql(0)
+        expect(light.config.data_store.get_failures(light).size).to eql(0)
         begin
           run
         rescue error.class
           nil
         end
-        expect(light.configuration.data_store.get_failures(light).size).to eql(1)
+        expect(light.config.data_store.get_failures(light).size).to eql(1)
       end
 
       context 'when error is not in the list of tracked errors' do
@@ -60,7 +60,7 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
           rescue error.class
             nil
           end.not_to change {
-            light.configuration.data_store.get_failures(light).size
+            light.config.data_store.get_failures(light).size
           }.from(0)
         end
       end
@@ -74,7 +74,7 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
           rescue error.class
             nil
           end.not_to change {
-            light.configuration.data_store.get_failures(light).size
+            light.config.data_store.get_failures(light).size
           }.from(0)
         end
       end
@@ -88,7 +88,7 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
           rescue error.class
             nil
           end.to change {
-            light.configuration.data_store.get_failures(light).size
+            light.config.data_store.get_failures(light).size
           }.by(1)
         end
       end
@@ -102,7 +102,7 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
           rescue error.class
             nil
           end.not_to change {
-            light.configuration.data_store.get_failures(light).size
+            light.config.data_store.get_failures(light).size
           }.from(0)
         end
       end
@@ -116,7 +116,7 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
           rescue error.class
             nil
           end.to change {
-            light.configuration.data_store.get_failures(light).size
+            light.config.data_store.get_failures(light).size
           }.by(1)
         end
       end
@@ -137,7 +137,7 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
 
       context 'when we already sent notifications' do
         before do
-          light.configuration.data_store.with_notification_lock(light, Stoplight::Color::GREEN,
+          light.config.data_store.with_notification_lock(light, Stoplight::Color::GREEN,
                                                                 Stoplight::Color::RED) do
 end
         end
@@ -187,7 +187,7 @@ end
       end
 
       before do
-        allow(light.configuration.data_store).to receive(:clear_failures) { raise error }
+        allow(light.config.data_store).to receive(:clear_failures) { raise error }
       end
 
       it 'runs the code' do
@@ -208,8 +208,8 @@ end
     let(:light) { super().with_threshold(2) }
 
     before do
-      light.configuration.data_store.record_failure(light, failure2)
-      light.configuration.data_store.record_failure(light, failure)
+      light.config.data_store.record_failure(light, failure2)
+      light.config.data_store.record_failure(light, failure)
     end
 
     it 'runs the code' do
@@ -231,8 +231,8 @@ end
     let(:light) { super().with_threshold(2) }
 
     before do
-      light.configuration.data_store.record_failure(light, other)
-      light.configuration.data_store.record_failure(light, failure)
+      light.config.data_store.record_failure(light, other)
+      light.config.data_store.record_failure(light, failure)
     end
 
     it 'raises an error' do
