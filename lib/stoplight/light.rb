@@ -33,7 +33,6 @@ module Stoplight
     #   # @return [Proc]
     def_delegator :configuration, :error_notifier
 
-
     # @!attribute [r] name
     #   @return [String]
     def_delegator :configuration, :name
@@ -42,10 +41,24 @@ module Stoplight
     # @api private
     attr_reader :configuration
 
+    class << self
+      # @param settings [Hash]
+      #   @see +Stoplight::Configuration#initialize+
+      # @return [Stoplight::Light]
+      def with(**settings)
+        new Configuration.new(**settings)
+      end
+    end
+
     # @param configuration [Stoplight::Configuration]
-    # @yield []
     def initialize(configuration)
       @configuration = configuration
+    end
+
+    # @param other [any]
+    # @return [Boolean]
+    def ==(other)
+      other.is_a?(self.class) && configuration == other.configuration
     end
 
     private
