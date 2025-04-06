@@ -7,6 +7,6 @@ RSpec.describe Stoplight::Light do
   let(:name) { ('a'..'z').to_a.shuffle.join }
 
   it_behaves_like Stoplight::CircuitBreaker do
-    let(:circuit_breaker) { described_class.new('foo', configuration) }
+    let(:circuit_breaker) { described_class.new(configuration) }
   end
 end
