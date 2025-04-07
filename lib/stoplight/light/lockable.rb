@@ -40,7 +40,7 @@ module Stoplight
         self
       end
 
-      # Unlocks light and sets it's state to State::UNLOCKED
+      # Unlocks light and sets its state to State::UNLOCKED
       #
       # @example
       #   light = Stoplight('example-locked')
