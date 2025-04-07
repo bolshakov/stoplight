@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.shared_examples 'Stoplight::DataStore::Base#names' do
-  let(:config) { light.config }
-
   it 'is initially empty' do
     expect(data_store.names).to eql([])
   end

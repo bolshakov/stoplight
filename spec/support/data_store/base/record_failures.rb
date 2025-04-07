@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.shared_examples 'Stoplight::DataStore::Base#record_failure' do
-  let(:config) { light.config }
-
   it 'returns the number of failures' do
     expect(data_store.record_failure(config, failure)).to eql(1)
   end
@@ -30,7 +28,7 @@ RSpec.shared_examples 'Stoplight::DataStore::Base#record_failure' do
 
   shared_examples 'with_threshold' do
     context 'when the number of errors is bigger then threshold' do
-      let(:light) { super().with_threshold(1) }
+      let(:config) { super().with(threshold: 1) }
 
       before do
         data_store.record_failure(config, failure)
@@ -51,7 +49,7 @@ RSpec.shared_examples 'Stoplight::DataStore::Base#record_failure' do
   context 'with window_size' do
     let(:window_size) { 3600 }
 
-    let(:light) { super().with_window_size(window_size) }
+    let(:config) { super().with(window_size: window_size) }
 
     context 'when error is outside of the window' do
       let(:older_failure) { Stoplight::Failure.new('class', 'message 3', Time.new - window_size - 1) }

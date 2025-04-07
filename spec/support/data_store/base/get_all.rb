@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.shared_examples 'Stoplight::DataStore::Base#get_all' do
-  let(:config) { light.config }
-
   context 'when there are no errors' do
     it 'returns the failures and the state' do
       failures, state = data_store.get_all(config)
@@ -28,7 +26,7 @@ RSpec.shared_examples 'Stoplight::DataStore::Base#get_all' do
   context 'when there is a failure outside of the window' do
     let(:window_size) { 3600 }
     let(:older_failure) { Stoplight::Failure.new('class', 'message 3', Time.new - window_size - 1) }
-    let(:light) { super().with_window_size(window_size) }
+    let(:config) { super().with(window_size: window_size) }
 
     before do
       data_store.record_failure(config, older_failure)

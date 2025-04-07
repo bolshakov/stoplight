@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.shared_examples 'Stoplight::DataStore::Base#clear_failures' do
-  let(:config) { light.config }
-
   before do
     data_store.record_failure(config, failure)
   end

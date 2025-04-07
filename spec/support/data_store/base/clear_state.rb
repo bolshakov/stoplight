@@ -2,7 +2,6 @@
 
 RSpec.shared_examples 'Stoplight::DataStore::Base#clear_state' do
   let(:state) { 'state' }
-  let(:config) { light.config }
 
   it 'returns the state' do
     data_store.set_state(config, state)
