@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
-  subject(:light) { Stoplight(name).build }
+  let(:config) { super().with(notifiers: notifiers) }
 
   let(:code) { -> { code_result } }
   let(:code_result) { random_string }
@@ -12,25 +12,23 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
   let(:notifier) { Stoplight::Notifier::IO.new(io) }
   let(:io) { StringIO.new }
 
-  before { light.with_notifiers(notifiers) }
-
   def run(fallback = nil)
     light.run(fallback, &code)
   end
 
   context 'when the light is green' do
-    before { light.configuration.data_store.clear_failures(light) }
+    before { data_store.clear_failures(config) }
 
     it 'runs the code' do
       expect(run).to eql(code_result)
     end
 
     context 'with some failures' do
-      before { light.configuration.data_store.record_failure(light, failure) }
+      before { data_store.record_failure(config, failure) }
 
       it 'clears the failures' do
         run
-        expect(light.configuration.data_store.get_failures(light).size).to eql(0)
+        expect(data_store.get_failures(config).size).to eql(0)
       end
     end
 
@@ -42,17 +40,17 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
       end
 
       it 'records the failure' do
-        expect(light.configuration.data_store.get_failures(light).size).to eql(0)
+        expect(data_store.get_failures(config).size).to eql(0)
         begin
           run
         rescue error.class
           nil
         end
-        expect(light.configuration.data_store.get_failures(light).size).to eql(1)
+        expect(data_store.get_failures(config).size).to eql(1)
       end
 
       context 'when error is not in the list of tracked errors' do
-        let(:light) { super().with_tracked_errors(KeyError) }
+        let(:config) { super().with(tracked_errors: [KeyError]) }
 
         it 'does not record the failure' do
           expect do
@@ -60,13 +58,18 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
           rescue error.class
             nil
           end.not_to change {
-            light.configuration.data_store.get_failures(light).size
+            config.data_store.get_failures(config).size
           }.from(0)
         end
       end
 
       context 'when error is the list of tracked errors and in the list of skipped errors' do
-        let(:light) { super().with_tracked_errors(error.class).with_skipped_errors(error.class) }
+        let(:config) do
+          super().with(
+            tracked_errors: [error.class],
+            skipped_errors: [error.class]
+          )
+        end
 
         it 'does not record the failure' do
           expect do
@@ -74,13 +77,13 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
           rescue error.class
             nil
           end.not_to change {
-            light.configuration.data_store.get_failures(light).size
+            config.data_store.get_failures(config).size
           }.from(0)
         end
       end
 
       context 'when error is in the list of tracked errors' do
-        let(:light) { super().with_tracked_errors(KeyError, error.class) }
+        let(:config) { super().with(tracked_errors: [KeyError, error.class]) }
 
         it 'records the failure' do
           expect do
@@ -88,13 +91,13 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
           rescue error.class
             nil
           end.to change {
-            light.configuration.data_store.get_failures(light).size
+            config.data_store.get_failures(config).size
           }.by(1)
         end
       end
 
       context 'when error is in the list of skipped errors' do
-        let(:light) { super().with_skipped_errors(KeyError, error.class) }
+        let(:config) { super().with(skipped_errors: [KeyError, error.class]) }
 
         it 'does not record the failure' do
           expect do
@@ -102,13 +105,13 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
           rescue error.class
             nil
           end.not_to change {
-            light.configuration.data_store.get_failures(light).size
+            light.config.data_store.get_failures(config).size
           }.from(0)
         end
       end
 
       context 'when error is not in the list of skipped errors' do
-        let(:light) { super().with_skipped_errors(KeyError) }
+        let(:config) { super().with(skipped_errors: [KeyError]) }
 
         it 'records the failure' do
           expect do
@@ -116,14 +119,14 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
           rescue error.class
             nil
           end.to change {
-            light.configuration.data_store.get_failures(light).size
+            config.data_store.get_failures(config).size
           }.by(1)
         end
       end
 
       context 'when we did not send notifications yet' do
         it 'notifies when transitioning to red' do
-          light.threshold.times do
+          config.threshold.times do
             expect(io.string).to eql('')
             begin
               run
@@ -137,13 +140,13 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
 
       context 'when we already sent notifications' do
         before do
-          light.configuration.data_store.with_notification_lock(light, Stoplight::Color::GREEN,
-                                                                Stoplight::Color::RED) do
+          data_store.with_notification_lock(light, Stoplight::Color::GREEN,
+                                            Stoplight::Color::RED) do
 end
         end
 
         it 'does not send new notifications' do
-          light.threshold.times do
+          config.threshold.times do
             expect(io.string).to eql('')
             begin
               run
@@ -156,7 +159,7 @@ end
       end
 
       it 'notifies when transitioning to red' do
-        light.threshold.times do
+        config.threshold.times do
           expect(io.string).to eql('')
           begin
             run
@@ -179,39 +182,33 @@ end
     end
 
     context 'when the data store is failing' do
-      let(:error_notifier) { ->(_) {} }
       let(:error) { StandardError.new('something went wrong') }
+      let(:config) { super().with(error_notifier: ->(e) { @yielded_error = e }) }
 
       before do
-        expect(data_store).to receive(:clear_failures) { raise error }
-
-        light.with_error_notifier(&error_notifier)
+        allow(data_store).to receive(:clear_failures) { raise error }
       end
 
       it 'runs the code' do
         expect(run).to eql(code_result)
       end
 
-      it 'notifies about the error' do
-        has_notified = false
-        light.with_error_notifier do |e|
-          has_notified = true
-          expect(e).to eq(error)
-        end
+      fit 'notifies about the error' do
+        expect(@yielded_error).to be(nil)
         run
-        expect(has_notified).to eql(true)
+        expect(@yielded_error).to eql(error)
       end
     end
   end
 
   context 'when the light is yellow' do
-    let(:failure) { Stoplight::Failure.new(error.class.name, error.message, Time.new - light.cool_off_time) }
-    let(:failure2) { Stoplight::Failure.new(error.class.name, error.message, Time.new - light.cool_off_time - 10) }
+    let(:failure) { Stoplight::Failure.new(error.class.name, error.message, Time.new - config.cool_off_time) }
+    let(:failure2) { Stoplight::Failure.new(error.class.name, error.message, Time.new - config.cool_off_time - 10) }
+    let(:config) { super().with(threshold: 2) }
 
     before do
-      light.with_threshold(2)
-      light.configuration.data_store.record_failure(light, failure2)
-      light.configuration.data_store.record_failure(light, failure)
+      data_store.record_failure(config, failure2)
+      data_store.record_failure(config, failure)
     end
 
     it 'runs the code' do
@@ -228,13 +225,13 @@ end
 
   context 'when the light is red' do
     let(:other) do
-      Stoplight::Failure.new(error.class.name, error.message, Time.new - light.cool_off_time)
+      Stoplight::Failure.new(error.class.name, error.message, Time.new - config.cool_off_time)
     end
+    let(:config) { super().with(threshold: 2) }
 
     before do
-      light.with_threshold(2)
-      light.configuration.data_store.record_failure(light, other)
-      light.configuration.data_store.record_failure(light, failure)
+      data_store.record_failure(config, other)
+      data_store.record_failure(config, failure)
     end
 
     it 'raises an error' do

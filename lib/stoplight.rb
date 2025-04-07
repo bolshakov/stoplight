@@ -44,13 +44,14 @@ module Stoplight # rubocop:disable Style/Documentation
 end
 
 require 'stoplight/circuit_breaker'
-require 'stoplight/builder'
-require 'stoplight/configuration'
+require 'stoplight/light/config'
+require 'stoplight/light/configurable'
 require 'stoplight/light/lockable'
 require 'stoplight/light/runnable'
 require 'stoplight/light'
 
 # @return [Stoplight::CircuitBreaker]
 def Stoplight(name) # rubocop:disable Naming/MethodName
-  Stoplight::Builder.with(name: name)
+  config = Stoplight::Light::Config.new(name: name)
+  Stoplight::Light.new(config)
 end

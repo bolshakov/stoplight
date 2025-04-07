@@ -12,8 +12,8 @@ module Stoplight
     # This data structure enables us to query errors that happened within a specific
     # period. We use this feature to support +window_size+ option.
     #
-    # To avoid uncontrolled memory consumption, we keep at most +light.threshold+ number
-    # of errors happened within last +light.window_size+ seconds (by default infinity).
+    # To avoid uncontrolled memory consumption, we keep at most +config.threshold+ number
+    # of errors happened within last +config.window_size+ seconds (by default infinity).
     #
     # @see Base
     class Redis < Base
@@ -38,57 +38,57 @@ module Stoplight
         (state_names + failure_names).uniq
       end
 
-      def get_all(light)
+      def get_all(config)
         failures, state = @redis.multi do |transaction|
-          query_failures(light, transaction: transaction)
-          transaction.hget(states_key, light.name)
+          query_failures(config, transaction: transaction)
+          transaction.hget(states_key, config.name)
         end
 
         [
-          normalize_failures(failures, light.error_notifier),
+          normalize_failures(failures, config.error_notifier),
           normalize_state(state)
         ]
       end
 
-      def get_failures(light)
-        normalize_failures(query_failures(light), light.error_notifier)
+      def get_failures(config)
+        normalize_failures(query_failures(config), config.error_notifier)
       end
 
       # Saves a new failure to the errors HSet and cleans up outdated errors.
-      def record_failure(light, failure)
+      def record_failure(config, failure)
         *, size = @redis.multi do |transaction|
-          failures_key = failures_key(light)
+          failures_key = failures_key(config)
 
           transaction.zadd(failures_key, failure.time.to_i, failure.to_json)
-          remove_outdated_failures(light, failure.time, transaction: transaction)
+          remove_outdated_failures(config, failure.time, transaction: transaction)
           transaction.zcard(failures_key)
         end
 
         size
       end
 
-      def clear_failures(light)
+      def clear_failures(config)
         failures, = @redis.multi do |transaction|
-          query_failures(light, transaction: transaction)
-          transaction.del(failures_key(light))
+          query_failures(config, transaction: transaction)
+          transaction.del(failures_key(config))
         end
 
-        normalize_failures(failures, light.error_notifier)
+        normalize_failures(failures, config.error_notifier)
       end
 
-      def get_state(light)
-        query_state(light) || State::UNLOCKED
+      def get_state(config)
+        query_state(config) || State::UNLOCKED
       end
 
-      def set_state(light, state)
-        @redis.hset(states_key, light.name, state)
+      def set_state(config, state)
+        @redis.hset(states_key, config.name, state)
         state
       end
 
-      def clear_state(light)
+      def clear_state(config)
         state, = @redis.multi do |transaction|
-          query_state(light, transaction: transaction)
-          transaction.hdel(states_key, light.name)
+          query_state(config, transaction: transaction)
+          transaction.hdel(states_key, config.name)
         end
 
         normalize_state(state)
@@ -96,10 +96,10 @@ module Stoplight
 
       LOCK_TTL = 2_000 # milliseconds
 
-      def with_notification_lock(light, from_color, to_color)
-        @redlock.lock(notification_lock_key(light), LOCK_TTL) do
-          if last_notification(light) != [from_color, to_color]
-            set_last_notification(light, from_color, to_color)
+      def with_notification_lock(config, from_color, to_color)
+        @redlock.lock(notification_lock_key(config), LOCK_TTL) do
+          if last_notification(config) != [from_color, to_color]
+            set_last_notification(config, from_color, to_color)
 
             yield
           end
@@ -108,35 +108,35 @@ module Stoplight
 
       private
 
-      # @param light [Stoplight::Light]
+      # @param config [Stoplight::Light::Config]
       # @param time [Time]
-      def remove_outdated_failures(light, time, transaction: @redis)
-        failures_key = failures_key(light)
+      def remove_outdated_failures(config, time, transaction: @redis)
+        failures_key = failures_key(config)
 
         # Remove all errors happened before the window start
-        transaction.zremrangebyscore(failures_key, 0, time.to_i - light.window_size)
-        # Keep at most +light.threshold+ number of errors
-        transaction.zremrangebyrank(failures_key, 0, -light.threshold - 1)
+        transaction.zremrangebyscore(failures_key, 0, time.to_i - config.window_size)
+        # Keep at most +config.threshold+ number of errors
+        transaction.zremrangebyrank(failures_key, 0, -config.threshold - 1)
       end
 
-      # @param light [Stoplight::Light]
+      # @param config [Stoplight::Light::Config]
       # @return [Array, nil]
-      def last_notification(light)
-        @redis.get(last_notification_key(light))&.split('->')
+      def last_notification(config)
+        @redis.get(last_notification_key(config))&.split('->')
       end
 
-      # @param light [Stoplight::Light]
+      # @param config [Stoplight::Light::Config]
       # @param from_color [String]
       # @param to_color [String]
       # @return [void]
-      def set_last_notification(light, from_color, to_color)
-        @redis.set(last_notification_key(light), [from_color, to_color].join('->'))
+      def set_last_notification(config, from_color, to_color)
+        @redis.set(last_notification_key(config), [from_color, to_color].join('->'))
       end
 
-      def query_failures(light, transaction: @redis)
-        window_start = Time.now.to_i - light.window_size
+      def query_failures(config, transaction: @redis)
+        window_start = Time.now.to_i - config.window_size
 
-        transaction.zrange(failures_key(light), Float::INFINITY, window_start, rev: true, by_score: true)
+        transaction.zrange(failures_key(config), Float::INFINITY, window_start, rev: true, by_score: true)
       end
 
       def normalize_failures(failures, error_notifier)
@@ -148,28 +148,28 @@ module Stoplight
         end
       end
 
-      def query_state(light, transaction: @redis)
-        transaction.hget(states_key, light.name)
+      def query_state(config, transaction: @redis)
+        transaction.hget(states_key, config.name)
       end
 
       def normalize_state(state)
         state || State::UNLOCKED
       end
 
-      # We store a list of failures happened in the  +light+ in this key
+      # We store a list of failures happened in the  +config+ in this key
       #
-      # @param light [Stoplight::Light]
+      # @param config [Stoplight::Light::Config]
       # @return [String]
-      def failures_key(light)
-        key('failures', light.name)
+      def failures_key(config)
+        key('failures', config.name)
       end
 
-      def notification_lock_key(light)
-        key('notification_lock', light.name)
+      def notification_lock_key(config)
+        key('notification_lock', config.name)
       end
 
-      def last_notification_key(light)
-        key('last_notification', light.name)
+      def last_notification_key(config)
+        key('last_notification', config.name)
       end
 
       def states_key

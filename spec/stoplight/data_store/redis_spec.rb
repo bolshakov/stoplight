@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe Stoplight::DataStore::Redis, :redis do
   let(:data_store) { described_class.new(redis, redlock: redlock) }
   let(:redlock) { instance_double(Redlock::Client) }
-  let(:light) { Stoplight(name).build }
+  let(:config) { Stoplight::Light::Config.new(name: name) }
   let(:name) { ('a'..'z').to_a.shuffle.join }
   let(:failure) { Stoplight::Failure.new('class', 'message', Time.new - 60) }
   let(:other) { Stoplight::Failure.new('class', 'message 2', Time.new) }
@@ -21,15 +21,13 @@ RSpec.describe Stoplight::DataStore::Redis, :redis do
 
   it_behaves_like 'Stoplight::DataStore::Base#get_failures' do
     context 'when JSON is invalid' do
-      before do
-        light.with_error_notifier { |_error| }
-      end
+      let(:config) { Stoplight::Light::Config.new(name: name, error_notifier: ->(_error) {}) }
 
       it 'handles it without an error' do
         expect(failure).to receive(:to_json).and_return('invalid JSON')
 
-        expect { data_store.record_failure(light, failure) }
-          .to change { data_store.get_failures(light) }
+        expect { data_store.record_failure(config, failure) }
+          .to change { data_store.get_failures(config) }
           .to([have_attributes(error_class: 'JSON::ParserError')])
       end
     end
