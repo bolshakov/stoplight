@@ -69,13 +69,13 @@ module Stoplight
 
       private
 
-      # @param config [Stoplight::Config]
+      # @param config [Stoplight::Light::Config]
       # @return [Array, nil]
       def last_notification(config)
         @last_notifications[config.name]
       end
 
-      # @param config [Stoplight::Config]
+      # @param config [Stoplight::Light::Config]
       # @param from_color [String]
       # @param to_color [String]
       # @return [void]
@@ -83,7 +83,7 @@ module Stoplight
         @last_notifications[config.name] = [from_color, to_color]
       end
 
-      # @param config [Stoplight::Config]
+      # @param config [Stoplight::Light::Config]
       # @return [<Stoplight::Failure>]
       def query_failures(config, time = Time.now)
         @failures[config.name].select do |failure|

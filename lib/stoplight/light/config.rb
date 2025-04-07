@@ -8,7 +8,7 @@ module Stoplight
         alias __new_without_defaults__ new
 
         # It overrides the +Config.new+ to inject default settings
-        # @see +Stoplight::Config#initialize+
+        # @see +Stoplight::Light::Config#initialize+
         def new(**settings)
           __new_without_defaults__(
             **default_settings.merge(settings)
@@ -105,7 +105,7 @@ module Stoplight
       # @param window_size [Numeric]
       # @param tracked_errors [Array<StandardError>]
       # @param skipped_errors [Array<Exception>]
-      # @return [Stoplight::Config]
+      # @return [Stoplight::Light::Config]
       def with(
         cool_off_time: self.cool_off_time,
         data_store: self.data_store,

@@ -108,7 +108,7 @@ module Stoplight
 
       private
 
-      # @param config [Stoplight::Config]
+      # @param config [Stoplight::Light::Config]
       # @param time [Time]
       def remove_outdated_failures(config, time, transaction: @redis)
         failures_key = failures_key(config)
@@ -119,13 +119,13 @@ module Stoplight
         transaction.zremrangebyrank(failures_key, 0, -config.threshold - 1)
       end
 
-      # @param config [Stoplight::Config]
+      # @param config [Stoplight::Light::Config]
       # @return [Array, nil]
       def last_notification(config)
         @redis.get(last_notification_key(config))&.split('->')
       end
 
-      # @param config [Stoplight::Config]
+      # @param config [Stoplight::Light::Config]
       # @param from_color [String]
       # @param to_color [String]
       # @return [void]
@@ -158,7 +158,7 @@ module Stoplight
 
       # We store a list of failures happened in the  +config+ in this key
       #
-      # @param config [Stoplight::Config]
+      # @param config [Stoplight::Light::Config]
       # @return [String]
       def failures_key(config)
         key('failures', config.name)

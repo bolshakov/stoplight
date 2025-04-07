@@ -9,51 +9,51 @@ module Stoplight
         raise NotImplementedError
       end
 
-      # @param _config [Stoplight::Config]
+      # @param _config [Stoplight::Light::Config]
       # @return [Array(Array<Failure>, String)]
       def get_all(_config)
         raise NotImplementedError
       end
 
-      # @param _config [Stoplight::Config]
+      # @param _config [Stoplight::Light::Config]
       # @return [Array<Failure>]
       def get_failures(_config)
         raise NotImplementedError
       end
 
-      # @param _config [Stoplight::Config]
+      # @param _config [Stoplight::Light::Config]
       # @param _failure [Failure]
       # @return [Fixnum]
       def record_failure(_config, _failure)
         raise NotImplementedError
       end
 
-      # @param _config [Stoplight::Config]
+      # @param _config [Stoplight::Light::Config]
       # @return [Array<Failure>]
       def clear_failures(_config)
         raise NotImplementedError
       end
 
-      # @param _config [Stoplight::Config]
+      # @param _config [Stoplight::Light::Config]
       # @return [String]
       def get_state(_config)
         raise NotImplementedError
       end
 
-      # @param _config [Stoplight::Config]
+      # @param _config [Stoplight::Light::Config]
       # @param _state [String]
       # @return [String]
       def set_state(_config, _state)
         raise NotImplementedError
       end
 
-      # @param _config [Stoplight::Config]
+      # @param _config [Stoplight::Light::Config]
       # @return [String]
       def clear_state(_config)
         raise NotImplementedError
       end
 
-      # @param _config [Stoplight::Config]
+      # @param _config [Stoplight::Light::Config]
       # @param _from_color [String]
       # @param _to_color [String]
       # @yield _block

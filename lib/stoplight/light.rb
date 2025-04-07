@@ -9,15 +9,17 @@ module Stoplight
     include Runnable
 
     # @!attribute [r] config
-    #   @return [Stoplight::Config]
+    #   @return [Stoplight::Light::Config]
     #   @api private
     attr_reader :config
 
-    # @param config [Stoplight::Config]
+    # @param config [Stoplight::Light::Config]
     def initialize(config)
       @config = config
     end
 
+    # Two lights considered equal if they have the same configuration.
+    #
     # @param other [any]
     # @return [Boolean]
     def ==(other)
