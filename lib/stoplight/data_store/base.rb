@@ -53,12 +53,20 @@ module Stoplight
         raise NotImplementedError
       end
 
-      # @param _config [Stoplight::Light::Config]
-      # @param _from_color [String]
-      # @param _to_color [String]
-      # @yield _block
-      # @return [Void]
-      def with_notification_lock(_config, _from_color, _to_color, &_block)
+      # Executes the provided block only if the given color transition (from_color → to_color)
+      # hasn't been recently processed, preventing duplicate notifications across distributed servers.
+      #
+      # @example
+      #   with_deduplicated_notification(config, Color::GREEN, Color::RED) do
+      #     send_alert_email("Service #{config.name} is down!")
+      #   end
+      #
+      # @param _config [Stoplight::Light::Config] the light configuration
+      # @param _from_color [String] the initial color state (e.g., Color::GREEN)
+      # @param _to_color [String] the new color state (e.g., Color::RED)
+      # @yield Executes the block if this is a new or expired transition
+      # @return [void]
+      def with_deduplicated_notification(_config, _from_color, _to_color, &_block)
         raise NotImplementedError
       end
     end
