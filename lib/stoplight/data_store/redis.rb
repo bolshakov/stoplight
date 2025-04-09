@@ -121,10 +121,7 @@ module Stoplight
         if prev_from_color == from_color and prev_to_color == to_color then
           return 0
         else
-          -- Get current timestamp
-          local current_time = redis.call('TIME')[1]
-
-          redis.call('HSET', last_notification_key, 'from_color', from_color, 'to_color', to_color, 'timestamp', current_time)
+          redis.call('HSET', last_notification_key, 'from_color', from_color, 'to_color', to_color)
           redis.call('EXPIRE', last_notification_key, ttl)
           return 1
         end
@@ -138,7 +135,7 @@ module Stoplight
           argv: [config.name, from_color, to_color, NOTIFICATION_DEDUPLICATION_TTL]
         )
 
-        yield if deduplication_status == 1
+        yield if Integer(deduplication_status) == 1
       end
 
       private
