@@ -57,7 +57,7 @@ module Stoplight
         synchronize { @states.delete(config.name) }
       end
 
-      def with_notification_lock(config, from_color, to_color)
+      def with_deduplicated_notification(config, from_color, to_color)
         synchronize do
           if last_notification(config) != [from_color, to_color]
             set_last_notification(config, from_color, to_color)

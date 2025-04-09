@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'redlock'
-
 module Stoplight
   module DataStore
     # == Errors
@@ -18,12 +16,11 @@ module Stoplight
     # @see Base
     class Redis < Base
       KEY_SEPARATOR = ':'
-      KEY_PREFIX = %w[stoplight v4].join(KEY_SEPARATOR)
+      KEY_PREFIX = %w[stoplight v5].join(KEY_SEPARATOR)
 
       # @param redis [::Redis]
-      def initialize(redis, redlock: Redlock::Client.new([redis]))
+      def initialize(redis)
         @redis = redis
-        @redlock = redlock
       end
 
       def names
@@ -95,16 +92,53 @@ module Stoplight
         normalize_state(state)
       end
 
-      LOCK_TTL = 2_000 # milliseconds
+      NOTIFICATION_DEDUPLICATION_TTL = 60 # TTL for notification deduplication (in seconds)
+      private_constant :NOTIFICATION_DEDUPLICATION_TTL
 
-      def with_notification_lock(config, from_color, to_color)
-        @redlock.lock(notification_lock_key(config), LOCK_TTL) do
-          if last_notification(config) != [from_color, to_color]
-            set_last_notification(config, from_color, to_color)
+      # This Lua script implements a notification deduplication mechanism:
+      # 1. It checks if the current color transition (from_color → to_color) matches the previously recorded one
+      # 2. If it's the same transition, returns 0 (don't notify) to prevent duplicate notifications
+      # 3. If it's a different transition (or first time), it:
+      #    - Records the new transition with a timestamp
+      #    - Sets an expiration time on the record (allowing notifications to repeat after TTL as a fail-safe mechanism)
+      #    - Returns 1 (proceed with notification)
+      #
+      # This ensures that when multiple servers detect the same transition simultaneously,
+      # only one notification is sent, while still allowing future transitions to trigger notifications.
+      #
+      # This script is executed on redis and it's guaranteed that the operations are atomic.
+      NOTIFICATION_DEDUPLICATION_SCRIPT = <<~LUA
+        local last_notification_key = KEYS[1]
 
-            yield
-          end
+        local light_name = ARGV[1]
+        local from_color = ARGV[2]
+        local to_color = ARGV[3]
+        local ttl = tonumber(ARGV[4])
+
+        local prev_transition = redis.call('HMGET', last_notification_key, 'from_color', 'to_color')
+        local prev_from_color, prev_to_color = unpack(prev_transition)
+
+        if prev_from_color == from_color and prev_to_color == to_color then
+          return 0
+        else
+          -- Get current timestamp
+          local current_time = redis.call('TIME')[1]
+
+          redis.call('HSET', last_notification_key, 'from_color', from_color, 'to_color', to_color, 'timestamp', current_time)
+          redis.call('EXPIRE', last_notification_key, ttl)
+          return 1
         end
+      LUA
+      private_constant :NOTIFICATION_DEDUPLICATION_SCRIPT
+
+      def with_deduplicated_notification(config, from_color, to_color)
+        deduplication_status = @redis.eval(
+          NOTIFICATION_DEDUPLICATION_SCRIPT,
+          keys: [last_notification_key(config)],
+          argv: [config.name, from_color, to_color, NOTIFICATION_DEDUPLICATION_TTL]
+        )
+
+        yield if deduplication_status == 1
       end
 
       private
@@ -118,20 +152,6 @@ module Stoplight
         transaction.zremrangebyscore(failures_key, 0, time.to_i - config.window_size)
         # Keep at most +config.threshold+ number of errors
         transaction.zremrangebyrank(failures_key, 0, -config.threshold - 1)
-      end
-
-      # @param config [Stoplight::Light::Config]
-      # @return [Array, nil]
-      def last_notification(config)
-        @redis.get(last_notification_key(config))&.split('->')
-      end
-
-      # @param config [Stoplight::Light::Config]
-      # @param from_color [String]
-      # @param to_color [String]
-      # @return [void]
-      def set_last_notification(config, from_color, to_color)
-        @redis.set(last_notification_key(config), [from_color, to_color].join('->'))
       end
 
       def query_failures(config, transaction: @redis)
@@ -163,10 +183,6 @@ module Stoplight
       # @return [String]
       def failures_key(config)
         key('failures', config.name)
-      end
-
-      def notification_lock_key(config)
-        key('notification_lock', config.name)
       end
 
       def last_notification_key(config)

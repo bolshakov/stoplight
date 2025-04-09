@@ -40,13 +40,11 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
       end
 
       it 'records the failure' do
-        expect(data_store.get_failures(config).size).to eql(0)
-        begin
+        expect do
           run
         rescue error.class
           nil
-        end
-        expect(data_store.get_failures(config).size).to eql(1)
+        end.to change { data_store.get_failures(config).size }.from(0).to(1)
       end
 
       context 'when error is not in the list of tracked errors' do
@@ -126,23 +124,24 @@ RSpec.shared_examples 'Stoplight::Light::Runnable#run' do
 
       context 'when we did not send notifications yet' do
         it 'notifies when transitioning to red' do
-          config.threshold.times do
-            expect(io.string).to eql('')
-            begin
-              run
-            rescue error.class
-              nil
+          expect do
+            config.threshold.times do
+              expect(io.string).to eql('')
+              begin
+                run
+              rescue error.class
+                nil
+              end
             end
-          end
-          expect(io.string).to_not eql('')
+          end.to change(io, :string).from('').to(
+            include("Switching #{name} from green to red because #{error.class} #{error.message}")
+          )
         end
       end
 
       context 'when we already sent notifications' do
         before do
-          data_store.with_notification_lock(light, Stoplight::Color::GREEN,
-                                            Stoplight::Color::RED) do
-end
+          data_store.with_deduplicated_notification(light, Stoplight::Color::GREEN, Stoplight::Color::RED) {}
         end
 
         it 'does not send new notifications' do

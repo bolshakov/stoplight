@@ -3,8 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe Stoplight::DataStore::Redis, :redis do
-  let(:data_store) { described_class.new(redis, redlock: redlock) }
-  let(:redlock) { instance_double(Redlock::Client) }
+  let(:data_store) { described_class.new(redis) }
   let(:config) { Stoplight::Light::Config.new(name: name) }
   let(:name) { ('a'..'z').to_a.shuffle.join }
   let(:failure) { Stoplight::Failure.new('class', 'message', Time.new - 60) }
@@ -33,11 +32,5 @@ RSpec.describe Stoplight::DataStore::Redis, :redis do
     end
   end
 
-  it_behaves_like 'Stoplight::DataStore::Base#with_notification_lock' do
-    let(:lock_key) { "stoplight:v4:notification_lock:#{name}" }
-
-    before do
-      allow(redlock).to receive(:lock).with(lock_key, 2_000).and_yield
-    end
-  end
+  it_behaves_like 'Stoplight::DataStore::Base#with_deduplicated_notification'
 end
