@@ -41,7 +41,7 @@ module Stoplight
       def get_all(config)
         failures, state = @redis.multi do |transaction|
           query_failures(config, transaction: transaction)
-          transaction.hget(states_key, config.name)
+          query_state(config, transaction: transaction)
         end
 
         [
@@ -77,7 +77,8 @@ module Stoplight
       end
 
       def get_state(config)
-        query_state(config) || State::UNLOCKED
+        state = query_state(config)
+        normalize_state(state)
       end
 
       def set_state(config, state)
