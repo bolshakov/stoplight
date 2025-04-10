@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-require 'json'
-require 'time'
+require "json"
+require "time"
 
 module Stoplight
   class Failure # rubocop:disable Style/Documentation
-    TIME_FORMAT = '%Y-%m-%dT%H:%M:%S.%N%:z'
+    TIME_FORMAT = "%Y-%m-%dT%H:%M:%S.%N%:z"
 
     # @return [String]
     attr_reader :error_class
@@ -26,11 +26,11 @@ module Stoplight
     # @raise [ArgumentError]
     def self.from_json(json)
       object = JSON.parse(json)
-      error_object = object['error']
+      error_object = object["error"]
 
-      error_class = error_object['class']
-      error_message = error_object['message']
-      time = Time.parse(object['time'])
+      error_class = error_object["class"]
+      error_message = error_object["message"]
+      time = Time.parse(object["time"])
 
       new(error_class, error_message, time)
     end

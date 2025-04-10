@@ -48,7 +48,7 @@ module Stoplight
       # @return [any]
       # @raise [Error::RedLight]
       def run(fallback = nil, &code)
-        raise ArgumentError, 'nothing to run. Please, pass a block into `Light#run`' unless block_given?
+        raise ArgumentError, "nothing to run. Please, pass a block into `Light#run`" unless block_given?
 
         case color
         when Color::GREEN then run_green(fallback, &code)

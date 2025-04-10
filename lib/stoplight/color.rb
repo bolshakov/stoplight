@@ -2,8 +2,8 @@
 
 module Stoplight
   module Color
-    GREEN = 'green'
-    YELLOW = 'yellow'
-    RED = 'red'
+    GREEN = "green"
+    YELLOW = "yellow"
+    RED = "red"
   end
 end

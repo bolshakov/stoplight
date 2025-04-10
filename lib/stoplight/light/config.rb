@@ -5,7 +5,7 @@ module Stoplight
     # A +Stoplight::Light+ configuration object.
     class Config
       class << self
-        alias __new_without_defaults__ new
+        alias_method :__new_without_defaults__, :new
 
         # It overrides the +Config.new+ to inject default settings
         # @see +Stoplight::Light::Config#initialize+
@@ -78,7 +78,7 @@ module Stoplight
       # @param tracked_errors [Array<StandardError>]
       # @param skipped_errors [Array<Exception>]
       def initialize(name:, cool_off_time:, data_store:, error_notifier:, notifiers:, threshold:, window_size:,
-                     tracked_errors:, skipped_errors:)
+        tracked_errors:, skipped_errors:)
         @name = name
         @cool_off_time = cool_off_time
         @data_store = data_store

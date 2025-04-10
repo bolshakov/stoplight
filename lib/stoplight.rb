@@ -16,26 +16,26 @@ module Stoplight # rubocop:disable Style/Documentation
   end
 end
 
-require 'stoplight/version'
+require "stoplight/version"
 
-require 'stoplight/color'
-require 'stoplight/error'
-require 'stoplight/failure'
-require 'stoplight/state'
+require "stoplight/color"
+require "stoplight/error"
+require "stoplight/failure"
+require "stoplight/state"
 
-require 'stoplight/data_store'
-require 'stoplight/data_store/base'
-require 'stoplight/data_store/memory'
-require 'stoplight/data_store/redis'
+require "stoplight/data_store"
+require "stoplight/data_store/base"
+require "stoplight/data_store/memory"
+require "stoplight/data_store/redis"
 
-require 'stoplight/notifier'
-require 'stoplight/notifier/base'
-require 'stoplight/notifier/generic'
+require "stoplight/notifier"
+require "stoplight/notifier/base"
+require "stoplight/notifier/generic"
 
-require 'stoplight/notifier/io'
-require 'stoplight/notifier/logger'
+require "stoplight/notifier/io"
+require "stoplight/notifier/logger"
 
-require 'stoplight/default'
+require "stoplight/default"
 
 module Stoplight # rubocop:disable Style/Documentation
   @default_data_store = Default::DATA_STORE
@@ -43,12 +43,12 @@ module Stoplight # rubocop:disable Style/Documentation
   @default_error_notifier = Default::ERROR_NOTIFIER
 end
 
-require 'stoplight/circuit_breaker'
-require 'stoplight/light/config'
-require 'stoplight/light/configurable'
-require 'stoplight/light/lockable'
-require 'stoplight/light/runnable'
-require 'stoplight/light'
+require "stoplight/circuit_breaker"
+require "stoplight/light/config"
+require "stoplight/light/configurable"
+require "stoplight/light/lockable"
+require "stoplight/light/runnable"
+require "stoplight/light"
 
 # @return [Stoplight::CircuitBreaker]
 def Stoplight(name) # rubocop:disable Naming/MethodName

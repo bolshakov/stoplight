@@ -9,9 +9,9 @@ module Stoplight
     ERROR_NOTIFIER = ->(error) { warn error }
 
     FORMATTER = lambda do |light, from_color, to_color, error|
-      words = ['Switching', light.name, 'from', from_color, 'to', to_color]
-      words += ['because', error.class, error.message] if error
-      words.join(' ')
+      words = ["Switching", light.name, "from", from_color, "to", to_color]
+      words += ["because", error.class, error.message] if error
+      words.join(" ")
     end
 
     NOTIFIERS = [

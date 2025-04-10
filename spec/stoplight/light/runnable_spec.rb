@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
-require 'stringio'
+require "spec_helper"
+require "stringio"
 
 RSpec.describe Stoplight::Light::Runnable, :redis do
   let(:failure) do
@@ -13,25 +13,25 @@ RSpec.describe Stoplight::Light::Runnable, :redis do
   let(:time) { Time.new }
 
   def random_string
-    ('a'..'z').to_a.sample(8).join
+    ("a".."z").to_a.sample(8).join
   end
 
   let(:config) { Stoplight::Light::Config.new(name: name, data_store: data_store) }
   let(:light) { Stoplight::Light.new(config) }
 
-  context 'with memory data store' do
+  context "with memory data store" do
     let(:data_store) { Stoplight::DataStore::Memory.new }
 
-    it_behaves_like 'Stoplight::Light::Runnable#state'
-    it_behaves_like 'Stoplight::Light::Runnable#color'
-    it_behaves_like 'Stoplight::Light::Runnable#run'
+    it_behaves_like "Stoplight::Light::Runnable#state"
+    it_behaves_like "Stoplight::Light::Runnable#color"
+    it_behaves_like "Stoplight::Light::Runnable#run"
   end
 
-  context 'with redis data store', :redis do
+  context "with redis data store", :redis do
     let(:data_store) { Stoplight::DataStore::Redis.new(redis) }
 
-    it_behaves_like 'Stoplight::Light::Runnable#state'
-    it_behaves_like 'Stoplight::Light::Runnable#color'
-    it_behaves_like 'Stoplight::Light::Runnable#run'
+    it_behaves_like "Stoplight::Light::Runnable#state"
+    it_behaves_like "Stoplight::Light::Runnable#color"
+    it_behaves_like "Stoplight::Light::Runnable#run"
   end
 end

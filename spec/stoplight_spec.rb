@@ -1,50 +1,50 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
+require "spec_helper"
 
 RSpec.describe Stoplight do
-  it 'is a module' do
+  it "is a module" do
     expect(described_class).to be_a(Module)
   end
 
-  describe '.default_notifiers' do
-    it 'is initially the default' do
+  describe ".default_notifiers" do
+    it "is initially the default" do
       expect(described_class.default_notifiers)
         .to eql(Stoplight::Default::NOTIFIERS)
     end
   end
 
-  describe '.default_data_store' do
-    it 'is initially the default' do
+  describe ".default_data_store" do
+    it "is initially the default" do
       expect(described_class.default_data_store)
         .to eql(Stoplight::Default::DATA_STORE)
     end
   end
 
-  describe '.default_error_notifier' do
-    it 'is initially the default' do
+  describe ".default_error_notifier" do
+    it "is initially the default" do
       expect(described_class.default_error_notifier)
         .to eql(Stoplight::Default::ERROR_NOTIFIER)
     end
   end
 end
 
-RSpec.describe 'Stoplight' do
+RSpec.describe "Stoplight" do
   subject(:light) { Stoplight(name) }
 
-  let(:name) { ('a'..'z').to_a.shuffle.join }
+  let(:name) { ("a".."z").to_a.shuffle.join }
 
-  it 'creates a stoplight' do
+  it "creates a stoplight" do
     config = Stoplight::Light::Config.new(name: name)
     expect(light).to eq(Stoplight::Light.new(config))
   end
 
-  it 'is a class' do
+  it "is a class" do
     expect(light).to be_kind_of(Stoplight::CircuitBreaker)
   end
 
-  describe '#name' do
-    it 'reads the name' do
+  describe "#name" do
+    it "reads the name" do
       expect(light.name).to eql(name)
     end
   end
