@@ -7,20 +7,18 @@ on:
 
 jobs:
   rubocop:
-    name: Rubocop 👮
+    name: Standard 👮
     runs-on: ubuntu-latest
+    permissions:
+      checks: write
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
+      - name: Standard Ruby
+        uses: "standardrb/standard-ruby-action@v1"
         with:
-          ruby-version: 3.3.4
-          bundler-cache: true
-
-      - name: Lint code for consistent style
-        run: bundle exec rubocop -f github
+          autofix: false
 
 
   spec:

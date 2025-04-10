@@ -1,19 +1,19 @@
 # frozen_string_literal: true
 
-require 'monitor'
+require "monitor"
 
 module Stoplight
   module DataStore
     # @see Base
     class Memory < Base
       include MonitorMixin
-      KEY_SEPARATOR = ':'
+      KEY_SEPARATOR = ":"
 
       def initialize
         @failures = Hash.new { |h, k| h[k] = [] }
         @states = Hash.new { |h, k| h[k] = State::UNLOCKED }
         @last_notifications = {}
-        super() # MonitorMixin
+        super # MonitorMixin
       end
 
       def names

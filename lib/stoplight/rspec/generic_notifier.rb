@@ -1,39 +1,39 @@
 # frozen_string_literal: true
 
-RSpec.shared_examples 'a generic notifier' do
-  it 'includes Generic' do
+RSpec.shared_examples "a generic notifier" do
+  it "includes Generic" do
     expect(described_class).to include(Stoplight::Notifier::Generic)
   end
 
-  describe '#formatter' do
-    it 'is initially the default' do
+  describe "#formatter" do
+    it "is initially the default" do
       formatter = nil
       expect(described_class.new(nil, formatter).formatter)
         .to eql(Stoplight::Default::FORMATTER)
     end
 
-    it 'reads the formatter' do
+    it "reads the formatter" do
       formatter = proc {}
       expect(described_class.new(nil, formatter).formatter)
         .to eql(formatter)
     end
   end
 
-  describe '#notify' do
+  describe "#notify" do
     let(:light) { Stoplight(name) }
-    let(:name) { ('a'..'z').to_a.shuffle.join }
+    let(:name) { ("a".."z").to_a.shuffle.join }
     let(:from_color) { Stoplight::Color::GREEN }
     let(:to_color) { Stoplight::Color::RED }
     let(:notifier) { described_class.new(double.as_null_object) }
 
-    it 'returns the message' do
+    it "returns the message" do
       error = nil
       expect(notifier.notify(light, from_color, to_color, error))
         .to eql(notifier.formatter.call(light, from_color, to_color, error))
     end
 
-    it 'returns the message with an error' do
-      error = ZeroDivisionError.new('divided by 0')
+    it "returns the message with an error" do
+      error = ZeroDivisionError.new("divided by 0")
       expect(notifier.notify(light, from_color, to_color, error))
         .to eql(notifier.formatter.call(light, from_color, to_color, error))
     end

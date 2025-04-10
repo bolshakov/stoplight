@@ -15,7 +15,7 @@ module Stoplight
     #
     # @see Base
     class Redis < Base
-      KEY_SEPARATOR = ':'
+      KEY_SEPARATOR = ":"
       KEY_PREFIX = %w[stoplight v5].join(KEY_SEPARATOR)
 
       # @param redis [::Redis]
@@ -26,10 +26,10 @@ module Stoplight
       def names
         state_names = @redis.hkeys(states_key)
 
-        pattern = key('failures', '*')
-        prefix_regex = /^#{key('failures', '')}/
+        pattern = key("failures", "*")
+        prefix_regex = /^#{key("failures", "")}/
         failure_names = @redis.scan_each(match: pattern).to_a.map do |key|
-          key.sub(prefix_regex, '')
+          key.sub(prefix_regex, "")
         end
 
         (state_names + failure_names).uniq
@@ -160,7 +160,7 @@ module Stoplight
       def normalize_failures(failures, error_notifier)
         failures.map do |json|
           Failure.from_json(json)
-        rescue StandardError => e
+        rescue => e
           error_notifier.call(e)
           Failure.from_error(e)
         end
@@ -179,15 +179,15 @@ module Stoplight
       # @param config [Stoplight::Light::Config]
       # @return [String]
       def failures_key(config)
-        key('failures', config.name)
+        key("failures", config.name)
       end
 
       def last_notification_key(config)
-        key('last_notification', config.name)
+        key("last_notification", config.name)
       end
 
       def states_key
-        key('states')
+        key("states")
       end
 
       def key(*pieces)

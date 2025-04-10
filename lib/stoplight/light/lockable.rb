@@ -30,10 +30,10 @@ module Stoplight
       # @return [Stoplight::CircuitBreaker] returns locked circuit breaker
       def lock(color)
         state = case color
-                when Color::RED then State::LOCKED_RED
-                when Color::GREEN then State::LOCKED_GREEN
-                else raise Error::IncorrectColor
-                end
+        when Color::RED then State::LOCKED_RED
+        when Color::GREEN then State::LOCKED_GREEN
+        else raise Error::IncorrectColor
+        end
 
         safely { config.data_store.set_state(config, state) }
 
