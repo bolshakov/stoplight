@@ -119,7 +119,7 @@ module Stoplight
       end
 
       def notify(from_color, to_color, error = nil)
-        config.data_store.with_notification_lock(config, from_color, to_color) do
+        config.data_store.with_deduplicated_notification(config, from_color, to_color) do
           config.notifiers.each do |notifier|
             safely { notifier.notify(self, from_color, to_color, error) }
           end
