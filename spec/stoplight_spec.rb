@@ -48,4 +48,39 @@ RSpec.describe "Stoplight" do
       expect(light.name).to eql(name)
     end
   end
+
+  context "with settings" do
+    subject(:light) { Stoplight(name, **settings) }
+
+    let(:settings) do
+      {
+        cool_off_time: 1,
+        data_store: data_store,
+        error_notifier: error_notifier,
+        notifiers: notifiers,
+        threshold: 4,
+        window_size: 5,
+        tracked_errors: [StandardError],
+        skipped_errors: [KeyError]
+      }
+    end
+    let(:data_store) { Stoplight::DataStore::Memory.new }
+    let(:error_notifier) { ->(error) { warn error } }
+    let(:notifiers) { Stoplight::Notifier::IO.new($stdout) }
+
+    it "instantiates with the correct settings" do
+      config = Stoplight::Light::Config.new(name: name, **settings)
+      expect(light).to eq(Stoplight::Light.new(config))
+    end
+
+    context "when unknown option is given" do
+      let(:settings) do
+        super().merge(unknown_option: "unknown")
+      end
+
+      it "raises an ArgumentError" do
+        expect { light }.to raise_error(ArgumentError, /unknown_option/)
+      end
+    end
+  end
 end

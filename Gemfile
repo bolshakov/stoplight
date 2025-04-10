@@ -5,7 +5,6 @@ source "https://rubygems.org"
 gemspec
 
 group :development do
-  gem "standard"
   gem "benchmark-ips", "~> 2.14"
   gem "database_cleaner-redis", "~> 2.0"
   gem "debug"
@@ -15,5 +14,6 @@ group :development do
   gem "ruby-prof"
   gem "simplecov", "~> 0.22"
   gem "simplecov-lcov", "~> 0.8"
+  gem "standard"
   gem "timecop", "~> 0.9"
 end
