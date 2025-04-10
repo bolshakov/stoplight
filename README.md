@@ -509,9 +509,9 @@ stoplight = Stoplight("test-#{rand}")
 
 ## Maintenance Policy
 
-Stoplight supports the latest three minor versions of Ruby, which currently are: `3.0.x`, `3.1.x`, and `3.2.x`. Changing
+Stoplight supports the latest three minor versions of Ruby, which currently are: `3.2.x`, `3.3.x`, and `3.4.x`. Changing
 the minimum supported Ruby version is not considered a breaking change.
-We support the current stable Redis version (`7.2`) and the latest release of the previous major version (`6.2.9`)
+We support the current stable Redis version (`7.4.x`) and the latest release of the previous major version (`6.2.x`)
 
 ## Credits
 
