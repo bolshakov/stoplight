@@ -21,9 +21,9 @@ RSpec.describe Stoplight::Light::Config do
 
   let(:name) { "foobar" }
   let(:cool_off_time) { Stoplight::Light::Config::DEFAULT_COOL_OFF_TIME }
-  let(:data_store) { Stoplight.default_data_store }
-  let(:error_notifier) { Stoplight.default_error_notifier }
-  let(:notifiers) { Stoplight.default_notifiers }
+  let(:data_store) { Stoplight::Light::Config::DEFAULT_DATA_STORE }
+  let(:error_notifier) { Stoplight::Light::Config::DEFAULT_ERROR_NOTIFIER }
+  let(:notifiers) { Stoplight::Light::Config::DEFAULT_NOTIFIERS }
   let(:threshold) { Stoplight::Light::Config::DEFAULT_THRESHOLD }
   let(:window_size) { Stoplight::Light::Config::DEFAULT_WINDOW_SIZE }
   let(:tracked_errors) { Stoplight::Light::Config::DEFAULT_TRACKED_ERRORS }
@@ -35,9 +35,9 @@ RSpec.describe Stoplight::Light::Config do
     it "returns the default values" do
       is_expected.to have_attributes(
         cool_off_time: Stoplight::Light::Config::DEFAULT_COOL_OFF_TIME,
-        data_store: Stoplight.default_data_store,
-        error_notifier: Stoplight.default_error_notifier,
-        notifiers: Stoplight.default_notifiers,
+        data_store: Stoplight::Light::Config::DEFAULT_DATA_STORE,
+        error_notifier: Stoplight::Light::Config::DEFAULT_ERROR_NOTIFIER,
+        notifiers: Stoplight::Light::Config::DEFAULT_NOTIFIERS,
         threshold: Stoplight::Light::Config::DEFAULT_THRESHOLD,
         window_size: Stoplight::Light::Config::DEFAULT_WINDOW_SIZE,
         tracked_errors: Stoplight::Light::Config::DEFAULT_TRACKED_ERRORS,

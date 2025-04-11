@@ -40,12 +40,18 @@ module Stoplight
     # @param settings_overrides [Hash] The settings to override.
     # @return [Stoplight::Light::Config] The configuration for the specified light.
     def configure_light(name, **settings_overrides)
-      settings = user_level_default_settings
+      settings = user_level_programmatic_default_settings
+        .merge(user_level_default_settings)
         .merge(light_settings(name))
         .merge(settings_overrides)
         .merge(name:)
 
       Light::Config.new(**settings)
+    end
+
+    # @return [Hash]
+    private def user_level_programmatic_default_settings
+      Stoplight.__programmatic_settings || {}
     end
 
     # Returns the user-level default settings for the lights.

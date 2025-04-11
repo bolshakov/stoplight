@@ -12,8 +12,11 @@ module Stoplight
       DEFAULT_WINDOW_SIZE = Float::INFINITY
       DEFAULT_SKIPPED_ERRORS = [].freeze
       DEFAULT_TRACKED_ERRORS = [StandardError].freeze
-
       DEFAULT_DATA_STORE = DataStore::Memory.new
+      DEFAULT_NOTIFIERS = [
+        Notifier::IO.new($stderr)
+      ].freeze
+      DEFAULT_ERROR_NOTIFIER = ->(error) { warn error }
 
       DEFAULT_SETTINGS = {
         cool_off_time: DEFAULT_COOL_OFF_TIME,
@@ -21,10 +24,9 @@ module Stoplight
         window_size: DEFAULT_WINDOW_SIZE,
         tracked_errors: DEFAULT_TRACKED_ERRORS,
         skipped_errors: DEFAULT_SKIPPED_ERRORS,
-
-        data_store: Stoplight.default_data_store,
-        error_notifier: Stoplight.default_error_notifier,
-        notifiers: Stoplight.default_notifiers
+        data_store: DEFAULT_DATA_STORE,
+        error_notifier: DEFAULT_ERROR_NOTIFIER,
+        notifiers: DEFAULT_NOTIFIERS
       }.freeze
 
       attribute :name, Types::Coercible::String

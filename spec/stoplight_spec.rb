@@ -6,27 +6,6 @@ RSpec.describe Stoplight do
   it "is a module" do
     expect(described_class).to be_a(Module)
   end
-
-  describe ".default_notifiers" do
-    it "is initially the default" do
-      expect(described_class.default_notifiers)
-        .to eql(Stoplight::Default::NOTIFIERS)
-    end
-  end
-
-  describe ".default_data_store" do
-    it "is initially the default" do
-      expect(described_class.default_data_store)
-        .to eql(Stoplight::Default::DATA_STORE)
-    end
-  end
-
-  describe ".default_error_notifier" do
-    it "is initially the default" do
-      expect(described_class.default_error_notifier)
-        .to eql(Stoplight::Default::ERROR_NOTIFIER)
-    end
-  end
 end
 
 RSpec.describe "Stoplight" do
@@ -84,42 +63,64 @@ RSpec.describe "Stoplight" do
     end
   end
 
-  describe "#load_config!" do
+  describe ".configure" do
     subject(:config) { Stoplight.config }
 
-    around do |example|
-      default_window_size = ENV["STOPLIGHT__DEFAULT__WINDOW_SIZE"]
-      light2_threshold = ENV["STOPLIGHT__LIGHTS__LIGHT2__THRESHOLD"]
-      ENV["STOPLIGHT__DEFAULT__WINDOW_SIZE"] = "30"
-      ENV["STOPLIGHT__LIGHTS__LIGHT2__THRESHOLD"] = "4"
+    context "with file-based and env-based configuration" do
+      around do |example|
+        default_window_size = ENV["STOPLIGHT__DEFAULT__WINDOW_SIZE"]
+        light2_threshold = ENV["STOPLIGHT__LIGHTS__LIGHT2__THRESHOLD"]
+        ENV["STOPLIGHT__DEFAULT__WINDOW_SIZE"] = "30"
+        ENV["STOPLIGHT__LIGHTS__LIGHT2__THRESHOLD"] = "4"
 
-      Stoplight.load_config!(config_root: File.join(__dir__, "fixtures", "settings"))
+        Stoplight.reset_config!
+        Stoplight.configure(config_root: File.join(__dir__, "fixtures", "settings"))
 
-      example.run
-    ensure
-      Stoplight.reset_config!
-      ENV["STOPLIGHT__DEFAULT__WINDOW_SIZE"] = default_window_size
-      ENV["STOPLIGHT__LIGHTS__LIGHT2__THRESHOLD"] = light2_threshold
+        example.run
+      ensure
+        Stoplight.reset_config!
+        ENV["STOPLIGHT__DEFAULT__WINDOW_SIZE"] = default_window_size
+        ENV["STOPLIGHT__LIGHTS__LIGHT2__THRESHOLD"] = light2_threshold
+      end
+
+      it "loads the configuration from the provided config root and env_variables" do
+        is_expected.to eq(
+          Stoplight::Config.new(
+            default: {
+              cool_off_time: 42, # default from config file
+              window_size: 30 # default from ENV
+            },
+            lights: {
+              light1: {
+                cool_off_time: 15, # from config file
+                threshold: 1 # from config file
+              },
+              light2: {
+                threshold: 4 # from ENV
+              }
+            }
+          )
+        )
+      end
     end
 
-    it "loads the configuration from the provided config root and env_variables" do
-      is_expected.to eq(
-        Stoplight::Config.new(
-          default: {
-            cool_off_time: 42, # default from config file
-            window_size: 30 # default from ENV
-          },
-          lights: {
-            light1: {
-              cool_off_time: 15, # from config file
-              threshold: 1 # from config file
-            },
-            light2: {
-              threshold: 4 # from ENV
-            }
-          }
+    context "with a custom data store" do
+      let(:data_store) { Stoplight::DataStore::Memory.new }
+
+      around do |example|
+        Stoplight.reset_config!
+        Stoplight.configure(data_store:)
+
+        example.run
+      ensure
+        Stoplight.reset_config!
+      end
+
+      it "sets the default data store" do
+        expect(Stoplight.config.default).to eq(
+          data_store: data_store
         )
-      )
+      end
     end
   end
 end
