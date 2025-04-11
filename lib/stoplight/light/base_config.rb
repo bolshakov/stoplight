@@ -27,11 +27,7 @@ module Stoplight
       attribute? :window_size, (Types::Integer | Types::Float)
       attribute? :tracked_errors, Types::Array.of(Types::TrackedError)
       attribute? :skipped_errors, Types::Array.of(Types::SkippedError).constructor { |value|
-        if value == Dry::Core::Undefined
-          ALWAYS_SKIPPED_ERRORS
-        else
-          Set[*value, *ALWAYS_SKIPPED_ERRORS].to_a
-        end
+        Set[*value, *ALWAYS_SKIPPED_ERRORS].to_a
       }
     end
   end
