@@ -7,15 +7,24 @@ module Stoplight
       schema schema.strict
       transform_keys(&:to_sym)
 
+      DEFAULT_COOL_OFF_TIME = 60.0
+      DEFAULT_THRESHOLD = 3
+      DEFAULT_WINDOW_SIZE = Float::INFINITY
+      DEFAULT_SKIPPED_ERRORS = [].freeze
+      DEFAULT_TRACKED_ERRORS = [StandardError].freeze
+
+      DEFAULT_DATA_STORE = DataStore::Memory.new
+
       DEFAULT_SETTINGS = {
-        cool_off_time: Stoplight::Default::COOL_OFF_TIME,
+        cool_off_time: DEFAULT_COOL_OFF_TIME,
+        threshold: DEFAULT_THRESHOLD,
+        window_size: DEFAULT_WINDOW_SIZE,
+        tracked_errors: DEFAULT_TRACKED_ERRORS,
+        skipped_errors: DEFAULT_SKIPPED_ERRORS,
+
         data_store: Stoplight.default_data_store,
         error_notifier: Stoplight.default_error_notifier,
-        notifiers: Stoplight.default_notifiers,
-        threshold: Stoplight::Default::THRESHOLD,
-        window_size: Stoplight::Default::WINDOW_SIZE,
-        tracked_errors: Stoplight::Default::TRACKED_ERRORS,
-        skipped_errors: Stoplight::Default::SKIPPED_ERRORS
+        notifiers: Stoplight.default_notifiers
       }.freeze
 
       attribute :name, Types::Coercible::String

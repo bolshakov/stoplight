@@ -9,7 +9,7 @@ RSpec.shared_examples "a generic notifier" do
     it "is initially the default" do
       formatter = nil
       expect(described_class.new(nil, formatter).formatter)
-        .to eql(Stoplight::Default::FORMATTER)
+        .to eql(Stoplight::Notifier::Generic::DEFAULT_FORMATTER)
     end
 
     it "reads the formatter" do

@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 module Stoplight
+  # TODO: reference constants from Stoplight::Light::Config
   module Default
     COOL_OFF_TIME = 60.0
 
@@ -22,14 +23,6 @@ module Stoplight
 
     WINDOW_SIZE = Float::INFINITY
 
-    TRACKED_ERRORS = [StandardError].freeze
-    SKIPPED_ERRORS = [
-      NoMemoryError,
-      ScriptError,
-      SecurityError,
-      SignalException,
-      SystemExit,
-      SystemStackError
-    ].freeze
+    warn "You're using the deprecated constants in Stoplight::Default. Please consult the upgrade guide for more information."
   end
 end

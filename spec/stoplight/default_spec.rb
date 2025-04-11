@@ -9,7 +9,7 @@ RSpec.describe Stoplight::Default do
 
   describe "::COOL_OFF_TIME" do
     it "is a float" do
-      expect(Stoplight::Default::COOL_OFF_TIME).to be_a(Float)
+      expect(Stoplight::Light::Config::DEFAULT_COOL_OFF_TIME).to be_a(Float)
     end
   end
 
@@ -31,12 +31,12 @@ RSpec.describe Stoplight::Default do
 
   describe "::FORMATTER" do
     it "is a proc" do
-      expect(Stoplight::Default::FORMATTER).to be_a(Proc)
+      expect(Stoplight::Notifier::Generic::DEFAULT_FORMATTER).to be_a(Proc)
     end
 
     it "has the same arity as #notify" do
       notify = Stoplight::Notifier::Base.new.method(:notify)
-      expect(Stoplight::Default::FORMATTER.arity).to eql(notify.arity)
+      expect(Stoplight::Notifier::Generic::DEFAULT_FORMATTER.arity).to eql(notify.arity)
     end
   end
 
@@ -58,7 +58,7 @@ RSpec.describe Stoplight::Default do
 
   describe "::THRESHOLD" do
     it "is an integer" do
-      expect(Stoplight::Default::THRESHOLD).to be_a(Integer)
+      expect(Stoplight::Light::Config::DEFAULT_THRESHOLD).to be_a(Integer)
     end
   end
 end

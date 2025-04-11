@@ -10,6 +10,15 @@ module Stoplight
     class BaseConfig < Dry::Struct
       transform_keys(&:to_sym)
 
+      ALWAYS_SKIPPED_ERRORS = [
+        NoMemoryError,
+        ScriptError,
+        SecurityError,
+        SignalException,
+        SystemExit,
+        SystemStackError
+      ].freeze
+
       attribute? :cool_off_time, Types::Coercible::Float
       attribute? :data_store, Types::DataStore
       attribute? :error_notifier, Types::ErrorNotifier
@@ -19,9 +28,9 @@ module Stoplight
       attribute? :tracked_errors, Types::Array.of(Types::TrackedError)
       attribute? :skipped_errors, Types::Array.of(Types::SkippedError).constructor { |value|
         if value == Dry::Core::Undefined
-          Stoplight::Default::SKIPPED_ERRORS
+          ALWAYS_SKIPPED_ERRORS
         else
-          Set[*value, *Stoplight::Default::SKIPPED_ERRORS].to_a
+          Set[*value, *ALWAYS_SKIPPED_ERRORS].to_a
         end
       }
     end

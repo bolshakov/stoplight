@@ -7,9 +7,9 @@ RSpec.shared_examples Stoplight::Light::Configurable do
       data_store: Stoplight.default_data_store,
       notifiers: Stoplight.default_notifiers,
       error_notifier: Stoplight.default_error_notifier,
-      cool_off_time: Stoplight::Default::COOL_OFF_TIME,
-      threshold: Stoplight::Default::THRESHOLD,
-      window_size: Stoplight::Default::WINDOW_SIZE
+      cool_off_time: Stoplight::Light::Config::DEFAULT_COOL_OFF_TIME,
+      threshold: Stoplight::Light::Config::DEFAULT_THRESHOLD,
+      window_size: Stoplight::Light::Config::DEFAULT_WINDOW_SIZE
     )
   end
 
@@ -86,7 +86,7 @@ RSpec.shared_examples Stoplight::Light::Configurable do
 
     it "configures skipped errors" do
       expect(with_attribute.config.skipped_errors).to contain_exactly(*skipped_errors,
-        *Stoplight::Default::SKIPPED_ERRORS)
+        *Stoplight::Light::Config::ALWAYS_SKIPPED_ERRORS)
     end
   end
 end
