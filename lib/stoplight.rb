@@ -50,8 +50,22 @@ require "stoplight/light/lockable"
 require "stoplight/light/runnable"
 require "stoplight/light"
 
-# @return [Stoplight::CircuitBreaker]
-def Stoplight(name) # rubocop:disable Naming/MethodName
-  config = Stoplight::Light::Config.new(name: name)
+# Creates a new Stoplight circuit breaker with the given name and settings.
+#
+# @param name [String] The name of the circuit breaker.
+# @param settings [Hash] Optional settings to configure the circuit breaker.
+#   @option settings [Numeric] :cool_off_time The time to wait before resetting the circuit breaker.
+#   @option settings [Stoplight::DataStore::Base] :data_store The data store to use for storing state.
+#   @option settings [Proc] :error_notifier A proc to handle error notifications.
+#   @option settings [Array<Stoplight::Notifier::Base>] :notifiers A list of notifiers to use.
+#   @option settings [Numeric] :threshold The failure threshold to trip the circuit breaker.
+#   @option settings [Numeric] :window_size The size of the rolling window for failure tracking.
+#   @option settings [Array<StandardError>] :tracked_errors A list of errors to track.
+#   @option settings [Array<Exception>] :skipped_errors A list of errors to skip.
+#
+# @return [Stoplight::CircuitBreaker] A new circuit breaker instance.
+# @raise [ArgumentError] If an unknown option is provided in the settings.
+def Stoplight(name, **settings) # rubocop:disable Naming/MethodName
+  config = Stoplight::Light::Config.new(name: name, **settings)
   Stoplight::Light.new(config)
 end

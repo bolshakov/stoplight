@@ -307,6 +307,34 @@ the cool off to `Float::INFINITY`. To make automatic recovery instantaneous,
 set the cool off to `0` seconds. Note that this is not recommended, as it
 effectively replaces the red state with yellow.
 
+### Direct Usage
+
+In addition to the builder interface, you can directly create a stoplight using 
+the `Stoplight()` method. This method allows you to configure the stoplight with a name and 
+optional settings in a single step.
+
+```ruby
+light = Stoplight('example-direct', cool_off_time: 10, threshold: 5)
+
+light.run { 1 / 0 }
+# ZeroDivisionError: divided by 0
+light.color
+# => "red"
+```
+
+The `Stoplight()` method accepts the following settings:
+
+* `:cool_off_time` - The time to wait before resetting the circuit breaker.
+* `:data_store` - The data store to use for storing state.
+* `:error_notifier` - A proc to handle error notifications.
+* `:notifiers` - A list of notifiers to use.
+* `:threshold` - The failure threshold to trip the circuit breaker.
+* `:window_size` - The size of the rolling window for failure tracking.
+* `:tracked_errors` - A list of errors to track.
+* `:skipped_errors` - A list of errors to skip.
+
+This approach is useful for quickly setting up a stoplight without chaining multiple configuration methods.
+
 ### Rails
 
 Stoplight was designed to wrap Rails actions with minimal effort. Here's an
