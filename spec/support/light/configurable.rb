@@ -24,7 +24,7 @@ RSpec.shared_examples Stoplight::Light::Configurable do
   end
 
   describe "#with_data_store" do
-    let(:data_store) { instance_double(Stoplight::DataStore::Redis) }
+    let(:data_store) { Stoplight::DataStore::Memory.new }
 
     include_examples "configurable attribute", :data_store
   end
@@ -48,7 +48,7 @@ RSpec.shared_examples Stoplight::Light::Configurable do
   end
 
   describe "#with_notifiers" do
-    let(:notifiers) { 1_000 }
+    let(:notifiers) { [Stoplight::Notifier::IO.new($stderr)] }
 
     include_examples "configurable attribute", :notifiers
   end

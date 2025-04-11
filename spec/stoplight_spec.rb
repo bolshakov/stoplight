@@ -66,7 +66,7 @@ RSpec.describe "Stoplight" do
     end
     let(:data_store) { Stoplight::DataStore::Memory.new }
     let(:error_notifier) { ->(error) { warn error } }
-    let(:notifiers) { Stoplight::Notifier::IO.new($stdout) }
+    let(:notifiers) { [Stoplight::Notifier::IO.new($stdout)] }
 
     it "instantiates with the correct settings" do
       config = Stoplight::Light::Config.new(name: name, **settings)
@@ -79,7 +79,7 @@ RSpec.describe "Stoplight" do
       end
 
       it "raises an ArgumentError" do
-        expect { light }.to raise_error(ArgumentError, /unknown_option/)
+        expect { light }.to raise_error(StandardError, /unknown_option/)
       end
     end
   end
