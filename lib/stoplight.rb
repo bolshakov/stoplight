@@ -1,54 +1,77 @@
 # frozen_string_literal: true
 
+require "configx"
+
+require "zeitwerk"
+loader = Zeitwerk::Loader.for_gem
+loader.ignore("#{__dir__}/stoplight/rspec", "#{__dir__}/stoplight/rspec.rb")
+loader.inflector.inflect(
+  "io" => "IO"
+)
+loader.setup
+
 module Stoplight # rubocop:disable Style/Documentation
   class << self
-    # @!attribute default_data_store
-    #   @return [DataStore::Base]
-    attr_accessor :default_data_store
+    attr_accessor :__programmatic_settings
 
-    # @!attribute default_notifiers
-    #   @return [Array<Notifier::Base>]
-    attr_accessor :default_notifiers
+    # Configures the +Stoplight+ with settings for all circuit breakers.
+    #
+    # This method allows configuring both:
+    # - Config loading options (file paths, environment variable prefixes, etc.)
+    # - Global default settings for all circuit breakers (data_store, threshold, etc.)
+    #
+    # Once configured, the configuration becomes immutable for the lifecycle of the application.
+    # Call `reset_config!` if you need to reconfigure.
+    #
+    # @param settings [Hash] Configuration options
+    #
+    # @option settings [String] :config_root Path to the configuration directory (default: 'config')
+    # @option settings [String] :dir_name Directory name for configuration files (default: 'stoplight')
+    # @option settings [String] :file_name Base filename for configuration files (default: 'stoplight')
+    # @option settings [String] :env_prefix Prefix for environment variables (default: 'STOPLIGHT')
+    # @option settings [String] :env_separator Separator for environment variables (default: '__')
+    #
+    # You can also provide any circuit breaker setting as a global default:
+    # @option settings [Numeric] :cool_off_time Default cool-off time for all circuit breakers
+    # @option settings [Integer] :threshold Default error threshold for all circuit breakers
+    # @option settings [Numeric] :window_size Default window size for all circuit breakers
+    # @option settings [DataStore::Base] :data_store Default data store for all circuit breakers
+    # @option settings [Array<Notifier::Base>] :notifiers Default notifiers for all circuit breakers
+    # @option settings [Proc] :error_notifier Default error notifier for all circuit breakers
+    #
+    # @example Configure with defaults
+    #   Stoplight.configure
+    #
+    # @example Configure with custom settings
+    #   Stoplight.configure(
+    #     config_root: 'custom_config',
+    #     threshold: 5,
+    #     data_store: Stoplight::DataStore::Redis.new(Redis.new)
+    #   )
+    #
+    # @raise [RuntimeError] If Stoplight has already been configured
+    # @return [void]
+    def configure(**settings)
+      raise "Stoplight is already configured" if @config
 
-    # @!attribute default_error_notifier
-    #   @return [Proc]
-    attr_accessor :default_error_notifier
+      configx_setting_names = %i[name env_prefix env_separator dir_name file_name config_root]
+      configx_settings = settings.slice(*configx_setting_names)
+      self.__programmatic_settings = settings.except(*configx_setting_names)
+
+      @config = ConfigProvider.load(**configx_settings)
+    end
+
+    # @!attribute config
+    # @return [Stoplight::Config]
+    def config
+      @config ||= configure
+    end
+
+    def reset_config!
+      @config = nil
+    end
   end
 end
-
-require "stoplight/version"
-
-require "stoplight/color"
-require "stoplight/error"
-require "stoplight/failure"
-require "stoplight/state"
-
-require "stoplight/data_store"
-require "stoplight/data_store/base"
-require "stoplight/data_store/memory"
-require "stoplight/data_store/redis"
-
-require "stoplight/notifier"
-require "stoplight/notifier/base"
-require "stoplight/notifier/generic"
-
-require "stoplight/notifier/io"
-require "stoplight/notifier/logger"
-
-require "stoplight/default"
-
-module Stoplight # rubocop:disable Style/Documentation
-  @default_data_store = Default::DATA_STORE
-  @default_notifiers = Default::NOTIFIERS
-  @default_error_notifier = Default::ERROR_NOTIFIER
-end
-
-require "stoplight/circuit_breaker"
-require "stoplight/light/config"
-require "stoplight/light/configurable"
-require "stoplight/light/lockable"
-require "stoplight/light/runnable"
-require "stoplight/light"
 
 # Creates a new Stoplight circuit breaker with the given name and settings.
 #
@@ -66,6 +89,6 @@ require "stoplight/light"
 # @return [Stoplight::CircuitBreaker] A new circuit breaker instance.
 # @raise [ArgumentError] If an unknown option is provided in the settings.
 def Stoplight(name, **settings) # rubocop:disable Naming/MethodName
-  config = Stoplight::Light::Config.new(name: name, **settings)
+  config = Stoplight.config.configure_light(name, **settings)
   Stoplight::Light.new(config)
 end

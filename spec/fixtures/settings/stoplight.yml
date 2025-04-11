@@ -1,0 +1,12 @@
+---
+default:
+  cool_off_time: 42
+  window_size: 14
+
+
+lights:
+  light1:
+    cool_off_time: 15
+    threshold: 1
+
+

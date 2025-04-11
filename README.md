@@ -335,6 +335,62 @@ The `Stoplight()` method accepts the following settings:
 
 This approach is useful for quickly setting up a stoplight without chaining multiple configuration methods.
 
+### Configuration
+
+Stoplight provides a flexible configuration system that allows you to set defaults in multiple ways.
+
+#### Global Configuration
+
+You can configure Stoplight globally using the `Stoplight.configure` method:
+
+```ruby
+Stoplight.configure(
+    cool_off_time: 30,
+    threshold: 5,
+    data_store: Stoplight::DataStore::Redis.new(Redis.new),
+    notifiers: [Stoplight::Notifier::Logger.new(Rails.logger)]
+)
+```
+
+#### File-based Configuration
+
+Stoplight supports loading configuration from YAML files:
+
+```yml
+# config/stoplight.yml
+default:
+  cool_off_time: 30
+  threshold: 5
+  
+lights:
+  payment_service:
+    cool_off_time: 60
+    threshold: 3
+```
+
+#### Environment Variables
+
+You can also configure Stoplight using environment variables:
+
+```yml
+STOPLIGHT__DEFAULT__COOL_OFF_TIME=30
+STOPLIGHT__DEFAULT__THRESHOLD=5
+STOPLIGHT__LIGHTS__PAYMENT_SERVICE__COOL_OFF_TIME=60
+```
+
+**Note**: When configuring specific lights through environment variables, the light names must be 
+lowercase. For example, use `payment_service` instead of `PaymentService`.
+
+#### Configuration Precedence
+
+Settings are applied in the following order (highest precedence first):
+
+1. Per-call settings (`Stoplight('name', cool_off_time: 30)`)
+2. Light-specific settings from YAML/ENV
+3. Global default settings from YAML/ENV
+4. Programmatic settings from Stoplight.configure
+5. Library-level hardcoded defaults
+
 ### Rails
 
 Stoplight was designed to wrap Rails actions with minimal effort. Here's an

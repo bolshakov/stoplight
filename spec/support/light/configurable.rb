@@ -4,12 +4,12 @@ RSpec.shared_examples Stoplight::Light::Configurable do
   let(:config) do
     Stoplight::Light::Config.new(
       name: name,
-      data_store: Stoplight.default_data_store,
-      notifiers: Stoplight.default_notifiers,
-      error_notifier: Stoplight.default_error_notifier,
-      cool_off_time: Stoplight::Default::COOL_OFF_TIME,
-      threshold: Stoplight::Default::THRESHOLD,
-      window_size: Stoplight::Default::WINDOW_SIZE
+      data_store: Stoplight::Light::Config::DEFAULT_DATA_STORE,
+      notifiers: Stoplight::Light::Config::DEFAULT_NOTIFIERS,
+      error_notifier: Stoplight::Light::Config::DEFAULT_ERROR_NOTIFIER,
+      cool_off_time: Stoplight::Light::Config::DEFAULT_COOL_OFF_TIME,
+      threshold: Stoplight::Light::Config::DEFAULT_THRESHOLD,
+      window_size: Stoplight::Light::Config::DEFAULT_WINDOW_SIZE
     )
   end
 
@@ -24,7 +24,7 @@ RSpec.shared_examples Stoplight::Light::Configurable do
   end
 
   describe "#with_data_store" do
-    let(:data_store) { instance_double(Stoplight::DataStore::Redis) }
+    let(:data_store) { Stoplight::DataStore::Memory.new }
 
     include_examples "configurable attribute", :data_store
   end
@@ -48,7 +48,7 @@ RSpec.shared_examples Stoplight::Light::Configurable do
   end
 
   describe "#with_notifiers" do
-    let(:notifiers) { 1_000 }
+    let(:notifiers) { [Stoplight::Notifier::IO.new($stderr)] }
 
     include_examples "configurable attribute", :notifiers
   end
@@ -86,7 +86,7 @@ RSpec.shared_examples Stoplight::Light::Configurable do
 
     it "configures skipped errors" do
       expect(with_attribute.config.skipped_errors).to contain_exactly(*skipped_errors,
-        *Stoplight::Default::SKIPPED_ERRORS)
+        *Stoplight::Light::Config::ALWAYS_SKIPPED_ERRORS)
     end
   end
 end

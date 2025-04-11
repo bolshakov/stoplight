@@ -3,136 +3,54 @@
 module Stoplight
   class Light < CircuitBreaker
     # A +Stoplight::Light+ configuration object.
-    class Config
+    class Config < BaseConfig
+      schema schema.strict
+      transform_keys(&:to_sym)
+
+      DEFAULT_COOL_OFF_TIME = 60.0
+      DEFAULT_THRESHOLD = 3
+      DEFAULT_WINDOW_SIZE = Float::INFINITY
+      DEFAULT_SKIPPED_ERRORS = [].freeze
+      DEFAULT_TRACKED_ERRORS = [StandardError].freeze
+      DEFAULT_DATA_STORE = DataStore::Memory.new
+      DEFAULT_NOTIFIERS = [
+        Stoplight::Notifier::IO.new($stderr)
+      ].freeze
+      DEFAULT_ERROR_NOTIFIER = ->(error) { warn error }
+
+      DEFAULT_SETTINGS = {
+        cool_off_time: DEFAULT_COOL_OFF_TIME,
+        threshold: DEFAULT_THRESHOLD,
+        window_size: DEFAULT_WINDOW_SIZE,
+        tracked_errors: DEFAULT_TRACKED_ERRORS,
+        skipped_errors: DEFAULT_SKIPPED_ERRORS,
+        data_store: DEFAULT_DATA_STORE,
+        error_notifier: DEFAULT_ERROR_NOTIFIER,
+        notifiers: DEFAULT_NOTIFIERS
+      }.freeze
+
+      attribute :name, Types::Coercible::String
+
       class << self
         alias_method :__new_without_defaults__, :new
 
-        # It overrides the +Config.new+ to inject default settings
-        # @see +Stoplight::Light::Config#initialize+
+        # It overrides the +Config.new+ to inject library-level default settings
+        # @api private this method should not be used directly
+        # @see +Stoplight()+
         def new(**settings)
-          __new_without_defaults__(
-            **default_settings.merge(settings)
-          )
+          __new_without_defaults__(**default_settings.merge(settings))
         end
 
-        private
-
-        # @return [Hash]
-        def default_settings
-          {
-            cool_off_time: Default::COOL_OFF_TIME,
-            data_store: Stoplight.default_data_store,
-            error_notifier: Stoplight.default_error_notifier,
-            notifiers: Stoplight.default_notifiers,
-            threshold: Default::THRESHOLD,
-            window_size: Default::WINDOW_SIZE,
-            tracked_errors: Default::TRACKED_ERRORS,
-            skipped_errors: Default::SKIPPED_ERRORS
-          }
+        private def default_settings
+          DEFAULT_SETTINGS
         end
       end
 
-      # @!attribute [r] name
-      #   @return [String]
-      attr_reader :name
-
-      # @!attribute [r] cool_off_time
-      #   @return [Numeric]
-      attr_reader :cool_off_time
-
-      # @!attribute [r] data_store
-      #   @return [Stoplight::DataStore::Base]
-      attr_reader :data_store
-
-      # @!attribute [r] error_notifier
-      #   # @return [StandardError => void]
-      attr_reader :error_notifier
-
-      # @!attribute [r] notifiers
-      #   # @return [Array<Notifier::Base>]
-      attr_reader :notifiers
-
-      # @!attribute [r] threshold
-      #   @return [Numeric]
-      attr_reader :threshold
-
-      # @!attribute [r] window_size
-      #   @return [Numeric]
-      attr_reader :window_size
-
-      # @!attribute [r] tracked_errors
-      #   @return [Set<StandardError>]
-      attr_reader :tracked_errors
-
-      # @!attribute [r] skipped_errors
-      #  @return [Set<Exception>]
-      attr_reader :skipped_errors
-
-      # @param name [String]
-      # @param cool_off_time [Numeric]
-      # @param data_store [Stoplight::DataStore::Base]
-      # @param error_notifier [Proc]
-      # @param notifiers [Stoplight::Notifier::Base]
-      # @param threshold [Numeric]
-      # @param window_size [Numeric]
-      # @param tracked_errors [Array<StandardError>]
-      # @param skipped_errors [Array<Exception>]
-      def initialize(name:, cool_off_time:, data_store:, error_notifier:, notifiers:, threshold:, window_size:,
-        tracked_errors:, skipped_errors:)
-        @name = name
-        @cool_off_time = cool_off_time
-        @data_store = data_store
-        @error_notifier = error_notifier
-        @notifiers = notifiers
-        @threshold = threshold
-        @window_size = window_size
-        @tracked_errors = Set.new(tracked_errors)
-        @skipped_errors = Set.new(skipped_errors + Stoplight::Default::SKIPPED_ERRORS)
-      end
-
-      # @param other [any]
-      # @return [Boolean]
-      def ==(other)
-        other.is_a?(self.class) && settings == other.settings
-      end
-
-      # @param cool_off_time [Numeric]
-      # @param data_store [Stoplight::DataStore::Base]
-      # @param error_notifier [Proc]
-      # @param name [String]
-      # @param notifiers [Array<Stoplight::Notifier::Base>]
-      # @param threshold [Numeric]
-      # @param window_size [Numeric]
-      # @param tracked_errors [Array<StandardError>]
-      # @param skipped_errors [Array<Exception>]
+      # Updates the configuration with new settings and returns a new instance.
+      #
       # @return [Stoplight::Light::Config]
-      def with(
-        cool_off_time: self.cool_off_time,
-        data_store: self.data_store,
-        error_notifier: self.error_notifier,
-        name: self.name,
-        notifiers: self.notifiers,
-        threshold: self.threshold,
-        window_size: self.window_size,
-        tracked_errors: self.tracked_errors,
-        skipped_errors: self.skipped_errors
-      )
-        Config.new(
-          cool_off_time: cool_off_time, data_store: data_store, error_notifier: error_notifier, name: name,
-          notifiers: notifiers, threshold: threshold, window_size: window_size, tracked_errors: tracked_errors,
-          skipped_errors: skipped_errors
-        )
-      end
-
-      protected
-
-      # @return [Hash]
-      def settings
-        {
-          cool_off_time: cool_off_time, data_store: data_store, error_notifier: error_notifier, name: name,
-          notifiers: notifiers, threshold: threshold, window_size: window_size, tracked_errors: tracked_errors,
-          skipped_errors: skipped_errors
-        }
+      def with(**settings)
+        self.class.new(**to_h.merge(settings))
       end
     end
   end

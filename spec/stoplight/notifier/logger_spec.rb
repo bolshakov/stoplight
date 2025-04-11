@@ -19,7 +19,7 @@ RSpec.describe Stoplight::Notifier::Logger do
   describe "#formatter" do
     it "is initially the default" do
       expect(described_class.new(nil, nil).formatter)
-        .to eql(Stoplight::Default::FORMATTER)
+        .to eql(Stoplight::Notifier::Generic::DEFAULT_FORMATTER)
     end
 
     it "reads the formatter" do
