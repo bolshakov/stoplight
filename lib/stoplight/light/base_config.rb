@@ -8,6 +8,8 @@ module Stoplight
     #
     # @api private
     class BaseConfig < Dry::Struct
+      transform_keys(&:to_sym)
+
       attribute? :cool_off_time, Types::Coercible::Float
       attribute? :data_store, Types::DataStore
       attribute? :error_notifier, Types::ErrorNotifier

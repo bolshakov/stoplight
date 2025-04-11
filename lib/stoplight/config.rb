@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "configx"
+
 module Stoplight
   # This is a Stoplight configuration class.
   #
@@ -8,9 +10,8 @@ module Stoplight
   #
   # @see Stoplight::Light
   # @api private
-  class Config < Dry::Struct
+  class Config < ConfigX::Config
     schema schema.strict
-    transform_keys(&:to_sym)
 
     # @!attribute default [Hash]
     #   @return [Hash] A user defined default settings for all lights. If some
@@ -21,13 +22,13 @@ module Stoplight
     #  @return [Hash] A hash of light names and their settings. This allows you to
     #    configure each light with its own settings in a single place
     attribute :lights, Types::Hash.map(
-      Types::Coercible::String,
+      Types::Coercible::Symbol,
       Light::BaseConfig.schema
     ).default { {} }
 
     # Returns a configuration for a specific light with the given name and settings overrides.
     #
-    # This method combines settings from three sources in the following order of precedence:
+    # This method combines settings from three sources in the following order of precedence (last one wins):
     # 1. **Settings Overrides**: Explicit settings passed as arguments to this method.
     # 2. **Light-Specific Settings**: Settings defined for the specific light in the +lights+ attribute.
     # 3. **User-Level Default Settings**: General default settings defined in the +default+ attribute.
@@ -61,7 +62,7 @@ module Stoplight
     # @param name [Symbol]
     # @return [Hash]
     private def light_settings(name)
-      lights.fetch(name.to_s, {}).to_h
+      lights.fetch(name.to_sym, {}).to_h
     end
   end
 end

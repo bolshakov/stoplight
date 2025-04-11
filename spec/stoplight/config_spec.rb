@@ -40,7 +40,7 @@ RSpec.describe Stoplight::Config do
       let(:config) do
         described_class.new(
           lights: {
-            "light1" => {
+            light1: {
               window_size: 664
             }
           }
@@ -49,7 +49,7 @@ RSpec.describe Stoplight::Config do
 
       it "returns a hash with the light name and its config" do
         expect(config.lights).to eq(
-          "light1" => {window_size: 664}
+          light1: {window_size: 664}
         )
       end
     end
@@ -62,11 +62,11 @@ RSpec.describe Stoplight::Config do
           window_size: 664
         },
         lights: {
-          "light1" => {
+          light1: {
             window_size: 100,
             cool_off_time: 30
           },
-          "light2" => {
+          light2: {
             cool_off_time: 54
           }
         }

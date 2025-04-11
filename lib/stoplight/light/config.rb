@@ -24,6 +24,8 @@ module Stoplight
         alias_method :__new_without_defaults__, :new
 
         # It overrides the +Config.new+ to inject library-level default settings
+        # @api private this method should not be used directly
+        # @see +Stoplight()+
         def new(**settings)
           __new_without_defaults__(**default_settings.merge(settings))
         end

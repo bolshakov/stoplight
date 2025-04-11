@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "configx"
+
 module Stoplight # rubocop:disable Style/Documentation
   class << self
     # @!attribute default_data_store
@@ -17,7 +19,26 @@ module Stoplight # rubocop:disable Style/Documentation
     # @!attribute config
     # @return [Stoplight::Config]
     def config
-      @config ||= Stoplight::Config.new
+      @config ||= load_config!
+    end
+
+    def load_config!(**config_factory_settings)
+      @config = ConfigX::ConfigFactory.load(
+        **default_config_factory_settings.merge(config_factory_settings)
+      )
+    end
+
+    def reset_config!
+      @config = nil
+    end
+
+    private def default_config_factory_settings
+      {
+        env_prefix: "STOPLIGHT",
+        dir_name: "stoplight",
+        file_name: "stoplight",
+        config_class: Stoplight::Config
+      }
     end
   end
 end

@@ -83,4 +83,43 @@ RSpec.describe "Stoplight" do
       end
     end
   end
+
+  describe "#load_config!" do
+    subject(:config) { Stoplight.config }
+
+    around do |example|
+      default_window_size = ENV["STOPLIGHT__DEFAULT__WINDOW_SIZE"]
+      light2_threshold = ENV["STOPLIGHT__LIGHTS__LIGHT2__THRESHOLD"]
+      ENV["STOPLIGHT__DEFAULT__WINDOW_SIZE"] = "30"
+      ENV["STOPLIGHT__LIGHTS__LIGHT2__THRESHOLD"] = "4"
+
+      Stoplight.load_config!(config_root: File.join(__dir__, "fixtures", "settings"))
+
+      example.run
+    ensure
+      Stoplight.reset_config!
+      ENV["STOPLIGHT__DEFAULT__WINDOW_SIZE"] = default_window_size
+      ENV["STOPLIGHT__LIGHTS__LIGHT2__THRESHOLD"] = light2_threshold
+    end
+
+    it "loads the configuration from the provided config root and env_variables" do
+      is_expected.to eq(
+        Stoplight::Config.new(
+          default: {
+            cool_off_time: 42, # default from config file
+            window_size: 30 # default from ENV
+          },
+          lights: {
+            light1: {
+              cool_off_time: 15, # from config file
+              threshold: 1 # from config file
+            },
+            light2: {
+              threshold: 4 # from ENV
+            }
+          }
+        )
+      )
+    end
+  end
 end
