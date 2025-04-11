@@ -20,28 +20,28 @@ RSpec.describe Stoplight::Light::Config do
   end
 
   let(:name) { "foobar" }
-  let(:cool_off_time) { Stoplight::Default::COOL_OFF_TIME }
+  let(:cool_off_time) { Stoplight::Light::Config::DEFAULT_COOL_OFF_TIME }
   let(:data_store) { Stoplight.default_data_store }
   let(:error_notifier) { Stoplight.default_error_notifier }
   let(:notifiers) { Stoplight.default_notifiers }
-  let(:threshold) { Stoplight::Default::THRESHOLD }
-  let(:window_size) { Stoplight::Default::WINDOW_SIZE }
-  let(:tracked_errors) { Stoplight::Default::TRACKED_ERRORS }
-  let(:skipped_errors) { Stoplight::Default::SKIPPED_ERRORS }
+  let(:threshold) { Stoplight::Light::Config::DEFAULT_THRESHOLD }
+  let(:window_size) { Stoplight::Light::Config::DEFAULT_WINDOW_SIZE }
+  let(:tracked_errors) { Stoplight::Light::Config::DEFAULT_TRACKED_ERRORS }
+  let(:skipped_errors) { [] }
 
   context "with default settings" do
     subject(:config) { described_class.new(name:) }
 
     it "returns the default values" do
       is_expected.to have_attributes(
-        cool_off_time: Stoplight::Default::COOL_OFF_TIME,
+        cool_off_time: Stoplight::Light::Config::DEFAULT_COOL_OFF_TIME,
         data_store: Stoplight.default_data_store,
         error_notifier: Stoplight.default_error_notifier,
         notifiers: Stoplight.default_notifiers,
-        threshold: Stoplight::Default::THRESHOLD,
-        window_size: Stoplight::Default::WINDOW_SIZE,
-        tracked_errors: Stoplight::Default::TRACKED_ERRORS,
-        skipped_errors: Stoplight::Default::SKIPPED_ERRORS
+        threshold: Stoplight::Light::Config::DEFAULT_THRESHOLD,
+        window_size: Stoplight::Light::Config::DEFAULT_WINDOW_SIZE,
+        tracked_errors: Stoplight::Light::Config::DEFAULT_TRACKED_ERRORS,
+        skipped_errors: Stoplight::Light::Config::ALWAYS_SKIPPED_ERRORS
       )
     end
   end
@@ -133,7 +133,7 @@ RSpec.describe Stoplight::Light::Config do
     let(:skipped_errors) { [error_class] }
 
     it "returns the same value" do
-      is_expected.to contain_exactly(*skipped_errors, *Stoplight::Default::SKIPPED_ERRORS)
+      is_expected.to contain_exactly(*skipped_errors, *Stoplight::Light::Config::ALWAYS_SKIPPED_ERRORS)
     end
   end
 
@@ -167,7 +167,7 @@ RSpec.describe Stoplight::Light::Config do
 
       it "returns a new config with the updated settings" do
         is_expected.to be_a(described_class)
-        is_expected.to have_attributes(**new_settings.merge(skipped_errors: [KeyError, *Stoplight::Default::SKIPPED_ERRORS]))
+        is_expected.to have_attributes(**new_settings.merge(skipped_errors: [KeyError, *Stoplight::Light::Config::ALWAYS_SKIPPED_ERRORS]))
       end
     end
 
@@ -184,7 +184,7 @@ RSpec.describe Stoplight::Light::Config do
 
       it "returns a new config with the updated settings" do
         is_expected.to be_a(described_class)
-        is_expected.to have_attributes(**settings.merge(new_settings))
+        is_expected.to have_attributes(**settings.merge(new_settings).merge(skipped_errors: Stoplight::Light::Config::ALWAYS_SKIPPED_ERRORS))
       end
     end
   end
