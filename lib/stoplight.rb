@@ -17,7 +17,6 @@ module Stoplight # rubocop:disable Style/Documentation
 end
 
 require "stoplight/version"
-
 require "stoplight/color"
 require "stoplight/error"
 require "stoplight/failure"
@@ -42,8 +41,9 @@ module Stoplight # rubocop:disable Style/Documentation
   @default_notifiers = Default::NOTIFIERS
   @default_error_notifier = Default::ERROR_NOTIFIER
 end
-
+require "stoplight/types"
 require "stoplight/circuit_breaker"
+require "stoplight/light/default_config"
 require "stoplight/light/config"
 require "stoplight/light/configurable"
 require "stoplight/light/lockable"
