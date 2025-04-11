@@ -14,7 +14,7 @@ module Stoplight
       DEFAULT_TRACKED_ERRORS = [StandardError].freeze
       DEFAULT_DATA_STORE = DataStore::Memory.new
       DEFAULT_NOTIFIERS = [
-        Notifier::IO.new($stderr)
+        Stoplight::Notifier::IO.new($stderr)
       ].freeze
       DEFAULT_ERROR_NOTIFIER = ->(error) { warn error }
 

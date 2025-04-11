@@ -4,6 +4,7 @@ PATH
     stoplight (4.1.1)
       configx
       dry-struct
+      zeitwerk
 
 GEM
   remote: https://rubygems.org/

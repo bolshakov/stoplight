@@ -2,36 +2,13 @@
 
 require "configx"
 
-require "stoplight/version"
-require "stoplight/color"
-require "stoplight/error"
-require "stoplight/failure"
-require "stoplight/state"
-
-require "stoplight/data_store"
-require "stoplight/data_store/base"
-require "stoplight/data_store/memory"
-require "stoplight/data_store/redis"
-
-require "stoplight/notifier"
-require "stoplight/notifier/base"
-require "stoplight/notifier/generic"
-
-require "stoplight/notifier/io"
-require "stoplight/notifier/logger"
-
-require "stoplight/default"
-
-require "stoplight/types"
-require "stoplight/circuit_breaker"
-require "stoplight/light/base_config"
-require "stoplight/light/config"
-require "stoplight/config_provider"
-require "stoplight/config"
-require "stoplight/light/configurable"
-require "stoplight/light/lockable"
-require "stoplight/light/runnable"
-require "stoplight/light"
+require "zeitwerk"
+loader = Zeitwerk::Loader.for_gem
+loader.ignore("#{__dir__}/stoplight/rspec", "#{__dir__}/stoplight/rspec.rb")
+loader.inflector.inflect(
+  "io" => "IO"
+)
+loader.setup
 
 module Stoplight # rubocop:disable Style/Documentation
   class << self
