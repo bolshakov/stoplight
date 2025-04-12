@@ -27,116 +27,40 @@ RSpec.describe Stoplight::Config do
     end
   end
 
-  describe "#lights" do
-    context "without any light configs" do
-      let(:config) { described_class.new }
-
-      it "returns an empty hash" do
-        expect(config.lights).to eq({})
-      end
-    end
-
-    context "with light config" do
-      let(:config) do
-        described_class.new(
-          lights: {
-            "light1" => {
-              window_size: 664
-            }
-          }
-        )
-      end
-
-      it "returns a hash with the light name and its config" do
-        expect(config.lights).to eq(
-          "light1" => {window_size: 664}
-        )
-      end
-    end
-  end
-
-  describe "#config_for_light" do
+  describe "#configure_light" do
     let(:config) do
       described_class.new(
         default: {
-          window_size: 664
-        },
-        lights: {
-          "light1" => {
-            window_size: 100,
-            cool_off_time: 30
-          },
-          "light2" => {
-            cool_off_time: 54
-          }
+          window_size: 664,
+          threshold: 7
         }
       )
     end
 
-    context "when the configuration option is defined on the defaults and light level" do
+    context "when the configuration option is defined on the defaults level" do
       subject(:light_config) { config.configure_light("light1") }
 
       it "returns individual config with default as a fallback" do
         is_expected.to eq(
           Stoplight::Light::Config.new(
             name: "light1",
-            window_size: 100,
-            cool_off_time: 30.0
-          )
-        )
-      end
-    end
-
-    context "when the configuration option is defined only on the light level" do
-      subject(:light_config) { config.configure_light("light2") }
-
-      it "returns individual config with default as a fallback" do
-        is_expected.to eq(
-          Stoplight::Light::Config.new(
-            name: "light2",
             window_size: 664,
-            cool_off_time: 54.0
+            threshold: 7
           )
         )
       end
     end
 
-    context "when the configuration option is defined only on the light level and overrides provided" do
-      subject(:light_config) { config.configure_light("light2", cool_off_time: 14.0) }
+    context "when the configuration option is defined only on the default level and overrides provided" do
+      subject(:light_config) { config.configure_light("light2", threshold: 2, cool_off_time: 14.0) }
 
       it "returns individual config with default as a fallback and provided overrides" do
         is_expected.to eq(
           Stoplight::Light::Config.new(
             name: "light2",
             window_size: 664,
-            cool_off_time: 14.0
-          )
-        )
-      end
-    end
-
-    context "when the light is not configured" do
-      subject(:light_config) { config.configure_light("unknown_light") }
-
-      it "returns the default config if no specific config is found" do
-        is_expected.to eq(
-          Stoplight::Light::Config.new(
-            name: "unknown_light",
-            window_size: 664
-          )
-        )
-      end
-    end
-
-    context "when the light is not configured and overrides provided" do
-      subject(:light_config) { config.configure_light("unknown_light", cool_off_time: 14.0) }
-
-      it "returns the default config if no specific config is found" do
-        is_expected.to eq(
-          Stoplight::Light::Config.new(
-            name: "unknown_light",
-            window_size: 664,
-            cool_off_time: 14.0
+            cool_off_time: 14.0,
+            threshold: 2
           )
         )
       end

@@ -83,4 +83,29 @@ RSpec.describe "Stoplight" do
       end
     end
   end
+
+  describe ".configure" do
+    subject(:config) { Stoplight.config }
+
+    context "with a custom data store" do
+      let(:data_store) { Stoplight::DataStore::Memory.new }
+
+      around do |example|
+        Stoplight.reset_config!
+        Stoplight.configure do |config|
+          config.data_store = data_store
+        end
+
+        example.run
+      ensure
+        Stoplight.reset_config!
+      end
+
+      it "sets the default data store" do
+        expect(Stoplight.config.default).to eq(
+          data_store: data_store
+        )
+      end
+    end
+  end
 end

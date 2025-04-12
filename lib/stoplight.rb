@@ -17,11 +17,38 @@ module Stoplight # rubocop:disable Style/Documentation
     # @!attribute config
     # @return [Stoplight::Config]
     def config
-      @config ||= Stoplight::Config.new
+      @config ||= configure
+    end
+
+    # Configures the +Stoplight+ with settings for all circuit breakers.
+    #
+    # This method allows configuring global default settings for all circuit breakers (data_store, threshold, etc.)
+    #
+    # Once configured, the configuration becomes immutable for the lifecycle of the application.
+    # Call `reset_config!` if you need to reconfigure.
+    #
+    # @example Configure with custom settings
+    #   Stoplight.configure do |config|
+    #     config.threshold = 5
+    #     config.data_store = Stoplight::DataStore::Redis.new(Redis.new)
+    #   )
+    #
+    # @raise [RuntimeError] If Stoplight has already been configured
+    # @return [void]
+    def configure
+      raise "Stoplight is already configured" if @config
+
+      programmatic_settings = Stoplight::ProgrammaticConfig.new
+      yield(programmatic_settings) if block_given?
+      @config = Stoplight::Config.new(default: programmatic_settings.to_h)
+    end
+
+    def reset_config!
+      @config = nil
     end
   end
 end
-
+require "stoplight/programmatic_config"
 require "stoplight/version"
 require "stoplight/color"
 require "stoplight/error"
