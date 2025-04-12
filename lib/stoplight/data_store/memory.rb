@@ -12,6 +12,7 @@ module Stoplight
       def initialize
         @failures = Hash.new { |h, k| h[k] = [] }
         @states = Hash.new { |h, k| h[k] = State::UNLOCKED }
+        @notification_lock = Monitor.new
         @last_notifications = {}
         super # MonitorMixin
       end
@@ -58,13 +59,14 @@ module Stoplight
       end
 
       def with_deduplicated_notification(config, from_color, to_color)
-        synchronize do
+        notify = false
+        @notification_lock.synchronize do
           if last_notification(config) != [from_color, to_color]
             set_last_notification(config, from_color, to_color)
-
-            yield
+            notify = true
           end
         end
+        yield if notify
       end
 
       private
