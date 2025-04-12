@@ -335,65 +335,102 @@ The `Stoplight()` method accepts the following settings:
 
 This approach is useful for quickly setting up a stoplight without chaining multiple configuration methods.
 
-### Rails
+## Configuration
 
-Stoplight was designed to wrap Rails actions with minimal effort. Here's an
-example configuration:
+Stoplight comes with a global configuration system that makes it easier to set up and 
+manage default settings for all your circuit breakers. This feature enables you to define 
+configuration options once and have them applied consistently across all lights in 
+your application.
+
+### Basic Configuration
+
+You can configure Stoplight with global defaults using the new `configure` method:
 
 ```ruby
-class ApplicationController < ActionController::Base
-  around_action :stoplight
-
-  private
-
-  def stoplight(&block)
-    Stoplight("#{params[:controller]}##{params[:action]}")
-      .run(-> { render(nothing: true, status: :service_unavailable) }, &block)
-  end
+Stoplight.configure do |config|
+  config.threshold = 5
+  config.cool_off_time = 30.0
+  config.data_store = Stoplight::DataStore::Memory.new
+  config.tracked_errors = [ApiError, TimeoutError]
+  config.skipped_errors = [ActiveRecord::RecordNotFound]
 end
 ```
 
-## Setup
+Once configured, all new stoplights will automatically inherit these settings as 
+their defaults, which can still be overridden on a per-stoplight basis when needed.
+
+The following options can be configured:
+
+| Option | Description | Default Value |
+|--------|-------------|---------------|
+| `cool_off_time` | Time in seconds before a red light transitions to yellow | `60.0` |
+| `data_store` | Storage for circuit breaker state | `Stoplight::DataStore::Memory.new` |
+| `error_notifier` | Handler for internal errors | Default error handler |
+| `notifiers` | List of notifiers for state transitions | Default IO notifier |
+| `threshold` | Number of failures before tripping the circuit | `3` |
+| `window_size` | Size of the rolling window for failures | `Float::INFINITY` |
+| `tracked_errors` | List of errors that should trip the circuit | `[StandardError]` |
+| `skipped_errors` | List of errors that should be ignored | Built-in list of system errors |
+
+The configuration becomes immutable after it's set to prevent unexpected changes 
+in a running application. If you need to reconfigure Stoplight, you can use the `reset_config!` method:
+
+```ruby
+Stoplight.reset_config!
+Stoplight.configure do |config|
+  # New configuration
+end
+```
+
+When a stoplight is created, settings are applied in the following order of precedence (last one wins):
+
+1. Library-level default settings (defined in `Stoplight::Light::Config::DEFAULT_SETTINGS`)
+2. User-level default settings (defined via `Stoplight.configure`)
+3. Per-stoplight settings (passed directly to the `Stoplight()` method or via builder methods)
+
+This means you can have global configuration while still customizing individual stoplights as needed.
+
+### Example
+
+```ruby
+# Set global defaults
+Stoplight.configure do |config|
+  config.threshold = 5
+  config.data_store = Stoplight::DataStore::Redis.new(redis)
+end
+
+# Uses the global defaults
+light1 = Stoplight('api-service')
+
+# Overrides just the threshold
+light2 = Stoplight('database-service', threshold: 10)
+
+# Uses builder pattern to override settings
+light3 = Stoplight('email-service')
+  .with_cool_off_time(15)
+  .with_tracked_errors([Timeout::Error, NetworkError])
+```
 
 ### Data store
 
-Stoplight uses an in-memory data store out of the box.
-
-```ruby
-require 'stoplight'
-# => true
-Stoplight.default_data_store
-# => #<Stoplight::DataStore::Memory:...>
-```
-
-If you want to use a persistent data store, you'll have to set it up. Currently
-the only supported persistent data store is Redis.
-
-#### Redis
+Stoplight uses an in-memory data store out of the box. If you want to use a persistent data 
+store, you'll have to set it up. Currently the only supported persistent data store is Redis.
 
 Make sure you have [the Redis gem][] installed before configuring Stoplight.
 
 ```ruby
 require 'redis'
-# => true
 redis = Redis.new
-# => #<Redis client ...>
 data_store = Stoplight::DataStore::Redis.new(redis)
-# => #<Stoplight::DataStore::Redis:...>
-Stoplight.default_data_store = data_store
-# => #<Stoplight::DataStore::Redis:...>
+Stoplight.configure do |config|
+  config.data_store = data_store
+end
 ```
 
 ### Notifiers
 
-Stoplight sends notifications to standard error by default.
-
-``` rb
-Stoplight.default_notifiers
-# => [#<Stoplight::Notifier::IO:...>]
-```
-
-If you want to send notifications elsewhere, you'll have to set them up.
+Stoplight sends notifications about color changes to standard error by default. If you want to send 
+notifications elsewhere, you'll have to set them up.
 
 #### IO
 
@@ -404,11 +441,11 @@ the `Stoplight::Notifier::IO` notifier for that.
 require 'stringio'
 
 io = StringIO.new
-# => #<StringIO:...>
 notifier = Stoplight::Notifier::IO.new(io)
-# => #<Stoplight::Notifier::IO:...>
-Stoplight.default_notifiers += [notifier]
-# => [#<Stoplight::Notifier::IO:...>, #<Stoplight::Notifier::IO:...>]
+
+Stoplight.configure do |config| 
+  config.default_notifiers = [notifier]
+end
 ```
 
 #### Logger
@@ -418,13 +455,12 @@ library.
 
 ```ruby
 require 'logger'
-# => true
 logger = Logger.new(STDERR)
-# => #<Logger:...>
 notifier = Stoplight::Notifier::Logger.new(logger)
-# => #<Stoplight::Notifier::Logger:...>
-Stoplight.default_notifiers += [notifier]
-# => [#<Stoplight::Notifier::IO:...>, #<Stoplight::Notifier::Logger:...>]
+
+Stoplight.configure do |config|
+  config.default_notifiers = [notifier]
+end
 ```
 
 #### Community-supported Notifiers
@@ -461,7 +497,7 @@ class IO < Stoplight::Notifier::Base
 end
 ```
 
-### Rails
+### Rails Integration
 
 Stoplight is designed to work seamlessly with Rails. If you want to use the
 in-memory data store, you don't need to do anything special. If you want to use
@@ -471,8 +507,30 @@ Stoplight:
 ```ruby
 # config/initializers/stoplight.rb
 require 'stoplight'
-Stoplight.default_data_store = Stoplight::DataStore::Redis.new(...)
-Stoplight.default_notifiers += [Stoplight::Notifier::Logger.new(Rails.logger)]
+
+Stoplight.configure do |config|
+  config.data_store = Stoplight::DataStore::Redis.new(Redis.new(url: ENV['REDIS_URL']))
+  config.notifiers = [Stoplight::Notifier::Logger.new(Rails.logger)]
+  config.threshold = Rails.env.production? ? 10 : 2
+end
+```
+
+This ensures all your circuit breakers across the application share consistent default
+behavior while still allowing for customization where needed.
+
+Stoplight was designed to wrap Rails actions with minimal effort. Here's an example configuration:
+
+```ruby
+class ApplicationController < ActionController::Base
+  around_action :stoplight
+
+  private
+
+  def stoplight(&block)
+    Stoplight("#{params[:controller]}##{params[:action]}")
+      .run(-> { render(nothing: true, status: :service_unavailable) }, &block)
+  end
+end
 ```
 
 ## Advanced usage
@@ -514,8 +572,10 @@ stoplights are spewing messages into your test output, you can silence them
 with a couple configuration changes.
 
 ```ruby
-Stoplight.default_error_notifier = -> _ {}
-Stoplight.default_notifiers = []
+Stoplight.configure do |config|
+  config.notifiers = []
+  config.error_notifier = ->() {}
+end
 ```
 
 If your tests mysteriously fail because stoplights are the wrong color, you can
@@ -524,7 +584,10 @@ give each test case a fresh data store with RSpec.
 
 ```ruby
 before(:each) do
-  Stoplight.default_data_store = Stoplight::DataStore::Memory.new
+  Stoplight.reset_config!
+  Stoplight.configure do |config| 
+    config.data_store = Stoplight::DataStore::Memory.new
+  end
 end
 ```
 
