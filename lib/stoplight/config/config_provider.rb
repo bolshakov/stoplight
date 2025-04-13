@@ -1,0 +1,77 @@
+# frozen_string_literal: true
+
+module Stoplight
+  module Config
+    # Provides configuration for a Stoplight light by its name.
+    #
+    # It combines settings from three sources in the following order of precedence:
+    # 1. **Settings Overrides**: Explicit settings passed as arguments to this method.
+    # 2. **Programmatic Configuration**: Settings defined using the +Stoplight.configure+ method.
+    # 4. **Library-Level Default Settings**: Default settings defined in the +Stoplight::Light::Config::DEFAULT_SETTINGS+ module.
+    #
+    # The settings are merged in this order, with higher-precedence settings overriding lower-precedence ones.
+    #
+    # @api private
+    class ConfigProvider
+      # @!attribute [r] programmatic_config
+      #   @return [Stoplight::Config::ProgrammaticConfig]
+      private attr_reader :programmatic_config
+
+      # @!attribute [r] legacy_config
+      #   @return [Stoplight::Config::LegacyConfig]
+      private attr_reader :legacy_config
+
+      CONFIGURATION_CONFIGURATION_ERROR = <<~ERROR
+        Configuration conflict detected!
+          
+        You've attempted to use both the old and new configuration styles:
+          - Old style: Stoplight.default_data_store = value
+          - New style: Stoplight.configure { |config| config.data_store = value }
+        
+        Please choose only one configuration method for consistency.
+        Note: The old style is deprecated and will be removed in a future version.
+      ERROR
+      private_constant :CONFIGURATION_CONFIGURATION_ERROR
+
+      # @param programmatic_config [Stoplight::Config::ProgrammaticConfig]
+      # @param legacy_config [Stoplight::Config::LegacyConfig]
+      # @raise [Error::ConfigurationError] if both programmatic_config and legacy_config are not empty
+      def initialize(programmatic_config:, legacy_config:)
+        unless programmatic_config.empty? || legacy_config.empty?
+          raise Error::ConfigurationError, CONFIGURATION_CONFIGURATION_ERROR
+        end
+
+        @programmatic_config = programmatic_config
+        @legacy_config = legacy_config
+      end
+
+      # Returns a configuration for a specific light with the given name and settings overrides.
+      #
+      # @param light_name [Symbol, String] The name of the light.
+      # @param settings_overrides [Hash] The settings to override.
+      # @return [Stoplight::Light::Config] The configuration for the specified light.
+      # @raise [Error::ConfigurationError]
+      def provide(light_name, **settings_overrides)
+        raise Error::ConfigurationError, <<~ERROR if settings_overrides.has_key?(:name)
+          The +name+ setting cannot be overridden in the configuration.
+        ERROR
+
+        settings = programmatic_settings.merge(
+          legacy_settings,
+          settings_overrides,
+          {name: light_name}
+        )
+
+        Light::Config.new(**settings)
+      end
+
+      private def programmatic_settings
+        programmatic_config.to_h
+      end
+
+      private def legacy_settings
+        legacy_config.to_h
+      end
+    end
+  end
+end

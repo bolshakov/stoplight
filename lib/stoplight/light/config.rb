@@ -9,9 +9,9 @@ module Stoplight
 
       DEFAULT_SETTINGS = {
         cool_off_time: Stoplight::Default::COOL_OFF_TIME,
-        data_store: Stoplight.default_data_store,
-        error_notifier: Stoplight.default_error_notifier,
-        notifiers: Stoplight.default_notifiers,
+        data_store: Stoplight::Default::DATA_STORE,
+        error_notifier: Stoplight::Default::ERROR_NOTIFIER,
+        notifiers: Stoplight::Default::NOTIFIERS,
         threshold: Stoplight::Default::THRESHOLD,
         window_size: Stoplight::Default::WINDOW_SIZE,
         tracked_errors: Stoplight::Default::TRACKED_ERRORS,

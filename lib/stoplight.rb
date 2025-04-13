@@ -14,10 +14,23 @@ module Stoplight # rubocop:disable Style/Documentation
     #   @return [Proc]
     attr_accessor :default_error_notifier
 
+    def configure
+      programmatic_config = Stoplight::Config::ProgrammaticConfig.new
+      yield(programmatic_config) if block_given?
+
+      @config_provider = Stoplight::Config::ConfigProvider.new(
+        programmatic_config:, legacy_config:
+      )
+    end
+
     # @!attribute config
     # @return [Stoplight::Config]
-    def config
-      @config ||= Stoplight::Config.new
+    def config_provider
+      @config_provider ||= configure
+    end
+
+    private def legacy_config
+      @legacy_config ||= Stoplight::Config::LegacyConfig.new
     end
   end
 end
@@ -51,7 +64,9 @@ require "stoplight/types"
 require "stoplight/circuit_breaker"
 require "stoplight/light/base_config"
 require "stoplight/light/config"
-require "stoplight/config"
+require "stoplight/config/programmatic_config"
+require "stoplight/config/legacy_config"
+require "stoplight/config/config_provider"
 require "stoplight/light/configurable"
 require "stoplight/light/lockable"
 require "stoplight/light/runnable"
@@ -73,6 +88,6 @@ require "stoplight/light"
 # @return [Stoplight::CircuitBreaker] A new circuit breaker instance.
 # @raise [ArgumentError] If an unknown option is provided in the settings.
 def Stoplight(name, **settings) # rubocop:disable Naming/MethodName
-  config = Stoplight.config.configure_light(name, **settings)
+  config = Stoplight.config_provider.provide(name, **settings)
   Stoplight::Light.new(config)
 end
