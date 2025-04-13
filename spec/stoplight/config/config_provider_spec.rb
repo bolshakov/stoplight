@@ -3,21 +3,21 @@
 require "spec_helper"
 
 RSpec.describe Stoplight::Config::ConfigProvider do
-  subject(:config_provider) { described_class.new(programmatic_config:, legacy_config:) }
+  subject(:config_provider) { described_class.new(user_default_config:, legacy_config:) }
 
-  let(:programmatic_config) { Stoplight::Config::ProgrammaticConfig.new }
+  let(:user_default_config) { Stoplight::Config::UserDefaultConfig.new }
   let(:legacy_config) { Stoplight::Config::LegacyConfig.new }
 
-  context "with programmatic configuration and legacy configuration are not empty" do
-    let(:programmatic_config) do
-      Stoplight::Config::ProgrammaticConfig.new.tap do |config|
+  context "with user default configuration and legacy configuration are not empty" do
+    let(:user_default_config) do
+      Stoplight::Config::UserDefaultConfig.new.tap do |config|
         config.cool_off_time = 10
       end
     end
     let(:legacy_config) do
-      Stoplight::Config::LegacyConfig.new.tap do |config|
-        config.error_notifier = ->(error) { puts "Error: #{error}" }
-      end
+      Stoplight::Config::LegacyConfig.new(
+        error_notifier: ->(error) { puts "Error: #{error}" }
+      )
     end
 
     it "raises configuration error" do
@@ -40,9 +40,9 @@ RSpec.describe Stoplight::Config::ConfigProvider do
       end
     end
 
-    context "with programmatic configuration" do
-      let(:programmatic_config) do
-        Stoplight::Config::ProgrammaticConfig.new.tap do |config|
+    context "with user default configuration" do
+      let(:user_default_config) do
+        Stoplight::Config::UserDefaultConfig.new.tap do |config|
           config.data_store = data_store
           config.error_notifier = error_notifier
           config.notifiers = notifiers
@@ -65,7 +65,7 @@ RSpec.describe Stoplight::Config::ConfigProvider do
       context "without settings overrides" do
         let(:settings_overrides) { {} }
 
-        it "returns a configuration from programmatic settings" do
+        it "returns a configuration from user default settings" do
           expect(config).to have_attributes(
             data_store: data_store,
             error_notifier: error_notifier,
@@ -88,7 +88,7 @@ RSpec.describe Stoplight::Config::ConfigProvider do
           }
         end
 
-        it "returns a configuration from programmatic settings with provided overrides" do
+        it "returns a configuration from user default settings with provided overrides" do
           expect(config.data_store).to be(overridden_data_store)
           expect(config.error_notifier).to be(error_notifier)
           expect(config.notifiers).to contain_exactly(*notifiers)
@@ -97,12 +97,12 @@ RSpec.describe Stoplight::Config::ConfigProvider do
     end
 
     context "with legacy configuration" do
-      let(:programmatic_config) do
-        Stoplight::Config::LegacyConfig.new.tap do |config|
-          config.data_store = data_store
-          config.error_notifier = error_notifier
-          config.notifiers = notifiers
-        end
+      let(:user_default_config) do
+        Stoplight::Config::LegacyConfig.new(
+          data_store: data_store,
+          error_notifier: error_notifier,
+          notifiers: notifiers
+        )
       end
       let(:data_store) { Stoplight::DataStore::Memory.new }
       let(:error_notifier) { ->(error) { puts "Error: #{error}" } }

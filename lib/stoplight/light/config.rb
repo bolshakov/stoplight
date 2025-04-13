@@ -3,6 +3,7 @@
 module Stoplight
   class Light < CircuitBreaker
     # A +Stoplight::Light+ configuration object.
+    # @api private
     class Config < BaseConfig
       schema schema.strict
       transform_keys(&:to_sym)

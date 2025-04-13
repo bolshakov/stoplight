@@ -83,4 +83,23 @@ RSpec.describe "Stoplight" do
       end
     end
   end
+
+  describe ".configure" do
+    before { Stoplight.reset_config! }
+    after { Stoplight.reset_config! }
+
+    it "raises an error if configured more than once" do
+      Stoplight.configure {}
+      expect { Stoplight.configure {} }.to raise_error(Stoplight::Error::ConfigurationError, "Stoplight must be configured only once")
+    end
+
+    it "allows configuration with a block" do
+      Stoplight.configure do |config|
+        config.window_size = 94
+      end
+      expect(Stoplight.config_provider.provide("")).to have_attributes(
+        window_size: 94
+      )
+    end
+  end
 end

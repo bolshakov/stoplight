@@ -13,15 +13,15 @@ module Stoplight
     #
     # @api private
     class ConfigProvider
-      # @!attribute [r] programmatic_config
-      #   @return [Stoplight::Config::ProgrammaticConfig]
-      private attr_reader :programmatic_config
+      # @!attribute [r] user_default_config
+      #   @return [Stoplight::Config::UserDefaultConfig]
+      private attr_reader :user_default_config
 
       # @!attribute [r] legacy_config
       #   @return [Stoplight::Config::LegacyConfig]
       private attr_reader :legacy_config
 
-      CONFIGURATION_CONFIGURATION_ERROR = <<~ERROR
+      CONFIGURATION_ERROR = <<~ERROR
         Configuration conflict detected!
           
         You've attempted to use both the old and new configuration styles:
@@ -31,17 +31,17 @@ module Stoplight
         Please choose only one configuration method for consistency.
         Note: The old style is deprecated and will be removed in a future version.
       ERROR
-      private_constant :CONFIGURATION_CONFIGURATION_ERROR
+      private_constant :CONFIGURATION_ERROR
 
-      # @param programmatic_config [Stoplight::Config::ProgrammaticConfig]
+      # @param user_default_config [Stoplight::Config::UserDefaultConfig]
       # @param legacy_config [Stoplight::Config::LegacyConfig]
-      # @raise [Error::ConfigurationError] if both programmatic_config and legacy_config are not empty
-      def initialize(programmatic_config:, legacy_config:)
-        unless programmatic_config.empty? || legacy_config.empty?
-          raise Error::ConfigurationError, CONFIGURATION_CONFIGURATION_ERROR
+      # @raise [Error::ConfigurationError] if both user_default_config and legacy_config are not empty
+      def initialize(user_default_config:, legacy_config:)
+        unless user_default_config.empty? || legacy_config.empty?
+          raise Error::ConfigurationError, CONFIGURATION_ERROR
         end
 
-        @programmatic_config = programmatic_config
+        @user_default_config = user_default_config
         @legacy_config = legacy_config
       end
 
@@ -56,7 +56,7 @@ module Stoplight
           The +name+ setting cannot be overridden in the configuration.
         ERROR
 
-        settings = programmatic_settings.merge(
+        settings = user_default_settings.merge(
           legacy_settings,
           settings_overrides,
           {name: light_name}
@@ -65,8 +65,8 @@ module Stoplight
         Light::Config.new(**settings)
       end
 
-      private def programmatic_settings
-        programmatic_config.to_h
+      private def user_default_settings
+        user_default_config.to_h
       end
 
       private def legacy_settings

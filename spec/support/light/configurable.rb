@@ -4,9 +4,9 @@ RSpec.shared_examples Stoplight::Light::Configurable do
   let(:config) do
     Stoplight::Light::Config.new(
       name: name,
-      data_store: Stoplight.default_data_store,
-      notifiers: Stoplight.default_notifiers,
-      error_notifier: Stoplight.default_error_notifier,
+      data_store: Stoplight::Default::DATA_STORE,
+      notifiers: Stoplight::Default::NOTIFIERS,
+      error_notifier: Stoplight::Default::ERROR_NOTIFIER,
       cool_off_time: Stoplight::Default::COOL_OFF_TIME,
       threshold: Stoplight::Default::THRESHOLD,
       window_size: Stoplight::Default::WINDOW_SIZE
