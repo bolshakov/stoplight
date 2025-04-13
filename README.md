@@ -380,8 +380,10 @@ redis = Redis.new
 # => #<Redis client ...>
 data_store = Stoplight::DataStore::Redis.new(redis)
 # => #<Stoplight::DataStore::Redis:...>
-Stoplight.default_data_store = data_store
-# => #<Stoplight::DataStore::Redis:...>
+
+Stoplight.configure do |config|
+  config.data_store = data_store
+end
 ```
 
 ### Notifiers
@@ -389,7 +391,7 @@ Stoplight.default_data_store = data_store
 Stoplight sends notifications to standard error by default.
 
 ``` rb
-Stoplight.default_notifiers
+Stoplight::Default::NOTIFIERS
 # => [#<Stoplight::Notifier::IO:...>]
 ```
 
@@ -407,8 +409,11 @@ io = StringIO.new
 # => #<StringIO:...>
 notifier = Stoplight::Notifier::IO.new(io)
 # => #<Stoplight::Notifier::IO:...>
-Stoplight.default_notifiers += [notifier]
-# => [#<Stoplight::Notifier::IO:...>, #<Stoplight::Notifier::IO:...>]
+
+Stoplight.configure do |config|
+  # Set all notifiers at once (replaces existing notifiers)
+  config.notifiers = [Stoplight::Notifier::IO.new($stderr), notifier]
+end
 ```
 
 #### Logger
@@ -423,8 +428,10 @@ logger = Logger.new(STDERR)
 # => #<Logger:...>
 notifier = Stoplight::Notifier::Logger.new(logger)
 # => #<Stoplight::Notifier::Logger:...>
-Stoplight.default_notifiers += [notifier]
-# => [#<Stoplight::Notifier::IO:...>, #<Stoplight::Notifier::Logger:...>]
+Stoplight.configure do |config|
+  # Set all notifiers at once (replaces existing notifiers)
+  config.notifiers = [Stoplight::Notifier::IO.new($stderr), notifier]
+end
 ```
 
 #### Community-supported Notifiers
@@ -471,9 +478,37 @@ Stoplight:
 ```ruby
 # config/initializers/stoplight.rb
 require 'stoplight'
-Stoplight.default_data_store = Stoplight::DataStore::Redis.new(...)
-Stoplight.default_notifiers += [Stoplight::Notifier::Logger.new(Rails.logger)]
+Stoplight.configure do |config|
+  config.data_store = Stoplight::DataStore::Redis.new(...)
+  config.notifiers = [Stoplight::Notifier::Logger.new(Rails.logger)]
+end
 ```
+
+## Global Configuration
+
+Stoplight provides a comprehensive configuration API for setting global defaults:
+
+```ruby
+Stoplight.configure do |config|
+  # Data storage configuration
+  config.data_store = Stoplight::DataStore::Redis.new(redis_client)
+
+  # Notification configuration
+  config.notifiers = [Stoplight::Notifier::Logger.new(Rails.logger)]
+  config.error_notifier = ->(error) { Bugsnag.notify(error) }
+
+  # Circuit breaker behavior
+  config.cool_off_time = 120        # Seconds until red becomes yellow
+  config.threshold = 5              # Failures before switching to red
+  config.window_size = 14           # Time window to count failures
+
+  # Error handling
+  config.tracked_errors = [StandardError]
+  config.skipped_errors = [ActiveRecord::RecordNotFound]
+end
+```
+
+All stoplights will use these global defaults unless overridden with the `.with_*` methods.
 
 ## Advanced usage
 
@@ -514,8 +549,11 @@ stoplights are spewing messages into your test output, you can silence them
 with a couple configuration changes.
 
 ```ruby
-Stoplight.default_error_notifier = -> _ {}
-Stoplight.default_notifiers = []
+Stoplight.reset_config!
+Stoplight.configure do |config|
+  config.error_notifier = -> _ {}
+  config.notifiers = []
+end
 ```
 
 If your tests mysteriously fail because stoplights are the wrong color, you can
@@ -524,7 +562,9 @@ give each test case a fresh data store with RSpec.
 
 ```ruby
 before(:each) do
-  Stoplight.default_data_store = Stoplight::DataStore::Memory.new
+  Stoplight.configure do |config|
+    config.data_store = Stoplight::DataStore::Memory.new
+  end
 end
 ```
 
