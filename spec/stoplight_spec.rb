@@ -22,9 +22,47 @@ RSpec.describe Stoplight do
   end
 
   describe ".default_error_notifier" do
-    it "is initially the default" do
-      expect(described_class.default_error_notifier)
-        .to eql(Stoplight::Default::ERROR_NOTIFIER)
+    before { Stoplight.instance_variable_set(:@default_error_notifier, nil) }
+    after { Stoplight.instance_variable_set(:@default_error_notifier, nil) }
+
+    it "returns the default error notifier when not set" do
+      expect(Stoplight.default_error_notifier).to eq(Stoplight::Default::ERROR_NOTIFIER)
+    end
+
+    it "allows setting a custom error notifier" do
+      custom_notifier = ->(error) { warn "Custom: #{error}" }
+      Stoplight.default_error_notifier = custom_notifier
+      expect(Stoplight.default_error_notifier).to eq(custom_notifier)
+    end
+  end
+
+  describe ".default_data_store" do
+    before { Stoplight.instance_variable_set(:@default_data_store, nil) }
+    after { Stoplight.instance_variable_set(:@default_data_store, nil) }
+
+    it "returns the default data store when not set" do
+      expect(Stoplight.default_data_store).to eq(Stoplight::Default::DATA_STORE)
+    end
+
+    it "allows setting a custom data store" do
+      custom_store = Stoplight::DataStore::Memory.new
+      Stoplight.default_data_store = custom_store
+      expect(Stoplight.default_data_store).to eq(custom_store)
+    end
+  end
+
+  describe ".default_notifiers" do
+    before { Stoplight.instance_variable_set(:@default_notifiers, nil) }
+    after { Stoplight.instance_variable_set(:@default_notifiers, nil) }
+
+    it "returns the default notifiers when not set" do
+      expect(Stoplight.default_notifiers).to eq(Stoplight::Default::NOTIFIERS)
+    end
+
+    it "allows setting custom notifiers" do
+      custom_notifiers = [Stoplight::Notifier::IO.new($stdout)]
+      Stoplight.default_notifiers = custom_notifiers
+      expect(Stoplight.default_notifiers).to eq(custom_notifiers)
     end
   end
 end
