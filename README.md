@@ -411,8 +411,7 @@ notifier = Stoplight::Notifier::IO.new(io)
 # => #<Stoplight::Notifier::IO:...>
 
 Stoplight.configure do |config|
-  # Set all notifiers at once (replaces existing notifiers)
-  config.notifiers = [Stoplight::Notifier::IO.new($stderr), notifier]
+  config.notifiers += [notifier]
 end
 ```
 
@@ -429,8 +428,7 @@ logger = Logger.new(STDERR)
 notifier = Stoplight::Notifier::Logger.new(logger)
 # => #<Stoplight::Notifier::Logger:...>
 Stoplight.configure do |config|
-  # Set all notifiers at once (replaces existing notifiers)
-  config.notifiers = [Stoplight::Notifier::IO.new($stderr), notifier]
+  config.notifiers += [notifier]
 end
 ```
 
@@ -480,7 +478,7 @@ Stoplight:
 require 'stoplight'
 Stoplight.configure do |config|
   config.data_store = Stoplight::DataStore::Redis.new(...)
-  config.notifiers = [Stoplight::Notifier::Logger.new(Rails.logger)]
+  config.notifiers += [Stoplight::Notifier::Logger.new(Rails.logger)]
 end
 ```
 
@@ -494,7 +492,7 @@ Stoplight.configure do |config|
   config.data_store = Stoplight::DataStore::Redis.new(redis_client)
 
   # Notification configuration
-  config.notifiers = [Stoplight::Notifier::Logger.new(Rails.logger)]
+  config.notifiers += [Stoplight::Notifier::Logger.new(Rails.logger)]
   config.error_notifier = ->(error) { Bugsnag.notify(error) }
 
   # Circuit breaker behavior

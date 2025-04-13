@@ -52,7 +52,7 @@ RSpec.describe Stoplight::Config::ConfigProvider do
         Stoplight::Config::UserDefaultConfig.new.tap do |config|
           config.data_store = data_store
           config.error_notifier = error_notifier
-          config.notifiers = notifiers
+          config.notifiers += notifiers
           config.cool_off_time = cool_off_time
           config.threshold = threshold
           config.window_size = window_size
@@ -76,7 +76,7 @@ RSpec.describe Stoplight::Config::ConfigProvider do
           expect(config).to have_attributes(
             data_store: data_store,
             error_notifier: error_notifier,
-            notifiers: contain_exactly(*notifiers),
+            notifiers: contain_exactly(*Stoplight::Default::NOTIFIERS, *notifiers),
             cool_off_time: cool_off_time,
             threshold: threshold,
             window_size: window_size,
@@ -99,7 +99,7 @@ RSpec.describe Stoplight::Config::ConfigProvider do
           expect(config).to have_attributes(
             data_store: overridden_data_store,
             error_notifier: error_notifier,
-            notifiers: contain_exactly(*notifiers),
+            notifiers: contain_exactly(*Stoplight::Default::NOTIFIERS, *notifiers),
             cool_off_time: cool_off_time,
             threshold: threshold,
             window_size: window_size,

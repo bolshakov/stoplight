@@ -24,9 +24,9 @@ module Stoplight
       #   @return [Proc, nil] The default error notifier (callable object).
       attr_writer :error_notifier
 
-      # @!attribute [w] notifiers
+      # @!attribute [rw] notifiers
       #   @return [Array<Stoplight::Notifier::Base>, nil] The default list of notifiers.
-      attr_writer :notifiers
+      attr_accessor :notifiers
 
       # @!attribute [w] threshold
       #   @return [Integer, nil] The default failure threshold to trip the circuit breaker.
@@ -44,6 +44,12 @@ module Stoplight
       #   @return [Array<Class>, nil] The default list of errors to skip.
       attr_writer :skipped_errors
 
+      def initialize
+        # This allows users appending notifiers to the default list,
+        # while still allowing them to override the default list.
+        @notifiers = Default::NOTIFIERS
+      end
+
       # Converts the user-defined configuration to a hash.
       #
       # @return [Hash] A hash representation of the configuration, excluding nil values.
@@ -53,7 +59,7 @@ module Stoplight
           cool_off_time: @cool_off_time,
           data_store: @data_store,
           error_notifier: @error_notifier,
-          notifiers: @notifiers,
+          notifiers: (@notifiers == Default::NOTIFIERS) ? nil : @notifiers, # This is to avoid conflicts with legacy config
           threshold: @threshold,
           window_size: @window_size,
           tracked_errors: @tracked_errors,
