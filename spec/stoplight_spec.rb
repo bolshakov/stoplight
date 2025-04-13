@@ -35,7 +35,7 @@ RSpec.describe "Stoplight" do
   let(:name) { ("a".."z").to_a.shuffle.join }
 
   it "creates a stoplight" do
-    config = Stoplight::Light::Config.new(name: name)
+    config = Stoplight.config_provider.provide(name)
     expect(light).to eq(Stoplight::Light.new(config))
   end
 
@@ -69,7 +69,7 @@ RSpec.describe "Stoplight" do
     let(:notifiers) { [Stoplight::Notifier::IO.new($stdout)] }
 
     it "instantiates with the correct settings" do
-      config = Stoplight::Light::Config.new(name: name, **settings)
+      config = Stoplight.config_provider.provide(name, **settings)
       expect(light).to eq(Stoplight::Light.new(config))
     end
 

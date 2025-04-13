@@ -5,9 +5,9 @@ module Stoplight
     # Provides configuration for a Stoplight light by its name.
     #
     # It combines settings from three sources in the following order of precedence:
-    # 1. **Settings Overrides**: Explicit settings passed as arguments to this method.
-    # 2. **Programmatic Configuration**: Settings defined using the +Stoplight.configure+ method.
-    # 4. **Library-Level Default Settings**: Default settings defined in the +Stoplight::Light::Config::DEFAULT_SETTINGS+ module.
+    # 1. **Settings Overrides**: Explicit settings passed as arguments to +#provide+ method.
+    # 2. **User-level Default Settings**: Settings defined using the +Stoplight.configure+ method.
+    # 4. **Library-Level Default Settings**: Default settings defined in the +Stoplight::Config::UserDefaultConfig+ module.
     #
     # The settings are merged in this order, with higher-precedence settings overriding lower-precedence ones.
     #
@@ -20,6 +20,10 @@ module Stoplight
       # @!attribute [r] legacy_config
       #   @return [Stoplight::Config::LegacyConfig]
       private attr_reader :legacy_config
+
+      # @!attribute [r] library_default_config
+      #   @return [Stoplight::Config::LibraryDefaultConfig]
+      private attr_reader :library_default_config
 
       CONFIGURATION_ERROR = <<~ERROR
         Configuration conflict detected!
@@ -35,14 +39,16 @@ module Stoplight
 
       # @param user_default_config [Stoplight::Config::UserDefaultConfig]
       # @param legacy_config [Stoplight::Config::LegacyConfig]
+      # @param library_default_config [Stoplight::Config::LibraryDefaultConfig]
       # @raise [Error::ConfigurationError] if both user_default_config and legacy_config are not empty
-      def initialize(user_default_config:, legacy_config:)
+      def initialize(user_default_config:, legacy_config:, library_default_config:)
         unless user_default_config.empty? || legacy_config.empty?
           raise Error::ConfigurationError, CONFIGURATION_ERROR
         end
 
         @user_default_config = user_default_config
         @legacy_config = legacy_config
+        @library_default_config = library_default_config
       end
 
       # Returns a configuration for a specific light with the given name and settings overrides.
@@ -56,7 +62,8 @@ module Stoplight
           The +name+ setting cannot be overridden in the configuration.
         ERROR
 
-        settings = user_default_settings.merge(
+        settings = library_default_settings.merge(
+          user_default_settings,
           legacy_settings,
           settings_overrides,
           {name: light_name}
@@ -67,6 +74,10 @@ module Stoplight
 
       private def user_default_settings
         user_default_config.to_h
+      end
+
+      private def library_default_settings
+        library_default_config.to_h
       end
 
       private def legacy_settings

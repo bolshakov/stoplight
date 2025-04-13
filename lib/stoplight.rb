@@ -83,12 +83,13 @@ module Stoplight # rubocop:disable Style/Documentation
     def configure
       raise Error::ConfigurationError, "Stoplight must be configured only once" if @config_provider
 
-      user_defaults = Stoplight::Config::UserDefaultConfig.new
+      user_defaults = Config::UserDefaultConfig.new
       yield(user_defaults) if block_given?
 
-      @config_provider = Stoplight::Config::ConfigProvider.new(
+      @config_provider = Config::ConfigProvider.new(
         user_default_config: user_defaults.freeze,
-        legacy_config: Stoplight::Config::LegacyConfig.new(
+        library_default_config: Config::LibraryDefaultConfig.new,
+        legacy_config: Config::LegacyConfig.new(
           data_store: @default_data_store,
           error_notifier: @default_error_notifier,
           notifiers: @default_notifiers
@@ -136,6 +137,7 @@ require "stoplight/types"
 require "stoplight/circuit_breaker"
 require "stoplight/light/base_config"
 require "stoplight/light/config"
+require "stoplight/config/library_default_config"
 require "stoplight/config/user_default_config"
 require "stoplight/config/legacy_config"
 require "stoplight/config/config_provider"

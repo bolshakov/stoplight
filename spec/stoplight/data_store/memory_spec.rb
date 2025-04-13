@@ -4,7 +4,7 @@ require "spec_helper"
 
 RSpec.describe Stoplight::DataStore::Memory do
   let(:data_store) { described_class.new }
-  let(:config) { Stoplight::Light::Config.new(name: name) }
+  let(:config) { Stoplight.config_provider.provide(name) }
   let(:name) { ("a".."z").to_a.shuffle.join }
   let(:failure) { Stoplight::Failure.new("class", "message", Time.new) }
   let(:other) { Stoplight::Failure.new("class", "message 2", Time.new) }

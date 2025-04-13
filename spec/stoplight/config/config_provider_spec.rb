@@ -3,8 +3,15 @@
 require "spec_helper"
 
 RSpec.describe Stoplight::Config::ConfigProvider do
-  subject(:config_provider) { described_class.new(user_default_config:, legacy_config:) }
+  subject(:config_provider) do
+    described_class.new(
+      user_default_config:,
+      library_default_config:,
+      legacy_config:
+    )
+  end
 
+  let(:library_default_config) { Stoplight::Config::LibraryDefaultConfig.new }
   let(:user_default_config) { Stoplight::Config::UserDefaultConfig.new }
   let(:legacy_config) { Stoplight::Config::LegacyConfig.new }
 
@@ -89,9 +96,16 @@ RSpec.describe Stoplight::Config::ConfigProvider do
         end
 
         it "returns a configuration from user default settings with provided overrides" do
-          expect(config.data_store).to be(overridden_data_store)
-          expect(config.error_notifier).to be(error_notifier)
-          expect(config.notifiers).to contain_exactly(*notifiers)
+          expect(config).to have_attributes(
+            data_store: overridden_data_store,
+            error_notifier: error_notifier,
+            notifiers: contain_exactly(*notifiers),
+            cool_off_time: cool_off_time,
+            threshold: threshold,
+            window_size: window_size,
+            tracked_errors: tracked_errors,
+            skipped_errors: include(*skipped_errors)
+          )
         end
       end
     end
@@ -112,9 +126,16 @@ RSpec.describe Stoplight::Config::ConfigProvider do
         let(:settings_overrides) { {} }
 
         it "returns a configuration from legacy settings" do
-          expect(config.data_store).to be(data_store)
-          expect(config.error_notifier).to be(error_notifier)
-          expect(config.notifiers).to contain_exactly(*notifiers)
+          expect(config).to have_attributes(
+            cool_off_time: Stoplight::Default::COOL_OFF_TIME,
+            threshold: Stoplight::Default::THRESHOLD,
+            window_size: Stoplight::Default::WINDOW_SIZE,
+            tracked_errors: Stoplight::Default::TRACKED_ERRORS,
+            skipped_errors: Stoplight::Default::SKIPPED_ERRORS,
+            data_store: data_store,
+            error_notifier: error_notifier,
+            notifiers: contain_exactly(*notifiers)
+          )
         end
       end
 
@@ -128,9 +149,16 @@ RSpec.describe Stoplight::Config::ConfigProvider do
         end
 
         it "returns a configuration from legacy settings with provided overrides" do
-          expect(config.data_store).to be(overridden_data_store)
-          expect(config.error_notifier).to be(error_notifier)
-          expect(config.notifiers).to contain_exactly(*notifiers)
+          expect(config).to have_attributes(
+            cool_off_time: Stoplight::Default::COOL_OFF_TIME,
+            threshold: Stoplight::Default::THRESHOLD,
+            window_size: Stoplight::Default::WINDOW_SIZE,
+            tracked_errors: Stoplight::Default::TRACKED_ERRORS,
+            skipped_errors: Stoplight::Default::SKIPPED_ERRORS,
+            data_store: overridden_data_store,
+            error_notifier: error_notifier,
+            notifiers: contain_exactly(*notifiers)
+          )
         end
       end
     end

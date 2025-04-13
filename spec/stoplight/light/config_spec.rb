@@ -29,23 +29,6 @@ RSpec.describe Stoplight::Light::Config do
   let(:tracked_errors) { Stoplight::Default::TRACKED_ERRORS }
   let(:skipped_errors) { Stoplight::Default::SKIPPED_ERRORS }
 
-  context "with default settings" do
-    subject(:config) { described_class.new(name:) }
-
-    it "returns the default values" do
-      is_expected.to have_attributes(
-        cool_off_time: Stoplight::Default::COOL_OFF_TIME,
-        data_store: Stoplight::Default::DATA_STORE,
-        error_notifier: Stoplight::Default::ERROR_NOTIFIER,
-        notifiers: Stoplight::Default::NOTIFIERS,
-        threshold: Stoplight::Default::THRESHOLD,
-        window_size: Stoplight::Default::WINDOW_SIZE,
-        tracked_errors: Stoplight::Default::TRACKED_ERRORS,
-        skipped_errors: Stoplight::Default::SKIPPED_ERRORS
-      )
-    end
-  end
-
   describe "#cool_off_time" do
     subject { config.cool_off_time }
 
