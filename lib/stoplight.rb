@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
 module Stoplight # rubocop:disable Style/Documentation
+  CONFIG_MUTEX = Mutex.new
+  private_constant :CONFIG_MUTEX
+
   class << self
     # Sets the default error notifier.
     #
@@ -102,7 +105,9 @@ module Stoplight # rubocop:disable Style/Documentation
     # @return [Stoplight::Config::ConfigProvider]
     # @api private
     def config_provider
-      @config_provider ||= configure
+      CONFIG_MUTEX.synchronize do
+        @config_provider ||= configure
+      end
     end
 
     # Resets the library's configuration.
