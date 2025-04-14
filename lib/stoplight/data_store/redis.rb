@@ -224,7 +224,7 @@ module Stoplight
       end
 
       def key(*pieces)
-        ([KEY_PREFIX] + pieces).join(KEY_SEPARATOR)
+        [KEY_PREFIX, *pieces].join(KEY_SEPARATOR)
       end
     end
   end
