@@ -3,35 +3,8 @@
 module Stoplight
   class Light < CircuitBreaker
     # A +Stoplight::Light+ configuration object.
+    # @api private
     class Config
-      class << self
-        alias_method :__new_without_defaults__, :new
-
-        # It overrides the +Config.new+ to inject default settings
-        # @see +Stoplight::Light::Config#initialize+
-        def new(**settings)
-          __new_without_defaults__(
-            **default_settings.merge(settings)
-          )
-        end
-
-        private
-
-        # @return [Hash]
-        def default_settings
-          {
-            cool_off_time: Default::COOL_OFF_TIME,
-            data_store: Stoplight.default_data_store,
-            error_notifier: Stoplight.default_error_notifier,
-            notifiers: Stoplight.default_notifiers,
-            threshold: Default::THRESHOLD,
-            window_size: Default::WINDOW_SIZE,
-            tracked_errors: Default::TRACKED_ERRORS,
-            skipped_errors: Default::SKIPPED_ERRORS
-          }
-        end
-      end
-
       # @!attribute [r] name
       #   @return [String]
       attr_reader :name
@@ -61,11 +34,11 @@ module Stoplight
       attr_reader :window_size
 
       # @!attribute [r] tracked_errors
-      #   @return [Set<StandardError>]
+      #   @return [Array<StandardError>]
       attr_reader :tracked_errors
 
       # @!attribute [r] skipped_errors
-      #  @return [Set<Exception>]
+      #  @return [Array<Exception>]
       attr_reader :skipped_errors
 
       # @param name [String]
@@ -77,8 +50,8 @@ module Stoplight
       # @param window_size [Numeric]
       # @param tracked_errors [Array<StandardError>]
       # @param skipped_errors [Array<Exception>]
-      def initialize(name:, cool_off_time:, data_store:, error_notifier:, notifiers:, threshold:, window_size:,
-        tracked_errors:, skipped_errors:)
+      def initialize(name: nil, cool_off_time: nil, data_store: nil, error_notifier: nil, notifiers: nil, threshold: nil, window_size: nil,
+        tracked_errors: nil, skipped_errors: nil)
         @name = name
         @cool_off_time = cool_off_time
         @data_store = data_store
@@ -86,52 +59,35 @@ module Stoplight
         @notifiers = notifiers
         @threshold = threshold
         @window_size = window_size
-        @tracked_errors = Set.new(tracked_errors)
-        @skipped_errors = Set.new(skipped_errors + Stoplight::Default::SKIPPED_ERRORS)
+        @tracked_errors = Array(tracked_errors)
+        @skipped_errors = Set[*skipped_errors, *Stoplight::Default::SKIPPED_ERRORS].to_a
       end
 
       # @param other [any]
       # @return [Boolean]
       def ==(other)
-        other.is_a?(self.class) && settings == other.settings
+        other.is_a?(self.class) && to_h == other.to_h
       end
 
-      # @param cool_off_time [Numeric]
-      # @param data_store [Stoplight::DataStore::Base]
-      # @param error_notifier [Proc]
-      # @param name [String]
-      # @param notifiers [Array<Stoplight::Notifier::Base>]
-      # @param threshold [Numeric]
-      # @param window_size [Numeric]
-      # @param tracked_errors [Array<StandardError>]
-      # @param skipped_errors [Array<Exception>]
+      # Updates the configuration with new settings and returns a new instance.
+      #
       # @return [Stoplight::Light::Config]
-      def with(
-        cool_off_time: self.cool_off_time,
-        data_store: self.data_store,
-        error_notifier: self.error_notifier,
-        name: self.name,
-        notifiers: self.notifiers,
-        threshold: self.threshold,
-        window_size: self.window_size,
-        tracked_errors: self.tracked_errors,
-        skipped_errors: self.skipped_errors
-      )
-        Config.new(
-          cool_off_time: cool_off_time, data_store: data_store, error_notifier: error_notifier, name: name,
-          notifiers: notifiers, threshold: threshold, window_size: window_size, tracked_errors: tracked_errors,
-          skipped_errors: skipped_errors
-        )
+      def with(**settings)
+        self.class.new(**to_h.merge(settings))
       end
-
-      protected
 
       # @return [Hash]
-      def settings
+      def to_h
         {
-          cool_off_time: cool_off_time, data_store: data_store, error_notifier: error_notifier, name: name,
-          notifiers: notifiers, threshold: threshold, window_size: window_size, tracked_errors: tracked_errors,
-          skipped_errors: skipped_errors
+          cool_off_time:,
+          data_store:,
+          error_notifier:,
+          name:,
+          notifiers:,
+          threshold:,
+          window_size:,
+          tracked_errors:,
+          skipped_errors:
         }
       end
     end

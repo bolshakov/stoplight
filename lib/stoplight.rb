@@ -1,23 +1,125 @@
 # frozen_string_literal: true
 
 module Stoplight # rubocop:disable Style/Documentation
+  CONFIG_MUTEX = Mutex.new
+  private_constant :CONFIG_MUTEX
+
   class << self
-    # @!attribute default_data_store
-    #   @return [DataStore::Base]
-    attr_accessor :default_data_store
+    # Sets the default error notifier.
+    #
+    # @param value [#call]
+    # @return [#call]
+    # @deprecated Use `Stoplight.configure { |config| config.error_notifier= }` instead.
+    def default_error_notifier=(value)
+      warn "[DEPRECATED] `Stoplight.default_error_notifier=` is deprecated. " \
+        "Please use `Stoplight.configure { |config| config.error_notifier= }` instead."
+      @default_error_notifier = value
+    end
 
-    # @!attribute default_notifiers
-    #   @return [Array<Notifier::Base>]
-    attr_accessor :default_notifiers
+    # Retrieves the default error notifier.
+    #
+    # @return [#call]
+    # @deprecated
+    def default_error_notifier
+      warn "[DEPRECATED] `Stoplight.default_error_notifier` is deprecated."
+      @default_error_notifier || Default::ERROR_NOTIFIER
+    end
 
-    # @!attribute default_error_notifier
-    #   @return [Proc]
-    attr_accessor :default_error_notifier
+    # Sets the default notifiers.
+    #
+    # @param value [Array<Stoplight::Notifier::Base>] An array of notifier instances.
+    # @return [Array<Stoplight::Notifier::Base>]
+    # @deprecated Use `Stoplight.configure { |config| config.notifiers= }` instead.
+    def default_notifiers=(value)
+      warn "[DEPRECATED] `Stoplight.default_notifiers=` is deprecated. " \
+        "Please use `Stoplight.configure { |config| config.notifiers= }` instead."
+      @default_notifiers = value
+    end
+
+    # Retrieves the default notifiers.
+    #
+    # @return [Array<Stoplight::Notifier::Base>]
+    # @deprecated
+    def default_notifiers
+      warn "[DEPRECATED] `Stoplight.default_notifiers` is deprecated."
+      @default_notifiers || Default::NOTIFIERS
+    end
+
+    # Sets the default data store.
+    #
+    # @param value [Stoplight::DataStore::Base] A data store instance for storing state.
+    # @return [Stoplight::DataStore::Base]
+    # @deprecated Use `Stoplight.configure { |config| config.data_store= }` instead.
+    def default_data_store=(value)
+      warn "[DEPRECATED] `Stoplight.default_data_store=` is deprecated. " \
+        "Please use `Stoplight.configure { |config| config.data_store= }` instead."
+      @default_data_store = value
+    end
+
+    # @return [Stoplight::DataStore::Base]
+    # @deprecated
+    def default_data_store
+      warn "[DEPRECATED] `Stoplight.default_data_store` is deprecated."
+      @default_data_store || Default::DATA_STORE
+    end
+
+    # Configures the Stoplight library.
+    #
+    # This method allows you to set up the library's configuration using a block.
+    # It raises an error if called more than once.
+    #
+    # @yield [config] Provides a configuration object to the block.
+    # @yieldparam config [Stoplight::Config::ProgrammaticConfig] The configuration object.
+    # @raise [Stoplight::Error::ConfigurationError] If the library is already configured.
+    #
+    # @example
+    #   Stoplight.configure do |config|
+    #     config.window_size = 14
+    #     config.data_store = Stoplight::DataStore::Redis.new(redis_client)
+    #     config.notifiers = [Stoplight::Notifier::IO.new($stdout)]
+    #     config.cool_off_time = 120
+    #     config.threshold = 5
+    #     config.tracked_errors = [StandardError]
+    #     config.skipped_errors = [RuntimeError]
+    #   end
+    #
+    def configure
+      raise Error::ConfigurationError, "Stoplight must be configured only once" if @config_provider
+
+      user_defaults = Config::UserDefaultConfig.new
+      yield(user_defaults) if block_given?
+
+      @config_provider = Config::ConfigProvider.new(
+        user_default_config: user_defaults.freeze,
+        library_default_config: Config::LibraryDefaultConfig.new,
+        legacy_config: Config::LegacyConfig.new(
+          data_store: @default_data_store,
+          error_notifier: @default_error_notifier,
+          notifiers: @default_notifiers
+        )
+      )
+    end
+
+    # Retrieves the current configuration provider.
+    #
+    # @return [Stoplight::Config::ConfigProvider]
+    # @api private
+    def config_provider
+      CONFIG_MUTEX.synchronize do
+        @config_provider ||= configure
+      end
+    end
+
+    # Resets the library's configuration.
+    #
+    # This method clears the current configuration, allowing the library to be reconfigured.
+    def reset_config!
+      @config_provider = nil
+    end
   end
 end
 
 require "stoplight/version"
-
 require "stoplight/color"
 require "stoplight/error"
 require "stoplight/failure"
@@ -36,15 +138,12 @@ require "stoplight/notifier/io"
 require "stoplight/notifier/logger"
 
 require "stoplight/default"
-
-module Stoplight # rubocop:disable Style/Documentation
-  @default_data_store = Default::DATA_STORE
-  @default_notifiers = Default::NOTIFIERS
-  @default_error_notifier = Default::ERROR_NOTIFIER
-end
-
 require "stoplight/circuit_breaker"
 require "stoplight/light/config"
+require "stoplight/config/library_default_config"
+require "stoplight/config/user_default_config"
+require "stoplight/config/legacy_config"
+require "stoplight/config/config_provider"
 require "stoplight/light/configurable"
 require "stoplight/light/lockable"
 require "stoplight/light/runnable"
@@ -66,6 +165,6 @@ require "stoplight/light"
 # @return [Stoplight::CircuitBreaker] A new circuit breaker instance.
 # @raise [ArgumentError] If an unknown option is provided in the settings.
 def Stoplight(name, **settings) # rubocop:disable Naming/MethodName
-  config = Stoplight::Light::Config.new(name: name, **settings)
+  config = Stoplight.config_provider.provide(name, **settings)
   Stoplight::Light.new(config)
 end

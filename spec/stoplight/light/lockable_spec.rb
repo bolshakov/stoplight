@@ -5,7 +5,7 @@ require "spec_helper"
 RSpec.describe Stoplight::Light::Lockable do
   subject(:light) { Stoplight::Light.new(config) }
 
-  let(:config) { Stoplight::Light::Config.new(name: name) }
+  let(:config) { Stoplight.config_provider.provide(name) }
   let(:code) { -> { code_result } }
   let(:code_result) { random_string }
   let(:name) { random_string }
