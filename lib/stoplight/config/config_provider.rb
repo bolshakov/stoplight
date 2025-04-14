@@ -42,7 +42,7 @@ module Stoplight
       # @param library_default_config [Stoplight::Config::LibraryDefaultConfig]
       # @raise [Error::ConfigurationError] if both user_default_config and legacy_config are not empty
       def initialize(user_default_config:, legacy_config:, library_default_config:)
-        unless user_default_config.empty? || legacy_config.empty?
+        if user_default_config.any? && legacy_config.any?
           raise Error::ConfigurationError, CONFIGURATION_ERROR
         end
 
@@ -55,6 +55,7 @@ module Stoplight
       #
       # @param light_name [Symbol, String] The name of the light.
       # @param settings_overrides [Hash] The settings to override.
+      #   @see +Stoplight()+
       # @return [Stoplight::Light::Config] The configuration for the specified light.
       # @raise [Error::ConfigurationError]
       def provide(light_name, **settings_overrides)

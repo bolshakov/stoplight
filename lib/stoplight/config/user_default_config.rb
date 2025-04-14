@@ -67,9 +67,9 @@ module Stoplight
         }.compact
       end
 
-      # @return [Boolean] True if the configuration hash is empty, false otherwise.
+      # @return [Boolean] True if the configuration hash is not empty, false otherwise.
       # @api private
-      def_delegator :to_h, :empty?
+      def_delegator :to_h, :any?
     end
   end
 end

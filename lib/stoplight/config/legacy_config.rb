@@ -30,7 +30,7 @@ module Stoplight
         }.compact
       end
 
-      def_delegator :to_h, :empty?
+      def_delegator :to_h, :any?
     end
   end
 end
