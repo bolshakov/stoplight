@@ -101,9 +101,9 @@ module Stoplight
 
       def get_all(config)
         failures, state = @redis.then do |client|
-          client.multi do |transaction|
-            query_failures(config, transaction: transaction)
-            query_state(config, transaction: transaction)
+          client.pipelined do |pipeline|
+            query_failures(config, transaction: pipeline)
+            query_state(config, transaction: pipeline)
           end
         end
 
