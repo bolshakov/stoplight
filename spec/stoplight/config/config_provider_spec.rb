@@ -87,8 +87,7 @@ RSpec.describe Stoplight::Config::ConfigProvider do
       end
 
       context "with settings overrides" do
-        let(:redis) { instance_double(Redis) }
-        let(:overridden_data_store) { Stoplight::DataStore::Redis.new(redis) }
+        let(:overridden_data_store) { instance_double(Stoplight::DataStore::Redis) }
         let(:settings_overrides) do
           {
             data_store: overridden_data_store
@@ -140,8 +139,7 @@ RSpec.describe Stoplight::Config::ConfigProvider do
       end
 
       context "with settings overrides" do
-        let(:redis) { instance_double(Redis) }
-        let(:overridden_data_store) { Stoplight::DataStore::Redis.new(redis) }
+        let(:overridden_data_store) { instance_double(Stoplight::DataStore::Redis) }
         let(:settings_overrides) do
           {
             data_store: overridden_data_store
