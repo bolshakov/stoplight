@@ -27,7 +27,7 @@ module Stoplight
         if state == State::LOCKED_GREEN then Color::GREEN
         elsif state == State::LOCKED_RED then Color::RED
         elsif failures.size < config.threshold then Color::GREEN
-        elsif failure && Time.now - failure.time >= config.cool_off_time
+        elsif failure&.cool_off_period_exceeded?(config.cool_off_time)
           Color::YELLOW
         else
           Color::RED

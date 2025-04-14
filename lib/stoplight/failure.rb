@@ -44,6 +44,12 @@ module Stoplight
       @time = time
     end
 
+    # @param cool_off_time [Numeric]
+    # @return [Boolean]
+    def cool_off_period_exceeded?(cool_off_time)
+      Time.now - time >= cool_off_time
+    end
+
     # @param other [Failure]
     # @return [Boolean]
     def ==(other)
