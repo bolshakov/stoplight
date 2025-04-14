@@ -18,27 +18,31 @@ module Stoplight
       KEY_SEPARATOR = ":"
       KEY_PREFIX = %w[stoplight v5].join(KEY_SEPARATOR)
 
-      # @param redis [::Redis]
+      # @param redis [::Redis, ConnectionPool<::Redis>]
       def initialize(redis)
         @redis = redis
       end
 
       def names
-        state_names = @redis.hkeys(states_key)
+        state_names = @redis.then { _1.hkeys(states_key) }
 
         pattern = key("failures", "*")
         prefix_regex = /^#{key("failures", "")}/
-        failure_names = @redis.scan_each(match: pattern).to_a.map do |key|
-          key.sub(prefix_regex, "")
+        failure_names = @redis.then do |client|
+          client.scan_each(match: pattern).to_a.map do |key|
+            key.sub(prefix_regex, "")
+          end
         end
 
         (state_names + failure_names).uniq
       end
 
       def get_all(config)
-        failures, state = @redis.multi do |transaction|
-          query_failures(config, transaction: transaction)
-          query_state(config, transaction: transaction)
+        failures, state = @redis.then do |client|
+          client.multi do |transaction|
+            query_failures(config, transaction: transaction)
+            query_state(config, transaction: transaction)
+          end
         end
 
         [
@@ -53,21 +57,25 @@ module Stoplight
 
       # Saves a new failure to the errors HSet and cleans up outdated errors.
       def record_failure(config, failure)
-        *, size = @redis.multi do |transaction|
-          failures_key = failures_key(config)
+        *, size = @redis.then do |client|
+          client.multi do |transaction|
+            failures_key = failures_key(config)
 
-          transaction.zadd(failures_key, failure.time.to_i, failure.to_json)
-          remove_outdated_failures(config, failure.time, transaction: transaction)
-          transaction.zcard(failures_key)
+            transaction.zadd(failures_key, failure.time.to_i, failure.to_json)
+            remove_outdated_failures(config, failure.time, transaction: transaction)
+            transaction.zcard(failures_key)
+          end
         end
 
         size
       end
 
       def clear_failures(config)
-        failures, = @redis.multi do |transaction|
-          query_failures(config, transaction: transaction)
-          transaction.del(failures_key(config))
+        failures, = @redis.then do |client|
+          client.multi do |transaction|
+            query_failures(config, transaction: transaction)
+            transaction.del(failures_key(config))
+          end
         end
 
         normalize_failures(failures, config.error_notifier)
@@ -79,14 +87,16 @@ module Stoplight
       end
 
       def set_state(config, state)
-        @redis.hset(states_key, config.name, state)
+        @redis.then { _1.hset(states_key, config.name, state) }
         state
       end
 
       def clear_state(config)
-        state, = @redis.multi do |transaction|
-          query_state(config, transaction: transaction)
-          transaction.hdel(states_key, config.name)
+        state, = @redis.then do |client|
+          client.multi do |transaction|
+            query_state(config, transaction: transaction)
+            transaction.hdel(states_key, config.name)
+          end
         end
 
         normalize_state(state)
@@ -129,11 +139,13 @@ module Stoplight
       private_constant :NOTIFICATION_DEDUPLICATION_SCRIPT
 
       def with_deduplicated_notification(config, from_color, to_color)
-        deduplication_status = @redis.eval(
-          NOTIFICATION_DEDUPLICATION_SCRIPT,
-          keys: [last_notification_key(config)],
-          argv: [config.name, from_color, to_color, NOTIFICATION_DEDUPLICATION_TTL]
-        )
+        deduplication_status = @redis.then do |client|
+          client.eval(
+            NOTIFICATION_DEDUPLICATION_SCRIPT,
+            keys: [last_notification_key(config)],
+            argv: [config.name, from_color, to_color, NOTIFICATION_DEDUPLICATION_TTL]
+          )
+        end
 
         yield if Integer(deduplication_status) == 1
       end
@@ -142,7 +154,7 @@ module Stoplight
 
       # @param config [Stoplight::Light::Config]
       # @param time [Time]
-      def remove_outdated_failures(config, time, transaction: @redis)
+      def remove_outdated_failures(config, time, transaction:)
         failures_key = failures_key(config)
 
         # Remove all errors happened before the window start
@@ -154,7 +166,9 @@ module Stoplight
       def query_failures(config, transaction: @redis)
         window_start = Time.now.to_i - config.window_size
 
-        transaction.zrange(failures_key(config), Float::INFINITY, window_start, rev: true, by_score: true)
+        transaction.then do |client|
+          client.zrange(failures_key(config), Float::INFINITY, window_start, rev: true, by_score: true)
+        end
       end
 
       def normalize_failures(failures, error_notifier)
@@ -167,7 +181,9 @@ module Stoplight
       end
 
       def query_state(config, transaction: @redis)
-        transaction.hget(states_key, config.name)
+        transaction.then do |client|
+          client.hget(states_key, config.name)
+        end
       end
 
       def normalize_state(state)

@@ -386,6 +386,30 @@ Stoplight.configure do |config|
 end
 ```
 
+##### Connection Pooling
+
+For high traffic applications, it's recommended to use connection pooling with Redis. Stoplight supports the
+[connection_pool] gem:
+
+```ruby
+require 'redis'
+require 'connection_pool'
+
+# Create a connection pool
+pool = ConnectionPool.new(size: 5, timeout: 3) do
+  Redis.new
+end
+
+# Use the pool with Stoplight
+data_store = Stoplight::DataStore::Redis.new(pool)
+
+Stoplight.configure do |config|
+  config.data_store = data_store
+end
+```
+
+Using a connection pool helps manage Redis connections efficiently in multithreaded environments and prevents connection exhaustion.
+
 ### Notifiers
 
 Stoplight sends notifications to standard error by default.
@@ -617,3 +641,4 @@ Stoplight is licensed under [the MIT License][].
 [CircuitBreaker]: http://martinfowler.com/bliki/CircuitBreaker.html
 [the MIT license]: LICENSE.md
 [stoplight-sentry]: https://github.com/bolshakov/stoplight-sentry
+[connection_pool]: https://github.com/mperham/connection_pool
