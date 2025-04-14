@@ -4,17 +4,91 @@ module Stoplight
   class Light < CircuitBreaker
     # A +Stoplight::Light+ configuration object.
     # @api private
-    class Config < BaseConfig
-      schema schema.strict
-      transform_keys(&:to_sym)
+    class Config
+      # @!attribute [r] name
+      #   @return [String]
+      attr_reader :name
 
-      attribute :name, Types::Coercible::String
+      # @!attribute [r] cool_off_time
+      #   @return [Numeric]
+      attr_reader :cool_off_time
+
+      # @!attribute [r] data_store
+      #   @return [Stoplight::DataStore::Base]
+      attr_reader :data_store
+
+      # @!attribute [r] error_notifier
+      #   # @return [StandardError => void]
+      attr_reader :error_notifier
+
+      # @!attribute [r] notifiers
+      #   # @return [Array<Notifier::Base>]
+      attr_reader :notifiers
+
+      # @!attribute [r] threshold
+      #   @return [Numeric]
+      attr_reader :threshold
+
+      # @!attribute [r] window_size
+      #   @return [Numeric]
+      attr_reader :window_size
+
+      # @!attribute [r] tracked_errors
+      #   @return [Array<StandardError>]
+      attr_reader :tracked_errors
+
+      # @!attribute [r] skipped_errors
+      #  @return [Array<Exception>]
+      attr_reader :skipped_errors
+
+      # @param name [String]
+      # @param cool_off_time [Numeric]
+      # @param data_store [Stoplight::DataStore::Base]
+      # @param error_notifier [Proc]
+      # @param notifiers [Stoplight::Notifier::Base]
+      # @param threshold [Numeric]
+      # @param window_size [Numeric]
+      # @param tracked_errors [Array<StandardError>]
+      # @param skipped_errors [Array<Exception>]
+      def initialize(name: nil, cool_off_time: nil, data_store: nil, error_notifier: nil, notifiers: nil, threshold: nil, window_size: nil,
+        tracked_errors: nil, skipped_errors: nil)
+        @name = name
+        @cool_off_time = cool_off_time
+        @data_store = data_store
+        @error_notifier = error_notifier
+        @notifiers = notifiers
+        @threshold = threshold
+        @window_size = window_size
+        @tracked_errors = Array(tracked_errors)
+        @skipped_errors = Set[*skipped_errors, *Stoplight::Default::SKIPPED_ERRORS].to_a
+      end
+
+      # @param other [any]
+      # @return [Boolean]
+      def ==(other)
+        other.is_a?(self.class) && to_h == other.to_h
+      end
 
       # Updates the configuration with new settings and returns a new instance.
       #
       # @return [Stoplight::Light::Config]
       def with(**settings)
         self.class.new(**to_h.merge(settings))
+      end
+
+      # @return [Hash]
+      def to_h
+        {
+          cool_off_time:,
+          data_store:,
+          error_notifier:,
+          name:,
+          notifiers:,
+          threshold:,
+          window_size:,
+          tracked_errors:,
+          skipped_errors:
+        }
       end
     end
   end
