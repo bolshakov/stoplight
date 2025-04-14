@@ -24,7 +24,7 @@ module Stoplight
       def get_all(config)
         [
           synchronize { query_failures(config) },
-          synchronize { @states[config.name] },
+          synchronize { @states[config.name] }
         ]
       end
 

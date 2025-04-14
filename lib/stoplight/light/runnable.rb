@@ -140,9 +140,7 @@ module Stoplight
           default
         end
 
-        Stoplight("#{name}-safely")
-          .with_data_store(Default::DATA_STORE)
-          .run(fallback, &code)
+        Stoplight("#{name}-safely", data_store: Default::DATA_STORE).run(fallback, &code)
       end
     end
   end

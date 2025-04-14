@@ -192,7 +192,7 @@ RSpec.shared_examples "Stoplight::Light::Runnable#run" do
         expect(run).to eql(code_result)
       end
 
-      fit "notifies about the error" do
+      it "notifies about the error" do
         expect(@yielded_error).to be(nil)
         run
         expect(@yielded_error).to eql(error)
