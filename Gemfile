@@ -10,7 +10,7 @@ group :development do
   gem "database_cleaner-redis", "~> 2.0"
   gem "debug"
   gem "rake", "~> 13.2"
-  gem "redis", "~> 4.8"
+  gem "redis", "~> 5.4"
   gem "rspec", "~> 3.13"
   gem "ruby-prof"
   gem "simplecov", "~> 0.22"
