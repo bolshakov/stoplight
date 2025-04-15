@@ -54,15 +54,3 @@ Benchmark.ips do |b|
 
   b.compare!
 end
-
-# ruby 3.3.4 (2024-07-09 revision be1089c8ec) [arm64-darwin23]
-# Warming up --------------------------------------
-#        not optimized     1.292k i/100ms
-#            optimized     2.214k i/100ms
-# Calculating -------------------------------------
-#        not optimized     16.963k (± 8.7%) i/s   (58.95 μs/i) -    167.960k in  10.033443s
-#            optimized     23.439k (± 4.7%) i/s   (42.66 μs/i) -    234.684k in  10.036023s
-#
-# Comparison:
-#            optimized:    23439.3 i/s
-#        not optimized:    16963.3 i/s - 1.38x  slower
