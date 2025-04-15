@@ -18,11 +18,11 @@ module Stoplight
       attr_reader :data_store
 
       # @!attribute [r] error_notifier
-      #   # @return [StandardError => void]
+      #   @return [StandardError => void]
       attr_reader :error_notifier
 
       # @!attribute [r] notifiers
-      #   # @return [Array<Notifier::Base>]
+      #   @return [Array<Stoplight::Notifier::Base>]
       attr_reader :notifiers
 
       # @!attribute [r] threshold
@@ -45,7 +45,7 @@ module Stoplight
       # @param cool_off_time [Numeric]
       # @param data_store [Stoplight::DataStore::Base]
       # @param error_notifier [Proc]
-      # @param notifiers [Stoplight::Notifier::Base]
+      # @param notifiers [Array<Stoplight::Notifier::Base>]
       # @param threshold [Numeric]
       # @param window_size [Numeric]
       # @param tracked_errors [Array<StandardError>]

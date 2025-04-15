@@ -6,7 +6,6 @@ require "stoplight"
 require "timecop"
 require_relative "support/data_store/base"
 require_relative "support/light/runnable"
-require_relative "support/light/configurable"
 require_relative "support/database_cleaner"
 require_relative "support/exception_helpers"
 
