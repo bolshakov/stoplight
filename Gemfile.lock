@@ -117,6 +117,7 @@ PLATFORMS
 DEPENDENCIES
   benchmark-ips (~> 2.14)
   concurrent-ruby-ext
+  connection_pool
   database_cleaner-redis (~> 2.0)
   debug
   rake (~> 13.2)

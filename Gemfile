@@ -5,6 +5,7 @@ source "https://rubygems.org"
 gemspec
 
 group :development do
+  gem "connection_pool"
   gem "concurrent-ruby-ext"
   gem "benchmark-ips", "~> 2.14"
   gem "database_cleaner-redis", "~> 2.0"
