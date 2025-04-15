@@ -5,8 +5,9 @@ module Stoplight
     module Runnable # rubocop:disable Style/Documentation
       # @return [String]
       def state
-        _, state = failures_and_state
-        state
+        safely(State::UNLOCKED) do
+          config.data_store.get_state(config)
+        end
       end
 
       # Returns current color:
@@ -26,7 +27,7 @@ module Stoplight
         if state == State::LOCKED_GREEN then Color::GREEN
         elsif state == State::LOCKED_RED then Color::RED
         elsif failures.size < config.threshold then Color::GREEN
-        elsif failure && Time.now - failure.time >= config.cool_off_time
+        elsif failure&.cool_off_period_exceeded?(config.cool_off_time)
           Color::YELLOW
         else
           Color::RED
@@ -139,9 +140,7 @@ module Stoplight
           default
         end
 
-        Stoplight("#{name}-safely")
-          .with_data_store(Default::DATA_STORE)
-          .run(fallback, &code)
+        Stoplight("#{name}-safely", data_store: Default::DATA_STORE).run(fallback, &code)
       end
     end
   end

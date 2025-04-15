@@ -22,7 +22,10 @@ module Stoplight
       end
 
       def get_all(config)
-        synchronize { [query_failures(config), @states[config.name]] }
+        [
+          synchronize { query_failures(config) },
+          synchronize { @states[config.name] }
+        ]
       end
 
       def get_failures(config)
