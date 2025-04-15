@@ -1,5 +1,12 @@
 # frozen_string_literal: true
 
+require "zeitwerk"
+
+loader = Zeitwerk::Loader.for_gem
+loader.inflector.inflect("io" => "IO")
+loader.ignore("#{__dir__}/stoplight/rspec.rb", "#{__dir__}/stoplight/rspec")
+loader.setup
+
 module Stoplight # rubocop:disable Style/Documentation
   CONFIG_MUTEX = Mutex.new
   private_constant :CONFIG_MUTEX
@@ -118,36 +125,6 @@ module Stoplight # rubocop:disable Style/Documentation
     end
   end
 end
-
-require "stoplight/version"
-require "stoplight/color"
-require "stoplight/error"
-require "stoplight/failure"
-require "stoplight/state"
-
-require "stoplight/data_store"
-require "stoplight/data_store/base"
-require "stoplight/data_store/memory"
-require "stoplight/data_store/redis"
-
-require "stoplight/notifier"
-require "stoplight/notifier/base"
-require "stoplight/notifier/generic"
-
-require "stoplight/notifier/io"
-require "stoplight/notifier/logger"
-
-require "stoplight/default"
-require "stoplight/circuit_breaker"
-require "stoplight/light/config"
-require "stoplight/config/library_default_config"
-require "stoplight/config/user_default_config"
-require "stoplight/config/legacy_config"
-require "stoplight/config/config_provider"
-require "stoplight/light/configurable"
-require "stoplight/light/lockable"
-require "stoplight/light/runnable"
-require "stoplight/light"
 
 # Creates a new Stoplight circuit breaker with the given name and settings.
 #
