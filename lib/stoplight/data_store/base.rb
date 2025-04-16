@@ -69,6 +69,19 @@ module Stoplight
       def with_deduplicated_notification(_config, _from_color, _to_color, &_block)
         raise NotImplementedError
       end
+
+      class << self
+        # Failures retention period in seconds.
+        #
+        # This is the time period during which failures are retained in the data store. You cannot have window_size
+        # greater than this value.
+        #
+        # @return [Numeric]
+        # @api private
+        def failures_retention_period = Stoplight::Default::WINDOW_SIZE
+      end
+
+      private def failures_retention_period = self.class.failures_retention_period
     end
   end
 end

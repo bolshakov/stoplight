@@ -97,6 +97,14 @@ RSpec.describe Stoplight::Light::Config do
     it "returns the same value" do
       is_expected.to eq(window_size)
     end
+
+    context "when window_size is greater than failures_retention_period" do
+      let(:window_size) { Stoplight::DataStore::Base.failures_retention_period + 1 }
+
+      it "raises a ConfigurationError" do
+        expect { config }.to raise_error(Stoplight::Error::ConfigurationError, /window_size must be less than or equal to/)
+      end
+    end
   end
 
   describe "#tracked_errors" do

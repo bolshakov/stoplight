@@ -56,20 +56,18 @@ module Stoplight
         local window_size = tonumber(ARGV[2])
         local threshold = tonumber(ARGV[3])
         local failure_json = ARGV[4]
+        local retention_period = tonumber(ARGV[5])
         
         -- Add new failure
         redis.call('ZADD', failures_key, current_time, failure_json)
         
-        -- Calculate window boundaries
-        local window_start = current_time - window_size
-        
+        -- Calculate retention period boundaries
+        local retention_period_start = current_time - retention_period       
         -- Remove failures outside time window
-        redis.call('ZREMRANGEBYSCORE', failures_key, 0, window_start)
-          
-        -- Keep at most threshold failures (remove oldest)
-        redis.call('ZREMRANGEBYRANK', failures_key, 0, -threshold - 1)
+        redis.call('ZREMRANGEBYSCORE', failures_key, 0, retention_period_start)
         
         -- Count only failures within current window
+        local window_start = current_time - window_size
         return redis.call('ZCOUNT', failures_key, window_start, '+inf')
       LUA
       private_constant :RECORD_FAILURE_SCRIPT
@@ -126,7 +124,7 @@ module Stoplight
           client.evalsha(
             @record_failure_script_sha,
             keys: [failures_key],
-            argv: [current_time, config.window_size, config.threshold, failure.to_json]
+            argv: [current_time, config.window_size, config.threshold, failure.to_json, failures_retention_period]
           )
         end
       end

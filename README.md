@@ -275,7 +275,7 @@ after the first call. With a sliding window of 2 seconds, only the errors that o
 (when the second error occurs), the window has shifted, and the stoplight switches to green state 
 causing the error to raise again. This provides a way to focus on the most recent errors.
 
-The default window size is infinity, so all failures counts.
+The default window size is 1 month, so all failures within this period counts.
 
 ### Custom Cool Off Time
 

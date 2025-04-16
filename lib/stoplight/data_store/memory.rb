@@ -36,12 +36,11 @@ module Stoplight
         synchronize do
           light_name = config.name
 
-          # Keep at most +config.threshold+ number of errors
-          @failures[light_name] = @failures[light_name].first(config.threshold - 1)
           @failures[light_name].unshift(failure)
-          # Remove all errors happened before the window start
-          @failures[light_name] = query_failures(config, failure.time)
-          @failures[light_name].size
+          # Remove all errors happened before the retention period start
+          @failures[light_name] = query_failures(config, window_size: failures_retention_period)
+
+          query_failures(config, time: failure.time).size
         end
       end
 
@@ -90,9 +89,9 @@ module Stoplight
 
       # @param config [Stoplight::Light::Config]
       # @return [<Stoplight::Failure>]
-      def query_failures(config, time = Time.now)
+      def query_failures(config, time: Time.now, window_size: config.window_size)
         @failures[config.name].select do |failure|
-          failure.time.to_i > time.to_i - config.window_size
+          failure.time.to_i > time.to_i - window_size
         end
       end
     end
