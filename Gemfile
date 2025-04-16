@@ -9,11 +9,10 @@ group :development do
   gem "concurrent-ruby-ext"
   gem "benchmark-ips", "~> 2.14"
   gem "database_cleaner-redis", "~> 2.0"
-  gem "debug"
   gem "rake", "~> 13.2"
   gem "redis", "~> 5.4"
   gem "rspec", "~> 3.13"
-  gem "ruby-prof"
+  gem "ruby-prof", platforms: :mri
   gem "simplecov", "~> 0.22"
   gem "simplecov-lcov", "~> 0.8"
   gem "standard"
