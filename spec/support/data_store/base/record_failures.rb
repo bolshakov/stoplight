@@ -26,7 +26,7 @@ RSpec.shared_examples "Stoplight::DataStore::Base#record_failure" do
     end
   end
 
-  shared_examples "with_threshold" do
+  context "with threshold" do
     context "when the number of errors is bigger then threshold" do
       let(:config) { super().with(threshold: 1) }
 
@@ -34,17 +34,15 @@ RSpec.shared_examples "Stoplight::DataStore::Base#record_failure" do
         data_store.record_failure(config, failure)
       end
 
-      it "limits the number of stored failures" do
+      it "returns all stored failures" do
         expect do
           data_store.record_failure(config, other)
         end.to change { data_store.get_failures(config) }
           .from([failure])
-          .to([other])
+          .to([other, failure])
       end
     end
   end
-
-  it_behaves_like "with_threshold"
 
   context "with window_size" do
     let(:window_size) { 3600 }
@@ -62,7 +60,5 @@ RSpec.shared_examples "Stoplight::DataStore::Base#record_failure" do
         expect(data_store.get_failures(config)).to eq([other, failure])
       end
     end
-
-    it_behaves_like "with_threshold"
   end
 end

@@ -52,6 +52,10 @@ module Stoplight
       # @param skipped_errors [Array<Exception>]
       def initialize(name: nil, cool_off_time: nil, data_store: nil, error_notifier: nil, notifiers: nil, threshold: nil, window_size: nil,
         tracked_errors: nil, skipped_errors: nil)
+        if window_size && window_size > DataStore::Base.failures_retention_period
+          raise Error::ConfigurationError, "window_size must be less than or equal to #{DataStore::Base.failures_retention_period}"
+        end
+
         @name = name
         @cool_off_time = cool_off_time
         @data_store = data_store
