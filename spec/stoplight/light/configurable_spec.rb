@@ -1,6 +1,11 @@
 # frozen_string_literal: true
 
-RSpec.shared_examples Stoplight::Light::Configurable do
+require "spec_helper"
+
+RSpec.describe Stoplight::Light::Configurable do
+  let(:name) { ("a".."z").to_a.shuffle.join }
+  let(:light) { Stoplight::Light.new(config) }
+
   let(:config) do
     Stoplight::Light::Config.new(
       name: name,
@@ -11,6 +16,24 @@ RSpec.shared_examples Stoplight::Light::Configurable do
       threshold: Stoplight::Default::THRESHOLD,
       window_size: Stoplight::Default::WINDOW_SIZE
     )
+  end
+
+  describe "#with" do
+    let(:settings) do
+      {
+        name: "combined-light",
+        threshold: 5,
+        window_size: 60,
+        tracked_errors: [RuntimeError],
+        skipped_errors: [KeyError, NoMemoryError, ScriptError, SecurityError, SignalException, SystemExit, SystemStackError]
+      }
+    end
+
+    subject(:with_combined_settings) { light.with(**settings) }
+
+    it "applies all settings correctly" do
+      expect(with_combined_settings.config).to have_attributes(**settings)
+    end
   end
 
   shared_examples "configurable attribute" do |attribute|

@@ -5,10 +5,6 @@ require "spec_helper"
 RSpec.describe Stoplight::Light do
   let(:name) { ("a".."z").to_a.shuffle.join }
 
-  it_behaves_like Stoplight::Light::Configurable do
-    let(:light) { described_class.new(config) }
-  end
-
   describe "#==" do
     let(:light) { Stoplight("foo") }
     let(:light_with_the_same_name) { Stoplight("foo") }
