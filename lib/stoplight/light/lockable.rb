@@ -27,7 +27,7 @@ module Stoplight
       #   light.lock(Stoplight::Color::RED)
       #
       # @param color [String] should be either +Color::RED+ or +Color::GREEN+
-      # @return [Stoplight::CircuitBreaker] returns locked circuit breaker
+      # @return [Stoplight::Light] returns locked light (circuit breaker)
       def lock(color)
         state = case color
         when Color::RED then State::LOCKED_RED
@@ -47,7 +47,7 @@ module Stoplight
       #   light.lock(Stoplight::Color::RED)
       #   light.unlock
       #
-      # @return [Stoplight::CircuitBreaker] returns unlocked circuit breaker
+      # @return [Stoplight::Light] returns unlocked light (circuit breaker)
       def unlock
         safely { config.data_store.set_state(config, Stoplight::State::UNLOCKED) }
 

@@ -54,7 +54,7 @@ module Stoplight
       #     .with_data_store(Stoplight::DataStore::Memory.new)
       #
       # @param data_store [DataStore::Base]
-      # @return [Stoplight::CircuitBreaker]
+      # @return [Stoplight::Light]
       def with_data_store(data_store)
         reconfigure(config.with(data_store: data_store))
       end
@@ -67,7 +67,7 @@ module Stoplight
       #     .cool_off_time(60)
       #
       # @param cool_off_time [Numeric] number of seconds
-      # @return [Stoplight::CircuitBreaker]
+      # @return [Stoplight::Light]
       def with_cool_off_time(cool_off_time)
         reconfigure(config.with(cool_off_time: cool_off_time))
       end
@@ -80,7 +80,7 @@ module Stoplight
       #     .with_threshold(5)
       #
       # @param threshold [Numeric]
-      # @return [Stoplight::CircuitBreaker]
+      # @return [Stoplight::Light]
       def with_threshold(threshold)
         reconfigure(config.with(threshold: threshold))
       end
@@ -96,7 +96,7 @@ module Stoplight
       # within 60 seconds period.
       #
       # @param window_size [Numeric] number of seconds
-      # @return [Stoplight::CircuitBreaker]
+      # @return [Stoplight::Light]
       def with_window_size(window_size)
         reconfigure(config.with(window_size: window_size))
       end
@@ -110,13 +110,13 @@ module Stoplight
       #     .with_notifiers([notifier])
       #
       # @param notifiers [Array<Notifier::Base>]
-      # @return [Stoplight::CircuitBreaker]
+      # @return [Stoplight::Light]
       def with_notifiers(notifiers)
         reconfigure(config.with(notifiers: notifiers))
       end
 
       # @param error_notifier [Proc]
-      # @return [Stoplight::CircuitBreaker]
+      # @return [Stoplight::Light]
       # @api private
       def with_error_notifier(&error_notifier)
         reconfigure(config.with(error_notifier: error_notifier))
@@ -134,7 +134,7 @@ module Stoplight
       # If not configured, the default tracked error is +StandardError+.
       #
       # @param tracked_errors [Array<StandardError>]
-      # @return [Stoplight::CircuitBreaker]
+      # @return [Stoplight::Light]
       def with_tracked_errors(*tracked_errors)
         reconfigure(config.with(tracked_errors: tracked_errors.dup.freeze))
       end
@@ -156,7 +156,7 @@ module Stoplight
       # @see +Stoplight::Default::SKIPPED_ERRORS+
       #
       # @param skipped_errors [Array<Exception>]
-      # @return [Stoplight::CircuitBreaker]
+      # @return [Stoplight::Light]
       def with_skipped_errors(*skipped_errors)
         reconfigure(config.with(skipped_errors: skipped_errors))
       end
