@@ -109,7 +109,7 @@ module Stoplight
       #   Stoplight('example')
       #     .with_notifiers([notifier])
       #
-      # @param notifiers [Array<FailSafe::Base>]
+      # @param notifiers [Array<Notifier::Base>]
       # @return [Stoplight::Light]
       def with_notifiers(notifiers)
         reconfigure(config.with(notifiers: notifiers))
