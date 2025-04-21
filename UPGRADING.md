@@ -41,7 +41,7 @@ gem 'stoplight'
 gem 'stoplight-sentry'
 
 # Code 
-Stoplight.default_notifiers += [Stoplight::Sentry::FailSafe.new(Sentry)]
+Stoplight.default_notifiers += [Stoplight::Sentry::Notifier.new(Sentry)]
 ```
 * If you cannot find a notifier gem, you may need to implement your own. Consider checking the 
   [How to implement your own notifier?]  guide which contains all the information needed to implement a notifier. You 
