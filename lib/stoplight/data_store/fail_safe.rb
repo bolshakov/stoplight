@@ -35,7 +35,6 @@ module Stoplight
       # @param data_store [Stoplight::DataStore::Base]
       def initialize(data_store)
         @data_store = data_store
-        @circuit_breaker = Stoplight("#{data_store.class.name}-safely", data_store: Default::DATA_STORE)
       end
 
       def names
@@ -99,12 +98,10 @@ module Stoplight
       # @param default [Object, nil]
       # @param config [Stoplight::Light::Config]
       private def with_fallback(default = nil, config = nil, &code)
-        fallback = proc do |error|
-          config.error_notifier.call(error) if config && error
-          default
-        end
-
-        circuit_breaker.run(fallback, &code)
+        yield
+      rescue => error
+        config.error_notifier.call(error) if config && error
+        default
       end
     end
   end
