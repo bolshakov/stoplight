@@ -71,7 +71,7 @@ RSpec.describe Stoplight::Light::Configurable do
   end
 
   describe "#with_notifiers" do
-    let(:notifiers) { [Stoplight::Notifier::IO.new($stderr)] }
+    let(:notifiers) { [Stoplight::Notifier::FailSafe.wrap(Stoplight::Notifier::IO.new($stderr))] }
 
     include_examples "configurable attribute", :notifiers
   end

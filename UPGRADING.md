@@ -33,6 +33,7 @@ Unfortunately, we cannot support all the possible notifiers.
 * If you just use the default, `Stoplight::Notifier::IO`, or `Stoplight::Notifier::Logger` notifiers, then you 
   don't need to do anything!
 * Otherwise, you many need to find a third-party notifier:
+
 ```ruby
 # Gemfile
 gem 'sentry'
@@ -40,7 +41,7 @@ gem 'stoplight'
 gem 'stoplight-sentry'
 
 # Code 
-Stoplight.default_notifiers += [Stoplight::Sentry::Notifier.new(Sentry)]
+Stoplight.default_notifiers += [Stoplight::Sentry::FailSafe.new(Sentry)]
 ```
 * If you cannot find a notifier gem, you may need to implement your own. Consider checking the 
   [How to implement your own notifier?]  guide which contains all the information needed to implement a notifier. You 
