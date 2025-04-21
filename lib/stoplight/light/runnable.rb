@@ -54,7 +54,8 @@ module Stoplight
       end
 
       private def state_strategy_factory(color)
-        case color
+        @strategies ||= {}
+        @strategies[color] ||= case color
         when Color::GREEN
           GreenRunStrategy.new(config)
         when Color::YELLOW
