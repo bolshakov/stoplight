@@ -12,6 +12,9 @@ module Stoplight # rubocop:disable Style/Documentation
   private_constant :CONFIG_MUTEX
 
   class << self
+    ALREADY_CONFIGURED_ERROR = "Stoplight must be configured only once"
+    private_constant :ALREADY_CONFIGURED_ERROR
+
     # Sets the default error notifier.
     #
     # @param value [#call]
@@ -20,6 +23,8 @@ module Stoplight # rubocop:disable Style/Documentation
     def default_error_notifier=(value)
       warn "[DEPRECATED] `Stoplight.default_error_notifier=` is deprecated. " \
         "Please use `Stoplight.configure { |config| config.error_notifier= }` instead."
+      raise Error::ConfigurationError, ALREADY_CONFIGURED_ERROR if @config_provider
+
       @default_error_notifier = value
     end
 
@@ -40,6 +45,8 @@ module Stoplight # rubocop:disable Style/Documentation
     def default_notifiers=(value)
       warn "[DEPRECATED] `Stoplight.default_notifiers=` is deprecated. " \
         "Please use `Stoplight.configure { |config| config.notifiers= }` instead."
+      raise Error::ConfigurationError, ALREADY_CONFIGURED_ERROR if @config_provider
+
       @default_notifiers = value
     end
 
@@ -60,6 +67,8 @@ module Stoplight # rubocop:disable Style/Documentation
     def default_data_store=(value)
       warn "[DEPRECATED] `Stoplight.default_data_store=` is deprecated. " \
         "Please use `Stoplight.configure { |config| config.data_store= }` instead."
+      raise Error::ConfigurationError, ALREADY_CONFIGURED_ERROR if @config_provider
+
       @default_data_store = value
     end
 
@@ -91,7 +100,7 @@ module Stoplight # rubocop:disable Style/Documentation
     #   end
     #
     def configure
-      raise Error::ConfigurationError, "Stoplight must be configured only once" if @config_provider
+      raise Error::ConfigurationError, ALREADY_CONFIGURED_ERROR if @config_provider
 
       user_defaults = Config::UserDefaultConfig.new
       yield(user_defaults) if block_given?
