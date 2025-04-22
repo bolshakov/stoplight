@@ -12,7 +12,7 @@ module Stoplight
       class RedRunStrategy < RunStrategy
         # Executes the fallback proc when the light is in the red state.
         #
-        # @param fallback [Proc, nil] A fallback prod to execute instead of the code block.
+        # @param fallback [Proc, nil] A fallback proc to execute instead of the code block.
         # @return [Object, nil] The result of the fallback proc if provided.
         # @raise [Stoplight::Error::RedLight] Raises an error if no fallback is provided.
         def execute(fallback)

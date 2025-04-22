@@ -16,7 +16,7 @@ module Stoplight
         # Wraps a notifier with fail-safe mechanisms.
         #
         # @param notifier [Stoplight::Notifier::Base] The notifier to wrap.
-        # @return [Stoplight::Notifier::::FailSafe] The original notifier if it is already
+        # @return [Stoplight::Notifier::FailSafe] The original notifier if it is already
         #   a +FailSafe+ instance, otherwise a new +FailSafe+ instance.
         def wrap(notifier)
           case notifier
