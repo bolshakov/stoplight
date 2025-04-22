@@ -12,10 +12,6 @@ module Stoplight
       #   @return [Stoplight::Notifier::Base] The underlying notifier being wrapped.
       protected attr_reader :notifier
 
-      # @!attribute [r] circuit_breaker
-      #   @return [Stoplight] The circuit breaker used to handle failures.
-      private attr_reader :circuit_breaker
-
       class << self
         # Wraps a notifier with fail-safe mechanisms.
         #
@@ -37,7 +33,6 @@ module Stoplight
       # @param notifier [Stoplight::Notifier::Base] The notifier to wrap.
       def initialize(notifier)
         @notifier = notifier
-        @circuit_breaker = Stoplight("#{notifier.class.name}-safely", data_store: Default::DATA_STORE, notifiers: [])
       end
 
       # Sends a notification using the wrapped notifier with fail-safe mechanisms.
@@ -61,6 +56,11 @@ module Stoplight
       # @return [Boolean]
       def ==(other)
         other.is_a?(FailSafe) && notifier == other.notifier
+      end
+
+      # @return [Stoplight] The circuit breaker used to handle failures.
+      private def circuit_breaker
+        @circuit_breaker ||= Stoplight("#{notifier.class.name}-safely", data_store: Default::DATA_STORE, notifiers: [])
       end
     end
   end
