@@ -13,17 +13,9 @@ module Stoplight
     #
     # @api private
     class ConfigProvider
-      # @!attribute [r] user_default_config
-      #   @return [Stoplight::Config::UserDefaultConfig]
-      private attr_reader :user_default_config
-
-      # @!attribute [r] legacy_config
-      #   @return [Stoplight::Config::LegacyConfig]
-      private attr_reader :legacy_config
-
-      # @!attribute [r] library_default_config
-      #   @return [Stoplight::Config::LibraryDefaultConfig]
-      private attr_reader :library_default_config
+      # @!attribute [r] default_settings
+      #   @return [Hash]
+      private attr_reader :default_settings
 
       CONFIGURATION_ERROR = <<~ERROR
         Configuration conflict detected!
@@ -46,9 +38,10 @@ module Stoplight
           raise Error::ConfigurationError, CONFIGURATION_ERROR
         end
 
-        @user_default_config = user_default_config
-        @legacy_config = legacy_config
-        @library_default_config = library_default_config
+        @default_settings = library_default_config.to_h.merge(
+          user_default_config.to_h,
+          legacy_config.to_h
+        )
       end
 
       # Returns a configuration for a specific light with the given name and settings overrides.
@@ -63,26 +56,9 @@ module Stoplight
           The +name+ setting cannot be overridden in the configuration.
         ERROR
 
-        settings = library_default_settings.merge(
-          user_default_settings,
-          legacy_settings,
-          settings_overrides,
-          {name: light_name}
-        )
+        settings = default_settings.merge(settings_overrides, {name: light_name})
 
         Light::Config.new(**settings)
-      end
-
-      private def user_default_settings
-        user_default_config.to_h
-      end
-
-      private def library_default_settings
-        library_default_config.to_h
-      end
-
-      private def legacy_settings
-        legacy_config.to_h
       end
     end
   end

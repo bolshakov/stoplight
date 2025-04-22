@@ -22,8 +22,15 @@ RSpec.describe Stoplight do
   end
 
   describe ".default_error_notifier" do
-    before { Stoplight.instance_variable_set(:@default_error_notifier, nil) }
-    after { Stoplight.instance_variable_set(:@default_error_notifier, nil) }
+    around do |example|
+      Stoplight.reset_config!
+      Stoplight.instance_variable_set(:@default_error_notifier, nil)
+
+      example.run
+
+      Stoplight.reset_config!
+      Stoplight.instance_variable_set(:@default_error_notifier, nil)
+    end
 
     it "returns the default error notifier when not set" do
       expect(Stoplight.default_error_notifier).to eq(Stoplight::Default::ERROR_NOTIFIER)
@@ -37,8 +44,15 @@ RSpec.describe Stoplight do
   end
 
   describe ".default_data_store" do
-    before { Stoplight.instance_variable_set(:@default_data_store, nil) }
-    after { Stoplight.instance_variable_set(:@default_data_store, nil) }
+    around do |example|
+      Stoplight.reset_config!
+      Stoplight.instance_variable_set(:@default_data_store, nil)
+
+      example.run
+
+      Stoplight.reset_config!
+      Stoplight.instance_variable_set(:@default_data_store, nil)
+    end
 
     it "returns the default data store when not set" do
       expect(Stoplight.default_data_store).to eq(Stoplight::Default::DATA_STORE)
@@ -52,8 +66,15 @@ RSpec.describe Stoplight do
   end
 
   describe ".default_notifiers" do
-    before { Stoplight.instance_variable_set(:@default_notifiers, nil) }
-    after { Stoplight.instance_variable_set(:@default_notifiers, nil) }
+    around do |example|
+      Stoplight.reset_config!
+      Stoplight.instance_variable_set(:@default_notifiers, nil)
+
+      example.run
+
+      Stoplight.reset_config!
+      Stoplight.instance_variable_set(:@default_notifiers, nil)
+    end
 
     it "returns the default notifiers when not set" do
       expect(Stoplight.default_notifiers).to eq(Stoplight::Default::NOTIFIERS)
