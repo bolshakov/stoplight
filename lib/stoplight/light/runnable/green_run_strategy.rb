@@ -37,9 +37,10 @@ module Stoplight
         # @return [void]
         private def record_error(error)
           failure = Failure.from_error(error)
-          number_of_errors = data_store.record_failure(config, failure)
+          successes, failures = data_store.record_failure(config, failure)
+          number_of_failures_in_a_row = (successes > 0) ? 0 : failures
 
-          if config.threshold_exceeded?(number_of_errors)
+          if config.threshold_exceeded?(number_of_failures_in_a_row)
             notify(config, Color::GREEN, Color::RED, error)
           end
         end

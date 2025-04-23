@@ -9,9 +9,8 @@ RSpec.describe Stoplight::DataStore::Redis, :redis do
   let(:failure) { Stoplight::Failure.new("class", "message", Time.new - 60) }
   let(:other) { Stoplight::Failure.new("class", "message 2", Time.new) }
 
-
-  describe ".buckets_key_for_time" do
-    subject(:buckets_key_for_time) { described_class.buckets_key_for_time(light_name, time) }
+  describe ".buckets_for_time" do
+    subject(:buckets_key_for_time) { described_class.buckets_for_time(light_name, time:) }
 
     let(:light_name) { "test-light" }
 
@@ -72,7 +71,6 @@ RSpec.describe Stoplight::DataStore::Redis, :redis do
       end
     end
 
-
     context "when window size is between 10 and 60 seconds" do
       let(:window_end) { Time.new(2023, 10, 1, 12, 34, 56) }
       let(:window_size) { 25 }
@@ -103,10 +101,8 @@ RSpec.describe Stoplight::DataStore::Redis, :redis do
           "stoplight:v5:stats:test-light:60s:1696156320",
           "stoplight:v5:stats:test-light:60s:1696156380",
           "stoplight:v5:stats:test-light:60s:1696156440",
-
           "stoplight:v5:stats:test-light:10s:1696156180",
           "stoplight:v5:stats:test-light:10s:1696156190",
-
           "stoplight:v5:stats:test-light:1s:1696156172",
           "stoplight:v5:stats:test-light:1s:1696156173",
           "stoplight:v5:stats:test-light:1s:1696156174",

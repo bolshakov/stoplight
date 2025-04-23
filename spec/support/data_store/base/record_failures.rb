@@ -2,7 +2,7 @@
 
 RSpec.shared_examples "Stoplight::DataStore::Base#record_failure" do
   it "returns the number of failures" do
-    expect(data_store.record_failure(config, failure)).to eql(1)
+    expect(data_store.record_failure(config, failure)).to eql([0, 1])
   end
 
   context "when there is an error" do

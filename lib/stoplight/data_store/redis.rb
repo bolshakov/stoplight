@@ -40,7 +40,7 @@ module Stoplight
         # @param time [Time, Numeric] The time for which to retrieve bucket keys.
         # @return [Array<String>] A list of Redis keys for the buckets.
         # @api private
-        def buckets_key_for_time(light_name, time)
+        def buckets_for_time(light_name, time:)
           BUCKETS.map do |bucket_size|
             bucket_key(light_name, time:, bucket_size:)
           end
@@ -106,7 +106,7 @@ module Stoplight
               light_name,
               bucket_size: BUCKETS.fetch(bucket_order - 1),
               start_ts: start_ts,
-              end_ts: aligned_start_ts - 1,
+              end_ts: aligned_start_ts - 1
             )
             buckets + reminder_buckets
           end
@@ -171,16 +171,16 @@ module Stoplight
 
       RECORD_FAILURE_SCRIPT = <<~LUA
         local failures_key = KEYS[1]
-        local current_time = tonumber(ARGV[1])
+        local failure_ts = tonumber(ARGV[1])
         local window_size = tonumber(ARGV[2])
         local threshold = tonumber(ARGV[3])
         local failure_json = ARGV[4]
 
         -- Add new failure
-        redis.call('ZADD', failures_key, current_time, failure_json)
+        redis.call('ZADD', failures_key, failure_ts, failure_json)
 
         -- Calculate window boundaries
-        local window_start = current_time - window_size
+        local window_start = failure_ts - window_size
 
         -- Remove failures outside time window
         redis.call('ZREMRANGEBYSCORE', failures_key, 0, window_start)
@@ -193,6 +193,36 @@ module Stoplight
       LUA
       private_constant :RECORD_FAILURE_SCRIPT
 
+      RECORD_FAILURE_V2_SCRIPT = <<~LUA
+        local number_of_time_buckets = tonumber(ARGV[1])
+        local number_of_failures = tonumber(ARGV[2])
+        local bucket_ttl = 5000000 -- Around 2 months
+
+        -- Record number of failures to time buckets
+        for idx = 1, number_of_time_buckets do
+          local bucket_key = KEYS[idx]
+          redis.call('HINCRBY', bucket_key, 'failure', number_of_failures)
+          redis.call('EXPIRE', bucket_key, bucket_ttl)
+        end
+
+        -- Read number of success/failure within the current window
+        local success = 0
+        local failure = 0
+        for idx = number_of_time_buckets + 1, #KEYS do
+          local bucket_key = KEYS[idx]
+          local result = redis.call('HMGET', bucket_key, 'success', 'failure')
+          if result[1] then
+            success = success + tonumber(result[1])
+          end
+          if result[2] then
+            failure = failure + tonumber(result[2])
+          end
+        end
+
+        return {success, failure}
+      LUA
+      private_constant :RECORD_FAILURE_V2_SCRIPT
+
       # @param redis [::Redis, ConnectionPool<::Redis>]
       def initialize(redis)
         @redis = redis
@@ -201,6 +231,9 @@ module Stoplight
         end
         @record_failure_script_sha = @redis.then do |client|
           client.script("load", RECORD_FAILURE_SCRIPT)
+        end
+        @record_failure_v2_script_sha = @redis.then do |client|
+          client.script("load", RECORD_FAILURE_V2_SCRIPT)
         end
       end
 
@@ -237,17 +270,46 @@ module Stoplight
       end
 
       # Saves a new failure to the errors HSet and cleans up outdated errors.
+      # @return [Metadata] the number of success/failures in the current window
+      # Data structures:
+      #   "stoplight:v5:stats:{light_name}:{window_size}s:{time_prefix}":
+      #       fields:
+      #         success: int
+      #         failure: int
+      #   "stoplight:v5:metadata:{light_name}":
+      #       fields:
+      #         last_failure: JSON
+      #
       def record_failure(config, failure)
-        failures_key = failures_key(config)
-        current_time = failure.time.to_i
+        failure_ts = failure.time.to_i
 
-        @redis.then do |client|
+        failures_key = failures_key(config)
+
+        time_buckets = self.class.buckets_for_time(config.name, time: failure_ts)
+        buckets_for_window = self.class.buckets_for_window(config.name, window_end: failure_ts, window_size: config.window_size)
+
+        success, failure = @redis.then do |client|
+          # This is to support #get_failures for now, which is not used in the code
           client.evalsha(
             @record_failure_script_sha,
             keys: [failures_key],
-            argv: [current_time, config.window_size, config.threshold, failure.to_json]
+            argv: [failure_ts, config.window_size, config.threshold, failure.to_json]
+          )
+
+          client.evalsha(
+            @record_failure_v2_script_sha,
+            argv: [
+              time_buckets.count, # we pass variables number of keys. This argument specifies how many keys are passed
+              1                  # number of failures
+            ],
+            keys: [
+              *time_buckets,        # Buckets to write (cover current moment)
+              *buckets_for_window   # Buckets to read (cover window size)
+            ]
           )
         end
+
+        [success, failure]
       end
 
       def clear_failures(config)
