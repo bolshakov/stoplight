@@ -54,15 +54,29 @@ module Stoplight
       end
 
       private def state_strategy_factory(color)
-        @strategies ||= {}
-        @strategies[color] ||= case color
+        case color
         when Color::GREEN
-          GreenRunStrategy.new(config)
+          green_run_strategy
         when Color::YELLOW
-          YellowRunStrategy.new(config)
+          yellow_run_strategy
         else
-          RedRunStrategy.new(config)
+          red_run_strategy
         end
+      end
+
+      # @return [Stoplight::Runnable::RunStrategy]
+      private def green_run_strategy
+        @green_run_strategy ||= GreenRunStrategy.new(config)
+      end
+
+      # @return [Stoplight::Runnable::RunStrategy]
+      private def yellow_run_strategy
+        @yellow_run_strategy ||= YellowRunStrategy.new(config)
+      end
+
+      # @return [Stoplight::Runnable::RunStrategy]
+      private def red_run_strategy
+        @red_run_strategy ||= RedRunStrategy.new(config)
       end
     end
   end
