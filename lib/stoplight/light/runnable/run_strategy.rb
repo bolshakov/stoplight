@@ -3,7 +3,8 @@
 module Stoplight
   class Light < CircuitBreaker
     module Runnable
-      # Represents a strategy for running a light's operations.
+      # Represents an abstract strategy for running a light's operations.
+      # Every new strategy should be a child of this class.
       #
       # @api private
       # @abstract
