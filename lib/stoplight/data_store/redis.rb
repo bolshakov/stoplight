@@ -195,20 +195,32 @@ module Stoplight
 
       RECORD_FAILURE_V2_SCRIPT = <<~LUA
         local number_of_time_buckets = tonumber(ARGV[1])
-        local number_of_failures = tonumber(ARGV[2])
+        local number_of_failures = tonumber(ARGV[3])
+        local failure_at_ts = tonumber(ARGV[4])
+        local failure_json = ARGV[5]
         local bucket_ttl = 5000000 -- Around 2 months
 
+        local metadata_key = KEYS[1]
+
         -- Record number of failures to time buckets
-        for idx = 1, number_of_time_buckets do
+        for idx = 2, number_of_time_buckets do
           local bucket_key = KEYS[idx]
           redis.call('HINCRBY', bucket_key, 'failure', number_of_failures)
           redis.call('EXPIRE', bucket_key, bucket_ttl)
         end
 
+        -- Record metadata (last failere and failure streak)
+        local prev_failure_at_ts = redis.call('HGET', metadata_key, 'last_failure_at_ts')
+        
+        if prev_failure_at_ts and prev_failure_at_ts < failure_at_ts then
+          redis.call('HSET', metadata_key, 'last_failure_at_ts', failure_at_ts, 'last_failure_json', failure_json)          
+        end
+        redis.call('HINCRBY', metadata_key, "failures_streak", number_of_failures)
+
         -- Read number of success/failure within the current window
         local success = 0
         local failure = 0
-        for idx = number_of_time_buckets + 1, #KEYS do
+        for idx = number_of_time_buckets + 2, #KEYS do
           local bucket_key = KEYS[idx]
           local result = redis.call('HMGET', bucket_key, 'success', 'failure')
           if result[1] then
@@ -269,6 +281,7 @@ module Stoplight
         normalize_failures(query_failures(config), config.error_notifier)
       end
 
+
       # Saves a new failure to the errors HSet and cleans up outdated errors.
       # @return [Metadata] the number of success/failures in the current window
       # Data structures:
@@ -279,9 +292,18 @@ module Stoplight
       #   "stoplight:v5:metadata:{light_name}":
       #       fields:
       #         last_failure: JSON
+      # On Success:
+      # 1. Increment success counter in appropriate buckets
+      # 2. Reset failures_streak to 0
+      # 3. Update last_success_at_ts to current time
+      #
+      # On Failure:
+      # 1. Increment failure counter in appropriate buckets
+      # 2. Increment failures_streak counter
       #
       def record_failure(config, failure)
         failure_ts = failure.time.to_i
+        failure_json = failure.to_json
 
         failures_key = failures_key(config)
 
@@ -293,18 +315,22 @@ module Stoplight
           client.evalsha(
             @record_failure_script_sha,
             keys: [failures_key],
-            argv: [failure_ts, config.window_size, config.threshold, failure.to_json]
+            argv: [failure_ts, config.window_size, config.threshold, failure_json]
           )
 
           client.evalsha(
             @record_failure_v2_script_sha,
             argv: [
-              time_buckets.count, # we pass variables number of keys. This argument specifies how many keys are passed
-              1                  # number of failures
+              time_buckets.count, # 1. We pass variables number of keys. This argument specifies how many keys are passed
+              1,                  # 3. Number of failures
+              failure_ts,         # 4. Record time
+              failure_json,       # 5. Serialized error
             ],
             keys: [
+              "metadata",
               *time_buckets,        # Buckets to write (cover current moment)
               *buckets_for_window   # Buckets to read (cover window size)
+
             ]
           )
         end
