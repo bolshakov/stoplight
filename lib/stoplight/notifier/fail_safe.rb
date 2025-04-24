@@ -60,7 +60,7 @@ module Stoplight
 
       # @return [Stoplight] The circuit breaker used to handle failures.
       private def circuit_breaker
-        @circuit_breaker ||= Stoplight("#{notifier.class.name}-safely", data_store: Default::DATA_STORE, notifiers: [])
+        @circuit_breaker ||= Stoplight("stoplight:notifier:fail_safe:#{notifier.class.name}", data_store: Default::DATA_STORE, notifiers: [])
       end
     end
   end
