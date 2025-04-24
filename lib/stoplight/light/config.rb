@@ -54,9 +54,9 @@ module Stoplight
         tracked_errors: nil, skipped_errors: nil)
         @name = name
         @cool_off_time = cool_off_time
-        @data_store = data_store
+        @data_store = DataStore::FailSafe.wrap(data_store)
         @error_notifier = error_notifier
-        @notifiers = notifiers
+        @notifiers = notifiers.map { |notifier| Notifier::FailSafe.wrap(notifier) }
         @threshold = threshold
         @window_size = window_size
         @tracked_errors = Array(tracked_errors)
@@ -67,6 +67,27 @@ module Stoplight
       # @return [Boolean]
       def ==(other)
         other.is_a?(self.class) && to_h == other.to_h
+      end
+
+      # @param error [Exception]
+      # @return [Boolean]
+      def track_error?(error)
+        skip = skipped_errors.any? { |klass| klass === error }
+        track = tracked_errors.any? { |klass| klass === error }
+
+        !skip && track
+      end
+
+      # @param number_of_errors [Numeric]
+      # @return [Boolean]
+      def threshold_exceeded?(number_of_errors)
+        number_of_errors == threshold
+      end
+
+      # @param number_of_errors [Numeric]
+      # @return [Boolean]
+      def below_threshold?(number_of_errors)
+        number_of_errors < threshold
       end
 
       # Updates the configuration with new settings and returns a new instance.

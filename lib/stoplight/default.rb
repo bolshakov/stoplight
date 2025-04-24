@@ -15,7 +15,7 @@ module Stoplight
     end
 
     NOTIFIERS = [
-      Notifier::IO.new($stderr)
+      Notifier::FailSafe.wrap(Notifier::IO.new($stderr))
     ].freeze
 
     THRESHOLD = 3

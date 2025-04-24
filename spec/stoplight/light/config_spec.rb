@@ -73,9 +73,10 @@ RSpec.describe Stoplight::Light::Config do
     subject { config.notifiers }
 
     let(:notifiers) { [Stoplight::Notifier::IO.new($stderr)] }
+    let(:fail_safe_notifiers) { notifiers.map { |x| Stoplight::Notifier::FailSafe.wrap(x) } }
 
     it "returns the same value" do
-      is_expected.to contain_exactly(*notifiers)
+      is_expected.to contain_exactly(*fail_safe_notifiers)
     end
   end
 
@@ -134,13 +135,15 @@ RSpec.describe Stoplight::Light::Config do
     subject { config.with(**new_settings) }
 
     context "when all settings are updated" do
+      let(:notifier) { Stoplight::Notifier::IO.new($stderr) }
+
       let(:new_settings) do
         {
           name: "bar",
           cool_off_time: 10,
           data_store: Stoplight::DataStore::Memory.new,
           error_notifier: ->(error) { warn error },
-          notifiers: [Stoplight::Notifier::IO.new($stderr)],
+          notifiers: [notifier],
           threshold: 5,
           window_size: 10,
           tracked_errors: [StandardError],
@@ -150,24 +153,33 @@ RSpec.describe Stoplight::Light::Config do
 
       it "returns a new config with the updated settings" do
         is_expected.to be_a(described_class)
-        is_expected.to have_attributes(**new_settings.merge(skipped_errors: [KeyError, *Stoplight::Default::SKIPPED_ERRORS]))
+        is_expected.to have_attributes(
+          **new_settings.merge(
+            skipped_errors: [KeyError, *Stoplight::Default::SKIPPED_ERRORS],
+            notifiers: [Stoplight::Notifier::FailSafe.wrap(notifier)]
+          )
+        )
       end
     end
 
     context "when some settings are not updated" do
+      let(:notifier) { Stoplight::Notifier::IO.new($stderr) }
+
       let(:new_settings) do
         {
           name: "bar",
           cool_off_time: 10,
           data_store: Stoplight::DataStore::Memory.new,
           error_notifier: ->(error) { warn error },
-          notifiers: [Stoplight::Notifier::IO.new($stderr)]
+          notifiers: [notifier]
         }
       end
 
       it "returns a new config with the updated settings" do
         is_expected.to be_a(described_class)
-        is_expected.to have_attributes(**settings.merge(new_settings))
+        is_expected.to have_attributes(
+          **settings.merge(new_settings).merge(notifiers: [Stoplight::Notifier::FailSafe.wrap(notifier)])
+        )
       end
     end
   end

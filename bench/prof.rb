@@ -38,11 +38,7 @@ end
 
 profile_scenario("success", RubyProf::PROCESS_TIME) do
   50.times do
-    stoplight.run do
-      sleep(0.01)
-      10_000.times { Math.sqrt(rand) }
-      File.read(File::NULL)
-    end
+    stoplight.run {}
   end
 end
 

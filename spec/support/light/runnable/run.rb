@@ -179,25 +179,6 @@ RSpec.shared_examples "Stoplight::Light::Runnable#run" do
         end
       end
     end
-
-    context "when the data store is failing" do
-      let(:error) { StandardError.new("something went wrong") }
-      let(:config) { super().with(error_notifier: ->(e) { @yielded_error = e }) }
-
-      before do
-        allow(data_store).to receive(:clear_failures) { raise error }
-      end
-
-      it "runs the code" do
-        expect(run).to eql(code_result)
-      end
-
-      it "notifies about the error" do
-        expect(@yielded_error).to be(nil)
-        run
-        expect(@yielded_error).to eql(error)
-      end
-    end
   end
 
   context "when the light is yellow" do

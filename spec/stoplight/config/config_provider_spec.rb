@@ -76,7 +76,12 @@ RSpec.describe Stoplight::Config::ConfigProvider do
           expect(config).to have_attributes(
             data_store: data_store,
             error_notifier: error_notifier,
-            notifiers: contain_exactly(*Stoplight::Default::NOTIFIERS, *notifiers),
+            notifiers: contain_exactly(
+              *[
+                *Stoplight::Default::NOTIFIERS,
+                *notifiers
+              ].map { |x| Stoplight::Notifier::FailSafe.wrap(x) }
+            ),
             cool_off_time: cool_off_time,
             threshold: threshold,
             window_size: window_size,
@@ -96,9 +101,14 @@ RSpec.describe Stoplight::Config::ConfigProvider do
 
         it "returns a configuration from user default settings with provided overrides" do
           expect(config).to have_attributes(
-            data_store: overridden_data_store,
+            data_store: Stoplight::DataStore::FailSafe.new(overridden_data_store),
             error_notifier: error_notifier,
-            notifiers: contain_exactly(*Stoplight::Default::NOTIFIERS, *notifiers),
+            notifiers: contain_exactly(
+              *[
+                *Stoplight::Default::NOTIFIERS,
+                *notifiers
+              ].map { |x| Stoplight::Notifier::FailSafe.wrap(x) }
+            ),
             cool_off_time: cool_off_time,
             threshold: threshold,
             window_size: window_size,
@@ -119,7 +129,7 @@ RSpec.describe Stoplight::Config::ConfigProvider do
       end
       let(:data_store) { Stoplight::DataStore::Memory.new }
       let(:error_notifier) { ->(error) { puts "Error: #{error}" } }
-      let(:notifiers) { [Stoplight::Notifier::IO.new($stdout)] }
+      let(:notifiers) { [Stoplight::Notifier::FailSafe.wrap(Stoplight::Notifier::IO.new($stdout))] }
 
       context "without settings overrides" do
         let(:settings_overrides) { {} }
@@ -153,7 +163,7 @@ RSpec.describe Stoplight::Config::ConfigProvider do
             window_size: Stoplight::Default::WINDOW_SIZE,
             tracked_errors: Stoplight::Default::TRACKED_ERRORS,
             skipped_errors: Stoplight::Default::SKIPPED_ERRORS,
-            data_store: overridden_data_store,
+            data_store: Stoplight::DataStore::FailSafe.new(overridden_data_store),
             error_notifier: error_notifier,
             notifiers: contain_exactly(*notifiers)
           )
