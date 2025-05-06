@@ -33,55 +33,28 @@ RSpec.describe Stoplight::DataStore::FailSafe do
     end
   end
 
-  describe "#get_all" do
-    subject { fail_safe.get_all(config) }
+  describe "#get_metadata" do
+    subject { fail_safe.get_metadata(config) }
 
     context "when data_store returns all data" do
-      let(:all_data) do
-        [
-          Stoplight::Failure.new("class", "message", Time.new),
-          Stoplight::State::LOCKED_GREEN
-        ]
+      let(:metadata) do
+        Stoplight::DataStore::Metadata.empty.with(failures: 4)
       end
 
       it "returns all data from data_store" do
         expect(error_notifier).not_to receive(:call)
-        expect(data_store).to receive(:get_all).with(config).and_return(all_data)
+        expect(data_store).to receive(:get_metadata).with(config).and_return(metadata)
 
-        is_expected.to eq(all_data)
+        is_expected.to eq(metadata)
       end
     end
 
     context "when data_store fails" do
       it "returns empty list of all data" do
         expect(error_notifier).to receive(:call).with(error)
-        expect(data_store).to receive(:get_all).with(config) { raise error }
+        expect(data_store).to receive(:get_metadata).with(config) { raise error }
 
-        is_expected.to eq([[], Stoplight::State::UNLOCKED])
-      end
-    end
-  end
-
-  describe "#get_failures" do
-    subject { fail_safe.get_failures(config) }
-
-    context "when data_store returns failures" do
-      let(:failures) { [Stoplight::Failure.new("class", "message", Time.new)] }
-
-      it "returns failures from data_store" do
-        expect(error_notifier).not_to receive(:call)
-        expect(data_store).to receive(:get_failures).with(config).and_return(failures)
-
-        is_expected.to eq(failures)
-      end
-    end
-
-    context "when data_store fails" do
-      it "returns empty list of failures" do
-        expect(error_notifier).to receive(:call).with(error)
-        expect(data_store).to receive(:get_failures).with(config) { raise error }
-
-        is_expected.to eq([])
+        is_expected.to eq(Stoplight::DataStore::Metadata.empty)
       end
     end
   end
@@ -105,31 +78,7 @@ RSpec.describe Stoplight::DataStore::FailSafe do
         expect(error_notifier).to receive(:call).with(error)
         expect(data_store).to receive(:record_failure).with(config, failure) { raise error }
 
-        is_expected.to eq(0)
-      end
-    end
-  end
-
-  describe "#clear_failures" do
-    subject { fail_safe.clear_failures(config) }
-
-    let(:failures) { [Stoplight::Failure.new("class", "message", Time.new)] }
-
-    context "when data_store clears failure" do
-      it "returns all failures from data_store" do
-        expect(error_notifier).not_to receive(:call)
-        expect(data_store).to receive(:clear_failures).with(config).and_return(failures)
-
-        is_expected.to eq(failures)
-      end
-    end
-
-    context "when data_store fails" do
-      it "returns empty list of failures" do
-        expect(error_notifier).to receive(:call).with(error)
-        expect(data_store).to receive(:clear_failures).with(config) { raise error }
-
-        is_expected.to eq([])
+        is_expected.to eq(nil)
       end
     end
   end
@@ -204,33 +153,28 @@ RSpec.describe Stoplight::DataStore::FailSafe do
     end
   end
 
-  describe "#with_deduplicated_notification" do
-    let(:from_color) { Stoplight::Color::GREEN }
-    let(:to_color) { Stoplight::Color::RED }
+  describe "#transition_to_color" do
+    subject { fail_safe.transition_to_color(config, color) }
+
+    let(:color) { Stoplight::Color::GREEN }
 
     context "when data_store does not fail" do
-      it "yields the block" do
+      let(:value) { rand }
+
+      it "returns the value" do
         expect(error_notifier).not_to receive(:call)
 
-        expect do |notification|
-          expect(data_store).to receive(:with_deduplicated_notification).with(config, from_color, to_color, &notification)
-          fail_safe.with_deduplicated_notification(config, from_color, to_color, &notification)
-        end.to yield_control
+        expect(data_store).to receive(:transition_to_color).with(config, color).and_return(value)
+        is_expected.to eq(value)
       end
     end
 
     context "when data_store fails" do
-      it "yields the block once" do
+      it "returns false" do
         expect(error_notifier).to receive(:call).with(error)
+        expect(data_store).to receive(:transition_to_color).with(config, color).and_raise(error)
 
-        expect do |notification|
-          expect(data_store).to receive(:with_deduplicated_notification).with(config, from_color, to_color) do |_, _, _, &block|
-            block.call
-            raise error
-          end
-
-          fail_safe.with_deduplicated_notification(config, from_color, to_color, &notification)
-        end.to yield_control.once
+        is_expected.to eq(false)
       end
     end
   end

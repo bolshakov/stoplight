@@ -3,75 +3,47 @@
 RSpec.shared_examples "Stoplight::Light::Runnable#color" do
   let(:name) { random_string }
 
-  it "is initially green" do
+  it "is initially GREEN" do
     expect(light.color).to eql(Stoplight::Color::GREEN)
   end
 
-  context "when its locked green" do
+  context "when its locked GREEN" do
     before do
       data_store.set_state(config, Stoplight::State::LOCKED_GREEN)
     end
 
-    it "is green" do
+    it "is GREEN" do
       expect(light.color).to eql(Stoplight::Color::GREEN)
     end
   end
 
-  context "when its locked red" do
+  context "when its locked RED" do
     before do
       data_store.set_state(config, Stoplight::State::LOCKED_RED)
     end
 
-    it "is red" do
+    it "is RED" do
       expect(light.color).to eql(Stoplight::Color::RED)
     end
   end
 
-  context "when there are many failures" do
-    let(:anther) { Stoplight::Failure.new(error.class.name, error.message, time - 10) }
-    let(:config) { super().with(threshold: 2) }
-
+  context "when transitioned to RED" do
     before do
-      data_store.record_failure(config, failure)
+      data_store.transition_to_color(config, Stoplight::Color::RED)
     end
 
-    it "turns red" do
-      expect do
-        data_store.record_failure(config, anther)
-      end.to change(light, :color).to be(Stoplight::Color::RED)
+    it "is RED" do
+      expect(light.color).to eql(Stoplight::Color::RED)
     end
   end
 
-  context "when the most recent failure is old" do
-    let(:failure) { Stoplight::Failure.new(error.class.name, error.message, Time.new - config.cool_off_time) }
-    let(:failure2) { Stoplight::Failure.new(error.class.name, error.message, Time.new - config.cool_off_time - 10) }
-    let(:config) { super().with(threshold: 2) }
-
+  context "when transitioned to YELLOW" do
     before do
-      data_store.record_failure(config, failure2)
+      data_store.transition_to_color(config, Stoplight::Color::YELLOW)
     end
 
-    it "turns yellow" do
-      expect do
-        data_store.record_failure(config, failure)
-      end.to change(light, :color).to be(Stoplight::Color::YELLOW)
-    end
-  end
-
-  context "when the least recent failure is old" do
-    let(:other) do
-      Stoplight::Failure.new(error.class.name, error.message, Time.new - config.cool_off_time)
-    end
-    let(:config) { super().with(threshold: 2) }
-
-    before do
-      data_store.record_failure(config, other)
-    end
-
-    it "is red when the least recent failure is old" do
-      expect do
-        data_store.record_failure(config, failure)
-      end.to change(light, :color).to be(Stoplight::Color::RED)
+    it "is YELLOW" do
+      expect(light.color).to eql(Stoplight::Color::YELLOW)
     end
   end
 end

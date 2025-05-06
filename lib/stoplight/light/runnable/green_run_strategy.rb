@@ -17,31 +17,37 @@ module Stoplight
         # @return [Object] The result of the code block if successful.
         # @raise [Exception] Re-raises the error if it is not tracked or no fallback is provided.
         def execute(fallback, &code)
-          code.call.tap do
-            data_store.clear_failures(config)
-          end
+          # Consider implementing sampling rate to limit the memory footprint
+          code.call.tap { record_success }
         rescue Exception => error # rubocop: disable Lint/RescueException
-          raise unless config.track_error?(error)
-          record_error(error)
+          if config.track_error?(error)
+            record_error(error)
 
-          if fallback
-            fallback.call(error)
+            if fallback
+              fallback.call(error)
+            else
+              raise
+            end
           else
+            # User chose to not track the error, so we record it as a success
+            record_success
             raise
           end
         end
 
-        # Records an error and notifies if the error threshold is exceeded.
-        #
-        # @param error [Exception] The error to record.
-        # @return [void]
         private def record_error(error)
-          failure = Failure.from_error(error)
-          number_of_errors = data_store.record_failure(config, failure)
+          failure = Stoplight::Failure.from_error(error)
+          metadata = data_store.record_failure(config, failure)
 
-          if config.threshold_exceeded?(number_of_errors)
-            notify(config, Color::GREEN, Color::RED, error)
+          if config.evaluation_strategy.evaluate(config, metadata) && data_store.transition_to_color(config, Color::RED)
+            config.notifiers.each do |notifier|
+              notifier.notify(config, Color::GREEN, Color::RED, error)
+            end
           end
+        end
+
+        private def record_success
+          data_store.record_success(config)
         end
       end
     end

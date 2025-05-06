@@ -5,6 +5,9 @@ source "https://rubygems.org"
 gemspec
 
 group :development do
+  gem "rantly"
+  gem "connection_pool"
+  gem "concurrent-ruby-ext"
   gem "benchmark-ips", "~> 2.14"
   gem "concurrent-ruby-ext"
   gem "connection_pool"

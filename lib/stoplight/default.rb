@@ -20,7 +20,7 @@ module Stoplight
 
     THRESHOLD = 3
 
-    WINDOW_SIZE = Float::INFINITY
+    WINDOW_SIZE = 600
 
     TRACKED_ERRORS = [StandardError].freeze
     SKIPPED_ERRORS = [
@@ -31,5 +31,8 @@ module Stoplight
       SystemExit,
       SystemStackError
     ].freeze
+
+    EVALUATION_STRATEGY = EvaluationStrategy.new
+    RECOVERY_STRATEGY = RecoveryStrategy.new
   end
 end

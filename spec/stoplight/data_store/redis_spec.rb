@@ -9,17 +9,52 @@ RSpec.describe Stoplight::DataStore::Redis, :redis do
   let(:failure) { Stoplight::Failure.new("class", "message", Time.new - 60) }
   let(:other) { Stoplight::Failure.new("class", "message 2", Time.new) }
 
-  shared_examples Stoplight::DataStore::Redis do
-    it_behaves_like "Stoplight::DataStore::Base"
-    it_behaves_like "Stoplight::DataStore::Base#names"
-    it_behaves_like "Stoplight::DataStore::Base#get_all"
-    it_behaves_like "Stoplight::DataStore::Base#record_failure"
-    it_behaves_like "Stoplight::DataStore::Base#clear_failures"
-    it_behaves_like "Stoplight::DataStore::Base#get_state"
-    it_behaves_like "Stoplight::DataStore::Base#set_state"
-    it_behaves_like "Stoplight::DataStore::Base#clear_state"
+  describe ".buckets_for_window" do
+    subject(:buckets) { described_class.buckets_for_window(light_name, metric:, window_end:, window_size:) }
 
-    it_behaves_like "Stoplight::DataStore::Base#get_failures" do
+    let(:light_name) { "test-light" }
+    let(:metric) { "failures" }
+
+    context "when window size is smaller than the bucket size" do
+      let(:window_end) { Time.new(2023, 10, 1, 12, 34, 56) }
+      let(:window_size) { 300 } # Smaller than BUCKET_SIZE (600)
+
+      it "returns a single bucket key" do
+        is_expected.to contain_exactly(
+          "stoplight:v5:metrics:test-light:failures:1696156200",
+          "stoplight:v5:metrics:test-light:failures:1696155600"
+        )
+      end
+    end
+
+    context "when window size spans multiple buckets" do
+      let(:window_end) { Time.new(2023, 10, 1, 12, 34, 56) }
+      let(:window_size) { 1800 } # Spans 4 buckets (600s each)
+
+      it "returns all bucket keys within the window" do
+        is_expected.to contain_exactly(
+          "stoplight:v5:metrics:test-light:failures:1696154400",
+          "stoplight:v5:metrics:test-light:failures:1696155000",
+          "stoplight:v5:metrics:test-light:failures:1696155600",
+          "stoplight:v5:metrics:test-light:failures:1696156200"
+        )
+      end
+    end
+
+    context "when window size is exactly one bucket size" do
+      let(:window_end) { Time.new(2023, 10, 1, 12, 30, 0o0) }
+      let(:window_size) { 600 } # Exactly one bucket size
+
+      it "returns the single bucket key" do
+        is_expected.to contain_exactly(
+          "stoplight:v5:metrics:test-light:failures:1696155600"
+        )
+      end
+    end
+  end
+
+  shared_examples Stoplight::DataStore::Redis do
+    it_behaves_like "data store metrics" do
       context "when JSON is invalid" do
         let(:config) { Stoplight.config_provider.provide(name, error_notifier: ->(_error) {}) }
 
@@ -27,13 +62,24 @@ RSpec.describe Stoplight::DataStore::Redis, :redis do
           expect(failure).to receive(:to_json).and_return("invalid JSON")
 
           expect { data_store.record_failure(config, failure) }
-            .to change { data_store.get_failures(config) }
-            .to([have_attributes(error_class: "JSON::ParserError")])
+            .to change { data_store.get_metadata(config) }
+            .to(
+              have_attributes(
+                last_failure: have_attributes(
+                  error_class: "JSON::ParserError"
+                )
+              )
+            )
         end
       end
     end
 
-    it_behaves_like "Stoplight::DataStore::Base#with_deduplicated_notification"
+    it_behaves_like "Stoplight::DataStore::Base"
+    it_behaves_like "Stoplight::DataStore::Base#names"
+    it_behaves_like "Stoplight::DataStore::Base#get_state"
+    it_behaves_like "Stoplight::DataStore::Base#set_state"
+    it_behaves_like "Stoplight::DataStore::Base#clear_state"
+    it_behaves_like "Stoplight::DataStore::Base#transition_to_color"
   end
 
   it_behaves_like Stoplight::DataStore::Redis do

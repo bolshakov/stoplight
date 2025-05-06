@@ -63,7 +63,7 @@ RSpec.describe Stoplight::Config::ConfigProvider do
       let(:data_store) { Stoplight::DataStore::Memory.new }
       let(:error_notifier) { ->(error) { puts "Error: #{error}" } }
       let(:notifiers) { [Stoplight::Notifier::IO.new($stdout)] }
-      let(:cool_off_time) { 10.0 }
+      let(:cool_off_time) { 10 }
       let(:threshold) { 5 }
       let(:window_size) { 20 }
       let(:tracked_errors) { [StandardError] }

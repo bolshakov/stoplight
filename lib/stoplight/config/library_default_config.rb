@@ -13,7 +13,9 @@ module Stoplight
         threshold: Stoplight::Default::THRESHOLD,
         window_size: Stoplight::Default::WINDOW_SIZE,
         tracked_errors: Stoplight::Default::TRACKED_ERRORS,
-        skipped_errors: Stoplight::Default::SKIPPED_ERRORS
+        skipped_errors: Stoplight::Default::SKIPPED_ERRORS,
+        evaluation_strategy: Stoplight::Default::EVALUATION_STRATEGY,
+        recovery_strategy: Stoplight::Default::RECOVERY_STRATEGY
       }.freeze
       private_constant :DEFAULT_SETTINGS
 
