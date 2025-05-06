@@ -128,7 +128,9 @@ module Stoplight
           threshold:,
           window_size:,
           tracked_errors:,
-          skipped_errors:
+          skipped_errors:,
+          evaluation_strategy:,
+          recovery_strategy:,
         }
       end
     end

@@ -184,16 +184,16 @@ module Stoplight
       #
       # @param config [Stoplight::Light::Config] The light configuration
       # @param color [String] The color to transition to ("GREEN", "YELLOW", or "RED")
-      # @param current_ts [Integer] Current timestamp
+      # @param current_time [Time]
       # @return [Boolean] true if this is the first instance to detect this transition
-      def transition_to_color(config, color, current_ts: Time.now.to_i)
+      def transition_to_color(config, color, current_time: Time.now)
         case color
         when Color::GREEN
           transition_to_green(config)
         when Color::YELLOW
-          transition_to_yellow(config, current_ts:)
+          transition_to_yellow(config, current_time:)
         when Color::RED
-          transition_to_red(config, current_ts:)
+          transition_to_red(config, current_time:)
         else
           raise ArgumentError, "Invalid color: #{color}"
         end
@@ -208,7 +208,11 @@ module Stoplight
 
         synchronize do
           metadata = @metadata[light_name]
-          @metadata[light_name] = metadata.with(recovery_started_at: nil, last_breach_at: nil)
+          @metadata[light_name] = metadata.with(
+            recovery_started_at: nil,
+            last_breach_at: nil,
+            recovery_scheduled_after: nil,
+          )
 
           if metadata.recovery_started_at || metadata.last_breach_at
             true
@@ -221,9 +225,9 @@ module Stoplight
       # Transitions to YELLOW (recovery) state and ensures only one notification
       #
       # @param config [Stoplight::Light::Config] The light configuration
-      # @param current_ts [Integer] Current timestamp
+      # @param current_time [Time]
       # @return [Boolean] true if this is the first instance to detect this transition
-      private def transition_to_yellow(config, current_ts: Time.now.to_i)
+      private def transition_to_yellow(config, current_time: Time.now)
         light_name = config.name
 
         synchronize do
@@ -232,7 +236,7 @@ module Stoplight
             false
           else
             @metadata[light_name] = metadata.with(
-              recovery_started_at: current_ts,
+              recovery_started_at: current_time,
               recovery_scheduled_after: nil,
               last_breach_at: nil
             )
@@ -244,20 +248,24 @@ module Stoplight
       # Transitions to RED state and ensures only one notification
       #
       # @param config [Stoplight::Light::Config] The light configuration
-      # @param current_ts [Integer] Current timestamp
+      # @param current_time [Time]
       # @return [Boolean] true if this is the first instance to detect this transition
-      private def transition_to_red(config, current_ts: Time.now.to_i)
+      private def transition_to_red(config, current_time: Time.now)
         light_name = config.name
-        recovery_scheduled_after_ts = current_ts + config.cool_off_time
+        recovery_scheduled_after = current_time + config.cool_off_time
 
         synchronize do
           metadata = @metadata[light_name]
           if metadata.last_breach_at
+            @metadata[light_name] = metadata.with(
+              recovery_scheduled_after: recovery_scheduled_after,
+              recovery_started_at: nil
+            )
             false
           else
             @metadata[light_name] = metadata.with(
-              last_breach_at: current_ts,
-              recovery_scheduled_after: recovery_scheduled_after_ts,
+              last_breach_at: current_time,
+              recovery_scheduled_after: recovery_scheduled_after,
               recovery_started_at: nil
             )
             true
