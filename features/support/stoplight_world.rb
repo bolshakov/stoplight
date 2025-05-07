@@ -56,16 +56,20 @@ module StoplightWorld
     @echo_service = nil
     @last_exception = nil
     @last_result = nil
-    Stoplight.default_data_store = case ENV.fetch("STOPLIGHT_DATA_STORE", "Memory")
-    when "Memory"
-      Stoplight::DataStore::Memory.new
-    when "Redis"
-      DatabaseCleaner[:redis].db = redis
-      DatabaseCleaner.clean_with(:deletion)
 
-      redis = Redis.new(url: ENV.fetch("STOPLIGHT_REDIS_URL", "redis://127.0.0.1:6379/0"))
-      Stoplight::DataStore::Redis.new(redis)
+    Stoplight.reset_config!
+    Stoplight.configure do |config|
+      config.data_store = case ENV.fetch("STOPLIGHT_DATA_STORE", "Memory")
+      when "Memory"
+        Stoplight::DataStore::Memory.new
+      when "Redis"
+        redis = Redis.new(url: ENV.fetch("STOPLIGHT_REDIS_URL", "redis://127.0.0.1:6379/0"))
+
+        DatabaseCleaner[:redis].db = redis
+        DatabaseCleaner.clean_with(:deletion)
+        Stoplight::DataStore::Redis.new(redis)
+      end
+      config.notifiers = [TestNotifier.new(notifications)]
     end
-    Stoplight.default_notifiers = [TestNotifier.new(notifications)]
   end
 end

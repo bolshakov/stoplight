@@ -52,23 +52,17 @@ Feature: Stoplight Basic Functionality
     Then the light returns "Service says: Are you sure?"
 
   Scenario: Light with fallback returns fallback value in red state
-    Given the light is configured with:
-      | Fallback | Service temporarily unavailable |
-    And the protected service starts failing with "connection-timeout"
+    Given the protected service starts failing with "connection-timeout"
     And the light enters the red state
-    When I make a request to the service with "Hi! How are you?" message
+    When I make a request to the service with "Hi! How are you?" message and fallback "Service temporarily unavailable"
     Then the light returns "Service temporarily unavailable"
 
   Scenario: Light with fallback ignores fallback value in green state
-    Given the light is configured with:
-      | Fallback | Service temporarily unavailable |
-    When I make a request to the service with "Hi! How are you?" message
+    When I make a request to the service with "Hi! How are you?" message and fallback "Service temporarily unavailable"
     Then the light returns "Service says: Hi! How are you?"
 
   Scenario: Light with fallback returns fallback value in case of failure in yellow state
-    Given the light is configured with:
-      | Fallback | Service temporarily unavailable |
     And the protected service starts failing with "connection-timeout"
     And the light enters the yellow state
-    When I make a request to the service with "Hi! How are you?" message
+    When I make a request to the service with "Hi! How are you?" message and fallback "Service temporarily unavailable"
     Then the light returns "Service temporarily unavailable"

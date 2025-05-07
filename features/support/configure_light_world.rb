@@ -7,9 +7,7 @@ module ConfigureLightWorld
     table.rows_hash.each_pair do |option, value|
       light = case option
       when "Skipped Errors"
-        configure_error_handler(light, value)
-      when "Fallback"
-        configure_fallback(light, value)
+        configure_skipped_errors(light, value)
       when "Threshold"
         configure_threshold(light, value)
       when "Cool Off Time"
@@ -24,28 +22,19 @@ module ConfigureLightWorld
   end
 
   def configure_window_size(light, value)
-    light.with_window_size(value.to_f)
+    light.with(window_size: value.to_f)
   end
 
   def configure_cool_off_time(light, value)
-    light.with_cool_off_time(value.to_f)
+    light.with(cool_off_time: value.to_f)
   end
 
   def configure_threshold(light, value)
-    light.with_threshold(value.to_i)
+    light.with(threshold: value.to_i)
   end
 
-  def configure_fallback(light, value)
-    light.with_fallback { value }
-  end
-
-  def configure_error_handler(light, value)
+  def configure_skipped_errors(light, value)
     exception_classes = value.split(",").map(&:strip).map { |name| Object.const_get(name) }
-
-    light.with_error_handler do |error, handler|
-      raise error if exception_classes.any? { |klass| error.is_a?(klass) }
-
-      handler.call(error)
-    end
+    light.with(skipped_errors: exception_classes)
   end
 end

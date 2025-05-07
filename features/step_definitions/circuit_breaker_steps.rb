@@ -24,11 +24,15 @@ Given(/^(?:the light) enters (?:the )?yellow state$/) do
   expect(current_light.color).to eq(Stoplight::Color::YELLOW)
 end
 
-And(/^I make (\d+|a) request(?:s)? to the (?:protected )?service(?: with "([^"]+)" message)?$/) do |count, message|
+And(/^I make (\d+|a) request(?:s)? to the (?:protected )?service(?: with "([^"]+)" message)?(?: (?:with|and) fallback "([^"]+)")?$/) do |count, message, fallback|
   count = (count == "a") ? 1 : count.to_i
+  fallback_proc = ->(_) { fallback } if fallback
+
   count.times do |x|
     capture_result do
-      current_light.run { echo_service.call(message || "hello #{x}") }
+      current_light.run(fallback_proc) do
+        echo_service.call(message || "hello #{x}")
+      end
     end
   end
 end
