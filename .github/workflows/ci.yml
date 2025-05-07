@@ -20,6 +20,38 @@ jobs:
         with:
           autofix: false
 
+  features:
+    name: Features (${{ matrix.data_store }} data store) 🥒
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        data_store: [ 'Memory', "Redis" ]
+    services:
+      redis:
+        image: redis:7.2
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.3.4
+          bundler-cache: true
+
+      - name: Run Features
+        run: bundle exec cucumber
+        env:
+          STOPLIGHT_REDIS_URL: "redis://127.0.0.1:6379/0"
+          STOPLIGHT_DATA_STORE: ${{ matrix.data_store }}
+          CUCUMBER_PUBLISH_TOKEN: ${{ secrets.CUCUMBER_PUBLISH_TOKEN }}
 
   spec:
     name: Specs on Ruby ${{ matrix.ruby }} with Redis ${{ matrix.redis }} 💚
