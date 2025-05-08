@@ -54,7 +54,7 @@ RSpec.describe Stoplight::Light::Runnable::YellowRunStrategy do
 
           expect do
             expect { result }.to raise_error(error)
-          end.not_to change { data_store.get_failures(config).size }
+          end.to change { data_store.get_failures(config).size }.by(1)
         end
 
         context "when fallback is provided" do
@@ -70,7 +70,7 @@ RSpec.describe Stoplight::Light::Runnable::YellowRunStrategy do
 
             expect do
               expect(result).to eq("Fallback")
-            end.not_to change { data_store.get_failures(config).size }
+            end.to change { data_store.get_failures(config).size }.by(1)
 
             expect(@error).to eq(error)
           end

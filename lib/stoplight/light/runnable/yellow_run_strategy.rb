@@ -24,6 +24,8 @@ module Stoplight
           end
         rescue Exception => error # rubocop: disable Lint/RescueException
           raise unless config.track_error?(error)
+          failure = Failure.from_error(error)
+          data_store.record_failure(config, failure)
 
           if fallback
             fallback.call(error)
