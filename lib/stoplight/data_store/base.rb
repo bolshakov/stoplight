@@ -23,7 +23,7 @@ module Stoplight
       #
       # @param config [Stoplight::Light::Config] The light configuration.
       # @param failure [Failure] The failure to record.
-      # @return [void]
+      # @return [Stoplight::DataStore::Metadata] The metadata associated with the light.
       def record_failure(config, failure)
         raise NotImplementedError
       end
@@ -42,7 +42,7 @@ module Stoplight
       #
       # @param config [Stoplight::Light::Config] The light configuration.
       # @param failure [Failure] The failure to record.
-      # @return [void]
+      # @return [Stoplight::DataStore::Metadata]
       def record_recovery_probe_failure(config, failure)
         raise NotImplementedError
       end
@@ -52,7 +52,7 @@ module Stoplight
       # @param config [Stoplight::Light::Config] The light configuration.
       # @param request_id [String] The unique identifier for the request
       # @param request_time [Time] The time of the request
-      # @return [void]
+      # @return [Stoplight::DataStore::Metadata]
       def record_recovery_probe_success(config, request_id:, request_time:)
         raise NotImplementedError
       end
@@ -82,13 +82,14 @@ module Stoplight
         raise NotImplementedError
       end
 
-      # Transitions the Stoplight to the specified color (state).
+      # Transitions the Stoplight to the specified color.
       #
-      # This method performs a state transition operation that works across distributed instances
-      # of the circuit breaker. It ensures that in a multi-instance environment, only one instance
+      # This method performs a color transition operation that works across distributed instances
+      # of the light. It ensures that in a multi-instance environment, only one instance
       # is considered the "first" to perform the transition (and therefore responsible for
       # triggering notifications).
       #
+      # @param config [Stoplight::Light::Config]
       # @param color [String] The target color/state to transition to.
       #   Should be one of Stoplight::Color::GREEN, Stoplight::Color::YELLOW, or Stoplight::Color::RED.
       #
@@ -99,7 +100,7 @@ module Stoplight
       # @note In distributed environments with multiple instances, race conditions can occur when instances
       #   attempt conflicting transitions simultaneously (e.g., one instance tries to transition from
       #   YELLOW to GREEN while another tries YELLOW to RED). The implementation handles this, but
-      #   be aware that the last operation may determine the final state.
+      #   be aware that the last operation may determine the final color of the light.
       #
       def transition_to_color(config, color)
         raise NotImplementedError

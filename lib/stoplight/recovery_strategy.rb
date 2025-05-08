@@ -6,9 +6,9 @@ module Stoplight
     # @param metadata [Stoplight::DataStore::Metadata]
     # @return [Stoplight::Color::YELLOW, Stoplight::Color::GREEN, Stoplight::Color::RED]
     def evaluate(config, metadata)
-      recovery_started_at = (metadata.recovery_started_at || metadata.recovery_scheduled_after)
+      recovery_started_at = metadata.recovery_started_at || metadata.recovery_scheduled_after
       last_success_at = metadata.last_success_at
-      if last_success_at && recovery_started_at < last_success_at
+      if last_success_at && recovery_started_at <= last_success_at
         Color::GREEN
       else
         Color::RED

@@ -104,7 +104,7 @@ RSpec.shared_examples "data store metrics" do
     end
 
     context "when a newer recovery probe success is recorded after a newer recovery probe success" do
-      let(:recovery_probe_request_time) { request_time - 10}
+      let(:recovery_probe_request_time) { request_time - 10 }
 
       before do
         data_store.record_recovery_probe_success(config, request_time:)

@@ -407,16 +407,18 @@ module Stoplight
       #
       # @param config [Stoplight::Light::Config] The light configuration
       # @param color [String] The color to transition to ("GREEN", "YELLOW", or "RED")
-      # @param current_ts [Integer] Current timestamp
+      # @param current_time [Time] Current timestamp
       # @return [Boolean] true if this is the first instance to detect this transition
-      def transition_to_color(config, color, current_ts: Time.now.to_i)
+      def transition_to_color(config, color, current_time: Time.now)
+        current_time.to_i
+
         case color
         when Color::GREEN
           transition_to_green(config)
         when Color::YELLOW
-          transition_to_yellow(config, current_ts:)
+          transition_to_yellow(config, current_time:)
         when Color::RED
-          transition_to_red(config, current_ts:)
+          transition_to_red(config, current_time:)
         else
           raise ArgumentError, "Invalid color: #{color}"
         end
@@ -438,9 +440,10 @@ module Stoplight
       # Transitions to YELLOW (recovery) state and ensures only one notification
       #
       # @param config [Stoplight::Light::Config] The light configuration
-      # @param current_ts [Integer] Current timestamp
+      # @param current_time [Time] Current timestamp
       # @return [Boolean] true if this is the first instance to detect this transition
-      private def transition_to_yellow(config, current_ts: Time.now.to_i)
+      private def transition_to_yellow(config, current_time: Time.now)
+        current_ts = current_time.to_i
         meta_key = metadata_key(config)
 
         script = <<~LUA
@@ -467,9 +470,10 @@ module Stoplight
       # Transitions to RED state and ensures only one notification
       #
       # @param config [Stoplight::Light::Config] The light configuration
-      # @param current_ts [Integer] Current timestamp
+      # @param current_time [Time] Current timestamp
       # @return [Boolean] true if this is the first instance to detect this transition
-      private def transition_to_red(config, current_ts: Time.now.to_i)
+      private def transition_to_red(config, current_time: Time.now)
+        current_ts = current_time.to_i
         meta_key = metadata_key(config)
         recovery_scheduled_after_ts = current_ts + config.cool_off_time
 

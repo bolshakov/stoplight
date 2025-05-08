@@ -6,7 +6,7 @@ module Stoplight
     # @param metadata [Stoplight::DataStore::Metadata]
     # @return [Boolean]
     def evaluate(config, metadata)
-      metadata.consecutive_failures >= config.threshold
+      [metadata.consecutive_failures, metadata.failures].min >= config.threshold
     end
   end
 end

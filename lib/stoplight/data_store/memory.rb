@@ -21,10 +21,13 @@ module Stoplight
         super # MonitorMixin
       end
 
+      # @return [Array<String>]
       def names
         synchronize { @metadata.keys }
       end
 
+      # @param config [Stoplight::Light::Config]
+      # @return [Stoplight::DataStore::Metadata]
       def get_metadata(config)
         light_name = config.name
         window_end = Time.now
@@ -58,6 +61,9 @@ module Stoplight
         end
       end
 
+      # @param config [Stoplight::Light::Config]
+      # @param failure [Stoplight::Failure]
+      # @return [Stoplight::DataStore::Metadata]
       def record_failure(config, failure)
         light_name = config.name
 
@@ -79,9 +85,14 @@ module Stoplight
               consecutive_successes: 0
             )
           end
+          get_metadata(config)
         end
       end
 
+      # @param config [Stoplight::Light::Config]
+      # @param request_id [String]
+      # @param request_time [Time]
+      # @return [void]
       def record_success(config, request_time: Time.now, request_id: SecureRandom.hex(12))
         light_name = config.name
 
@@ -104,6 +115,9 @@ module Stoplight
         end
       end
 
+      # @param config [Stoplight::Light::Config]
+      # @param failure [Stoplight::Failure]
+      # @return [Stoplight::DataStore::Metadata]
       def record_recovery_probe_failure(config, failure)
         light_name = config.name
 
@@ -125,31 +139,42 @@ module Stoplight
               consecutive_successes: 0
             )
           end
+          get_metadata(config)
         end
       end
 
+      # @param config [Stoplight::Light::Config]
+      # @param request_id [String]
+      # @param request_time [Time]
+      # @return [Stoplight::DataStore::Metadata]
       def record_recovery_probe_success(config, request_time: Time.now, request_id: SecureRandom.hex(12))
         light_name = config.name
 
         synchronize do
           @recovery_probe_successes[light_name].unshift(request_time)
           metadata = @metadata[light_name]
+          recovery_started_at = metadata.recovery_started_at || request_time
 
           @metadata[light_name] = if metadata.last_success_at.nil? || request_time > metadata.last_success_at
             metadata.with(
               last_success_at: request_time,
+              recovery_started_at:,
               consecutive_failures: 0,
               consecutive_successes: metadata.consecutive_successes.succ
             )
           else
             metadata.with(
+              recovery_started_at:,
               consecutive_failures: 0,
               consecutive_successes: metadata.consecutive_successes.succ
             )
           end
+          get_metadata(config)
         end
       end
 
+      # @param config [Stoplight::Light::Config]
+      # @return [String]
       def get_state(config)
         light_name = config.name
 
@@ -160,6 +185,9 @@ module Stoplight
         metadata.locked_state || State::UNLOCKED
       end
 
+      # @param config [Stoplight::Light::Config]
+      # @param state [String]
+      # @return [String]
       def set_state(config, state)
         light_name = config.name
 
@@ -170,6 +198,8 @@ module Stoplight
         state
       end
 
+      # @param config [Stoplight::Light::Config]
+      # @return [String]
       def clear_state(config)
         light_name = config.name
 
@@ -211,7 +241,7 @@ module Stoplight
           @metadata[light_name] = metadata.with(
             recovery_started_at: nil,
             last_breach_at: nil,
-            recovery_scheduled_after: nil,
+            recovery_scheduled_after: nil
           )
 
           if metadata.recovery_started_at || metadata.last_breach_at

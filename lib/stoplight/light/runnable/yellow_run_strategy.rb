@@ -55,7 +55,7 @@ module Stoplight
           when Color::GREEN
             if data_store.transition_to_color(config, Color::GREEN)
               config.notifiers.each do |notifier|
-                notifier.notify(config, Color::YELLOW, Color::GREEN, nil)
+                notifier.notify(config, Color::RED, Color::GREEN, nil)
               end
             end
           when Color::YELLOW

@@ -20,7 +20,7 @@ RSpec.shared_examples "Stoplight::DataStore::Base#transition_to_color" do
       it { expect(data_store.transition_to_color(config, Stoplight::Color::GREEN)).to be(true) }
 
       it "resets timestamps" do
-        data_store.transition_to_color(config, Stoplight::Color::GREEN, current_ts: current_time.to_i)
+        data_store.transition_to_color(config, Stoplight::Color::GREEN, current_time:)
 
         expect(data_store.get_metadata(config)).to have_attributes(
           recovery_started_at: nil,
@@ -49,7 +49,7 @@ RSpec.shared_examples "Stoplight::DataStore::Base#transition_to_color" do
 
       it "sets the recovery_started_at timestamp" do
         expect do
-          data_store.transition_to_color(config, Stoplight::Color::YELLOW, current_ts: current_time.to_i)
+          data_store.transition_to_color(config, Stoplight::Color::YELLOW, current_time:)
         end.to change { data_store.get_metadata(config) }
           .from(have_attributes(recovery_started_at: nil))
           .to(have_attributes(recovery_started_at: current_time))
@@ -75,7 +75,7 @@ RSpec.shared_examples "Stoplight::DataStore::Base#transition_to_color" do
 
       it "sets the last_breach_at and recovery_scheduled_after timestamps" do
         expect do
-          data_store.transition_to_color(config, Stoplight::Color::RED, current_ts: current_time.to_i)
+          data_store.transition_to_color(config, Stoplight::Color::RED, current_time:)
         end.to change { data_store.get_metadata(config) }
           .from(have_attributes(last_breach_at: nil, recovery_scheduled_after: nil))
           .to(have_attributes(last_breach_at: current_time, recovery_scheduled_after: current_time + config.cool_off_time))
@@ -91,7 +91,7 @@ RSpec.shared_examples "Stoplight::DataStore::Base#transition_to_color" do
 
       it "sets the last_breach_at and recovery_scheduled_after timestamps" do
         expect do
-          data_store.transition_to_color(config, Stoplight::Color::RED, current_ts: current_time.to_i)
+          data_store.transition_to_color(config, Stoplight::Color::RED, current_time:)
         end.to change { data_store.get_metadata(config) }
           .from(have_attributes(last_breach_at: nil, recovery_scheduled_after: nil))
           .to(have_attributes(last_breach_at: current_time, recovery_scheduled_after: current_time + config.cool_off_time))

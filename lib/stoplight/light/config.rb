@@ -130,7 +130,7 @@ module Stoplight
           tracked_errors:,
           skipped_errors:,
           evaluation_strategy:,
-          recovery_strategy:,
+          recovery_strategy:
         }
       end
     end
