@@ -302,7 +302,7 @@ module Stoplight
 
       # @param config [Stoplight::Light::Config] The light configuration.
       # @param failure [Stoplight::Failure] The failure to record.
-      # @return [Stoplight::DataStore::Metadata] The updated metadata after recording the failure.
+      # @return [Stoplight::Metadata] The updated metadata after recording the failure.
       def record_failure(config, failure)
         current_ts = failure.time.to_i
         failure_json = failure.to_json
@@ -339,7 +339,7 @@ module Stoplight
       #
       # @param config [Stoplight::Light::Config] The light configuration.
       # @param failure [Failure] The failure to record.
-      # @return [Stoplight::DataStore::Metadata] The updated metadata after recording the failure.
+      # @return [Stoplight::Metadata] The updated metadata after recording the failure.
       def record_recovery_probe_failure(config, failure)
         current_ts = failure.time.to_i
         failure_json = failure.to_json
@@ -362,7 +362,7 @@ module Stoplight
       # @param config [Stoplight::Light::Config] The light configuration.
       # @param request_id [String] The unique identifier for the request
       # @param request_time [Time] The time of the request
-      # @return [Stoplight::DataStore::Metadata] The updated metadata after recording the success.
+      # @return [Stoplight::Metadata] The updated metadata after recording the success.
       def record_recovery_probe_success(config, request_id: SecureRandom.hex(12), request_time: Time.now)
         request_ts = request_time.to_i
 

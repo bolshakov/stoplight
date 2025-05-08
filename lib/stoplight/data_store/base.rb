@@ -14,7 +14,7 @@ module Stoplight
       # Retrieves metadata for a specific light configuration.
       #
       # @param config [Stoplight::Light::Config] The light configuration.
-      # @return [Stoplight::DataStore::Metadata] The metadata associated with the light.
+      # @return [Stoplight::Metadata] The metadata associated with the light.
       def get_metadata(config)
         raise NotImplementedError
       end
@@ -23,7 +23,7 @@ module Stoplight
       #
       # @param config [Stoplight::Light::Config] The light configuration.
       # @param failure [Failure] The failure to record.
-      # @return [Stoplight::DataStore::Metadata] The metadata associated with the light.
+      # @return [Stoplight::Metadata] The metadata associated with the light.
       def record_failure(config, failure)
         raise NotImplementedError
       end
@@ -42,7 +42,7 @@ module Stoplight
       #
       # @param config [Stoplight::Light::Config] The light configuration.
       # @param failure [Failure] The failure to record.
-      # @return [Stoplight::DataStore::Metadata]
+      # @return [Stoplight::Metadata]
       def record_recovery_probe_failure(config, failure)
         raise NotImplementedError
       end
@@ -52,7 +52,7 @@ module Stoplight
       # @param config [Stoplight::Light::Config] The light configuration.
       # @param request_id [String] The unique identifier for the request
       # @param request_time [Time] The time of the request
-      # @return [Stoplight::DataStore::Metadata]
+      # @return [Stoplight::Metadata]
       def record_recovery_probe_success(config, request_id:, request_time:)
         raise NotImplementedError
       end

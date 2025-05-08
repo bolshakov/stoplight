@@ -38,7 +38,7 @@ RSpec.describe Stoplight::DataStore::FailSafe do
 
     context "when data_store returns all data" do
       let(:metadata) do
-        Stoplight::DataStore::Metadata.empty.with(failures: 4)
+        Stoplight::Metadata.empty.with(failures: 4)
       end
 
       it "returns all data from data_store" do
@@ -54,7 +54,7 @@ RSpec.describe Stoplight::DataStore::FailSafe do
         expect(error_notifier).to receive(:call).with(error)
         expect(data_store).to receive(:get_metadata).with(config) { raise error }
 
-        is_expected.to eq(Stoplight::DataStore::Metadata.empty)
+        is_expected.to eq(Stoplight::Metadata.empty)
       end
     end
   end

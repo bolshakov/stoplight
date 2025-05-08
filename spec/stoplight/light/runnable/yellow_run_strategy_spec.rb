@@ -13,7 +13,7 @@ RSpec.describe Stoplight::Light::Runnable::YellowRunStrategy do
   end
   let(:notifier) { instance_double(Stoplight::Notifier::Base) }
   let(:recovery_strategy) { instance_double(Stoplight::RecoveryStrategy) }
-  let(:metadata) { instance_double(Stoplight::DataStore::Metadata) }
+  let(:metadata) { instance_double(Stoplight::Metadata) }
 
   shared_examples Stoplight::Light::Runnable::YellowRunStrategy do
     shared_examples "recovery success" do

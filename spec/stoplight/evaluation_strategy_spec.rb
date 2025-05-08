@@ -6,7 +6,7 @@ RSpec.describe Stoplight::EvaluationStrategy do
   subject { described_class.new.evaluate(config, metadata) }
 
   let(:config) { instance_double(Stoplight::Light::Config, threshold:) }
-  let(:metadata) { instance_double(Stoplight::DataStore::Metadata, consecutive_failures:, failures:) }
+  let(:metadata) { instance_double(Stoplight::Metadata, consecutive_failures:, failures:) }
 
   context "when the number of consecutive failures is greater than the threshold" do
     let(:consecutive_failures) { 2 }

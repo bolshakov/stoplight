@@ -3,7 +3,7 @@
 module Stoplight
   class RecoveryStrategy
     # @param config [Stoplight::Light::Config]
-    # @param metadata [Stoplight::DataStore::Metadata]
+    # @param metadata [Stoplight::Metadata]
     # @return [Stoplight::Color::YELLOW, Stoplight::Color::GREEN, Stoplight::Color::RED]
     def evaluate(config, metadata)
       recovery_started_at = metadata.recovery_started_at || metadata.recovery_scheduled_after

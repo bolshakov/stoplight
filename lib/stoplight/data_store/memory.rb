@@ -27,7 +27,7 @@ module Stoplight
       end
 
       # @param config [Stoplight::Light::Config]
-      # @return [Stoplight::DataStore::Metadata]
+      # @return [Stoplight::Metadata]
       def get_metadata(config)
         light_name = config.name
         window_end = Time.now
@@ -63,7 +63,7 @@ module Stoplight
 
       # @param config [Stoplight::Light::Config]
       # @param failure [Stoplight::Failure]
-      # @return [Stoplight::DataStore::Metadata]
+      # @return [Stoplight::Metadata]
       def record_failure(config, failure)
         light_name = config.name
 
@@ -117,7 +117,7 @@ module Stoplight
 
       # @param config [Stoplight::Light::Config]
       # @param failure [Stoplight::Failure]
-      # @return [Stoplight::DataStore::Metadata]
+      # @return [Stoplight::Metadata]
       def record_recovery_probe_failure(config, failure)
         light_name = config.name
 
@@ -146,7 +146,7 @@ module Stoplight
       # @param config [Stoplight::Light::Config]
       # @param request_id [String]
       # @param request_time [Time]
-      # @return [Stoplight::DataStore::Metadata]
+      # @return [Stoplight::Metadata]
       def record_recovery_probe_success(config, request_time: Time.now, request_id: SecureRandom.hex(12))
         light_name = config.name
 

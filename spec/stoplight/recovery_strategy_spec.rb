@@ -6,7 +6,7 @@ RSpec.describe Stoplight::RecoveryStrategy do
   subject(:evaluate) { described_class.new.evaluate(nil, metadata) }
 
   let(:metadata) do
-    instance_double(Stoplight::DataStore::Metadata,
+    instance_double(Stoplight::Metadata,
       recovery_started_at:,
       last_success_at:)
   end

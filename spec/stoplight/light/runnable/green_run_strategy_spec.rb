@@ -34,7 +34,7 @@ RSpec.describe Stoplight::Light::Runnable::GreenRunStrategy do
 
       let(:error) { StandardError.new("Test error") }
       let(:code) { -> { raise error } }
-      let(:metadata) { instance_double(Stoplight::DataStore::Metadata) }
+      let(:metadata) { instance_double(Stoplight::Metadata) }
 
       context "when error is tracked" do
         before do
