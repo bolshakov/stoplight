@@ -31,23 +31,23 @@ module Stoplight
       def get_metadata(config)
         light_name = config.name
         window_end = Time.now
-        window_start = window_end - config.window_size.to_i
-        recovery_window_start = window_end - config.cool_off_time.to_i
+        window = (config.threshold == Float::INFINITY) ? (..window_end) : ((window_end - config.threshold + 1)..window_end)
+        recovery_window = (window_end - config.cool_off_time + 1)..window_end
 
         synchronize do
           failures = @failures[config.name].count do |failure|
-            failure.time > window_start && failure.time < window_end
+            window.cover?(failure.time)
           end
 
           successes = @successes[config.name].count do |request_time|
-            request_time > window_start && request_time < window_end
+            window.cover?(request_time)
           end
 
           recovery_probe_failures = @recovery_probe_failures[config.name].count do |failure|
-            failure.time > recovery_window_start && failure.time < window_end
+            recovery_window.cover?(failure.time)
           end
           recovery_probe_successes = @recovery_probe_successes[config.name].count do |request_time|
-            request_time > recovery_window_start && request_time < window_end
+            recovery_window.cover?(request_time)
           end
 
           @metadata[light_name].with(

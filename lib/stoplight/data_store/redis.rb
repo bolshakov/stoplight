@@ -41,7 +41,7 @@ module Stoplight
         # @api private
         def buckets_for_window(light_name, metric:, window_end:, window_size:)
           window_end_ts = window_end.to_i
-          window_start_ts = window_end_ts - window_size.to_i
+          window_start_ts = window_end_ts - [window_size, Base::METRICS_RETENTION_TIME].min.to_i
 
           # Find bucket timestamps that contain any part of the window
           start_bucket = (window_start_ts / BUCKET_SIZE) * BUCKET_SIZE
@@ -257,7 +257,7 @@ module Stoplight
       def get_metadata(config)
         window_end = Time.now
         window_end_ts = window_end.to_i
-        window_start_ts = window_end_ts - config.window_size.to_i
+        window_start_ts = window_end_ts - [config.window_size, Base::METRICS_RETENTION_TIME].min.to_i
         recovery_window_start_ts = window_end_ts - config.cool_off_time.to_i
 
         failure_keys = failure_bucket_keys(config, window_end: window_end_ts)
@@ -514,8 +514,8 @@ module Stoplight
         self.class.buckets_for_window(
           config.name,
           metric: "failure",
-          window_end: window_end.to_i,
-          window_size: config.window_size.to_i
+          window_end: window_end,
+          window_size: config.window_size
         )
       end
 
@@ -523,8 +523,8 @@ module Stoplight
         self.class.buckets_for_window(
           config.name,
           metric: "success",
-          window_end: window_end.to_i,
-          window_size: config.window_size.to_i
+          window_end: window_end,
+          window_size: config.window_size
         )
       end
 
@@ -532,8 +532,8 @@ module Stoplight
         self.class.buckets_for_window(
           config.name,
           metric: "recovery_probe_failure",
-          window_end: window_end.to_i,
-          window_size: config.cool_off_time.to_i
+          window_end: window_end,
+          window_size: config.cool_off_time
         )
       end
 
@@ -541,25 +541,25 @@ module Stoplight
         self.class.buckets_for_window(
           config.name,
           metric: "recovery_probe_success",
-          window_end: window_end.to_i,
-          window_size: config.cool_off_time.to_i
+          window_end: window_end,
+          window_size: config.cool_off_time
         )
       end
 
       private def successes_key(config, time:)
-        self.class.bucket_key(config.name, metric: "success", time: time.to_i)
+        self.class.bucket_key(config.name, metric: "success", time:)
       end
 
       private def failures_key(config, time:)
-        self.class.bucket_key(config.name, metric: "failure", time: time.to_i)
+        self.class.bucket_key(config.name, metric: "failure", time:)
       end
 
       private def recovery_probe_successes_key(config, time:)
-        self.class.bucket_key(config.name, metric: "recovery_probe_success", time: time.to_i)
+        self.class.bucket_key(config.name, metric: "recovery_probe_success", time:)
       end
 
       private def recovery_probe_failures_key(config, time:)
-        self.class.bucket_key(config.name, metric: "recovery_probe_failure", time: time.to_i)
+        self.class.bucket_key(config.name, metric: "recovery_probe_failure", time:)
       end
 
       private def metadata_key(config)

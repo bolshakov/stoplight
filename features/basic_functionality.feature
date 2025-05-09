@@ -22,11 +22,14 @@ Feature: Stoplight Basic Functionality
 
   Scenario: Light count all failures regardless of time
     Given the protected service starts failing with "connection-timeout"
-    When I make 2 requests to the service
+    When I make a request to the service
     Then the light color is green
-    When 10 minutes elapsed
+    When 10 days elapsed
     And I make a request to the service
     Then the light color is green
+    When 10 days elapsed
+    And I make a request to the service
+    Then the light color is red
 
   Scenario: Light allows one test probe (unsuccessful) in the red state
     Given the protected service starts failing with "connection-timeout"

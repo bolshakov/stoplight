@@ -4,6 +4,8 @@ module Stoplight
   module DataStore
     # @abstract
     class Base
+      METRICS_RETENTION_TIME = 60 * 60 * 24 # 1 day
+
       # Retrieves the names of all lights stored in the data store.
       #
       # @return [Array<String>] An array of light names.
