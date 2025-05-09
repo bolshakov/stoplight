@@ -32,7 +32,7 @@ module Stoplight
       SystemStackError
     ].freeze
 
-    EVALUATION_STRATEGY = EvaluationStrategy.new
+    TRAFFIC_CONTROL = TrafficControl::ConsecutiveFailures.new
     RECOVERY_STRATEGY = RecoveryStrategy.new
   end
 end

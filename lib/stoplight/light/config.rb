@@ -41,9 +41,9 @@ module Stoplight
       #  @return [Array<Exception>]
       attr_reader :skipped_errors
 
-      # @!attribute [r] evaluation_strategy
-      #  @return [Stoplight::EvaluationStrategy]
-      attr_reader :evaluation_strategy
+      # @!attribute [r] traffic_control
+      #  @return [Stoplight::TrafficControl::Base]
+      attr_reader :traffic_control
 
       # @!attribute [r] recovery_strategy
       #   @return [Stoplight::RecoveryStrategy]
@@ -58,10 +58,10 @@ module Stoplight
       # @param window_size [Numeric]
       # @param tracked_errors [Array<StandardError>]
       # @param skipped_errors [Array<Exception>]
-      # @param evaluation_strategy [Stoplight::EvaluationStrategy]
+      # @param traffic_control [Stoplight::TrafficControl::Base]
       # @param recovery_strategy [Stoplight::RecoveryStrategy]
       def initialize(name: nil, cool_off_time: nil, data_store: nil, error_notifier: nil, notifiers: nil, threshold: nil, window_size: nil,
-        tracked_errors: nil, skipped_errors: nil, evaluation_strategy: nil, recovery_strategy: nil)
+        tracked_errors: nil, skipped_errors: nil, traffic_control: nil, recovery_strategy: nil)
         @name = name
         @cool_off_time = cool_off_time.to_i
         @data_store = DataStore::FailSafe.wrap(data_store)
@@ -71,7 +71,7 @@ module Stoplight
         @window_size = window_size
         @tracked_errors = Array(tracked_errors)
         @skipped_errors = Set[*skipped_errors, *Stoplight::Default::SKIPPED_ERRORS].to_a
-        @evaluation_strategy = evaluation_strategy
+        @traffic_control = traffic_control
         @recovery_strategy = recovery_strategy
       end
 
@@ -129,7 +129,7 @@ module Stoplight
           window_size:,
           tracked_errors:,
           skipped_errors:,
-          evaluation_strategy:,
+          traffic_control:,
           recovery_strategy:
         }
       end

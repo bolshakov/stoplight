@@ -2,8 +2,8 @@
 
 require "spec_helper"
 
-RSpec.describe Stoplight::EvaluationStrategy do
-  subject { described_class.new.evaluate(config, metadata) }
+RSpec.describe Stoplight::TrafficControl::ConsecutiveFailures do
+  subject { described_class.new.stop_traffic?(config, metadata) }
 
   let(:config) { instance_double(Stoplight::Light::Config, threshold:, window_size:) }
   let(:metadata) { instance_double(Stoplight::Metadata, consecutive_failures:, failures:) }

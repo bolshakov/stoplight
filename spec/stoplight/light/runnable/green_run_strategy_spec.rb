@@ -9,12 +9,12 @@ RSpec.describe Stoplight::Light::Runnable::GreenRunStrategy do
     Stoplight.config_provider.provide(
       "foo",
       data_store:,
-      evaluation_strategy:,
+      traffic_control:,
       notifiers: [notifier]
     )
   end
   let(:notifier) { instance_double(Stoplight::Notifier::Base) }
-  let(:evaluation_strategy) { instance_double(Stoplight::EvaluationStrategy) }
+  let(:traffic_control) { instance_double(Stoplight::TrafficControl::Base) }
 
   shared_examples Stoplight::Light::Runnable::GreenRunStrategy do
     context "when code executes successfully" do
@@ -46,7 +46,7 @@ RSpec.describe Stoplight::Light::Runnable::GreenRunStrategy do
 
           context "when threshold is breached" do
             before do
-              expect(evaluation_strategy).to receive(:evaluate).with(config, metadata).and_return(true)
+              expect(traffic_control).to receive(:stop_traffic?).with(config, metadata).and_return(true)
             end
 
             context "when transitions to red" do
@@ -86,7 +86,7 @@ RSpec.describe Stoplight::Light::Runnable::GreenRunStrategy do
 
           context "when threshold is not breached" do
             before do
-              expect(evaluation_strategy).to receive(:evaluate).with(config, metadata).and_return(false)
+              expect(traffic_control).to receive(:stop_traffic?).with(config, metadata).and_return(false)
             end
 
             it "records failure and raises the error without a notification" do
@@ -111,7 +111,7 @@ RSpec.describe Stoplight::Light::Runnable::GreenRunStrategy do
           end
 
           before do
-            expect(evaluation_strategy).to receive(:evaluate).with(config, metadata).and_return(true)
+            expect(traffic_control).to receive(:stop_traffic?).with(config, metadata).and_return(true)
             expect(data_store).to receive(:transition_to_color).with(config, Stoplight::Color::RED).and_return(true)
           end
 
