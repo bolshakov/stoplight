@@ -49,7 +49,7 @@ module Stoplight
         end
 
         private def recover(metadata)
-          recovery_result = config.recovery_strategy.evaluate(config, metadata)
+          recovery_result = config.traffic_recovery.determine_color(config, metadata)
 
           case recovery_result
           when Color::GREEN

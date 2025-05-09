@@ -2,8 +2,8 @@
 
 require "spec_helper"
 
-RSpec.describe Stoplight::RecoveryStrategy do
-  subject(:evaluate) { described_class.new.evaluate(nil, metadata) }
+RSpec.describe Stoplight::TrafficRecovery::SingleSuccess do
+  subject(:determine_color) { described_class.new.determine_color(nil, metadata) }
 
   let(:metadata) do
     instance_double(Stoplight::Metadata,

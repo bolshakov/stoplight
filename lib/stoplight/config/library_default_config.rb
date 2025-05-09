@@ -15,7 +15,7 @@ module Stoplight
         tracked_errors: Stoplight::Default::TRACKED_ERRORS,
         skipped_errors: Stoplight::Default::SKIPPED_ERRORS,
         traffic_control: Stoplight::Default::TRAFFIC_CONTROL,
-        recovery_strategy: Stoplight::Default::RECOVERY_STRATEGY
+        traffic_recovery: Stoplight::Default::TRAFFIC_RECOVERY
       }.freeze
       private_constant :DEFAULT_SETTINGS
 

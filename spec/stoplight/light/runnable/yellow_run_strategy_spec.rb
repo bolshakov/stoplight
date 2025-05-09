@@ -8,17 +8,17 @@ RSpec.describe Stoplight::Light::Runnable::YellowRunStrategy do
   let(:config) do
     Stoplight.config_provider.provide("foo",
       data_store:,
-      recovery_strategy:,
+      traffic_recovery:,
       notifiers: [notifier])
   end
   let(:notifier) { instance_double(Stoplight::Notifier::Base) }
-  let(:recovery_strategy) { instance_double(Stoplight::RecoveryStrategy) }
+  let(:traffic_recovery) { instance_double(Stoplight::TrafficRecovery::Base) }
   let(:metadata) { instance_double(Stoplight::Metadata) }
 
   shared_examples Stoplight::Light::Runnable::YellowRunStrategy do
     shared_examples "recovery success" do
       before do
-        expect(recovery_strategy).to receive(:evaluate).with(config, metadata).and_return(recovery_result)
+        expect(traffic_recovery).to receive(:determine_color).with(config, metadata).and_return(recovery_result)
       end
 
       context "when recovery strategy returns GREEN" do
@@ -113,7 +113,7 @@ RSpec.describe Stoplight::Light::Runnable::YellowRunStrategy do
       it_behaves_like "recovery success"
 
       it "returns the result" do
-        expect(recovery_strategy).to receive(:evaluate).and_return(Stoplight::Color::YELLOW)
+        expect(traffic_recovery).to receive(:determine_color).and_return(Stoplight::Color::YELLOW)
         expect(result).to eq("Success")
       end
     end
@@ -133,7 +133,7 @@ RSpec.describe Stoplight::Light::Runnable::YellowRunStrategy do
           let(:fallback) { nil }
 
           before do
-            expect(recovery_strategy).to receive(:evaluate).with(config, metadata).and_return(recovery_result)
+            expect(traffic_recovery).to receive(:determine_color).with(config, metadata).and_return(recovery_result)
           end
 
           context "when recovery strategy returns GREEN" do
@@ -237,7 +237,7 @@ RSpec.describe Stoplight::Light::Runnable::YellowRunStrategy do
           }
 
           it "records a failed recovery probe and returns fallback" do
-            expect(recovery_strategy).to receive(:evaluate).with(config, metadata).and_return(Stoplight::Color::YELLOW)
+            expect(traffic_recovery).to receive(:determine_color).with(config, metadata).and_return(Stoplight::Color::YELLOW)
 
             Timecop.freeze do
               failure = Stoplight::Failure.from_error(error)
@@ -260,7 +260,7 @@ RSpec.describe Stoplight::Light::Runnable::YellowRunStrategy do
         it_behaves_like "recovery success"
 
         it "raises the error and record recovery success" do
-          expect(recovery_strategy).to receive(:evaluate).and_return(Stoplight::Color::YELLOW)
+          expect(traffic_recovery).to receive(:determine_color).and_return(Stoplight::Color::YELLOW)
 
           expect { result }.to raise_error(error)
         end

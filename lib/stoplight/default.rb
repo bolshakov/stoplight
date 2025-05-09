@@ -33,6 +33,6 @@ module Stoplight
     ].freeze
 
     TRAFFIC_CONTROL = TrafficControl::ConsecutiveFailures.new
-    RECOVERY_STRATEGY = RecoveryStrategy.new
+    TRAFFIC_RECOVERY = TrafficRecovery::SingleSuccess.new
   end
 end
