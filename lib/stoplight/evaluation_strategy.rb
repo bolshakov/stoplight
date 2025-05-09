@@ -6,10 +6,10 @@ module Stoplight
     # @param metadata [Stoplight::Metadata]
     # @return [Boolean]
     def evaluate(config, metadata)
-      if config.window_size == Float::INFINITY
-        metadata.consecutive_failures >= config.threshold
-      else
+      if config.window_size
         [metadata.consecutive_failures, metadata.failures].min >= config.threshold
+      else
+        metadata.consecutive_failures >= config.threshold
       end
     end
   end

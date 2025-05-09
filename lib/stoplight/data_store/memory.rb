@@ -31,7 +31,7 @@ module Stoplight
       def get_metadata(config)
         light_name = config.name
         window_end = Time.now
-        window = (config.threshold == Float::INFINITY) ? (..window_end) : ((window_end - config.threshold + 1)..window_end)
+        window = config.threshold ? ((window_end - config.threshold + 1)..window_end) : (..window_end)
         recovery_window = (window_end - config.cool_off_time + 1)..window_end
 
         synchronize do

@@ -20,7 +20,7 @@ module Stoplight
 
     THRESHOLD = 3
 
-    WINDOW_SIZE = Float::INFINITY
+    WINDOW_SIZE = nil
 
     TRACKED_ERRORS = [StandardError].freeze
     SKIPPED_ERRORS = [

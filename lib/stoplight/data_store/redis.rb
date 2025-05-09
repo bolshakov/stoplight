@@ -41,7 +41,7 @@ module Stoplight
         # @api private
         def buckets_for_window(light_name, metric:, window_end:, window_size:)
           window_end_ts = window_end.to_i
-          window_start_ts = window_end_ts - [window_size, Base::METRICS_RETENTION_TIME].min.to_i
+          window_start_ts = window_end_ts - [window_size, Base::METRICS_RETENTION_TIME].compact.min.to_i
 
           # Find bucket timestamps that contain any part of the window
           start_bucket = (window_start_ts / BUCKET_SIZE) * BUCKET_SIZE
@@ -257,7 +257,7 @@ module Stoplight
       def get_metadata(config)
         window_end = Time.now
         window_end_ts = window_end.to_i
-        window_start_ts = window_end_ts - [config.window_size, Base::METRICS_RETENTION_TIME].min.to_i
+        window_start_ts = window_end_ts - (config.window_size || [config.window_size, Base::METRICS_RETENTION_TIME].compact.min.to_i)
         recovery_window_start_ts = window_end_ts - config.cool_off_time.to_i
 
         failure_keys = failure_bucket_keys(config, window_end: window_end_ts)

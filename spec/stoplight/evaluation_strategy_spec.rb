@@ -8,8 +8,8 @@ RSpec.describe Stoplight::EvaluationStrategy do
   let(:config) { instance_double(Stoplight::Light::Config, threshold:, window_size:) }
   let(:metadata) { instance_double(Stoplight::Metadata, consecutive_failures:, failures:) }
 
-  context "when the window size is infinite" do
-    let(:window_size) { Float::INFINITY }
+  context "when the window size is not sent" do
+    let(:window_size) { nil }
 
     context "when the number of consecutive failures is greater than the threshold" do
       let(:consecutive_failures) { 3 }
@@ -36,7 +36,7 @@ RSpec.describe Stoplight::EvaluationStrategy do
     end
   end
 
-  context "when the window size is finite" do
+  context "when the window size is set" do
     let(:window_size) { 600 }
 
     context "when the number of consecutive failures is greater than the threshold" do
