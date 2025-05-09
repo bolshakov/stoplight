@@ -51,8 +51,6 @@ module Stoplight
           end
 
           @metadata[light_name].with(
-            window_end:,
-            window_size: config.window_size,
             failures:,
             successes:,
             recovery_probe_failures:,

@@ -3,8 +3,6 @@
 module Stoplight
   # @api private
   Metadata = Data.define(
-    :window_end,
-    :window_size,
     :successes,
     :failures,
     :recovery_probe_successes,
@@ -22,8 +20,6 @@ module Stoplight
     class << self
       def empty
         new(
-          window_end: nil,
-          window_size: nil,
           successes: 0,
           failures: 0,
           recovery_probe_successes: 0,
@@ -41,8 +37,6 @@ module Stoplight
       end
     end
     def initialize(
-      window_end:,
-      window_size:,
       successes:,
       failures:,
       recovery_probe_successes:,
@@ -58,7 +52,6 @@ module Stoplight
       recovery_scheduled_after: nil
     )
       super(
-        window_end:, window_size:,
         recovery_probe_successes: Integer(recovery_probe_successes),
         recovery_probe_failures: Integer(recovery_probe_failures),
         successes: Integer(successes),

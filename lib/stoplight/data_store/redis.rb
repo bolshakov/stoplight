@@ -289,8 +289,6 @@ module Stoplight
         last_failure = normalize_failure(last_failure_json, config.error_notifier) if last_failure_json
 
         Metadata.new(
-          window_end:,
-          window_size: config.window_size,
           successes: successes,
           failures: failures,
           recovery_probe_successes: recovery_probe_successes,
