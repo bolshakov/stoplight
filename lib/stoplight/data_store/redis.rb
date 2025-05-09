@@ -111,8 +111,10 @@ module Stoplight
         local failures_key = KEYS[2]
 
         -- Record failure
-        redis.call('ZADD', failures_key, failure_ts, failure_id)
-        redis.call('EXPIRE', failures_key, bucket_ttl, "NX")
+        if failures_key ~= nil then
+          redis.call('ZADD', failures_key, failure_ts, failure_id)
+          redis.call('EXPIRE', failures_key, bucket_ttl, "NX")
+        end
         
         -- Record metadata (last failure and consecutive failures)
         local meta = redis.call(
@@ -152,8 +154,10 @@ module Stoplight
         local successes_key = KEYS[2]
 
         -- Record success
-        redis.call('ZADD', successes_key, request_ts, request_id)
-        redis.call('EXPIRE', successes_key, bucket_ttl, "NX")
+        if successes_key ~= nil then
+          redis.call('ZADD', successes_key, request_ts, request_id)
+          redis.call('EXPIRE', successes_key, bucket_ttl, "NX")
+        end
         
         -- Record metadata
         local meta = redis.call(
@@ -311,8 +315,8 @@ module Stoplight
             argv: [current_ts, SecureRandom.uuid, failure_json],
             keys: [
               metadata_key(config),
-              failures_key(config, time: current_ts)
-            ]
+              config.window_size && failures_key(config, time: current_ts)
+            ].compact
           )
         end
         get_metadata(config)
@@ -327,8 +331,8 @@ module Stoplight
             argv: [request_ts, request_id],
             keys: [
               metadata_key(config),
-              successes_key(config, time: request_ts)
-            ]
+              config.window_size && successes_key(config, time: request_ts)
+            ].compact
           )
         end
       end
@@ -348,8 +352,8 @@ module Stoplight
             argv: [current_ts, SecureRandom.uuid, failure_json],
             keys: [
               metadata_key(config),
-              recovery_probe_failures_key(config, time: current_ts)
-            ]
+              config.window_size && recovery_probe_failures_key(config, time: current_ts)
+            ].compact
           )
         end
         get_metadata(config)
@@ -370,8 +374,8 @@ module Stoplight
             argv: [request_ts, request_id],
             keys: [
               metadata_key(config),
-              recovery_probe_successes_key(config, time: request_ts)
-            ]
+              config.window_size && recovery_probe_successes_key(config, time: request_ts)
+            ].compact
           )
         end
         get_metadata(config)

@@ -20,10 +20,10 @@ module Stoplight
     class << self
       def empty
         new(
-          successes: 0,
-          failures: 0,
-          recovery_probe_successes: 0,
-          recovery_probe_failures: 0,
+          successes: nil,
+          failures: nil,
+          recovery_probe_successes: nil,
+          recovery_probe_failures: nil,
           last_failure_at: nil,
           last_success_at: nil,
           consecutive_failures: 0,
@@ -52,10 +52,10 @@ module Stoplight
       recovery_scheduled_after: nil
     )
       super(
-        recovery_probe_successes: Integer(recovery_probe_successes),
-        recovery_probe_failures: Integer(recovery_probe_failures),
-        successes: Integer(successes),
-        failures: Integer(failures),
+        recovery_probe_successes:,
+        recovery_probe_failures:,
+        successes:,
+        failures:,
         last_failure_at: (Time.at(Integer(last_failure_at)) if last_failure_at),
         last_success_at: (Time.at(Integer(last_success_at)) if last_success_at),
         consecutive_failures: Integer(consecutive_failures),

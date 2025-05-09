@@ -67,7 +67,7 @@ module Stoplight
 
         synchronize do
           # Keep at most +config.threshold+ number of errors
-          @failures[light_name].unshift(failure)
+          @failures[light_name].unshift(failure) if config.window_size
 
           metadata = @metadata[light_name]
           @metadata[light_name] = if metadata.last_failure_at.nil? || failure.time > metadata.last_failure_at
@@ -95,7 +95,7 @@ module Stoplight
         light_name = config.name
 
         synchronize do
-          @successes[light_name].unshift(request_time)
+          @successes[light_name].unshift(request_time) if config.window_size
           metadata = @metadata[light_name]
 
           @metadata[light_name] = if metadata.last_success_at.nil? || request_time > metadata.last_success_at
@@ -121,7 +121,7 @@ module Stoplight
 
         synchronize do
           # Keep at most +config.threshold+ number of errors
-          @recovery_probe_failures[light_name].unshift(failure)
+          @recovery_probe_failures[light_name].unshift(failure) if config.window_size
 
           metadata = @metadata[light_name]
           @metadata[light_name] = if metadata.last_failure_at.nil? || failure.time > metadata.last_failure_at
@@ -149,7 +149,7 @@ module Stoplight
         light_name = config.name
 
         synchronize do
-          @recovery_probe_successes[light_name].unshift(request_time)
+          @recovery_probe_successes[light_name].unshift(request_time) if config.window_size
           metadata = @metadata[light_name]
           recovery_started_at = metadata.recovery_started_at || request_time
 
