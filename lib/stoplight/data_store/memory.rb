@@ -41,7 +41,7 @@ module Stoplight
           @failures[light_name].unshift(failure)
           # Remove all errors happened before the window start
           @failures[light_name] = query_failures(config, failure.time)
-          @failures[light_name].size
+          [0, @failures[light_name].size]
         end
       end
 

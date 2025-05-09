@@ -23,7 +23,7 @@ module Stoplight
 
       # @param _config [Stoplight::Light::Config]
       # @param _failure [Failure]
-      # @return [Fixnum]
+      # @return [(Numeric, Numeric)] number of success and failures withing the window
       def record_failure(_config, _failure)
         raise NotImplementedError
       end
