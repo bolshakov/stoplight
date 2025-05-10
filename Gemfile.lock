@@ -74,6 +74,7 @@ GEM
     racc (1.8.1)
     rainbow (3.1.1)
     rake (13.2.1)
+    rantly (3.0.0)
     rdoc (6.13.1)
       psych (>= 4.0.0)
     redis (5.4.0)
@@ -155,6 +156,7 @@ DEPENDENCIES
   database_cleaner-redis (~> 2.0)
   debug
   rake (~> 13.2)
+  rantly
   redis (~> 5.4)
   rspec (~> 3.13)
   ruby-prof

@@ -35,16 +35,16 @@ RSpec.describe Stoplight::Light::Config do
     context "when set to a float number" do
       let(:cool_off_time) { 66.4 }
 
-      it "returns the correct value" do
-        is_expected.to eq(cool_off_time)
+      it "returns the integer value" do
+        is_expected.to eq(66)
       end
     end
 
     context "when set to an integer number" do
       let(:cool_off_time) { 66 }
 
-      it "returns the correct value casted to Float" do
-        is_expected.to eq(66.0)
+      it "returns the value" do
+        is_expected.to eq(66)
       end
     end
   end

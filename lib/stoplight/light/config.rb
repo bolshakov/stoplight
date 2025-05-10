@@ -41,6 +41,14 @@ module Stoplight
       #  @return [Array<Exception>]
       attr_reader :skipped_errors
 
+      # @!attribute [r] traffic_control
+      #  @return [Stoplight::TrafficControl::Base]
+      attr_reader :traffic_control
+
+      # @!attribute [r] traffic_recovery
+      #   @return [Stoplight::TrafficRecovery::Base]
+      attr_reader :traffic_recovery
+
       # @param name [String]
       # @param cool_off_time [Numeric]
       # @param data_store [Stoplight::DataStore::Base]
@@ -50,10 +58,12 @@ module Stoplight
       # @param window_size [Numeric]
       # @param tracked_errors [Array<StandardError>]
       # @param skipped_errors [Array<Exception>]
+      # @param traffic_control [Stoplight::TrafficControl::Base]
+      # @param traffic_recovery [Stoplight::TrafficRecovery::Base]
       def initialize(name: nil, cool_off_time: nil, data_store: nil, error_notifier: nil, notifiers: nil, threshold: nil, window_size: nil,
-        tracked_errors: nil, skipped_errors: nil)
+        tracked_errors: nil, skipped_errors: nil, traffic_control: nil, traffic_recovery: nil)
         @name = name
-        @cool_off_time = cool_off_time
+        @cool_off_time = cool_off_time.to_i
         @data_store = DataStore::FailSafe.wrap(data_store)
         @error_notifier = error_notifier
         @notifiers = notifiers.map { |notifier| Notifier::FailSafe.wrap(notifier) }
@@ -61,6 +71,8 @@ module Stoplight
         @window_size = window_size
         @tracked_errors = Array(tracked_errors)
         @skipped_errors = Set[*skipped_errors, *Stoplight::Default::SKIPPED_ERRORS].to_a
+        @traffic_control = traffic_control
+        @traffic_recovery = traffic_recovery
       end
 
       # @param other [any]
@@ -97,6 +109,14 @@ module Stoplight
         self.class.new(**to_h.merge(settings))
       end
 
+      THRESHOLD_STRATEGY = proc do |config, metadata|
+        metadata.consecutive_failures >= config.threshold && metadata.failures >= config.threshold
+      end
+      private_constant :THRESHOLD_STRATEGY
+      def threshold_strategy
+        THRESHOLD_STRATEGY.curry.call(self)
+      end
+
       # @return [Hash]
       def to_h
         {
@@ -108,7 +128,9 @@ module Stoplight
           threshold:,
           window_size:,
           tracked_errors:,
-          skipped_errors:
+          skipped_errors:,
+          traffic_control:,
+          traffic_recovery:
         }
       end
     end
