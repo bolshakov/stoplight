@@ -68,7 +68,6 @@ module Stoplight
       KEY_SEPARATOR = ":"
       KEY_PREFIX = %w[stoplight v5].join(KEY_SEPARATOR)
 
-
       # @param redis [::Redis, ConnectionPool<::Redis>]
       def initialize(redis)
         @redis = redis
@@ -103,8 +102,13 @@ module Stoplight
         window_start_ts = window_end_ts - (config.window_size || [config.window_size, Base::METRICS_RETENTION_TIME].compact.min.to_i)
         recovery_window_start_ts = window_end_ts - config.cool_off_time.to_i
 
-        failure_keys = failure_bucket_keys(config, window_end: window_end_ts)
-        success_keys = success_bucket_keys(config, window_end: window_end_ts)
+        if config.window_size
+          failure_keys = failure_bucket_keys(config, window_end: window_end_ts)
+          success_keys = success_bucket_keys(config, window_end: window_end_ts)
+        else
+          failure_keys = []
+          success_keys = []
+        end
         recovery_probe_failure_keys = recovery_probe_failure_bucket_keys(config, window_end: window_end_ts)
         recovery_probe_success_keys = recovery_probe_success_bucket_keys(config, window_end: window_end_ts)
 
