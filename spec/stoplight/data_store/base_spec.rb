@@ -24,7 +24,7 @@ RSpec.describe Stoplight::DataStore::Base do
 
   describe "#record_success" do
     it "is not implemented" do
-      expect { data_store.record_success(nil, request_time: nil, request_id: nil) }
+      expect { data_store.record_success(nil) }
         .to raise_error(NotImplementedError)
     end
   end
@@ -38,7 +38,7 @@ RSpec.describe Stoplight::DataStore::Base do
 
   describe "#record_recovery_probe_success" do
     it "is not implemented" do
-      expect { data_store.record_recovery_probe_success(nil, request_time: nil, request_id: nil) }
+      expect { data_store.record_recovery_probe_success(nil) }
         .to raise_error(NotImplementedError)
     end
   end

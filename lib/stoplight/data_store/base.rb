@@ -23,7 +23,7 @@ module Stoplight
 
       # Records a failure for a specific light configuration.
       #
-      # @param config [Stoplight::Light::Config] The light configuration.
+      # @param config [Stoplight::Light::Config]
       # @param failure [Failure] The failure to record.
       # @return [Stoplight::Metadata] The metadata associated with the light.
       def record_failure(config, failure)
@@ -32,18 +32,16 @@ module Stoplight
 
       # Records a success for a specific light configuration.
       #
-      # @param config [Stoplight::Light::Config] The light configuration.
-      # @param request_id [String] The unique identifier for the request
-      # @param request_time [Time] The time of the request
+      # @param config [Stoplight::Light::Config]
       # @return [void]
-      def record_success(config, request_id:, request_time:)
+      def record_success(config)
         raise NotImplementedError
       end
 
       # Records a failed recovery probe for a specific light configuration.
       #
-      # @param config [Stoplight::Light::Config] The light configuration.
-      # @param failure [Failure] The failure to record.
+      # @param config [Stoplight::Light::Config]
+      # @param failure [Failure]
       # @return [Stoplight::Metadata]
       def record_recovery_probe_failure(config, failure)
         raise NotImplementedError
@@ -51,25 +49,23 @@ module Stoplight
 
       # Records a successful recovery probe for a specific light configuration.
       #
-      # @param config [Stoplight::Light::Config] The light configuration.
-      # @param request_id [String] The unique identifier for the request
-      # @param request_time [Time] The time of the request
+      # @param config [Stoplight::Light::Config]
       # @return [Stoplight::Metadata]
-      def record_recovery_probe_success(config, request_id:, request_time:)
+      def record_recovery_probe_success(config)
         raise NotImplementedError
       end
 
       # Retrieves the state of a specific light configuration.
       #
-      # @param config [Stoplight::Light::Config] The light configuration.
-      # @return [String] The current state of the light.
+      # @param config [Stoplight::Light::Config]
+      # @return [String]
       def get_state(config)
         raise NotImplementedError
       end
 
       # Sets the state of a specific light configuration.
       #
-      # @param config [Stoplight::Light::Config] The light configuration.
+      # @param config [Stoplight::Light::Config]
       # @param state [String] The new state to set.
       # @return [String] The state that was set.
       def set_state(config, state)
@@ -78,7 +74,7 @@ module Stoplight
 
       # Clears the state of a specific light configuration.
       #
-      # @param config [Stoplight::Light::Config] The light configuration.
+      # @param config [Stoplight::Light::Config]
       # @return [String] The cleared state.
       def clear_state(config)
         raise NotImplementedError

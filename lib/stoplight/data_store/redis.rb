@@ -68,183 +68,22 @@ module Stoplight
       KEY_SEPARATOR = ":"
       KEY_PREFIX = %w[stoplight v5].join(KEY_SEPARATOR)
 
-      # This Lua script implements a notification deduplication mechanism:
-      # 1. It checks if the current color transition (from_color → to_color) matches the previously recorded one
-      # 2. If it's the same transition, returns 0 (don't notify) to prevent duplicate notifications
-      # 3. If it's a different transition (or first time), it:
-      #    - Records the new transition with a timestamp
-      #    - Sets an expiration time on the record (allowing notifications to repeat after TTL as a fail-safe mechanism)
-      #    - Returns 1 (proceed with notification)
-      #
-      # This ensures that when multiple servers detect the same transition simultaneously,
-      # only one notification is sent, while still allowing future transitions to trigger notifications.
-      #
-      # This script is executed on redis and it's guaranteed that the operations are atomic.
-      NOTIFICATION_DEDUPLICATION_SCRIPT = <<~LUA
-        local last_notification_key = KEYS[1]
-
-        local light_name = ARGV[1]
-        local from_color = ARGV[2]
-        local to_color = ARGV[3]
-        local ttl = tonumber(ARGV[4])
-
-        local prev_transition = redis.call('HMGET', last_notification_key, 'from_color', 'to_color')
-        local prev_from_color, prev_to_color = unpack(prev_transition)
-
-        if prev_from_color == from_color and prev_to_color == to_color then
-          return 0
-        else
-          redis.call('HSET', last_notification_key, 'from_color', from_color, 'to_color', to_color)
-          redis.call('EXPIRE', last_notification_key, ttl)
-          return 1
-        end
-      LUA
-      private_constant :NOTIFICATION_DEDUPLICATION_SCRIPT
-
-      RECORD_FAILURE_SCRIPT = <<~LUA
-        local failure_ts = tonumber(ARGV[1])
-        local failure_id = ARGV[2]
-        local failure_json = ARGV[3]
-        local bucket_ttl = 86400
-
-        local metadata_key = KEYS[1]
-        local failures_key = KEYS[2]
-
-        -- Record failure
-        if failures_key ~= nil then
-          redis.call('ZADD', failures_key, failure_ts, failure_id)
-          redis.call('EXPIRE', failures_key, bucket_ttl, "NX")
-        end
-        
-        -- Record metadata (last failure and consecutive failures)
-        local meta = redis.call(
-          'HMGET', metadata_key, 
-          'last_failure_at', 'consecutive_failures'
-        )
-        local prev_failure_ts = tonumber(meta[1])
-        local prev_consecutive_failures = tonumber(meta[2])
-        
-        -- Update failure metadata
-        --   TODO: Maybe it worth resetting consecutive failures streak if prev_failure_ts happened long time ago
-        --     e.g. local max_failure_age = math.max(window_size * 3, 3600)
-        if not prev_failure_ts or failure_ts > prev_failure_ts then
-          redis.call(
-            'HSET', metadata_key, 
-            'last_failure_at', failure_ts,
-            'last_failure_json', failure_json,
-            'consecutive_failures', (prev_consecutive_failures or 0) + 1,
-            'consecutive_successes', 0
-          )
-        else
-          redis.call(
-            'HSET', metadata_key, 
-            'consecutive_failures', (prev_consecutive_failures or 0) + 1,
-            'consecutive_successes', 0
-          )
-        end
-      LUA
-      private_constant :RECORD_FAILURE_SCRIPT
-
-      RECORD_SUCCESS_SCRIPT = <<~LUA
-        local request_ts = tonumber(ARGV[1])
-        local request_id = ARGV[2]
-        local bucket_ttl = 86400
-
-        local metadata_key = KEYS[1]
-        local successes_key = KEYS[2]
-
-        -- Record success
-        if successes_key ~= nil then
-          redis.call('ZADD', successes_key, request_ts, request_id)
-          redis.call('EXPIRE', successes_key, bucket_ttl, "NX")
-        end
-        
-        -- Record metadata
-        local meta = redis.call(
-          'HMGET', metadata_key, 
-          'last_success_at', 'consecutive_successes'
-        )
-        local prev_success_ts = tonumber(meta[1])
-        local prev_consecutive_successes = tonumber(meta[2])
-        
-        -- Update metadata
-        if not prev_success_ts or request_ts > prev_success_ts then
-          redis.call(
-            'HSET', metadata_key, 
-            'last_success_at', request_ts,    
-            'consecutive_failures', 0,
-            'consecutive_successes', (prev_consecutive_successes or 0) + 1       
-          )
-        else
-          redis.call(
-            'HSET', metadata_key, 
-            'consecutive_failures', 0,
-            'consecutive_successes', (prev_consecutive_successes or 0) + 1
-          )
-        end
-      LUA
-      private_constant :RECORD_SUCCESS_SCRIPT
-
-      GET_METADATA_SCRIPT = <<~LUA
-        local number_of_metric_buckets = tonumber(ARGV[1])
-        local number_of_recovery_buckets = tonumber(ARGV[2])
-        local window_start_ts = tonumber(ARGV[3])
-        local window_end_ts = tonumber(ARGV[4])
-        local recovery_window_start_ts = tonumber(ARGV[5])
-
-        local metadata_key = KEYS[1]
-        
-        -- Read number of successes within the time window
-        local key_offset = 1 -- start from the second key (the first is metadata key)
-        local successes = 0
-        for idx = key_offset + 1, key_offset + number_of_metric_buckets do
-          local key = KEYS[idx]
-          successes = successes + tonumber(redis.call('ZCOUNT', key, window_start_ts, window_end_ts))
-        end
-     
-        -- Read number of failures within the time window
-        key_offset = key_offset + number_of_metric_buckets
-        local failures = 0
-        for idx = key_offset + 1, key_offset + number_of_metric_buckets do
-          local key = KEYS[idx]
-          failures = failures + tonumber(redis.call('ZCOUNT', key, window_start_ts, window_end_ts))
-        end
-
-        -- Read number of successful recovery probes within cooling off time
-        key_offset = key_offset + number_of_metric_buckets 
-        local recovery_probe_successes = 0
-        for idx = key_offset + 1, key_offset + number_of_recovery_buckets do
-          local key = KEYS[idx]
-          recovery_probe_successes = recovery_probe_successes + tonumber(redis.call('ZCOUNT', key, recovery_window_start_ts, window_end_ts))
-        end
-
-        -- Read number of failed recovery probes within cooling off time
-        key_offset = key_offset + number_of_recovery_buckets 
-        local recovery_probe_failures = 0
-        for idx = key_offset + 1, key_offset + number_of_recovery_buckets  do
-          local key = KEYS[idx]
-          recovery_probe_failures = recovery_probe_failures + tonumber(redis.call('ZCOUNT', key, recovery_window_start_ts, window_end_ts))
-        end
-
-        local metadata = redis.call('HGETALL',  metadata_key)
-        return {successes, failures, recovery_probe_successes, recovery_probe_failures, metadata}
-      LUA
-      private_constant :GET_METADATA_SCRIPT
 
       # @param redis [::Redis, ConnectionPool<::Redis>]
       def initialize(redis)
         @redis = redis
-        @notification_deduplication_script_sha = @redis.then do |client|
-          client.script("load", NOTIFICATION_DEDUPLICATION_SCRIPT)
-        end
-        @record_failure_script_sha = @redis.then do |client|
-          client.script("load", RECORD_FAILURE_SCRIPT)
-        end
-        @record_success_script_sha = @redis.then do |client|
-          client.script("load", RECORD_SUCCESS_SCRIPT)
-        end
-        @get_metadata_script_sha = @redis.then do |client|
-          client.script("load", GET_METADATA_SCRIPT)
+        @redis.then do |client|
+          @record_failure_sha,
+          @record_success_sha,
+          @get_metadata_sha,
+          @transition_to_yellow_sha,
+          @transition_to_red_sha = client.pipelined do |pipeline|
+            pipeline.script("load", Lua::RECORD_FAILURE)
+            pipeline.script("load", Lua::RECORD_SUCCESS)
+            pipeline.script("load", Lua::GET_METADATA)
+            pipeline.script("load", Lua::TRANSITION_TO_YELLOW)
+            pipeline.script("load", Lua::TRANSITION_TO_RED)
+          end
         end
       end
 
@@ -271,7 +110,7 @@ module Stoplight
 
         successes, failures, recovery_probe_successes, recovery_probe_failures, meta = @redis.with do |client|
           client.evalsha(
-            @get_metadata_script_sha,
+            @get_metadata_sha,
             argv: [
               failure_keys.count,
               recovery_probe_failure_keys.count,
@@ -311,7 +150,7 @@ module Stoplight
 
         @redis.then do |client|
           client.evalsha(
-            @record_failure_script_sha,
+            @record_failure_sha,
             argv: [current_ts, SecureRandom.uuid, failure_json],
             keys: [
               metadata_key(config),
@@ -327,7 +166,7 @@ module Stoplight
 
         @redis.then do |client|
           client.evalsha(
-            @record_success_script_sha,
+            @record_success_sha,
             argv: [request_ts, request_id],
             keys: [
               metadata_key(config),
@@ -348,7 +187,7 @@ module Stoplight
 
         @redis.then do |client|
           client.evalsha(
-            @record_failure_script_sha,
+            @record_failure_sha,
             argv: [current_ts, SecureRandom.uuid, failure_json],
             keys: [
               metadata_key(config),
@@ -370,7 +209,7 @@ module Stoplight
 
         @redis.then do |client|
           client.evalsha(
-            @record_success_script_sha,
+            @record_success_sha,
             argv: [request_ts, request_id],
             keys: [
               metadata_key(config),
@@ -448,20 +287,9 @@ module Stoplight
         current_ts = current_time.to_i
         meta_key = metadata_key(config)
 
-        script = <<~LUA
-          local meta_key = KEYS[1]
-          local current_ts = tonumber(ARGV[1])
-          local became_yellow = redis.call('HSETNX', meta_key, 'recovery_started_at', current_ts)
-          if became_yellow == 1 then
-            redis.call('HDEL', meta_key, 'recovery_scheduled_after', 'last_breach_at')
-          end
-          return became_yellow
-        LUA
-
-        # HSETNX returns 1 if field is new and was set, 0 if field already exists
         became_yellow = @redis.then do |client|
-          client.eval(
-            script,
+          client.evalsha(
+            @transition_to_yellow_sha,
             argv: [current_ts],
             keys: [meta_key]
           )
@@ -479,22 +307,9 @@ module Stoplight
         meta_key = metadata_key(config)
         recovery_scheduled_after_ts = current_ts + config.cool_off_time
 
-        script = <<~LUA
-          local meta_key = KEYS[1]
-          local current_ts = tonumber(ARGV[1])
-          local recovery_scheduled_after_ts = tonumber(ARGV[2])
-
-          local became_red = redis.call('HSETNX', meta_key, 'last_breach_at', current_ts)
-          if became_red == 1 then
-            redis.call('HSET', meta_key, 'recovery_scheduled_after', recovery_scheduled_after_ts)
-            redis.call("HDEL", meta_key, "recovery_started_at")
-          end
-          return became_red
-        LUA
-
         became_red = @redis.then do |client|
-          client.eval(
-            script,
+          client.evalsha(
+            @transition_to_red_sha,
             argv: [current_ts, recovery_scheduled_after_ts],
             keys: [meta_key]
           )
