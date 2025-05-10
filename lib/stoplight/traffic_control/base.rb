@@ -19,6 +19,7 @@ module Stoplight
     #   end
     #
     # @abstract
+    # @api private
     class Base
       # Determines whether traffic should be stopped based on the Stoplight's
       # current state and metrics.

@@ -32,6 +32,7 @@ module Stoplight
     #   end
     #
     # @abstract
+    # @api private
     class Base
       # Determines the appropriate recovery state based on the Stoplight's
       # current metrics and recovery progress.

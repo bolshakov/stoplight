@@ -16,7 +16,7 @@ module Stoplight
     # - The Stoplight will wait for the cool-off period (60 seconds)
     # - Then enter the recovery phase (YELLOW color)
     # - The first successful probe will resume normal traffic flow (green color)
-    #
+    # @api private
     class SingleSuccess < Base
       # @param config [Stoplight::Light::Config]
       # @param metadata [Stoplight::Metadata]

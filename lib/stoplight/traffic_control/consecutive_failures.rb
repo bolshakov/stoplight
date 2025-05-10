@@ -24,7 +24,7 @@ module Stoplight
     #   strategy = Stoplight::TrafficControlStrategy::ConsecutiveFailures.new
     #
     # Will switch to red only if 5 consecutive failures occur regardless of the time window
-    #
+    # @api private
     class ConsecutiveFailures < Base
       # Determines if traffic should be stopped based on failure counts.
       #
