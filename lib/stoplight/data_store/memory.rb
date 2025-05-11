@@ -5,7 +5,6 @@ require "monitor"
 module Stoplight
   module DataStore
     # @see Base
-    # TODO: Add a way to limit the number of failures stored in memory
     class Memory < Base
       include MonitorMixin
       KEY_SEPARATOR = ":"
@@ -35,16 +34,16 @@ module Stoplight
         recovery_window = (window_end - config.cool_off_time + 1)..window_end
 
         synchronize do
-          failures = @failures[config.name].count do |failure|
-            window.cover?(failure.time)
+          failures = @failures[config.name].count do |request_time|
+            window.cover?(request_time)
           end
 
           successes = @successes[config.name].count do |request_time|
             window.cover?(request_time)
           end
 
-          recovery_probe_failures = @recovery_probe_failures[config.name].count do |failure|
-            recovery_window.cover?(failure.time)
+          recovery_probe_failures = @recovery_probe_failures[config.name].count do |request_time|
+            recovery_window.cover?(request_time)
           end
           recovery_probe_successes = @recovery_probe_successes[config.name].count do |request_time|
             recovery_window.cover?(request_time)
@@ -59,6 +58,17 @@ module Stoplight
         end
       end
 
+      # @param metrics [<Time>]
+      # @param window_size [Numeric, nil]
+      # @return [void]
+      def cleanup(metrics, window_size:)
+        return if rand >= 0.1 # 10% probability to clean up
+
+        min_age = Time.now - [window_size&.*(3), METRICS_RETENTION_TIME].compact.min
+
+        metrics.reject! { _1 < min_age }
+      end
+
       # @param config [Stoplight::Light::Config]
       # @param failure [Stoplight::Failure]
       # @return [Stoplight::Metadata]
@@ -67,7 +77,9 @@ module Stoplight
 
         synchronize do
           # Keep at most +config.threshold+ number of errors
-          @failures[light_name].unshift(failure) if config.window_size
+          @failures[light_name].unshift(failure.time) if config.window_size
+
+          cleanup(@failures[light_name], window_size: config.window_size)
 
           metadata = @metadata[light_name]
           @metadata[light_name] = if metadata.last_failure_at.nil? || failure.time > metadata.last_failure_at
@@ -96,8 +108,9 @@ module Stoplight
 
         synchronize do
           @successes[light_name].unshift(request_time) if config.window_size
-          metadata = @metadata[light_name]
+          cleanup(@successes[light_name], window_size: config.window_size)
 
+          metadata = @metadata[light_name]
           @metadata[light_name] = if metadata.last_success_at.nil? || request_time > metadata.last_success_at
             metadata.with(
               last_success_at: request_time,
@@ -121,7 +134,8 @@ module Stoplight
 
         synchronize do
           # Keep at most +config.threshold+ number of errors
-          @recovery_probe_failures[light_name].unshift(failure) if config.window_size
+          @recovery_probe_failures[light_name].unshift(failure.time) if config.window_size
+          cleanup(@recovery_probe_failures[light_name], window_size: config.cool_off_time)
 
           metadata = @metadata[light_name]
           @metadata[light_name] = if metadata.last_failure_at.nil? || failure.time > metadata.last_failure_at
@@ -150,9 +164,10 @@ module Stoplight
 
         synchronize do
           @recovery_probe_successes[light_name].unshift(request_time) if config.window_size
+          cleanup(@recovery_probe_successes[light_name], window_size: config.cool_off_time)
+
           metadata = @metadata[light_name]
           recovery_started_at = metadata.recovery_started_at || request_time
-
           @metadata[light_name] = if metadata.last_success_at.nil? || request_time > metadata.last_success_at
             metadata.with(
               last_success_at: request_time,
