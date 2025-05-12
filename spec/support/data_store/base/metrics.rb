@@ -391,54 +391,40 @@ RSpec.shared_examples "data store metrics" do
     let(:failure) { Stoplight::Failure.from_error(error) }
     let(:error) { StandardError.new("Test error") }
 
-    context "without window_size" do
-      let(:window_size) { nil }
-
-      it "does not return the number of successful requests" do
+    context "when the success is recorded" do
+      it "returns the the number of successful requests" do
         expect do
           data_store.record_recovery_probe_success(config)
-        end.not_to change { data_store.get_metadata(config).recovery_probe_successes }
+        end.to change { data_store.get_metadata(config).recovery_probe_successes }.by(1)
+
+        expect do
+          data_store.record_recovery_probe_success(config)
+        end.to change { data_store.get_metadata(config).recovery_probe_successes }.by(1)
       end
     end
 
-    context "with window_size" do
-      let(:window_size) { 600 }
+    context "when a failure is recorded after success" do
+      it "returns the the number of successful requests in total" do
+        data_store.record_recovery_probe_success(config)
 
-      context "when the success is recorded" do
-        it "returns the the number of successful requests" do
-          expect do
-            data_store.record_recovery_probe_success(config)
-          end.to change { data_store.get_metadata(config).recovery_probe_successes }.by(1)
-
-          expect do
-            data_store.record_recovery_probe_success(config)
-          end.to change { data_store.get_metadata(config).recovery_probe_successes }.by(1)
-        end
+        expect do
+          data_store.record_recovery_probe_failure(config, failure)
+          data_store.record_success(config) # ignored
+          data_store.record_recovery_probe_success(config)
+          data_store.record_recovery_probe_success(config)
+        end.to change { data_store.get_metadata(config).recovery_probe_successes }.from(1).to(3)
       end
+    end
 
-      context "when a failure is recorded after success" do
-        it "returns the the number of successful requests in total" do
-          data_store.record_recovery_probe_success(config)
+    context "when a success is outside of the running window" do
+      let(:window_size) { 5000 }
 
-          expect do
-            data_store.record_recovery_probe_failure(config, failure)
-            data_store.record_success(config) # ignored
-            data_store.record_recovery_probe_success(config)
-            data_store.record_recovery_probe_success(config)
-          end.to change { data_store.get_metadata(config).recovery_probe_successes }.from(1).to(3)
-        end
-      end
+      it "returns the the number of successful requests within the current window" do
+        data_store.record_recovery_probe_success(config, request_time: Time.now - window_size - 1)
+        data_store.record_recovery_probe_success(config)
+        data_store.record_recovery_probe_success(config)
 
-      context "when a success is outside of the running window" do
-        let(:window_size) { 5000 }
-
-        it "returns the the number of successful requests within the current window" do
-          data_store.record_recovery_probe_success(config, request_time: Time.now - window_size - 1)
-          data_store.record_recovery_probe_success(config)
-          data_store.record_recovery_probe_success(config)
-
-          expect(data_store.get_metadata(config).recovery_probe_successes).to eq(2)
-        end
+        expect(data_store.get_metadata(config).recovery_probe_successes).to eq(2)
       end
     end
   end
@@ -447,55 +433,41 @@ RSpec.shared_examples "data store metrics" do
     let(:failure) { Stoplight::Failure.from_error(error) }
     let(:error) { StandardError.new("Test error") }
 
-    context "without window_size" do
-      let(:window_size) { nil }
-
-      it "does not return the number of failed requests" do
+    context "when the failure is recorded" do
+      it "returns the number of failed requests" do
         expect do
           data_store.record_recovery_probe_failure(config, failure)
-        end.not_to change { data_store.get_metadata(config).recovery_probe_failures }
+        end.to change { data_store.get_metadata(config).recovery_probe_failures }.by(1)
+
+        expect do
+          data_store.record_recovery_probe_failure(config, failure)
+        end.to change { data_store.get_metadata(config).recovery_probe_failures }.by(1)
       end
     end
 
-    context "with window_size" do
-      let(:window_size) { 600 }
+    context "when a success is recorded after failure" do
+      it "returns the the number of failed requests in total" do
+        data_store.record_recovery_probe_failure(config, Stoplight::Failure.from_error(error))
 
-      context "when the failure is recorded" do
-        it "returns the number of failed requests" do
-          expect do
-            data_store.record_recovery_probe_failure(config, failure)
-          end.to change { data_store.get_metadata(config).recovery_probe_failures }.by(1)
-
-          expect do
-            data_store.record_recovery_probe_failure(config, failure)
-          end.to change { data_store.get_metadata(config).recovery_probe_failures }.by(1)
-        end
-      end
-
-      context "when a success is recorded after failure" do
-        it "returns the the number of failed requests in total" do
+        expect do
+          data_store.record_recovery_probe_success(config)
+          data_store.record_failure(config, Stoplight::Failure.from_error(error)) # ignored
           data_store.record_recovery_probe_failure(config, Stoplight::Failure.from_error(error))
-
-          expect do
-            data_store.record_recovery_probe_success(config)
-            data_store.record_failure(config, Stoplight::Failure.from_error(error)) # ignored
-            data_store.record_recovery_probe_failure(config, Stoplight::Failure.from_error(error))
-            data_store.record_recovery_probe_failure(config, Stoplight::Failure.from_error(error))
-          end.to change { data_store.get_metadata(config).recovery_probe_failures }.from(1).to(3)
-        end
+          data_store.record_recovery_probe_failure(config, Stoplight::Failure.from_error(error))
+        end.to change { data_store.get_metadata(config).recovery_probe_failures }.from(1).to(3)
       end
+    end
 
-      context "when a failure is outside of the running window" do
-        let(:outdated_failure) { Stoplight::Failure.from_error(error, time: Time.now - window_size - 1) }
-        let(:window_size) { 5000 }
+    context "when a failure is outside of the running window" do
+      let(:outdated_failure) { Stoplight::Failure.from_error(error, time: Time.now - window_size - 1) }
+      let(:window_size) { 5000 }
 
-        it "returns the the number of successful requests within the current window" do
-          data_store.record_recovery_probe_failure(config, outdated_failure)
-          data_store.record_recovery_probe_failure(config, failure)
-          data_store.record_recovery_probe_failure(config, failure)
+      it "returns the the number of successful requests within the current window" do
+        data_store.record_recovery_probe_failure(config, outdated_failure)
+        data_store.record_recovery_probe_failure(config, failure)
+        data_store.record_recovery_probe_failure(config, failure)
 
-          expect(data_store.get_metadata(config).recovery_probe_failures).to eq(2)
-        end
+        expect(data_store.get_metadata(config).recovery_probe_failures).to eq(2)
       end
     end
   end
@@ -631,7 +603,7 @@ RSpec.shared_examples "data store metrics" do
 
       context "when a failure is outside of the running window" do
         let(:outdated_failure) { Stoplight::Failure.from_error(error, time: Time.now - window_size - 1) }
-        let(:window_size) { 5000 }
+        let(:window_size) { 300 }
 
         it "returns the the number of successful requests within the current window" do
           data_store.record_failure(config, outdated_failure)

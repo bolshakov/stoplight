@@ -195,7 +195,7 @@ module Stoplight
             argv: [current_ts, SecureRandom.uuid, failure_json],
             keys: [
               metadata_key(config),
-              config.window_size && recovery_probe_failures_key(config, time: current_ts)
+              recovery_probe_failures_key(config, time: current_ts)
             ].compact
           )
         end
@@ -217,7 +217,7 @@ module Stoplight
             argv: [request_ts, request_id],
             keys: [
               metadata_key(config),
-              config.window_size && recovery_probe_successes_key(config, time: request_ts)
+              recovery_probe_successes_key(config, time: request_ts)
             ].compact
           )
         end

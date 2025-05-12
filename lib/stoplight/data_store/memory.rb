@@ -133,8 +133,7 @@ module Stoplight
         light_name = config.name
 
         synchronize do
-          # Keep at most +config.threshold+ number of errors
-          @recovery_probe_failures[light_name].unshift(failure.time) if config.window_size
+          @recovery_probe_failures[light_name].unshift(failure.time)
           cleanup(@recovery_probe_failures[light_name], window_size: config.cool_off_time)
 
           metadata = @metadata[light_name]
@@ -163,7 +162,7 @@ module Stoplight
         light_name = config.name
 
         synchronize do
-          @recovery_probe_successes[light_name].unshift(request_time) if config.window_size
+          @recovery_probe_successes[light_name].unshift(request_time)
           cleanup(@recovery_probe_successes[light_name], window_size: config.cool_off_time)
 
           metadata = @metadata[light_name]
