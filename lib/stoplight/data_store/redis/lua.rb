@@ -6,20 +6,24 @@ module Stoplight
       # @api private
       module Lua
         RECORD_FAILURE = <<~LUA
-          local failure_ts = tonumber(ARGV[1])
-          local failure_id = ARGV[2]
-          local failure_json = ARGV[3]
+          local number_of_time_buckets = tonumber(ARGV[1])
+          local number_of_failures = tonumber(ARGV[2])
+          local metric = ARGV[3]
+
+          local failure_ts = tonumber(ARGV[4])
+          local failure_id = ARGV[5]
+          local failure_json = ARGV[6]
           local bucket_ttl = 86400
-  
+
           local metadata_key = KEYS[1]
-          local failures_key = KEYS[2]
-  
-          -- Record failure
-          if failures_key ~= nil then
-            redis.call('ZADD', failures_key, failure_ts, failure_id)
-            redis.call('EXPIRE', failures_key, bucket_ttl, "NX")
+
+          -- Record number of failures to time buckets
+          for idx = 2, number_of_time_buckets + 1 do
+            local bucket_key = KEYS[idx]
+            redis.call('HINCRBY', bucket_key, metric, number_of_failures)
+            redis.call('EXPIRE', bucket_key, bucket_ttl)
           end
-          
+
           -- Record metadata (last failure and consecutive failures)
           local meta = redis.call(
             'HMGET', metadata_key, 
@@ -36,30 +40,34 @@ module Stoplight
               'HSET', metadata_key, 
               'last_failure_at', failure_ts,
               'last_failure_json', failure_json,
-              'consecutive_failures', (prev_consecutive_failures or 0) + 1,
+              'consecutive_failures', (prev_consecutive_failures or 0) + number_of_failures,
               'consecutive_successes', 0
             )
           else
             redis.call(
               'HSET', metadata_key, 
-              'consecutive_failures', (prev_consecutive_failures or 0) + 1,
+              'consecutive_failures', (prev_consecutive_failures or 0) + number_of_failures,
               'consecutive_successes', 0
             )
           end
         LUA
 
         RECORD_SUCCESS = <<~LUA
-          local request_ts = tonumber(ARGV[1])
-          local request_id = ARGV[2]
+          local number_of_time_buckets = tonumber(ARGV[1])
+          local number_of_successes = tonumber(ARGV[2])
+          local metric = ARGV[3]
+
+          local request_ts = tonumber(ARGV[4])
+          local request_id = ARGV[4]
           local bucket_ttl = 86400
   
           local metadata_key = KEYS[1]
-          local successes_key = KEYS[2]
   
-          -- Record success
-          if successes_key ~= nil then
-            redis.call('ZADD', successes_key, request_ts, request_id)
-            redis.call('EXPIRE', successes_key, bucket_ttl, "NX")
+          -- Record number of successes to time buckets
+          for idx = 2, number_of_time_buckets + 1 do
+            local bucket_key = KEYS[idx]
+            redis.call('HINCRBY', bucket_key, metric, number_of_successes)
+            redis.call('EXPIRE', bucket_key, bucket_ttl)
           end
           
           -- Record metadata
@@ -76,19 +84,19 @@ module Stoplight
               'HSET', metadata_key, 
               'last_success_at', request_ts,    
               'consecutive_failures', 0,
-              'consecutive_successes', (prev_consecutive_successes or 0) + 1       
+              'consecutive_successes', (prev_consecutive_successes or 0) + number_of_successes
             )
           else
             redis.call(
               'HSET', metadata_key, 
               'consecutive_failures', 0,
-              'consecutive_successes', (prev_consecutive_successes or 0) + 1
+              'consecutive_successes', (prev_consecutive_successes or 0) + number_of_successes
             )
           end
         LUA
 
         GET_METADATA = <<~LUA
-          local number_of_metric_buckets = tonumber(ARGV[1])
+          local number_of_buckets = tonumber(ARGV[1])
           local number_of_recovery_buckets = tonumber(ARGV[2])
           local window_start_ts = tonumber(ARGV[3])
           local window_end_ts = tonumber(ARGV[4])
@@ -99,33 +107,28 @@ module Stoplight
           -- Read number of successes within the time window
           local key_offset = 1 -- start from the second key (the first is metadata key)
           local successes = 0
-          for idx = key_offset + 1, key_offset + number_of_metric_buckets do
-            local key = KEYS[idx]
-            successes = successes + tonumber(redis.call('ZCOUNT', key, window_start_ts, window_end_ts))
-          end
-       
-          -- Read number of failures within the time window
-          key_offset = key_offset + number_of_metric_buckets
           local failures = 0
-          for idx = key_offset + 1, key_offset + number_of_metric_buckets do
+          for idx = key_offset + 1, key_offset + number_of_buckets do
             local key = KEYS[idx]
-            failures = failures + tonumber(redis.call('ZCOUNT', key, window_start_ts, window_end_ts))
+            local metrics = redis.call('HMGET', key, 'successes', 'failures')
+            if metrics then 
+              successes = successes + (tonumber(metrics[1]) or 0)
+              failures = failures + (tonumber(metrics[2]) or 0)
+            end
           end
-  
-          -- Read number of successful recovery probes within cooling off time
-          key_offset = key_offset + number_of_metric_buckets 
+
+          -- Can we optimize this by using reading recovery once as part of the above
+          -- successes/failures loop?
+          local key_offset = key_offset + number_of_buckets
           local recovery_probe_successes = 0
+          local recovery_probe_failures = 0
           for idx = key_offset + 1, key_offset + number_of_recovery_buckets do
             local key = KEYS[idx]
-            recovery_probe_successes = recovery_probe_successes + tonumber(redis.call('ZCOUNT', key, recovery_window_start_ts, window_end_ts))
-          end
-  
-          -- Read number of failed recovery probes within cooling off time
-          key_offset = key_offset + number_of_recovery_buckets 
-          local recovery_probe_failures = 0
-          for idx = key_offset + 1, key_offset + number_of_recovery_buckets  do
-            local key = KEYS[idx]
-            recovery_probe_failures = recovery_probe_failures + tonumber(redis.call('ZCOUNT', key, recovery_window_start_ts, window_end_ts))
+            local metrics = redis.call('HMGET', key, 'recovery_probe_successes', 'recovery_probe_failures')
+            if metrics then 
+              recovery_probe_successes = recovery_probe_successes + (tonumber(metrics[1]) or 0)
+              recovery_probe_failures = recovery_probe_failures + (tonumber(metrics[2]) or 0)
+            end
           end
   
           local metadata = redis.call('HGETALL',  metadata_key)

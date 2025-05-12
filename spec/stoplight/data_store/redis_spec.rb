@@ -10,55 +10,109 @@ RSpec.describe Stoplight::DataStore::Redis, :redis do
   let(:other) { Stoplight::Failure.new("class", "message 2", Time.new) }
   let(:window_size) { Stoplight::Default::WINDOW_SIZE }
 
-  xdescribe ".buckets_for_window" do
-    subject(:buckets) { described_class.buckets_for_window(light_name, metric:, window_end:, window_size:) }
+  describe ".buckets_for_time" do
+    subject(:buckets_key_for_time) { described_class.buckets_for_time(light_name, time:) }
 
     let(:light_name) { "test-light" }
-    let(:metric) { "failures" }
 
-    xcontext "when window size is smaller than the bucket size" do
+    context "when time is a Time object" do
+      let(:time) { Time.new(2023, 10, 1, 12, 34, 56) }
+
+      it "returns keys for all bucket sizes for the given time" do
+        is_expected.to contain_exactly(
+          "stoplight:v5:stats:test-light:1s:1696156496",
+          "stoplight:v5:stats:test-light:10s:1696156490",
+          "stoplight:v5:stats:test-light:60s:1696156440"
+        )
+      end
+    end
+
+    context "when time is a numeric timestamp" do
+      let(:time) { 1696156496 }
+
+      it "handles numeric time input correctly" do
+        is_expected.to contain_exactly(
+          "stoplight:v5:stats:test-light:1s:1696156496",
+          "stoplight:v5:stats:test-light:10s:1696156490",
+          "stoplight:v5:stats:test-light:60s:1696156440"
+        )
+      end
+    end
+
+    context "when time is exactly on a bucket boundary" do
+      let(:time) { Time.new(2023, 10, 1, 12, 34, 0) }
+
+      it "returns keys aligned to bucket boundaries" do
+        is_expected.to contain_exactly(
+          "stoplight:v5:stats:test-light:1s:1696156440",
+          "stoplight:v5:stats:test-light:10s:1696156440",
+          "stoplight:v5:stats:test-light:60s:1696156440"
+        )
+      end
+    end
+  end
+
+  describe ".buckets_for_window" do
+    subject(:buckets_for_window) { described_class.buckets_for_window("test-light", window_end:, window_size:) }
+
+    let(:window_end) { Time.new(2023, 10, 1, 12, 34, 56) }
+
+    context "when window size is less than 10 seconds" do
       let(:window_end) { Time.new(2023, 10, 1, 12, 34, 56) }
-      let(:window_size) { 300 } # Smaller than BUCKET_SIZE (600)
+      let(:window_size) { 5 }
 
-      it "returns a single bucket key" do
+      it "returns only 1-second buckets" do
         is_expected.to contain_exactly(
-          "stoplight:v5:metrics:test-light:failures:1696156200",
-          "stoplight:v5:metrics:test-light:failures:1696155600"
+          "stoplight:v5:stats:test-light:1s:1696156496",
+          "stoplight:v5:stats:test-light:1s:1696156495",
+          "stoplight:v5:stats:test-light:1s:1696156494",
+          "stoplight:v5:stats:test-light:1s:1696156493",
+          "stoplight:v5:stats:test-light:1s:1696156492"
         )
       end
     end
 
-    xcontext "when window size spans multiple buckets" do
+    context "when window size is between 10 and 60 seconds" do
       let(:window_end) { Time.new(2023, 10, 1, 12, 34, 56) }
-      let(:window_size) { 1800 } # Spans 4 buckets (600s each)
+      let(:window_size) { 25 }
 
-      it "returns all bucket keys within the window" do
+      it "returns a mix of 10-second and 1-second buckets" do
         is_expected.to contain_exactly(
-          "stoplight:v5:metrics:test-light:failures:1696154400",
-          "stoplight:v5:metrics:test-light:failures:1696155000",
-          "stoplight:v5:metrics:test-light:failures:1696155600",
-          "stoplight:v5:metrics:test-light:failures:1696156200"
+          "stoplight:v5:stats:test-light:10s:1696156490",
+          "stoplight:v5:stats:test-light:10s:1696156480",
+          "stoplight:v5:stats:test-light:1s:1696156479",
+          "stoplight:v5:stats:test-light:1s:1696156478",
+          "stoplight:v5:stats:test-light:1s:1696156477",
+          "stoplight:v5:stats:test-light:1s:1696156476",
+          "stoplight:v5:stats:test-light:1s:1696156475",
+          "stoplight:v5:stats:test-light:1s:1696156474",
+          "stoplight:v5:stats:test-light:1s:1696156473",
+          "stoplight:v5:stats:test-light:1s:1696156472"
         )
       end
     end
 
-    xcontext "when window size is exactly one bucket size" do
-      let(:window_end) { Time.new(2023, 10, 1, 12, 30, 0o0) }
-      let(:window_size) { 600 } # Exactly one bucket size
+    context "when window_size is bigger then 60 seconds" do
+      let(:window_size) { 325 }
 
-      it "returns the single bucket key" do
+      it "returns a mix of 60s, 10s and 1s buckets" do
         is_expected.to contain_exactly(
-          "stoplight:v5:metrics:test-light:failures:1696155600"
+          "stoplight:v5:stats:test-light:60s:1696156200",
+          "stoplight:v5:stats:test-light:60s:1696156260",
+          "stoplight:v5:stats:test-light:60s:1696156320",
+          "stoplight:v5:stats:test-light:60s:1696156380",
+          "stoplight:v5:stats:test-light:60s:1696156440",
+          "stoplight:v5:stats:test-light:10s:1696156180",
+          "stoplight:v5:stats:test-light:10s:1696156190",
+          "stoplight:v5:stats:test-light:1s:1696156172",
+          "stoplight:v5:stats:test-light:1s:1696156173",
+          "stoplight:v5:stats:test-light:1s:1696156174",
+          "stoplight:v5:stats:test-light:1s:1696156175",
+          "stoplight:v5:stats:test-light:1s:1696156176",
+          "stoplight:v5:stats:test-light:1s:1696156177",
+          "stoplight:v5:stats:test-light:1s:1696156178",
+          "stoplight:v5:stats:test-light:1s:1696156179"
         )
-      end
-    end
-
-    context "when window size is exactly one bucket size" do
-      let(:window_end) { Time.new(2023, 10, 1, 12, 30, 0o0) }
-      let(:window_size) { Float::INFINITY }
-
-      it "returns at most 144 buckets (1 day)" do
-        is_expected.to have_attributes(count: 144)
       end
     end
   end
