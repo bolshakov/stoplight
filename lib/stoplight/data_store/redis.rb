@@ -160,7 +160,7 @@ module Stoplight
         @redis.then do |client|
           client.evalsha(
             @record_failure_sha,
-            argv: [current_ts, SecureRandom.uuid, failure_json],
+            argv: [current_ts, SecureRandom.uuid, failure_json, metrics_ttl, metadata_ttl],
             keys: [
               metadata_key(config),
               config.window_size && failures_key(config, time: current_ts)
@@ -176,7 +176,7 @@ module Stoplight
         @redis.then do |client|
           client.evalsha(
             @record_success_sha,
-            argv: [request_ts, request_id],
+            argv: [request_ts, request_id, metrics_ttl, metadata_ttl],
             keys: [
               metadata_key(config),
               config.window_size && successes_key(config, time: request_ts)
@@ -197,7 +197,7 @@ module Stoplight
         @redis.then do |client|
           client.evalsha(
             @record_failure_sha,
-            argv: [current_ts, SecureRandom.uuid, failure_json],
+            argv: [current_ts, SecureRandom.uuid, failure_json, metrics_ttl, metrics_ttl],
             keys: [
               metadata_key(config),
               recovery_probe_failures_key(config, time: current_ts)
@@ -219,7 +219,7 @@ module Stoplight
         @redis.then do |client|
           client.evalsha(
             @record_success_sha,
-            argv: [request_ts, request_id],
+            argv: [request_ts, request_id, metrics_ttl, metadata_ttl],
             keys: [
               metadata_key(config),
               recovery_probe_successes_key(config, time: request_ts)
@@ -390,6 +390,20 @@ module Stoplight
 
       private def metadata_key(config)
         key("metadata", config.name)
+      end
+
+      METRICS_TTL = 86400 # 1 day
+      private_constant :METRICS_TTL
+
+      private def metrics_ttl
+        METRICS_TTL
+      end
+
+      METADATA_TTL =86400 * 7 # 7 days
+      private_constant :METADATA_TTL
+
+      private def metadata_ttl
+        METADATA_TTL
       end
     end
   end

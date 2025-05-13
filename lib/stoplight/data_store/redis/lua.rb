@@ -9,7 +9,8 @@ module Stoplight
           local failure_ts = tonumber(ARGV[1])
           local failure_id = ARGV[2]
           local failure_json = ARGV[3]
-          local bucket_ttl = 86400
+          local bucket_ttl = tonumber(ARGV[4])
+          local metadata_ttl = tonumber(ARGV[5])
   
           local metadata_key = KEYS[1]
           local failures_key = KEYS[2]
@@ -46,12 +47,14 @@ module Stoplight
               'consecutive_successes', 0
             )
           end
+          redis.call('EXPIRE', metadata_key, metadata_ttl, "GT")
         LUA
 
         RECORD_SUCCESS = <<~LUA
           local request_ts = tonumber(ARGV[1])
           local request_id = ARGV[2]
-          local bucket_ttl = 86400
+          local bucket_ttl = tonumber(ARGV[3])
+          local metadata_ttl = tonumber(ARGV[4])
   
           local metadata_key = KEYS[1]
           local successes_key = KEYS[2]
@@ -85,6 +88,7 @@ module Stoplight
               'consecutive_successes', (prev_consecutive_successes or 0) + 1
             )
           end
+          redis.call('EXPIRE', metadata_key, metadata_ttl, "GT")
         LUA
 
         GET_METADATA = <<~LUA
