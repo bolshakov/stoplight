@@ -90,31 +90,11 @@ module Stoplight
         !skip && track
       end
 
-      # @param number_of_errors [Numeric]
-      # @return [Boolean]
-      def threshold_exceeded?(number_of_errors)
-        number_of_errors == threshold
-      end
-
-      # @param number_of_errors [Numeric]
-      # @return [Boolean]
-      def below_threshold?(number_of_errors)
-        number_of_errors < threshold
-      end
-
       # Updates the configuration with new settings and returns a new instance.
       #
       # @return [Stoplight::Light::Config]
       def with(**settings)
         self.class.new(**to_h.merge(settings))
-      end
-
-      THRESHOLD_STRATEGY = proc do |config, metadata|
-        metadata.consecutive_failures >= config.threshold && metadata.failures >= config.threshold
-      end
-      private_constant :THRESHOLD_STRATEGY
-      def threshold_strategy
-        THRESHOLD_STRATEGY.curry.call(self)
       end
 
       # @return [Hash]
