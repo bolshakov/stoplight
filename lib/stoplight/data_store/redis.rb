@@ -30,6 +30,10 @@ module Stoplight
         end
 
         BUCKETS = [1, 10, 60].freeze
+        private_constant :BUCKETS
+        def buckets
+          BUCKETS
+        end
 
         # Retrieves Redis keys for all bucket sizes at a specific time.
         #
@@ -38,7 +42,7 @@ module Stoplight
         # @return [Array<String>] A list of Redis keys for the buckets.
         # @api private
         def buckets_for_time(light_name, time:)
-          BUCKETS.map do |bucket_size|
+          buckets.map do |bucket_size|
             bucket_key(light_name, time:, bucket_size:)
           end
         end
@@ -57,13 +61,7 @@ module Stoplight
         # @api private
         def buckets_for_window(light_name, window_end:, window_size:)
           # Determine the largest bucket size that fits within the window size.
-          max_bucket_size = if window_size < 10
-            1
-          elsif window_size < 60
-            10
-          else
-            60
-          end
+          max_bucket_size = self.buckets.select { |size| size <= window_size }.max || self.buckets.first
 
           window_end_ts = window_end.to_i
           window_start_ts = window_end_ts - window_size.to_i + 1
@@ -86,7 +84,7 @@ module Stoplight
         # @param end_ts [Integer] The end timestamp of the range.
         # @return [Array<String>] A list of Redis keys for the buckets.
         private def use_buckets_with_reminder(light_name, bucket_size:, start_ts:, end_ts:)
-          bucket_order = BUCKETS.index(bucket_size)
+          bucket_order = buckets.index(bucket_size)
 
           raise ArgumentError, "unsupported bucket size" unless bucket_order
 
@@ -101,7 +99,7 @@ module Stoplight
           else
             reminder_buckets = use_buckets_with_reminder(
               light_name,
-              bucket_size: BUCKETS.fetch(bucket_order - 1),
+              bucket_size: self.buckets.fetch(bucket_order - 1),
               start_ts: start_ts,
               end_ts: aligned_start_ts - 1
             )
