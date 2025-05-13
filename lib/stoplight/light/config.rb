@@ -73,6 +73,14 @@ module Stoplight
         @skipped_errors = Set[*skipped_errors, *Stoplight::Default::SKIPPED_ERRORS].to_a
         @traffic_control = traffic_control
         @traffic_recovery = traffic_recovery
+
+        validate_config!
+      end
+
+      private def validate_config!
+        if window_size && window_size < cool_off_time
+          raise Error::ConfigurationError, "window_size should be >= cool_off_time"
+        end
       end
 
       # @param other [any]
