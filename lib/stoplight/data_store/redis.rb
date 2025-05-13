@@ -29,8 +29,6 @@ module Stoplight
           [KEY_PREFIX, *pieces].join(KEY_SEPARATOR)
         end
 
-        BUCKET_SIZE = 600 # 10m
-
         # Retrieves the list of Redis bucket keys required to cover a specific time window.
         #
         # @param light_name [String] The name of the light (used as part of the Redis key).
@@ -44,12 +42,12 @@ module Stoplight
           window_start_ts = window_end_ts - [window_size, Base::METRICS_RETENTION_TIME].compact.min.to_i
 
           # Find bucket timestamps that contain any part of the window
-          start_bucket = (window_start_ts / BUCKET_SIZE) * BUCKET_SIZE
+          start_bucket = (window_start_ts / bucket_size) * bucket_size
 
           # End bucket is the last bucket that contains data within our window
-          end_bucket = ((window_end_ts - 1) / BUCKET_SIZE) * BUCKET_SIZE
+          end_bucket = ((window_end_ts - 1) / bucket_size) * bucket_size
 
-          (start_bucket..end_bucket).step(BUCKET_SIZE).map do |bucket_start|
+          (start_bucket..end_bucket).step(bucket_size).map do |bucket_start|
             bucket_key(light_name, metric: metric, time: bucket_start)
           end
         end
@@ -61,7 +59,14 @@ module Stoplight
         # @param time [Time, Numeric] The time for which to generate the key.
         # @return [String] The generated Redis key.
         def bucket_key(light_name, metric:, time:)
-          key("metrics", light_name, metric, (time.to_i / BUCKET_SIZE) * BUCKET_SIZE)
+          key("metrics", light_name, metric, (time.to_i / bucket_size) * bucket_size)
+        end
+
+        BUCKET_SIZE = 600 # 10m
+        private_constant :BUCKET_SIZE
+
+        private def bucket_size
+          BUCKET_SIZE
         end
       end
 
