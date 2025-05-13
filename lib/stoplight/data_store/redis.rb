@@ -62,7 +62,7 @@ module Stoplight
           key("metrics", light_name, metric, (time.to_i / bucket_size) * bucket_size)
         end
 
-        BUCKET_SIZE = 600 # 10m
+        BUCKET_SIZE = 3600 # 1h
         private_constant :BUCKET_SIZE
 
         private def bucket_size

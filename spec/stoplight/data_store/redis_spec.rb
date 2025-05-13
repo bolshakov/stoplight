@@ -10,55 +10,54 @@ RSpec.describe Stoplight::DataStore::Redis, :redis do
   let(:other) { Stoplight::Failure.new("class", "message 2", Time.new) }
   let(:window_size) { Stoplight::Default::WINDOW_SIZE }
 
-  xdescribe ".buckets_for_window" do
+  describe ".buckets_for_window" do
     subject(:buckets) { described_class.buckets_for_window(light_name, metric:, window_end:, window_size:) }
 
     let(:light_name) { "test-light" }
     let(:metric) { "failures" }
 
-    xcontext "when window size is smaller than the bucket size" do
+    context "when window size is smaller than the bucket size" do
       let(:window_end) { Time.new(2023, 10, 1, 12, 34, 56) }
-      let(:window_size) { 300 } # Smaller than BUCKET_SIZE (600)
+      let(:window_size) { 1000 } # Smaller than BUCKET_SIZE (3600)
 
       it "returns a single bucket key" do
         is_expected.to contain_exactly(
-          "stoplight:v5:metrics:test-light:failures:1696156200",
-          "stoplight:v5:metrics:test-light:failures:1696155600"
+          "stoplight:v5:metrics:test-light:failures:1696154400"
         )
       end
     end
 
-    xcontext "when window size spans multiple buckets" do
-      let(:window_end) { Time.new(2023, 10, 1, 12, 34, 56) }
-      let(:window_size) { 1800 } # Spans 4 buckets (600s each)
+    context "when window size spans multiple buckets" do
+      let(:window_end) { Time.new(2023, 10, 1, 12, 0) }
+      let(:window_size) { 14400 } # Spans 4 buckets (3600s each)
 
       it "returns all bucket keys within the window" do
         is_expected.to contain_exactly(
-          "stoplight:v5:metrics:test-light:failures:1696154400",
-          "stoplight:v5:metrics:test-light:failures:1696155000",
-          "stoplight:v5:metrics:test-light:failures:1696155600",
-          "stoplight:v5:metrics:test-light:failures:1696156200"
-        )
-      end
-    end
-
-    xcontext "when window size is exactly one bucket size" do
-      let(:window_end) { Time.new(2023, 10, 1, 12, 30, 0o0) }
-      let(:window_size) { 600 } # Exactly one bucket size
-
-      it "returns the single bucket key" do
-        is_expected.to contain_exactly(
-          "stoplight:v5:metrics:test-light:failures:1696155600"
+          "stoplight:v5:metrics:test-light:failures:1696140000",
+          "stoplight:v5:metrics:test-light:failures:1696143600",
+          "stoplight:v5:metrics:test-light:failures:1696147200",
+          "stoplight:v5:metrics:test-light:failures:1696150800"
         )
       end
     end
 
     context "when window size is exactly one bucket size" do
-      let(:window_end) { Time.new(2023, 10, 1, 12, 30, 0o0) }
-      let(:window_size) { Float::INFINITY }
+      let(:window_end) { Time.new(2023, 10, 1, 12, 0, 0, 0) }
+      let(:window_size) { 3600 } # Exactly one bucket size
+
+      it "returns the single bucket key" do
+        is_expected.to contain_exactly(
+          "stoplight:v5:metrics:test-light:failures:1696158000"
+        )
+      end
+    end
+
+    context "when window size is exactly one bucket size" do
+      let(:window_end) { Time.new(2023, 10, 1, 12, 30, 0,0) }
+      let(:window_size) { nil }
 
       it "returns at most 144 buckets (1 day)" do
-        is_expected.to have_attributes(count: 144)
+        is_expected.to have_attributes(count: 25)
       end
     end
   end
