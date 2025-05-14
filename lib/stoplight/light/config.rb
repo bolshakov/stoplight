@@ -79,7 +79,7 @@ module Stoplight
 
       private def validate_config!
         if window_size && window_size < cool_off_time
-          raise Error::ConfigurationError, "window_size should be >= cool_off_time"
+          raise Error::ConfigurationError, "window_size (#{window_size}) should be >= cool_off_time (#{cool_off_time})"
         end
       end
 

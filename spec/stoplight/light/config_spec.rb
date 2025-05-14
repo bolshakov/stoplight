@@ -190,7 +190,7 @@ RSpec.describe Stoplight::Light::Config do
       let(:cool_off_time) { 10 }
 
       it "raises a ConfigurationError" do
-        expect { config }.to raise_error(Stoplight::Error::ConfigurationError, /window_size should be >= cool_off_time/)
+        expect { config }.to raise_error(Stoplight::Error::ConfigurationError, "window_size (5) should be >= cool_off_time (10)")
       end
     end
 
