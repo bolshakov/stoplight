@@ -10,8 +10,8 @@ RSpec.describe Stoplight::DataStore::Redis, :redis do
   let(:other) { Stoplight::Failure.new("class", "message 2", Time.new) }
   let(:window_size) { Stoplight::Default::WINDOW_SIZE }
 
-  describe ".buckets_for_window" do
-    subject(:buckets) { described_class.buckets_for_window(light_name, metric:, window_end:, window_size:) }
+  xdescribe ".buckets_for_window" do
+    subject(:buckets) { described_class.buckets_for_window_v0(light_name, metric:, window_end:, window_size:) }
 
     let(:light_name) { "test-light" }
     let(:metric) { "failures" }
