@@ -28,7 +28,7 @@ jobs:
         data_store: [ 'Memory', "Redis" ]
     services:
       redis:
-        image: redis:7.2
+        image: redis:8.0
         options: >-
           --health-cmd "redis-cli ping"
           --health-interval 10s
@@ -59,7 +59,7 @@ jobs:
     strategy:
       matrix:
         ruby: [ '3.2', '3.3', '3.4' ]
-        redis: [ '6.2', '7.4' ]
+        redis: [ '7.4', '8.0' ]
     services:
       redis:
         image: redis:${{ matrix.redis }}
