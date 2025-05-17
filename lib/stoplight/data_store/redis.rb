@@ -28,46 +28,6 @@ module Stoplight
         def key(*pieces)
           [KEY_PREFIX, *pieces].join(KEY_SEPARATOR)
         end
-
-        # Retrieves the list of Redis bucket keys required to cover a specific time window.
-        #
-        # @param light_name [String] The name of the light (used as part of the Redis key).
-        # @param metric [String] The metric type (e.g., "failures").
-        # @param window_end [Time, Numeric] The end time of the window (can be a Time object or a numeric timestamp).
-        # @param window_size [Numeric] The size of the time window in seconds.
-        # @return [Array<String>] A list of Redis keys for the buckets that cover the time window.
-        # @api private
-        def buckets_for_window(light_name, metric:, window_end:, window_size:)
-          window_end_ts = window_end.to_i
-          window_start_ts = window_end_ts - [window_size, Base::METRICS_RETENTION_TIME].compact.min.to_i
-
-          # Find bucket timestamps that contain any part of the window
-          start_bucket = (window_start_ts / bucket_size) * bucket_size
-
-          # End bucket is the last bucket that contains data within our window
-          end_bucket = ((window_end_ts - 1) / bucket_size) * bucket_size
-
-          (start_bucket..end_bucket).step(bucket_size).map do |bucket_start|
-            bucket_key(light_name, metric: metric, time: bucket_start)
-          end
-        end
-
-        # Generates a Redis key for a specific metric and time.
-        #
-        # @param light_name [String] The name of the light.
-        # @param metric [String] The metric type (e.g., "failures").
-        # @param time [Time, Numeric] The time for which to generate the key.
-        # @return [String] The generated Redis key.
-        def bucket_key(light_name, metric:, time:)
-          key("metrics", light_name, metric, (time.to_i / bucket_size) * bucket_size)
-        end
-
-        BUCKET_SIZE = 3600 # 1h
-        private_constant :BUCKET_SIZE
-
-        private def bucket_size
-          BUCKET_SIZE
-        end
       end
 
       KEY_SEPARATOR = ":"
@@ -107,32 +67,19 @@ module Stoplight
         window_start_ts = window_end_ts - (config.window_size || [config.window_size, Base::METRICS_RETENTION_TIME].compact.min.to_i)
         recovery_window_start_ts = window_end_ts - config.cool_off_time.to_i
 
-        if config.window_size
-          failure_keys = failure_bucket_keys(config, window_end: window_end_ts)
-          success_keys = success_bucket_keys(config, window_end: window_end_ts)
-        else
-          failure_keys = []
-          success_keys = []
-        end
-        recovery_probe_failure_keys = recovery_probe_failure_bucket_keys(config, window_end: window_end_ts)
-        recovery_probe_success_keys = recovery_probe_success_bucket_keys(config, window_end: window_end_ts)
-
         successes, failures, recovery_probe_successes, recovery_probe_failures, meta = @redis.with do |client|
           client.evalsha(
             @get_metadata_sha,
             argv: [
-              failure_keys.count,
-              recovery_probe_failure_keys.count,
-              window_start_ts,
               window_end_ts,
-              recovery_window_start_ts
+              bucket(window_start_ts),
+              bucket(recovery_window_start_ts),
             ],
             keys: [
               metadata_key(config),
-              *success_keys,
-              *failure_keys,
-              *recovery_probe_success_keys,
-              *recovery_probe_failure_keys
+              metrics_key(config),
+              buckets_key(config),
+              recovery_buckets_key(config),
             ]
           )
         end
@@ -150,6 +97,7 @@ module Stoplight
         )
       end
 
+
       # @param config [Stoplight::Light::Config] The light configuration.
       # @param failure [Stoplight::Failure] The failure to record.
       # @return [Stoplight::Metadata] The updated metadata after recording the failure.
@@ -160,10 +108,18 @@ module Stoplight
         @redis.then do |client|
           client.evalsha(
             @record_failure_sha,
-            argv: [current_ts, SecureRandom.uuid, failure_json, metrics_ttl, metadata_ttl],
+            argv: [
+              current_ts,
+              SecureRandom.uuid,
+              failure_json,
+              metrics_ttl,
+              metadata_ttl,
+              bucket(current_ts, prefix: "f"),
+            ],
             keys: [
               metadata_key(config),
-              config.window_size && failures_key(config, time: current_ts)
+              metrics_key(config),
+              config.window_size && buckets_key(config),
             ].compact
           )
         end
@@ -176,10 +132,17 @@ module Stoplight
         @redis.then do |client|
           client.evalsha(
             @record_success_sha,
-            argv: [request_ts, request_id, metrics_ttl, metadata_ttl],
+            argv: [
+              request_ts,
+              request_id,
+              metrics_ttl,
+              metadata_ttl,
+              bucket(request_ts, prefix: "s"),
+            ],
             keys: [
               metadata_key(config),
-              config.window_size && successes_key(config, time: request_ts)
+              metrics_key(config),
+              config.window_size && buckets_key(config),
             ].compact
           )
         end
@@ -197,10 +160,18 @@ module Stoplight
         @redis.then do |client|
           client.evalsha(
             @record_failure_sha,
-            argv: [current_ts, SecureRandom.uuid, failure_json, metrics_ttl, metrics_ttl],
+            argv: [
+              current_ts,
+              SecureRandom.uuid,
+              failure_json,
+              metrics_ttl,
+              metrics_ttl,
+              bucket(current_ts, prefix: "rf"),
+            ],
             keys: [
               metadata_key(config),
-              recovery_probe_failures_key(config, time: current_ts)
+              metrics_key(config),
+              recovery_buckets_key(config),
             ].compact
           )
         end
@@ -219,15 +190,43 @@ module Stoplight
         @redis.then do |client|
           client.evalsha(
             @record_success_sha,
-            argv: [request_ts, request_id, metrics_ttl, metadata_ttl],
+            argv: [
+              request_ts,
+              request_id,
+              metrics_ttl,
+              metadata_ttl,
+              bucket(request_ts, prefix: "rs"),
+            ],
             keys: [
               metadata_key(config),
-              recovery_probe_successes_key(config, time: request_ts)
+              metrics_key(config),
+              recovery_buckets_key(config),
             ].compact
           )
         end
         get_metadata(config)
       end
+
+      private def bucket(time, prefix: nil)
+        [prefix, (time.to_i / bucket_size) * bucket_size].compact.join(KEY_SEPARATOR)
+      end
+
+      private def bucket_size
+        5
+      end
+
+      private def metrics_key(config)
+        key("metrics", config.name)
+      end
+
+      private def buckets_key(config)
+        key("buckets", config.name)
+      end
+
+      private def recovery_buckets_key(config)
+        key("recovery_buckets", config.name)
+      end
+
 
       def get_state(config)
         @redis.then do |client|
@@ -335,58 +334,6 @@ module Stoplight
       end
 
       def_delegator "self.class", :key
-
-      private def failure_bucket_keys(config, window_end:)
-        self.class.buckets_for_window(
-          config.name,
-          metric: "failure",
-          window_end: window_end,
-          window_size: config.window_size
-        )
-      end
-
-      private def success_bucket_keys(config, window_end:)
-        self.class.buckets_for_window(
-          config.name,
-          metric: "success",
-          window_end: window_end,
-          window_size: config.window_size
-        )
-      end
-
-      private def recovery_probe_failure_bucket_keys(config, window_end:)
-        self.class.buckets_for_window(
-          config.name,
-          metric: "recovery_probe_failure",
-          window_end: window_end,
-          window_size: config.cool_off_time
-        )
-      end
-
-      private def recovery_probe_success_bucket_keys(config, window_end:)
-        self.class.buckets_for_window(
-          config.name,
-          metric: "recovery_probe_success",
-          window_end: window_end,
-          window_size: config.cool_off_time
-        )
-      end
-
-      private def successes_key(config, time:)
-        self.class.bucket_key(config.name, metric: "success", time:)
-      end
-
-      private def failures_key(config, time:)
-        self.class.bucket_key(config.name, metric: "failure", time:)
-      end
-
-      private def recovery_probe_successes_key(config, time:)
-        self.class.bucket_key(config.name, metric: "recovery_probe_success", time:)
-      end
-
-      private def recovery_probe_failures_key(config, time:)
-        self.class.bucket_key(config.name, metric: "recovery_probe_failure", time:)
-      end
 
       private def metadata_key(config)
         key("metadata", config.name)

@@ -3,18 +3,45 @@
 require "benchmark/ips"
 require "stoplight"
 require "redis"
+require "timecop"
 
 redis = Redis.new
 data_store = Stoplight::DataStore::Redis.new(redis)
-Stoplight.default_data_store = data_store
-cashed_stoplight = Stoplight("")
 
-Benchmark.ips do |b|
-  b.report("creating lambda") { -> {} }
-  b.report("calling lambda") { -> {}.call }
-  b.report("creating stoplight") { Stoplight("") }
-  b.report("calling stoplight") { Stoplight("").run {} }
-  b.report("calling cached_stoplight") { cashed_stoplight.run {} }
+# In your benchmark file
+BUCKET_SIZES = [5, 10, 30, 60, 300].freeze
+WINDOW_SIZES = (300..3600).step(300).to_a.freeze       # 5m to 1h
 
-  b.compare!
+results = {}
+
+BUCKET_SIZES.each do |bucket_size_value|
+  puts "=== Testing buckets: #{bucket_size_value}s ==="
+
+  WINDOW_SIZES.each do |window_size|
+    puts "Testing window_size: #{window_size}s"
+
+    stoplight = Stoplight(SecureRandom.uuid, window_size: window_size, data_store: data_store)
+
+    Stoplight::DataStore::Redis.class_eval(<<~RUBY)
+      def bucket_size
+        #{bucket_size_value}
+      end
+    RUBY
+
+    start_time = Time.at(1747129162) - window_size
+
+    result = Benchmark.ips do |b|
+      b.report("#{bucket_size_value}s buckets, #{window_size}s window") do
+        Timecop.freeze(start_time + rand(window_size * 2)) do
+          stoplight.run {}
+        end
+      end
+    end
+
+    results[[bucket_size_value, window_size]] = result.data.dig(0, :ips)
+  end
 end
+
+require "json"
+# Save results for plotting
+File.write("hash_performance_matrix.json", results.to_json)
