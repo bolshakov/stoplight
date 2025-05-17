@@ -28,6 +28,100 @@ module Stoplight
         def key(*pieces)
           [KEY_PREFIX, *pieces].join(KEY_SEPARATOR)
         end
+
+        BUCKETS = [1, 10, 60].freeze
+        private_constant :BUCKETS
+        def buckets
+          BUCKETS
+        end
+
+        # Retrieves Redis keys for all bucket sizes at a specific time.
+        #
+        # @param time [Time, Numeric] The time for which to retrieve bucket keys.
+        # @return [Array<String>] A list of Redis keys for the buckets.
+        # @api private
+        def buckets_for_time(time:)
+          buckets.map do |bucket_size|
+            bucket_key(time:, bucket_size:)
+          end
+        end
+
+        # Retrieves the list of Redis bucket keys required to cover a specific time window.
+        #
+        # This method calculates which buckets (1-second, 10-second, or 60-second) are needed
+        # to represent the data for a given time window. It selects the largest bucket size
+        # that fits within the window and recursively includes smaller buckets for any remaining
+        # time that does not align with the larger bucket boundaries.
+        #
+        # @param window_end [Time, Numeric] The end time of the window (can be a Time object or a numeric timestamp).
+        # @param window_size [Numeric] The size of the time window in seconds.
+        # @return [Array<String>] A list of Redis keys for the buckets that cover the time window.
+        # @api private
+        def buckets_for_window(window_end:, window_size:)
+          # Determine the largest bucket size that fits within the window size.
+          max_bucket_size = buckets.select { |size| size <= window_size }.max || buckets.first
+
+          window_end_ts = window_end.to_i
+          window_start_ts = window_end_ts - window_size.to_i + 1
+
+          # Generate the bucket keys for the window using the largest bucket size
+          # and recursively include smaller buckets for any remaining time.
+          use_buckets_with_reminder(
+            bucket_size: max_bucket_size,
+            start_ts: window_start_ts,
+            end_ts: window_end_ts
+          )
+        end
+
+        # Recursively retrieves buckets for a given time range, including smaller buckets for reminders.
+        #
+        # @param bucket_size [Integer] The size of the bucket in seconds.
+        # @param start_ts [Integer] The start timestamp of the range.
+        # @param end_ts [Integer] The end timestamp of the range.
+        # @return [Array<String>] A list of Redis keys for the buckets.
+        private def use_buckets_with_reminder(bucket_size:, start_ts:, end_ts:)
+          bucket_order = buckets.index(bucket_size)
+
+          raise ArgumentError, "unsupported bucket size" unless bucket_order
+
+          # Align to bucket_size-second boundaries
+          aligned_start_ts = ((start_ts + bucket_size - 1) / bucket_size) * bucket_size  # Round up to next bucket_size boundary
+          aligned_end_ts = (end_ts / bucket_size) * bucket_size # Round down to previous bucket_size boundary
+
+          buckets = use_buckets(bucket_size:, start_ts: aligned_start_ts, end_ts: aligned_end_ts)
+
+          if bucket_order == 0
+            buckets
+          else
+            reminder_buckets = use_buckets_with_reminder(
+              bucket_size: self.buckets.fetch(bucket_order - 1),
+              start_ts: start_ts,
+              end_ts: aligned_start_ts - 1
+            )
+            buckets + reminder_buckets
+          end
+        end
+
+        # Generates Redis keys for buckets within a specific range.
+        #
+        # @param bucket_size [Integer] The size of the bucket in seconds.
+        # @param start_ts [Integer] The start timestamp of the range.
+        # @param end_ts [Integer] The end timestamp of the range.
+        # @return [Array<String>] A list of Redis keys for the buckets.
+        private def use_buckets(bucket_size:, start_ts:, end_ts:)
+          start_ts.step(by: bucket_size, to: end_ts).map do |time|
+            bucket_key(bucket_size:, time:)
+          end
+        end
+
+        # Generates a Redis key for a specific bucket size and time.
+        #
+        # @param bucket_size [Integer] The size of the bucket in seconds.
+        # @param time [Time, Numeric] The time for which to generate the key.
+        # @return [String] The generated Redis key.
+        private def bucket_key(bucket_size:, time:)
+          ["#{bucket_size}s", (time.to_i / bucket_size) * bucket_size].join(KEY_SEPARATOR)
+        end
       end
 
       KEY_SEPARATOR = ":"
@@ -64,22 +158,28 @@ module Stoplight
       def get_metadata(config)
         window_end = Time.now
         window_end_ts = window_end.to_i
-        window_start_ts = window_end_ts - (config.window_size || [config.window_size, Base::METRICS_RETENTION_TIME].compact.min.to_i)
-        recovery_window_start_ts = window_end_ts - config.cool_off_time.to_i
+
+        buckets = if config.window_size
+          window_size = config.window_size || [config.window_size, Base::METRICS_RETENTION_TIME].compact.min.to_i
+          self.class.buckets_for_window(window_end: window_end_ts, window_size:)
+        else
+          []
+        end
+
+        recovery_buckets = self.class.buckets_for_window(window_end: window_end_ts, window_size: config.cool_off_time.to_i)
 
         successes, failures, recovery_probe_successes, recovery_probe_failures, meta = @redis.with do |client|
           client.evalsha(
             @get_metadata_sha,
             argv: [
-              window_end_ts,
-              bucket(window_start_ts),
-              bucket(recovery_window_start_ts),
+              buckets.count,
+              recovery_buckets.count,
+              *buckets,
+              *recovery_buckets
             ],
             keys: [
               metadata_key(config),
               metrics_key(config),
-              buckets_key(config),
-              recovery_buckets_key(config),
             ]
           )
         end
@@ -105,6 +205,12 @@ module Stoplight
         current_ts = failure.time.to_i
         failure_json = failure.to_json
 
+        buckets = if config.window_size
+          buckets_with_prefix(self.class.buckets_for_time(time: current_ts), prefix: "f")
+        else
+          []
+        end
+
         @redis.then do |client|
           client.evalsha(
             @record_failure_sha,
@@ -114,20 +220,30 @@ module Stoplight
               failure_json,
               metrics_ttl,
               metadata_ttl,
-              bucket(current_ts, prefix: "f"),
+              buckets.count,
+              *buckets,
             ],
             keys: [
               metadata_key(config),
               metrics_key(config),
-              config.window_size && buckets_key(config),
             ].compact
           )
         end
         get_metadata(config)
       end
 
+      private def buckets_with_prefix(buckets, prefix:)
+        buckets.map { |bucket| [prefix, bucket].join(KEY_SEPARATOR)}
+      end
+
       def record_success(config, request_id: SecureRandom.hex(12), request_time: Time.now)
         request_ts = request_time.to_i
+
+        buckets = if config.window_size
+          buckets_with_prefix(self.class.buckets_for_time(time: request_ts), prefix: "s")
+        else
+          []
+        end
 
         @redis.then do |client|
           client.evalsha(
@@ -137,13 +253,13 @@ module Stoplight
               request_id,
               metrics_ttl,
               metadata_ttl,
-              bucket(request_ts, prefix: "s"),
+              buckets.count,
+              *buckets,
             ],
             keys: [
               metadata_key(config),
               metrics_key(config),
-              config.window_size && buckets_key(config),
-            ].compact
+            ]
           )
         end
       end
@@ -157,6 +273,8 @@ module Stoplight
         current_ts = failure.time.to_i
         failure_json = failure.to_json
 
+        buckets = buckets_with_prefix(self.class.buckets_for_time(time: current_ts), prefix: "rf")
+
         @redis.then do |client|
           client.evalsha(
             @record_failure_sha,
@@ -166,13 +284,13 @@ module Stoplight
               failure_json,
               metrics_ttl,
               metrics_ttl,
-              bucket(current_ts, prefix: "rf"),
+              buckets.count,
+              *buckets
             ],
             keys: [
               metadata_key(config),
               metrics_key(config),
-              recovery_buckets_key(config),
-            ].compact
+            ]
           )
         end
         get_metadata(config)
@@ -187,6 +305,8 @@ module Stoplight
       def record_recovery_probe_success(config, request_id: SecureRandom.hex(12), request_time: Time.now)
         request_ts = request_time.to_i
 
+        buckets = buckets_with_prefix(self.class.buckets_for_time(time: request_ts), prefix: "rs")
+
         @redis.then do |client|
           client.evalsha(
             @record_success_sha,
@@ -195,13 +315,13 @@ module Stoplight
               request_id,
               metrics_ttl,
               metadata_ttl,
-              bucket(request_ts, prefix: "rs"),
+              buckets.count,
+              *buckets
             ],
             keys: [
               metadata_key(config),
               metrics_key(config),
-              recovery_buckets_key(config),
-            ].compact
+            ]
           )
         end
         get_metadata(config)

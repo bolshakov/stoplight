@@ -2,21 +2,23 @@ local request_ts = tonumber(ARGV[1])
 local request_id = ARGV[2]
 local bucket_ttl = tonumber(ARGV[3])
 local metadata_ttl = tonumber(ARGV[4])
-local bucket = ARGV[5]
+local buckets_count = tonumber(ARGV[5])
 
 local metadata_key = KEYS[1]
 local metrics_key = KEYS[2] -- A hash holding time buckets with counts
-local buckets_key = KEYS[3] -- A sorted set holding buckets in use
 
--- Record success
-if buckets_key then
-  redis.call('HINCRBY', metrics_key, bucket, 1)
-  --redis.log(redis.LOG_WARNING, 'Hash updated: key="' .. metrics_key .. '"  field="' .. bucket .. '" operation="INCRBY"')
-  redis.call('ZADD', buckets_key, request_ts, bucket)
-  --redis.log(redis.LOG_WARNING, 'Sorted Set element added key="' .. buckets_key .. '"  member="' .. bucket .. '" score="' .. request_ts .. '"')
+local buckets = {}
+for idx = 1, buckets_count do
+  table.insert(buckets, ARGV[5 + idx])
+end
 
-  redis.call('HEXPIRE', metrics_key, bucket_ttl, 'NX', 'FIELDS', 1, bucket)
-  redis.call('EXPIRE', buckets_key, bucket_ttl, 'GT')
+-- redis.log(redis.LOG_WARNING, "Writing metrics to buckets=" .. cjson.encode(buckets))
+
+if #buckets > 0 then
+  for _, bucket in pairs(buckets) do
+    redis.call('HINCRBY', metrics_key, bucket, 1)
+  end
+  redis.call('HEXPIRE', metrics_key, bucket_ttl, 'NX', 'FIELDS', buckets_count, unpack(buckets))
 end
 
 -- Record metadata

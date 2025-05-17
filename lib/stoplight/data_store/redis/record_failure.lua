@@ -3,17 +3,23 @@ local failure_id = ARGV[2]
 local failure_json = ARGV[3]
 local bucket_ttl = tonumber(ARGV[4])
 local metadata_ttl = tonumber(ARGV[5])
-local bucket = ARGV[6]
+local buckets_count = tonumber(ARGV[6])
 
 local metadata_key = KEYS[1]
 local metrics_key = KEYS[2] -- A hash holding time buckets with counts
-local buckets_key = KEYS[3] -- A sorted set holding buckets in use
 
-if buckets_key then
-  redis.call('HINCRBY', metrics_key, bucket, 1)
-  redis.call('ZADD', buckets_key, failure_ts, bucket)
-  redis.call('HEXPIRE', metrics_key, bucket_ttl, 'NX', 'FIELDS', 1, bucket)
-  redis.call('EXPIRE', buckets_key, bucket_ttl, 'GT')
+local buckets = {}
+for idx = 1, buckets_count do
+  table.insert(buckets, ARGV[6 + idx])
+end
+
+-- redis.log(redis.LOG_WARNING, "Writing metrics to buckets=" .. cjson.encode(buckets))
+
+if #buckets > 0 then
+  for _, bucket in pairs(buckets) do
+    redis.call('HINCRBY', metrics_key, bucket, 1)
+  end
+  redis.call('HEXPIRE', metrics_key, bucket_ttl, 'NX', 'FIELDS', buckets_count, unpack(buckets))
 end
 
 -- Record metadata (last failure and consecutive failures)
