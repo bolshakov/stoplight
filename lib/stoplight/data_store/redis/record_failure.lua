@@ -10,7 +10,7 @@ local failures_key = KEYS[2]
 -- Record failure
 if failures_key ~= nil then
   redis.call('ZADD', failures_key, failure_ts, failure_id)
-  redis.call('EXPIRE', failures_key, bucket_ttl, "NX")
+  redis.call('EXPIRE', failures_key, bucket_ttl, 'NX')
 end
 
 -- Record metadata
@@ -34,4 +34,4 @@ else
     'consecutive_successes', 0
   )
 end
-redis.call('EXPIRE', metadata_key, metadata_ttl, "GT")
+redis.call('EXPIRE', metadata_key, metadata_ttl, 'GT')

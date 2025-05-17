@@ -12,7 +12,7 @@ group :development do
   gem "database_cleaner-redis", "~> 2.0"
   gem "debug"
   gem "rake", "~> 13.2"
-  gem "rantly"
+  gem "rantly", "~> 2.0.0"
   gem "redis", "~> 5.4"
   gem "rspec", "~> 3.13"
   gem "ruby-prof"

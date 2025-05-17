@@ -28,7 +28,7 @@ jobs:
         data_store: [ 'Memory', "Redis" ]
     services:
       redis:
-        image: redis:8.0
+        image: redis:7.4
         options: >-
           --health-cmd "redis-cli ping"
           --health-interval 10s

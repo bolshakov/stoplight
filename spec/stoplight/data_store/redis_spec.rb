@@ -17,7 +17,7 @@ RSpec.describe Stoplight::DataStore::Redis, :redis do
     let(:metric) { "failures" }
 
     context "when window size is smaller than the bucket size" do
-      let(:window_end) { Time.new(2023, 10, 1, 12, 34, 56) }
+      let(:window_end) { Time.at(1696156496) }
       let(:window_size) { 1000 } # Smaller than BUCKET_SIZE (3600)
 
       it "returns a single bucket key" do
@@ -28,7 +28,7 @@ RSpec.describe Stoplight::DataStore::Redis, :redis do
     end
 
     context "when window size spans multiple buckets" do
-      let(:window_end) { Time.new(2023, 10, 1, 12, 0, 0) }
+      let(:window_end) { Time.at(1696154400) }
       let(:window_size) { 14400 } # Spans 4 buckets (3600s each)
 
       it "returns all bucket keys within the window" do
@@ -42,7 +42,7 @@ RSpec.describe Stoplight::DataStore::Redis, :redis do
     end
 
     context "when window size is exactly one bucket size" do
-      let(:window_end) { Time.new(2023, 10, 1, 12, 0, 0) }
+      let(:window_end) { Time.at(1696154400) }
       let(:window_size) { 3600 } # Exactly one bucket size
 
       it "returns the single bucket key" do
@@ -53,7 +53,7 @@ RSpec.describe Stoplight::DataStore::Redis, :redis do
     end
 
     context "when window size is exactly one bucket size" do
-      let(:window_end) { Time.new(2023, 10, 1, 12, 30, 0) }
+      let(:window_end) { Time.at(1696156200) }
       let(:window_size) { nil }
 
       it "returns at most 144 buckets (1 day)" do
