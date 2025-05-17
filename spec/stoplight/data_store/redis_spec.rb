@@ -53,7 +53,7 @@ RSpec.describe Stoplight::DataStore::Redis, :redis do
     end
 
     context "when window size is exactly one bucket size" do
-      let(:window_end) { Time.new(2023, 10, 1, 12, 30, 0,0) }
+      let(:window_end) { Time.new(2023, 10, 1, 12, 30, 0, 0) }
       let(:window_size) { nil }
 
       it "returns at most 144 buckets (1 day)" do

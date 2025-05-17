@@ -399,7 +399,7 @@ module Stoplight
         METRICS_TTL
       end
 
-      METADATA_TTL =86400 * 7 # 7 days
+      METADATA_TTL = 86400 * 7 # 7 days
       private_constant :METADATA_TTL
 
       private def metadata_ttl
