@@ -9,7 +9,7 @@ class OldRedis < Stoplight::DataStore::Redis
   def record_failure(config, failure)
     *, size = @redis.then do |client|
       client.multi do |transaction|
-        failures_key = failures_key(config)
+        failures_key = failures_key_v0(config)
 
         transaction.zadd(failures_key, failure.time.to_i, failure.to_json)
         remove_outdated_failures(config, failure.time, transaction: transaction)
@@ -25,7 +25,7 @@ class OldRedis < Stoplight::DataStore::Redis
   # @param config [Stoplight::Light::Config]
   # @param time [Time]
   def remove_outdated_failures(config, time, transaction:)
-    failures_key = failures_key(config)
+    failures_key = failures_key_v0(config)
 
     # Remove all errors happened before the window start
     transaction.zremrangebyscore(failures_key, 0, time.to_i - config.window_size)

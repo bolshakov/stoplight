@@ -276,7 +276,7 @@ RSpec.shared_examples "data store metrics" do
     end
   end
 
-  describe "Metadata#success" do
+  describe "Metadata#successes" do
     let(:failure) { Stoplight::Failure.from_error(error) }
     let(:error) { StandardError.new("Test error") }
 
@@ -321,7 +321,7 @@ RSpec.shared_examples "data store metrics" do
         let(:window_size) { 5000 }
 
         it "returns the the number of successful requests within the current window" do
-          data_store.record_success(config, request_time: Time.now - window_size - 1)
+          data_store.record_success(config, request_time: Time.now - window_size - 10)
           data_store.record_success(config)
           data_store.record_success(config)
 
@@ -373,7 +373,7 @@ RSpec.shared_examples "data store metrics" do
       end
 
       context "when a failure is outside of the running window" do
-        let(:outdated_failure) { Stoplight::Failure.from_error(error, time: Time.now - window_size - 1) }
+        let(:outdated_failure) { Stoplight::Failure.from_error(error, time: Time.now - window_size - 10) }
         let(:window_size) { 5000 }
 
         it "returns the the number of successful requests within the current window" do
@@ -602,7 +602,7 @@ RSpec.shared_examples "data store metrics" do
       end
 
       context "when a failure is outside of the running window" do
-        let(:outdated_failure) { Stoplight::Failure.from_error(error, time: Time.now - window_size - 1) }
+        let(:outdated_failure) { Stoplight::Failure.from_error(error, time: Time.now - window_size - 10) }
         let(:window_size) { 300 }
 
         it "returns the the number of successful requests within the current window" do
@@ -613,6 +613,66 @@ RSpec.shared_examples "data store metrics" do
           expect(data_store.get_metadata(config)).to have_attributes(
             failures: 2,
             consecutive_failures: 3
+          )
+        end
+      end
+    end
+  end
+
+  describe "#record_success" do
+    context "without window_size" do
+      let(:window_size) { nil }
+
+      it "does not record the number of successful requests" do
+        expect do
+          data_store.record_success(config)
+        end.to change { data_store.get_metadata(config) }
+          .from(have_attributes(consecutive_successes: 0))
+          .to(have_attributes(consecutive_successes: 1))
+      end
+    end
+
+    context "with window_size" do
+      let(:window_size) { 600 }
+
+      context "when the success is recorded" do
+        it "returns the number of successful requests" do
+          expect do
+            data_store.record_success(config)
+          end.to change { data_store.get_metadata(config).to_h.values_at(:successes, :consecutive_successes) }
+            .from([0, 0])
+            .to([1, 1])
+        end
+      end
+
+      context "when a success is recorded after failure" do
+        before do
+          data_store.record_success(config)
+        end
+
+        it "returns the the number of successful requests in total" do
+          expect do
+            data_store.record_failure(config, Stoplight::Failure.from_error(StandardError.new("bang")))
+            data_store.record_success(config)
+            data_store.record_success(config)
+          end.to change { data_store.get_metadata(config) }
+            .from(have_attributes(failures: 0, successes: 1, consecutive_successes: 1))
+            .to(have_attributes(failures: 1, successes: 3, consecutive_successes: 2))
+        end
+      end
+
+      context "when a success is outside of the running window" do
+        let(:outdated_success_time) { Time.now - window_size - 100 }
+        let(:window_size) { 300 }
+
+        it "returns the the number of successful requests within the current window" do
+          data_store.record_success(config, request_time: outdated_success_time)
+          data_store.record_success(config)
+          data_store.record_success(config)
+
+          expect(data_store.get_metadata(config)).to have_attributes(
+            successes: 2,
+            consecutive_successes: 3
           )
         end
       end
