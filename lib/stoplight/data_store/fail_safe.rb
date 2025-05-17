@@ -44,9 +44,9 @@ module Stoplight
         end
       end
 
-      def get_all(config)
-        with_fallback([[], State::UNLOCKED], config) do
-          data_store.get_all(config)
+      def get_metadata(config)
+        with_fallback(Metadata.empty, config) do
+          data_store.get_metadata(config)
         end
       end
 
@@ -56,21 +56,27 @@ module Stoplight
         end
       end
 
-      def get_failures(config)
-        with_fallback([], config) do
-          data_store.get_failures(config)
-        end
-      end
-
       def record_failure(config, failure)
-        with_fallback(0, config) do
+        with_fallback(nil, config) do
           data_store.record_failure(config, failure)
         end
       end
 
-      def clear_failures(config)
-        with_fallback([], config) do
-          data_store.clear_failures(config)
+      def record_success(config, **args)
+        with_fallback(nil, config) do
+          data_store.record_success(config, **args)
+        end
+      end
+
+      def record_recovery_probe_success(config, **args)
+        with_fallback(nil, config) do
+          data_store.record_recovery_probe_success(config, **args)
+        end
+      end
+
+      def record_recovery_probe_failure(config, failure)
+        with_fallback(nil, config) do
+          data_store.record_recovery_probe_failure(config, failure)
         end
       end
 
@@ -86,9 +92,9 @@ module Stoplight
         end
       end
 
-      def with_deduplicated_notification(config, from_color, to_color, &notification)
-        with_fallback(nil, config) do
-          data_store.with_deduplicated_notification(config, from_color, to_color, &notification)
+      def transition_to_color(config, color)
+        with_fallback(false, config) do
+          data_store.transition_to_color(config, color)
         end
       end
 

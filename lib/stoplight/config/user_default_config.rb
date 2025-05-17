@@ -8,7 +8,7 @@ module Stoplight
     #
     # This class allows users to define default settings for various Stoplight
     # parameters, such as cool-off time, data store, error notifier, and more.
-    #
+    # TODO: add evaluation/recovery strategy support
     class UserDefaultConfig
       extend Forwardable
 

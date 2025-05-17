@@ -35,16 +35,16 @@ RSpec.describe Stoplight::Light::Config do
     context "when set to a float number" do
       let(:cool_off_time) { 66.4 }
 
-      it "returns the correct value" do
-        is_expected.to eq(cool_off_time)
+      it "returns the integer value" do
+        is_expected.to eq(66)
       end
     end
 
     context "when set to an integer number" do
       let(:cool_off_time) { 66 }
 
-      it "returns the correct value casted to Float" do
-        is_expected.to eq(66.0)
+      it "returns the value" do
+        is_expected.to eq(66)
       end
     end
   end
@@ -93,7 +93,7 @@ RSpec.describe Stoplight::Light::Config do
   describe "#window_size" do
     subject { config.window_size }
 
-    let(:window_size) { 10 }
+    let(:window_size) { 1000 }
 
     it "returns the same value" do
       is_expected.to eq(window_size)
@@ -180,6 +180,26 @@ RSpec.describe Stoplight::Light::Config do
         is_expected.to have_attributes(
           **settings.merge(new_settings).merge(notifiers: [Stoplight::Notifier::FailSafe.wrap(notifier)])
         )
+      end
+    end
+  end
+
+  describe "#validate_config!" do
+    context "when window_size is less than cool_off_time" do
+      let(:window_size) { 5 }
+      let(:cool_off_time) { 10 }
+
+      it "raises a ConfigurationError" do
+        expect { config }.to raise_error(Stoplight::Error::ConfigurationError, "window_size (5) should be >= cool_off_time (10)")
+      end
+    end
+
+    context "when window_size is greater than or equal to cool_off_time" do
+      let(:window_size) { 10 }
+      let(:cool_off_time) { 5 }
+
+      it "does not raise an error" do
+        expect { config }.not_to raise_error
       end
     end
   end

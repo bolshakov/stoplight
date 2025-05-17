@@ -35,10 +35,10 @@ Feature: Stoplight Custom Configuration
 
   Scenario: Light with custom window size only counts recent failures
     Given the light is configured with:
-      | Window Size | 10s |
+      | Window Size   | 120s |
     And the protected service starts failing with "connection-timeout"
     And I make 2 requests to the protected service
-    When 11 seconds elapsed
+    When 121 seconds elapsed
     And I make 2 request to the protected service
     Then the light color is green
     When I make 1 request to the protected service

@@ -10,7 +10,7 @@ RSpec.describe Stoplight::Failure do
   let(:json) do
     JSON.generate(
       error: {class: error_class, message: error_message},
-      time: time.strftime("%Y-%m-%dT%H:%M:%S.%N%:z")
+      time: time.to_i
     )
   end
 
@@ -24,7 +24,7 @@ RSpec.describe Stoplight::Failure do
         failure = described_class.from_error(error)
         expect(failure.error_class).to eql(error_class)
         expect(failure.error_message).to eql(error_message)
-        expect(failure.time).to eql(Time.new)
+        expect(failure.time.to_i).to eql(Time.new.to_i)
       end
     end
   end
@@ -81,6 +81,24 @@ RSpec.describe Stoplight::Failure do
   describe "#time" do
     it "reads the time" do
       expect(described_class.new(nil, nil, time).time).to eql(time)
+    end
+  end
+
+  describe "#==" do
+    context "when the objects are equal" do
+      let(:other) { described_class.new(error_class, error_message, time) }
+
+      it "returns true" do
+        expect(described_class.new(error_class, error_message, time)).to eq(other)
+      end
+    end
+
+    context "when the objects are not equal" do
+      let(:other) { described_class.new(error_class, "msg", time) }
+
+      it "returns false" do
+        expect(described_class.new(error_class, error_message, time)).not_to eq(other)
+      end
     end
   end
 

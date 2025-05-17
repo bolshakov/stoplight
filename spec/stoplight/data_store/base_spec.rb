@@ -15,19 +15,6 @@ RSpec.describe Stoplight::DataStore::Base do
     end
   end
 
-  describe "#get_all" do
-    it "is not implemented" do
-      expect { data_store.get_all(nil) }.to raise_error(NotImplementedError)
-    end
-  end
-
-  describe "#get_failures" do
-    it "is not implemented" do
-      expect { data_store.get_failures(nil) }
-        .to raise_error(NotImplementedError)
-    end
-  end
-
   describe "#record_failure" do
     it "is not implemented" do
       expect { data_store.record_failure(nil, nil) }
@@ -35,9 +22,23 @@ RSpec.describe Stoplight::DataStore::Base do
     end
   end
 
-  describe "#clear_failures" do
+  describe "#record_success" do
     it "is not implemented" do
-      expect { data_store.clear_failures(nil) }
+      expect { data_store.record_success(nil) }
+        .to raise_error(NotImplementedError)
+    end
+  end
+
+  describe "#record_recovery_probe_failure" do
+    it "is not implemented" do
+      expect { data_store.record_recovery_probe_failure(nil, nil) }
+        .to raise_error(NotImplementedError)
+    end
+  end
+
+  describe "#record_recovery_probe_success" do
+    it "is not implemented" do
+      expect { data_store.record_recovery_probe_success(nil) }
         .to raise_error(NotImplementedError)
     end
   end
@@ -62,9 +63,16 @@ RSpec.describe Stoplight::DataStore::Base do
     end
   end
 
-  describe "#with_notification_lock" do
+  describe "#transition_to_color" do
     it "is not implemented" do
-      expect { data_store.with_deduplicated_notification(nil, nil, nil) }
+      expect { data_store.transition_to_color(nil, nil) }
+        .to raise_error(NotImplementedError)
+    end
+  end
+
+  describe "#get_metadata" do
+    it "is not implemented" do
+      expect { data_store.get_metadata(nil) }
         .to raise_error(NotImplementedError)
     end
   end

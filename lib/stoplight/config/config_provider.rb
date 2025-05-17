@@ -57,7 +57,6 @@ module Stoplight
         ERROR
 
         settings = default_settings.merge(settings_overrides, {name: light_name})
-
         Light::Config.new(**settings)
       end
     end
