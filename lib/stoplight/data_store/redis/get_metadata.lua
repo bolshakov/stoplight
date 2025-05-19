@@ -25,13 +25,13 @@ end
 local offset = 2
 local successes = count_events(2, number_of_metric_buckets, window_start_ts)
 
-local offset = offset + number_of_metric_buckets
+offset = offset + number_of_metric_buckets
 local failures = count_events(offset, number_of_metric_buckets, window_start_ts)
 
-local offset = offset + number_of_metric_buckets
+offset = offset + number_of_metric_buckets
 local recovery_probe_successes = count_events(offset, number_of_recovery_buckets, recovery_window_start_ts)
 
-local offset = offset + number_of_recovery_buckets
+offset = offset + number_of_recovery_buckets
 local recovery_probe_failures = count_events(offset, number_of_recovery_buckets, recovery_window_start_ts)
 
 local metadata = redis.call('HGETALL',  metadata_key)
