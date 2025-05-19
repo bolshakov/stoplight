@@ -627,8 +627,10 @@ RSpec.shared_examples "data store metrics" do
           data_store.transition_to_color(config, Stoplight::Color::RED)
           data_store.transition_to_color(config, Stoplight::Color::GREEN)
 
-          data_store.record_failure(config, failure)
-          expect(data_store.get_metadata(config)).to have_attributes(failures: 1)
+          Timecop.travel(Time.now + 10) do
+            data_store.record_failure(config, failure)
+            expect(data_store.get_metadata(config)).to have_attributes(failures: 1)
+          end
         end
       end
     end
