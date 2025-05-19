@@ -81,12 +81,14 @@ module Stoplight
           @record_success_sha,
           @get_metadata_sha,
           @transition_to_yellow_sha,
-          @transition_to_red_sha = client.pipelined do |pipeline|
+          @transition_to_red_sha,
+          @transition_to_green_sha = client.pipelined do |pipeline|
             pipeline.script("load", Lua::RECORD_FAILURE)
             pipeline.script("load", Lua::RECORD_SUCCESS)
             pipeline.script("load", Lua::GET_METADATA)
             pipeline.script("load", Lua::TRANSITION_TO_YELLOW)
             pipeline.script("load", Lua::TRANSITION_TO_RED)
+            pipeline.script("load", Lua::TRANSITION_TO_GREEN)
           end
         end
       end
@@ -256,7 +258,7 @@ module Stoplight
       # Combined method that performs the state transition based on color
       #
       # @param config [Stoplight::Light::Config] The light configuration
-      # @param color [String] The color to transition to ("GREEN", "YELLOW", or "RED")
+      # @param color [String] The color to transition to ("green", "yellow", or "red")
       # @param current_time [Time] Current timestamp
       # @return [Boolean] true if this is the first instance to detect this transition
       def transition_to_color(config, color, current_time: Time.now)
@@ -278,13 +280,18 @@ module Stoplight
       #
       # @param config [Stoplight::Light::Config] The light configuration
       # @return [Boolean] true if this is the first instance to detect this transition
-      private def transition_to_green(config)
+      private def transition_to_green(config, current_time: Time.now)
+        current_ts = current_time.to_i
         meta_key = metadata_key(config)
 
-        # Atomic operation using HDEL that returns number of fields actually deleted
-        @redis.then do |client|
-          client.hdel(meta_key, "recovery_started_at", "last_breach_at", "recovery_scheduled_after") > 0
+        became_green = @redis.then do |client|
+          client.evalsha(
+            @transition_to_green_sha,
+            argv: [current_ts],
+            keys: [meta_key]
+          )
         end
+        became_green == 1
       end
 
       # Transitions to YELLOW (recovery) state and ensures only one notification

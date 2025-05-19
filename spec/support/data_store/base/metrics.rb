@@ -605,7 +605,7 @@ RSpec.shared_examples "data store metrics" do
         let(:outdated_failure) { Stoplight::Failure.from_error(error, time: Time.now - window_size - 1) }
         let(:window_size) { 300 }
 
-        it "returns the the number of successful requests within the current window" do
+        it "returns the the number of successful failures within the current window" do
           data_store.record_failure(config, outdated_failure)
           data_store.record_failure(config, failure)
           data_store.record_failure(config, failure)
@@ -614,6 +614,21 @@ RSpec.shared_examples "data store metrics" do
             failures: 2,
             consecutive_failures: 3
           )
+        end
+      end
+
+      context "when a failure after successful recovery" do
+        let(:outdated_failure) { Stoplight::Failure.from_error(error, time: Time.now - cool_off_time - 1) }
+        let(:cool_off_time) { 60 }
+        let(:window_size) { 300 }
+
+        it "returns the the number of successful failures within the current window after recovery" do
+          data_store.record_failure(config, outdated_failure)
+          data_store.transition_to_color(config, Stoplight::Color::RED)
+          data_store.transition_to_color(config, Stoplight::Color::GREEN)
+
+          data_store.record_failure(config, failure)
+          expect(data_store.get_metadata(config)).to have_attributes(failures: 1)
         end
       end
     end

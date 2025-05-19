@@ -10,6 +10,7 @@ module Stoplight
         GET_METADATA = File.read(File.join(__dir__, "get_metadata.lua"))
         TRANSITION_TO_YELLOW = File.read(File.join(__dir__, "transition_to_yellow.lua"))
         TRANSITION_TO_RED = File.read(File.join(__dir__, "transition_to_red.lua"))
+        TRANSITION_TO_GREEN = File.read(File.join(__dir__, "transition_to_green.lua"))
       end
     end
   end

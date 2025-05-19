@@ -4,11 +4,12 @@ require "connection_pool"
 require "spec_helper"
 
 RSpec.describe Stoplight::DataStore::Redis, :redis do
-  let(:config) { Stoplight.config_provider.provide(name, window_size:) }
+  let(:config) { Stoplight.config_provider.provide(name, window_size:, cool_off_time:) }
   let(:name) { ("a".."z").to_a.shuffle.join }
   let(:failure) { Stoplight::Failure.new("class", "message", Time.new - 60) }
   let(:other) { Stoplight::Failure.new("class", "message 2", Time.new) }
   let(:window_size) { Stoplight::Default::WINDOW_SIZE }
+  let(:cool_off_time) { Stoplight::Default::COOL_OFF_TIME }
 
   describe ".buckets_for_window" do
     subject(:buckets) { described_class.buckets_for_window(light_name, metric:, window_end:, window_size:) }

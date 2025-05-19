@@ -30,10 +30,17 @@ module Stoplight
       def get_metadata(config)
         light_name = config.name
         window_end = Time.now
-        window = config.window_size ? ((window_end - config.window_size + 1)..window_end) : (..window_end)
         recovery_window = (window_end - config.cool_off_time + 1)..window_end
 
         synchronize do
+          recovered_at = @metadata[light_name].recovered_at
+          window = if config.window_size
+            window_start = [recovered_at, (window_end - config.window_size + 1)].compact.max
+            (window_start..window_end)
+          else
+            (..window_end)
+          end
+
           failures = @failures[config.name].count do |request_time|
             window.cover?(request_time)
           end
@@ -245,21 +252,21 @@ module Stoplight
       #
       # @param config [Stoplight::Light::Config] The light configuration
       # @return [Boolean] true if this is the first instance to detect this transition
-      private def transition_to_green(config)
+      private def transition_to_green(config, current_time: Time.now)
         light_name = config.name
 
         synchronize do
           metadata = @metadata[light_name]
-          @metadata[light_name] = metadata.with(
-            recovery_started_at: nil,
-            last_breach_at: nil,
-            recovery_scheduled_after: nil
-          )
-
-          if metadata.recovery_started_at || metadata.last_breach_at
-            true
-          else
+          if metadata.recovered_at
             false
+          else
+            @metadata[light_name] = metadata.with(
+              recovered_at: current_time,
+              recovery_started_at: nil,
+              last_breach_at: nil,
+              recovery_scheduled_after: nil
+            )
+            true
           end
         end
       end
@@ -280,6 +287,7 @@ module Stoplight
             @metadata[light_name] = metadata.with(
               recovery_started_at: current_time,
               recovery_scheduled_after: nil,
+              recovered_at: nil,
               last_breach_at: nil
             )
             true
@@ -301,14 +309,16 @@ module Stoplight
           if metadata.last_breach_at
             @metadata[light_name] = metadata.with(
               recovery_scheduled_after: recovery_scheduled_after,
-              recovery_started_at: nil
+              recovery_started_at: nil,
+              recovered_at: nil
             )
             false
           else
             @metadata[light_name] = metadata.with(
               last_breach_at: current_time,
               recovery_scheduled_after: recovery_scheduled_after,
-              recovery_started_at: nil
+              recovery_started_at: nil,
+              recovered_at: nil
             )
             true
           end
