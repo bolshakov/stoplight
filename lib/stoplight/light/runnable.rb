@@ -28,7 +28,7 @@ module Stoplight
           Color::RED
         elsif (metadata.recovery_scheduled_after && metadata.recovery_scheduled_after < current_time) || metadata.recovery_started_at
           Color::YELLOW
-        elsif metadata.last_breach_at
+        elsif metadata.breached_at
           Color::RED
         else
           Color::GREEN

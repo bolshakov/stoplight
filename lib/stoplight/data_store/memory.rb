@@ -263,7 +263,7 @@ module Stoplight
             @metadata[light_name] = metadata.with(
               recovered_at: current_time,
               recovery_started_at: nil,
-              last_breach_at: nil,
+              breached_at: nil,
               recovery_scheduled_after: nil
             )
             true
@@ -288,7 +288,7 @@ module Stoplight
               recovery_started_at: current_time,
               recovery_scheduled_after: nil,
               recovered_at: nil,
-              last_breach_at: nil
+              breached_at: nil
             )
             true
           end
@@ -306,7 +306,7 @@ module Stoplight
 
         synchronize do
           metadata = @metadata[light_name]
-          if metadata.last_breach_at
+          if metadata.breached_at
             @metadata[light_name] = metadata.with(
               recovery_scheduled_after: recovery_scheduled_after,
               recovery_started_at: nil,
@@ -315,7 +315,7 @@ module Stoplight
             false
           else
             @metadata[light_name] = metadata.with(
-              last_breach_at: current_time,
+              breached_at: current_time,
               recovery_scheduled_after: recovery_scheduled_after,
               recovery_started_at: nil,
               recovered_at: nil

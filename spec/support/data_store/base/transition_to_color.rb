@@ -24,7 +24,7 @@ RSpec.shared_examples "Stoplight::DataStore::Base#transition_to_color" do
 
         expect(data_store.get_metadata(config)).to have_attributes(
           recovery_started_at: nil,
-          last_breach_at: nil,
+          breached_at: nil,
           recovery_scheduled_after: nil
         )
       end
@@ -73,12 +73,12 @@ RSpec.shared_examples "Stoplight::DataStore::Base#transition_to_color" do
 
       it { expect(data_store.transition_to_color(config, Stoplight::Color::RED)).to be(true) }
 
-      it "sets the last_breach_at and recovery_scheduled_after timestamps" do
+      it "sets the breached_at and recovery_scheduled_after timestamps" do
         expect do
           data_store.transition_to_color(config, Stoplight::Color::RED, current_time:)
         end.to change { data_store.get_metadata(config) }
-          .from(have_attributes(last_breach_at: nil, recovery_scheduled_after: nil))
-          .to(have_attributes(last_breach_at: current_time, recovery_scheduled_after: current_time + config.cool_off_time))
+          .from(have_attributes(breached_at: nil, recovery_scheduled_after: nil))
+          .to(have_attributes(breached_at: current_time, recovery_scheduled_after: current_time + config.cool_off_time))
       end
     end
 
@@ -89,12 +89,12 @@ RSpec.shared_examples "Stoplight::DataStore::Base#transition_to_color" do
 
       it { expect(data_store.transition_to_color(config, Stoplight::Color::RED)).to be(true) }
 
-      it "sets the last_breach_at and recovery_scheduled_after timestamps" do
+      it "sets the breached_at and recovery_scheduled_after timestamps" do
         expect do
           data_store.transition_to_color(config, Stoplight::Color::RED, current_time:)
         end.to change { data_store.get_metadata(config) }
-          .from(have_attributes(last_breach_at: nil, recovery_scheduled_after: nil))
-          .to(have_attributes(last_breach_at: current_time, recovery_scheduled_after: current_time + config.cool_off_time))
+          .from(have_attributes(breached_at: nil, recovery_scheduled_after: nil))
+          .to(have_attributes(breached_at: current_time, recovery_scheduled_after: current_time + config.cool_off_time))
       end
     end
 

@@ -5,6 +5,6 @@ local current_ts = tonumber(ARGV[1])
 local became_green = redis.call('HSETNX', meta_key, 'recovered_at', current_ts)
 
 if became_green == 1 then
-  redis.call("HDEL", meta_key, 'recovery_started_at', 'recovery_scheduled_after', 'last_breach_at')
+  redis.call("HDEL", meta_key, 'recovery_started_at', 'recovery_scheduled_after', 'breached_at')
 end
 return became_green
