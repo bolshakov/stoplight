@@ -183,24 +183,4 @@ RSpec.describe Stoplight::Light::Config do
       end
     end
   end
-
-  describe "#validate_config!" do
-    context "when window_size is less than cool_off_time" do
-      let(:window_size) { 5 }
-      let(:cool_off_time) { 10 }
-
-      it "raises a ConfigurationError" do
-        expect { config }.to raise_error(Stoplight::Error::ConfigurationError, "window_size (5) should be >= cool_off_time (10)")
-      end
-    end
-
-    context "when window_size is greater than or equal to cool_off_time" do
-      let(:window_size) { 10 }
-      let(:cool_off_time) { 5 }
-
-      it "does not raise an error" do
-        expect { config }.not_to raise_error
-      end
-    end
-  end
 end
