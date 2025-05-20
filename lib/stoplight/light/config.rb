@@ -60,8 +60,8 @@ module Stoplight
       # @param skipped_errors [Array<Exception>]
       # @param traffic_control [Stoplight::TrafficControl::Base]
       # @param traffic_recovery [Stoplight::TrafficRecovery::Base]
-      def initialize(name: nil, cool_off_time: nil, data_store: nil, error_notifier: nil, notifiers: nil, threshold: nil, window_size: nil,
-        tracked_errors: nil, skipped_errors: nil, traffic_control: nil, traffic_recovery: nil)
+      def initialize(name:, cool_off_time:, data_store:, error_notifier:, notifiers:, threshold:, window_size:,
+        tracked_errors:, skipped_errors:, traffic_control:, traffic_recovery:)
         @name = name
         @cool_off_time = cool_off_time.to_i
         @data_store = DataStore::FailSafe.wrap(data_store)

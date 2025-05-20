@@ -15,7 +15,9 @@ RSpec.describe Stoplight::Light::Config do
       threshold:,
       window_size:,
       tracked_errors:,
-      skipped_errors:
+      skipped_errors:,
+      traffic_control:,
+      traffic_recovery:
     }
   end
 
@@ -28,6 +30,8 @@ RSpec.describe Stoplight::Light::Config do
   let(:window_size) { Stoplight::Default::WINDOW_SIZE }
   let(:tracked_errors) { Stoplight::Default::TRACKED_ERRORS }
   let(:skipped_errors) { Stoplight::Default::SKIPPED_ERRORS }
+  let(:traffic_control) { Stoplight::Default::TRAFFIC_CONTROL }
+  let(:traffic_recovery) { Stoplight::Default::TRAFFIC_RECOVERY }
 
   describe "#cool_off_time" do
     subject { config.cool_off_time }
