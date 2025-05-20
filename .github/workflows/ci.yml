@@ -59,7 +59,7 @@ jobs:
     strategy:
       matrix:
         ruby: [ '3.2', '3.3', '3.4' ]
-        redis: [ '7.4', '8.0' ]
+        redis: [ '6.2', '7.4']
     services:
       redis:
         image: redis:${{ matrix.redis }}

@@ -9,7 +9,7 @@ local successes_key = KEYS[2]
 -- Record success
 if successes_key ~= nil then
   redis.call('ZADD', successes_key, request_ts, request_id)
-  redis.call('EXPIRE', successes_key, bucket_ttl, 'NX')
+  redis.call('EXPIRE', successes_key, bucket_ttl) -- Not supported in Redis 6.2:, 'NX')
 end
 
 -- Record metadata
@@ -33,4 +33,4 @@ else
   )
 end
 
-redis.call('EXPIRE', metadata_key, metadata_ttl, 'GT')
+redis.call('EXPIRE', metadata_key, metadata_ttl) -- Not supported in Redis 6.2:, 'GT')
