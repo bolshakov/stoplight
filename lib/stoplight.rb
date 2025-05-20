@@ -99,9 +99,17 @@ module Stoplight # rubocop:disable Style/Documentation
     #     config.skipped_errors = [RuntimeError]
     #   end
     #
-    def configure
-      raise Error::ConfigurationError, ALREADY_CONFIGURED_ERROR if @config_provider
-
+    # @note It is not recommended to call this method multiple times because after reconfiguring Stoplight
+    #   it will not be possible to change the configuration of existing circuit breakers. If you do so, the method
+    #   produces a warning:
+    #
+    #     "Stoplight reconfigured. Existing circuit breakers will not see the new configuration. New
+    #       configuration: #<Stoplight::Config::ConfigProvider cool_off_time=32, threshold=3, window_size=94, tracked_errors=StandardError, skipped_errors=NoMemoryError,ScriptError,SecurityError,SignalException,SystemExit,SystemStackError, data_store=Stoplight::DataStore::Memory>\n"
+    #
+    #   If you really know what you are doing, you can pass the +trust_me_im_an_engineer+ parameter as +true+ to
+    #   suppress this warning, which could be useful in test environments.
+    #
+    def configure(trust_me_im_an_engineer: false)
       user_defaults = Config::UserDefaultConfig.new
       yield(user_defaults) if block_given?
 
@@ -113,7 +121,11 @@ module Stoplight # rubocop:disable Style/Documentation
           error_notifier: @default_error_notifier,
           notifiers: @default_notifiers
         )
-      )
+      ).tap do |config_provider|
+        if @config_provider && !trust_me_im_an_engineer
+          warn("Stoplight reconfigured. Existing circuit breakers will not see new configuration. New configuration: #{@config_provider.inspect}")
+        end
+      end
     end
 
     # Retrieves the current configuration provider.
@@ -124,13 +136,6 @@ module Stoplight # rubocop:disable Style/Documentation
       CONFIG_MUTEX.synchronize do
         @config_provider ||= configure
       end
-    end
-
-    # Resets the library's configuration.
-    #
-    # This method clears the current configuration, allowing the library to be reconfigured.
-    def reset_config!
-      @config_provider = nil
     end
   end
 end
