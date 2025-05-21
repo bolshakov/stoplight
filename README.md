@@ -363,10 +363,16 @@ end
 2. Reset data store between tests
 ```ruby
 before(:each) do
-  Stoplight.reset_config!
   Stoplight.configure do |config|
     config.data_store = Stoplight::DataStore::Memory.new
   end
+end
+```
+
+For those who know what they're doing...
+```ruby
+Stoplight.configure(trust_me_im_an_engineer: true) do # Suppresses reconfiguration warnings
+  # ...
 end
 ```
 
