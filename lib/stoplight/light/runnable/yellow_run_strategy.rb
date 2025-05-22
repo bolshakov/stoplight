@@ -55,11 +55,15 @@ module Stoplight
           when Color::GREEN
             if data_store.transition_to_color(config, Color::GREEN)
               config.notifiers.each do |notifier|
-                notifier.notify(config, Color::RED, Color::GREEN, nil)
+                notifier.notify(config, Color::YELLOW, Color::GREEN, nil)
               end
             end
           when Color::YELLOW
-            # No action needed, just a successful probe
+            if data_store.transition_to_color(config, Color::YELLOW)
+              config.notifiers.each do |notifier|
+                notifier.notify(config, Color::GREEN, Color::YELLOW, nil)
+              end
+            end
           when Color::RED
             if data_store.transition_to_color(config, Color::RED)
               config.notifiers.each do |notifier|
