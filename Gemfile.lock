@@ -2,6 +2,7 @@ PATH
   remote: .
   specs:
     stoplight (4.1.1)
+      zeitwerk
 
 GEM
   remote: https://rubygems.org/
@@ -163,7 +164,6 @@ DEPENDENCIES
   standard
   stoplight!
   timecop (~> 0.9)
-  zeitwerk
 
 BUNDLED WITH
    2.3.4
