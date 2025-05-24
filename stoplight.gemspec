@@ -29,5 +29,5 @@ Gem::Specification.new do |gem|
   ] + Dir.glob(File.join("lib", "**", "*.rb"))
 
   gem.required_ruby_version = ">= 3.0.6"
-  gem.add_development_dependency "zeitwerk"
+  gem.add_runtime_dependency "zeitwerk"
 end
