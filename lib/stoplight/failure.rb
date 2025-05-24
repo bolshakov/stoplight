@@ -16,8 +16,8 @@ module Stoplight
 
     # @param error [Exception]
     # @return (see #initialize)
-    def self.from_error(error)
-      new(error.class.name, error.message, Time.now)
+    def self.from_error(error, time: Time.now)
+      new(error.class.name, error.message, time)
     end
 
     # @param json [String]
@@ -30,7 +30,7 @@ module Stoplight
 
       error_class = error_object["class"]
       error_message = error_object["message"]
-      time = Time.parse(object["time"])
+      time = Time.at(object["time"])
 
       new(error_class, error_message, time)
     end
@@ -41,21 +41,16 @@ module Stoplight
     def initialize(error_class, error_message, time)
       @error_class = error_class
       @error_message = error_message
-      @time = time
-    end
-
-    # @param cool_off_time [Numeric]
-    # @return [Boolean]
-    def cool_off_period_exceeded?(cool_off_time)
-      Time.now - time >= cool_off_time
+      @time = Time.at(time.to_i) # truncate to seconds
     end
 
     # @param other [Failure]
     # @return [Boolean]
     def ==(other)
-      error_class == other.error_class &&
+      other.is_a?(self.class) &&
+        error_class == other.error_class &&
         error_message == other.error_message &&
-        time == other.time
+        time.to_i == other.time.to_i
     end
 
     # @param options [Object, nil]
@@ -67,7 +62,7 @@ module Stoplight
             class: error_class,
             message: error_message
           },
-          time: time.strftime(TIME_FORMAT)
+          time: time.to_i
         },
         options
       )

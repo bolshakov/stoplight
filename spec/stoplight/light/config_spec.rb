@@ -15,7 +15,9 @@ RSpec.describe Stoplight::Light::Config do
       threshold:,
       window_size:,
       tracked_errors:,
-      skipped_errors:
+      skipped_errors:,
+      traffic_control:,
+      traffic_recovery:
     }
   end
 
@@ -28,6 +30,8 @@ RSpec.describe Stoplight::Light::Config do
   let(:window_size) { Stoplight::Default::WINDOW_SIZE }
   let(:tracked_errors) { Stoplight::Default::TRACKED_ERRORS }
   let(:skipped_errors) { Stoplight::Default::SKIPPED_ERRORS }
+  let(:traffic_control) { Stoplight::Default::TRAFFIC_CONTROL }
+  let(:traffic_recovery) { Stoplight::Default::TRAFFIC_RECOVERY }
 
   describe "#cool_off_time" do
     subject { config.cool_off_time }
@@ -35,16 +39,16 @@ RSpec.describe Stoplight::Light::Config do
     context "when set to a float number" do
       let(:cool_off_time) { 66.4 }
 
-      it "returns the correct value" do
-        is_expected.to eq(cool_off_time)
+      it "returns the integer value" do
+        is_expected.to eq(66)
       end
     end
 
     context "when set to an integer number" do
       let(:cool_off_time) { 66 }
 
-      it "returns the correct value casted to Float" do
-        is_expected.to eq(66.0)
+      it "returns the value" do
+        is_expected.to eq(66)
       end
     end
   end
@@ -93,7 +97,7 @@ RSpec.describe Stoplight::Light::Config do
   describe "#window_size" do
     subject { config.window_size }
 
-    let(:window_size) { 10 }
+    let(:window_size) { 1000 }
 
     it "returns the same value" do
       is_expected.to eq(window_size)

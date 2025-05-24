@@ -19,16 +19,19 @@ module Stoplight
       #
       # @return [String] returns current light color
       def color
-        failures, state = config.data_store.get_all(config)
-        failure = failures.first
+        metadata = config.data_store.get_metadata(config)
 
-        if state == State::LOCKED_GREEN then Color::GREEN
-        elsif state == State::LOCKED_RED then Color::RED
-        elsif config.below_threshold?(failures.size) then Color::GREEN
-        elsif failure&.cool_off_period_exceeded?(config.cool_off_time)
-          Color::YELLOW
-        else
+        current_time = Time.now
+        if metadata.locked_state == State::LOCKED_GREEN
+          Color::GREEN
+        elsif metadata.locked_state == State::LOCKED_RED
           Color::RED
+        elsif (metadata.recovery_scheduled_after && metadata.recovery_scheduled_after < current_time) || metadata.recovery_started_at
+          Color::YELLOW
+        elsif metadata.breached_at
+          Color::RED
+        else
+          Color::GREEN
         end
       end
 
