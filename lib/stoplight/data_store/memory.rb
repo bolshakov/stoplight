@@ -69,8 +69,6 @@ module Stoplight
       # @param window_size [Numeric, nil]
       # @return [void]
       def cleanup(metrics, window_size:)
-        return if rand >= 0.1 # 10% probability to clean up
-
         min_age = Time.now - [window_size&.*(3), METRICS_RETENTION_TIME].compact.min
 
         metrics.reject! { _1 < min_age }
