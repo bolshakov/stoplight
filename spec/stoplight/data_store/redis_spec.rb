@@ -64,6 +64,50 @@ RSpec.describe Stoplight::DataStore::Redis, :redis do
   end
 
   shared_examples Stoplight::DataStore::Redis do
+    let(:warn_on_clock_skew) { false }
+
+    context "clock skew detection" do
+      let(:stderr) { StringIO.new }
+      before { $stderr = stderr }
+      after { $stderr = STDERR }
+
+      context "when clock skew is enabled" do
+        let(:warn_on_clock_skew) { true }
+
+        before do
+          allow(data_store).to receive(:should_sample?).with(0.01).and_return(true)
+        end
+
+        context "when clock is skewed" do
+          let(:current_time) { Time.now - 3600 }
+
+          around do |example|
+            Timecop.travel(current_time) do
+              example.run
+            end
+          end
+
+          it "produces a warning" do
+            expect do
+              data_store.get_metadata(config)
+            end.to change(stderr, :string).to(include("Detected clock skew between Redis and the application server. Redis time:"))
+          end
+        end
+
+        context "when clock is not skewed" do
+          before do
+            allow(data_store).to receive(:should_sample?).with(0.01).and_return(false)
+          end
+
+          it "does not produce a warning" do
+            expect do
+              data_store.get_metadata(config)
+            end.not_to change(stderr, :string)
+          end
+        end
+      end
+    end
+
     it_behaves_like "data store metrics" do
       context "when JSON is invalid" do
         let(:config) { Stoplight.config_provider.provide(name, error_notifier: ->(_error) {}) }
@@ -93,11 +137,11 @@ RSpec.describe Stoplight::DataStore::Redis, :redis do
   end
 
   it_behaves_like Stoplight::DataStore::Redis do
-    let(:data_store) { described_class.new(redis) }
+    let(:data_store) { described_class.new(redis, warn_on_clock_skew: warn_on_clock_skew) }
   end
 
   it_behaves_like Stoplight::DataStore::Redis do
-    let(:data_store) { described_class.new(pool) }
+    let(:data_store) { described_class.new(pool, warn_on_clock_skew: warn_on_clock_skew) }
     let(:pool) { ConnectionPool.new(size: 1, timeout: 5, &redis_client_factory) }
   end
 end

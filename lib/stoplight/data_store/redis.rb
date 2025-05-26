@@ -74,7 +74,10 @@ module Stoplight
       KEY_PREFIX = %w[stoplight v5].join(KEY_SEPARATOR)
 
       # @param redis [::Redis, ConnectionPool<::Redis>]
-      def initialize(redis)
+      # @param warn_on_clock_skew [Boolean] (true) Whether to warn about clock skew between Redis and
+      #   the application server
+      def initialize(redis, warn_on_clock_skew: true)
+        @warn_on_clock_skew = warn_on_clock_skew
         @redis = redis
         @redis.then do |client|
           @record_failure_sha,
@@ -104,6 +107,8 @@ module Stoplight
       end
 
       def get_metadata(config)
+        detect_clock_skew
+
         window_end = Time.now
         window_end_ts = window_end.to_i
         window_start_ts = window_end_ts - [config.window_size, Base::METRICS_RETENTION_TIME].compact.min.to_i
@@ -411,6 +416,24 @@ module Stoplight
 
       private def metadata_ttl
         METADATA_TTL
+      end
+
+      SKEW_TOLERANCE = 5 # seconds
+      private_constant :SKEW_TOLERANCE
+
+      private def detect_clock_skew
+        return unless @warn_on_clock_skew
+        return unless should_sample?(0.01) # 1% chance
+
+        redis_seconds, _redis_millis = @redis.then(&:time)
+        app_seconds = Time.now.to_i
+        if (redis_seconds - app_seconds).abs > SKEW_TOLERANCE
+          warn("Detected clock skew between Redis and the application server. Redis time: #{redis_seconds}, Application time: #{app_seconds}. See https://github.com/bolshakov/stoplight/wiki/Clock-Skew-and-Stoplight-Reliability")
+        end
+      end
+
+      private def should_sample?(probability)
+        rand <= probability
       end
     end
   end
