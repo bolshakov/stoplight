@@ -12,12 +12,11 @@ if successes_key ~= nil then
   redis.call('EXPIRE', successes_key, bucket_ttl) -- Not supported in Redis 6.2:, 'NX')
 end
 
--- Record metadata
+-- Update metadata
 local meta = redis.call('HMGET', metadata_key, 'last_success_at', 'consecutive_successes')
 local prev_success_ts = tonumber(meta[1])
 local prev_consecutive_successes = tonumber(meta[2])
 
--- Update metadata
 if not prev_success_ts or request_ts > prev_success_ts then
   redis.call(
     'HSET', metadata_key,

@@ -106,7 +106,7 @@ module Stoplight
       def get_metadata(config)
         window_end = Time.now
         window_end_ts = window_end.to_i
-        window_start_ts = window_end_ts - (config.window_size || [config.window_size, Base::METRICS_RETENTION_TIME].compact.min.to_i)
+        window_start_ts = window_end_ts - [config.window_size, Base::METRICS_RETENTION_TIME].compact.min.to_i
         recovery_window_start_ts = window_end_ts - config.cool_off_time.to_i
 
         if config.window_size
@@ -162,7 +162,7 @@ module Stoplight
         @redis.then do |client|
           client.evalsha(
             @record_failure_sha,
-            argv: [current_ts, SecureRandom.uuid, failure_json, metrics_ttl, metadata_ttl],
+            argv: [current_ts, SecureRandom.hex(12), failure_json, metrics_ttl, metadata_ttl],
             keys: [
               metadata_key(config),
               config.window_size && failures_key(config, time: current_ts)

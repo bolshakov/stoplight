@@ -13,12 +13,11 @@ if failures_key ~= nil then
   redis.call('EXPIRE', failures_key, bucket_ttl) -- Not supported in Redis 6.2:, 'NX')
 end
 
--- Record metadata
+-- Update metadata
 local meta = redis.call('HMGET', metadata_key, 'last_failure_at', 'consecutive_failures')
 local prev_failure_ts = tonumber(meta[1])
 local prev_consecutive_failures = tonumber(meta[2])
 
--- Update metadata
 if not prev_failure_ts or failure_ts > prev_failure_ts then
   redis.call(
     'HSET', metadata_key,
