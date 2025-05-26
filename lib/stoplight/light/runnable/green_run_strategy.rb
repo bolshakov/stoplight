@@ -19,7 +19,7 @@ module Stoplight
         def execute(fallback, &code)
           # TODO: Consider implementing sampling rate to limit the memory footprint
           code.call.tap { record_success }
-        rescue Exception => error # rubocop: disable Lint/RescueException
+        rescue => error
           if config.track_error?(error)
             record_error(error)
 

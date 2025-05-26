@@ -20,7 +20,7 @@ module Stoplight
         def execute(fallback, &code)
           # TODO: We need to employ a probabilistic approach here to avoid "thundering herd" problem
           code.call.tap { record_recovery_probe_success }
-        rescue Exception => error # rubocop: disable Lint/RescueException
+        rescue => error
           if config.track_error?(error)
             record_recovery_probe_failure(error)
 

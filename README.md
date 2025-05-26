@@ -193,11 +193,7 @@ light = Stoplight('payment-service')
 
 ## Error Handling
 
-By default, Stoplight tracks all `StandardError` exceptions, except for:
-
-```
-NoMemoryError, ScriptError, SecurityError, SignalException, SystemExit, SystemStackError
-```
+By default, Stoplight tracks all `StandardError` exceptions.
 
 ### Custom Error Configuration
 
@@ -223,8 +219,7 @@ Stoplight uses an in-memory data store out of the box:
 
 ```ruby
 require 'stoplight'
-# => true
-Stoplight.default_data_store
+Stoplight::Default::DATA_STORE
 # => #<Stoplight::DataStore::Memory:...>
 ```
 
