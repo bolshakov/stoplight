@@ -15,7 +15,11 @@ And(/^notification about transition from (#{match_color}) to (#{match_color}) is
 end
 
 Then(/^(?:the light|it) returns "([^"]+)"$/) do |expected_result|
-  expect(last_result).to eq(expected_result)
+  if last_exception
+    expect(last_exception).to be_nil, "Expected no exception, but got #{last_exception.class}: #{last_exception.message}"
+  else
+    expect(last_result).to eq(expected_result)
+  end
 end
 
 Then(/^(?:the light|it) fails with error:$/) do |table|

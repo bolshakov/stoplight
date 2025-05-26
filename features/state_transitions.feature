@@ -31,7 +31,7 @@ Feature: Stoplight State Transitions
     And the protected service recovers and starts functioning normally
     When I make a request to the protected service
     Then the light color is green
-    And notification about transition from red to green is sent
+    And notification about transition from yellow to green is sent
 
   Scenario: Light transitions to red after failure in yellow state
     Given the protected service starts failing with "connection-timeout"

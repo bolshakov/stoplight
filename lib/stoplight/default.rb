@@ -20,7 +20,7 @@ module Stoplight
 
     THRESHOLD = 3
 
-    WINDOW_SIZE = Float::INFINITY
+    WINDOW_SIZE = nil
 
     TRACKED_ERRORS = [StandardError].freeze
     SKIPPED_ERRORS = [
@@ -31,5 +31,8 @@ module Stoplight
       SystemExit,
       SystemStackError
     ].freeze
+
+    TRAFFIC_CONTROL = TrafficControl::ConsecutiveFailures.new
+    TRAFFIC_RECOVERY = TrafficRecovery::SingleSuccess.new
   end
 end
