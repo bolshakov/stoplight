@@ -194,6 +194,7 @@ light = Stoplight('payment-service')
 ## Error Handling
 
 By default, Stoplight tracks all `StandardError` exceptions.
+Note: System-level exceptions (e.g., `NoMemoryError`, `SignalException`) are not tracked, as they are not subclasses of `StandardError`.
 
 ### Custom Error Configuration
 
