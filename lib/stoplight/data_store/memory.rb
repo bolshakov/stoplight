@@ -81,7 +81,6 @@ module Stoplight
         light_name = config.name
 
         synchronize do
-          # Keep at most +config.threshold+ number of errors
           @failures[light_name].unshift(failure.time) if config.window_size
 
           cleanup(@failures[light_name], window_size: config.window_size)
