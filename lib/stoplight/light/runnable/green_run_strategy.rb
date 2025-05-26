@@ -17,7 +17,7 @@ module Stoplight
         # @return [Object] The result of the code block if successful.
         # @raise [Exception] Re-raises the error if it is not tracked or no fallback is provided.
         def execute(fallback, &code)
-          # Consider implementing sampling rate to limit the memory footprint
+          # TODO: Consider implementing sampling rate to limit the memory footprint
           code.call.tap { record_success }
         rescue Exception => error # rubocop: disable Lint/RescueException
           if config.track_error?(error)
