@@ -2,6 +2,9 @@
 
 source "https://rubygems.org"
 
+gem "sinatra"
+gem "sinatra-contrib"
+
 gemspec
 
 group :development do
