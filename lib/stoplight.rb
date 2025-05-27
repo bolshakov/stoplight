@@ -4,6 +4,7 @@ require "zeitwerk"
 
 loader = Zeitwerk::Loader.for_gem
 loader.inflector.inflect("io" => "IO")
+loader.do_not_eager_load("#{__dir__}/stoplight/data_store")
 loader.ignore("#{__dir__}/stoplight/rspec.rb", "#{__dir__}/stoplight/rspec")
 loader.setup
 
