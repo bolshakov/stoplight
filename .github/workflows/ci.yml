@@ -47,7 +47,7 @@ jobs:
           bundler-cache: true
 
       - name: Run Features
-        run: bundle exec cucumber
+        run: bundle exec cucumber features/stoplight
         env:
           STOPLIGHT_REDIS_URL: "redis://127.0.0.1:6379/0"
           STOPLIGHT_DATA_STORE: ${{ matrix.data_store }}
