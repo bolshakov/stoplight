@@ -23,14 +23,7 @@ module Stoplight
     WINDOW_SIZE = nil
 
     TRACKED_ERRORS = [StandardError].freeze
-    SKIPPED_ERRORS = [
-      NoMemoryError,
-      ScriptError,
-      SecurityError,
-      SignalException,
-      SystemExit,
-      SystemStackError
-    ].freeze
+    SKIPPED_ERRORS = [].freeze
 
     TRAFFIC_CONTROL = TrafficControl::ConsecutiveFailures.new
     TRAFFIC_RECOVERY = TrafficRecovery::SingleSuccess.new

@@ -70,7 +70,7 @@ module Stoplight
         @threshold = threshold
         @window_size = window_size
         @tracked_errors = Array(tracked_errors)
-        @skipped_errors = Set[*skipped_errors, *Stoplight::Default::SKIPPED_ERRORS].to_a
+        @skipped_errors = Array(skipped_errors)
         @traffic_control = traffic_control
         @traffic_recovery = traffic_recovery
       end
