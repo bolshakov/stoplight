@@ -3,7 +3,7 @@
 require "securerandom"
 
 module Stoplight
-  module Admin
+  class Admin
     class LightsRepository
       class Light
         COLORS = [
@@ -58,6 +58,7 @@ module Stoplight
           state == Stoplight::State::UNLOCKED
         end
 
+        # @return [Hash]
         def as_json
           {
             name: name,
@@ -78,7 +79,9 @@ module Stoplight
           return unless last_failure_time
 
           time_difference = Time.now - last_failure_time
-          if time_difference < 60
+          if time_difference < 1
+            "just now"
+          elsif time_difference < 60
             "#{time_difference.to_i}s ago"
           elsif time_difference < 3600
             "#{(time_difference / 60).to_i}m ago"
@@ -96,7 +99,7 @@ module Stoplight
             else
               "Last Error"
             end
-          when YELLOW
+          when Stoplight::Color::YELLOW
             "Testing Recovery"
           when GREEN
             if locked?
@@ -116,7 +119,7 @@ module Stoplight
             else
               "#{latest_failure.error_class}: #{latest_failure.error_message}"
             end
-          when YELLOW
+          when Stoplight::Color::YELLOW
             "#{latest_failure.error_class}: #{latest_failure.error_message}"
           when GREEN
             if locked?

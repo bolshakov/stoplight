@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Stoplight
-  module Admin
+  class Admin
     class LightsRepository
       # @!attribute data_store
       #   @return [Stoplight::DataStore::Base]
