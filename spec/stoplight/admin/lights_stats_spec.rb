@@ -1,11 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Stoplight::Admin::LightsStats do
-  subject(:light_stats) { described_class.new(lights) }
-
-  describe "#call" do
-    subject(:stats) { light_stats.call }
-
+  shared_examples Stoplight::Admin::LightsStats do
     context "when there are no lights" do
       let(:lights) { [] }
 
@@ -52,5 +48,14 @@ RSpec.describe Stoplight::Admin::LightsStats do
         )
       end
     end
+  end
+
+  it_behaves_like Stoplight::Admin::LightsStats, "#call" do
+    subject(:light_stats) { described_class.new(lights) }
+    subject(:stats) { light_stats.call }
+  end
+
+  it_behaves_like Stoplight::Admin::LightsStats, ".call" do
+    subject(:stats) { described_class.new(lights).call }
   end
 end

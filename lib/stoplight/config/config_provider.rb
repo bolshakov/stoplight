@@ -44,6 +44,11 @@ module Stoplight
         )
       end
 
+      # @return [Stoplight::DataStore::Base]
+      def data_store
+        default_settings.fetch(:data_store)
+      end
+
       # Returns a configuration for a specific light with the given name and settings overrides.
       #
       # @param light_name [Symbol, String] The name of the light.

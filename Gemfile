@@ -14,6 +14,7 @@ group :development do
   gem "cucumber"
   gem "database_cleaner-redis", "~> 2.0"
   gem "debug"
+  gem "rack-test"
   gem "rake", "~> 13.3"
   gem "rantly", "~> 2.0.0"
   gem "redis", "~> 5.4"

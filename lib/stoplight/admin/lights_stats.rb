@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Stoplight
-  module Admin
+  class Admin
     class LightsStats
       EMPTY_STATS = {
         count_red: 0, count_yellow: 0, count_green: 0,

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Stoplight
-  module Admin
+  class Admin
     class Dependencies
       # @!attribute data_store
       #   @return [Stoplight::DataStore::Base]
@@ -19,14 +19,6 @@ module Stoplight
       end
 
       # @return [Stoplight::Admin::Actions::Home]
-      def home_action
-        Stoplight::Admin::Actions::Home.new(
-          lights_repository: lights_repository,
-          lights_stats: Stoplight::Admin::LightsStats
-        )
-      end
-
-      # @return [Stoplight::Admin::Actions::Stats]
       def stats_action
         Stoplight::Admin::Actions::Stats.new(
           lights_repository: lights_repository,

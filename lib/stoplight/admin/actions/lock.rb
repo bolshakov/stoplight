@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Stoplight
-  module Admin
+  class Admin
     module Actions
       # This action locks light
       class Lock < Action
