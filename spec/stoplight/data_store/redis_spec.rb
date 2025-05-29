@@ -71,7 +71,7 @@ RSpec.describe Stoplight::DataStore::Redis, :redis do
       before { $stderr = stderr }
       after { $stderr = STDERR }
 
-      context "when clock skew is enabled" do
+      context "when clock skew warning is enabled" do
         let(:warn_on_clock_skew) { true }
 
         before do
@@ -91,6 +91,42 @@ RSpec.describe Stoplight::DataStore::Redis, :redis do
             expect do
               data_store.get_metadata(config)
             end.to change(stderr, :string).to(include("Detected clock skew between Redis and the application server. Redis time:"))
+          end
+        end
+
+        context "when clock is not skewed" do
+          before do
+            allow(data_store).to receive(:should_sample?).with(0.01).and_return(false)
+          end
+
+          it "does not produce a warning" do
+            expect do
+              data_store.get_metadata(config)
+            end.not_to change(stderr, :string)
+          end
+        end
+      end
+
+      context "when clock skew warning is disabled" do
+        let(:warn_on_clock_skew) { false }
+
+        before do
+          allow(data_store).to receive(:should_sample?).with(0.01).and_return(true)
+        end
+
+        context "when clock is skewed" do
+          let(:current_time) { Time.now - 3600 }
+
+          around do |example|
+            Timecop.travel(current_time) do
+              example.run
+            end
+          end
+
+          it "does not produce a warning" do
+            expect do
+              data_store.get_metadata(config)
+            end.not_to change(stderr, :string)
           end
         end
 
