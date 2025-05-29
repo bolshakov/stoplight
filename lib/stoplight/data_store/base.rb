@@ -64,14 +64,6 @@ module Stoplight
         raise NotImplementedError
       end
 
-      # Clears the state of a specific light configuration.
-      #
-      # @param config [Stoplight::Light::Config]
-      # @return [String] The cleared state.
-      def clear_state(config)
-        raise NotImplementedError
-      end
-
       # Transitions the Stoplight to the specified color.
       #
       # This method performs a color transition operation that works across distributed instances

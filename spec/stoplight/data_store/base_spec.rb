@@ -50,13 +50,6 @@ RSpec.describe Stoplight::DataStore::Base do
     end
   end
 
-  describe "#clear_state" do
-    it "is not implemented" do
-      expect { data_store.clear_state(nil) }
-        .to raise_error(NotImplementedError)
-    end
-  end
-
   describe "#transition_to_color" do
     it "is not implemented" do
       expect { data_store.transition_to_color(nil, nil) }

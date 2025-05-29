@@ -50,12 +50,6 @@ module Stoplight
         end
       end
 
-      def get_state(config)
-        with_fallback(State::UNLOCKED, config) do
-          data_store.get_state(config)
-        end
-      end
-
       def record_failure(config, failure)
         with_fallback(nil, config) do
           data_store.record_failure(config, failure)
@@ -83,12 +77,6 @@ module Stoplight
       def set_state(config, state)
         with_fallback(State::UNLOCKED, config) do
           data_store.set_state(config, state)
-        end
-      end
-
-      def clear_state(config)
-        with_fallback(State::UNLOCKED, config) do
-          data_store.clear_state(config)
         end
       end
 

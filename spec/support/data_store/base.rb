@@ -2,7 +2,6 @@
 
 require_relative "base/names"
 require_relative "base/set_state"
-require_relative "base/clear_state"
 require_relative "base/metrics"
 require_relative "base/transition_to_color"
 

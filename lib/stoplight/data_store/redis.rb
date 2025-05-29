@@ -243,17 +243,6 @@ module Stoplight
         state
       end
 
-      def clear_state(config)
-        key = metadata_key(config)
-        state, _ = @redis.then do |client|
-          client.multi do |transaction|
-            transaction.hget(key, "locked_state")
-            transaction.hdel(key, "locked_state")
-          end
-        end
-        state || State::UNLOCKED
-      end
-
       # Combined method that performs the state transition based on color
       #
       # @param config [Stoplight::Light::Config] The light configuration
