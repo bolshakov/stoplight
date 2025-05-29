@@ -10,6 +10,6 @@ RSpec.shared_examples "Stoplight::DataStore::Base#set_state" do
   it "persists the state" do
     data_store.set_state(config, state)
 
-    expect(data_store.get_state(config)).to eql(state)
+    expect(data_store.get_metadata(config).locked_state).to eql(state)
   end
 end

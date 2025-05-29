@@ -43,22 +43,9 @@ RSpec.describe Stoplight::DataStore::Base do
     end
   end
 
-  describe "#get_state" do
-    it "is not implemented" do
-      expect { data_store.get_state(nil) }.to raise_error(NotImplementedError)
-    end
-  end
-
   describe "#set_state" do
     it "is not implemented" do
       expect { data_store.set_state(nil, nil) }
-        .to raise_error(NotImplementedError)
-    end
-  end
-
-  describe "#clear_state" do
-    it "is not implemented" do
-      expect { data_store.clear_state(nil) }
         .to raise_error(NotImplementedError)
     end
   end

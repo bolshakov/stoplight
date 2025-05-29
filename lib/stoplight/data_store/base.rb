@@ -55,28 +55,12 @@ module Stoplight
         raise NotImplementedError
       end
 
-      # Retrieves the state of a specific light configuration.
-      #
-      # @param config [Stoplight::Light::Config]
-      # @return [String]
-      def get_state(config)
-        raise NotImplementedError
-      end
-
       # Sets the state of a specific light configuration.
       #
       # @param config [Stoplight::Light::Config]
       # @param state [String] The new state to set.
       # @return [String] The state that was set.
       def set_state(config, state)
-        raise NotImplementedError
-      end
-
-      # Clears the state of a specific light configuration.
-      #
-      # @param config [Stoplight::Light::Config]
-      # @return [String] The cleared state.
-      def clear_state(config)
         raise NotImplementedError
       end
 
