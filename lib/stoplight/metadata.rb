@@ -18,31 +18,11 @@ module Stoplight
     :recovery_started_at,
     :recovered_at
   ) do
-    class << self
-      def empty
-        new(
-          successes: nil,
-          failures: nil,
-          recovery_probe_successes: nil,
-          recovery_probe_failures: nil,
-          last_failure_at: nil,
-          last_success_at: nil,
-          consecutive_failures: 0,
-          consecutive_successes: 0,
-          last_failure: nil,
-          breached_at: nil,
-          locked_state: nil,
-          recovery_started_at: nil,
-          recovery_scheduled_after: nil,
-          recovered_at: nil
-        )
-      end
-    end
     def initialize(
-      successes:,
-      failures:,
-      recovery_probe_successes:,
-      recovery_probe_failures:,
+      successes: nil,
+      failures: nil,
+      recovery_probe_successes: nil,
+      recovery_probe_failures: nil,
       last_failure_at: nil,
       last_success_at: nil,
       consecutive_failures: 0,
@@ -70,6 +50,22 @@ module Stoplight
         recovery_started_at: (Time.at(Integer(recovery_started_at)) if recovery_started_at),
         recovered_at: (Time.at(Integer(recovered_at)) if recovered_at),
       )
+    end
+
+    # @param at [Time] (Time.now) the moment of time when the color is determined
+    # @return [String] one of +Color::GREEN+, +Color::RED+, or +Color::YELLOW+
+    def color(at: Time.now)
+      if locked_state == State::LOCKED_GREEN
+        Color::GREEN
+      elsif locked_state == State::LOCKED_RED
+        Color::RED
+      elsif (recovery_scheduled_after && recovery_scheduled_after < at) || recovery_started_at
+        Color::YELLOW
+      elsif breached_at
+        Color::RED
+      else
+        Color::GREEN
+      end
     end
   end
 end

@@ -16,7 +16,7 @@ module Stoplight
         @recovery_probe_failures = Hash.new { |h, k| h[k] = [] }
         @recovery_probe_successes = Hash.new { |h, k| h[k] = [] }
 
-        @metadata = Hash.new { |h, k| h[k] = Metadata.empty }
+        @metadata = Hash.new { |h, k| h[k] = Metadata.new }
         super # MonitorMixin
       end
 

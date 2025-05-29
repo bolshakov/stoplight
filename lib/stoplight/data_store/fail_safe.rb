@@ -45,7 +45,7 @@ module Stoplight
       end
 
       def get_metadata(config)
-        with_fallback(Metadata.empty, config) do
+        with_fallback(Metadata.new, config) do
           data_store.get_metadata(config)
         end
       end
