@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Stoplight
-  class Light < CircuitBreaker
+  class Light
     # A +Stoplight::Light+ configuration object.
     # @api private
     class Config

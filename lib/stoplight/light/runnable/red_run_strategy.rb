@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Stoplight
-  class Light < CircuitBreaker
+  class Light
     module Runnable
       # Defines how the light executes when it is red.
       #

@@ -99,7 +99,7 @@ RSpec.describe "Stoplight" do
   end
 
   it "is a class" do
-    expect(light).to be_kind_of(Stoplight::CircuitBreaker)
+    expect(light).to be_kind_of(Stoplight::Light)
   end
 
   describe "#name" do

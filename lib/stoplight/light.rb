@@ -3,7 +3,7 @@
 module Stoplight
   #
   # @api private use +Stoplight()+ method instead
-  class Light < CircuitBreaker
+  class Light
     include Configurable
     include Lockable
     include Runnable
