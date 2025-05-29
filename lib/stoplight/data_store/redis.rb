@@ -236,12 +236,6 @@ module Stoplight
         get_metadata(config)
       end
 
-      def get_state(config)
-        @redis.then do |client|
-          client.hget(metadata_key(config), "locked_state")
-        end || State::UNLOCKED
-      end
-
       def set_state(config, state)
         @redis.then do |client|
           client.hset(metadata_key(config), "locked_state", state)

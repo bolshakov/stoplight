@@ -14,7 +14,7 @@ RSpec.shared_examples "Stoplight::DataStore::Base#clear_state" do
 
     expect do
       data_store.clear_state(config)
-    end.to change { data_store.get_state(config) }
+    end.to change { data_store.get_metadata(config).locked_state }
       .from(state).to(Stoplight::State::UNLOCKED)
   end
 end

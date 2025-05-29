@@ -190,18 +190,6 @@ module Stoplight
       end
 
       # @param config [Stoplight::Light::Config]
-      # @return [String]
-      def get_state(config)
-        light_name = config.name
-
-        metadata = synchronize do
-          @metadata[light_name]
-        end
-
-        metadata.locked_state || State::UNLOCKED
-      end
-
-      # @param config [Stoplight::Light::Config]
       # @param state [String]
       # @return [String]
       def set_state(config, state)

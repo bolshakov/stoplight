@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require_relative "base/names"
-require_relative "base/get_state"
 require_relative "base/set_state"
 require_relative "base/clear_state"
 require_relative "base/metrics"
