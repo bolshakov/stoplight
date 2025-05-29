@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Stoplight
-  class Light < CircuitBreaker
+  class Light
     module Runnable
       # Represents an abstract strategy for running a light's operations.
       # Every new strategy should be a child of this class.

@@ -3,7 +3,7 @@
 require "forwardable"
 
 module Stoplight
-  class Light < CircuitBreaker
+  class Light
     # Implements light configuration behaviour
     module Configurable
       extend Forwardable
