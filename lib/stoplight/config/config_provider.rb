@@ -15,7 +15,7 @@ module Stoplight
     class ConfigProvider
       # @!attribute [r] default_settings
       #   @return [Hash]
-      private attr_reader :default_settings
+      attr_reader :default_settings
 
       CONFIGURATION_ERROR = <<~ERROR
         Configuration conflict detected!
@@ -42,6 +42,17 @@ module Stoplight
           user_default_config.to_h,
           legacy_config.to_h
         )
+      end
+
+      def inspect
+        "#<#{self.class.name} " \
+          "cool_off_time=#{default_settings[:cool_off_time]}, " \
+          "threshold=#{default_settings[:threshold]}, " \
+          "window_size=#{default_settings[:window_size]}, " \
+          "tracked_errors=#{default_settings[:tracked_errors].join(",")}, " \
+          "skipped_errors=#{default_settings[:skipped_errors].join(",")}, " \
+          "data_store=#{default_settings[:data_store].class.name}" \
+          ">"
       end
 
       # Returns a configuration for a specific light with the given name and settings overrides.

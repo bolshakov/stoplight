@@ -23,12 +23,12 @@ RSpec.describe Stoplight do
 
   describe ".default_error_notifier" do
     around do |example|
-      Stoplight.reset_config!
+      Stoplight.instance_variable_set(:@config_provider, nil)
       Stoplight.instance_variable_set(:@default_error_notifier, nil)
 
       example.run
 
-      Stoplight.reset_config!
+      Stoplight.instance_variable_set(:@config_provider, nil)
       Stoplight.instance_variable_set(:@default_error_notifier, nil)
     end
 
@@ -45,12 +45,12 @@ RSpec.describe Stoplight do
 
   describe ".default_data_store" do
     around do |example|
-      Stoplight.reset_config!
+      Stoplight.instance_variable_set(:@config_provider, nil)
       Stoplight.instance_variable_set(:@default_data_store, nil)
 
       example.run
 
-      Stoplight.reset_config!
+      Stoplight.instance_variable_set(:@config_provider, nil)
       Stoplight.instance_variable_set(:@default_data_store, nil)
     end
 
@@ -67,12 +67,12 @@ RSpec.describe Stoplight do
 
   describe ".default_notifiers" do
     around do |example|
-      Stoplight.reset_config!
+      Stoplight.instance_variable_set(:@config_provider, nil)
       Stoplight.instance_variable_set(:@default_notifiers, nil)
 
       example.run
 
-      Stoplight.reset_config!
+      Stoplight.instance_variable_set(:@config_provider, nil)
       Stoplight.instance_variable_set(:@default_notifiers, nil)
     end
 
@@ -144,16 +144,47 @@ RSpec.describe "Stoplight" do
   end
 
   describe ".configure" do
-    before { Stoplight.reset_config! }
-    after { Stoplight.reset_config! }
+    context "when already configured" do
+      before do
+        $stderr = StringIO.new
 
-    it "raises an error if configured more than once" do
-      Stoplight.configure {}
-      expect { Stoplight.configure {} }.to raise_error(Stoplight::Error::ConfigurationError, "Stoplight must be configured only once")
+        Stoplight.configure(trust_me_im_an_engineer: true) do |config|
+          config.window_size = 94
+          config.cool_off_time = 32
+        end
+      end
+
+      after { $stderr = STDERR }
+
+      it "reconfigures with a warning" do
+        Stoplight.configure do |config|
+          config.window_size = 14
+        end
+
+        expect(Stoplight.config_provider.provide("")).to have_attributes(
+          window_size: 14,
+          cool_off_time: Stoplight::Default::COOL_OFF_TIME
+        )
+
+        expect($stderr.string).to include("Stoplight reconfigured. Existing circuit breakers will not see new configuration")
+      end
+
+      it "trusts an engineer" do
+        expect do
+          Stoplight.configure(trust_me_im_an_engineer: true) do |config|
+            config.window_size = 14
+          end
+        end.not_to change($stderr, :string)
+
+        expect(Stoplight.config_provider.provide("")).to have_attributes(
+          window_size: 14,
+          cool_off_time: Stoplight::Default::COOL_OFF_TIME
+        )
+      end
     end
 
     it "allows configuration with a block" do
-      Stoplight.configure do |config|
+      Stoplight.configure(trust_me_im_an_engineer: true) do |config|
         config.window_size = 94
       end
       expect(Stoplight.config_provider.provide("")).to have_attributes(
