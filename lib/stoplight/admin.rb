@@ -31,12 +31,6 @@ module Stoplight
       json({stats: stats, lights: lights.map(&:as_json)})
     end
 
-    post "/lock" do
-      dependencies.lock_action.call(params)
-
-      redirect to("/")
-    end
-
     post "/unlock" do
       dependencies.unlock_action.call(params)
 
