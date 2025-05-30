@@ -2,8 +2,6 @@ PATH
   remote: .
   specs:
     stoplight (4.1.1)
-      sinatra
-      sinatra-contrib
       zeitwerk
 
 GEM

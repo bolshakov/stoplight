@@ -29,7 +29,5 @@ Gem::Specification.new do |gem|
   ] + Dir.glob(File.join("lib", "**", "*.rb"))
 
   gem.required_ruby_version = ">= 3.2"
-  gem.add_runtime_dependency "sinatra"
-  gem.add_runtime_dependency "sinatra-contrib"
   gem.add_runtime_dependency "zeitwerk"
 end
