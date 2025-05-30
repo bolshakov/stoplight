@@ -2,8 +2,8 @@
 
 source "https://rubygems.org"
 
-gem "sinatra"
-gem "sinatra-contrib"
+gem "sinatra", require: false
+gem "sinatra-contrib", require: false
 
 gemspec
 
