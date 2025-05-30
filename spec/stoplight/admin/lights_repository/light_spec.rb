@@ -11,7 +11,7 @@ RSpec.describe Stoplight::Admin::LightsRepository::Light do
   end
   let(:failures) { [latest_failure] }
   let(:latest_failure) { Stoplight::Failure.from_error(latest_exception) }
-  let(:latest_exception) { StandardError.new("bang!")}
+  let(:latest_exception) { StandardError.new("bang!") }
   let(:color) { "green" }
   let(:name) { "light-specs" }
   let(:state) { Stoplight::State::UNLOCKED }
@@ -110,7 +110,7 @@ RSpec.describe Stoplight::Admin::LightsRepository::Light do
   end
 
   describe "#latest_failure" do
-    subject{ light.latest_failure }
+    subject { light.latest_failure }
 
     it { is_expected.to eq(latest_failure) }
   end
