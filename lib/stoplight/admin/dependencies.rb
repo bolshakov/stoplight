@@ -18,7 +18,7 @@ module Stoplight
         Stoplight::Admin::LightsRepository.new(data_store: data_store)
       end
 
-      # @return [Stoplight::Admin::Actions::Home]
+      # @return [Stoplight::Admin::Actions::Stats]
       def stats_action
         Stoplight::Admin::Actions::Stats.new(
           lights_repository: lights_repository,
