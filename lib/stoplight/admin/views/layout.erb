@@ -7,6 +7,11 @@
     <title>Stoplight Admin</title>
 
     <script type="module" src="https://cdn.jsdelivr.net/npm/@hotwired/turbo@latest/dist/turbo.es2017-esm.min.js"></script>
+    <script type="module">
+        document.addEventListener("turbo:load", () => {
+            window.initFlowbite()
+        })
+    </script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.css" />
   </head>
   <body>
