@@ -1,9 +1,18 @@
 # frozen_string_literal: true
 
-require "sinatra"
-require "sinatra/contrib"
-require "sinatra/base"
-require "sinatra/json"
+begin
+  require "sinatra"
+  require "sinatra/contrib"
+  require "sinatra/base"
+  require "sinatra/json"
+rescue LoadError
+  raise <<~WARN
+    "sinatra" and "sinatra-contrib" gems are unavailable and necessery for running Stoplight Admin panel
+    Please add them to your Gemfile and run `bundle install`:
+      gem "sinatra", required: false
+      gem "sinatra-contrib", require: false
+  WARN
+end
 
 module Stoplight
   class Admin < Sinatra::Base
