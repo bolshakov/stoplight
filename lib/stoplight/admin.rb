@@ -16,7 +16,7 @@ module Stoplight
 
     helpers Helpers
 
-    set :data_store, Proc.new {Stoplight.config_provider.data_store }
+    set :data_store, proc { Stoplight.config_provider.data_store }
     set :views, File.join(__dir__, "admin", "views")
 
     get "/" do
