@@ -4,19 +4,16 @@ ENV["APP_ENV"] = "test"
 
 require "rack/test"
 
-RSpec.describe Stoplight::Admin, :redis do
-  include Rack::Test::Methods
-  def app
-    Stoplight::Admin
-  end
-
+RSpec.describe Stoplight::Admin, type: %i[request] do
   let(:light) { Stoplight("foo") }
 
-  before :all do
+  before do
+    redis_instance = Redis.new(url: ENV.fetch("STOPLIGHT_REDIS_URL", "redis://127.0.0.1:6379/0"))
+    Stoplight.reset_config!
     Stoplight.configure do |config|
-      config.data_store = Stoplight::DataStore::Redis.new(Redis.new(url: ENV.fetch("STOPLIGHT_REDIS_URL",
-        "redis://127.0.0.1:6379/0")))
+      config.data_store = Stoplight::DataStore::Redis.new(redis_instance)
     end
+    redis_instance.flushall
   end
 
   describe "GET /" do
@@ -56,11 +53,11 @@ RSpec.describe Stoplight::Admin, :redis do
 
   describe "GET /stats" do
     context "with no lights" do
-      it "renders home page correctly" do
+      it "returns expected response" do
         get "/stats"
 
         expect(last_response).to be_ok
-        expect(JSON(last_response.body))
+        expect(response_body)
           .to eq(
             {
               "stats" =>
@@ -81,12 +78,12 @@ RSpec.describe Stoplight::Admin, :redis do
         light.run { 1 / 1 == 0 }
       end
 
-      it "renders home page correctly" do
+      it "returns expected response" do
         get "/stats"
 
         expect(last_response).to be_ok
 
-        expect(JSON(last_response.body))
+        expect(response_body)
           .to eq(
             {
               "stats" =>
