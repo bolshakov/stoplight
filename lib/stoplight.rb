@@ -148,7 +148,7 @@ end
 #   @option settings [Array<StandardError>] :tracked_errors A list of errors to track.
 #   @option settings [Array<Exception>] :skipped_errors A list of errors to skip.
 #
-# @return [Stoplight::CircuitBreaker] A new circuit breaker instance.
+# @return [Stoplight::Light] A new circuit breaker instance.
 # @raise [ArgumentError] If an unknown option is provided in the settings.
 def Stoplight(name, **settings) # rubocop:disable Naming/MethodName
   config = Stoplight.config_provider.provide(name, **settings)
