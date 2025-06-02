@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
-ENV["APP_ENV"] = "test"
-
-require "rack/test"
+require 'spec_helper'
 
 RSpec.describe Stoplight::Admin, type: %i[request] do
   let(:light) { Stoplight("foo") }
