@@ -190,18 +190,6 @@ module Stoplight
       end
 
       # @param config [Stoplight::Light::Config]
-      # @return [String]
-      def get_state(config)
-        light_name = config.name
-
-        metadata = synchronize do
-          @metadata[light_name]
-        end
-
-        metadata.locked_state || State::UNLOCKED
-      end
-
-      # @param config [Stoplight::Light::Config]
       # @param state [String]
       # @return [String]
       def set_state(config, state)
@@ -212,18 +200,6 @@ module Stoplight
           @metadata[light_name] = metadata.with(locked_state: state)
         end
         state
-      end
-
-      # @param config [Stoplight::Light::Config]
-      # @return [String]
-      def clear_state(config)
-        light_name = config.name
-
-        synchronize do
-          metadata = @metadata[light_name]
-          @metadata[light_name] = metadata.with(locked_state: nil)
-          metadata.locked_state || State::UNLOCKED
-        end
       end
 
       # Combined method that performs the state transition based on color

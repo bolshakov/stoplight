@@ -5,7 +5,10 @@ module Stoplight
     module Runnable # rubocop:disable Style/Documentation
       # @return [String]
       def state
-        config.data_store.get_state(config)
+        config
+          .data_store
+          .get_metadata(config)
+          .locked_state
       end
 
       # Returns current color:

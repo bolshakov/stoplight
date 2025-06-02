@@ -83,30 +83,6 @@ RSpec.describe Stoplight::DataStore::FailSafe do
     end
   end
 
-  describe "#get_state" do
-    subject { fail_safe.get_state(config) }
-
-    context "when data_store returns state" do
-      let(:state) { Stoplight::State::LOCKED_GREEN }
-
-      it "returns state from data_store" do
-        expect(error_notifier).not_to receive(:call)
-        expect(data_store).to receive(:get_state).with(config).and_return(state)
-
-        is_expected.to eq(state)
-      end
-    end
-
-    context "when data_store fails" do
-      it "returns UNLOCKED state" do
-        expect(error_notifier).to receive(:call).with(error)
-        expect(data_store).to receive(:get_state).with(config) { raise error }
-
-        is_expected.to eq(Stoplight::State::UNLOCKED)
-      end
-    end
-  end
-
   describe "#set_state" do
     subject { fail_safe.set_state(config, state) }
     let(:state) { Stoplight::State::LOCKED_GREEN }
@@ -124,29 +100,6 @@ RSpec.describe Stoplight::DataStore::FailSafe do
       it "returns UNLOCKED state" do
         expect(error_notifier).to receive(:call).with(error)
         expect(data_store).to receive(:set_state).with(config, state) { raise error }
-
-        is_expected.to eq(Stoplight::State::UNLOCKED)
-      end
-    end
-  end
-
-  describe "#clear_state" do
-    subject { fail_safe.clear_state(config) }
-    let(:state) { Stoplight::State::UNLOCKED }
-
-    context "when data_store clears state" do
-      it "returns state from data_store" do
-        expect(error_notifier).not_to receive(:call)
-        expect(data_store).to receive(:clear_state).with(config).and_return(state)
-
-        is_expected.to eq(state)
-      end
-    end
-
-    context "when data_store fails" do
-      it "returns UNLOCKED state" do
-        expect(error_notifier).to receive(:call).with(error)
-        expect(data_store).to receive(:clear_state).with(config) { raise error }
 
         is_expected.to eq(Stoplight::State::UNLOCKED)
       end

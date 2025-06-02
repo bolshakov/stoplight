@@ -13,8 +13,6 @@ RSpec.describe Stoplight::DataStore::Memory do
   it_behaves_like "data store metrics"
   it_behaves_like "Stoplight::DataStore::Base"
   it_behaves_like "Stoplight::DataStore::Base#names"
-  it_behaves_like "Stoplight::DataStore::Base#get_state"
   it_behaves_like "Stoplight::DataStore::Base#set_state"
-  it_behaves_like "Stoplight::DataStore::Base#clear_state"
   it_behaves_like "Stoplight::DataStore::Base#transition_to_color"
 end
