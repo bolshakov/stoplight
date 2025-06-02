@@ -75,7 +75,7 @@ GEM
       stringio
     racc (1.8.1)
     rainbow (3.1.1)
-    rake (13.2.1)
+    rake (13.3.0)
     rantly (2.0.0)
     rdoc (6.13.1)
       psych (>= 4.0.0)
@@ -158,7 +158,7 @@ DEPENDENCIES
   cucumber
   database_cleaner-redis (~> 2.0)
   debug
-  rake (~> 13.2)
+  rake (~> 13.3)
   rantly (~> 2.0.0)
   redis (~> 5.4)
   rspec (~> 3.13)
