@@ -21,4 +21,5 @@ Stoplight::Admin.configure do
   set :environment, :production
 end
 
-run Stoplight::Admin
+app = Rack::Builder.new { run Stoplight::Admin }.to_app
+app.run!
