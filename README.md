@@ -118,6 +118,35 @@ result = light.run(fallback) { external_service.call }
 If the light is green but the call fails, the fallback receives the `error`. If the light is red, the fallback 
 receives `nil`. In both cases, the return value of the fallback becomes the return value of the `run` method.
 
+## Admin Panel
+
+Stoplight goes with a built-in Admin Panel that can track all active Lights and manually lock them in the desired state (`Green` or `Red`). Locking lights in certain states might be helpful in scenarios like E2E testing.
+
+To add Admin Panel to your Rails project, add this configuration to your `config/routes.rb` file.
+
+```ruby
+Rails.application.routes.draw do
+  # ...
+
+  mount Stoplight::Admin => '/stoplights'
+
+  # ...
+end
+```
+
+**IMPORTANT:** Stoplight Admin Panel requires you to have `sinatra` and `sinatra-contrib` gems installed. You can either add them to your Gemfile:
+
+```ruby
+gem "sinatra", require: false
+gem "sinatra-contrib", require: false
+```
+
+Or install it manually:
+```ruby
+gem install sinatra
+gem install sinatra-contrib
+```
+
 ## Configuration 
 
 ### Global Configuration
