@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
+require "spec_helper"
 
 RSpec.describe Stoplight::Admin, type: %i[request] do
   let(:light) { Stoplight("foo") }
