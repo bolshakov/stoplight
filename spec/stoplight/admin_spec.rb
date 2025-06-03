@@ -4,6 +4,7 @@ require "spec_helper"
 
 RSpec.describe Stoplight::Admin, type: %i[request] do
   let(:light) { Stoplight("foo") }
+  let(:light_condition) { proc { 1 / 1 == 0 } }
 
   before do
     redis_instance = Redis.new(url: ENV.fetch("STOPLIGHT_REDIS_URL", "redis://127.0.0.1:6379/0"))
@@ -28,7 +29,7 @@ RSpec.describe Stoplight::Admin, type: %i[request] do
     end
 
     context "with some lights" do
-      before { light.run { 1 / 1 == 0 } }
+      before { light.run(&light_condition) }
 
       it "renders home page correctly" do
         get "/"
@@ -72,9 +73,7 @@ RSpec.describe Stoplight::Admin, type: %i[request] do
     end
 
     context "with some lights" do
-      before do
-        light.run { 1 / 1 == 0 }
-      end
+      before { light.run(&light_condition) }
 
       it "returns expected response" do
         get "/stats"
@@ -102,7 +101,7 @@ RSpec.describe Stoplight::Admin, type: %i[request] do
 
   describe "POST /unlock" do
     before do
-      light.run { 1 / 1 == 0 }
+      light.run(&light_condition)
       light.lock(Stoplight::Color::GREEN)
     end
 
@@ -116,9 +115,7 @@ RSpec.describe Stoplight::Admin, type: %i[request] do
   end
 
   describe "POST /green" do
-    before do
-      light.run { 1 / 1 == 0 }
-    end
+    before { light.run(&light_condition) }
 
     it "locks the light" do
       post "/green", names: "foo"
@@ -130,9 +127,7 @@ RSpec.describe Stoplight::Admin, type: %i[request] do
   end
 
   describe "POST /red" do
-    before do
-      light.run { 1 / 1 == 0 }
-    end
+    before { light.run(&light_condition) }
 
     it "locks the light" do
       post "/red", names: "foo"
