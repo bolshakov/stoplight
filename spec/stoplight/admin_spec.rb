@@ -2,17 +2,15 @@
 
 require "spec_helper"
 
-RSpec.describe Stoplight::Admin, type: %i[request] do
+RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
   let(:light) { Stoplight("foo") }
   let(:light_condition) { proc { 1 / 1 == 0 } }
 
   before do
-    redis_instance = Redis.new(url: ENV.fetch("STOPLIGHT_REDIS_URL", "redis://127.0.0.1:6379/0"))
     Stoplight.reset_config!
     Stoplight.configure do |config|
-      config.data_store = Stoplight::DataStore::Redis.new(redis_instance)
+      config.data_store = Stoplight::DataStore::Redis.new(redis)
     end
-    redis_instance.flushall
   end
 
   describe "GET /" do
