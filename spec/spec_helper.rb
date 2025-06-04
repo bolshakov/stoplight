@@ -4,16 +4,21 @@ require "simplecov"
 
 require "stoplight"
 require "timecop"
+require "rack/test"
 require_relative "support/data_store/base"
 require_relative "support/light/runnable"
 require_relative "support/database_cleaner"
 require_relative "support/exception_helpers"
+require_relative "support/route_helpers"
 
 Timecop.safe_mode = true
 
 RSpec.configure do |rspec|
+  rspec.include Rack::Test::Methods
   rspec.include ExceptionHelpers
+  rspec.include RouteHelpers, type: :request
 
+  rspec.filter_run_when_matching :focus
   rspec.color = true
   rspec.disable_monkey_patching!
   rspec.order = :random

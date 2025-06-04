@@ -1,0 +1,25 @@
+#!/usr/bin/env ruby
+
+require "bundler/inline"
+
+gemfile do
+  source "https://rubygems.org"
+
+  gem "puma"
+  gem "rackup"
+  gem "redis"
+  gem "sinatra"
+  gem "sinatra-contrib"
+  gem "zeitwerk"
+end
+
+require "sinatra"
+require_relative "../lib/stoplight"
+
+Stoplight::Admin.configure do
+  set :data_store, Stoplight::DataStore::Redis.new(Redis.new)
+  set :environment, :production
+end
+
+app = Rack::Builder.new { run Stoplight::Admin }.to_app
+app.run!
