@@ -15,4 +15,3 @@ Stoplight::Admin.configure do
 end
 
 run Stoplight::Admin
-
