@@ -89,7 +89,7 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
                  "percent_yellow" => 0,
                  "percent_green" => 100},
               "lights" => [
-                {"color" => "green", "failures" => [nil], "locked" => false, "name" => "foo"}
+                {"color" => "green", "failures" => [], "locked" => false, "name" => "foo"}
               ]
             }
           )
