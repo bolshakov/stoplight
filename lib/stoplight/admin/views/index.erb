@@ -28,7 +28,7 @@
     </div>
   </section>
 <% else %>
-  <section class="justify-center space-y-4">
+  <section class="flex flex-wrap justify-center space-y-4">
     <% lights.each do |light| %>
       <%= erb :_card, locals: { light:, color: light.color } %>
     <% end %>
