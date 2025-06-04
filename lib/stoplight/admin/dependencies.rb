@@ -27,6 +27,7 @@ module Stoplight
       end
 
       # @return [Stoplight::Admin::Actions::Lock]
+      # @deprecated Is no longer used in Admin
       def lock_action
         Stoplight::Admin::Actions::Lock.new(lights_repository: lights_repository)
       end
