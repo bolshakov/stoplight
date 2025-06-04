@@ -1,0 +1,31 @@
+# See https://docs.docker.com/engine/reference/builder/#dockerignore-file for more about ignoring files.
+
+# Ignore git directory.
+/.git/
+/.gitignore
+
+# Ignore bundler config.
+/.bundle
+
+# Ignore all environment files.
+/.env*
+
+# Ignore coverage.
+/coverage
+
+# Ignore CI service files.
+/.github
+
+# Ignore Docker-related files
+/.dockerignore
+/Dockerfile*
+
+# Ignore build gems
+/pkg
+
+# Ignore specs and features
+/features
+/spec
+
+# Ignore benchmarks
+/bench
