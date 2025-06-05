@@ -12,6 +12,7 @@
 
 # Ignore coverage.
 /coverage
+.simplecov
 
 # Ignore CI service files.
 /.github
@@ -26,6 +27,7 @@
 # Ignore specs and features
 /features
 /spec
+.rspec
 
 # Ignore benchmarks
 /bench
