@@ -147,6 +147,21 @@ gem install sinatra
 gem install sinatra-contrib
 ```
 
+### Standalone Admin Panel Setup
+
+It is possible to run the Admin Panel separately from your application using the `stoplight-admin:<release-version>` docker image.
+
+```shell
+docker run --net=host stoplight-admin:v5
+```
+
+**IMPORTANT:** Standalone Admin Panel should use the same Redis your application uses. To achieve this, set the `REDIS_URL` ENV variable via `-e REDIS_URL=<url-to-your-redis-servier>.` E.g.:
+
+```shell
+docker run -e REDIS_URL=redis://localhost:6378  --net=host stoplight-admin:v5
+```
+
+
 ## Configuration 
 
 ### Global Configuration
