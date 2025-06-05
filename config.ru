@@ -9,9 +9,7 @@ require "stoplight/admin"
 
 redis = Redis.new
 
-Stoplight::Admin.configure do
-  set :data_store, Stoplight::DataStore::Redis.new(redis)
-  set :environment, :production
-end
+Stoplight::Admin.set :data_store, Stoplight::DataStore::Redis.new(redis)
+Stoplight::Admin.set :environment, :production
 
 run Stoplight::Admin
