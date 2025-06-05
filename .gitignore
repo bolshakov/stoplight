@@ -7,3 +7,4 @@
 /vendor/
 /.idea
 profile_results
+/docker/Gemfile.lock

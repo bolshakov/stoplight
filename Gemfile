@@ -2,10 +2,15 @@
 
 source "https://rubygems.org"
 
-gem "sinatra", require: false
-gem "sinatra-contrib", require: false
-
 gemspec
+
+gem "redis"
+
+group :admin do
+  gem "sinatra", require: false
+  gem "sinatra-contrib", require: false
+  gem "puma", require: false
+end
 
 group :development do
   gem "benchmark-ips", "~> 2.14"
@@ -17,7 +22,6 @@ group :development do
   gem "rack-test"
   gem "rake", "~> 13.3"
   gem "rantly", "~> 2.0.0"
-  gem "redis", "~> 5.4"
   gem "rspec", "~> 3.13"
   gem "ruby-prof"
   gem "simplecov", "~> 0.22"
