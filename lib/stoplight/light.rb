@@ -4,12 +4,18 @@ module Stoplight
   #
   # @api private use +Stoplight()+ method instead
   class Light
-    include Configurable
+    extend Forwardable
+    include ConfigurationBuilderInterface
 
     # @!attribute [r] config
     #   @return [Stoplight::Light::Config]
     #   @api private
     attr_reader :config
+
+    # @!attribute [r] name
+    #   The name of the light.
+    #   @return [String]
+    def_delegator :config, :name
 
     # @param config [Stoplight::Light::Config]
     def initialize(config, green_run_strategy: nil, yellow_run_strategy: nil, red_run_strategy: nil)
@@ -112,6 +118,41 @@ module Stoplight
       other.is_a?(self.class) && config == other.config
     end
 
+    # Reconfigures the light with updated settings and returns a new instance.
+    #
+    # This method allows you to modify the configuration of a +Stoplight::Light+ object
+    # by providing a hash of settings. The original light remains unchanged, and a new
+    # light instance with the updated configuration is returned.
+    #
+    # @param settings [Hash] A hash of configuration options to update.
+    # @option settings [String] :name The name of the light.
+    # @option settings [Numeric] :cool_off_time The cool-off time in seconds before the light attempts recovery.
+    # @option settings [Numeric] :threshold The failure threshold to trigger the red state.
+    # @option settings [Numeric] :window_size The time window in seconds for counting failures.
+    # @option settings [Stoplight::DataStore::Base] :data_store The data store to use for persisting light state.
+    # @option settings [Array<Stoplight::Notifier::Base>] :notifiers A list of notifiers to handle light events.
+    # @option settings [Proc] :error_notifier A custom error notifier to handle exceptions.
+    # @option settings [Array<StandardError>] :tracked_errors A list of errors to track for failure counting.
+    # @option settings [Array<StandardError>] :skipped_errors A list of errors to skip from failure counting.
+    # @return [Stoplight::Light] A new `Stoplight::Light` instance with the updated configuration.
+    #
+    # @example Reconfiguring a light with custom settings
+    #   light = Stoplight('payment-api')
+    #
+    #   # Create a light for invoices with a higher threshold
+    #   invoices_light = light.with(tracked_errors: [TimeoutError], threshold: 10)
+    #
+    #   # Create a light for payments with a lower threshold
+    #   payment_light = light.with(threshold: 5)
+    #
+    #   # Run the lights with their respective configurations
+    #   invoices_light.run(->(error) { [] }) { call_invoices_api }
+    #   payment_light.run(->(error) { nil }) { call_payment_api }
+    # @see +Stoplight()+
+    def with(**settings)
+      reconfigure(config.with(**settings))
+    end
+
     private
 
     def state_strategy_factory(color)
@@ -138,6 +179,12 @@ module Stoplight
     # @return [Stoplight::Runnable::RunStrategy]
     def red_run_strategy
       @red_run_strategy ||= RedRunStrategy.new(config)
+    end
+
+    # @param config [Stoplight::Light::Config]
+    # @return [Stoplight::Light]
+    def reconfigure(config)
+      self.class.new(config)
     end
   end
 end

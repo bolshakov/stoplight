@@ -107,6 +107,24 @@ RSpec.describe Stoplight::Light do
     end
   end
 
+  describe "#with" do
+    let(:settings) do
+      {
+        name: "combined-light",
+        threshold: 5,
+        window_size: 60,
+        tracked_errors: [RuntimeError],
+        skipped_errors: [KeyError, NoMemoryError, ScriptError, SecurityError, SignalException, SystemExit, SystemStackError]
+      }
+    end
+
+    subject(:with_combined_settings) { light.with(**settings) }
+
+    it "applies all settings correctly" do
+      expect(with_combined_settings.config).to have_attributes(**settings)
+    end
+  end
+
   context "with memory data store" do
     let(:config) { Stoplight.config_provider.provide(random_string, data_store:) }
     let(:data_store) { Stoplight::DataStore::Memory.new }
