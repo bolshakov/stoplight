@@ -2,7 +2,7 @@
 
 require "spec_helper"
 
-RSpec.describe Stoplight::Light::Runnable::YellowRunStrategy do
+RSpec.describe Stoplight::Light::YellowRunStrategy do
   subject(:strategy) { described_class.new(config) }
 
   let(:config) do
@@ -15,7 +15,7 @@ RSpec.describe Stoplight::Light::Runnable::YellowRunStrategy do
   let(:traffic_recovery) { instance_double(Stoplight::TrafficRecovery::Base) }
   let(:metadata) { instance_double(Stoplight::Metadata) }
 
-  shared_examples Stoplight::Light::Runnable::YellowRunStrategy do
+  shared_examples Stoplight::Light::YellowRunStrategy do
     shared_examples "recovery success" do
       before do
         expect(traffic_recovery).to receive(:determine_color).with(config, metadata).and_return(recovery_result)
@@ -303,12 +303,12 @@ RSpec.describe Stoplight::Light::Runnable::YellowRunStrategy do
   context "with memory data store" do
     let(:data_store) { Stoplight::DataStore::Memory.new }
 
-    it_behaves_like Stoplight::Light::Runnable::YellowRunStrategy
+    it_behaves_like Stoplight::Light::YellowRunStrategy
   end
 
   context "with redis data store", :redis do
     let(:data_store) { Stoplight::DataStore::Redis.new(redis) }
 
-    it_behaves_like Stoplight::Light::Runnable::YellowRunStrategy
+    it_behaves_like Stoplight::Light::YellowRunStrategy
   end
 end

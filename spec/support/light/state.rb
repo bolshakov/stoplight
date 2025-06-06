@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.shared_examples "Stoplight::Light::Runnable#state" do
+RSpec.shared_examples "Stoplight::Light#state" do
   let(:name) { random_string }
 
   it "is initially unlocked" do

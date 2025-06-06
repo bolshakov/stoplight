@@ -2,12 +2,12 @@
 
 require "spec_helper"
 
-RSpec.describe Stoplight::Light::Runnable::RedRunStrategy do
+RSpec.describe Stoplight::Light::RedRunStrategy do
   subject(:strategy) { described_class.new(config) }
 
   let(:config) { Stoplight.config_provider.provide("foo", data_store:) }
 
-  shared_examples Stoplight::Light::Runnable::RedRunStrategy do
+  shared_examples Stoplight::Light::RedRunStrategy do
     subject(:result) { strategy.execute(fallback) { 42 } }
 
     context "when fallback is provided" do
@@ -37,12 +37,12 @@ RSpec.describe Stoplight::Light::Runnable::RedRunStrategy do
   context "with memory data store" do
     let(:data_store) { Stoplight::DataStore::Memory.new }
 
-    it_behaves_like Stoplight::Light::Runnable::RedRunStrategy
+    it_behaves_like Stoplight::Light::RedRunStrategy
   end
 
   context "with redis data store", :redis do
     let(:data_store) { Stoplight::DataStore::Redis.new(redis) }
 
-    it_behaves_like Stoplight::Light::Runnable::RedRunStrategy
+    it_behaves_like Stoplight::Light::RedRunStrategy
   end
 end

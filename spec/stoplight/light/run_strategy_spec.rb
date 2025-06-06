@@ -2,7 +2,7 @@
 
 require "spec_helper"
 
-RSpec.describe Stoplight::Light::Runnable::RunStrategy do
+RSpec.describe Stoplight::Light::RunStrategy do
   describe "#execute" do
     subject(:strategy) { described_class.new(config) }
 

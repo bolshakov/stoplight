@@ -2,7 +2,7 @@
 
 require "spec_helper"
 
-RSpec.describe Stoplight::Light::Runnable::GreenRunStrategy do
+RSpec.describe Stoplight::Light::GreenRunStrategy do
   subject(:strategy) { described_class.new(config) }
 
   let(:config) do
@@ -16,7 +16,7 @@ RSpec.describe Stoplight::Light::Runnable::GreenRunStrategy do
   let(:notifier) { instance_double(Stoplight::Notifier::Base) }
   let(:traffic_control) { instance_double(Stoplight::TrafficControl::Base) }
 
-  shared_examples Stoplight::Light::Runnable::GreenRunStrategy do
+  shared_examples Stoplight::Light::GreenRunStrategy do
     context "when code executes successfully" do
       subject(:result) { strategy.execute(nil, &code) }
 
@@ -148,12 +148,12 @@ RSpec.describe Stoplight::Light::Runnable::GreenRunStrategy do
   context "with memory data store" do
     let(:data_store) { Stoplight::DataStore::Memory.new }
 
-    it_behaves_like Stoplight::Light::Runnable::GreenRunStrategy
+    it_behaves_like Stoplight::Light::GreenRunStrategy
   end
 
   context "with redis data store", :redis do
     let(:data_store) { Stoplight::DataStore::Redis.new(redis) }
 
-    it_behaves_like Stoplight::Light::Runnable::GreenRunStrategy
+    it_behaves_like Stoplight::Light::GreenRunStrategy
   end
 end
