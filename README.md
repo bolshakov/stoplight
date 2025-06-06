@@ -48,6 +48,14 @@ stateDiagram
     Yellow --> Green: Successful attempt
     Yellow --> Red: Failed attempt
     Green --> Green: Success
+    
+    classDef greenState fill:#28a745,stroke:#1e7e34,stroke-width:2px,color:#fff
+    classDef redState fill:#dc3545,stroke:#c82333,stroke-width:2px,color:#fff
+    classDef yellowState fill:#ffc107,stroke:#e0a800,stroke-width:2px,color:#000
+    
+    class Green greenState
+    class Red redState
+    class Yellow yellowState
 ```
 
 - **Green**: Normal operation. Code runs as expected. (Circuit closed)
