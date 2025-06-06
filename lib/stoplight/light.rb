@@ -5,7 +5,6 @@ module Stoplight
   # @api private use +Stoplight()+ method instead
   class Light
     include Configurable
-    include Lockable
 
     # @!attribute [r] config
     #   @return [Stoplight::Light::Config]
@@ -69,6 +68,40 @@ module Stoplight
 
       strategy = state_strategy_factory(color)
       strategy.execute(fallback, &code)
+    end
+
+    # Locks light in either +State::LOCKED_RED+ or +State::LOCKED_GREEN+
+    #
+    # @example
+    #   light = Stoplight('example-locked')
+    #   light.lock(Stoplight::Color::RED)
+    #
+    # @param color [String] should be either +Color::RED+ or +Color::GREEN+
+    # @return [Stoplight::Light] returns locked light (circuit breaker)
+    def lock(color)
+      state = case color
+      when Color::RED then State::LOCKED_RED
+      when Color::GREEN then State::LOCKED_GREEN
+      else raise Error::IncorrectColor
+      end
+
+      config.data_store.set_state(config, state)
+
+      self
+    end
+
+    # Unlocks light and sets its state to State::UNLOCKED
+    #
+    # @example
+    #   light = Stoplight('example-locked')
+    #   light.lock(Stoplight::Color::RED)
+    #   light.unlock
+    #
+    # @return [Stoplight::Light] returns unlocked light (circuit breaker)
+    def unlock
+      config.data_store.set_state(config, Stoplight::State::UNLOCKED)
+
+      self
     end
 
     # Two lights considered equal if they have the same configuration.
