@@ -58,7 +58,7 @@ Stoplight's behavior is controlled by three primary parameters:
 
 1. **Threshold** (default: `3`): Number of failures required to transition from green to red.
 2. **Cool Off Time** (default: `60` seconds): Time to wait in the red state before transitioning to yellow.
-3. **Window Size** (default: `infinity`): Time window in which failures are counted toward the threshold.
+3. **Window Size** (default: `nil`): Time window in which failures are counted toward the threshold. By default, all failures are counted.
 
 ## Basic Usage
 
@@ -66,7 +66,7 @@ Stoplight works right out of the box with sensible defaults:
 
 ```ruby
 # Create a stoplight with default settings
-light = Stoplight('payment-service')
+light = Stoplight("Payment Service")
 
 # Use it to wrap code that might fail
 result = light.run { payment_gateway.process(order) }
@@ -76,7 +76,7 @@ When everything works, the light stays green and your code runs normally. If the
 light turns red and raises a `Stoplight::Error::RedLight` exception to prevent further calls.
 
 ```ruby
-light = Stoplight('example-zero')
+light = Stoplight("Example")
 light.run { 1 / 0 } #=> raises ZeroDivisionError: divided by 0
 light.run { 1 / 0 } #=> raises ZeroDivisionError: divided by 0
 light.run { 1 / 0 } #=> raises ZeroDivisionError: divided by 0
@@ -190,17 +190,19 @@ end
 The simplest way to create a stoplight is with a name:
 
 ```ruby
-light = Stoplight('payment-service')
+light = Stoplight("Payment Service")
 ```
 
 You can also provide settings during creation:
 
 ```ruby
-light = Stoplight('payment-service', 
+data_store = Stoplight::DataStore::Redis.new(Redis.new)
+
+light = Stoplight("Payment Service", 
   threshold: 5,                           # 5 failures before turning red
-  cool_off_time: 30,                      # Wait 30 seconds before attempting recovery
-  window_size: 60,                        # Only count failures in the last minute
-  data_store: Redis.new,                  # Use Redis for persistence
+  cool_off_time: 60,                      # Wait 60 seconds before attempting recovery
+  window_size: 300,                       # Only count failures in the last five minutes
+  data_store: data_store,                 # Use Redis for persistence
   tracked_errors: [TimeoutError],         # Only count TimeoutError
   skipped_errors: [ValidationError]       # Ignore ValidationError
 )
@@ -212,28 +214,16 @@ You can create specialized versions of existing stoplights:
 
 ```ruby
 # Base configuration for API calls
-base_api = Stoplight('api-service')
+base_api = Stoplight("Service API")
 
 # Create specialized version for the users endpoint
 users_api = base_api.with(
-  cool_off_time: 10,                      # Faster recovery for user API
   tracked_errors: [TimeoutError]          # Only track timeouts
 )
 ```
 
 The `#with` method creates a new stoplight instance without modifying the original, making it ideal for creating 
 specialized stoplights from a common configuration.
-
-### Builder Style
-
-For a more expressive configuration style, you can use method chaining:
-
-```ruby
-light = Stoplight('payment-service')
-  .with_threshold(5)
-  .with_cool_off_time(30)
-  .with_window_size(60)
-```
 
 ## Error Handling
 
@@ -245,13 +235,13 @@ Note: System-level exceptions (e.g., `NoMemoryError`, `SignalException`) are not
 Control which errors affect your stoplight state. Skip specific errors (will not count toward failure threshold)
 
 ```ruby
-light = Stoplight('example-api', skipped_errors: [ActiveRecord::RecordNotFound, ValidationError])
+light = Stoplight("Example API", skipped_errors: [ActiveRecord::RecordNotFound, ValidationError])
 ```
 
 Only track specific errors (only these count toward failure threshold)
 
 ```ruby
-light = Stoplight('example-api', tracked_errors: [NetworkError, Timeout::Error])
+light = Stoplight("Example API", tracked_errors: [NetworkError, Timeout::Error])
 ```
 
 When both methods are used, `skipped_errors` takes precedence over `tracked_errors`.
@@ -263,16 +253,16 @@ When both methods are used, `skipped_errors` takes precedence over `tracked_erro
 Stoplight uses an in-memory data store out of the box:
 
 ```ruby
-require 'stoplight'
+require "stoplight"
 Stoplight::Default::DATA_STORE
 # => #<Stoplight::DataStore::Memory:...>
 ```
 
-For production environments, you'll likely want to use a persistent data store. Currently, Redis is the supported option:
+For production environments, you'll likely want to use a persistent data store. Currently, [Redis] is the supported option:
 
 ```ruby
 # Configure Redis as the data store
-require 'redis'
+require "redis"
 redis = Redis.new
 data_store = Stoplight::DataStore::Redis.new(redis)
 
@@ -283,10 +273,10 @@ end
 
 #### Connection Pooling with Redis
 
-For high-traffic applications or when you want to control a number of opened connections to redis: 
+For high-traffic applications or when you want to control a number of opened connections to Redis: 
 
 ```ruby
-require 'connection_pool'
+require "connection_pool"
 pool = ConnectionPool.new(size: 5, timeout: 3) { Redis.new }
 data_store = Stoplight::DataStore::Redis.new(pool)
 
@@ -301,7 +291,7 @@ Stoplight notifies when lights change state. Configure how these notifications a
 
 ```ruby
 # Log to a specific logger
-logger = Logger.new('stoplight.log')
+logger = Logger.new("stoplight.log")
 notifier = Stoplight::Notifier::Logger.new(logger)
 
 # Configure globally
@@ -381,7 +371,7 @@ Configure Stoplight in an initializer:
 
 ```ruby
 # config/initializers/stoplight.rb
-require 'stoplight'
+require "stoplight"
 Stoplight.configure do |config|
   config.data_store = Stoplight::DataStore::Redis.new(Redis.new)
   config.notifiers += [Stoplight::Notifier::Logger.new(Rails.logger)]
@@ -448,3 +438,4 @@ Fowler’s [CircuitBreaker][] article.
 [Lokideos]: https://github.com/Lokideos
 [complete list of contributors]: https://github.com/bolshakov/stoplight/graphs/contributors
 [CircuitBreaker]: http://martinfowler.com/bliki/CircuitBreaker.html
+[Redis]: https://redis.io/

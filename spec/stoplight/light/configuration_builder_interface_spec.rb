@@ -2,7 +2,7 @@
 
 require "spec_helper"
 
-RSpec.describe Stoplight::Light::Configurable do
+RSpec.describe Stoplight::Light::ConfigurationBuilderInterface do
   let(:name) { ("a".."z").to_a.shuffle.join }
   let(:light) { Stoplight::Light.new(config) }
 
@@ -20,24 +20,6 @@ RSpec.describe Stoplight::Light::Configurable do
       traffic_control: Stoplight::Default::TRAFFIC_CONTROL,
       traffic_recovery: Stoplight::Default::TRAFFIC_RECOVERY
     )
-  end
-
-  describe "#with" do
-    let(:settings) do
-      {
-        name: "combined-light",
-        threshold: 5,
-        window_size: 60,
-        tracked_errors: [RuntimeError],
-        skipped_errors: [KeyError, NoMemoryError, ScriptError, SecurityError, SignalException, SystemExit, SystemStackError]
-      }
-    end
-
-    subject(:with_combined_settings) { light.with(**settings) }
-
-    it "applies all settings correctly" do
-      expect(with_combined_settings.config).to have_attributes(**settings)
-    end
   end
 
   shared_examples "configurable attribute" do |attribute|

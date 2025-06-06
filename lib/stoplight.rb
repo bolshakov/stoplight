@@ -155,6 +155,26 @@ end
 #
 # @return [Stoplight::Light] A new circuit breaker instance.
 # @raise [ArgumentError] If an unknown option is provided in the settings.
+#
+# @example configure circuit breaker behavior
+#   light = Stoplight("Payment API", window_size: 300, threshold: 5, cool_off_time: 60)
+#
+# @example configure data store
+#   light = Stoplight("Payment API", data_store: Stoplight::DataStore::Redis.new(redis_client))
+#
+# In the example below, the +TimeoutError+ and +NetworkError+ exceptions
+# will be counted towards the threshold for moving the circuit breaker into the red state.
+# If not configured, the default tracked error is +StandardError+.
+#
+# @example configure tracked errors
+#   light = Stoplight("Payment API", tracked_errors: [TimeoutError, NetworkError])
+#
+# In the example below , the +ActiveRecord::RecordNotFound+ doesn't
+# move the circuit breaker into the red state.
+#
+# @example configure skipped errors
+#   light = Stoplight("Payment API", skipped_errors: [ActiveRecord::RecordNotFound])
+#
 def Stoplight(name, **settings) # rubocop:disable Naming/MethodName
   config = Stoplight.config_provider.provide(name, **settings)
   Stoplight::Light.new(config)

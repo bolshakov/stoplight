@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.shared_examples "Stoplight::Light::Runnable#color" do
+RSpec.shared_examples "Stoplight::Light#color" do
   let(:name) { random_string }
 
   it "is initially GREEN" do
