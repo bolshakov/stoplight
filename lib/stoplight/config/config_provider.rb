@@ -17,30 +17,12 @@ module Stoplight
       #   @return [Hash]
       private attr_reader :default_settings
 
-      CONFIGURATION_ERROR = <<~ERROR
-        Configuration conflict detected!
-          
-        You've attempted to use both the old and new configuration styles:
-          - Old style: Stoplight.default_data_store = value
-          - New style: Stoplight.configure { |config| config.data_store = value }
-        
-        Please choose only one configuration method for consistency.
-        Note: The old style is deprecated and will be removed in a future version.
-      ERROR
-      private_constant :CONFIGURATION_ERROR
-
       # @param user_default_config [Stoplight::Config::UserDefaultConfig]
-      # @param legacy_config [Stoplight::Config::LegacyConfig]
       # @param library_default_config [Stoplight::Config::LibraryDefaultConfig]
       # @raise [Error::ConfigurationError] if both user_default_config and legacy_config are not empty
-      def initialize(user_default_config:, legacy_config:, library_default_config:)
-        if user_default_config.any? && legacy_config.any?
-          raise Error::ConfigurationError, CONFIGURATION_ERROR
-        end
-
+      def initialize(user_default_config:, library_default_config:)
         @default_settings = library_default_config.to_h.merge(
-          user_default_config.to_h,
-          legacy_config.to_h
+          user_default_config.to_h
         )
       end
 

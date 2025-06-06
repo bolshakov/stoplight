@@ -20,70 +20,6 @@ module Stoplight # rubocop:disable Style/Documentation
     ALREADY_CONFIGURED_ERROR = "Stoplight must be configured only once"
     private_constant :ALREADY_CONFIGURED_ERROR
 
-    # Sets the default error notifier.
-    #
-    # @param value [#call]
-    # @return [#call]
-    # @deprecated Use `Stoplight.configure { |config| config.error_notifier= }` instead.
-    def default_error_notifier=(value)
-      warn "[DEPRECATED] `Stoplight.default_error_notifier=` is deprecated. " \
-        "Please use `Stoplight.configure { |config| config.error_notifier= }` instead."
-      raise Error::ConfigurationError, ALREADY_CONFIGURED_ERROR if @config_provider
-
-      @default_error_notifier = value
-    end
-
-    # Retrieves the default error notifier.
-    #
-    # @return [#call]
-    # @deprecated
-    def default_error_notifier
-      warn "[DEPRECATED] `Stoplight.default_error_notifier` is deprecated."
-      @default_error_notifier || Default::ERROR_NOTIFIER
-    end
-
-    # Sets the default notifiers.
-    #
-    # @param value [Array<Stoplight::Notifier::Base>] An array of notifier instances.
-    # @return [Array<Stoplight::Notifier::Base>]
-    # @deprecated Use `Stoplight.configure { |config| config.notifiers= }` instead.
-    def default_notifiers=(value)
-      warn "[DEPRECATED] `Stoplight.default_notifiers=` is deprecated. " \
-        "Please use `Stoplight.configure { |config| config.notifiers= }` instead."
-      raise Error::ConfigurationError, ALREADY_CONFIGURED_ERROR if @config_provider
-
-      @default_notifiers = value
-    end
-
-    # Retrieves the default notifiers.
-    #
-    # @return [Array<Stoplight::Notifier::Base>]
-    # @deprecated
-    def default_notifiers
-      warn "[DEPRECATED] `Stoplight.default_notifiers` is deprecated."
-      @default_notifiers || Default::NOTIFIERS
-    end
-
-    # Sets the default data store.
-    #
-    # @param value [Stoplight::DataStore::Base] A data store instance for storing state.
-    # @return [Stoplight::DataStore::Base]
-    # @deprecated Use `Stoplight.configure { |config| config.data_store= }` instead.
-    def default_data_store=(value)
-      warn "[DEPRECATED] `Stoplight.default_data_store=` is deprecated. " \
-        "Please use `Stoplight.configure { |config| config.data_store= }` instead."
-      raise Error::ConfigurationError, ALREADY_CONFIGURED_ERROR if @config_provider
-
-      @default_data_store = value
-    end
-
-    # @return [Stoplight::DataStore::Base]
-    # @deprecated
-    def default_data_store
-      warn "[DEPRECATED] `Stoplight.default_data_store` is deprecated."
-      @default_data_store || Default::DATA_STORE
-    end
-
     # Configures the Stoplight library.
     #
     # This method allows you to set up the library's configuration using a block.
@@ -112,12 +48,7 @@ module Stoplight # rubocop:disable Style/Documentation
 
       @config_provider = Config::ConfigProvider.new(
         user_default_config: user_defaults.freeze,
-        library_default_config: Config::LibraryDefaultConfig.new,
-        legacy_config: Config::LegacyConfig.new(
-          data_store: @default_data_store,
-          error_notifier: @default_error_notifier,
-          notifiers: @default_notifiers
-        )
+        library_default_config: Config::LibraryDefaultConfig.new
       )
     end
 
