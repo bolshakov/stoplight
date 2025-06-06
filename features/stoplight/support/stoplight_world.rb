@@ -57,8 +57,7 @@ module StoplightWorld
     @last_exception = nil
     @last_result = nil
 
-    Stoplight.reset_config!
-    Stoplight.configure do |config|
+    Stoplight.configure(trust_me_im_an_engineer: true) do |config|
       config.data_store = case ENV.fetch("STOPLIGHT_DATA_STORE", "Memory")
       when "Memory"
         Stoplight::DataStore::Memory.new

@@ -7,8 +7,7 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
   let(:light_condition) { proc { 1 / 1 == 0 } }
 
   before do
-    Stoplight.reset_config!
-    Stoplight.configure do |config|
+    Stoplight.configure(trust_me_im_an_engineer: true) do |config|
       config.data_store = Stoplight::DataStore::Redis.new(redis)
     end
   end

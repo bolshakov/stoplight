@@ -401,7 +401,6 @@ end
 2. Reset data store between tests
 ```ruby
 before(:each) do
-  Stoplight.reset_config!
   Stoplight.configure do |config|
     config.data_store = Stoplight::DataStore::Memory.new
   end
