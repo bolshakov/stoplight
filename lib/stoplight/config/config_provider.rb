@@ -46,6 +46,17 @@ module Stoplight
         settings = default_settings.merge(settings_overrides, {name: light_name})
         Light::Config.new(**settings)
       end
+
+      def inspect
+        "#<#{self.class.name} " \
+          "cool_off_time=#{default_settings[:cool_off_time]}, " \
+          "threshold=#{default_settings[:threshold]}, " \
+          "window_size=#{default_settings[:window_size]}, " \
+          "tracked_errors=#{default_settings[:tracked_errors].join(",")}, " \
+          "skipped_errors=#{default_settings[:skipped_errors].join(",")}, " \
+          "data_store=#{default_settings[:data_store].class.name}" \
+        ">"
+      end
     end
   end
 end

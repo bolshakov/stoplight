@@ -56,16 +56,17 @@ RSpec.describe "Stoplight" do
   end
 
   describe ".configure" do
-    before { Stoplight.reset_config! }
-    after { Stoplight.reset_config! }
-
-    it "raises an error if configured more than once" do
+    it "produces a warning if configured more than once" do
       Stoplight.configure {}
-      expect { Stoplight.configure {} }.to raise_error(Stoplight::Error::ConfigurationError, "Stoplight must be configured only once")
+
+      expect do
+        Stoplight.configure {}
+      end.to output(/Stoplight reconfigured. Existing circuit breakers will not see new configuration. New configuration/)
+        .to_stderr
     end
 
     it "allows configuration with a block" do
-      Stoplight.configure do |config|
+      Stoplight.configure(trust_me_im_an_engineer: true) do |config|
         config.window_size = 94
       end
       expect(Stoplight.config_provider.provide("")).to have_attributes(
