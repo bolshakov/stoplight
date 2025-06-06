@@ -4,7 +4,7 @@ require "forwardable"
 
 module Stoplight
   class Light
-    # Implements light configuration behaviour
+    # Implements light configuration behavior
     module ConfigurationBuilderInterface
       # Configures data store to be used with this circuit breaker
       #
@@ -14,6 +14,7 @@ module Stoplight
       #
       # @param data_store [DataStore::Base]
       # @return [Stoplight::Light]
+      # @deprecated consider using +Light#with+ for reconfiguration
       def with_data_store(data_store)
         reconfigure(config.with(data_store: data_store))
       end
@@ -27,6 +28,7 @@ module Stoplight
       #
       # @param cool_off_time [Numeric] number of seconds
       # @return [Stoplight::Light]
+      # @deprecated consider using +Light#with+ for reconfiguration
       def with_cool_off_time(cool_off_time)
         reconfigure(config.with(cool_off_time: cool_off_time))
       end
@@ -40,6 +42,7 @@ module Stoplight
       #
       # @param threshold [Numeric]
       # @return [Stoplight::Light]
+      # @deprecated consider using +Light#with+ for reconfiguration
       def with_threshold(threshold)
         reconfigure(config.with(threshold: threshold))
       end
@@ -56,6 +59,7 @@ module Stoplight
       #
       # @param window_size [Numeric] number of seconds
       # @return [Stoplight::Light]
+      # @deprecated consider using +Light#with+ for reconfiguration
       def with_window_size(window_size)
         reconfigure(config.with(window_size: window_size))
       end
@@ -70,6 +74,7 @@ module Stoplight
       #
       # @param notifiers [Array<Notifier::Base>]
       # @return [Stoplight::Light]
+      # @deprecated consider using +Light#with+ for reconfiguration
       def with_notifiers(notifiers)
         reconfigure(config.with(notifiers: notifiers))
       end
@@ -77,6 +82,7 @@ module Stoplight
       # @param error_notifier [Proc]
       # @return [Stoplight::Light]
       # @api private
+      # @deprecated consider using +Light#with+ for reconfiguration
       def with_error_notifier(&error_notifier)
         reconfigure(config.with(error_notifier: error_notifier))
       end
@@ -94,6 +100,7 @@ module Stoplight
       #
       # @param tracked_errors [Array<StandardError>]
       # @return [Stoplight::Light]
+      # @deprecated consider using +Light#with+ for reconfiguration
       def with_tracked_errors(*tracked_errors)
         reconfigure(config.with(tracked_errors: tracked_errors.dup.freeze))
       end
@@ -112,6 +119,7 @@ module Stoplight
       #
       # @param skipped_errors [Array<Exception>]
       # @return [Stoplight::Light]
+      # @deprecated consider using +Light#with+ for reconfiguration
       def with_skipped_errors(*skipped_errors)
         reconfigure(config.with(skipped_errors: skipped_errors))
       end
