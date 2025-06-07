@@ -1,3 +1,152 @@
+## Stoplight 5.0 
+
+Stoplight 5.0 introduces several breaking changes designed to improve configuration consistency, simplify error 
+handling, and improve performance. This guide will help you migrate from Stoplight 4.x to 5.0.
+
+### Migration Checklist
+
+- [] Update global configuration to use the new block syntax
+- [] Replace any remaining Stoplight() {} calls with Stoplight().run {}
+- [] Convert error handlers to tracked/skipped error lists
+- [] Move fallbacks from configuration to #run method calls
+- [] Account for Stoplight state reset after deployment
+- [] Test thoroughly in a staging environment
+
+### Global Configuration Redesign
+
+Global configuration has moved from individual setters to a unified configuration block system for better consistency.
+
+#### Why was this decision made?
+
+We wanted to provide a more consistent and safer configuration experience:
+
+* Eliminates race conditions caused by individual global setters
+* Atomic configuration ensures all settings are applied together
+* Enables advanced features like configuration inheritance and overrides
+* More idiomatic Ruby following block-based configuration conventions
+ 
+#### So, what does this mean for me?
+
+You'll need to update your configuration code:
+
+```diff
+# Old way (Stoplight 4.x)
+- Stoplight.default_data_store = Stoplight::DataStore::Redis.new(redis)
+- Stoplight.default_notifiers += [Stoplight::Notifier::Logger.new(Rails.logger)]
+- Stoplight.default_error_notifier = ->(error) { Bugsnag.notify(error) }
+
+# New way (Stoplight 5.0)
++ Stoplight.configure do |config|
++   config.data_store = Stoplight::DataStore::Redis.new(redis)
++   config.notifiers += [Stoplight::Notifier::Logger.new(Rails.logger)]
++   config.error_notifier = ->(error) { Bugsnag.notify(error) }
++ end
+```
+
+> 📖 **Reference**: For more configuration options, check the Stoplight's [configuration documentation]
+
+### Deprecated Interface Removal
+
+The `Stoplight() {}` interface, deprecated in Stoplight 4.0, has been completely removed which enabled us 
+to simplify the codebase and improve performance.
+
+#### So, what does this mean for me?
+
+All `Stoplight() {}` calls must be converted to use the `#run {}` interface.
+
+```diff
+- Stoplight('API Call') { ... }.run
++ Stoplight('API Call').run { ... }
+```
+
+> 📖 **Reference**: For detailed migration examples, see the [Stoplight 4.0 upgrade guide].
+
+### Simplified Error Handling
+
+
+The complex `#with_error_handler` callback has been replaced with explicit error classification using 
+`#with_skipped_errors` and `#with_tracked_errors`.
+
+#### Why was this decision made?
+
+* Eliminates confusion about when to call handlers vs. raise errors
+* Prevents configuration leakage between different circuit breakers
+* Simpler API - just list error types instead of writing handler logic
+* Explicit separation between counted and ignored errors
+
+#### So, what does this mean for me?
+
+Replace error handlers with error classification:
+
+```diff 
+# Old way
+- light = Stoplight('api-call')
+-   .with_error_handler do |error, handle|
+-     if error.is_a?(ActiveRecord::RecordNotFound) || error.is_a?(ActiveRecord::RecordInvalid)
+-       raise error  # Don't track this error
+-     else
+-       handle.call(error)  # Track this error
+-     end
+-   end
+
+# New way
++ light = Stoplight('api-call')
++   .with_skipped_errors(ActiveRecord::RecordNotFound, ActiveRecord::RecordInvalid)
+```
+
+> 📖 **Reference**: See the Stoplight [error handling] documentation for more examples.
+
+### Fallback Handling Changes
+
+Fallbacks are now provided directly to the `#run` method as a parameter, rather than being configured on the 
+light instance.
+
+```ruby
+light = Stoplight("Payment Gateway")
+
+# Different operations with operation-specific fallbacks
+light.run(-> { [] }) { get_invoices }
+light.run(-> { 0 }) { get_credits }
+```
+
+#### Why was this decision made?
+
+* Operation-specific fallbacks enable each protected operation can have its own fallback.
+* Therefore, configuration can be reused without fallback contamination
+* Makes it obvious which fallback belongs to which operation
+
+#### So, what does this mean for me?
+
+If you were using fallbacks, you'll need to update your code to pass the fallback directly to the `#run` method:
+
+```diff
+# Old way
+- light = Stoplight("Payment Gateway")
+-   .with_fallback { |error| handle_payment_failure(error) }
+- result = light.run { process_payment }
+
+# New way
++ light = Stoplight('payment') 
++ result = light.run(->(error) { handle_payment_failure(error) }) { process_payment }
+```
+
+### Redis Data Structure Changes
+
+Stoplight 5.0 uses completely new Redis data structures that are incompatible with previous versions.
+
+#### Why was this decision made?
+
+The Redis data store has been completely rewritten with new, more efficient data structures to support the 
+new features such as error rate tracking, more robust circuit breaker decision-making in distributed environments, 
+and green lights visibility in the admin UI.
+
+#### So, what does this mean for me?
+
+After upgrading, Stoplight will not be aware of failures and state from the previous version. Your existing Redis data 
+will be ignored (but not deleted), and lights will start fresh in the green state.
+
+**No code changes are required** - the upgrade is automatic, but you'll lose historical failure data.
+
 ## Stoplight 4.0
 
 ### Notifiers have dropped!
@@ -137,7 +286,10 @@ Nothing. Stoplight will function as usual.
 
 [stoplight-sentry]: https://github.com/bolshakov/stoplight-sentry
 [Community-supported notifiers]: https://github.com/bolshakov/stoplight/tree/master#community-supported-notifiers
-[How to implement your own notifier?]: https://github.com/bolshakov/stoplight/tree/master#how-to-implement-your-own-notifier
+[How to implement your own notifier?]: https://github.com/bolshakov/stoplight/blob/master/lib/stoplight/notifier/generic.rb
 [dropped notifiers]: https://github.com/bolshakov/stoplight/tree/v3.0.1/lib/stoplight/notifier
 [without passing an empty block]: https://github.com/bolshakov/stoplight-admin/blob/9c9848eb94410e46b20972548f0863db224cb6da/lib/sinatra/stoplight_admin.rb#L30
 [sliding window]: https://github.com/bolshakov/stoplight#custom-window-size
+[configuration documentation]: https://github.com/bolshakov/stoplight?tab=readme-ov-file#configuration
+[error handling]: https://github.com/bolshakov/stoplight?tab=readme-ov-file#error-handling
+[Stoplight 4.0 upgrade guide]: https://github.com/bolshakov/stoplight/blob/master/UPGRADING.md#stoplight-interface-has-changed
