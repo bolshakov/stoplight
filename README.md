@@ -19,8 +19,6 @@ calls, Stoplight prevents cascading failures from affecting your entire applicat
 **The best part?** Stoplight works with zero configuration out of the box, while offering deep customization when you 
 need it.
 
-Check out [stoplight-admin][] for a web UI to control your stoplights.
-
 ## Installation
 
 Add it to your Gemfile:

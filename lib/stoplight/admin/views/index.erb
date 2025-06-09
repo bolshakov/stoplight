@@ -28,7 +28,7 @@
     </div>
   </section>
 <% else %>
-  <section class="flex flex-wrap items-start space-y-4">
+  <section class="grid gap-4" style="grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));">
     <% lights.each do |light| %>
       <%= erb :_card, locals: { light:, color: light.color } %>
     <% end %>
