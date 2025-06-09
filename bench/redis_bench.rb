@@ -6,7 +6,9 @@ require "redis"
 
 redis = Redis.new
 data_store = Stoplight::DataStore::Redis.new(redis)
-Stoplight.default_data_store = data_store
+Stoplight.configure do |config|
+  config.data_store = data_store
+end
 cashed_stoplight = Stoplight("")
 
 Benchmark.ips do |b|

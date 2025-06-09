@@ -11,7 +11,9 @@ FileUtils.mkdir_p("profile_results")
 # Setup Stoplight with Redis data store
 redis = Redis.new
 data_store = Stoplight::DataStore::Redis.new(redis)
-Stoplight.default_data_store = data_store
+Stoplight.configure do |config|
+  config.data_store = data_store
+end
 
 stoplight = Stoplight("example").with_threshold(5).with_cool_off_time(60)
 
