@@ -12,7 +12,7 @@ RSpec.describe Stoplight::Light::GreenRunStrategy do
     )
   end
   let(:notifier) { instance_double(Stoplight::Notifier::Base) }
-  let(:traffic_control) { instance_double(Stoplight::TrafficControl::Base) }
+  let(:traffic_control) { Stoplight::TrafficControl::ConsecutiveFailures.new }
 
   shared_examples Stoplight::Light::GreenRunStrategy do
     context "when code executes successfully" do
