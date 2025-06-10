@@ -168,4 +168,31 @@ RSpec.describe Stoplight::Light::Config do
       end
     end
   end
+
+  describe "#traffic_control" do
+    let(:traffic_control) { instance_double(Stoplight::TrafficControl::Base) }
+
+    before do
+      allow(traffic_control).to receive(:check_compatibility).and_return(compatibility_result)
+    end
+
+    context "when traffic control is compatible with the config" do
+      let(:compatibility_result) { Stoplight::Config::CompatibilityResult.compatible }
+
+      it "does not raise any errors" do
+        expect { config }.not_to raise_error
+      end
+    end
+
+    context "when traffic control is not compatible with the config" do
+      let(:compatibility_result) { Stoplight::Config::CompatibilityResult.incompatible("incompatible") }
+
+      it "raises a configuration errors" do
+        expect { config }.to raise_error(
+          Stoplight::Error::ConfigurationError,
+          "RSpec::Mocks::InstanceVerifyingDouble strategy is incompatible with the Stoplight configuration: incompatible"
+        )
+      end
+    end
+  end
 end

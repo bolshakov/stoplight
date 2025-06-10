@@ -26,6 +26,10 @@ module Stoplight
     # Will switch to red only if 5 consecutive failures occur regardless of the time window
     # @api private
     class ConsecutiveFailures < Base
+      # @param config [Stoplight::Light::Config]
+      # @return [Stoplight::Config::CompatibilityResult]
+      def check_compatibility(config) = compatible
+
       # Determines if traffic should be stopped based on failure counts.
       #
       # @param config [Stoplight::Light::Config]
