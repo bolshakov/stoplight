@@ -4,7 +4,9 @@ RSpec.describe Stoplight::TrafficControl::ConsecutiveFailures do
   describe "#check_compatibility" do
     subject(:strategy) { described_class.new.check_compatibility(config) }
 
-    let(:config) { instance_double(Stoplight::Light::Config, window_size:) }
+    let(:config) { instance_double(Stoplight::Light::Config, window_size:, threshold:) }
+    let(:threshold) { 42 }
+    let(:window_size) { nil }
 
     context "when stoplight tracks running window" do
       let(:window_size) { 600 }
@@ -16,6 +18,26 @@ RSpec.describe Stoplight::TrafficControl::ConsecutiveFailures do
       let(:window_size) { nil }
 
       it { is_expected.to be_compatible }
+    end
+
+    context "when threshold is less then 1" do
+      let(:threshold) { 0 }
+
+      it { is_expected.to be_incompatible }
+
+      it "returns an error message" do
+        expect(strategy.error_messages).to eq("`threshold` should be bigger than 0")
+      end
+    end
+
+    context "when threshold is not an integer" do
+      let(:threshold) { 14.87 }
+
+      it { is_expected.to be_incompatible }
+
+      it "returns an error message" do
+        expect(strategy.error_messages).to eq("`threshold` should be an integer")
+      end
     end
   end
 

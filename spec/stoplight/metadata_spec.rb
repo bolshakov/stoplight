@@ -52,4 +52,30 @@ RSpec.describe Stoplight::Metadata do
       it { is_expected.to be(Stoplight::Color::RED) }
     end
   end
+
+  describe "#error_rate" do
+    context "when there successes or failures are nil" do
+      let(:metadata) { Stoplight::Metadata.new(successes: nil, failures: nil) }
+
+      it "returns 0" do
+        expect(metadata.error_rate).to eq(0)
+      end
+    end
+
+    context "when there are no successes or failures" do
+      let(:metadata) { Stoplight::Metadata.new(successes: 0, failures: 0) }
+
+      it "returns 0" do
+        expect(metadata.error_rate).to eq(0)
+      end
+    end
+
+    context "when there are successes and failures" do
+      let(:metadata) { Stoplight::Metadata.new(successes: 10, failures: 5) }
+
+      it "returns the error rate" do
+        expect(metadata.error_rate).to eq(5.fdiv(15))
+      end
+    end
+  end
 end
