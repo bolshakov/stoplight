@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "spec_helper"
-
 RSpec.describe Stoplight::Light::Config do
   let(:config) { described_class.new(**settings) }
 
@@ -33,22 +31,16 @@ RSpec.describe Stoplight::Light::Config do
   let(:traffic_control) { Stoplight::Default::TRAFFIC_CONTROL }
   let(:traffic_recovery) { Stoplight::Default::TRAFFIC_RECOVERY }
 
-  describe "#cool_off_time" do
-    subject { config.cool_off_time }
+  describe "#initialize" do
+    describe "traffic_control" do
+      subject(:traffic_control_out) { config.traffic_control }
 
-    context "when set to a float number" do
-      let(:cool_off_time) { 66.4 }
+      let(:settings) { super().merge(traffic_control: traffic_control_in) }
 
-      it "returns the integer value" do
-        is_expected.to eq(66)
-      end
-    end
+      context "when traffic_control is a Stoplight::TrafficControl::Base instance" do
+        let(:traffic_control_in) { Stoplight::TrafficControl::ConsecutiveFailures.new }
 
-    context "when set to an integer number" do
-      let(:cool_off_time) { 66 }
-
-      it "returns the value" do
-        is_expected.to eq(66)
+        it { is_expected.to eq(traffic_control_in) }
       end
     end
   end
@@ -70,17 +62,6 @@ RSpec.describe Stoplight::Light::Config do
 
     it "returns the same value" do
       is_expected.to be(error_notifier)
-    end
-  end
-
-  describe "#notifiers" do
-    subject { config.notifiers }
-
-    let(:notifiers) { [Stoplight::Notifier::IO.new($stderr)] }
-    let(:fail_safe_notifiers) { notifiers.map { |x| Stoplight::Notifier::FailSafe.wrap(x) } }
-
-    it "returns the same value" do
-      is_expected.to contain_exactly(*fail_safe_notifiers)
     end
   end
 
@@ -160,7 +141,7 @@ RSpec.describe Stoplight::Light::Config do
         is_expected.to have_attributes(
           **new_settings.merge(
             skipped_errors: [KeyError, *Stoplight::Default::SKIPPED_ERRORS],
-            notifiers: [Stoplight::Notifier::FailSafe.wrap(notifier)]
+            notifiers: [notifier]
           )
         )
       end
@@ -182,7 +163,7 @@ RSpec.describe Stoplight::Light::Config do
       it "returns a new config with the updated settings" do
         is_expected.to be_a(described_class)
         is_expected.to have_attributes(
-          **settings.merge(new_settings).merge(notifiers: [Stoplight::Notifier::FailSafe.wrap(notifier)])
+          **settings.merge(new_settings).merge(notifiers: [notifier])
         )
       end
     end

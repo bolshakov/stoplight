@@ -14,9 +14,7 @@ module Stoplight
       words.join(" ")
     end
 
-    NOTIFIERS = [
-      Notifier::FailSafe.wrap(Notifier::IO.new($stderr))
-    ].freeze
+    NOTIFIERS = [Notifier::IO.new($stderr)].freeze
 
     THRESHOLD = 3
 

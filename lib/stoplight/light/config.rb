@@ -63,14 +63,14 @@ module Stoplight
       def initialize(name:, cool_off_time:, data_store:, error_notifier:, notifiers:, threshold:, window_size:,
         tracked_errors:, skipped_errors:, traffic_control:, traffic_recovery:)
         @name = name
-        @cool_off_time = cool_off_time.to_i
-        @data_store = DataStore::FailSafe.wrap(data_store)
+        @cool_off_time = cool_off_time
+        @data_store = data_store
         @error_notifier = error_notifier
-        @notifiers = notifiers.map { |notifier| Notifier::FailSafe.wrap(notifier) }
+        @notifiers = notifiers
         @threshold = threshold
         @window_size = window_size
-        @tracked_errors = Array(tracked_errors)
-        @skipped_errors = Array(skipped_errors)
+        @tracked_errors = tracked_errors
+        @skipped_errors = skipped_errors
         @traffic_control = traffic_control
         @traffic_recovery = traffic_recovery
       end
