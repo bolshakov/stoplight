@@ -35,7 +35,6 @@ module Stoplight
       # @param data_store [Stoplight::DataStore::Base]
       def initialize(data_store)
         @data_store = data_store
-        @circuit_breaker = Stoplight("stoplight:data_store:fail_safe:#{data_store.class.name}", data_store: Default::DATA_STORE)
       end
 
       def names
@@ -99,6 +98,10 @@ module Stoplight
         end
 
         circuit_breaker.run(fallback, &code)
+      end
+
+      private def circuit_breaker
+        @circuit_breaker ||= Stoplight("stoplight:data_store:fail_safe:#{data_store.class.name}", true, data_store: Default::DATA_STORE)
       end
     end
   end
