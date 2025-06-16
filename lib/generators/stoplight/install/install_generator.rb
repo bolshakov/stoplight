@@ -19,6 +19,10 @@ module Stoplight
       ROUTES_PATH = "config/routes.rb"
       STOPLIGHT_CONFIG_TEMPLATE = "stoplight.rb.erb"
       INITIALIZERS_PATH = "config/initializers"
+      AFTER_INSTALL_NOTIFICATION = <<~TEXT
+        \nThank you for using stoplight!
+        Now to finish configuration go to 'config/initializers/stoplight.rb' to set up connection to Redis.\n
+      TEXT
 
       def generate_initializer
         initializer_template = STOPLIGHT_CONFIG_TEMPLATE
@@ -33,6 +37,10 @@ module Stoplight
 
           inject_into_file ROUTES_PATH, insert_string, after: ".application.routes.draw do\n"
         end
+      end
+
+      def redis_configuration_notification
+        print AFTER_INSTALL_NOTIFICATION
       end
     end
   end
