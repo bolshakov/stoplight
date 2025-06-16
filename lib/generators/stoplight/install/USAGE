@@ -1,0 +1,13 @@
+Description:
+  Generates stoplight initializer to setup Stoplight Redis configuration
+    and optionally sets up Admin panel
+  
+Examples:
+  rails generate stoplight:install
+
+    This will generate "config/initializers/stoplight.rb" initializer with basic config
+    Then you should adjust Redis config there.
+
+  rails generate stoplight:install --with-admin-panel
+
+    This will generate initializer and will add a route to the admin panel to your "config/routes.rb" file

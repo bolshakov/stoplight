@@ -9,6 +9,7 @@ loader.do_not_eager_load(
   "#{__dir__}/stoplight/admin",
   "#{__dir__}/stoplight/admin.rb"
 )
+loader.ignore("#{__dir__}/generators")
 loader.ignore("#{__dir__}/stoplight/rspec.rb", "#{__dir__}/stoplight/rspec")
 loader.setup
 

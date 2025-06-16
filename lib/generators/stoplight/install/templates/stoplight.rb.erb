@@ -1,0 +1,11 @@
+# frozen_string_literal: true
+
+require "redis"
+
+# Setup your specific Redis setup here
+redis = Redis.new
+data_store = Stoplight::DataStore::Redis.new(redis)
+
+Stoplight.configure do |config|
+  config.data_store = data_store
+end
