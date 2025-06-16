@@ -51,7 +51,6 @@ jobs:
         env:
           STOPLIGHT_REDIS_URL: "redis://127.0.0.1:6379/0"
           STOPLIGHT_DATA_STORE: ${{ matrix.data_store }}
-          CUCUMBER_PUBLISH_TOKEN: ${{ secrets.CUCUMBER_PUBLISH_TOKEN }}
 
   spec:
     name: Specs on Ruby ${{ matrix.ruby }} with Redis ${{ matrix.redis }} 💚
