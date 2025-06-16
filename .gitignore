@@ -4,7 +4,12 @@
 /doc/
 /pkg/
 /tmp/
+tmp/
 /vendor/
 /.idea
 profile_results
 /docker/Gemfile.lock
+
+spec/dummy/db/*.sqlite3
+spec/dummy/db/*.sqlite3-journal
+*.log

@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+ENV["RAILS_ENV"] = "test"
+
 require "simplecov"
 
 require "stoplight"
@@ -14,6 +16,9 @@ require_relative "support/exception_helpers"
 require_relative "support/route_helpers"
 
 Timecop.safe_mode = true
+
+require File.expand_path("dummy/config/environment", __dir__)
+require "ammeter/init"
 
 RSpec.configure do |rspec|
   rspec.include Rack::Test::Methods
