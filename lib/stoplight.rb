@@ -79,6 +79,12 @@ module Stoplight # rubocop:disable Style/Documentation
         @config_provider ||= configure
       end
     end
+
+    # @api private
+    def create_light(name, config_provider: self.config_provider, **settings)
+      config = config_provider.provide(name, **settings)
+      Stoplight::Light.new(config)
+    end
   end
 end
 
@@ -118,6 +124,5 @@ end
 #   light = Stoplight("Payment API", skipped_errors: [ActiveRecord::RecordNotFound])
 #
 def Stoplight(name, **settings) # rubocop:disable Naming/MethodName
-  config = Stoplight.config_provider.provide(name, **settings)
-  Stoplight::Light.new(config)
+  Stoplight.create_light(name, **settings)
 end
