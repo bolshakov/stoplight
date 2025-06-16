@@ -35,6 +35,14 @@ Or install it manually:
 $ gem install stoplight
 ```
 
+### Rails
+
+For Rails application you can use generator to set up initializer and Admin Panel:
+
+```sh
+rails generate stoplight:install --with-admin-panel
+```
+
 Stoplight uses [Semantic Versioning][]. Check out [the change log][] for a detailed list of changes.
 
 ## Core Concepts
