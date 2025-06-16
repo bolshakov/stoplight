@@ -27,6 +27,7 @@ RSpec.describe Stoplight::Generators::InstallGenerator, type: :generator do
       run_generator(args)
 
       is_expected.to be_a_file
+      is_expected.to have_correct_syntax
       is_expected.to contain(/Stoplight.configure do \|config\|/)
       is_expected.to contain(/require "redis"/)
       is_expected.to contain(/redis = Redis.new/)
@@ -66,6 +67,7 @@ RSpec.describe Stoplight::Generators::InstallGenerator, type: :generator do
       it "mounts admin panel to routes" do
         run_generator(args)
 
+        is_expected.to have_correct_syntax
         is_expected.to contain(/mount Stoplight::Admin => '\/stoplights'/)
       end
     end
