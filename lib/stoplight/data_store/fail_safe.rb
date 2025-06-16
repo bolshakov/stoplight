@@ -12,10 +12,6 @@ module Stoplight
       #   @return [Stoplight::DataStore::Base] The underlying data store being wrapped.
       protected attr_reader :data_store
 
-      # @!attribute [r] circuit_breaker
-      #   @return [Stoplight] The circuit breaker used to handle failures.
-      private attr_reader :circuit_breaker
-
       class << self
         # Wraps a data store with fail-safe mechanisms.
         #
