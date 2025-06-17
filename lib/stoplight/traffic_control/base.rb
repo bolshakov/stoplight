@@ -30,6 +30,12 @@ module Stoplight
       def stop_traffic?(config, metadata)
         raise NotImplementedError
       end
+
+      # @param other [any]
+      # @return [Boolean]
+      def ==(other)
+        other.is_a?(self.class)
+      end
     end
   end
 end

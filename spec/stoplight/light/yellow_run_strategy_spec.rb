@@ -139,9 +139,7 @@ RSpec.describe Stoplight::Light::YellowRunStrategy do
       let(:code) { -> { raise error } }
 
       context "when error is tracked" do
-        before do
-          allow(config).to receive(:track_error?).with(error).and_return(true)
-        end
+        let(:config) { super().with(tracked_errors: [error]) }
 
         context "when fallback is not provided" do
           let(:fallback) { nil }
@@ -290,10 +288,7 @@ RSpec.describe Stoplight::Light::YellowRunStrategy do
 
       context "when error is not tracked" do
         let(:fallback) { nil }
-
-        before do
-          allow(config).to receive(:track_error?).with(error).and_return(false)
-        end
+        let(:config) { super().with(skipped_errors: [error]) }
 
         it_behaves_like "recovery success"
       end
