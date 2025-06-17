@@ -24,6 +24,16 @@ module Stoplight
         Now to finish configuration go to 'config/initializers/stoplight.rb' to set up connection to Redis.\n
       TEXT
 
+      STOPLIGHT_ADMIN_ROUTE = <<-RUBY
+  mount Stoplight::Admin => '/stoplights'
+      RUBY
+
+      STOPLIGHT_AUTH = <<-RUBY
+  Stoplight::Admin.use(Rack::Auth::Basic) do |username, password|
+    username == ENV["STOPLIGHT_ADMIN_USERNAME"] && password == ENV["STOPLIGHT_ADMIN_PASSWORD"]
+  end
+      RUBY
+
       def generate_initializer
         initializer_template = STOPLIGHT_CONFIG_TEMPLATE
         copy_file initializer_template, "#{INITIALIZERS_PATH}/stoplight.rb"
@@ -31,11 +41,9 @@ module Stoplight
 
       def generate_admin_panel
         if options[:with_admin_panel]
-          spacing = " " * 2
-          route = "mount Stoplight::Admin => '/stoplights'"
-          insert_string = "#{spacing}#{route}\n"
+          route_config = "#{STOPLIGHT_AUTH}#{STOPLIGHT_ADMIN_ROUTE}\n"
 
-          inject_into_file ROUTES_PATH, insert_string, after: ".application.routes.draw do\n"
+          inject_into_file ROUTES_PATH, route_config, after: ".application.routes.draw do\n"
         end
       end
 

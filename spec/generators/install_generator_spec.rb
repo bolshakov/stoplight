@@ -69,6 +69,8 @@ RSpec.describe Stoplight::Generators::InstallGenerator, type: :generator do
 
         is_expected.to have_correct_syntax
         is_expected.to contain(/mount Stoplight::Admin => '\/stoplights'/)
+        is_expected.to contain(/Stoplight::Admin.use(Rack::Auth::Basic) do |username, password|/)
+        is_expected.to contain(/username == ENV\["STOPLIGHT_ADMIN_USERNAME"\] && password == ENV\["STOPLIGHT_ADMIN_PASSWORD"\]/)
       end
     end
   end

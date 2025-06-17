@@ -144,11 +144,16 @@ To add Admin Panel to your Rails project, add this configuration to your `config
 Rails.application.routes.draw do
   # ...
 
+  Stoplight::Admin.use(Rack::Auth::Basic) do |username, password|
+    username == ENV["STOPLIGHT_ADMIN_USERNAME"] && password == ENV["STOPLIGHT_ADMIN_PASSWORD"]
+  end
   mount Stoplight::Admin => '/stoplights'
 
   # ...
 end
 ```
+
+Then set up `STOPLIGHT_ADMIN_USERNAME` and `STOPLIGHT_ADMIN_PASSWORD` env variables to access your Admin panel.
 
 **IMPORTANT:** Stoplight Admin Panel requires you to have `sinatra` and `sinatra-contrib` gems installed. You can either add them to your Gemfile:
 
