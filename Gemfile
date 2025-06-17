@@ -13,6 +13,7 @@ group :admin do
 end
 
 group :development do
+  gem "ammeter"
   gem "benchmark-ips", "~> 2.14"
   gem "concurrent-ruby-ext"
   gem "connection_pool"
@@ -28,9 +29,4 @@ group :development do
   gem "simplecov-lcov", "~> 0.8"
   gem "standard"
   gem "timecop", "~> 0.9"
-
-  # Rails dummy and ammeter dependencies
-  gem "activerecord"
-  gem "ammeter"
-  gem "pg"
 end
