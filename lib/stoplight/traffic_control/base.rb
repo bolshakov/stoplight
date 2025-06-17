@@ -33,9 +33,11 @@ module Stoplight
       #
       # @param config [Stoplight::Light::Config]
       # @return [Stoplight::TrafficControl::CompatibilityResult]
+      # :nocov:
       def check_compatibility(config)
         raise NotImplementedError
       end
+      # :nocov:
 
       # Determines whether traffic should be stopped based on the Stoplight's
       # current state and metrics.
