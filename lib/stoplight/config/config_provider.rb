@@ -80,7 +80,7 @@ module Stoplight
       def transform_settings(settings)
         settings.merge(
           data_store: build_data_store(settings.fetch(:data_store)),
-          notifiers: build_notifiers(settings.fetch(:notifiers, [])),
+          notifiers: build_notifiers(settings.fetch(:notifiers)),
           tracked_errors: build_tracked_errors(settings.fetch(:tracked_errors)),
           skipped_errors: build_skipped_errors(settings.fetch(:skipped_errors)),
           cool_off_time: build_cool_off_time(settings.fetch(:cool_off_time))
