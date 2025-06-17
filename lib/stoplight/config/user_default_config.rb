@@ -46,7 +46,7 @@ module Stoplight
 
       # @!attribute [w] traffic_control
       #   @return [Stoplight::TrafficControl::Base, Symbol, Hash] The traffic control strategy.
-      attr_reader :traffic_control
+      attr_writer :traffic_control
 
       def initialize
         # This allows users appending notifiers to the default list,
