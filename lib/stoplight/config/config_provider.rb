@@ -46,7 +46,9 @@ module Stoplight
         ERROR
 
         settings = default_settings.merge(settings_overrides, {name: light_name})
-        Light::Config.new(**transform_settings(settings))
+        validate_config!(
+          Light::Config.new(**transform_settings(settings))
+        )
       end
 
       # Creates a configuration from a given +Stoplight::Light::Config+ object extending it
@@ -83,7 +85,8 @@ module Stoplight
           notifiers: build_notifiers(settings.fetch(:notifiers)),
           tracked_errors: build_tracked_errors(settings.fetch(:tracked_errors)),
           skipped_errors: build_skipped_errors(settings.fetch(:skipped_errors)),
-          cool_off_time: build_cool_off_time(settings.fetch(:cool_off_time))
+          cool_off_time: build_cool_off_time(settings.fetch(:cool_off_time)),
+          traffic_control: build_traffic_control(settings.fetch(:traffic_control))
         )
       end
 
@@ -107,11 +110,35 @@ module Stoplight
         cool_off_time.to_i
       end
 
-      def validate_traffic_control_compatibility!
-        traffic_control.check_compatibility(self).then do |compatibility_result|
+      def build_traffic_control(traffic_control)
+        case traffic_control
+        in Stoplight::TrafficControl::Base
+          traffic_control
+        in :consecutive_failures
+          Stoplight::TrafficControl::ConsecutiveFailures.new
+        in :error_rate
+          Stoplight::TrafficControl::ErrorRate.new
+        in {error_rate: error_rate_settings}
+          Stoplight::TrafficControl::ErrorRate.new(**error_rate_settings)
+        else
+          raise Error::ConfigurationError, <<~ERROR
+            unsupported traffic_control strategy provided. Supported options:
+              * Stoplight::TrafficControl::ConsecutiveFailures
+              * Stoplight::TrafficControl::ErrorRate
+          ERROR
+        end
+      end
+
+      def validate_config!(config)
+        validate_traffic_control_compatibility!(config)
+        config
+      end
+
+      def validate_traffic_control_compatibility!(config)
+        config.traffic_control.check_compatibility(config).then do |compatibility_result|
           if compatibility_result.incompatible?
             raise Stoplight::Error::ConfigurationError.new(
-              "#{traffic_control.class.name} strategy is incompatible with the Stoplight configuration: #{compatibility_result.error_messages}"
+              "#{config.traffic_control.class.name} strategy is incompatible with the Stoplight configuration: #{compatibility_result.error_messages}"
             )
           end
         end
