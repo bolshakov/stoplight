@@ -183,6 +183,23 @@ RSpec.describe Stoplight::Config::ConfigProvider do
         config = config_provider.provide("api")
         expect(config.traffic_control).to be_a(Stoplight::TrafficControl::ErrorRate)
       end
+
+      context "when neither user nor library default config sets traffic_control" do
+        let(:library_default_config) do
+          # Return a hash without :traffic_control
+          double(to_h: { cool_off_time: 1, data_store: Stoplight::Default::DATA_STORE, error_notifier: Stoplight::Default::ERROR_NOTIFIER, notifiers: Stoplight::Default::NOTIFIERS, threshold: 1, window_size: 1, tracked_errors: [StandardError], skipped_errors: [], traffic_recovery: Stoplight::Default::TRAFFIC_RECOVERY })
+        end
+        let(:user_default_config) do
+          # Return an empty hash
+          double(to_h: {})
+        end
+        let(:settings_overrides) { {} }
+
+        it "falls back to Default::TRAFFIC_CONTROL" do
+          config = config_provider.provide(:test_light)
+          expect(config.traffic_control).to eq(Stoplight::Default::TRAFFIC_CONTROL)
+        end
+      end
     end
   end
 end

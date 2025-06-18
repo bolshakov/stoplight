@@ -108,4 +108,11 @@ RSpec.describe Stoplight::TrafficControl::ConsecutiveFailures do
       end
     end
   end
+
+  describe 'Base#stop_traffic?' do
+    it 'raises NotImplementedError' do
+      base = Stoplight::TrafficControl::Base.new
+      expect { base.stop_traffic?(double, double) }.to raise_error(NotImplementedError)
+    end
+  end
 end
