@@ -187,7 +187,7 @@ RSpec.describe Stoplight::Config::ConfigProvider do
       context "when neither user nor library default config sets traffic_control" do
         let(:library_default_config) do
           # Return a hash without :traffic_control
-          double(to_h: { cool_off_time: 1, data_store: Stoplight::Default::DATA_STORE, error_notifier: Stoplight::Default::ERROR_NOTIFIER, notifiers: Stoplight::Default::NOTIFIERS, threshold: 1, window_size: 1, tracked_errors: [StandardError], skipped_errors: [], traffic_recovery: Stoplight::Default::TRAFFIC_RECOVERY })
+          double(to_h: {cool_off_time: 1, data_store: Stoplight::Default::DATA_STORE, error_notifier: Stoplight::Default::ERROR_NOTIFIER, notifiers: Stoplight::Default::NOTIFIERS, threshold: 1, window_size: 1, tracked_errors: [StandardError], skipped_errors: [], traffic_recovery: Stoplight::Default::TRAFFIC_RECOVERY})
         end
         let(:user_default_config) do
           # Return an empty hash
