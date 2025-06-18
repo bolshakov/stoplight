@@ -11,9 +11,11 @@ RSpec.describe Stoplight::Light do
       data_store: Stoplight::Default::DATA_STORE,
       error_notifier: Stoplight::Default::ERROR_NOTIFIER,
       notifiers: Stoplight::Default::NOTIFIERS,
+      threshold: 1, # Added default threshold
       window_size: nil,
       tracked_errors: [StandardError],
       skipped_errors: [],
+      traffic_control: Stoplight::TrafficControl::ConsecutiveFailures.new, # Added default traffic_control
       traffic_recovery: Stoplight::Default::TRAFFIC_RECOVERY
     )
   end
