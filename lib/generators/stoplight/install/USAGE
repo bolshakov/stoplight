@@ -10,4 +10,7 @@ Examples:
 
   rails generate stoplight:install --with-admin-panel
 
-    This will generate initializer and will add a route to the admin panel to your "config/routes.rb" file
+    This generated all needed requirements to set up Stoplight Admin Panel:
+    * It generates initializer "config/initializers/stoplight.rb" with Redis configuration
+    * It injects your "config/routes.rb" with route with basic authentication to Stoplight Admin panel
+    * It injects your Gemfile with needed dependencies ('redis', 'sinatra' and 'sinatra-contrib')
