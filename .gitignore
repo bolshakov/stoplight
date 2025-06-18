@@ -4,7 +4,18 @@
 /doc/
 /pkg/
 /tmp/
+tmp/
 /vendor/
 /.idea
 profile_results
 /docker/Gemfile.lock
+*.log
+
+# OS or Editor folders
+.DS_Store
+.cache
+.project
+.settings
+.tmproj
+.idea
+Thumbs.db

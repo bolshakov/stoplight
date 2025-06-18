@@ -13,6 +13,7 @@ group :admin do
 end
 
 group :development do
+  gem "ammeter"
   gem "benchmark-ips", "~> 2.14"
   gem "concurrent-ruby-ext"
   gem "connection_pool"

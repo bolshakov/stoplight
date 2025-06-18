@@ -1,0 +1,18 @@
+# frozen_string_literal: true
+
+require "redis"
+
+# Set up your project-specific Redis setup here
+# One of the simplest configurations would be configuring Redis via url
+# Example:
+#   redis = Redis.new(url: ENV["REDIS_URL"])
+# REDIS_URL usually looks like this
+#   "redis://<username>:<password>@<server ip address>:<port>/<redis db>"
+# Example:
+#   "redis://admin:p4ssw0rd@10.0.1.1:6380/15"
+redis = Redis.new
+data_store = Stoplight::DataStore::Redis.new(redis)
+
+Stoplight.configure do |config|
+  config.data_store = data_store
+end
