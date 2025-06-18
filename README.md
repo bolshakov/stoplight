@@ -60,12 +60,11 @@ stateDiagram
 - **Red**: Failure state. Fast-fails without running the code. (Circuit open)
 - **Yellow**: Recovery state. Allows a test execution to see if the problem is resolved. (Circuit half-open)
 
-Stoplight's behavior is controlled by four primary parameters:
+Stoplight's behavior is controlled by three main primary parameters:
 
-1. **Traffic Control**: A strategy that defines how Stoplight determines when to trip the circuit (default: `:consecutive_failures`)
-2. **Threshold**: The failure limit that triggers a state change (default: `3`)
-3. **Cool Off Time** (default: `60` seconds): Time to wait in the red state before transitioning to yellow
-4. **Window Size** (default: `nil`): Time window for tracking failures. When set, enables sliding window behavior
+1. **Threshold** (default: `3`): Number of failures required to transition from green to red.
+2. **Cool Off Time** (default: `60` seconds): Time to wait in the red state before transitioning to yellow.
+3. **Window Size** (default: `nil`): Time window in which failures are counted toward the threshold. By default, all failures are counted.
 
 ## Basic Usage
 
@@ -262,11 +261,14 @@ When both methods are used, `skipped_errors` takes precedence over `tracked_erro
 
 ### Traffic Control Strategies
 
-Stoplight supports two built-in strategies that determine when a stoplight should stop traffic.
+You've seen how Stoplight transitions from green to red when failures reach the threshold. But **how exactly does it 
+decide when that threshold is reached?** That's where traffic control strategies come in.
+
+Stoplight offers two built-in strategies for counting failures:
 
 #### Consecutive Failures (Default)
 
-Stops traffic when a specified number of consecutive failures occur. Works with or without time windows.
+Stops traffic when a specified number of consecutive failures occur. Works with or without time sliding windows.
 
 ```ruby
 light = Stoplight(
@@ -291,7 +293,7 @@ light = Stoplight(
 Counts consecutive failures within a 5-minute sliding window. Both conditions must be met: 5 consecutive failures 
 AND at least 5 total failures within the window.
 
-_This is Stoplight's default strategy when no traffic_control is specified._
+_This is Stoplight's default strategy when no `traffic_control` is specified._
 
 #### Error Rate
 
