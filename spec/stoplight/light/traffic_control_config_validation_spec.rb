@@ -59,5 +59,9 @@ RSpec.describe Stoplight::Light do
       config = config_base.with(threshold: 3, traffic_control: Stoplight::TrafficControl::ConsecutiveFailures.new)
       expect { described_class.new(config) }.not_to raise_error
     end
+
+    it "does not raise for default config_base" do
+      expect { described_class.new(config_base) }.not_to raise_error
+    end
   end
 end
