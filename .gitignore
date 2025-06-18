@@ -9,7 +9,13 @@ tmp/
 /.idea
 profile_results
 /docker/Gemfile.lock
-
-spec/dummy/db/*.sqlite3
-spec/dummy/db/*.sqlite3-journal
 *.log
+
+# OS or Editor folders
+.DS_Store
+.cache
+.project
+.settings
+.tmproj
+.idea
+Thumbs.db
