@@ -200,6 +200,19 @@ RSpec.describe Stoplight::Config::ConfigProvider do
           expect(config.traffic_control).to eq(Stoplight::Default::TRAFFIC_CONTROL)
         end
       end
+
+      context "when default_settings has :traffic_control key with nil value" do
+        let(:library_default_config) do
+          double(to_h: {cool_off_time: 1, data_store: Stoplight::Default::DATA_STORE, error_notifier: Stoplight::Default::ERROR_NOTIFIER, notifiers: Stoplight::Default::NOTIFIERS, threshold: 1, window_size: 1, tracked_errors: [StandardError], skipped_errors: [], traffic_recovery: Stoplight::Default::TRAFFIC_RECOVERY, traffic_control: nil})
+        end
+        let(:user_default_config) { double(to_h: {}) }
+        let(:settings_overrides) { {} }
+
+        it "returns nil for traffic_control" do
+          config = config_provider.provide(:test_light)
+          expect(config.traffic_control).to be_nil
+        end
+      end
     end
   end
 end
