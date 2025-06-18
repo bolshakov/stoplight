@@ -1,4 +1,4 @@
-Now# frozen_string_literal: true
+# frozen_string_literal: true
 
 module Stoplight
   module Config
@@ -12,7 +12,7 @@ module Stoplight
         when Hash
           if tc.key?(:error_rate)
             opts = tc[:error_rate] || {}
-            Stoplight::TrafficControl::ErrorRate.new(**opts.transform_keys { |k| k == :min_requests ? :min_sample_size : k })
+            Stoplight::TrafficControl::ErrorRate.new(**opts.transform_keys { |k| (k == :min_requests) ? :min_sample_size : k })
           elsif tc.key?(:consecutive_failures)
             opts = tc[:consecutive_failures] || {}
             Stoplight::TrafficControl::ConsecutiveFailures.new(**opts)

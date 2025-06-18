@@ -15,7 +15,7 @@ module Stoplight
     #
     # @api private
     class ConfigProvider
-      require_relative 'traffic_control_builder'
+      require_relative "traffic_control_builder"
 
       include TrafficControlBuilder
 

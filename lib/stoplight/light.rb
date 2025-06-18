@@ -195,11 +195,11 @@ module Stoplight
       threshold = config.threshold
       if tc.is_a?(Stoplight::TrafficControl::ErrorRate)
         unless threshold.is_a?(Numeric) && threshold > 0.0 && threshold < 1.0
-          raise ArgumentError, 'For ErrorRate strategy, threshold must be a float between 0.0 and 1.0'
+          raise ArgumentError, "For ErrorRate strategy, threshold must be a float between 0.0 and 1.0"
         end
       elsif tc.is_a?(Stoplight::TrafficControl::ConsecutiveFailures)
         unless threshold.is_a?(Integer) && threshold > 0
-          raise ArgumentError, 'For ConsecutiveFailures strategy, threshold must be a positive integer'
+          raise ArgumentError, "For ConsecutiveFailures strategy, threshold must be a positive integer"
         end
       end
     end

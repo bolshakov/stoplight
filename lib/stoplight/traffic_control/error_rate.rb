@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative 'base'
+require_relative "base"
 
 module Stoplight
   module TrafficControl
@@ -25,7 +25,7 @@ module Stoplight
       def stop_traffic?(config, metadata)
         threshold = config.threshold
         unless threshold.is_a?(Numeric) && threshold > 0.0 && threshold < 1.0
-          raise ArgumentError, 'threshold for ErrorRate must be a float between 0.0 and 1.0'
+          raise ArgumentError, "threshold for ErrorRate must be a float between 0.0 and 1.0"
         end
         total = (metadata.successes || 0) + (metadata.failures || 0)
         return false if total < @min_sample_size
