@@ -2,6 +2,7 @@
 
 require "spec_helper"
 require "generators/stoplight/install/install_generator"
+require "debug"
 
 RSpec.describe Stoplight::Generators::InstallGenerator, type: :generator do
   destination File.expand_path("../../tmp", __dir__)
@@ -38,26 +39,39 @@ RSpec.describe Stoplight::Generators::InstallGenerator, type: :generator do
   end
 
   describe "admin panel" do
-    subject { file(routes_path) }
+    subject { file("config/routes.rb") }
 
-    let(:config_path) { "config" }
-    let(:routes_path) { "#{config_path}/routes.rb" }
+    let(:config_path) { File.join(destination_root, "config") }
+    let(:routes_path) { File.join(destination_root, "config", "routes.rb") }
+    let(:gemfile_path) { File.join(destination_root, "Gemfile") }
 
     before do
-      FileUtils.mkdir_p(File.join(destination_root, config_path))
-      FileUtils.rm(File.join(destination_root, routes_path)) if File.exist?(File.join(destination_root, routes_path))
-      File.write(File.join(destination_root, routes_path), <<~RUBY
+      FileUtils.mkdir_p(config_path)
+      FileUtils.touch(gemfile_path)
+      File.write(routes_path, <<~RUBY
         Rails.application.routes.draw do
         end
       RUBY
       )
     end
 
+    after { FileUtils.rm(routes_path) }
+
     context "without admin panel flag" do
       it "does not mount admin panel to routes" do
         run_generator(args)
 
         is_expected.not_to contain(/mount Stoplight::Admin/)
+      end
+
+      context "dependencies" do
+        subject { file("Gemfile") }
+
+        it "does not add dependencies to Gemfile" do
+          is_expected.to_not contain(/gem 'redis'/)
+          is_expected.to_not contain(/gem 'sinatra', require: false/)
+          is_expected.to_not contain(/gem 'sinatra-contrib', require: false/)
+        end
       end
     end
 
@@ -71,6 +85,18 @@ RSpec.describe Stoplight::Generators::InstallGenerator, type: :generator do
         is_expected.to contain(/mount Stoplight::Admin => '\/stoplights'/)
         is_expected.to contain(/Stoplight::Admin.use(Rack::Auth::Basic) do |username, password|/)
         is_expected.to contain(/username == ENV\["STOPLIGHT_ADMIN_USERNAME"\] && password == ENV\["STOPLIGHT_ADMIN_PASSWORD"\]/)
+      end
+
+      context "dependencies" do
+        subject { file("Gemfile") }
+
+        it "adds dependencies to Gemfile" do
+          run_generator(args)
+
+          is_expected.to contain(/gem 'redis'/)
+          is_expected.to contain(/gem 'sinatra', require: false/)
+          is_expected.to contain(/gem 'sinatra-contrib', require: false/)
+        end
       end
     end
   end

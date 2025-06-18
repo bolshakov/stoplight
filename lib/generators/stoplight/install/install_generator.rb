@@ -21,7 +21,9 @@ module Stoplight
       INITIALIZERS_PATH = "config/initializers"
       AFTER_INSTALL_NOTIFICATION = <<~TEXT
         \nThank you for using stoplight!
-        Now to finish configuration go to 'config/initializers/stoplight.rb' to set up connection to Redis.\n
+        Now to finish configuration:
+        * Run `bundle` from the project root to install new gems
+        * Go to 'config/initializers/stoplight.rb' to set up connection to Redis.\n
       TEXT
 
       STOPLIGHT_ADMIN_ROUTE = <<-RUBY
@@ -33,6 +35,24 @@ module Stoplight
     username == ENV["STOPLIGHT_ADMIN_USERNAME"] && password == ENV["STOPLIGHT_ADMIN_PASSWORD"]
   end
       RUBY
+
+      def generate_redis_gem
+        if options[:with_admin_panel]
+          conf = "\ngem 'redis'"
+          inject_into_file "Gemfile", conf
+        end
+      end
+
+      def generate_sinatra_deps
+        if options[:with_admin_panel]
+          conf = <<~RUBY
+            gem 'sinatra', require: false
+            gem 'sinatra-contrib', require: false
+          RUBY
+
+          inject_into_file "Gemfile", "\n#{conf}"
+        end
+      end
 
       def generate_initializer
         initializer_template = STOPLIGHT_CONFIG_TEMPLATE
