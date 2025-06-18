@@ -35,14 +35,6 @@ Or install it manually:
 $ gem install stoplight
 ```
 
-### Rails
-
-For Rails application you can use generator to set up initializer and Admin Panel:
-
-```sh
-rails generate stoplight:install --with-admin-panel
-```
-
 Stoplight uses [Semantic Versioning][]. Check out [the change log][] for a detailed list of changes.
 
 ## Core Concepts
@@ -138,7 +130,7 @@ receives `nil`. In both cases, the return value of the fallback becomes the retu
 
 Stoplight goes with a built-in Admin Panel that can track all active Lights and manually lock them in the desired state (`Green` or `Red`). Locking lights in certain states might be helpful in scenarios like E2E testing.
 
-To add Admin Panel to your Rails project, add this configuration to your `config/routes.rb` file.
+To add Admin Panel protected by basic authentication to your Rails project, add this configuration to your `config/routes.rb` file.
 
 ```ruby
 Rails.application.routes.draw do
@@ -397,6 +389,12 @@ Stoplight.configure do |config|
   config.data_store = Stoplight::DataStore::Redis.new(Redis.new)
   config.notifiers += [Stoplight::Notifier::Logger.new(Rails.logger)]
 end
+```
+
+You can generate initializer with Redis, Admin Panel route and add needed gems to your Gemfile:
+
+```sh
+rails generate stoplight:install --with-admin-panel
 ```
 
 ## Testing
