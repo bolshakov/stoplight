@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "forwardable"
+require_relative "traffic_control_builder"
 
 module Stoplight
   module Config
@@ -11,6 +12,7 @@ module Stoplight
     # TODO: add evaluation/recovery strategy support
     class UserDefaultConfig
       extend Forwardable
+      include TrafficControlBuilder
 
       # @!attribute [w] cool_off_time
       #   @return [Integer, nil] The default cool-off time in seconds.
@@ -44,6 +46,10 @@ module Stoplight
       #   @return [Stoplight::DataStore::Base] The default data store instance.
       attr_writer :data_store
 
+      # @!attribute [w] traffic_control
+      #   @return [Stoplight::TrafficControl::Base, nil] The default traffic control strategy.
+      attr_writer :traffic_control
+
       def initialize
         # This allows users appending notifiers to the default list,
         # while still allowing them to override the default list.
@@ -55,6 +61,7 @@ module Stoplight
       # @return [Hash] A hash representation of the configuration, excluding nil values.
       # @api private
       def to_h
+        tc = build_traffic_control(@traffic_control)
         {
           cool_off_time: @cool_off_time,
           data_store: @data_store,
@@ -63,7 +70,8 @@ module Stoplight
           threshold: @threshold,
           window_size: @window_size,
           tracked_errors: @tracked_errors,
-          skipped_errors: @skipped_errors
+          skipped_errors: @skipped_errors,
+          traffic_control: tc
         }.compact
       end
 

@@ -147,5 +147,42 @@ RSpec.describe Stoplight::Config::ConfigProvider do
         is_expected.to be(60)
       end
     end
+
+    describe "traffic_control symbol and hash support" do
+      it 'accepts :error_rate symbol in explicit settings' do
+        config = config_provider.provide('api', traffic_control: :error_rate)
+        expect(config.traffic_control).to be_a(Stoplight::TrafficControl::ErrorRate)
+      end
+
+      it 'accepts :consecutive_failures symbol in explicit settings' do
+        config = config_provider.provide('api', traffic_control: :consecutive_failures)
+        expect(config.traffic_control).to be_a(Stoplight::TrafficControl::ConsecutiveFailures)
+      end
+
+      it 'accepts hash for error_rate with options' do
+        config = config_provider.provide('api', traffic_control: { error_rate: { min_requests: 42 } })
+        tc = config.traffic_control
+        expect(tc).to be_a(Stoplight::TrafficControl::ErrorRate)
+        expect(tc.instance_variable_get(:@min_sample_size)).to eq(42)
+      end
+
+      it 'accepts hash for consecutive_failures with options' do
+        config = config_provider.provide('api', traffic_control: { consecutive_failures: {} })
+        tc = config.traffic_control
+        expect(tc).to be_a(Stoplight::TrafficControl::ConsecutiveFailures)
+      end
+
+      it 'raises for unknown hash key' do
+        expect {
+          config_provider.provide('api', traffic_control: { unknown: {} })
+        }.to raise_error(ArgumentError)
+      end
+
+      it 'uses user default config for traffic_control if not overridden' do
+        user_default_config.traffic_control = :error_rate
+        config = config_provider.provide('api')
+        expect(config.traffic_control).to be_a(Stoplight::TrafficControl::ErrorRate)
+      end
+    end
   end
 end

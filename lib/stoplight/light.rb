@@ -19,6 +19,7 @@ module Stoplight
 
     # @param config [Stoplight::Light::Config]
     def initialize(config, green_run_strategy: nil, yellow_run_strategy: nil, red_run_strategy: nil)
+      validate_config!(config)
       @config = config
       @green_run_strategy = green_run_strategy
       @yellow_run_strategy = yellow_run_strategy
@@ -187,6 +188,20 @@ module Stoplight
     # @return [Stoplight::Light]
     def reconfigure(config)
       self.class.new(config)
+    end
+
+    def validate_config!(config)
+      tc = config.traffic_control
+      threshold = config.threshold
+      if tc.is_a?(Stoplight::TrafficControl::ErrorRate)
+        unless threshold.is_a?(Numeric) && threshold > 0.0 && threshold < 1.0
+          raise ArgumentError, 'For ErrorRate strategy, threshold must be a float between 0.0 and 1.0'
+        end
+      elsif tc.is_a?(Stoplight::TrafficControl::ConsecutiveFailures)
+        unless threshold.is_a?(Integer) && threshold > 0
+          raise ArgumentError, 'For ConsecutiveFailures strategy, threshold must be a positive integer'
+        end
+      end
     end
   end
 end

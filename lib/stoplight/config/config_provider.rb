@@ -15,6 +15,10 @@ module Stoplight
     #
     # @api private
     class ConfigProvider
+      require_relative 'traffic_control_builder'
+
+      include TrafficControlBuilder
+
       # @!attribute [r] default_settings
       #   @return [Hash]
       private attr_reader :default_settings
@@ -78,6 +82,20 @@ module Stoplight
       private
 
       def transform_settings(settings)
+        # Merge precedence: library defaults < user defaults < explicit settings
+        # traffic_control: explicit > user default > library default
+        traffic_control =
+          case tc = settings[:traffic_control]
+          when nil
+            if default_settings.key?(:traffic_control)
+              default_settings[:traffic_control]
+            else
+              Default::TRAFFIC_CONTROL
+            end
+          else
+            build_traffic_control(tc)
+          end
+        settings = settings.merge(traffic_control: traffic_control)
         settings.merge(
           data_store: build_data_store(settings.fetch(:data_store)),
           notifiers: build_notifiers(settings.fetch(:notifiers)),
