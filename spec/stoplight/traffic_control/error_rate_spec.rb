@@ -53,4 +53,24 @@ RSpec.describe Stoplight::TrafficControl::ErrorRate do
       expect { strategy.stop_traffic?(config, metadata) }.to raise_error(ArgumentError)
     end
   end
+
+  describe "#==" do
+    it "returns true for two ErrorRate objects with the same min_sample_size" do
+      a = described_class.new(min_sample_size: 10)
+      b = described_class.new(min_sample_size: 10)
+      expect(a).to eq(b)
+    end
+
+    it "returns false for ErrorRate objects with different min_sample_size" do
+      a = described_class.new(min_sample_size: 10)
+      b = described_class.new(min_sample_size: 20)
+      expect(a).not_to eq(b)
+    end
+
+    it "returns false for different class" do
+      a = described_class.new(min_sample_size: 10)
+      b = Object.new
+      expect(a).not_to eq(b)
+    end
+  end
 end
