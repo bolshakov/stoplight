@@ -122,3 +122,5 @@ def Stoplight(name, **settings) # rubocop:disable Naming/MethodName
   config = Stoplight.config_provider.provide(name, settings)
   Stoplight::Light.new(config)
 end
+
+loader.eager_load
