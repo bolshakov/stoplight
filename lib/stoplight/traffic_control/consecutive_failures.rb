@@ -29,7 +29,7 @@ module Stoplight
       # @param config [Stoplight::Light::Config]
       # @return [Stoplight::Config::CompatibilityResult]
       def check_compatibility(config)
-        if config.threshold < 1
+        if config.threshold <= 0
           incompatible("`threshold` should be bigger than 0")
         elsif !config.threshold.is_a?(Integer)
           incompatible("`threshold` should be an integer")
