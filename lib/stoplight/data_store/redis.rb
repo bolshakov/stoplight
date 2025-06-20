@@ -32,7 +32,7 @@ module Stoplight
         # Retrieves the list of Redis bucket keys required to cover a specific time window.
         #
         # @param light_name [String] The name of the light (used as part of the Redis key).
-        # @param metric [String] The metric type (e.g., "failures").
+        # @param metric [String] The metric type (e.g., "errors").
         # @param window_end [Time, Numeric] The end time of the window (can be a Time object or a numeric timestamp).
         # @param window_size [Numeric] The size of the time window in seconds.
         # @return [Array<String>] A list of Redis keys for the buckets that cover the time window.
@@ -55,7 +55,7 @@ module Stoplight
         # Generates a Redis key for a specific metric and time.
         #
         # @param light_name [String] The name of the light.
-        # @param metric [String] The metric type (e.g., "failures").
+        # @param metric [String] The metric type (e.g., "errors").
         # @param time [Time, Numeric] The time for which to generate the key.
         # @return [String] The generated Redis key.
         def bucket_key(light_name, metric:, time:)
@@ -124,7 +124,7 @@ module Stoplight
         recovery_probe_failure_keys = recovery_probe_failure_bucket_keys(config, window_end: window_end_ts)
         recovery_probe_success_keys = recovery_probe_success_bucket_keys(config, window_end: window_end_ts)
 
-        successes, failures, recovery_probe_successes, recovery_probe_failures, meta = @redis.with do |client|
+        successes, errors, recovery_probe_successes, recovery_probe_errors, meta = @redis.with do |client|
           client.evalsha(
             @get_metadata_sha,
             argv: [
@@ -144,15 +144,15 @@ module Stoplight
           )
         end
         meta_hash = meta.each_slice(2).to_h.transform_keys(&:to_sym)
-        last_failure_json = meta_hash.delete(:last_failure_json)
-        last_failure = normalize_failure(last_failure_json, config.error_notifier) if last_failure_json
+        last_error_json = meta_hash.delete(:last_error_json)
+        last_error = normalize_failure(last_error_json, config.error_notifier) if last_error_json
 
         Metadata.new(
           successes: successes,
-          failures: failures,
+          errors: errors,
           recovery_probe_successes: recovery_probe_successes,
-          recovery_probe_failures: recovery_probe_failures,
-          last_failure:,
+          recovery_probe_errors: recovery_probe_errors,
+          last_error:,
           **meta_hash
         )
       end
@@ -170,7 +170,7 @@ module Stoplight
             argv: [current_ts, SecureRandom.hex(12), failure_json, metrics_ttl, metadata_ttl],
             keys: [
               metadata_key(config),
-              config.window_size && failures_key(config, time: current_ts)
+              config.window_size && errors_key(config, time: current_ts)
             ].compact
           )
         end
@@ -207,7 +207,7 @@ module Stoplight
             argv: [current_ts, SecureRandom.uuid, failure_json, metrics_ttl, metrics_ttl],
             keys: [
               metadata_key(config),
-              recovery_probe_failures_key(config, time: current_ts)
+              recovery_probe_errors_key(config, time: current_ts)
             ].compact
           )
         end
@@ -371,7 +371,7 @@ module Stoplight
         self.class.bucket_key(config.name, metric: "success", time:)
       end
 
-      private def failures_key(config, time:)
+      private def errors_key(config, time:)
         self.class.bucket_key(config.name, metric: "failure", time:)
       end
 
@@ -379,7 +379,7 @@ module Stoplight
         self.class.bucket_key(config.name, metric: "recovery_probe_success", time:)
       end
 
-      private def recovery_probe_failures_key(config, time:)
+      private def recovery_probe_errors_key(config, time:)
         self.class.bucket_key(config.name, metric: "recovery_probe_failure", time:)
       end
 

@@ -6,30 +6,30 @@ RSpec.describe Stoplight::TrafficControl::ConsecutiveFailures do
   subject { described_class.new.stop_traffic?(config, metadata) }
 
   let(:config) { instance_double(Stoplight::Light::Config, threshold:, window_size:) }
-  let(:metadata) { instance_double(Stoplight::Metadata, consecutive_failures:, failures:) }
+  let(:metadata) { instance_double(Stoplight::Metadata, consecutive_errors:, errors:) }
 
   context "when the window size is not sent" do
     let(:window_size) { nil }
 
-    context "when the number of consecutive failures is greater than the threshold" do
-      let(:consecutive_failures) { 3 }
-      let(:failures) { 1 }
+    context "when the number of consecutive errors is greater than the threshold" do
+      let(:consecutive_errors) { 3 }
+      let(:errors) { 1 }
       let(:threshold) { 2 }
 
       it { is_expected.to be(true) }
     end
 
-    context "when the number of consecutive failures is equal to the threshold" do
-      let(:consecutive_failures) { 2 }
-      let(:failures) { 1 }
+    context "when the number of consecutive errors is equal to the threshold" do
+      let(:consecutive_errors) { 2 }
+      let(:errors) { 1 }
       let(:threshold) { 2 }
 
       it { is_expected.to be(true) }
     end
 
-    context "when the number of consecutive failures is less then the threshold" do
-      let(:consecutive_failures) { 1 }
-      let(:failures) { 1 }
+    context "when the number of consecutive errors is less then the threshold" do
+      let(:consecutive_errors) { 1 }
+      let(:errors) { 1 }
       let(:threshold) { 2 }
 
       it { is_expected.to be(false) }
@@ -39,70 +39,70 @@ RSpec.describe Stoplight::TrafficControl::ConsecutiveFailures do
   context "when the window size is set" do
     let(:window_size) { 600 }
 
-    context "when the number of consecutive failures is greater than the threshold" do
-      let(:consecutive_failures) { 2 }
+    context "when the number of consecutive errors is greater than the threshold" do
+      let(:consecutive_errors) { 2 }
       let(:threshold) { 1 }
 
-      context "when the number of failures is less than the threshold" do
-        let(:failures) { 0 }
+      context "when the number of errors is less than the threshold" do
+        let(:errors) { 0 }
 
         it { is_expected.to be(false) }
       end
 
-      context "when the number of failures is equal to the threshold" do
-        let(:failures) { 1 }
+      context "when the number of errors is equal to the threshold" do
+        let(:errors) { 1 }
 
         it { is_expected.to be(true) }
       end
 
-      context "when the number of failures is bigger to the threshold" do
-        let(:failures) { 2 }
+      context "when the number of errors is bigger to the threshold" do
+        let(:errors) { 2 }
 
         it { is_expected.to be(true) }
       end
     end
 
-    context "when the number of consecutive failures equals to the threshold" do
-      let(:consecutive_failures) { 1 }
+    context "when the number of consecutive errors equals to the threshold" do
+      let(:consecutive_errors) { 1 }
       let(:threshold) { 1 }
 
-      context "when the number of failures is less than the threshold" do
-        let(:failures) { 0 }
+      context "when the number of errors is less than the threshold" do
+        let(:errors) { 0 }
 
         it { is_expected.to be(false) }
       end
 
-      context "when the number of failures is equal to the threshold" do
-        let(:failures) { 1 }
+      context "when the number of errors is equal to the threshold" do
+        let(:errors) { 1 }
 
         it { is_expected.to be(true) }
       end
 
-      context "when the number of failures is bigger to the threshold" do
-        let(:failures) { 2 }
+      context "when the number of errors is bigger to the threshold" do
+        let(:errors) { 2 }
 
         it { is_expected.to be(true) }
       end
     end
 
-    context "when the number of consecutive failures is less than the threshold" do
-      let(:consecutive_failures) { 1 }
+    context "when the number of consecutive errors is less than the threshold" do
+      let(:consecutive_errors) { 1 }
       let(:threshold) { 2 }
 
-      context "when the number of failures is less than the threshold" do
-        let(:failures) { 0 }
+      context "when the number of errors is less than the threshold" do
+        let(:errors) { 0 }
 
         it { is_expected.to be(false) }
       end
 
-      context "when the number of failures is equal to the threshold" do
-        let(:failures) { 1 }
+      context "when the number of errors is equal to the threshold" do
+        let(:errors) { 1 }
 
         it { is_expected.to be(false) }
       end
 
-      context "when the number of failures is bigger to the threshold" do
-        let(:failures) { 2 }
+      context "when the number of errors is bigger to the threshold" do
+        let(:errors) { 2 }
 
         it { is_expected.to be(false) }
       end

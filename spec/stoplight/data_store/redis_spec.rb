@@ -155,7 +155,7 @@ RSpec.describe Stoplight::DataStore::Redis, :redis do
             .to change { data_store.get_metadata(config) }
             .to(
               have_attributes(
-                last_failure: have_attributes(
+                last_error: have_attributes(
                   error_class: "JSON::ParserError"
                 )
               )

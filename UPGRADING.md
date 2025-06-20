@@ -1,3 +1,162 @@
+## Stoplight 5.0 
+
+Stoplight 5.0 introduces several breaking changes, so you'll need to set aside some time to update your code. The good 
+news is that most of the changes are pretty straightforward, and once you're done, you'll have a much cleaner and 
+more powerful setup.
+
+Here's what you'll want to tackle during your upgrade. Don't worry if this looks like a lot - most of these are simple 
+find-and-replace operations:
+
+- [] Update global configuration to use the new block syntax
+- [] Replace any remaining `Stoplight() {}` calls with `Stoplight().run {}`
+- [] Convert error handlers to tracked/skipped error lists
+- [] Move fallbacks from configuration to `#run` method calls
+- [] Account for Stoplight state reset after deployment
+- [] Test thoroughly in a staging environment
+
+### Global Configuration Redesign
+
+The biggest change you'll see is how global configuration works. We've moved away from individual setter methods to a 
+unified configuration block. The old individual setters were causing race conditions in production - imagine 
+one part of your app setting the data store while another part was setting notifiers, and depending on timing, you could 
+end up with inconsistent configuration states. The new block-based approach ensures all your settings are applied 
+atomically, which eliminates these edge cases completely.
+
+If you have code that looks like this:
+
+```ruby
+# Old way that won't work anymore
+Stoplight.default_data_store = Stoplight::DataStore::Redis.new(redis)
+Stoplight.default_notifiers += [Stoplight::Notifier::Logger.new(Rails.logger)]
+Stoplight.default_error_notifier = ->(error) { Bugsnag.notify(error) }
+```
+
+You'll need to convert it to the new block syntax:
+
+```ruby
+# New way that's much more reliable
+Stoplight.configure do |config|
+  config.data_store = Stoplight::DataStore::Redis.new(redis)
+  config.notifiers += [Stoplight::Notifier::Logger.new(Rails.logger)]
+  config.error_notifier = ->(error) { Bugsnag.notify(error) }
+end
+```
+
+The new approach ensures all your configuration is applied atomically, which prevents some weird edge cases where 
+partial configuration changes could cause unexpected behavior.
+
+### Cleaning Up Old Deprecated Code
+
+Remember `Stoplight() {}` interface that got deprecated way back in 4.0? Well, it's finally gone completely. If you 
+still have any of these in your codebase, you'll need to convert them to use the run method:
+
+```ruby
+# This won't work anymore
+Stoplight('API Call') { make_api_request }.run
+
+# Change it to this
+Stoplight('API Call').run { make_api_request }
+```
+
+Most codebases shouldn't have these anymore since they've been deprecated for a while, but it's worth doing a quick 
+grep to make sure.
+
+### Error Handling Gets Much Simpler
+
+This is probably the change you'll appreciate most once you're used to it. The old `with_error_handler` callback system 
+was confusing and led to a lot of boilerplate code, but more importantly, it was a source of bugs. We kept 
+seeing cases where developers would forget to call the handler properly, or accidentally raise errors when they meant 
+to track them, or create configuration that leaked between different circuit breakers. The new approach is much more 
+straightforward and eliminates these problems entirely - you just tell Stoplight which errors to track and which to ignore.
+
+If you have complex error handler logic like this:
+
+```ruby
+# Old complicated way
+light = Stoplight('api-call')
+  .with_error_handler do |error, handle|
+    if error.is_a?(ActiveRecord::RecordNotFound) || error.is_a?(ActiveRecord::RecordInvalid)
+      raise error  # Don't track this error
+    else
+      handle.call(error)  # Track this error
+    end
+  end
+```
+
+You can replace it with this much cleaner approach:
+
+```ruby
+# New simple way
+light = Stoplight('api-call', skipped_errors: [ActiveRecord::RecordNotFound, ActiveRecord::RecordInvalid])
+```
+
+The new system is way more explicit about what's happening, and you don't have to worry about accidentally forgetting 
+to call the handler or raising the error in the right places.
+
+### Fallbacks Work Differently Now
+
+Fallbacks have moved from being configured on the light instance to being passed directly to the run method. This might 
+seem like a small change, but it's actually pretty powerful and solves a real problem we've observed in production 
+codebases. When fallbacks were configured on the light instance, you'd often end up with the same circuit breaker 
+protecting multiple different operations, but each operation would need its own fallback strategy. This led to either 
+duplicated light configurations or inappropriate fallbacks being applied to the wrong operations. The new approach 
+makes each operation's fallback explicit and prevents configuration contamination between different use cases.
+
+Instead of configuring fallbacks upfront like this:
+
+```ruby
+# Old way
+light = Stoplight("Payment Gateway")
+        .with_fallback { |error| handle_payment_failure(error) }
+result = light.run { process_payment }
+```
+
+You now pass the fallback directly to the run method:
+
+```ruby
+# New way
+light = Stoplight('Payment Gateway') 
+result = light.run(->(error) { handle_payment_failure(error) }) { process_payment }
+```
+
+This makes it much clearer which fallback belongs to which operation, and you can easily have the same circuit breaker 
+protect multiple operations with completely different fallback behaviors.
+
+### Redis Data Gets a Fresh Start
+
+Here's the one change that doesn't require any code updates but is worth knowing about: Stoplight 5.0 uses completely 
+new Redis data structures that aren't compatible with the old version. We didn't make this change lightly - the old 
+data structures were becoming a bottleneck for the new features we wanted to build, especially around better 
+distributed coordination and more sophisticated error tracking. The new structures use Lua scripting for atomic 
+operations, which eliminates race conditions in distributed environments and provides much better performance. 
+Unfortunately, there was no practical way to migrate the old data format without significant complexity and potential 
+data corruption risks, so we opted for a clean break.
+
+For most applications, this isn't a big deal since circuit breakers are designed to adapt quickly to current conditions 
+anyway. But if you have circuit breakers that take a long time to fail and you're upgrading during a period when your 
+dependencies are already having issues, you might want to plan your deployment timing accordingly.
+
+The old Redis data won't be deleted, so if you really need to reference historical information for debugging purposes, 
+it'll still be there. But Stoplight will ignore it completely and start fresh.
+
+### Testing Your Migration
+
+Once you've made all these changes, definitely test everything thoroughly in a staging environment that mirrors your 
+production setup. Pay special attention to how your circuit breakers behave under load and make sure your error 
+classification is working the way you expect.
+
+The new error handling system is much more explicit, but that also means if you get the configuration wrong, it'll be 
+more obvious what's happening (which is actually a good thing).
+
+### Getting Help
+
+If you run into any issues during the migration, don't hesitate to post a message to our [Discussions forum]. We've 
+tried to make the error messages as clear as possible when something's misconfigured. The new APIs are much more 
+consistent and predictable once you get used to them.
+
+Overall, while this upgrade does require some work upfront, the end result is a much cleaner and more reliable circuit 
+breaker setup that should serve you well going forward.
+
 ## Stoplight 4.0
 
 ### Notifiers have dropped!
@@ -137,7 +296,8 @@ Nothing. Stoplight will function as usual.
 
 [stoplight-sentry]: https://github.com/bolshakov/stoplight-sentry
 [Community-supported notifiers]: https://github.com/bolshakov/stoplight/tree/master#community-supported-notifiers
-[How to implement your own notifier?]: https://github.com/bolshakov/stoplight/tree/master#how-to-implement-your-own-notifier
+[How to implement your own notifier?]: https://github.com/bolshakov/stoplight/blob/master/lib/stoplight/notifier/generic.rb
 [dropped notifiers]: https://github.com/bolshakov/stoplight/tree/v3.0.1/lib/stoplight/notifier
 [without passing an empty block]: https://github.com/bolshakov/stoplight-admin/blob/9c9848eb94410e46b20972548f0863db224cb6da/lib/sinatra/stoplight_admin.rb#L30
 [sliding window]: https://github.com/bolshakov/stoplight#custom-window-size
+[Discussions forum]: https://github.com/bolshakov/stoplight/discussions/categories/q-a

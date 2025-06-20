@@ -75,10 +75,10 @@ module Stoplight
 
         # @return [String, nil]
         def last_check_in_words
-          last_failure_time = latest_failure&.time
-          return unless last_failure_time
+          last_error_time = latest_failure&.time
+          return unless last_error_time
 
-          time_difference = Time.now - last_failure_time
+          time_difference = Time.now - last_error_time
           if time_difference < 1
             "just now"
           elsif time_difference < 60

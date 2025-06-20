@@ -62,7 +62,7 @@ module Stoplight
           name: name,
           color: light.color,
           state: metadata.locked_state,
-          failures: [metadata.last_failure].compact
+          failures: [metadata.last_error].compact
         )
       end
 
