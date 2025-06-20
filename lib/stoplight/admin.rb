@@ -25,6 +25,7 @@ module Stoplight
 
     helpers Helpers
 
+    set :protection, except: %i[json_csrf]
     set :data_store, proc { Stoplight.config_provider.data_store }
     set :views, File.join(__dir__, "admin", "views")
 
