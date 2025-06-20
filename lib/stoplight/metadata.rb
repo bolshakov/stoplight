@@ -67,5 +67,21 @@ module Stoplight
         Color::GREEN
       end
     end
+
+    # Calculates the error rate based on the number of successes and errors.
+    #
+    # @return [Float]
+    def error_rate
+      if successes.nil? || errors.nil? || (successes + errors).zero?
+        0.0
+      else
+        errors.fdiv(successes + errors)
+      end
+    end
+
+    # @return [Integer]
+    def requests
+      successes + errors
+    end
   end
 end

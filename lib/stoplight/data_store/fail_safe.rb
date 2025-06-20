@@ -37,7 +37,12 @@ module Stoplight
       # @param data_store [Stoplight::DataStore::Base]
       def initialize(data_store)
         @data_store = data_store
-        @circuit_breaker = Stoplight("stoplight:data_store:fail_safe:#{data_store.class.name}", data_store: Default::DATA_STORE)
+        @circuit_breaker = Stoplight(
+          "stoplight:data_store:fail_safe:#{data_store.class.name}",
+          data_store: Default::DATA_STORE,
+          traffic_control: TrafficControl::ConsecutiveErrors.new,
+          threshold: Default::THRESHOLD
+        )
       end
 
       def names

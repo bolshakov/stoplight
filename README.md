@@ -13,10 +13,10 @@ Stoplight is traffic control for code. It's an implementation of the circuit bre
 the documentation of the previous version 4.x, you can find it [here](https://github.com/bolshakov/stoplight/tree/v4.1.1).
 
 Stoplight helps your application gracefully handle failures in external dependencies
-(like flaky databases, unreliable APIs, or spotty web services). By wrapping these unreliable 
+(like flaky databases, unreliable APIs, or spotty web services). By wrapping these unreliable
 calls, Stoplight prevents cascading failures from affecting your entire application.
 
-**The best part?** Stoplight works with zero configuration out of the box, while offering deep customization when you 
+**The best part?** Stoplight works with zero configuration out of the box, while offering deep customization when you
 need it.
 
 ## Installation
@@ -60,7 +60,7 @@ stateDiagram
 - **Red**: Failure state. Fast-fails without running the code. (Circuit open)
 - **Yellow**: Recovery state. Allows a test execution to see if the problem is resolved. (Circuit half-open)
 
-Stoplight's behavior is controlled by three primary parameters:
+Stoplight's behavior is controlled by three main primary parameters:
 
 1. **Threshold** (default: `3`): Number of failures required to transition from green to red.
 2. **Cool Off Time** (default: `60` seconds): Time to wait in the red state before transitioning to yellow.
@@ -78,7 +78,7 @@ light = Stoplight("Payment Service")
 result = light.run { payment_gateway.process(order) }
 ```
 
-When everything works, the light stays green and your code runs normally. If the code fails repeatedly, the 
+When everything works, the light stays green and your code runs normally. If the code fails repeatedly, the
 light turns red and raises a `Stoplight::Error::RedLight` exception to prevent further calls.
 
 ```ruby
@@ -121,7 +121,7 @@ light = Stoplight('example-fallback')
 result = light.run(fallback) { external_service.call }
 ```
 
-If the light is green but the call fails, the fallback receives the `error`. If the light is red, the fallback 
+If the light is green but the call fails, the fallback receives the `error`. If the light is red, the fallback
 receives `nil`. In both cases, the return value of the fallback becomes the return value of the `run` method.
 
 ## Admin Panel
@@ -172,8 +172,7 @@ docker run --net=host bolshakov/stoplight-admin
 docker run -e REDIS_URL=redis://localhost:6378  --net=host bolshakov/stoplight-admin
 ```
 
-
-## Configuration 
+## Configuration
 
 ### Global Configuration
 
@@ -182,9 +181,10 @@ Stoplight allows you to set default values for all lights in your application:
 ```ruby
 Stoplight.configure do |config|
   # Set default behavior for all stoplights
-  config.threshold = 5
+  config.traffic_control = :error_rate
+  config.threshold = 0.5
   config.cool_off_time = 30
-  config.window_size = 60
+  config.window_size = 300
   
   # Set up default data store and notifiers
   config.data_store = Stoplight::DataStore::Redis.new(redis)
@@ -233,7 +233,7 @@ users_api = base_api.with(
 )
 ```
 
-The `#with` method creates a new stoplight instance without modifying the original, making it ideal for creating 
+The `#with` method creates a new stoplight instance without modifying the original, making it ideal for creating
 specialized stoplights from a common configuration.
 
 ## Error Handling
@@ -258,6 +258,78 @@ light = Stoplight("Example API", tracked_errors: [NetworkError, Timeout::Error])
 When both methods are used, `skipped_errors` takes precedence over `tracked_errors`.
 
 ## Advanced Configuration
+
+### Traffic Control Strategies
+
+You've seen how Stoplight transitions from green to red when failures reach the threshold. But **how exactly does it 
+decide when that threshold is reached?** That's where traffic control strategies come in.
+
+Stoplight offers two built-in strategies for counting failures:
+
+#### Consecutive Failures (Default)
+
+Stops traffic when a specified number of consecutive failures occur. Works with or without time sliding windows.
+
+```ruby
+light = Stoplight(
+  "Payment API", 
+  traffic_control: :consecutive_errors, 
+  threshold: 5,
+)
+```
+
+Counts consecutive failures regardless of when they occurred. Once 5 consecutive failures happen, the stoplight 
+turns red and stops traffic.
+
+```ruby
+light = Stoplight(
+  "Payment API", 
+  traffic_control: :consecutive_errors, 
+  threshold: 5, 
+  window_size: 300,
+)
+```
+
+Counts consecutive failures within a 5-minute sliding window. Both conditions must be met: 5 consecutive failures 
+AND at least 5 total failures within the window.
+
+_This is Stoplight's default strategy when no `traffic_control` is specified._
+
+#### Error Rate
+
+Stops traffic when the error rate exceeds a percentage within a sliding time window. Requires `window_size` to be 
+configured:
+
+
+```ruby
+light = Stoplight(
+  "Payment API", 
+  traffic_control: :error_rate, 
+  window_size: 300, 
+  threshold: 0.5,
+)
+```
+
+Monitors error rate over a 5-minute sliding window. The stoplight turns red when error rate exceeds 50%.
+
+```ruby
+light = Stoplight(
+  "Payment API", 
+  traffic_control: {
+    error_rate: { min_requests: 20 },
+  }, 
+  window_size: 300, 
+  threshold: 0.5,
+)
+```
+
+Only evaluates error rate after at least 20 requests within the window. Default `min_requests` is 10.
+
+
+#### When to use:
+
+* **Consecutive Failures**: Low-medium traffic, simple behavior, occasional spikes expected
+* **Error Rate**: High traffic, percentage-based SLAs, variable traffic patterns
 
 ### Data Store
 
@@ -284,7 +356,7 @@ end
 
 #### Connection Pooling with Redis
 
-For high-traffic applications or when you want to control a number of opened connections to Redis: 
+For high-traffic applications or when you want to control a number of opened connections to Redis:
 
 ```ruby
 require "connection_pool"
@@ -329,7 +401,7 @@ the [notifier interface documentation] for detailed instructions. Pull requests 
 
 ### Error Notifiers
 
-Stoplight is built for resilience. If the Redis data store fails, Stoplight automatically falls back to the in-memory 
+Stoplight is built for resilience. If the Redis data store fails, Stoplight automatically falls back to the in-memory
 data store. To get notified about such errors, you can configure an error notifier:
 
 ```ruby
@@ -340,7 +412,7 @@ end
 
 ### Locking
 
-Sometimes you need to override Stoplight's automatic behavior. Locking allows you to manually control the state of 
+Sometimes you need to override Stoplight's automatic behavior. Locking allows you to manually control the state of
 a stoplight, which is useful for:
 
 * **Maintenance periods**: Lock to red when a service is known to be unavailable
@@ -424,7 +496,7 @@ stoplight = Stoplight("test-#{rand}")
 ## Maintenance Policy
 
 Stoplight supports the latest three minor versions of Ruby, which currently are: `3.2.x`, `3.3.x`, and `3.4.x`. Changing
-the minimum supported Ruby version is not considered a breaking change. We support the current stable Redis 
+the minimum supported Ruby version is not considered a breaking change. We support the current stable Redis
 version (`7.4.x`) and the latest release of the previous major version (`6.2.x`)
 
 ## Credits

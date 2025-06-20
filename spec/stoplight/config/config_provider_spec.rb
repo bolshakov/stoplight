@@ -147,5 +147,73 @@ RSpec.describe Stoplight::Config::ConfigProvider do
         is_expected.to be(60)
       end
     end
+
+    describe "traffic_control" do
+      subject(:traffic_control_out) do
+        config_provider.provide(
+          "name",
+          traffic_control:,
+          window_size: 300,
+          threshold:
+        ).traffic_control
+      end
+
+      let(:threshold) { 50 }
+
+      context "when an instance of TrafficControl::Base" do
+        let(:traffic_control) { Stoplight::TrafficControl::ConsecutiveErrors.new }
+
+        it "returns the same traffic control object" do
+          is_expected.to eq(traffic_control)
+        end
+      end
+
+      context "when :consecutive_errors" do
+        let(:traffic_control) { :consecutive_errors }
+
+        it "returns an instance of Stoplight::TrafficControl::ConsecutiveErrors" do
+          is_expected.to eq(Stoplight::TrafficControl::ConsecutiveErrors.new)
+        end
+      end
+
+      context "when :error_rate" do
+        let(:traffic_control) { :error_rate }
+        let(:threshold) { 0.5 }
+
+        it "returns an instance of Stoplight::TrafficControl::ErrorRate" do
+          is_expected.to eq(Stoplight::TrafficControl::ErrorRate.new)
+        end
+      end
+
+      context "when :error_rate with options" do
+        let(:traffic_control) { {error_rate: {min_requests: 11}} }
+        let(:threshold) { 0.5 }
+
+        it "returns an instance of Stoplight::TrafficControl::ErrorRate with min_requests" do
+          is_expected.to eq(Stoplight::TrafficControl::ErrorRate.new(min_requests: 11))
+        end
+      end
+
+      context "when unsupported option" do
+        let(:traffic_control) { :latency }
+
+        it "raises an error" do
+          expect { traffic_control_out }.to raise_error(Stoplight::Error::ConfigurationError)
+        end
+      end
+
+      context "when traffic control is not compatible with the config" do
+        let(:traffic_control) { {error_rate: {min_requests: 11}} }
+        let(:threshold) { 5 } # must be 0..1
+
+        it "raises a configuration errors" do
+          expect { traffic_control_out }.to raise_error(
+            Stoplight::Error::ConfigurationError,
+            "Stoplight::TrafficControl::ErrorRate strategy is incompatible with the Stoplight configuration: " \
+            "`threshold` should be between 0 and 1"
+          )
+        end
+      end
+    end
   end
 end

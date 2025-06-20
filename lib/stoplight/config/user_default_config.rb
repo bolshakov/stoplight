@@ -44,6 +44,10 @@ module Stoplight
       #   @return [Stoplight::DataStore::Base] The default data store instance.
       attr_writer :data_store
 
+      # @!attribute [w] traffic_control
+      #   @return [Stoplight::TrafficControl::Base, Symbol, Hash] The traffic control strategy.
+      attr_writer :traffic_control
+
       def initialize
         # This allows users appending notifiers to the default list,
         # while still allowing them to override the default list.
@@ -63,7 +67,8 @@ module Stoplight
           threshold: @threshold,
           window_size: @window_size,
           tracked_errors: @tracked_errors,
-          skipped_errors: @skipped_errors
+          skipped_errors: @skipped_errors,
+          traffic_control: @traffic_control
         }.compact
       end
 
