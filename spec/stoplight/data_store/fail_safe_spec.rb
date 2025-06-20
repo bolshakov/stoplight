@@ -38,7 +38,7 @@ RSpec.describe Stoplight::DataStore::FailSafe do
 
     context "when data_store returns all data" do
       let(:metadata) do
-        Stoplight::Metadata.new.with(failures: 4)
+        Stoplight::Metadata.new.with(errors: 4)
       end
 
       it "returns all data from data_store" do
@@ -65,7 +65,7 @@ RSpec.describe Stoplight::DataStore::FailSafe do
     let(:failure) { Stoplight::Failure.new("class", "message", Time.new) }
 
     context "when data_store records failure" do
-      it "returns total number of failures from data_store" do
+      it "returns total number of errors from data_store" do
         expect(error_notifier).not_to receive(:call)
         expect(data_store).to receive(:record_failure).with(config, failure).and_return(4)
 
@@ -74,7 +74,7 @@ RSpec.describe Stoplight::DataStore::FailSafe do
     end
 
     context "when data_store fails" do
-      it "returns empty list of failures" do
+      it "returns empty list of errors" do
         expect(error_notifier).to receive(:call).with(error)
         expect(data_store).to receive(:record_failure).with(config, failure) { raise error }
 

@@ -21,13 +21,13 @@ if not prev_success_ts or request_ts > prev_success_ts then
   redis.call(
     'HSET', metadata_key,
     'last_success_at', request_ts,
-    'consecutive_failures', 0,
+    'consecutive_errors', 0,
     'consecutive_successes', (prev_consecutive_successes or 0) + 1
   )
 else
   redis.call(
     'HSET', metadata_key,
-    'consecutive_failures', 0,
+    'consecutive_errors', 0,
     'consecutive_successes', (prev_consecutive_successes or 0) + 1
   )
 end

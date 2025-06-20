@@ -10,10 +10,10 @@ module Stoplight
       KEY_SEPARATOR = ":"
 
       def initialize
-        @failures = Hash.new { |h, k| h[k] = [] }
+        @errors = Hash.new { |h, k| h[k] = [] }
         @successes = Hash.new { |h, k| h[k] = [] }
 
-        @recovery_probe_failures = Hash.new { |h, k| h[k] = [] }
+        @recovery_probe_errors = Hash.new { |h, k| h[k] = [] }
         @recovery_probe_successes = Hash.new { |h, k| h[k] = [] }
 
         @metadata = Hash.new { |h, k| h[k] = Metadata.new }
@@ -41,7 +41,7 @@ module Stoplight
             (..window_end)
           end
 
-          failures = @failures[config.name].count do |request_time|
+          errors = @errors[config.name].count do |request_time|
             window.cover?(request_time)
           end
 
@@ -49,7 +49,7 @@ module Stoplight
             window.cover?(request_time)
           end
 
-          recovery_probe_failures = @recovery_probe_failures[config.name].count do |request_time|
+          recovery_probe_errors = @recovery_probe_errors[config.name].count do |request_time|
             recovery_window.cover?(request_time)
           end
           recovery_probe_successes = @recovery_probe_successes[config.name].count do |request_time|
@@ -57,9 +57,9 @@ module Stoplight
           end
 
           @metadata[light_name].with(
-            failures:,
+            errors:,
             successes:,
-            recovery_probe_failures:,
+            recovery_probe_errors:,
             recovery_probe_successes:
           )
         end
@@ -81,21 +81,21 @@ module Stoplight
         light_name = config.name
 
         synchronize do
-          @failures[light_name].unshift(failure.time) if config.window_size
+          @errors[light_name].unshift(failure.time) if config.window_size
 
-          cleanup(@failures[light_name], window_size: config.window_size)
+          cleanup(@errors[light_name], window_size: config.window_size)
 
           metadata = @metadata[light_name]
-          @metadata[light_name] = if metadata.last_failure_at.nil? || failure.time > metadata.last_failure_at
+          @metadata[light_name] = if metadata.last_error_at.nil? || failure.time > metadata.last_error_at
             metadata.with(
-              last_failure_at: failure.time,
-              last_failure: failure,
-              consecutive_failures: metadata.consecutive_failures.succ,
+              last_error_at: failure.time,
+              last_error: failure,
+              consecutive_errors: metadata.consecutive_errors.succ,
               consecutive_successes: 0
             )
           else
             metadata.with(
-              consecutive_failures: metadata.consecutive_failures.succ,
+              consecutive_errors: metadata.consecutive_errors.succ,
               consecutive_successes: 0
             )
           end
@@ -118,12 +118,12 @@ module Stoplight
           @metadata[light_name] = if metadata.last_success_at.nil? || request_time > metadata.last_success_at
             metadata.with(
               last_success_at: request_time,
-              consecutive_failures: 0,
+              consecutive_errors: 0,
               consecutive_successes: metadata.consecutive_successes.succ
             )
           else
             metadata.with(
-              consecutive_failures: 0,
+              consecutive_errors: 0,
               consecutive_successes: metadata.consecutive_successes.succ
             )
           end
@@ -137,20 +137,20 @@ module Stoplight
         light_name = config.name
 
         synchronize do
-          @recovery_probe_failures[light_name].unshift(failure.time)
-          cleanup(@recovery_probe_failures[light_name], window_size: config.cool_off_time)
+          @recovery_probe_errors[light_name].unshift(failure.time)
+          cleanup(@recovery_probe_errors[light_name], window_size: config.cool_off_time)
 
           metadata = @metadata[light_name]
-          @metadata[light_name] = if metadata.last_failure_at.nil? || failure.time > metadata.last_failure_at
+          @metadata[light_name] = if metadata.last_error_at.nil? || failure.time > metadata.last_error_at
             metadata.with(
-              last_failure_at: failure.time,
-              last_failure: failure,
-              consecutive_failures: metadata.consecutive_failures.succ,
+              last_error_at: failure.time,
+              last_error: failure,
+              consecutive_errors: metadata.consecutive_errors.succ,
               consecutive_successes: 0
             )
           else
             metadata.with(
-              consecutive_failures: metadata.consecutive_failures.succ,
+              consecutive_errors: metadata.consecutive_errors.succ,
               consecutive_successes: 0
             )
           end
@@ -175,13 +175,13 @@ module Stoplight
             metadata.with(
               last_success_at: request_time,
               recovery_started_at:,
-              consecutive_failures: 0,
+              consecutive_errors: 0,
               consecutive_successes: metadata.consecutive_successes.succ
             )
           else
             metadata.with(
               recovery_started_at:,
-              consecutive_failures: 0,
+              consecutive_errors: 0,
               consecutive_successes: metadata.consecutive_successes.succ
             )
           end

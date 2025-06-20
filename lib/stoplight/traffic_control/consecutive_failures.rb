@@ -33,9 +33,9 @@ module Stoplight
       # @return [Boolean] true if failures have reached the threshold, false otherwise
       def stop_traffic?(config, metadata)
         if config.window_size
-          [metadata.consecutive_failures, metadata.failures].min >= config.threshold
+          [metadata.consecutive_errors, metadata.errors].min >= config.threshold
         else
-          metadata.consecutive_failures >= config.threshold
+          metadata.consecutive_errors >= config.threshold
         end
       end
     end

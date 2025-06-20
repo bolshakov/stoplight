@@ -14,7 +14,7 @@ module Stoplight
     #     end
     #
     #     def determine_color(config, metadata)
-    #       total_probes = metadata.recovery_probe_successes + metadata.recovery_probe_failures
+    #       total_probes = metadata.recovery_probe_successes + metadata.recovery_probe_errors
     #
     #       if total_probes < @min_samples
     #         return Color::YELLOW # Keep recovering, not enough samples
