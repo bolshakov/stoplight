@@ -147,5 +147,72 @@ RSpec.describe Stoplight::Config::ConfigProvider do
         is_expected.to be(60)
       end
     end
+
+    describe "traffic_control symbol and hash support" do
+      it "accepts :error_rate symbol in explicit settings" do
+        config = config_provider.provide("api", traffic_control: :error_rate)
+        expect(config.traffic_control).to be_a(Stoplight::TrafficControl::ErrorRate)
+      end
+
+      it "accepts :consecutive_failures symbol in explicit settings" do
+        config = config_provider.provide("api", traffic_control: :consecutive_failures)
+        expect(config.traffic_control).to be_a(Stoplight::TrafficControl::ConsecutiveFailures)
+      end
+
+      it "accepts hash for error_rate with options" do
+        config = config_provider.provide("api", traffic_control: {error_rate: {min_requests: 42}})
+        tc = config.traffic_control
+        expect(tc).to be_a(Stoplight::TrafficControl::ErrorRate)
+        expect(tc.instance_variable_get(:@min_sample_size)).to eq(42)
+      end
+
+      it "accepts hash for consecutive_failures with options" do
+        config = config_provider.provide("api", traffic_control: {consecutive_failures: {}})
+        tc = config.traffic_control
+        expect(tc).to be_a(Stoplight::TrafficControl::ConsecutiveFailures)
+      end
+
+      it "raises for unknown hash key" do
+        expect {
+          config_provider.provide("api", traffic_control: {unknown: {}})
+        }.to raise_error(ArgumentError)
+      end
+
+      it "uses user default config for traffic_control if not overridden" do
+        user_default_config.traffic_control = :error_rate
+        config = config_provider.provide("api")
+        expect(config.traffic_control).to be_a(Stoplight::TrafficControl::ErrorRate)
+      end
+
+      context "when neither user nor library default config sets traffic_control" do
+        let(:library_default_config) do
+          # Return a hash without :traffic_control
+          double(to_h: {cool_off_time: 1, data_store: Stoplight::Default::DATA_STORE, error_notifier: Stoplight::Default::ERROR_NOTIFIER, notifiers: Stoplight::Default::NOTIFIERS, threshold: 1, window_size: 1, tracked_errors: [StandardError], skipped_errors: [], traffic_recovery: Stoplight::Default::TRAFFIC_RECOVERY})
+        end
+        let(:user_default_config) do
+          # Return an empty hash
+          double(to_h: {})
+        end
+        let(:settings_overrides) { {} }
+
+        it "falls back to Default::TRAFFIC_CONTROL" do
+          config = config_provider.provide(:test_light)
+          expect(config.traffic_control).to eq(Stoplight::Default::TRAFFIC_CONTROL)
+        end
+      end
+
+      context "when default_settings has :traffic_control key with nil value" do
+        let(:library_default_config) do
+          double(to_h: {cool_off_time: 1, data_store: Stoplight::Default::DATA_STORE, error_notifier: Stoplight::Default::ERROR_NOTIFIER, notifiers: Stoplight::Default::NOTIFIERS, threshold: 1, window_size: 1, tracked_errors: [StandardError], skipped_errors: [], traffic_recovery: Stoplight::Default::TRAFFIC_RECOVERY, traffic_control: nil})
+        end
+        let(:user_default_config) { double(to_h: {}) }
+        let(:settings_overrides) { {} }
+
+        it "returns nil for traffic_control" do
+          config = config_provider.provide(:test_light)
+          expect(config.traffic_control).to be_nil
+        end
+      end
+    end
   end
 end
