@@ -161,18 +161,18 @@ RSpec.describe Stoplight::Config::ConfigProvider do
       let(:threshold) { 50 }
 
       context "when an instance of TrafficControl::Base" do
-        let(:traffic_control) { Stoplight::TrafficControl::ConsecutiveFailures.new }
+        let(:traffic_control) { Stoplight::TrafficControl::ConsecutiveErrors.new }
 
         it "returns the same traffic control object" do
           is_expected.to eq(traffic_control)
         end
       end
 
-      context "when :consecutive_failures" do
-        let(:traffic_control) { :consecutive_failures }
+      context "when :consecutive_errors" do
+        let(:traffic_control) { :consecutive_errors }
 
-        it "returns an instance of Stoplight::TrafficControl::ConsecutiveFailures" do
-          is_expected.to eq(Stoplight::TrafficControl::ConsecutiveFailures.new)
+        it "returns an instance of Stoplight::TrafficControl::ConsecutiveErrors" do
+          is_expected.to eq(Stoplight::TrafficControl::ConsecutiveErrors.new)
         end
       end
 

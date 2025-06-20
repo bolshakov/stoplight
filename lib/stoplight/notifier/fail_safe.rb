@@ -63,7 +63,7 @@ module Stoplight
         @circuit_breaker ||= Stoplight(
           "stoplight:notifier:fail_safe:#{notifier.class.name}",
           data_store: Default::DATA_STORE,
-          traffic_control: TrafficControl::ConsecutiveFailures.new,
+          traffic_control: TrafficControl::ConsecutiveErrors.new,
           threshold: Default::THRESHOLD,
           notifiers: []
         )

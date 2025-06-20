@@ -68,20 +68,20 @@ module Stoplight
       end
     end
 
-    # Calculates the error rate based on the number of successes and failures.
+    # Calculates the error rate based on the number of successes and errors.
     #
     # @return [Float]
     def error_rate
-      if successes.nil? || failures.nil? || (successes + failures).zero?
+      if successes.nil? || errors.nil? || (successes + errors).zero?
         0.0
       else
-        failures.fdiv(successes + failures)
+        errors.fdiv(successes + errors)
       end
     end
 
     # @return [Integer]
     def requests
-      successes + failures
+      successes + errors
     end
   end
 end

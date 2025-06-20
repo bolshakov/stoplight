@@ -114,8 +114,8 @@ module Stoplight
         case traffic_control
         in Stoplight::TrafficControl::Base
           traffic_control
-        in :consecutive_failures
-          Stoplight::TrafficControl::ConsecutiveFailures.new
+        in :consecutive_errors
+          Stoplight::TrafficControl::ConsecutiveErrors.new
         in :error_rate
           Stoplight::TrafficControl::ErrorRate.new
         in {error_rate: error_rate_settings}
@@ -123,7 +123,7 @@ module Stoplight
         else
           raise Error::ConfigurationError, <<~ERROR
             unsupported traffic_control strategy provided. Supported options:
-              * Stoplight::TrafficControl::ConsecutiveFailures
+              * Stoplight::TrafficControl::ConsecutiveErrors
               * Stoplight::TrafficControl::ErrorRate
           ERROR
         end

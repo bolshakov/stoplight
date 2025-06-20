@@ -23,7 +23,7 @@ module Stoplight
     TRACKED_ERRORS = [StandardError].freeze
     SKIPPED_ERRORS = [].freeze
 
-    TRAFFIC_CONTROL = TrafficControl::ConsecutiveFailures.new
+    TRAFFIC_CONTROL = TrafficControl::ConsecutiveErrors.new
     TRAFFIC_RECOVERY = TrafficRecovery::SingleSuccess.new
   end
 end

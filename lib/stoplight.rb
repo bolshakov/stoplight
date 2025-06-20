@@ -122,7 +122,7 @@ end
 #
 # @example configure traffic control to trip using consecutive failures method
 #   # When 5 consecutive failures occur, the circuit breaker will trip.
-#   light = Stoplight("Payment API", traffic_control: :consecutive_failures, threshold: 5)
+#   light = Stoplight("Payment API", traffic_control: :consecutive_errors, threshold: 5)
 #
 # @example configure traffic control to trip using error rate method
 #   # When 66.6% error rate reached withing a sliding 5 minute window, the circuit breaker will trip.
