@@ -65,12 +65,12 @@ RSpec.describe Stoplight::TrafficControl::ErrorRate do
     let(:config) { instance_double(Stoplight::Light::Config, window_size: 300, threshold: 0.6) }
 
     let(:metadata) do
-      Stoplight::Metadata.new(successes:, failures:)
+      Stoplight::Metadata.new(successes:, errors:)
     end
 
     context "when there are no requests" do
       let(:successes) { 0 }
-      let(:failures) { 0 }
+      let(:errors) { 0 }
 
       it "does not stop traffic" do
         is_expected.to be(false)
@@ -79,7 +79,7 @@ RSpec.describe Stoplight::TrafficControl::ErrorRate do
 
     context "when there is not enough requests" do
       let(:successes) { 0 }
-      let(:failures) { 9 }
+      let(:errors) { 9 }
 
       it "does not stop traffic" do
         is_expected.to be(false)
@@ -89,7 +89,7 @@ RSpec.describe Stoplight::TrafficControl::ErrorRate do
     context "when there is enough requests" do
       context "when threshold is reached" do
         let(:successes) { 40 }
-        let(:failures) { 60 }
+        let(:errors) { 60 }
 
         it "stops traffic" do
           is_expected.to be(true)
@@ -98,7 +98,7 @@ RSpec.describe Stoplight::TrafficControl::ErrorRate do
 
       context "when threshold is exceeded" do
         let(:successes) { 30 }
-        let(:failures) { 70 }
+        let(:errors) { 70 }
 
         it "stops traffic" do
           is_expected.to be(true)
@@ -107,7 +107,7 @@ RSpec.describe Stoplight::TrafficControl::ErrorRate do
 
       context "when threshold is not reached" do
         let(:successes) { 41 }
-        let(:failures) { 59 }
+        let(:errors) { 59 }
 
         it "does not stop traffic" do
           is_expected.to be(false)

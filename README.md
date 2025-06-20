@@ -273,7 +273,7 @@ Stops traffic when a specified number of consecutive failures occur. Works with 
 ```ruby
 light = Stoplight(
   "Payment API", 
-  traffic_control: :consecutive_failures, 
+  traffic_control: :consecutive_errors, 
   threshold: 5,
 )
 ```
@@ -284,7 +284,7 @@ turns red and stops traffic.
 ```ruby
 light = Stoplight(
   "Payment API", 
-  traffic_control: :consecutive_failures, 
+  traffic_control: :consecutive_errors, 
   threshold: 5, 
   window_size: 300,
 )
