@@ -94,6 +94,12 @@ module Stoplight
             pipeline.script("load", Lua::TRANSITION_TO_GREEN)
           end
         end
+      rescue => e
+        warn <<~WARNING
+          Stoplight could not establish connection to Redis to set up lua scripts.
+          If it happened outside of support scripts (e.g., `rake assets:precompile`), it will not work correctly.
+          Error message: #{e.message}.
+        WARNING
       end
 
       def names
