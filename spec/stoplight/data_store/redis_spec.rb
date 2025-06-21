@@ -11,6 +11,18 @@ RSpec.describe Stoplight::DataStore::Redis, :redis do
   let(:window_size) { Stoplight::Default::WINDOW_SIZE }
   let(:cool_off_time) { Stoplight::Default::COOL_OFF_TIME }
 
+  describe ".new" do
+    context "when redis is unavailable" do
+      before do
+        allow(redis).to receive(:then).and_raise(StandardError)
+      end
+
+      it "does not raise exception" do
+        expect { described_class.new(redis) }.not_to raise_error
+      end
+    end
+  end
+
   describe ".buckets_for_window" do
     subject(:buckets) { described_class.buckets_for_window(light_name, metric:, window_end:, window_size:) }
 
