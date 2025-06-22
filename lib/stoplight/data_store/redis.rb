@@ -79,12 +79,6 @@ module Stoplight
       def initialize(redis, warn_on_clock_skew: true)
         @warn_on_clock_skew = warn_on_clock_skew
         @redis = redis
-      rescue => e
-        warn <<~WARNING
-          Stoplight could not establish connection to Redis to set up lua scripts.
-          If it happened outside of support scripts (e.g., `rake assets:precompile`), it will not work correctly.
-          Error message: #{e.message}.
-        WARNING
       end
 
       def names
