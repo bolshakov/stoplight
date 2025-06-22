@@ -12,10 +12,6 @@ module Stoplight
       #   @return [Stoplight::DataStore::Base] The underlying data store being wrapped.
       protected attr_reader :data_store
 
-      # @!attribute [r] circuit_breaker
-      #   @return [Stoplight] The circuit breaker used to handle failures.
-      private attr_reader :circuit_breaker
-
       class << self
         # Wraps a data store with fail-safe mechanisms.
         #
@@ -35,7 +31,6 @@ module Stoplight
       # @param data_store [Stoplight::DataStore::Base]
       def initialize(data_store)
         @data_store = data_store
-        @circuit_breaker = Stoplight("stoplight:data_store:fail_safe:#{data_store.class.name}", data_store: Default::DATA_STORE)
       end
 
       def names
@@ -99,6 +94,12 @@ module Stoplight
         end
 
         circuit_breaker.run(fallback, &code)
+      end
+
+      # @!attribute [r] circuit_breaker
+      #   @return [Stoplight] The circuit breaker used to handle failures.
+      private def circuit_breaker
+        @circuit_breaker ||= Stoplight("stoplight:data_store:fail_safe:#{data_store.class.name}", data_store: Default::DATA_STORE)
       end
     end
   end
