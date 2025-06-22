@@ -79,21 +79,6 @@ module Stoplight
       def initialize(redis, warn_on_clock_skew: true)
         @warn_on_clock_skew = warn_on_clock_skew
         @redis = redis
-        @redis.then do |client|
-          @record_failure_sha,
-          @record_success_sha,
-          @get_metadata_sha,
-          @transition_to_yellow_sha,
-          @transition_to_red_sha,
-          @transition_to_green_sha = client.pipelined do |pipeline|
-            pipeline.script("load", Lua::RECORD_FAILURE)
-            pipeline.script("load", Lua::RECORD_SUCCESS)
-            pipeline.script("load", Lua::GET_METADATA)
-            pipeline.script("load", Lua::TRANSITION_TO_YELLOW)
-            pipeline.script("load", Lua::TRANSITION_TO_RED)
-            pipeline.script("load", Lua::TRANSITION_TO_GREEN)
-          end
-        end
       rescue => e
         warn <<~WARNING
           Stoplight could not establish connection to Redis to set up lua scripts.
@@ -132,7 +117,7 @@ module Stoplight
 
         successes, errors, recovery_probe_successes, recovery_probe_errors, meta = @redis.with do |client|
           client.evalsha(
-            @get_metadata_sha,
+            get_metadata_sha,
             argv: [
               failure_keys.count,
               recovery_probe_failure_keys.count,
@@ -172,7 +157,7 @@ module Stoplight
 
         @redis.then do |client|
           client.evalsha(
-            @record_failure_sha,
+            record_failure_sha,
             argv: [current_ts, SecureRandom.hex(12), failure_json, metrics_ttl, metadata_ttl],
             keys: [
               metadata_key(config),
@@ -188,7 +173,7 @@ module Stoplight
 
         @redis.then do |client|
           client.evalsha(
-            @record_success_sha,
+            record_success_sha,
             argv: [request_ts, request_id, metrics_ttl, metadata_ttl],
             keys: [
               metadata_key(config),
@@ -209,7 +194,7 @@ module Stoplight
 
         @redis.then do |client|
           client.evalsha(
-            @record_failure_sha,
+            record_failure_sha,
             argv: [current_ts, SecureRandom.uuid, failure_json, metrics_ttl, metrics_ttl],
             keys: [
               metadata_key(config),
@@ -231,7 +216,7 @@ module Stoplight
 
         @redis.then do |client|
           client.evalsha(
-            @record_success_sha,
+            record_success_sha,
             argv: [request_ts, request_id, metrics_ttl, metadata_ttl],
             keys: [
               metadata_key(config),
@@ -280,7 +265,7 @@ module Stoplight
 
         became_green = @redis.then do |client|
           client.evalsha(
-            @transition_to_green_sha,
+            transition_to_green_sha,
             argv: [current_ts],
             keys: [meta_key]
           )
@@ -299,7 +284,7 @@ module Stoplight
 
         became_yellow = @redis.then do |client|
           client.evalsha(
-            @transition_to_yellow_sha,
+            transition_to_yellow_sha,
             argv: [current_ts],
             keys: [meta_key]
           )
@@ -319,7 +304,7 @@ module Stoplight
 
         became_red = @redis.then do |client|
           client.evalsha(
-            @transition_to_red_sha,
+            transition_to_red_sha,
             argv: [current_ts, recovery_scheduled_after_ts],
             keys: [meta_key]
           )
@@ -423,6 +408,42 @@ module Stoplight
 
       private def should_sample?(probability)
         rand <= probability
+      end
+
+      private def record_success_sha
+        @record_success_sha ||= @redis.then do |client|
+          client.script("load", Lua::RECORD_SUCCESS)
+        end
+      end
+
+      private def get_metadata_sha
+        @get_metadata_sha ||= @redis.then do |client|
+          client.script("load", Lua::GET_METADATA)
+        end
+      end
+
+      private def transition_to_yellow_sha
+        @transition_to_yellow_sha ||= @redis.then do |client|
+          client.script("load", Lua::TRANSITION_TO_YELLOW)
+        end
+      end
+
+      private def transition_to_red_sha
+        @transition_to_red_sha ||= @redis.then do |client|
+          client.script("load", Lua::TRANSITION_TO_RED)
+        end
+      end
+
+      private def transition_to_green_sha
+        @transition_to_green_sha ||= @redis.then do |client|
+          client.script("load", Lua::TRANSITION_TO_GREEN)
+        end
+      end
+
+      private def record_failure_sha
+        @record_failure_sha ||= @redis.then do |client|
+          client.script("load", Lua::RECORD_FAILURE)
+        end
       end
     end
   end
