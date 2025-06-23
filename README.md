@@ -427,6 +427,12 @@ Stoplight supports the latest three minor versions of Ruby, which currently are:
 the minimum supported Ruby version is not considered a breaking change. We support the current stable Redis 
 version (`7.4.x`) and the latest release of the previous major version (`6.2.x`)
 
+## Development
+
+After checking out the repo, run `bundle install` to install dependencies. Run tests with `bundle exec rspec` and check 
+code style with `bundle exec standardrb`. We follow a git flow branching strategy - see our [Git Flow wiki page] for 
+details on branch naming, releases, and contribution workflow.
+
 ## Credits
 
 Stoplight was originally created by [camdez][] and [tfausak][]. It is currently maintained by [bolshakov][] and
@@ -455,3 +461,4 @@ Fowler’s [CircuitBreaker][] article.
 [complete list of contributors]: https://github.com/bolshakov/stoplight/graphs/contributors
 [CircuitBreaker]: http://martinfowler.com/bliki/CircuitBreaker.html
 [Redis]: https://redis.io/
+[Git Flow wiki page]: https://github.com/bolshakov/stoplight/wiki/Git-Flow
