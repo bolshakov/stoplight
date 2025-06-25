@@ -22,7 +22,7 @@ Feature: Stoplight State Transitions
   Scenario: Light transitions to yellow after cool-off period
     Given the protected service starts failing with "connection-timeout"
     And the light enters the red state
-    When 61 seconds elapsed
+    When 69 seconds elapsed
     Then the light color is yellow
 
   Scenario: Light transitions to green after success in yellow state

@@ -17,7 +17,6 @@ module Stoplight
       # @return [Object] The result of the code block if successful.
       # @raise [Exception] Re-raises the error if it is not tracked or no fallback is provided.
       def execute(fallback, &code)
-        # TODO: We need to employ a probabilistic approach here to avoid "thundering herd" problem
         code.call.tap { record_recovery_probe_success }
       rescue => error
         if config.track_error?(error)

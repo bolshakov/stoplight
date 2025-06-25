@@ -53,13 +53,14 @@ module Stoplight
     end
 
     # @param at [Time] (Time.now) the moment of time when the color is determined
+    # @param jitter [Numeric] a recovery jitter factor in seconds
     # @return [String] one of +Color::GREEN+, +Color::RED+, or +Color::YELLOW+
-    def color(at: Time.now)
+    def color(jitter:, at: Time.now)
       if locked_state == State::LOCKED_GREEN
         Color::GREEN
       elsif locked_state == State::LOCKED_RED
         Color::RED
-      elsif (recovery_scheduled_after && recovery_scheduled_after < at) || recovery_started_at
+      elsif (recovery_scheduled_after && recovery_scheduled_after + jitter < at) || recovery_started_at
         Color::YELLOW
       elsif breached_at
         Color::RED

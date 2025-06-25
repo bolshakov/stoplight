@@ -19,7 +19,7 @@ end
 
 Given(/^(?:the light) enters (?:the )?yellow state$/) do
   step("the light enters the red state")
-  Timecop.travel(Time.now + 1) until current_light.color == Stoplight::Color::YELLOW
+  Timecop.travel(Time.now + current_light.config.cool_off_time * 1.5) until current_light.color == Stoplight::Color::YELLOW
 
   expect(current_light.color).to eq(Stoplight::Color::YELLOW)
 end

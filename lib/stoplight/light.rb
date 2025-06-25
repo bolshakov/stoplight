@@ -17,12 +17,22 @@ module Stoplight
     #   @return [String]
     def_delegator :config, :name
 
+    # @!attribute [r] jitter
+    #   @return [Numeric] a random jitter to add to the cool-off time
+    private attr_reader :jitter
+
+    JITTER_FACTOR = 0.15
+    private_constant :JITTER_FACTOR
+
     # @param config [Stoplight::Light::Config]
     def initialize(config, green_run_strategy: nil, yellow_run_strategy: nil, red_run_strategy: nil)
       @config = config
       @green_run_strategy = green_run_strategy
       @yellow_run_strategy = yellow_run_strategy
       @red_run_strategy = red_run_strategy
+      @jitter = (config.cool_off_time * JITTER_FACTOR).then do |jitter_size|
+        rand(-jitter_size..jitter_size)
+      end
     end
 
     # Returns the current state of the light:
@@ -52,7 +62,7 @@ module Stoplight
       config
         .data_store
         .get_metadata(config)
-        .color
+        .color(jitter:)
     end
 
     # Runs the given block of code with this circuit breaker

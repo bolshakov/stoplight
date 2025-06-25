@@ -1,10 +1,8 @@
 # frozen_string_literal: true
 
-require "spec_helper"
-
 RSpec.describe Stoplight::Metadata do
   describe "#color" do
-    subject(:color) { metadata.color(at: current_time) }
+    subject(:color) { metadata.color(at: current_time, jitter:) }
 
     let(:metadata) do
       Stoplight::Metadata.new(
@@ -14,6 +12,7 @@ RSpec.describe Stoplight::Metadata do
         breached_at:
       )
     end
+    let(:jitter) { 10 }
     let(:current_time) { Time.now }
     let(:recovery_scheduled_after) { nil }
     let(:locked_state) { nil }
@@ -35,7 +34,7 @@ RSpec.describe Stoplight::Metadata do
     end
 
     context "when recovery scheduled before current time" do
-      let(:recovery_scheduled_after) { current_time - 1 }
+      let(:recovery_scheduled_after) { current_time - jitter - 1 }
 
       it { is_expected.to be(Stoplight::Color::YELLOW) }
     end
