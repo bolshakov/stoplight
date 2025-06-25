@@ -36,7 +36,7 @@ module Stoplight
         @circuit_breaker = Stoplight(
           "stoplight:data_store:fail_safe:#{data_store.class.name}",
           data_store: Default::DATA_STORE,
-          traffic_control: TrafficControl::ConsecutiveFailures.new,
+          traffic_control: TrafficControl::ConsecutiveErrors.new,
           threshold: Default::THRESHOLD
         )
       end
