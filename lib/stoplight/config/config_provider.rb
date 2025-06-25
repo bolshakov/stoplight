@@ -122,7 +122,7 @@ module Stoplight
           Stoplight::TrafficControl::ErrorRate.new(**error_rate_settings)
         else
           raise Error::ConfigurationError, <<~ERROR
-            unsupported traffic_control strategy provided. Supported options:
+            unsupported traffic_control strategy provided (`#{traffic_control}`). Supported options:
               * Stoplight::TrafficControl::ConsecutiveErrors
               * Stoplight::TrafficControl::ErrorRate
           ERROR
