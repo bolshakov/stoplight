@@ -41,7 +41,7 @@ Stoplight operates like a traffic light with three states:
 
 ```mermaid
 stateDiagram
-    Green --> Red: Failures reach threshold
+    Green --> Red: Errors reach threshold
     Red --> Yellow: After cool_off_time
     Yellow --> Green: Successful attempt
     Yellow --> Red: Failed attempt
@@ -62,9 +62,9 @@ stateDiagram
 
 Stoplight's behavior is controlled by three main primary parameters:
 
-1. **Threshold** (default: `3`): Number of failures required to transition from green to red.
+1. **Threshold** (default: `3`): Number of errors required to transition from green to red.
 2. **Cool Off Time** (default: `60` seconds): Time to wait in the red state before transitioning to yellow.
-3. **Window Size** (default: `nil`): Time window in which failures are counted toward the threshold. By default, all failures are counted.
+3. **Window Size** (default: `nil`): Time window in which errors are counted toward the threshold. By default, all errors are counted.
 
 ## Basic Usage
 
@@ -112,7 +112,7 @@ light.color #=> "green"
 
 ### Using Fallbacks
 
-Provide fallbacks to gracefully handle failures:
+Provide fallbacks to gracefully handle errors:
 
 ```ruby
 fallback = ->(error) { error ? "Failed: #{error.message}" : "Service unavailable" }
@@ -210,9 +210,9 @@ You can also provide settings during creation:
 data_store = Stoplight::DataStore::Redis.new(Redis.new)
 
 light = Stoplight("Payment Service", 
-  threshold: 5,                           # 5 failures before turning red
+  threshold: 5,                           # 5 errors before turning red
   cool_off_time: 60,                      # Wait 60 seconds before attempting recovery
-  window_size: 300,                       # Only count failures in the last five minutes
+  window_size: 300,                       # Only count errors in the last five minutes
   data_store: data_store,                 # Use Redis for persistence
   tracked_errors: [TimeoutError],         # Only count TimeoutError
   skipped_errors: [ValidationError]       # Ignore ValidationError
@@ -261,14 +261,14 @@ When both methods are used, `skipped_errors` takes precedence over `tracked_erro
 
 ### Traffic Control Strategies
 
-You've seen how Stoplight transitions from green to red when failures reach the threshold. But **how exactly does it 
+You've seen how Stoplight transitions from green to red when errors reach the threshold. But **how exactly does it 
 decide when that threshold is reached?** That's where traffic control strategies come in.
 
-Stoplight offers two built-in strategies for counting failures:
+Stoplight offers two built-in strategies for counting errors:
 
-#### Consecutive Failures (Default)
+#### Consecutive Errors (Default)
 
-Stops traffic when a specified number of consecutive failures occur. Works with or without time sliding windows.
+Stops traffic when a specified number of consecutive errors occur. Works with or without time sliding windows.
 
 ```ruby
 light = Stoplight(
@@ -278,7 +278,7 @@ light = Stoplight(
 )
 ```
 
-Counts consecutive failures regardless of when they occurred. Once 5 consecutive failures happen, the stoplight 
+Counts consecutive errors regardless of when they occurred. Once 5 consecutive errors happen, the stoplight 
 turns red and stops traffic.
 
 ```ruby
@@ -290,8 +290,8 @@ light = Stoplight(
 )
 ```
 
-Counts consecutive failures within a 5-minute sliding window. Both conditions must be met: 5 consecutive failures 
-AND at least 5 total failures within the window.
+Counts consecutive errors within a 5-minute sliding window. Both conditions must be met: 5 consecutive errors 
+AND at least 5 total errors within the window.
 
 _This is Stoplight's default strategy when no `traffic_control` is specified._
 
@@ -328,7 +328,7 @@ Only evaluates error rate after at least 20 requests within the window. Default 
 
 #### When to use:
 
-* **Consecutive Failures**: Low-medium traffic, simple behavior, occasional spikes expected
+* **Consecutive Errors**: Low-medium traffic, simple behavior, occasional spikes expected
 * **Error Rate**: High traffic, percentage-based SLAs, variable traffic patterns
 
 ### Data Store
