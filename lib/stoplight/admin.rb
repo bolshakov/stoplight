@@ -1,9 +1,8 @@
 # frozen_string_literal: true
 
 begin
-  require "sinatra"
-  require "sinatra/contrib"
   require "sinatra/base"
+  require "sinatra/contrib"
   require "sinatra/json"
 rescue LoadError
   raise <<~WARN
