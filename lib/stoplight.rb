@@ -95,6 +95,8 @@ end
 #   @option settings [Numeric] :window_size The size of the rolling window for failure tracking.
 #   @option settings [Array<StandardError>] :tracked_errors A list of errors to track.
 #   @option settings [Array<Exception>] :skipped_errors A list of errors to skip.
+#   @option settings [Stoplight::TrafficControl::Base, Symbol, {Symbol, Hash{Symbol, any}}] :traffic_control The
+#     traffic control strategy to use.
 #
 # @return [Stoplight::Light] A new circuit breaker instance.
 # @raise [ArgumentError] If an unknown option is provided in the settings.
@@ -117,6 +119,14 @@ end
 #
 # @example configure skipped errors
 #   light = Stoplight("Payment API", skipped_errors: [ActiveRecord::RecordNotFound])
+#
+# @example configure traffic control to trip using consecutive failures method
+#   # When 5 consecutive failures occur, the circuit breaker will trip.
+#   light = Stoplight("Payment API", traffic_control: :consecutive_errors, threshold: 5)
+#
+# @example configure traffic control to trip using error rate method
+#   # When 66.6% error rate reached withing a sliding 5 minute window, the circuit breaker will trip.
+#   light = Stoplight("Payment API", traffic_control: :error_rate, threshold: 0.666, window_size: 300)
 #
 def Stoplight(name, **settings) # rubocop:disable Naming/MethodName
   config = Stoplight.config_provider.provide(name, settings)

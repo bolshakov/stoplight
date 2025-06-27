@@ -9,6 +9,14 @@ module Stoplight
     #
     # @example Creating a custom strategy
     #   class ErrorRateStrategy < Stoplight::TrafficControl::Base
+    #     def check_compatibility(config)
+    #       if config.window_size.nil?
+    #         incompatible("`window_size` should be set")
+    #       else
+    #         compatible
+    #       end
+    #     end
+    #
     #     def stop_traffic?(config, metadata)
     #       total = metadata.successes + metadata.failures
     #       return false if total < 10 # Minimum sample size
@@ -21,6 +29,16 @@ module Stoplight
     # @abstract
     # @api private
     class Base
+      # Checks if the strategy is compatible with the given Stoplight configuration.
+      #
+      # @param config [Stoplight::Light::Config]
+      # @return [Stoplight::TrafficControl::CompatibilityResult]
+      # :nocov:
+      def check_compatibility(config)
+        raise NotImplementedError
+      end
+      # :nocov:
+
       # Determines whether traffic should be stopped based on the Stoplight's
       # current state and metrics.
       #
@@ -36,6 +54,17 @@ module Stoplight
       def ==(other)
         other.is_a?(self.class)
       end
+
+      # Returns a compatibility result indicating the strategy is compatible.
+      #
+      # @return [Stoplight::Config::CompatibilityResult] A compatible result.
+      private def compatible = Config::CompatibilityResult.compatible
+
+      # Returns a compatibility result indicating the strategy is incompatible.
+      #
+      # @param errors [Array<String>] The list of error messages describing incompatibility.
+      # @return [Stoplight::Config::CompatibilityResult] An incompatible result.
+      private def incompatible(*errors) = Config::CompatibilityResult.incompatible(*errors)
     end
   end
 end
