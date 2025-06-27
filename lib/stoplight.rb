@@ -9,6 +9,7 @@ loader.do_not_eager_load(
   "#{__dir__}/stoplight/admin",
   "#{__dir__}/stoplight/admin.rb"
 )
+loader.ignore("#{__dir__}/generators")
 loader.ignore("#{__dir__}/stoplight/rspec.rb", "#{__dir__}/stoplight/rspec")
 loader.setup
 
@@ -26,7 +27,7 @@ module Stoplight # rubocop:disable Style/Documentation
     # It raises an error if called more than once.
     #
     # @yield [config] Provides a configuration object to the block.
-    # @yieldparam config [Stoplight::Config::ProgrammaticConfig] The configuration object.
+    # @yieldparam config [Stoplight::Config::UserDefaultConfig] The configuration object.
     # @raise [Stoplight::Error::ConfigurationError] If the library is already configured.
     # @return [void]
     #
@@ -118,6 +119,6 @@ end
 #   light = Stoplight("Payment API", skipped_errors: [ActiveRecord::RecordNotFound])
 #
 def Stoplight(name, **settings) # rubocop:disable Naming/MethodName
-  config = Stoplight.config_provider.provide(name, **settings)
+  config = Stoplight.config_provider.provide(name, settings)
   Stoplight::Light.new(config)
 end

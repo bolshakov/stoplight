@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "securerandom"
+
 module Stoplight
   module DataStore
     # A wrapper around a data store that provides fail-safe mechanisms using a

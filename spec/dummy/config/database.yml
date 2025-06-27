@@ -1,0 +1,5 @@
+test:
+  adapter: sqlite3
+  encoding: unicode
+  pool: 5
+  database: stoplight_test

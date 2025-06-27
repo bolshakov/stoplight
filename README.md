@@ -128,17 +128,22 @@ receives `nil`. In both cases, the return value of the fallback becomes the retu
 
 Stoplight goes with a built-in Admin Panel that can track all active Lights and manually lock them in the desired state (`Green` or `Red`). Locking lights in certain states might be helpful in scenarios like E2E testing.
 
-To add Admin Panel to your Rails project, add this configuration to your `config/routes.rb` file.
+To add Admin Panel protected by basic authentication to your Rails project, add this configuration to your `config/routes.rb` file.
 
 ```ruby
 Rails.application.routes.draw do
   # ...
 
+  Stoplight::Admin.use(Rack::Auth::Basic) do |username, password|
+    username == ENV["STOPLIGHT_ADMIN_USERNAME"] && password == ENV["STOPLIGHT_ADMIN_PASSWORD"]
+  end
   mount Stoplight::Admin => '/stoplights'
 
   # ...
 end
 ```
+
+Then set up `STOPLIGHT_ADMIN_USERNAME` and `STOPLIGHT_ADMIN_PASSWORD` env variables to access your Admin panel.
 
 **IMPORTANT:** Stoplight Admin Panel requires you to have `sinatra` and `sinatra-contrib` gems installed. You can either add them to your Gemfile:
 
@@ -158,13 +163,13 @@ gem install sinatra-contrib
 It is possible to run the Admin Panel separately from your application using the `stoplight-admin:<release-version>` docker image.
 
 ```shell
-docker run --net=host stoplight-admin:v5
+docker run --net=host bolshakov/stoplight-admin
 ```
 
 **IMPORTANT:** Standalone Admin Panel should use the same Redis your application uses. To achieve this, set the `REDIS_URL` ENV variable via `-e REDIS_URL=<url-to-your-redis-servier>.` E.g.:
 
 ```shell
-docker run -e REDIS_URL=redis://localhost:6378  --net=host stoplight-admin:v5
+docker run -e REDIS_URL=redis://localhost:6378  --net=host bolshakov/stoplight-admin
 ```
 
 
@@ -384,6 +389,12 @@ Stoplight.configure do |config|
 end
 ```
 
+You can generate initializer with Redis, Admin Panel route and add needed gems to your Gemfile:
+
+```sh
+rails generate stoplight:install --with-admin-panel
+```
+
 ## Testing
 
 Tips for working with Stoplight in test environments:
@@ -416,6 +427,12 @@ Stoplight supports the latest three minor versions of Ruby, which currently are:
 the minimum supported Ruby version is not considered a breaking change. We support the current stable Redis 
 version (`7.4.x`) and the latest release of the previous major version (`6.2.x`)
 
+## Development
+
+After checking out the repo, run `bundle install` to install dependencies. Run tests with `bundle exec rspec` and check 
+code style with `bundle exec standardrb`. We follow a git flow branching strategy - see our [Git Flow wiki page] for 
+details on branch naming, releases, and contribution workflow.
+
 ## Credits
 
 Stoplight was originally created by [camdez][] and [tfausak][]. It is currently maintained by [bolshakov][] and
@@ -444,3 +461,4 @@ Fowler’s [CircuitBreaker][] article.
 [complete list of contributors]: https://github.com/bolshakov/stoplight/graphs/contributors
 [CircuitBreaker]: http://martinfowler.com/bliki/CircuitBreaker.html
 [Redis]: https://redis.io/
+[Git Flow wiki page]: https://github.com/bolshakov/stoplight/wiki/Git-Flow
