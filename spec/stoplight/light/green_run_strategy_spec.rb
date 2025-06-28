@@ -4,8 +4,8 @@ RSpec.describe Stoplight::Light::GreenRunStrategy do
   subject(:strategy) { described_class.new(config) }
 
   let(:config) do
-    Stoplight.config_provider.provide(
-      "foo",
+    Stoplight.default_config.with(
+      name: "foo",
       data_store:,
       traffic_control:,
       notifiers: [notifier]

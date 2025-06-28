@@ -228,6 +228,10 @@ module Stoplight
         state
       end
 
+      def inspect
+        "#<#{self.class.name} redis=#{@redis.inspect}>"
+      end
+
       # Combined method that performs the state transition based on color
       #
       # @param config [Stoplight::Light::Config] The light configuration

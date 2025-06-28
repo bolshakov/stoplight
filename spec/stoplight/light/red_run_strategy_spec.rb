@@ -5,7 +5,7 @@ require "spec_helper"
 RSpec.describe Stoplight::Light::RedRunStrategy do
   subject(:strategy) { described_class.new(config) }
 
-  let(:config) { Stoplight.config_provider.provide("foo", data_store:) }
+  let(:config) { Stoplight.default_config.with(name: "foo", data_store:) }
 
   shared_examples Stoplight::Light::RedRunStrategy do
     subject(:result) { strategy.execute(fallback) { 42 } }

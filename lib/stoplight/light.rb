@@ -150,9 +150,7 @@ module Stoplight
     #   payment_light.run(->(error) { nil }) { call_payment_api }
     # @see +Stoplight()+
     def with(**settings)
-      reconfigure(
-        Stoplight.config_provider.from_prototype(config, settings)
-      )
+      reconfigure(config.with(**settings))
     end
 
     private
