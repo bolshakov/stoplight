@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Stoplight::Light do
-  let(:config) { Stoplight.config_provider.provide(random_string) }
+  let(:config) { Stoplight.default_config.with(name: random_string) }
   let(:light) { Stoplight::Light.new(config) }
   let(:failure) do
     Stoplight::Failure.new(error.class_name, error.message, time)
@@ -126,7 +126,7 @@ RSpec.describe Stoplight::Light do
   end
 
   context "with memory data store" do
-    let(:config) { Stoplight.config_provider.provide(random_string, data_store:) }
+    let(:config) { Stoplight.default_config.with(name: random_string, data_store:) }
     let(:data_store) { Stoplight::DataStore::Memory.new }
 
     it_behaves_like "Stoplight::Light#state"
@@ -135,7 +135,7 @@ RSpec.describe Stoplight::Light do
   end
 
   context "with redis data store", :redis do
-    let(:config) { Stoplight.config_provider.provide(random_string, data_store:) }
+    let(:config) { Stoplight.default_config.with(name: random_string, data_store:) }
     let(:data_store) { Stoplight::DataStore::Redis.new(redis) }
 
     it_behaves_like "Stoplight::Light#state"

@@ -202,6 +202,11 @@ module Stoplight
         state
       end
 
+      # @return [String]
+      def inspect
+        "#<#{self.class.name}>"
+      end
+
       # Combined method that performs the state transition based on color
       #
       # @param config [Stoplight::Light::Config] The light configuration

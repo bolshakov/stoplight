@@ -3,7 +3,7 @@
 require "zeitwerk"
 
 loader = Zeitwerk::Loader.for_gem
-loader.inflector.inflect("io" => "IO")
+loader.inflector.inflect("io" => "IO", "dsl" => "DSL")
 loader.do_not_eager_load(
   "#{__dir__}/stoplight/data_store",
   "#{__dir__}/stoplight/admin",
@@ -14,6 +14,9 @@ loader.ignore("#{__dir__}/stoplight/rspec.rb", "#{__dir__}/stoplight/rspec")
 loader.setup
 
 module Stoplight # rubocop:disable Style/Documentation
+  CONFIG_DSL = Config::DSL.new
+  private_constant :CONFIG_DSL
+
   CONFIG_MUTEX = Mutex.new
   private_constant :CONFIG_MUTEX
 
@@ -47,7 +50,7 @@ module Stoplight # rubocop:disable Style/Documentation
     #   produces a warning:
     #
     #     "Stoplight reconfigured. Existing circuit breakers will not see the new configuration. New
-    #       configuration: #<Stoplight::Config::ConfigProvider cool_off_time=32, threshold=3, window_size=94, tracked_errors=StandardError, skipped_errors=NoMemoryError,ScriptError,SecurityError,SignalException,SystemExit,SystemStackError, data_store=Stoplight::DataStore::Memory>\n"
+    #       configuration: ...f
     #
     #   If you really know what you are doing, you can pass the +trust_me_im_an_engineer+ parameter as +true+ to
     #   suppress this warning, which could be useful in test environments.
@@ -56,28 +59,47 @@ module Stoplight # rubocop:disable Style/Documentation
       user_defaults = Config::UserDefaultConfig.new
       yield(user_defaults) if block_given?
 
-      reconfigured = !@config_provider.nil?
+      reconfigured = !@default_config.nil?
 
-      @config_provider = Config::ConfigProvider.new(
-        user_default_config: user_defaults.freeze,
-        library_default_config: Config::LibraryDefaultConfig.new
-      ).tap do
+      @default_config = Config::LibraryDefaultConfig.with(**user_defaults.to_h).tap do
         if reconfigured && !trust_me_im_an_engineer
           warn(
             "Stoplight reconfigured. Existing circuit breakers will not see new configuration. " \
-              "New configuration: #{@config_provider.inspect}"
+              "New configuration: #{@default_config.inspect}"
           )
         end
       end
     end
 
+    # Creates a Light for internal use.
+    #
+    # @param name [String]
+    # @param settings [Hash]
+    # @return [Stoplight::Light]
+    # @api private
+    def system_light(name, **settings)
+      config = Config::SystemConfig.with(name:, **settings)
+      Stoplight::Light.new(config)
+    end
+
+    # Create a Light with the user default configuration.
+    #
+    # @param name [String]
+    # @param settings [Hash]
+    # @return [Stoplight::Light]
+    # @api private
+    def light(name, **settings)
+      config = Stoplight.default_config.with(name:, **settings)
+      Stoplight::Light.new(config)
+    end
+
     # Retrieves the current configuration provider.
     #
-    # @return [Stoplight::Config::ConfigProvider]
+    # @return [Stoplight::Light::Config]
     # @api private
-    def config_provider
+    def default_config
       CONFIG_MUTEX.synchronize do
-        @config_provider ||= configure
+        @default_config ||= configure
       end
     end
   end
@@ -129,6 +151,5 @@ end
 #   light = Stoplight("Payment API", traffic_control: :error_rate, threshold: 0.666, window_size: 300)
 #
 def Stoplight(name, **settings) # rubocop:disable Naming/MethodName
-  config = Stoplight.config_provider.provide(name, settings)
-  Stoplight::Light.new(config)
+  Stoplight.light(name, **settings)
 end

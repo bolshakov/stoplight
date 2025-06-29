@@ -104,14 +104,9 @@ module Stoplight
         circuit_breaker.run(fallback, &code)
       end
 
-      # @return [Stoplight] The circuit breaker used to handle failures.
+      # @return [Stoplight::Light] The circuit breaker used to handle failures.
       private def circuit_breaker
-        @circuit_breaker ||= Stoplight(
-          "stoplight:data_store:fail_safe:#{data_store.class.name}",
-          data_store: Default::DATA_STORE,
-          traffic_control: TrafficControl::ConsecutiveErrors.new,
-          threshold: Default::THRESHOLD
-        )
+        @circuit_breaker ||= Stoplight.system_light("stoplight:data_store:fail_safe:#{data_store.class.name}")
       end
     end
   end

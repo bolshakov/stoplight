@@ -50,6 +50,14 @@ module Stoplight
       :traffic_control,
       :traffic_recovery
     ) do
+      class << self
+        # Creates a new NULL configuration object.
+        # @return [Stoplight::Light::Config]
+        def empty
+          new(**members.map { |key| [key, nil] }.to_h)
+        end
+      end
+
       # Checks if the given error should be tracked
       #
       # @param error [#==] The error to check, e.g. an Exception, Class or Proc
@@ -59,6 +67,33 @@ module Stoplight
         track = tracked_errors.any? { |klass| klass === error }
 
         !skip && track
+      end
+
+      # This method applies configuration dsl and revalidates the configuration
+      # @return [Stoplight::Light::Config]
+      def with(**settings)
+        super(**CONFIG_DSL.transform(settings)).then do |config|
+          config.validate_config!
+        end
+      end
+
+      # @raise [Stoplight::Error::ConfigurationError]
+      # @return [Stoplight::Light::Config] The validated configuration object.
+      def validate_config!
+        validate_traffic_control_compatibility!
+        self
+      end
+
+      private
+
+      def validate_traffic_control_compatibility!
+        traffic_control.check_compatibility(self).then do |compatibility_result|
+          if compatibility_result.incompatible?
+            raise Stoplight::Error::ConfigurationError.new(
+              "#{traffic_control.class.name} strategy is incompatible with the Stoplight configuration: #{compatibility_result.error_messages}"
+            )
+          end
+        end
       end
     end
   end
