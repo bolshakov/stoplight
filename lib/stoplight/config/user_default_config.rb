@@ -25,8 +25,12 @@ module Stoplight
       attr_accessor :notifiers
 
       # @!attribute [w] threshold
-      #   @return [Integer, nil] The default failure threshold to trip the circuit breaker.
+      #   @return [Integer, Float, nil] The default failure threshold to trip the circuit breaker.
       attr_writer :threshold
+
+      # @!attribute [w] recovery_threshold
+      #  @return [Integer, nil] The default recovery threshold for the circuit breaker.
+      attr_writer :recovery_threshold
 
       # @!attribute [w] window_size
       #   @return [Integer, nil] The default size of the rolling window for failure tracking.
@@ -65,6 +69,7 @@ module Stoplight
           error_notifier: @error_notifier,
           notifiers: @notifiers,
           threshold: @threshold,
+          recovery_threshold: @recovery_threshold,
           window_size: @window_size,
           tracked_errors: @tracked_errors,
           skipped_errors: @skipped_errors,

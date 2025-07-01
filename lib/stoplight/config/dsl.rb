@@ -31,6 +31,10 @@ module Stoplight
         if settings.has_key?(:traffic_control)
           settings[:traffic_control] = build_traffic_control(settings[:traffic_control])
         end
+
+        if settings.has_key?(:traffic_recovery)
+          settings[:traffic_recovery] = build_traffic_recovery(settings[:traffic_recovery])
+        end
         settings
       end
 
@@ -71,6 +75,20 @@ module Stoplight
             unsupported traffic_control strategy provided (`#{traffic_control}`). Supported options:
               * Stoplight::TrafficControl::ConsecutiveErrors
               * Stoplight::TrafficControl::ErrorRate
+          ERROR
+        end
+      end
+
+      def build_traffic_recovery(traffic_recovery)
+        case traffic_recovery
+        in Stoplight::TrafficRecovery::Base
+          traffic_recovery
+        in :consecutive_successes
+          Stoplight::TrafficRecovery::ConsecutiveSuccesses.new
+        else
+          raise Error::ConfigurationError, <<~ERROR
+            unsupported traffic_recovery strategy provided (`#{traffic_recovery}`). Supported options:
+              * Stoplight::TrafficRecovery::ConsecutiveSuccesses
           ERROR
         end
       end
