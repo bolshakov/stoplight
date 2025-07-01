@@ -44,6 +44,7 @@ module Stoplight
       :error_notifier,
       :notifiers,
       :threshold,
+      :recovery_threshold,
       :window_size,
       :tracked_errors,
       :skipped_errors,
@@ -88,6 +89,16 @@ module Stoplight
 
       def validate_traffic_control_compatibility!
         traffic_control.check_compatibility(self).then do |compatibility_result|
+          if compatibility_result.incompatible?
+            raise Stoplight::Error::ConfigurationError.new(
+              "#{traffic_control.class.name} strategy is incompatible with the Stoplight configuration: #{compatibility_result.error_messages}"
+            )
+          end
+        end
+      end
+
+      def validate_traffic_recovery_compatibility!
+        traffic_recovery.check_compatibility(self).then do |compatibility_result|
           if compatibility_result.incompatible?
             raise Stoplight::Error::ConfigurationError.new(
               "#{traffic_control.class.name} strategy is incompatible with the Stoplight configuration: #{compatibility_result.error_messages}"
