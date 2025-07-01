@@ -11,6 +11,7 @@ RSpec.describe Stoplight::Light::Config do
       error_notifier:,
       notifiers:,
       threshold:,
+      recovery_threshold:,
       window_size:,
       tracked_errors:,
       skipped_errors:,
@@ -25,6 +26,7 @@ RSpec.describe Stoplight::Light::Config do
   let(:error_notifier) { Stoplight::Default::ERROR_NOTIFIER }
   let(:notifiers) { Stoplight::Default::NOTIFIERS }
   let(:threshold) { Stoplight::Default::THRESHOLD }
+  let(:recovery_threshold) { Stoplight::Default::RECOVERY_THRESHOLD }
   let(:window_size) { Stoplight::Default::WINDOW_SIZE }
   let(:tracked_errors) { Stoplight::Default::TRACKED_ERRORS }
   let(:skipped_errors) { Stoplight::Default::SKIPPED_ERRORS }
@@ -200,6 +202,47 @@ RSpec.describe Stoplight::Light::Config do
 
       it "converts to integer" do
         is_expected.to be(60)
+      end
+    end
+
+    describe "traffic_recovery" do
+      subject(:traffic_recovery_out) do
+        Stoplight.default_config.with(
+          name: "name",
+          traffic_recovery:,
+          recovery_threshold:
+        ).traffic_recovery
+      end
+
+      let(:recovery_threshold) { 50 }
+
+      context "when an instance of TrafficRecovery::Base" do
+        let(:traffic_recovery) { Stoplight::TrafficRecovery::ConsecutiveSuccesses.new }
+
+        it "returns the same traffic recovery object" do
+          is_expected.to eq(traffic_recovery)
+        end
+      end
+
+      context "when :consecutive_successes" do
+        let(:traffic_recovery) { :consecutive_successes }
+
+        it "returns an instance of Stoplight::TrafficRecovery::ConsecutiveSuccesses" do
+          is_expected.to eq(Stoplight::TrafficRecovery::ConsecutiveSuccesses.new)
+        end
+      end
+
+      context "when unexpected strategy provided" do
+        let(:traffic_recovery) { 42 }
+
+        it "raises configuration error" do
+          expect do
+            traffic_recovery_out
+          end.to raise_error(Stoplight::Error::ConfigurationError, <<~ERROR)
+            unsupported traffic_recovery strategy provided (`42`). Supported options:
+              * Stoplight::TrafficRecovery::ConsecutiveSuccesses
+          ERROR
+        end
       end
     end
 

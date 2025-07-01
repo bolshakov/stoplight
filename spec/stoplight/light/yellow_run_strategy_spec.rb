@@ -13,7 +13,7 @@ RSpec.describe Stoplight::Light::YellowRunStrategy do
     )
   end
   let(:notifier) { instance_double(Stoplight::Notifier::Base) }
-  let(:traffic_recovery) { instance_double(Stoplight::TrafficRecovery::Base) }
+  let(:traffic_recovery) { Stoplight::TrafficRecovery::ConsecutiveSuccesses.new }
   let(:metadata) { instance_double(Stoplight::Metadata) }
 
   shared_examples Stoplight::Light::YellowRunStrategy do
