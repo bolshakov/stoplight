@@ -32,7 +32,7 @@ module Stoplight
       # Checks if the strategy is compatible with the given Stoplight configuration.
       #
       # @param config [Stoplight::Light::Config]
-      # @return [Stoplight::TrafficControl::CompatibilityResult]
+      # @return [Stoplight::Config::CompatibilityResult]
       # :nocov:
       def check_compatibility(config)
         raise NotImplementedError

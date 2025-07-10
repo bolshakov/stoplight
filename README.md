@@ -43,8 +43,8 @@ Stoplight operates like a traffic light with three states:
 stateDiagram
     Green --> Red: Errors reach threshold
     Red --> Yellow: After cool_off_time
-    Yellow --> Green: Successful attempt
-    Yellow --> Red: Failed attempt
+    Yellow --> Green: Successful recovery
+    Yellow --> Red: Failed recovery
     Green --> Green: Success
     
     classDef greenState fill:#28a745,stroke:#1e7e34,stroke-width:2px,color:#fff
@@ -60,11 +60,15 @@ stateDiagram
 - **Red**: Failure state. Fast-fails without running the code. (Circuit open)
 - **Yellow**: Recovery state. Allows a test execution to see if the problem is resolved. (Circuit half-open)
 
-Stoplight's behavior is controlled by three main primary parameters:
+Stoplight's behavior is controlled by two main parameters:
 
-1. **Threshold** (default: `3`): Number of errors required to transition from green to red.
-2. **Cool Off Time** (default: `60` seconds): Time to wait in the red state before transitioning to yellow.
-3. **Window Size** (default: `nil`): Time window in which errors are counted toward the threshold. By default, all errors are counted.
+1. **Window Size** (default: `nil`): Time window in which errors are counted toward the threshold. By default, all errors are counted.
+2. **Threshold** (default: `3`): Number of errors required to transition from green to red.
+
+Additionally, two other parameters control how Stoplight behaves after it turns red:
+ 
+1. **Cool Off Time** (default: `60` seconds): Time to wait in the red state before transitioning to yellow.
+2. **Recovery Threshold** (default: `1`): Number of successful attempts required to transition from yellow back to green.
 
 ## Basic Usage
 
@@ -182,9 +186,10 @@ Stoplight allows you to set default values for all lights in your application:
 Stoplight.configure do |config|
   # Set default behavior for all stoplights
   config.traffic_control = :error_rate
+  config.window_size = 300
   config.threshold = 0.5
   config.cool_off_time = 30
-  config.window_size = 300
+  config.recovery_threshold = 5
   
   # Set up default data store and notifiers
   config.data_store = Stoplight::DataStore::Redis.new(redis)
@@ -209,10 +214,11 @@ You can also provide settings during creation:
 ```ruby
 data_store = Stoplight::DataStore::Redis.new(Redis.new)
 
-light = Stoplight("Payment Service", 
+light = Stoplight("Payment Service",
+  window_size: 300,                       # Only count errors in the last five minutes
   threshold: 5,                           # 5 errors before turning red
   cool_off_time: 60,                      # Wait 60 seconds before attempting recovery
-  window_size: 300,                       # Only count errors in the last five minutes
+  recovery_threshold: 1,                  # 1 successful attempt to turn green again
   data_store: data_store,                 # Use Redis for persistence
   tracked_errors: [TimeoutError],         # Only count TimeoutError
   skipped_errors: [ValidationError]       # Ignore ValidationError
@@ -293,7 +299,15 @@ light = Stoplight(
 Counts consecutive errors within a 5-minute sliding window. Both conditions must be met: 5 consecutive errors 
 AND at least 5 total errors within the window.
 
-_This is Stoplight's default strategy when no `traffic_control` is specified._
+_This is Stoplight's default strategy when no `traffic_control` is specified._ You can omit `traffic_control` parameter 
+in the above examples:
+
+```ruby
+light = Stoplight(
+  "Payment API",
+  threshold: 5,
+)
+```
 
 #### Error Rate
 
@@ -330,6 +344,37 @@ Only evaluates error rate after at least 20 requests within the window. Default 
 
 * **Consecutive Errors**: Low-medium traffic, simple behavior, occasional spikes expected
 * **Error Rate**: High traffic, percentage-based SLAs, variable traffic patterns
+
+### Traffic Recovery Strategies
+
+In the yellow state, Stoplight behaves differently from normal (green) operation. Instead of
+blocking all traffic, it allows a limited number of real requests to pass through to
+the underlying service to determine if it has recovered. These aren't synthetic probes -
+they're actual user requests that will execute normally if the service is healthy.
+
+After collecting the necessary data from these requests, Stoplight decides whether to
+return to green or red state.
+
+Traffic Recovery strategies control how Stoplight evaluates these requests during
+the recovery phase.
+
+#### Consecutive Successes (Default)
+
+Returns to green after a specified number of consecutive successful recovery attempts. This is the default behavior.
+
+```ruby
+light = Stoplight(
+  "Payment API", 
+  traffic_recovery: :consecutive_successes, 
+  recovery_threshold: 3,
+)
+```
+
+This configuration requires 3 consecutive successful recovery probes before resuming normal traffic. If any probe 
+fails during recovery, the stoplight immediately returns to red and waits for another cool-off period before trying again.
+
+**Default behavior**: If no `recovery_threshold` is specified, Stoplight uses a conservative default of 1, meaning a 
+single successful recovery probe will resume traffic flow.
 
 ### Data Store
 

@@ -10,6 +10,7 @@ module Stoplight
       error_notifier: Stoplight::Default::ERROR_NOTIFIER,
       notifiers: Stoplight::Default::NOTIFIERS,
       threshold: Stoplight::Default::THRESHOLD,
+      recovery_threshold: Stoplight::Default::RECOVERY_THRESHOLD,
       window_size: Stoplight::Default::WINDOW_SIZE,
       tracked_errors: Stoplight::Default::TRACKED_ERRORS,
       skipped_errors: Stoplight::Default::SKIPPED_ERRORS,
