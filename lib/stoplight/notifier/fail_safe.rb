@@ -58,9 +58,12 @@ module Stoplight
         other.is_a?(FailSafe) && notifier == other.notifier
       end
 
-      # @return [Stoplight] The circuit breaker used to handle failures.
+      # @return [Stoplight::Light] The circuit breaker used to handle failures.
       private def circuit_breaker
-        @circuit_breaker ||= Stoplight("stoplight:notifier:fail_safe:#{notifier.class.name}", data_store: Default::DATA_STORE, notifiers: [])
+        @circuit_breaker ||= Stoplight.system_light(
+          "stoplight:notifier:fail_safe:#{notifier.class.name}",
+          notifiers: []
+        )
       end
     end
   end

@@ -4,15 +4,15 @@ RSpec.describe Stoplight::Light::GreenRunStrategy do
   subject(:strategy) { described_class.new(config) }
 
   let(:config) do
-    Stoplight.config_provider.provide(
-      "foo",
+    Stoplight.default_config.with(
+      name: "foo",
       data_store:,
       traffic_control:,
       notifiers: [notifier]
     )
   end
   let(:notifier) { instance_double(Stoplight::Notifier::Base) }
-  let(:traffic_control) { instance_double(Stoplight::TrafficControl::Base) }
+  let(:traffic_control) { Stoplight::TrafficControl::ConsecutiveErrors.new }
 
   shared_examples Stoplight::Light::GreenRunStrategy do
     context "when code executes successfully" do

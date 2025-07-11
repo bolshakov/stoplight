@@ -25,8 +25,12 @@ module Stoplight
       attr_accessor :notifiers
 
       # @!attribute [w] threshold
-      #   @return [Integer, nil] The default failure threshold to trip the circuit breaker.
+      #   @return [Integer, Float, nil] The default failure threshold to trip the circuit breaker.
       attr_writer :threshold
+
+      # @!attribute [w] recovery_threshold
+      #  @return [Integer, nil] The default recovery threshold for the circuit breaker.
+      attr_writer :recovery_threshold
 
       # @!attribute [w] window_size
       #   @return [Integer, nil] The default size of the rolling window for failure tracking.
@@ -43,6 +47,10 @@ module Stoplight
       # @!attribute [w] data_store
       #   @return [Stoplight::DataStore::Base] The default data store instance.
       attr_writer :data_store
+
+      # @!attribute [w] traffic_control
+      #   @return [Stoplight::TrafficControl::Base, Symbol, Hash] The traffic control strategy.
+      attr_writer :traffic_control
 
       def initialize
         # This allows users appending notifiers to the default list,
@@ -61,9 +69,11 @@ module Stoplight
           error_notifier: @error_notifier,
           notifiers: @notifiers,
           threshold: @threshold,
+          recovery_threshold: @recovery_threshold,
           window_size: @window_size,
           tracked_errors: @tracked_errors,
-          skipped_errors: @skipped_errors
+          skipped_errors: @skipped_errors,
+          traffic_control: @traffic_control
         }.compact
       end
 

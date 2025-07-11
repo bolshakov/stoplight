@@ -17,13 +17,14 @@ module Stoplight
     NOTIFIERS = [Notifier::IO.new($stderr)].freeze
 
     THRESHOLD = 3
+    RECOVERY_THRESHOLD = 1
 
     WINDOW_SIZE = nil
 
     TRACKED_ERRORS = [StandardError].freeze
     SKIPPED_ERRORS = [].freeze
 
-    TRAFFIC_CONTROL = TrafficControl::ConsecutiveFailures.new
-    TRAFFIC_RECOVERY = TrafficRecovery::SingleSuccess.new
+    TRAFFIC_CONTROL = TrafficControl::ConsecutiveErrors.new
+    TRAFFIC_RECOVERY = TrafficRecovery::ConsecutiveSuccesses.new
   end
 end
