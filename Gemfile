@@ -15,7 +15,6 @@ end
 group :development do
   gem "ammeter"
   gem "benchmark-ips", "~> 2.14"
-  gem "concurrent-ruby-ext"
   gem "connection_pool"
   gem "database_cleaner-redis", "~> 2.0"
   gem "rack-test"
@@ -26,7 +25,12 @@ group :development do
   gem "simplecov-lcov", "~> 0.8"
   gem "timecop", "~> 0.9"
 
+  platforms :jruby do
+    gem "bigdecimal", "~> 3.2.2"
+  end
+
   platforms :mri do
+    gem "bigdecimal", "~> 3.2.2"
     gem "cucumber"
     gem "debug"
     gem "ruby-prof"

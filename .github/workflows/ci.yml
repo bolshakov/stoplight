@@ -5,9 +5,6 @@ on:
   push:
     branches: [ master ]
 
-permissions:  # added using https://github.com/step-security/secure-repo
-  contents: read
-
 jobs:
   rubocop:
     name: Standard 👮
@@ -74,7 +71,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        ruby: [ '3.2', '3.3', '3.4', 'jruby-10.0.1.0' ]
+        ruby: [ '3.2', '3.3', '3.4', "jruby-10.0.1.0" ]
         redis: [ '6.2', '7.4']
     services:
       redis:
@@ -95,7 +92,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      # Set up Java 21 for JRuby
       - name: Set up Java 21 for JRuby
         if: startsWith(matrix.ruby, 'jruby')
         uses: actions/setup-java@8df1039502a15bceb9433410b1a100fbe190c53b # v4.5.0
@@ -105,9 +101,6 @@ jobs:
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@bb6434c747fa7022e12fa1cae2a0951fcffcff26 # v1.253.0
-        env:
-          BUNDLE_FORCE_RUBY_PLATFORM: "true"
-          BUNDLE_SPECIFIC_PLATFORM: "true"
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
@@ -122,6 +115,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           flag-name: ruby-${{ matrix.ruby }}
           parallel: true
+
   finish:
     permissions:
       checks: write  # for coverallsapp/github-action to create new checks
