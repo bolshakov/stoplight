@@ -1,6 +1,6 @@
-Feature: Stoplight State Transitions
+Feature: Consecutive Errors Traffic Control Strategy
   As a Ruby developer using Stoplight
-  I want to manage the state of a light based on service health
+  I want to control when a light transitions to red state based on the number of consecutive errors
   So that my application can respond appropriately to service failures
 
   Background:
