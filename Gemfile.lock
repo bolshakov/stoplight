@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    stoplight (5.2.0)
+    stoplight (5.3.0)
       zeitwerk
 
 GEM

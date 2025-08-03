@@ -1,5 +1,3 @@
-# This release does not add user-visible functionality, but improves the security of the release process.
-
 name: Release 🚀
 on:
   push:
