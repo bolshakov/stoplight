@@ -3,7 +3,6 @@
 [![Version badge][]][version]
 [![Build badge][]][build]
 [![Coverage badge][]][coverage]
-[![Climate badge][]][climate]
 
 Stoplight is traffic control for code. It's an implementation of the circuit breaker pattern in Ruby.
 
@@ -563,8 +562,6 @@ Fowler’s [CircuitBreaker][] article.
 [build]: https://github.com/bolshakov/stoplight/actions?query=branch%3Amaster
 [Coverage badge]: https://img.shields.io/coveralls/bolshakov/stoplight/master.svg?label=coverage
 [coverage]: https://coveralls.io/r/bolshakov/stoplight
-[Climate badge]: https://api.codeclimate.com/v1/badges/3451c2d281ffa345441a/maintainability
-[climate]: https://codeclimate.com/github/bolshakov/stoplight
 [stoplight-admin]: https://github.com/bolshakov/stoplight-admin
 [Semantic Versioning]: http://semver.org/spec/v2.0.0.html
 [the change log]: CHANGELOG.md
