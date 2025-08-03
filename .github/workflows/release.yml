@@ -15,7 +15,7 @@ jobs:
   gem:
     name: Ruby Gem 📦
     runs-on: ubuntu-latest
-    environment: releases
+    environment: release
     steps:
       - name: Harden the runner (Audit all outbound calls)
         uses: step-security/harden-runner@ec9f2d5744a09debf3a187a3f4f675c53b671911 # v2.13.0
@@ -38,7 +38,7 @@ jobs:
     name: Docker Image 🐳
     needs: [gem]
     runs-on: ubuntu-latest
-    environment: releases
+    environment: release
     steps:
       - name: Harden the runner (Audit all outbound calls)
         uses: step-security/harden-runner@ec9f2d5744a09debf3a187a3f4f675c53b671911 # v2.13.0
