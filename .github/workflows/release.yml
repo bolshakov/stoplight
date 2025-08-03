@@ -1,21 +1,22 @@
 name: Release 🚀
 on:
-  release:
-    types: [published]
+  push:
+    branches: [ main ]
 
 env:
   version: ${{ github.event.release.tag_name }}
   docker_username: ${{ secrets.DOCKER_HUB_USERNAME }}
   docker_password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
-permissions:  # added using https://github.com/step-security/secure-repo
-  contents: read
-
 jobs:
   gem:
     name: Ruby Gem 📦
     runs-on: ubuntu-latest
     environment: release
+    permissions:
+      contents: read
+      id-token: write # IMPORTANT: this permission is mandatory for trusted publishing
+      contents: write # IMPORTANT: this permission is required for `rake release` to push the release tag
     steps:
       - name: Harden the runner (Audit all outbound calls)
         uses: step-security/harden-runner@ec9f2d5744a09debf3a187a3f4f675c53b671911 # v2.13.0
@@ -39,6 +40,8 @@ jobs:
     needs: [gem]
     runs-on: ubuntu-latest
     environment: release
+    permissions:
+      contents: read
     steps:
       - name: Harden the runner (Audit all outbound calls)
         uses: step-security/harden-runner@ec9f2d5744a09debf3a187a3f4f675c53b671911 # v2.13.0
