@@ -3,7 +3,10 @@ name: 🚦Stoplight
 on:
   pull_request:
   push:
-    branches: [ master ]
+    branches: [ main ]
+
+permissions:  # added using https://github.com/step-security/secure-repo
+  contents: read
 
 jobs:
   rubocop:
@@ -13,10 +16,15 @@ jobs:
       checks: write
       contents: read
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@ec9f2d5744a09debf3a187a3f4f675c53b671911 # v2.13.0
+        with:
+          egress-policy: audit
+
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Standard Ruby
-        uses: "standardrb/standard-ruby-action@v1"
+        uses: standardrb/standard-ruby-action@eecb3f730879f5b8830705348c2961e5aa26de78 # v1.5.0
         with:
           autofix: false
 
@@ -37,11 +45,16 @@ jobs:
         ports:
           - 6379:6379
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@ec9f2d5744a09debf3a187a3f4f675c53b671911 # v2.13.0
+        with:
+          egress-policy: audit
+
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
+        uses: ruby/setup-ruby@bb6434c747fa7022e12fa1cae2a0951fcffcff26 # v1.253.0
         with:
           ruby-version: 3.3.4
           bundler-cache: true
@@ -54,6 +67,9 @@ jobs:
           CUCUMBER_PUBLISH_ENABLED: true
 
   spec:
+    permissions:
+      checks: write  # for coverallsapp/github-action to create new checks
+      contents: read  # for actions/checkout to fetch code
     name: Specs on Ruby ${{ matrix.ruby }} with Redis ${{ matrix.redis }} 💚
     runs-on: ubuntu-latest
     strategy:
@@ -71,11 +87,16 @@ jobs:
         ports:
           - 6379:6379
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@ec9f2d5744a09debf3a187a3f4f675c53b671911 # v2.13.0
+        with:
+          egress-policy: audit
+
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
+        uses: ruby/setup-ruby@bb6434c747fa7022e12fa1cae2a0951fcffcff26 # v1.253.0
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
@@ -85,17 +106,24 @@ jobs:
         env:
           STOPLIGHT_REDIS_URL: "redis://127.0.0.1:6379/0"
       - name: Coveralls
-        uses: coverallsapp/github-action@v1.1.2
+        uses: coverallsapp/github-action@8cbef1dea373ebce56de0a14c68d6267baa10b44 # v1.1.2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           flag-name: ruby-${{ matrix.ruby }}
           parallel: true
   finish:
+    permissions:
+      checks: write  # for coverallsapp/github-action to create new checks
     needs: spec
     runs-on: ubuntu-latest
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@ec9f2d5744a09debf3a187a3f4f675c53b671911 # v2.13.0
+        with:
+          egress-policy: audit
+
       - name: Coveralls Finished
-        uses: coverallsapp/github-action@master
+        uses: coverallsapp/github-action@09b709cf6a16e30b0808ba050c7a6e8a5ef13f8d # master
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           parallel-finished: true
