@@ -36,7 +36,7 @@ jobs:
 
   docker:
     name: Docker Image 🐳
-    depends-on: gem
+    needs: [gem]
     runs-on: ubuntu-latest
     environment: releases
     steps:
