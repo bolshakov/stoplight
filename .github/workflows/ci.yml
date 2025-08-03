@@ -106,7 +106,7 @@ jobs:
         env:
           STOPLIGHT_REDIS_URL: "redis://127.0.0.1:6379/0"
       - name: Coveralls
-        uses: coverallsapp/github-action@8cbef1dea373ebce56de0a14c68d6267baa10b44 # v1.1.2
+        uses: coverallsapp/github-action@648a8eb78e6d50909eff900e4ec85cab4524a45b # v2.3.6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           flag-name: ruby-${{ matrix.ruby }}
@@ -123,7 +123,7 @@ jobs:
           egress-policy: audit
 
       - name: Coveralls Finished
-        uses: coverallsapp/github-action@09b709cf6a16e30b0808ba050c7a6e8a5ef13f8d # master
+        uses: coverallsapp/github-action@648a8eb78e6d50909eff900e4ec85cab4524a45b # master
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           parallel-finished: true
