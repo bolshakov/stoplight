@@ -1,20 +1,48 @@
-name: Docker 🐳
+# This release does not add user-visible functionality, but improves the security of the release process.
+
+name: Release 🚀
 on:
-  release:
-    types: [published]
+  push:
+    branches: [ main ]
 
 env:
   version: ${{ github.event.release.tag_name }}
   docker_username: ${{ secrets.DOCKER_HUB_USERNAME }}
   docker_password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
-permissions:  # added using https://github.com/step-security/secure-repo
-  contents: read
-
 jobs:
-  build:
-    name: Build 🔧
+  gem:
+    name: Ruby Gem 📦
     runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      id-token: write # IMPORTANT: this permission is mandatory for trusted publishing
+      contents: write # IMPORTANT: this permission is required for `rake release` to push the release tag
+    steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@ec9f2d5744a09debf3a187a3f4f675c53b671911 # v2.13.0
+        with:
+          egress-policy: audit
+
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@bb6434c747fa7022e12fa1cae2a0951fcffcff26 # v1.253.0
+        with:
+          bundler-cache: true
+          ruby-version: ruby
+
+      - name: Release Gem
+        uses: rubygems/release-gem@ebe1ec66bd8d2c709ac29aa2b43438d450e7a0a6 # v1
+
+  docker:
+    name: Docker Image 🐳
+    needs: [gem]
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      contents: read
     steps:
       - name: Harden the runner (Audit all outbound calls)
         uses: step-security/harden-runner@ec9f2d5744a09debf3a187a3f4f675c53b671911 # v2.13.0
