@@ -80,17 +80,15 @@ jobs:
     permissions:
       checks: write  # for coverallsapp/github-action to create new checks
       contents: read  # for actions/checkout to fetch code
-    name: Specs on Ruby ${{ matrix.ruby }} with Redis ${{ matrix.redis }} 💚
+    name: Specs on Ruby ${{ matrix.ruby }} with Data Store as ${{ matrix.data-store-image }} 💚
     runs-on: ubuntu-latest
     strategy:
       matrix:
+        data-store-image: [ 'redis:6.2', 'redis:7.4', 'valkey/valkey:8-alpine' ]
         ruby: [ '3.2', '3.3', '3.4' ]
-        redis: [ '6.2', '7.4']
-        valkey: [ '8-alpine' ]
-        redis_url: [ 'redis://127.0.0.1:6379/0', 'redis://127.0.0.1:6380/0']
     services:
-      redis:
-        image: redis:${{ matrix.redis }}
+      data-store:
+        image: ${{ matrix.data-store-image }}
         options: >-
           --health-cmd "redis-cli ping"
           --health-interval 10s
@@ -98,15 +96,6 @@ jobs:
           --health-retries 5
         ports:
           - 6379:6379
-      valkey:
-        image: valkey/valkey:${{ matrix.valkey }}
-        options: >-
-          --health-cmd "valkey-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 6380:6379
     steps:
       - name: Harden the runner (Audit all outbound calls)
         uses: step-security/harden-runner@ec9f2d5744a09debf3a187a3f4f675c53b671911 # v2.13.0
@@ -125,7 +114,7 @@ jobs:
       - name: Run Tests
         run: bundle exec rake spec
         env:
-          STOPLIGHT_REDIS_URL: ${{ matrix.redis_url }}
+          STOPLIGHT_REDIS_URL: 'redis://127.0.0.1:6379/0'
       - name: Coveralls
         uses: coverallsapp/github-action@648a8eb78e6d50909eff900e4ec85cab4524a45b # v2.3.6
         with:
