@@ -200,6 +200,21 @@ Stoplight.configure do |config|
 end
 ```
 
+### Valkey Support
+
+Stoplight also supports [Valkey], a drop-in replacement for Redis.  
+Just point your Redis client to a Valkey instance and configure Stoplight as usual:
+
+```ruby
+# ...
+valkey = Redis.new(url: "redis://127.0.0.1:6379")
+
+Stoplight.configure do |config|
+  config.data_store = Stoplight::DataStore::Redis.new(valkey)
+  # ...
+end
+```
+
 ### Creating Stoplights
 
 The simplest way to create a stoplight is with a name:
@@ -576,3 +591,4 @@ Fowler’s [CircuitBreaker][] article.
 [CircuitBreaker]: http://martinfowler.com/bliki/CircuitBreaker.html
 [Redis]: https://redis.io/
 [Git Flow wiki page]: https://github.com/bolshakov/stoplight/wiki/Git-Flow
+[Valkey]: https://valkey.io/
