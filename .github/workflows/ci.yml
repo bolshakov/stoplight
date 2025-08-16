@@ -79,7 +79,11 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        data-store-image: [ 'redis:6.2', 'redis:7.4', 'valkey/valkey:8-alpine' ]
+        data-store-image:
+          - 'redis:6.2'
+          - 'redis:7.4'
+          - 'valkey/valkey:7-alpine'
+          - 'valkey/valkey:8-alpine'
         ruby: [ '3.2', '3.3', '3.4' ]
     services:
       data-store:
