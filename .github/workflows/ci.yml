@@ -29,15 +29,19 @@ jobs:
           autofix: false
 
   features:
-    name: Features (${{ matrix.data_store }} data store) 🥒
+    name: Features (${{ matrix.data_store }} Data Store and ${{ matrix.data_store_image }} Data Store image) 🥒
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        data_store: [ 'Memory', "Redis" ]
-        redis_url: [ 'redis://127.0.0.1:6379/0', 'redis://127.0.0.1:6380/0']
+        data_store: [ 'Memory', 'Redis' ]
+        data_store_image: [ 'redis:7.4', 'valkey/valkey:8-alpine' ]
+        exclude:
+          # Memory does not depend on the Data Store so we only want to run its suite once
+          - data_store: 'Memory'
+            data_store_image: 'valkey/valkey:8-alpine'
     services:
-      redis:
-        image: redis:7.4
+      data-store:
+        image: ${{ matrix.data_store_image }}
         options: >-
           --health-cmd "redis-cli ping"
           --health-interval 10s
@@ -45,15 +49,6 @@ jobs:
           --health-retries 5
         ports:
           - 6379:6379
-      valkey:
-        image: valkey/valkey:8-alpine
-        options: >-
-          --health-cmd "valkey-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 6380:6379
     steps:
       - name: Harden the runner (Audit all outbound calls)
         uses: step-security/harden-runner@ec9f2d5744a09debf3a187a3f4f675c53b671911 # v2.13.0
@@ -72,7 +67,7 @@ jobs:
       - name: Run Features
         run: bundle exec cucumber features/stoplight
         env:
-          STOPLIGHT_REDIS_URL: ${{ matrix.redis_url }}
+          STOPLIGHT_REDIS_URL: 'redis://127.0.0.1:6379/0'
           STOPLIGHT_DATA_STORE: ${{ matrix.data_store }}
           CUCUMBER_PUBLISH_ENABLED: true
 
