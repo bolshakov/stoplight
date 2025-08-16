@@ -34,7 +34,7 @@ jobs:
     strategy:
       matrix:
         data_store: [ 'Memory', "Redis" ]
-        redis_url: [ '"redis://127.0.0.1:6379/0"', '"redis://127.0.0.1:6380/0"']
+        redis_url: [ 'redis://127.0.0.1:6379/0', 'redis://127.0.0.1:6380/0']
     services:
       redis:
         image: redis:7.4
@@ -87,7 +87,7 @@ jobs:
         ruby: [ '3.2', '3.3', '3.4' ]
         redis: [ '6.2', '7.4']
         valkey: [ '8-alpine' ]
-        redis_url: [ '"redis://127.0.0.1:6379/0"', '"redis://127.0.0.1:6380/0"']
+        redis_url: [ 'redis://127.0.0.1:6379/0', 'redis://127.0.0.1:6380/0']
     services:
       redis:
         image: redis:${{ matrix.redis }}
