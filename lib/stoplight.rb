@@ -153,3 +153,5 @@ end
 def Stoplight(name, **settings) # rubocop:disable Naming/MethodName
   Stoplight.light(name, **settings)
 end
+
+loader.eager_load
