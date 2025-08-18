@@ -29,14 +29,19 @@ jobs:
           autofix: false
 
   features:
-    name: Features (${{ matrix.data_store }} data store) 🥒
+    name: Features (${{ matrix.data-store }} Data Store and ${{ matrix.data-store-image }} Data Store image) 🥒
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        data_store: [ 'Memory', "Redis" ]
+        data-store: [ 'Redis' ]
+        data-store-image: [ 'redis:7.4', 'valkey/valkey:8-alpine' ]
+        include:
+          # Memory does not depend on the Data Store so we only want to run its suite once
+          - data-store: 'Memory'
+            data-store-image: 'redis:7.4'
     services:
-      redis:
-        image: redis:7.4
+      data-store:
+        image: ${{ matrix.data-store-image }}
         options: >-
           --health-cmd "redis-cli ping"
           --health-interval 10s
@@ -62,23 +67,27 @@ jobs:
       - name: Run Features
         run: bundle exec cucumber features/stoplight
         env:
-          STOPLIGHT_REDIS_URL: "redis://127.0.0.1:6379/0"
-          STOPLIGHT_DATA_STORE: ${{ matrix.data_store }}
+          STOPLIGHT_REDIS_URL: 'redis://127.0.0.1:6379/0'
+          STOPLIGHT_DATA_STORE: ${{ matrix.data-store }}
           CUCUMBER_PUBLISH_ENABLED: true
 
   spec:
     permissions:
       checks: write  # for coverallsapp/github-action to create new checks
       contents: read  # for actions/checkout to fetch code
-    name: Specs on Ruby ${{ matrix.ruby }} with Redis ${{ matrix.redis }} 💚
+    name: Specs on Ruby ${{ matrix.ruby }} with Data Store as ${{ matrix.data-store-image }} 💚
     runs-on: ubuntu-latest
     strategy:
       matrix:
+        data-store-image:
+          - 'redis:6.2'
+          - 'redis:7.4'
+          - 'valkey/valkey:7-alpine'
+          - 'valkey/valkey:8-alpine'
         ruby: [ '3.2', '3.3', '3.4' ]
-        redis: [ '6.2', '7.4']
     services:
-      redis:
-        image: redis:${{ matrix.redis }}
+      data-store:
+        image: ${{ matrix.data-store-image }}
         options: >-
           --health-cmd "redis-cli ping"
           --health-interval 10s
@@ -104,7 +113,7 @@ jobs:
       - name: Run Tests
         run: bundle exec rake spec
         env:
-          STOPLIGHT_REDIS_URL: "redis://127.0.0.1:6379/0"
+          STOPLIGHT_REDIS_URL: 'redis://127.0.0.1:6379/0'
       - name: Coveralls
         uses: coverallsapp/github-action@648a8eb78e6d50909eff900e4ec85cab4524a45b # v2.3.6
         with:
