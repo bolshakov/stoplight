@@ -33,12 +33,12 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        data-store: [ 'Memory', 'Redis' ]
+        data-store: [ 'Redis' ]
         data-store-image: [ 'redis:7.4', 'valkey/valkey:8-alpine' ]
-        exclude:
+        include:
           # Memory does not depend on the Data Store so we only want to run its suite once
           - data-store: 'Memory'
-            data-store-image: 'valkey/valkey:8-alpine'
+            data-store-image: 'redis:7.4'
     services:
       data-store:
         image: ${{ matrix.data-store-image }}
