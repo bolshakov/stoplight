@@ -29,19 +29,19 @@ jobs:
           autofix: false
 
   features:
-    name: Features (${{ matrix.data_store }} Data Store and ${{ matrix.data_store_image }} Data Store image) 🥒
+    name: Features (${{ matrix.data-store }} Data Store and ${{ matrix.data-store-image }} Data Store image) 🥒
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        data_store: [ 'Memory', 'Redis' ]
-        data_store_image: [ 'redis:7.4', 'valkey/valkey:8-alpine' ]
+        data-store: [ 'Memory', 'Redis' ]
+        data-store-image: [ 'redis:7.4', 'valkey/valkey:8-alpine' ]
         exclude:
           # Memory does not depend on the Data Store so we only want to run its suite once
-          - data_store: 'Memory'
-            data_store_image: 'valkey/valkey:8-alpine'
+          - data-store: 'Memory'
+            data-store-image: 'valkey/valkey:8-alpine'
     services:
       data-store:
-        image: ${{ matrix.data_store_image }}
+        image: ${{ matrix.data-store-image }}
         options: >-
           --health-cmd "redis-cli ping"
           --health-interval 10s
