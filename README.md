@@ -385,7 +385,9 @@ Stoplight::Default::DATA_STORE
 # => #<Stoplight::DataStore::Memory:...>
 ```
 
-For production environments, you'll likely want to use a persistent data store. Currently, [Redis] is the supported option:
+#### Redis for Production
+
+For production environments, you'll likely want to use a persistent data store. One of the supported options is [Redis].
 
 ```ruby
 # Configure Redis as the data store
@@ -398,9 +400,26 @@ Stoplight.configure do |config|
 end
 ```
 
-#### Connection Pooling with Redis
+#### Valkey Support
 
-For high-traffic applications or when you want to control a number of opened connections to Redis:
+Stoplight also supports [Valkey], a drop-in replacement for Redis.  
+Just point your Redis client to a Valkey instance and configure Stoplight as usual:
+
+```ruby
+# ...
+# We assume that Valkey is available on 127.0.0.1:6379 address
+valkey = Redis.new(url: "redis://127.0.0.1:6379")
+data_store = Stoplight::DataStore::Redis.new(valkey)
+
+Stoplight.configure do |config|
+  config.data_store = data_store
+  # ...
+end
+```
+
+#### Connection Pooling
+
+For high-traffic applications or when you want to control a number of opened connections to the Data Store:
 
 ```ruby
 require "connection_pool"
@@ -576,3 +595,4 @@ Fowler’s [CircuitBreaker][] article.
 [CircuitBreaker]: http://martinfowler.com/bliki/CircuitBreaker.html
 [Redis]: https://redis.io/
 [Git Flow wiki page]: https://github.com/bolshakov/stoplight/wiki/Git-Flow
+[Valkey]: https://valkey.io/
