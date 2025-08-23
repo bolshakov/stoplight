@@ -34,7 +34,9 @@ jobs:
     strategy:
       matrix:
         data-store: [ 'Redis' ]
-        data-store-image: [ 'redis:7.4', 'valkey/valkey:8-alpine' ]
+        data-store-image:
+          - 'redis:7.4'
+          - 'valkey/valkey:8-alpine'
         include:
           # Memory does not depend on the Data Store so we only want to run its suite once
           - data-store: 'Memory'
