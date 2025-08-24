@@ -144,9 +144,27 @@ RSpec.describe Stoplight::Light::GreenRunStrategy do
     it_behaves_like Stoplight::Light::GreenRunStrategy
   end
 
-  context "with redis data store", :redis do
-    let(:data_store) { Stoplight::DataStore::Redis.new(redis) }
+  context "with redis data store" do
+    context "when redis is available", :redis do
+      let(:data_store) { Stoplight::DataStore::Redis.new(redis) }
 
-    it_behaves_like Stoplight::Light::GreenRunStrategy
+      it_behaves_like Stoplight::Light::GreenRunStrategy
+    end
+
+    context "when redis is unreachable" do
+      let(:data_store) { Stoplight::DataStore::Redis.new(redis) }
+      let(:redis) { Redis.new(url: "redis://561922f7-6b30-49d3-8148-324922d590d2:6379/0") }
+
+      context "when code fails with fallback" do
+        subject(:result) { strategy.execute(->(e) { "whoops" }, &code) }
+
+        let(:error) { StandardError.new("Test error") }
+        let(:code) { -> { raise error } }
+
+        it "returns fallback" do
+          expect(result).to eq("whoops")
+        end
+      end
+    end
   end
 end
