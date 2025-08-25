@@ -218,7 +218,7 @@ GEM
       simplecov-html (~> 0.11)
       simplecov_json_formatter (~> 0.1)
     simplecov-html (0.12.3)
-    simplecov-lcov (0.8.0)
+    simplecov-lcov (0.9.0)
     simplecov_json_formatter (0.1.4)
     sinatra (4.1.1)
       logger (>= 1.6.0)
@@ -279,7 +279,7 @@ DEPENDENCIES
   rspec (~> 3.13)
   ruby-prof
   simplecov (~> 0.22)
-  simplecov-lcov (~> 0.8)
+  simplecov-lcov (~> 0.9)
   sinatra
   sinatra-contrib
   standard
