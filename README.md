@@ -558,9 +558,45 @@ stoplight = Stoplight("test-#{rand}")
 
 ## Maintenance Policy
 
-Stoplight supports the latest three minor versions of Ruby, which currently are: `3.2.x`, `3.3.x`, and `3.4.x`. Changing
-the minimum supported Ruby version is not considered a breaking change. We support the current stable Redis
-version (`7.4.x`) and the latest release of the previous major version (`6.2.x`)
+We focus on supporting current, secure versions rather than maintaining extensive backwards compatibility. We follow 
+semantic versioning and give reasonable notice before dropping support.
+
+### Stoplight Version Support
+
+We only actively support the latest major version of Stoplight.
+
+* ✅ Bug fixes and new features go to the current major version only (e.g., if you're on 4.x, upgrade to 5.x for fixes)
+* ✅ Upgrade guidance is provided in release notes for major version changes
+* ✅ We won't break compatibility in patch/minor releases
+* ✅ We may accept community-contributed security patches for the previous major version
+* ❌ We don't backport fixes to old Stoplight major versions
+* ❌ We don't add new features to old Stoplight major versions
+
+### What We Support
+
+**Ruby**: Major versions that receive security updates (see [Ruby Maintenance Branches]):
+
+* Currently: Ruby 3.2.x, 3.3.x and 3.4.x
+* We test against these versions in CI
+
+**Data Stores**: Current supported versions from upstream (versions that receive security updates):
+
+* Redis: 8.0.x, 7.4.x, 7.2.x, 6.2.x (following [Redis's support policy])
+* Valkey: 8.0.x, 7.2.x (following [Valkey's support policy])
+* We test against the latest version of each major release
+
+For dependencies:
+* ✅ We test all supported dependency combinations in CI
+* ✅ We investigate bug reports on supported dependency versions
+* ❌ We don't test unsupported dependency versions (e.g., Ruby 3.1, Redis 5.x)
+* ❌ We don't fix bugs specific to unsupported dependencies
+
+### When We Drop Support
+
+* Ruby: When Ruby core team ends security support, we drop it in our next major release
+* Data Stores: When Redis/Valkey ends maintenance, we drop it in our next major release
+
+Example: "Ruby 3.2 reaches end-of-life in March 2026, so Stoplight 6.0 will require Ruby 3.3+"
 
 ## Development
 
@@ -596,3 +632,6 @@ Fowler’s [CircuitBreaker][] article.
 [Redis]: https://redis.io/
 [Git Flow wiki page]: https://github.com/bolshakov/stoplight/wiki/Git-Flow
 [Valkey]: https://valkey.io/
+[Ruby Maintenance Branches]: https://www.ruby-lang.org/en/downloads/branches/
+[Redis's support policy]: https://redis.io/about/releases/
+[Valkey's support policy]: https://valkey.io/topics/releases/
