@@ -81,9 +81,11 @@ jobs:
       matrix:
         data-store-image:
           - 'redis:6.2'
+          - 'redis:7.2'
           - 'redis:7.4'
-          - 'valkey/valkey:7-alpine'
-          - 'valkey/valkey:8-alpine'
+          - 'redis:8.0'
+          - 'valkey/valkey:7.2-alpine'
+          - 'valkey/valkey:8.1-alpine'
         ruby: [ '3.2', '3.3', '3.4' ]
     services:
       data-store:
