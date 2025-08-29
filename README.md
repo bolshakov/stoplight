@@ -4,7 +4,7 @@
 [![Build badge][]][build]
 [![Coverage badge][]][coverage]
 
-Stoplight is traffic control for code. It's an implementation of the circuit breaker pattern in Ruby.
+Stoplight is a traffic control for code. It's an implementation of the circuit breaker pattern in Ruby.
 
 ---
 
@@ -102,7 +102,7 @@ light.color # => "red"
 After one minute, the light transitions to yellow, allowing a test execution:
 
 ```ruby
-# Wait for the cool off time
+# Wait for the cool-off time
 sleep 60
 light.run { 1 / 1 } #=> 1
 ```
@@ -129,7 +129,7 @@ receives `nil`. In both cases, the return value of the fallback becomes the retu
 
 ## Admin Panel
 
-Stoplight goes with a built-in Admin Panel that can track all active Lights and manually lock them in the desired state (`Green` or `Red`). Locking lights in certain states might be helpful in scenarios like E2E testing.
+Stoplight comes with a built-in Admin Panel that can track all active Lights and manually lock them in the desired state (`Green` or `Red`). Locking lights in certain states might be helpful in scenarios like E2E testing.
 
 To add Admin Panel protected by basic authentication to your Rails project, add this configuration to your `config/routes.rb` file.
 
@@ -419,7 +419,7 @@ end
 
 #### Connection Pooling
 
-For high-traffic applications or when you want to control a number of opened connections to the Data Store:
+For high-traffic applications or when you want to control the number of open connections to the Data Store:
 
 ```ruby
 require "connection_pool"
@@ -433,7 +433,7 @@ end
 
 ### Notifiers
 
-Stoplight notifies when lights change state. Configure how these notifications are delivered:
+Stoplight notifies when the lights change state. Configure how these notifications are delivered:
 
 ```ruby
 # Log to a specific logger
@@ -622,7 +622,7 @@ Fowler’s [CircuitBreaker][] article.
 [the change log]: CHANGELOG.md
 [stoplight-sentry]: https://github.com/bolshakov/stoplight-sentry
 [stoplight-honeybadger]: https://github.com/qoqa/stoplight-honeybadger
-[notifier interface documentation]: https://github.com/bolshakov/stoplight/blob/master/lib/stoplight/notifier/generic.rb
+[notifier interface documentation]: https://github.com/bolshakov/stoplight/blob/main/lib/stoplight/notifier/generic.rb
 [camdez]: https://github.com/camdez
 [tfausak]: https://github.com/tfausak
 [bolshakov]: https://github.com/bolshakov
