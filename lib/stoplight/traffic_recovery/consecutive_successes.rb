@@ -49,16 +49,18 @@ module Stoplight
       #
       # @param config [Stoplight::Light::Config]
       # @param metadata [Stoplight::Metadata]
-      # @return [String]
+      # @return [TrafficRecovery::Decision]
       def determine_color(config, metadata)
+        return TrafficRecovery::PASS if metadata.color != Color::YELLOW
+
         recovery_started_at = metadata.recovery_started_at || metadata.recovery_scheduled_after
 
         if metadata.last_error_at && metadata.last_error_at >= recovery_started_at
-          Color::RED
+          TrafficRecovery::RED
         elsif [metadata.consecutive_successes, metadata.recovery_probe_successes].min >= config.recovery_threshold
-          Color::GREEN
+          TrafficRecovery::GREEN
         else
-          Color::YELLOW
+          TrafficRecovery::YELLOW
         end
       end
     end
