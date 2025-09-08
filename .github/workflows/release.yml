@@ -42,6 +42,7 @@ jobs:
 
   docker:
     name: Docker Image 🐳
+    environment: release
     needs: [gem]
     runs-on: ubuntu-latest
     permissions:
@@ -62,7 +63,7 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@184bdaa0721073962dff0199f1fb9940f07167d1 # v3.5.0
         with:
-          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          username: ${{ vars.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
       - name: Build and push
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6.18.0
