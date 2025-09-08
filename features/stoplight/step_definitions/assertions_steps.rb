@@ -29,7 +29,7 @@ Then(/^(?:the light|it) fails with error:$/) do |table|
       exception_class = Object.const_get(value)
       expect(last_exception)
         .to be_kind_of(exception_class),
-          "Expected exception to be of type #{value}, but got #{last_exception.class}"
+          "Expected exception to be of type #{value}, but got #{last_exception.inspect}"
     when "Message"
       expect(last_exception.message)
         .to eq(value),

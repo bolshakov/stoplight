@@ -78,4 +78,14 @@ RSpec.describe Stoplight::Metadata do
       end
     end
   end
+
+  describe "#with" do
+    subject { metadata.with(successes: "42") }
+
+    let(:metadata) { Stoplight::Metadata.new }
+
+    it "applies constructor logic" do
+      is_expected.to have_attributes(successes: 42)
+    end
+  end
 end
