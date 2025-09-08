@@ -52,6 +52,16 @@ module Stoplight
       )
     end
 
+    # Creates a new Metadata instance with updated attributes. This method overrides
+    # the default +with+ method provided by +Data.define+ to ensure constructor
+    # logic is applied.
+    #
+    # @param kwargs [Hash{Symbol => Object}]
+    # @return [Metadata]
+    def with(**kwargs)
+      self.class.new(**to_h.merge(kwargs))
+    end
+
     # @param at [Time] (Time.now) the moment of time when the color is determined
     # @return [String] one of +Color::GREEN+, +Color::RED+, or +Color::YELLOW+
     def color(at: Time.now)
