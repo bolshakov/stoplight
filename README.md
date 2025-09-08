@@ -3,9 +3,8 @@
 [![Version badge][]][version]
 [![Build badge][]][build]
 [![Coverage badge][]][coverage]
-[![Climate badge][]][climate]
 
-Stoplight is traffic control for code. It's an implementation of the circuit breaker pattern in Ruby.
+Stoplight is a traffic control for code. It's an implementation of the circuit breaker pattern in Ruby.
 
 ---
 
@@ -103,7 +102,7 @@ light.color # => "red"
 After one minute, the light transitions to yellow, allowing a test execution:
 
 ```ruby
-# Wait for the cool off time
+# Wait for the cool-off time
 sleep 60
 light.run { 1 / 1 } #=> 1
 ```
@@ -130,7 +129,7 @@ receives `nil`. In both cases, the return value of the fallback becomes the retu
 
 ## Admin Panel
 
-Stoplight goes with a built-in Admin Panel that can track all active Lights and manually lock them in the desired state (`Green` or `Red`). Locking lights in certain states might be helpful in scenarios like E2E testing.
+Stoplight comes with a built-in Admin Panel that can track all active Lights and manually lock them in the desired state (`Green` or `Red`). Locking lights in certain states might be helpful in scenarios like E2E testing.
 
 To add Admin Panel protected by basic authentication to your Rails project, add this configuration to your `config/routes.rb` file.
 
@@ -378,7 +377,12 @@ single successful recovery probe will resume traffic flow.
 
 ### Data Store
 
-Stoplight uses an in-memory data store out of the box:
+Stoplight officially supports three data stores:
+- In-memory data store
+- Redis
+- Valkey
+
+By default, Stoplight uses an in-memory data store:
 
 ```ruby
 require "stoplight"
@@ -386,7 +390,9 @@ Stoplight::Default::DATA_STORE
 # => #<Stoplight::DataStore::Memory:...>
 ```
 
-For production environments, you'll likely want to use a persistent data store. Currently, [Redis] is the supported option:
+#### Redis for Production
+
+For production environments, you'll likely want to use a persistent data store. One of the supported options is [Redis].
 
 ```ruby
 # Configure Redis as the data store
@@ -399,9 +405,32 @@ Stoplight.configure do |config|
 end
 ```
 
-#### Connection Pooling with Redis
+#### Valkey Support
 
-For high-traffic applications or when you want to control a number of opened connections to Redis:
+Stoplight also supports [Valkey], a drop-in replacement for Redis.  
+Just point your Redis client to a Valkey instance and configure Stoplight as usual:
+
+```ruby
+# ...
+# We assume that Valkey is available on 127.0.0.1:6379 address
+valkey = Redis.new(url: "redis://127.0.0.1:6379")
+data_store = Stoplight::DataStore::Redis.new(valkey)
+
+Stoplight.configure do |config|
+  config.data_store = data_store
+  # ...
+end
+```
+
+#### DragonflyDB Support
+
+Although Stoplight does not officially support [DragonflyDB], it can be used with it. For details, you may refer to the official [DragonflyDB documentation].
+
+**NOTE**: Compatibility with [DragonflyDB] is not guaranteed, and results may vary. However, you are welcome to contribute to the project if you find any issues.
+
+#### Connection Pooling
+
+For high-traffic applications or when you want to control the number of open connections to the Data Store:
 
 ```ruby
 require "connection_pool"
@@ -415,7 +444,7 @@ end
 
 ### Notifiers
 
-Stoplight notifies when lights change state. Configure how these notifications are delivered:
+Stoplight notifies when the lights change state. Configure how these notifications are delivered:
 
 ```ruby
 # Log to a specific logger
@@ -540,9 +569,45 @@ stoplight = Stoplight("test-#{rand}")
 
 ## Maintenance Policy
 
-Stoplight supports the latest three minor versions of Ruby, which currently are: `3.2.x`, `3.3.x`, and `3.4.x`. Changing
-the minimum supported Ruby version is not considered a breaking change. We support the current stable Redis
-version (`7.4.x`) and the latest release of the previous major version (`6.2.x`)
+We focus on supporting current, secure versions rather than maintaining extensive backwards compatibility. We follow 
+semantic versioning and give reasonable notice before dropping support.
+
+### Stoplight Version Support
+
+We only actively support the latest major version of Stoplight.
+
+* ✅ Bug fixes and new features go to the current major version only (e.g., if you're on 4.x, upgrade to 5.x for fixes)
+* ✅ Upgrade guidance is provided in release notes for major version changes
+* ✅ We won't break compatibility in patch/minor releases
+* ✅ We may accept community-contributed security patches for the previous major version
+* ❌ We don't backport fixes to old Stoplight major versions
+* ❌ We don't add new features to old Stoplight major versions
+
+### What We Support
+
+**Ruby**: Major versions that receive security updates (see [Ruby Maintenance Branches]):
+
+* Currently: Ruby 3.2.x, 3.3.x and 3.4.x
+* We test against these versions in CI
+
+**Data Stores**: Current supported versions from upstream (versions that receive security updates):
+
+* Redis: 8.0.x, 7.4.x, 7.2.x, 6.2.x (following [Redis's support policy])
+* Valkey: 8.0.x, 7.2.x (following [Valkey's support policy])
+* We test against the latest version of each major release
+
+For dependencies:
+* ✅ We test all supported dependency combinations in CI
+* ✅ We investigate bug reports on supported dependency versions
+* ❌ We don't test unsupported dependency versions (e.g., Ruby 3.1, Redis 5.x)
+* ❌ We don't fix bugs specific to unsupported dependencies
+
+### When We Drop Support
+
+* Ruby: When Ruby core team ends security support, we drop it in our next major release
+* Data Stores: When Redis/Valkey ends maintenance, we drop it in our next major release
+
+Example: "Ruby 3.2 reaches end-of-life in March 2026, so Stoplight 6.0 will require Ruby 3.3+"
 
 ## Development
 
@@ -563,14 +628,12 @@ Fowler’s [CircuitBreaker][] article.
 [build]: https://github.com/bolshakov/stoplight/actions?query=branch%3Amaster
 [Coverage badge]: https://img.shields.io/coveralls/bolshakov/stoplight/master.svg?label=coverage
 [coverage]: https://coveralls.io/r/bolshakov/stoplight
-[Climate badge]: https://api.codeclimate.com/v1/badges/3451c2d281ffa345441a/maintainability
-[climate]: https://codeclimate.com/github/bolshakov/stoplight
 [stoplight-admin]: https://github.com/bolshakov/stoplight-admin
 [Semantic Versioning]: http://semver.org/spec/v2.0.0.html
 [the change log]: CHANGELOG.md
 [stoplight-sentry]: https://github.com/bolshakov/stoplight-sentry
 [stoplight-honeybadger]: https://github.com/qoqa/stoplight-honeybadger
-[notifier interface documentation]: https://github.com/bolshakov/stoplight/blob/master/lib/stoplight/notifier/generic.rb
+[notifier interface documentation]: https://github.com/bolshakov/stoplight/blob/main/lib/stoplight/notifier/generic.rb
 [camdez]: https://github.com/camdez
 [tfausak]: https://github.com/tfausak
 [bolshakov]: https://github.com/bolshakov
@@ -579,3 +642,9 @@ Fowler’s [CircuitBreaker][] article.
 [CircuitBreaker]: http://martinfowler.com/bliki/CircuitBreaker.html
 [Redis]: https://redis.io/
 [Git Flow wiki page]: https://github.com/bolshakov/stoplight/wiki/Git-Flow
+[Valkey]: https://valkey.io/
+[Ruby Maintenance Branches]: https://www.ruby-lang.org/en/downloads/branches/
+[Redis's support policy]: https://redis.io/about/releases/
+[Valkey's support policy]: https://valkey.io/topics/releases/
+[DragonflyDB]: https://www.dragonflydb.io/
+[DragonflyDB documentation]: https://www.dragonflydb.io/docs/managing-dragonfly/scripting#script-flags

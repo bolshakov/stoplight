@@ -49,10 +49,7 @@ module Stoplight
       #
       # @param config [Stoplight::Light::Config]
       # @param metadata [Stoplight::Metadata]
-      # @return [String] One of the Stoplight::Color constants:
-      #   - Stoplight::Color::RED: Recovery failed, block all traffic
-      #   - Stoplight::Color::YELLOW: Continue recovery process
-      #   - Stoplight::Color::GREEN: Recovery successful, return to normal traffic flow
+      # @return [TrafficRecovery::Decision]
       def determine_color(config, metadata)
         raise NotImplementedError
       end

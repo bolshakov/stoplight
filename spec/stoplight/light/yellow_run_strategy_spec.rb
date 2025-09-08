@@ -22,8 +22,20 @@ RSpec.describe Stoplight::Light::YellowRunStrategy do
         expect(traffic_recovery).to receive(:determine_color).with(config, metadata).and_return(recovery_result)
       end
 
+      context "when recovery strategy returns PASS" do
+        let(:recovery_result) { Stoplight::TrafficRecovery::PASS }
+
+        it "does not make any recovery decisions" do
+          expect(data_store).not_to receive(:transition_to_color)
+          expect(notifier).not_to receive(:notify)
+          allow(data_store).to receive(:record_recovery_probe_success).with(config).and_return(metadata)
+
+          suppress(StandardError) { result }
+        end
+      end
+
       context "when recovery strategy returns GREEN" do
-        let(:recovery_result) { Stoplight::Color::GREEN }
+        let(:recovery_result) { Stoplight::TrafficRecovery::GREEN }
 
         context "when switched to GREEN" do
           before do
@@ -53,7 +65,7 @@ RSpec.describe Stoplight::Light::YellowRunStrategy do
       end
 
       context "when recovery strategy returns RED" do
-        let(:recovery_result) { Stoplight::Color::RED }
+        let(:recovery_result) { Stoplight::TrafficRecovery::RED }
 
         context "when switched to RED" do
           before do
@@ -83,7 +95,7 @@ RSpec.describe Stoplight::Light::YellowRunStrategy do
       end
 
       context "when recovery strategy returns YELLOW" do
-        let(:recovery_result) { Stoplight::Color::YELLOW }
+        let(:recovery_result) { Stoplight::TrafficRecovery::YELLOW }
 
         context "when switched to YELLOW" do
           before do
@@ -150,7 +162,7 @@ RSpec.describe Stoplight::Light::YellowRunStrategy do
           end
 
           context "when recovery strategy returns GREEN" do
-            let(:recovery_result) { Stoplight::Color::GREEN }
+            let(:recovery_result) { Stoplight::TrafficRecovery::GREEN }
 
             context "when switched to GREEN" do
               before do
@@ -188,7 +200,7 @@ RSpec.describe Stoplight::Light::YellowRunStrategy do
           end
 
           context "when recovery strategy returns RED" do
-            let(:recovery_result) { Stoplight::Color::RED }
+            let(:recovery_result) { Stoplight::TrafficRecovery::RED }
 
             context "when switched to RED" do
               before do
@@ -226,7 +238,7 @@ RSpec.describe Stoplight::Light::YellowRunStrategy do
           end
 
           context "when recovery strategy returns YELLOW" do
-            let(:recovery_result) { Stoplight::Color::YELLOW }
+            let(:recovery_result) { Stoplight::TrafficRecovery::YELLOW }
 
             context "when switched to YELLOW" do
               before do
@@ -274,7 +286,7 @@ RSpec.describe Stoplight::Light::YellowRunStrategy do
 
           it "records a failed recovery probe and returns fallback" do
             allow(notifier).to receive(:notify)
-            expect(traffic_recovery).to receive(:determine_color).with(config, metadata).and_return(Stoplight::Color::YELLOW)
+            expect(traffic_recovery).to receive(:determine_color).with(config, metadata).and_return(Stoplight::TrafficRecovery::YELLOW)
 
             Timecop.freeze do
               failure = Stoplight::Failure.from_error(error)

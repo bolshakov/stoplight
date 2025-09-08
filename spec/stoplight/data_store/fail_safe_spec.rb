@@ -78,7 +78,79 @@ RSpec.describe Stoplight::DataStore::FailSafe do
         expect(error_notifier).to receive(:call).with(error)
         expect(data_store).to receive(:record_failure).with(config, failure) { raise error }
 
-        is_expected.to eq(nil)
+        is_expected.to eq(Stoplight::EmptyMetadata)
+      end
+    end
+  end
+
+  describe "#record_success" do
+    subject(:record_success) { fail_safe.record_success(config) }
+
+    context "when data_store records failure" do
+      it "delegates to data_store" do
+        expect(error_notifier).not_to receive(:call)
+        expect(data_store).to receive(:record_success).with(config)
+
+        record_success
+      end
+    end
+
+    context "when data_store fails" do
+      it "does not fail" do
+        expect(error_notifier).to receive(:call).with(error)
+        expect(data_store).to receive(:record_success).with(config) { raise error }
+
+        record_success
+      end
+    end
+  end
+
+  describe "#record_recovery_probe_failure" do
+    subject { fail_safe.record_recovery_probe_failure(config, failure) }
+
+    let(:failure) { Stoplight::Failure.new("class", "message", Time.new) }
+
+    context "when data_store records recovery probe failure" do
+      let(:metadata) { Stoplight::Metadata.new(errors: 42) }
+
+      it "returns metadata from data_store" do
+        expect(error_notifier).not_to receive(:call)
+        expect(data_store).to receive(:record_recovery_probe_failure).with(config, failure).and_return(metadata)
+
+        is_expected.to eq(metadata)
+      end
+    end
+
+    context "when data_store fails" do
+      it "returns empty metadata" do
+        expect(error_notifier).to receive(:call).with(error)
+        expect(data_store).to receive(:record_recovery_probe_failure).with(config, failure) { raise error }
+
+        is_expected.to eq(Stoplight::EmptyMetadata)
+      end
+    end
+  end
+
+  describe "#record_recovery_probe_success" do
+    subject { fail_safe.record_recovery_probe_success(config) }
+
+    context "when data_store records recovery probe success" do
+      let(:metadata) { Stoplight::Metadata.new(errors: 42) }
+
+      it "returns metadata from data_store" do
+        expect(error_notifier).not_to receive(:call)
+        expect(data_store).to receive(:record_recovery_probe_success).with(config).and_return(metadata)
+
+        is_expected.to eq(metadata)
+      end
+    end
+
+    context "when data_store fails" do
+      it "returns empty metadata" do
+        expect(error_notifier).to receive(:call).with(error)
+        expect(data_store).to receive(:record_recovery_probe_success).with(config) { raise error }
+
+        is_expected.to eq(Stoplight::EmptyMetadata)
       end
     end
   end

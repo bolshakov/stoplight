@@ -48,13 +48,13 @@ module Stoplight
       end
 
       def get_metadata(config)
-        with_fallback(Metadata.new, config) do
+        with_fallback(EmptyMetadata, config) do
           data_store.get_metadata(config)
         end
       end
 
       def record_failure(config, failure)
-        with_fallback(nil, config) do
+        with_fallback(EmptyMetadata, config) do
           data_store.record_failure(config, failure)
         end
       end
@@ -66,13 +66,13 @@ module Stoplight
       end
 
       def record_recovery_probe_success(config, **args)
-        with_fallback(nil, config) do
+        with_fallback(EmptyMetadata, config) do
           data_store.record_recovery_probe_success(config, **args)
         end
       end
 
       def record_recovery_probe_failure(config, failure)
-        with_fallback(nil, config) do
+        with_fallback(EmptyMetadata, config) do
           data_store.record_recovery_probe_failure(config, failure)
         end
       end

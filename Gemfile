@@ -26,7 +26,7 @@ group :development do
   gem "rspec", "~> 3.13"
   gem "ruby-prof"
   gem "simplecov", "~> 0.22"
-  gem "simplecov-lcov", "~> 0.8"
+  gem "simplecov-lcov", "~> 0.9"
   gem "standard"
   gem "timecop", "~> 0.9"
 end

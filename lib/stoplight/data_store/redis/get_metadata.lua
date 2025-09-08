@@ -11,7 +11,7 @@ local metadata_key = KEYS[1]
 -- we need to limit the start time of the window to the time of the last recovery.
 local recovered_at = redis.call('HGET', metadata_key, "recovered_at")
 if recovered_at then
-  window_start_ts = math.max(window_start_ts, recovered_at)
+  window_start_ts = math.max(window_start_ts, tonumber(recovered_at))
 end
 
 local function count_events(start_idx, bucket_count, start_ts)
