@@ -377,7 +377,12 @@ single successful recovery probe will resume traffic flow.
 
 ### Data Store
 
-Stoplight uses an in-memory data store out of the box:
+Stoplight officially supports three data stores:
+- In-memory data store
+- Redis
+- Valkey
+
+By default, Stoplight uses an in-memory data store:
 
 ```ruby
 require "stoplight"
@@ -416,6 +421,12 @@ Stoplight.configure do |config|
   # ...
 end
 ```
+
+#### DragonflyDB Support
+
+Although Stoplight does not officially support [DragonflyDB], it can be used with it. For details, you may refer to the official [DragonflyDB documentation].
+
+**NOTE**: Compatibility with [DragonflyDB] is not guaranteed, and results may vary. However, you are welcome to contribute to the project if you find any issues.
 
 #### Connection Pooling
 
@@ -635,3 +646,5 @@ Fowler’s [CircuitBreaker][] article.
 [Ruby Maintenance Branches]: https://www.ruby-lang.org/en/downloads/branches/
 [Redis's support policy]: https://redis.io/about/releases/
 [Valkey's support policy]: https://valkey.io/topics/releases/
+[DragonflyDB]: https://www.dragonflydb.io/
+[DragonflyDB documentation]: https://www.dragonflydb.io/docs/managing-dragonfly/scripting#script-flags
