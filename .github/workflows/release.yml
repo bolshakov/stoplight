@@ -42,7 +42,7 @@ jobs:
 
   docker:
     name: Docker Image 🐳
-    environment: docker-release
+    needs: [gem]
     runs-on: ubuntu-latest
     permissions:
       contents: read
