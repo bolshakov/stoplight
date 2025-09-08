@@ -35,16 +35,17 @@ RSpec.describe Stoplight::TrafficRecovery::ConsecutiveSuccesses do
     let(:recovery_threshold) { 2 }
 
     let(:metadata) do
-      instance_double(
-        Stoplight::Metadata,
+      Stoplight::Metadata.new(
         consecutive_successes:,
         recovery_probe_successes:,
         last_error_at:,
-        recovery_started_at:
+        recovery_started_at:,
+        recovery_scheduled_after:
       )
     end
     let(:last_error_at) { recovery_started_at - 60 }
     let(:recovery_started_at) { Time.now }
+    let(:recovery_scheduled_after) { nil }
 
     context "when the last error happened after the recovery started" do
       let(:last_error_at) { recovery_started_at + 2 }
@@ -52,7 +53,7 @@ RSpec.describe Stoplight::TrafficRecovery::ConsecutiveSuccesses do
       let(:consecutive_successes) { 0 }
       let(:recovery_probe_successes) { 1 }
 
-      it { is_expected.to be(Stoplight::Color::RED) }
+      it { is_expected.to be(Stoplight::TrafficRecovery::RED) }
     end
 
     context "when the number of consecutive successes is greater than the threshold" do
@@ -61,19 +62,19 @@ RSpec.describe Stoplight::TrafficRecovery::ConsecutiveSuccesses do
       context "when the number of successes is less than the threshold" do
         let(:recovery_probe_successes) { recovery_threshold - 1 }
 
-        it { is_expected.to be(Stoplight::Color::YELLOW) }
+        it { is_expected.to be(Stoplight::TrafficRecovery::YELLOW) }
       end
 
       context "when the number of successes is equal to the threshold" do
         let(:recovery_probe_successes) { recovery_threshold }
 
-        it { is_expected.to be(Stoplight::Color::GREEN) }
+        it { is_expected.to be(Stoplight::TrafficRecovery::GREEN) }
       end
 
       context "when the number of successes is bigger to the threshold" do
         let(:recovery_probe_successes) { recovery_threshold + 1 }
 
-        it { is_expected.to be(Stoplight::Color::GREEN) }
+        it { is_expected.to be(Stoplight::TrafficRecovery::GREEN) }
       end
     end
 
@@ -83,19 +84,19 @@ RSpec.describe Stoplight::TrafficRecovery::ConsecutiveSuccesses do
       context "when the number of successes is less than the threshold" do
         let(:recovery_probe_successes) { recovery_threshold - 1 }
 
-        it { is_expected.to be(Stoplight::Color::YELLOW) }
+        it { is_expected.to be(Stoplight::TrafficRecovery::YELLOW) }
       end
 
       context "when the number of successes is equal to the threshold" do
         let(:recovery_probe_successes) { recovery_threshold }
 
-        it { is_expected.to be(Stoplight::Color::GREEN) }
+        it { is_expected.to be(Stoplight::TrafficRecovery::GREEN) }
       end
 
       context "when the number of successes is bigger to the threshold" do
         let(:recovery_probe_successes) { recovery_threshold + 1 }
 
-        it { is_expected.to be(Stoplight::Color::GREEN) }
+        it { is_expected.to be(Stoplight::TrafficRecovery::GREEN) }
       end
     end
 
@@ -105,20 +106,29 @@ RSpec.describe Stoplight::TrafficRecovery::ConsecutiveSuccesses do
       context "when the number of successes is less than the threshold" do
         let(:recovery_probe_successes) { recovery_threshold - 1 }
 
-        it { is_expected.to be(Stoplight::Color::YELLOW) }
+        it { is_expected.to be(Stoplight::TrafficRecovery::YELLOW) }
       end
 
       context "when the number of successes is equal to the threshold" do
         let(:recovery_probe_successes) { recovery_threshold }
 
-        it { is_expected.to be(Stoplight::Color::YELLOW) }
+        it { is_expected.to be(Stoplight::TrafficRecovery::YELLOW) }
       end
 
       context "when the number of successes is bigger to the threshold" do
         let(:recovery_probe_successes) { recovery_threshold + 1 }
 
-        it { is_expected.to be(Stoplight::Color::YELLOW) }
+        it { is_expected.to be(Stoplight::TrafficRecovery::YELLOW) }
       end
+    end
+
+    context "when already recovered on another Stoplight instance" do
+      let(:last_error_at) { Time.now - 60 }
+      let(:recovery_started_at) { nil }
+      let(:consecutive_successes) { 1 }
+      let(:recovery_probe_successes) { 0 }
+
+      it { is_expected.to be(Stoplight::TrafficRecovery::PASS) }
     end
   end
 end

@@ -51,24 +51,26 @@ module Stoplight
         recovery_result = config.traffic_recovery.determine_color(config, metadata)
 
         case recovery_result
-        when Color::GREEN
+        when TrafficRecovery::GREEN
           if data_store.transition_to_color(config, Color::GREEN)
             config.notifiers.each do |notifier|
               notifier.notify(config, Color::YELLOW, Color::GREEN, nil)
             end
           end
-        when Color::YELLOW
+        when TrafficRecovery::YELLOW
           if data_store.transition_to_color(config, Color::YELLOW)
             config.notifiers.each do |notifier|
               notifier.notify(config, Color::GREEN, Color::YELLOW, nil)
             end
           end
-        when Color::RED
+        when TrafficRecovery::RED
           if data_store.transition_to_color(config, Color::RED)
             config.notifiers.each do |notifier|
               notifier.notify(config, Color::YELLOW, Color::RED, nil)
             end
           end
+        when TrafficRecovery::PASS
+          # No state change, do nothing
         else
           raise "recovery strategy returned an expected color: #{recovery_result}"
         end
