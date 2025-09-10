@@ -33,6 +33,18 @@ Feature: Stoplight Custom Configuration
     And I make 1 requests to the protected service
     Then the light color is red
 
+  Scenario: Light with custom recovery threshold recovers after specified successes
+    Given the light is configured with:
+      | Recovery Threshold | 5 |
+    And the protected service starts failing with "connection-timeout"
+    And the light enters the red state
+    And 60 seconds elapsed
+    And the protected service recovers and starts functioning normally
+    When I make 4 requests to the protected service
+    And the light color is yellow
+    And I make 1 requests to the protected service
+    Then the light color is green
+
   Scenario: Light with custom window size only counts recent failures
     Given the light is configured with:
       | Window Size | 10s |
