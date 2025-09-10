@@ -26,6 +26,7 @@ Feature: Consecutive Errors Traffic Control Strategy
     Given the protected service recovers and starts functioning normally
     And I make 1 request to the protected service
     When the protected service starts failing with "connection-timeout" again
+    Then the light color is yellow
     And I make 1 request to the protected service
     Then the light color is red
     And notification about transition from yellow to red is sent

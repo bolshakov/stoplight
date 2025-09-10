@@ -30,12 +30,12 @@ module Stoplight
       def get_metadata(config)
         light_name = config.name
         window_end = Time.now
-        recovery_window = (window_end - config.cool_off_time + 1)..window_end
+        recovery_window = (window_end - config.cool_off_time)..window_end
 
         synchronize do
           recovered_at = @metadata[light_name].recovered_at
           window = if config.window_size
-            window_start = [recovered_at, (window_end - config.window_size + 1)].compact.max
+            window_start = [recovered_at, (window_end - config.window_size)].compact.max
             (window_start..window_end)
           else
             (..window_end)
@@ -259,9 +259,7 @@ module Stoplight
 
         synchronize do
           metadata = @metadata[light_name]
-          if metadata.recovery_started_at
-            false
-          else
+          if metadata.recovery_started_at.nil?
             @metadata[light_name] = metadata.with(
               recovery_started_at: current_time,
               recovery_scheduled_after: nil,
@@ -269,6 +267,13 @@ module Stoplight
               breached_at: nil
             )
             true
+          else
+            @metadata[light_name] = metadata.with(
+              recovery_scheduled_after: nil,
+              recovered_at: nil,
+              breached_at: nil
+            )
+            false
           end
         end
       end
