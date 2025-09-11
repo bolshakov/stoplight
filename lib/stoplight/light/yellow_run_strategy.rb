@@ -60,7 +60,7 @@ module Stoplight
         when TrafficRecovery::YELLOW
           if data_store.transition_to_color(config, Color::YELLOW)
             config.notifiers.each do |notifier|
-              notifier.notify(config, Color::GREEN, Color::YELLOW, nil)
+              notifier.notify(config, Color::RED, Color::YELLOW, nil)
             end
           end
         when TrafficRecovery::RED
