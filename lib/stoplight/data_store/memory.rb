@@ -170,17 +170,14 @@ module Stoplight
           cleanup(@recovery_probe_successes[light_name], window_size: config.cool_off_time)
 
           metadata = @metadata[light_name]
-          recovery_started_at = metadata.recovery_started_at || request_time
           @metadata[light_name] = if metadata.last_success_at.nil? || request_time > metadata.last_success_at
             metadata.with(
               last_success_at: request_time,
-              recovery_started_at:,
               consecutive_errors: 0,
               consecutive_successes: metadata.consecutive_successes.succ
             )
           else
             metadata.with(
-              recovery_started_at:,
               consecutive_errors: 0,
               consecutive_successes: metadata.consecutive_successes.succ
             )
