@@ -1,6 +1,6 @@
-Feature: Stoplight State Transitions
+Feature: Error Rate Traffic Control Strategy
   As a Ruby developer using Stoplight
-  I want to manage the state of a light based on service's error rate
+  I want to control when a light transitions to red state based on the error rate
   So that my application can respond appropriately to service failures
 
   Background:

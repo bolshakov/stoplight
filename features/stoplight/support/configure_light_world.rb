@@ -11,6 +11,8 @@ module ConfigureLightWorld
         configure_skipped_errors(value)
       when "Threshold"
         configure_threshold(value)
+      when "Recovery Threshold"
+        configure_recovery_threshold(value)
       when "Cool Off Time"
         configure_cool_off_time(value)
       when "Window Size"
@@ -44,6 +46,10 @@ module ConfigureLightWorld
     else
       value.to_i
     end
+  end
+
+  def configure_recovery_threshold(value)
+    @with_configuration[:recovery_threshold] = value.to_i
   end
 
   def configure_skipped_errors(value)

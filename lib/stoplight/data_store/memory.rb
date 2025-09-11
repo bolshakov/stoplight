@@ -30,12 +30,12 @@ module Stoplight
       def get_metadata(config)
         light_name = config.name
         window_end = Time.now
-        recovery_window = (window_end - config.cool_off_time + 1)..window_end
+        recovery_window = (window_end - config.cool_off_time)..window_end
 
         synchronize do
           recovered_at = @metadata[light_name].recovered_at
           window = if config.window_size
-            window_start = [recovered_at, (window_end - config.window_size + 1)].compact.max
+            window_start = [recovered_at, (window_end - config.window_size)].compact.max
             (window_start..window_end)
           else
             (..window_end)
@@ -170,17 +170,14 @@ module Stoplight
           cleanup(@recovery_probe_successes[light_name], window_size: config.cool_off_time)
 
           metadata = @metadata[light_name]
-          recovery_started_at = metadata.recovery_started_at || request_time
           @metadata[light_name] = if metadata.last_success_at.nil? || request_time > metadata.last_success_at
             metadata.with(
               last_success_at: request_time,
-              recovery_started_at:,
               consecutive_errors: 0,
               consecutive_successes: metadata.consecutive_successes.succ
             )
           else
             metadata.with(
-              recovery_started_at:,
               consecutive_errors: 0,
               consecutive_successes: metadata.consecutive_successes.succ
             )
@@ -259,9 +256,7 @@ module Stoplight
 
         synchronize do
           metadata = @metadata[light_name]
-          if metadata.recovery_started_at
-            false
-          else
+          if metadata.recovery_started_at.nil?
             @metadata[light_name] = metadata.with(
               recovery_started_at: current_time,
               recovery_scheduled_after: nil,
@@ -269,6 +264,13 @@ module Stoplight
               breached_at: nil
             )
             true
+          else
+            @metadata[light_name] = metadata.with(
+              recovery_scheduled_after: nil,
+              recovered_at: nil,
+              breached_at: nil
+            )
+            false
           end
         end
       end
