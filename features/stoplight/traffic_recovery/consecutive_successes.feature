@@ -21,6 +21,7 @@ Feature: Consecutive Errors Traffic Control Strategy
     When the protected service recovers and starts functioning normally
     And I make 2 request to the protected service
     Then the light color is yellow
+    And notification about transition from red to yellow is sent
 
   Scenario: Light returns to red after failure in yellow state
     Given the protected service recovers and starts functioning normally

@@ -103,7 +103,7 @@ RSpec.describe Stoplight::Light::YellowRunStrategy do
           end
 
           it "records failure, notify and raises an exception" do
-            expect(notifier).to receive(:notify).with(config, Stoplight::Color::GREEN, Stoplight::Color::YELLOW, nil)
+            expect(notifier).to receive(:notify).with(config, Stoplight::Color::RED, Stoplight::Color::YELLOW, nil)
             expect(data_store).to receive(:record_recovery_probe_success).with(config).and_return(metadata)
 
             suppress(StandardError) { result }
@@ -246,7 +246,7 @@ RSpec.describe Stoplight::Light::YellowRunStrategy do
               end
 
               it "records failure, notify and raises an exception" do
-                expect(notifier).to receive(:notify).with(config, Stoplight::Color::GREEN, Stoplight::Color::YELLOW, nil)
+                expect(notifier).to receive(:notify).with(config, Stoplight::Color::RED, Stoplight::Color::YELLOW, nil)
 
                 Timecop.freeze do
                   failure = Stoplight::Failure.from_error(error)
