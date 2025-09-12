@@ -49,6 +49,24 @@ RSpec.shared_examples "Stoplight::Light#run" do
         expect(light.run(fallback, &block)).to eq(43)
       end.to yield_control
     end
+
+    context "when cool_off_time elapsed" do
+      it "executes yellow strategy and send notification about transition to yellow" do
+        expect(notifier).to receive(:notify).with(config, Stoplight::Color::RED, Stoplight::Color::YELLOW, nil)
+
+        Timecop.travel(Time.now + config.cool_off_time) do
+          expect do |block|
+            expect(yellow_run_strategy).to receive(:execute) do |fb, &code|
+              expect(fb).to eq(fallback)
+              code.call
+              44
+            end
+
+            expect(light.run(fallback, &block)).to eq(44)
+          end.to yield_control
+        end
+      end
+    end
   end
 
   context "when the light is yellow" do
