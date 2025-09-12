@@ -35,10 +35,12 @@ Feature: Consecutive Errors Traffic Control Strategy
 
   Scenario: Light transitions to red after failure in yellow state
     Given the protected service starts failing with "connection-timeout"
+    And the light enters the red state
+    Then notification about transition from green to red is sent
     And the light enters the yellow state
     When I make 1 request to the service
     Then the light color is red
-    And notification about transition from green to red is sent
+    And notification about transition from yellow to red is sent
 
   Scenario: Light resets failure count after success
     Given the protected service starts failing with "connection-timeout"

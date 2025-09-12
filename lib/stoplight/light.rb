@@ -32,10 +32,7 @@ module Stoplight
     #
     # @return [String]
     def state
-      config
-        .data_store
-        .get_metadata(config)
-        .locked_state
+      metadata.locked_state
     end
 
     # Returns current color:
@@ -49,10 +46,7 @@ module Stoplight
     #
     # @return [String] returns current light color
     def color
-      config
-        .data_store
-        .get_metadata(config)
-        .color
+      metadata.color
     end
 
     # Runs the given block of code with this circuit breaker
@@ -71,6 +65,10 @@ module Stoplight
     # @raise [Error::RedLight]
     def run(fallback = nil, &code)
       raise ArgumentError, "nothing to run. Please, pass a block into `Light#run`" unless block_given?
+
+      metadata = self.metadata
+      color = metadata.color # This is needed to have a consistent view of the color during the execution
+      transition_to_color(metadata:, color:)
 
       strategy = state_strategy_factory(color)
       strategy.execute(fallback, &code)
@@ -185,6 +183,24 @@ module Stoplight
     # @return [Stoplight::Light]
     def reconfigure(config)
       self.class.new(config)
+    end
+
+    # @return [Stoplight::Metadata]
+    def metadata
+      config.data_store.get_metadata(config)
+    end
+
+    # @param metadata [Stoplight::Metadata]
+    # @param color [String]
+    # @return [void]
+    def transition_to_color(metadata:, color:)
+      return unless color == Color::YELLOW
+
+      if metadata.recovery_scheduled_after && config.data_store.transition_to_color(config, Color::YELLOW)
+        config.notifiers.each do |notifier|
+          notifier.notify(config, Color::RED, Color::YELLOW, nil)
+        end
+      end
     end
   end
 end
