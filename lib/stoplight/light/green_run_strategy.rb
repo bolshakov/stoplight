@@ -12,10 +12,11 @@ module Stoplight
       # Executes the provided code block when the light is in the green state.
       #
       # @param fallback [Proc, nil] A fallback proc to execute in case of an error.
+      # @param metadata [Stoplight::Metadata] Metadata capturing the current state of the light.
       # @yield The code block to execute.
       # @return [Object] The result of the code block if successful.
       # @raise [Exception] Re-raises the error if it is not tracked or no fallback is provided.
-      def execute(fallback, &code)
+      def execute(fallback, metadata:, &code)
         # TODO: Consider implementing sampling rate to limit the memory footprint
         code.call.tap { record_success }
       rescue => error
@@ -38,7 +39,9 @@ module Stoplight
         failure = Stoplight::Failure.from_error(error)
         metadata = data_store.record_failure(config, failure)
 
-        if config.traffic_control.stop_traffic?(config, metadata) && data_store.transition_to_color(config, Color::RED)
+        stop_traffic = config.traffic_control.stop_traffic?(config, metadata)
+        transition_to_color = stop_traffic && data_store.transition_to_color(config, Color::RED)
+        if transition_to_color
           config.notifiers.each do |notifier|
             notifier.notify(config, Color::GREEN, Color::RED, error)
           end

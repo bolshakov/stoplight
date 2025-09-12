@@ -22,7 +22,9 @@ module Stoplight
         @data_store = config.data_store
       end
 
-      def execute(fallback, &code)
+      # @param fallback [Proc, nil] A fallback proc to execute in case of an error.
+      # @param metadata [Stoplight::Metadata] Metadata capturing the current state of the light.
+      def execute(fallback, metadata:, &code)
         raise NotImplementedError, "Subclasses must implement the execute method"
       end
     end

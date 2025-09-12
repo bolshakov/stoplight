@@ -12,9 +12,10 @@ module Stoplight
       # Executes the fallback proc when the light is in the red state.
       #
       # @param fallback [Proc, nil] A fallback proc to execute instead of the code block.
+      # @param metadata [Stoplight::Metadata] Metadata capturing the current state of the light.
       # @return [Object, nil] The result of the fallback proc if provided.
       # @raise [Stoplight::Error::RedLight] Raises an error if no fallback is provided.
-      def execute(fallback)
+      def execute(fallback, metadata:)
         if fallback
           fallback.call(nil)
         else

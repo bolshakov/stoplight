@@ -14,12 +14,29 @@ RSpec.describe Stoplight::Light::YellowRunStrategy do
   end
   let(:notifier) { instance_double(Stoplight::Notifier::Base) }
   let(:traffic_recovery) { Stoplight::TrafficRecovery::ConsecutiveSuccesses.new }
-  let(:metadata) { instance_double(Stoplight::Metadata) }
+  let(:in_metadata) { instance_double(Stoplight::Metadata, color: Stoplight::Color::YELLOW, recovery_scheduled_after:) }
+  let(:out_metadata) { instance_double(Stoplight::Metadata) }
+  let(:recovery_scheduled_after) { nil }
 
   shared_examples Stoplight::Light::YellowRunStrategy do
     shared_examples "recovery success" do
       before do
-        expect(traffic_recovery).to receive(:determine_color).with(config, metadata).and_return(recovery_result)
+        expect(traffic_recovery).to receive(:determine_color).with(config, out_metadata).and_return(recovery_result)
+      end
+
+      context "when it enters yellow state after cool off time expiring" do
+        let(:recovery_result) { Stoplight::TrafficRecovery::GREEN }
+        let(:recovery_scheduled_after) { Time.now - 10 }
+
+        let(:code) { -> { "Success" } }
+
+        it "transitions to yellow before the probe" do
+          expect(notifier).to receive(:notify).with(config, Stoplight::Color::RED, Stoplight::Color::YELLOW, nil)
+          expect(notifier).to receive(:notify).with(config, Stoplight::Color::YELLOW, Stoplight::Color::GREEN, nil)
+          expect(data_store).to receive(:record_recovery_probe_success).with(config).and_return(out_metadata)
+
+          expect(result).to eq("Success")
+        end
       end
 
       context "when recovery strategy returns PASS" do
@@ -28,7 +45,7 @@ RSpec.describe Stoplight::Light::YellowRunStrategy do
         it "does not make any recovery decisions" do
           expect(data_store).not_to receive(:transition_to_color)
           expect(notifier).not_to receive(:notify)
-          allow(data_store).to receive(:record_recovery_probe_success).with(config).and_return(metadata)
+          allow(data_store).to receive(:record_recovery_probe_success).with(config).and_return(out_metadata)
 
           suppress(StandardError) { result }
         end
@@ -44,7 +61,7 @@ RSpec.describe Stoplight::Light::YellowRunStrategy do
 
           it "records success, notify and returns result" do
             expect(notifier).to receive(:notify).with(config, Stoplight::Color::YELLOW, Stoplight::Color::GREEN, nil)
-            expect(data_store).to receive(:record_recovery_probe_success).with(config).and_return(metadata)
+            expect(data_store).to receive(:record_recovery_probe_success).with(config).and_return(out_metadata)
 
             suppress(StandardError) { result }
           end
@@ -57,7 +74,7 @@ RSpec.describe Stoplight::Light::YellowRunStrategy do
 
           it "records success and returns result without a notification" do
             expect(notifier).not_to receive(:notify)
-            expect(data_store).to receive(:record_recovery_probe_success).with(config).and_return(metadata)
+            expect(data_store).to receive(:record_recovery_probe_success).with(config).and_return(out_metadata)
 
             suppress(StandardError) { result }
           end
@@ -74,7 +91,7 @@ RSpec.describe Stoplight::Light::YellowRunStrategy do
 
           it "records success, notify and returns result" do
             expect(notifier).to receive(:notify).with(config, Stoplight::Color::YELLOW, Stoplight::Color::RED, nil)
-            expect(data_store).to receive(:record_recovery_probe_success).with(config).and_return(metadata)
+            expect(data_store).to receive(:record_recovery_probe_success).with(config).and_return(out_metadata)
 
             suppress(StandardError) { result }
           end
@@ -87,7 +104,7 @@ RSpec.describe Stoplight::Light::YellowRunStrategy do
 
           it "records success and returns result without a notification" do
             expect(notifier).not_to receive(:notify)
-            expect(data_store).to receive(:record_recovery_probe_success).with(config).and_return(metadata)
+            expect(data_store).to receive(:record_recovery_probe_success).with(config).and_return(out_metadata)
 
             suppress(StandardError) { result }
           end
@@ -104,7 +121,7 @@ RSpec.describe Stoplight::Light::YellowRunStrategy do
 
           it "records failure, notify and raises an exception" do
             expect(notifier).to receive(:notify).with(config, Stoplight::Color::RED, Stoplight::Color::YELLOW, nil)
-            expect(data_store).to receive(:record_recovery_probe_success).with(config).and_return(metadata)
+            expect(data_store).to receive(:record_recovery_probe_success).with(config).and_return(out_metadata)
 
             suppress(StandardError) { result }
           end
@@ -117,7 +134,7 @@ RSpec.describe Stoplight::Light::YellowRunStrategy do
 
           it "records failure, raises an exception without a notification" do
             expect(notifier).not_to receive(:notify)
-            expect(data_store).to receive(:record_recovery_probe_success).with(config).and_return(metadata)
+            expect(data_store).to receive(:record_recovery_probe_success).with(config).and_return(out_metadata)
 
             suppress(StandardError) { result }
           end
@@ -129,7 +146,7 @@ RSpec.describe Stoplight::Light::YellowRunStrategy do
 
         it "raises an error" do
           expect(notifier).not_to receive(:notify)
-          expect(data_store).to receive(:record_recovery_probe_success).with(config).and_return(metadata)
+          expect(data_store).to receive(:record_recovery_probe_success).with(config).and_return(out_metadata)
 
           expect { result }.to raise_error(/recovery strategy returned an expected color/)
         end
@@ -137,7 +154,7 @@ RSpec.describe Stoplight::Light::YellowRunStrategy do
     end
 
     context "when code executes successfully" do
-      subject(:result) { strategy.execute(nil, &code) }
+      subject(:result) { strategy.execute(nil, metadata: in_metadata, &code) }
 
       let(:code) { -> { "Success" } }
       let(:failures) { [Stoplight::Failure.from_error(StandardError.new)] }
@@ -146,7 +163,7 @@ RSpec.describe Stoplight::Light::YellowRunStrategy do
     end
 
     context "when code fails" do
-      subject(:result) { strategy.execute(fallback, &code) }
+      subject(:result) { strategy.execute(fallback, metadata: in_metadata, &code) }
 
       let(:error) { StandardError.new("Test error") }
       let(:code) { -> { raise error } }
@@ -158,7 +175,7 @@ RSpec.describe Stoplight::Light::YellowRunStrategy do
           let(:fallback) { nil }
 
           before do
-            expect(traffic_recovery).to receive(:determine_color).with(config, metadata).and_return(recovery_result)
+            expect(traffic_recovery).to receive(:determine_color).with(config, out_metadata).and_return(recovery_result)
           end
 
           context "when recovery strategy returns GREEN" do
@@ -174,7 +191,7 @@ RSpec.describe Stoplight::Light::YellowRunStrategy do
 
                 Timecop.freeze do
                   failure = Stoplight::Failure.from_error(error)
-                  expect(data_store).to receive(:record_recovery_probe_failure).with(config, failure).and_return(metadata)
+                  expect(data_store).to receive(:record_recovery_probe_failure).with(config, failure).and_return(out_metadata)
 
                   expect { result }.to raise_error(error)
                 end
@@ -191,7 +208,7 @@ RSpec.describe Stoplight::Light::YellowRunStrategy do
 
                 Timecop.freeze do
                   failure = Stoplight::Failure.from_error(error)
-                  expect(data_store).to receive(:record_recovery_probe_failure).with(config, failure).and_return(metadata)
+                  expect(data_store).to receive(:record_recovery_probe_failure).with(config, failure).and_return(out_metadata)
 
                   expect { result }.to raise_error(error)
                 end
@@ -212,7 +229,7 @@ RSpec.describe Stoplight::Light::YellowRunStrategy do
 
                 Timecop.freeze do
                   failure = Stoplight::Failure.from_error(error)
-                  expect(data_store).to receive(:record_recovery_probe_failure).with(config, failure).and_return(metadata)
+                  expect(data_store).to receive(:record_recovery_probe_failure).with(config, failure).and_return(out_metadata)
 
                   expect { result }.to raise_error(error)
                 end
@@ -229,7 +246,7 @@ RSpec.describe Stoplight::Light::YellowRunStrategy do
 
                 Timecop.freeze do
                   failure = Stoplight::Failure.from_error(error)
-                  expect(data_store).to receive(:record_recovery_probe_failure).with(config, failure).and_return(metadata)
+                  expect(data_store).to receive(:record_recovery_probe_failure).with(config, failure).and_return(out_metadata)
 
                   expect { result }.to raise_error(error)
                 end
@@ -250,7 +267,7 @@ RSpec.describe Stoplight::Light::YellowRunStrategy do
 
                 Timecop.freeze do
                   failure = Stoplight::Failure.from_error(error)
-                  expect(data_store).to receive(:record_recovery_probe_failure).with(config, failure).and_return(metadata)
+                  expect(data_store).to receive(:record_recovery_probe_failure).with(config, failure).and_return(out_metadata)
 
                   expect { result }.to raise_error(error)
                 end
@@ -267,7 +284,7 @@ RSpec.describe Stoplight::Light::YellowRunStrategy do
 
                 Timecop.freeze do
                   failure = Stoplight::Failure.from_error(error)
-                  expect(data_store).to receive(:record_recovery_probe_failure).with(config, failure).and_return(metadata)
+                  expect(data_store).to receive(:record_recovery_probe_failure).with(config, failure).and_return(out_metadata)
 
                   expect { result }.to raise_error(error)
                 end
@@ -286,11 +303,11 @@ RSpec.describe Stoplight::Light::YellowRunStrategy do
 
           it "records a failed recovery probe and returns fallback" do
             allow(notifier).to receive(:notify)
-            expect(traffic_recovery).to receive(:determine_color).with(config, metadata).and_return(Stoplight::TrafficRecovery::YELLOW)
+            expect(traffic_recovery).to receive(:determine_color).with(config, out_metadata).and_return(Stoplight::TrafficRecovery::YELLOW)
 
             Timecop.freeze do
               failure = Stoplight::Failure.from_error(error)
-              expect(data_store).to receive(:record_recovery_probe_failure).with(config, failure).and_return(metadata)
+              expect(data_store).to receive(:record_recovery_probe_failure).with(config, failure).and_return(out_metadata)
               expect(result).to eq("Fallback")
             end
 

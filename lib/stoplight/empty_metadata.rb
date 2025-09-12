@@ -1,5 +1,9 @@
 # frozen_string_literal: true
 
 module Stoplight
-  EmptyMetadata = Metadata.new
+  class EmptyMetadata < Metadata
+    def initialize(current_time: Time.now)
+      super
+    end
+  end
 end

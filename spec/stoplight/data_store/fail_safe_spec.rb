@@ -34,11 +34,11 @@ RSpec.describe Stoplight::DataStore::FailSafe do
   end
 
   describe "#get_metadata" do
-    subject { fail_safe.get_metadata(config) }
+    subject(:get_metadata) { fail_safe.get_metadata(config) }
 
     context "when data_store returns all data" do
       let(:metadata) do
-        Stoplight::Metadata.new.with(errors: 4)
+        Stoplight::Metadata.new(current_time: Time.now).with(errors: 4)
       end
 
       it "returns all data from data_store" do
@@ -54,7 +54,7 @@ RSpec.describe Stoplight::DataStore::FailSafe do
         expect(error_notifier).to receive(:call).with(error)
         expect(data_store).to receive(:get_metadata).with(config) { raise error }
 
-        is_expected.to eq(Stoplight::Metadata.new)
+        is_expected.to eq(Stoplight::EmptyMetadata.new(current_time: get_metadata.current_time))
       end
     end
   end
@@ -78,7 +78,7 @@ RSpec.describe Stoplight::DataStore::FailSafe do
         expect(error_notifier).to receive(:call).with(error)
         expect(data_store).to receive(:record_failure).with(config, failure) { raise error }
 
-        is_expected.to eq(Stoplight::EmptyMetadata)
+        is_expected.to be_kind_of(Stoplight::EmptyMetadata)
       end
     end
   end
@@ -111,7 +111,7 @@ RSpec.describe Stoplight::DataStore::FailSafe do
     let(:failure) { Stoplight::Failure.new("class", "message", Time.new) }
 
     context "when data_store records recovery probe failure" do
-      let(:metadata) { Stoplight::Metadata.new(errors: 42) }
+      let(:metadata) { Stoplight::Metadata.new(errors: 42, current_time: Time.now) }
 
       it "returns metadata from data_store" do
         expect(error_notifier).not_to receive(:call)
@@ -126,7 +126,7 @@ RSpec.describe Stoplight::DataStore::FailSafe do
         expect(error_notifier).to receive(:call).with(error)
         expect(data_store).to receive(:record_recovery_probe_failure).with(config, failure) { raise error }
 
-        is_expected.to eq(Stoplight::EmptyMetadata)
+        is_expected.to be_kind_of(Stoplight::EmptyMetadata)
       end
     end
   end
@@ -135,7 +135,7 @@ RSpec.describe Stoplight::DataStore::FailSafe do
     subject { fail_safe.record_recovery_probe_success(config) }
 
     context "when data_store records recovery probe success" do
-      let(:metadata) { Stoplight::Metadata.new(errors: 42) }
+      let(:metadata) { Stoplight::Metadata.new(errors: 42, current_time: Time.now) }
 
       it "returns metadata from data_store" do
         expect(error_notifier).not_to receive(:call)
@@ -150,7 +150,7 @@ RSpec.describe Stoplight::DataStore::FailSafe do
         expect(error_notifier).to receive(:call).with(error)
         expect(data_store).to receive(:record_recovery_probe_success).with(config) { raise error }
 
-        is_expected.to eq(Stoplight::EmptyMetadata)
+        is_expected.to be_kind_of(Stoplight::EmptyMetadata)
       end
     end
   end
