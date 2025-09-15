@@ -34,6 +34,7 @@ RSpec.describe Stoplight::Notifier::Generic do
     let(:notifier_class) do
       Class.new do
         include Stoplight::Notifier::Generic
+
         def put(message)
           object.put(message)
         end

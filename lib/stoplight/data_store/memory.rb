@@ -7,6 +7,7 @@ module Stoplight
     # @see Base
     class Memory < Base
       include MonitorMixin
+
       KEY_SEPARATOR = ":"
 
       def initialize
