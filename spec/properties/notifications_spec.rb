@@ -31,6 +31,7 @@ RSpec.describe "Notifications" do
       example.run
 
       Timecop.safe_mode = safe_mode
+      Timecop.unfreeze
       Timecop.return
     end
 
