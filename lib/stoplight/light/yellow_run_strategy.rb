@@ -13,10 +13,12 @@ module Stoplight
       # Executes the provided code block when the light is in the yellow state.
       #
       # @param fallback [Proc, nil] A fallback proc to execute in case of an error.
+      # @param metadata [Stoplight::Metadata] Metadata capturing the current state of the light.
       # @yield The code block to execute.
       # @return [Object] The result of the code block if successful.
       # @raise [Exception] Re-raises the error if it is not tracked or no fallback is provided.
-      def execute(fallback, &code)
+      def execute(fallback, metadata:, &code)
+        transition_to_yellow(metadata:)
         # TODO: We need to employ a probabilistic approach here to avoid "thundering herd" problem
         code.call.tap { record_recovery_probe_success }
       rescue => error
@@ -45,6 +47,18 @@ module Stoplight
         metadata = data_store.record_recovery_probe_failure(config, failure)
 
         recover(metadata)
+      end
+
+      # @param metadata [Stoplight::Metadata]
+      # @return [void]
+      def transition_to_yellow(metadata:)
+        return unless metadata.color == Color::YELLOW
+
+        if metadata.recovery_scheduled_after && config.data_store.transition_to_color(config, Color::YELLOW)
+          config.notifiers.each do |notifier|
+            notifier.notify(config, Color::RED, Color::YELLOW, nil)
+          end
+        end
       end
 
       private def recover(metadata)

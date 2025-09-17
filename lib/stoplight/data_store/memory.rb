@@ -30,16 +30,16 @@ module Stoplight
       # @return [Stoplight::Metadata]
       def get_metadata(config)
         light_name = config.name
-        window_end = Time.now
-        recovery_window = (window_end - config.cool_off_time)..window_end
 
         synchronize do
+          current_time = Time.now
+          recovery_window = (current_time - config.cool_off_time)..current_time
           recovered_at = @metadata[light_name].recovered_at
           window = if config.window_size
-            window_start = [recovered_at, (window_end - config.window_size)].compact.max
-            (window_start..window_end)
+            window_start = [recovered_at, (current_time - config.window_size)].compact.max
+            (window_start..current_time)
           else
-            (..window_end)
+            (..current_time)
           end
 
           errors = @errors[config.name].count do |request_time|
@@ -58,6 +58,7 @@ module Stoplight
           end
 
           @metadata[light_name].with(
+            current_time:,
             errors:,
             successes:,
             recovery_probe_errors:,

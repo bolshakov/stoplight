@@ -3,18 +3,20 @@
 require "spec_helper"
 
 RSpec.describe Stoplight::Metadata do
+  let(:current_time) { Time.now }
+
   describe "#color" do
-    subject(:color) { metadata.color(at: current_time) }
+    subject(:color) { metadata.color }
 
     let(:metadata) do
       Stoplight::Metadata.new(
         locked_state:,
         recovery_scheduled_after:,
         recovery_started_at:,
-        breached_at:
+        breached_at:,
+        current_time:
       )
     end
-    let(:current_time) { Time.now }
     let(:recovery_scheduled_after) { nil }
     let(:locked_state) { nil }
     let(:recovery_started_at) { nil }
@@ -55,7 +57,7 @@ RSpec.describe Stoplight::Metadata do
 
   describe "#error_rate" do
     context "when there successes or errors are nil" do
-      let(:metadata) { Stoplight::Metadata.new(successes: nil, errors: nil) }
+      let(:metadata) { Stoplight::Metadata.new(successes: nil, errors: nil, current_time:) }
 
       it "returns 0" do
         expect(metadata.error_rate).to eq(0)
@@ -63,7 +65,7 @@ RSpec.describe Stoplight::Metadata do
     end
 
     context "when there are no successes or errors" do
-      let(:metadata) { Stoplight::Metadata.new(successes: 0, errors: 0) }
+      let(:metadata) { Stoplight::Metadata.new(successes: 0, errors: 0, current_time:) }
 
       it "returns 0" do
         expect(metadata.error_rate).to eq(0)
@@ -71,7 +73,7 @@ RSpec.describe Stoplight::Metadata do
     end
 
     context "when there are successes and errors" do
-      let(:metadata) { Stoplight::Metadata.new(successes: 10, errors: 5) }
+      let(:metadata) { Stoplight::Metadata.new(successes: 10, errors: 5, current_time:) }
 
       it "returns the error rate" do
         expect(metadata.error_rate).to eq(5.fdiv(15))
@@ -82,7 +84,7 @@ RSpec.describe Stoplight::Metadata do
   describe "#with" do
     subject { metadata.with(successes: "42") }
 
-    let(:metadata) { Stoplight::Metadata.new }
+    let(:metadata) { Stoplight::Metadata.new(current_time:) }
 
     it "applies constructor logic" do
       is_expected.to have_attributes(successes: 42)

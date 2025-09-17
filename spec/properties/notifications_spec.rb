@@ -50,7 +50,7 @@ RSpec.describe "Notifications" do
         notifications_before_run = notifier.notifications(light.name).count
 
         executions_sequence.each do |(should_fail, time_gap)|
-          Timecop.travel(Time.now + time_gap)
+          Timecop.freeze(Time.now + time_gap)
           suppress(StandardError) { light.run { raise if should_fail } }
 
           color_after_run = light.color
@@ -58,10 +58,10 @@ RSpec.describe "Notifications" do
 
           if color_before_run != color_after_run
             expect(notifications.count).to eq(notifications_before_run + 1),
-              "Expected a notification when transitioning from #{color_before_run} to #{color_after_run}, but did not"
+              "Expected a notification when transitioning from `#{color_before_run}` to `#{color_after_run}`, but did not"
 
             expect(notifications.last).to eq([color_before_run, color_after_run]),
-              "Expected notification to be from #{color_before_run} to #{color_after_run}, but was #{notifications.last}"
+              "Expected notification to be from `#{color_before_run}` to `#{color_after_run}`, but was `#{notifications.last.join("` to `")}`"
           end
 
           color_before_run = color_after_run
@@ -78,7 +78,7 @@ RSpec.describe "Notifications" do
   end
 
   context "with redis data store", :redis do
-    let(:data_store) { Stoplight::DataStore::Redis.new(redis) }
+    let(:data_store) { Stoplight::DataStore::Redis.new(redis, warn_on_clock_skew: false) }
 
     it_behaves_like "notify about state changes"
   end

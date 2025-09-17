@@ -3,6 +3,8 @@
 RSpec.describe Stoplight::TrafficControl::ErrorRate do
   subject(:traffic_control) { described_class.new }
 
+  let(:current_time) { Time.now }
+
   describe "#check_compatibility" do
     subject(:availability) { traffic_control.check_compatibility(config) }
 
@@ -65,7 +67,7 @@ RSpec.describe Stoplight::TrafficControl::ErrorRate do
     let(:config) { instance_double(Stoplight::Light::Config, window_size: 300, threshold: 0.6) }
 
     let(:metadata) do
-      Stoplight::Metadata.new(successes:, errors:)
+      Stoplight::Metadata.new(successes:, errors:, current_time:)
     end
 
     context "when there are no requests" do

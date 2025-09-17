@@ -94,8 +94,8 @@ module Stoplight
       def get_metadata(config)
         detect_clock_skew
 
-        window_end = Time.now
-        window_end_ts = window_end.to_i
+        current_time = Time.now
+        window_end_ts = current_time.to_i
         window_start_ts = window_end_ts - [config.window_size, Base::METRICS_RETENTION_TIME].compact.min.to_i
         recovery_window_start_ts = window_end_ts - config.cool_off_time.to_i
 
@@ -133,10 +133,11 @@ module Stoplight
         last_error = normalize_failure(last_error_json, config.error_notifier) if last_error_json
 
         Metadata.new(
-          successes: successes,
-          errors: errors,
-          recovery_probe_successes: recovery_probe_successes,
-          recovery_probe_errors: recovery_probe_errors,
+          current_time:,
+          successes:,
+          errors:,
+          recovery_probe_successes:,
+          recovery_probe_errors:,
           last_error:,
           **meta_hash
         )
