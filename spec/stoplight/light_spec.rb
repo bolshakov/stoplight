@@ -126,8 +126,9 @@ RSpec.describe Stoplight::Light do
   end
 
   context "with memory data store" do
-    let(:config) { Stoplight.default_config.with(name: random_string, data_store:) }
+    let(:config) { Stoplight.default_config.with(name: random_string, data_store:, notifiers: [notifier]) }
     let(:data_store) { Stoplight::DataStore::Memory.new }
+    let(:notifier) { instance_double(Stoplight::Notifier::Base) }
 
     it_behaves_like "Stoplight::Light#state"
     it_behaves_like "Stoplight::Light#color"
@@ -135,8 +136,9 @@ RSpec.describe Stoplight::Light do
   end
 
   context "with redis data store", :redis do
-    let(:config) { Stoplight.default_config.with(name: random_string, data_store:) }
+    let(:config) { Stoplight.default_config.with(name: random_string, data_store:, notifiers: [notifier]) }
     let(:data_store) { Stoplight::DataStore::Redis.new(redis) }
+    let(:notifier) { instance_double(Stoplight::Notifier::Base) }
 
     it_behaves_like "Stoplight::Light#state"
     it_behaves_like "Stoplight::Light#color"

@@ -6,9 +6,10 @@ RSpec.describe Stoplight::Light::RedRunStrategy do
   subject(:strategy) { described_class.new(config) }
 
   let(:config) { Stoplight.default_config.with(name: "foo", data_store:) }
+  let(:metadata) { instance_double(Stoplight::Metadata) }
 
   shared_examples Stoplight::Light::RedRunStrategy do
-    subject(:result) { strategy.execute(fallback) { 42 } }
+    subject(:result) { strategy.execute(fallback, metadata:) { 42 } }
 
     context "when fallback is provided" do
       let(:fallback) {

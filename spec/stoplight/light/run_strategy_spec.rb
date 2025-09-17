@@ -8,9 +8,10 @@ RSpec.describe Stoplight::Light::RunStrategy do
 
     let(:config) { instance_double(Stoplight::Light::Config, data_store:) }
     let(:data_store) { instance_double(Stoplight::DataStore::Base) }
+    let(:metadata) { instance_double(Stoplight::Metadata) }
 
     it "raises NotImplementedError" do
-      expect { strategy.execute(nil) {} }.to raise_error(NotImplementedError)
+      expect { strategy.execute(nil, metadata:) {} }.to raise_error(NotImplementedError)
     end
   end
 end

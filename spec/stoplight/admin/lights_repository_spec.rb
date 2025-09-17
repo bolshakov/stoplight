@@ -77,17 +77,17 @@ RSpec.describe Stoplight::Admin::LightsRepository, :redis do
     context "when the light is red" do
       before do
         begin
-          (light.run { raise })
+          light.run { raise }
         rescue
           nil
         end
         begin
-          (light.run { raise })
+          light.run { raise }
         rescue
           nil
         end
         begin
-          (light.run { raise })
+          light.run { raise }
         rescue
           nil
         end

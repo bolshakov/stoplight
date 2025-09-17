@@ -13,10 +13,11 @@ RSpec.describe Stoplight::Light::GreenRunStrategy do
   end
   let(:notifier) { instance_double(Stoplight::Notifier::Base) }
   let(:traffic_control) { Stoplight::TrafficControl::ConsecutiveErrors.new }
+  let(:metadata) { instance_double(Stoplight::Metadata) }
 
   shared_examples Stoplight::Light::GreenRunStrategy do
     context "when code executes successfully" do
-      subject(:result) { strategy.execute(nil, &code) }
+      subject(:result) { strategy.execute(nil, metadata:, &code) }
 
       let(:code) { -> { "Success" } }
 
@@ -28,7 +29,7 @@ RSpec.describe Stoplight::Light::GreenRunStrategy do
     end
 
     context "when code fails" do
-      subject(:result) { strategy.execute(fallback, &code) }
+      subject(:result) { strategy.execute(fallback, metadata:, &code) }
 
       let(:error) { StandardError.new("Test error") }
       let(:code) { -> { raise error } }
@@ -156,7 +157,7 @@ RSpec.describe Stoplight::Light::GreenRunStrategy do
       let(:redis) { Redis.new(url: "redis://561922f7-6b30-49d3-8148-324922d590d2:6379/0") }
 
       context "when code fails with fallback" do
-        subject(:result) { strategy.execute(->(e) { "whoops" }, &code) }
+        subject(:result) { strategy.execute(->(e) { "whoops" }, metadata:, &code) }
 
         let(:error) { StandardError.new("Test error") }
         let(:code) { -> { raise error } }
