@@ -20,7 +20,8 @@ module Stoplight
     :current_time
   ) do
     def initialize(
-      current_time:, successes: 0,
+      current_time: Time.now,
+      successes: 0,
       errors: 0,
       recovery_probe_successes: 0,
       recovery_probe_errors: 0,

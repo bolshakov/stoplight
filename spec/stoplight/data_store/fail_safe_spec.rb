@@ -54,7 +54,7 @@ RSpec.describe Stoplight::DataStore::FailSafe do
         expect(error_notifier).to receive(:call).with(error)
         expect(data_store).to receive(:get_metadata).with(config) { raise error }
 
-        is_expected.to eq(Stoplight::EmptyMetadata.new(current_time: get_metadata.current_time))
+        is_expected.to eq(Stoplight::Metadata.new(current_time: get_metadata.current_time))
       end
     end
   end
@@ -78,7 +78,7 @@ RSpec.describe Stoplight::DataStore::FailSafe do
         expect(error_notifier).to receive(:call).with(error)
         expect(data_store).to receive(:record_failure).with(config, failure) { raise error }
 
-        is_expected.to be_kind_of(Stoplight::EmptyMetadata)
+        is_expected.to be_kind_of(Stoplight::Metadata)
       end
     end
   end
@@ -126,7 +126,7 @@ RSpec.describe Stoplight::DataStore::FailSafe do
         expect(error_notifier).to receive(:call).with(error)
         expect(data_store).to receive(:record_recovery_probe_failure).with(config, failure) { raise error }
 
-        is_expected.to be_kind_of(Stoplight::EmptyMetadata)
+        is_expected.to be_kind_of(Stoplight::Metadata)
       end
     end
   end
@@ -150,7 +150,7 @@ RSpec.describe Stoplight::DataStore::FailSafe do
         expect(error_notifier).to receive(:call).with(error)
         expect(data_store).to receive(:record_recovery_probe_success).with(config) { raise error }
 
-        is_expected.to be_kind_of(Stoplight::EmptyMetadata)
+        is_expected.to be_kind_of(Stoplight::Metadata)
       end
     end
   end
