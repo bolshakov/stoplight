@@ -39,9 +39,7 @@ module Stoplight
         failure = Stoplight::Failure.from_error(error)
         metadata = data_store.record_failure(config, failure)
 
-        stop_traffic = config.traffic_control.stop_traffic?(config, metadata)
-        transition_to_color = stop_traffic && data_store.transition_to_color(config, Color::RED)
-        if transition_to_color
+        if config.traffic_control.stop_traffic?(config, metadata) && data_store.transition_to_color(config, Color::RED)
           config.notifiers.each do |notifier|
             notifier.notify(config, Color::GREEN, Color::RED, error)
           end
