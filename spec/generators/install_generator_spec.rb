@@ -35,6 +35,7 @@ RSpec.describe Stoplight::Generators::InstallGenerator, type: :generator do
       is_expected.to contain(/data_store = Stoplight::DataStore::Redis.new/)
       is_expected.to contain(/Stoplight.configure do |config|/)
       is_expected.to contain(/config.data_store = data_store/)
+      is_expected.to contain(/config.error_notifier = error_notifier/)
     end
   end
 
