@@ -131,6 +131,8 @@ receives `nil`. In both cases, the return value of the fallback becomes the retu
 
 Stoplight comes with a built-in Admin Panel that can track all active Lights and manually lock them in the desired state (`Green` or `Red`). Locking lights in certain states might be helpful in scenarios like E2E testing.
 
+![Admin Panel Screenshot](assets/admin.png)
+
 To add Admin Panel protected by basic authentication to your Rails project, add this configuration to your `config/routes.rb` file.
 
 ```ruby
