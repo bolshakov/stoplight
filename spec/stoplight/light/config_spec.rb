@@ -216,7 +216,7 @@ RSpec.describe Stoplight::Light::Config do
 
       let(:recovery_threshold) { 50 }
 
-      context "when an instance of TrafficRecovery::Base" do
+      context "when TrafficRecovery::ConsecutiveSuccesses" do
         let(:traffic_recovery) { Stoplight::TrafficRecovery::ConsecutiveSuccesses.new }
 
         it "returns the same traffic recovery object" do
@@ -244,6 +244,19 @@ RSpec.describe Stoplight::Light::Config do
           ERROR
         end
       end
+
+      context "when traffic recovery is not compatible with the config" do
+        let(:traffic_recovery) { :consecutive_successes }
+        let(:recovery_threshold) { 0 } # must be >0
+
+        it "raises a configuration errors" do
+          expect { traffic_recovery_out }.to raise_error(
+            Stoplight::Error::ConfigurationError,
+            "Stoplight::TrafficControl::ConsecutiveErrors strategy is incompatible with the Stoplight configuration: " \
+              "`recovery_threshold` should be bigger than 0"
+          )
+        end
+      end
     end
 
     describe "traffic_control" do
@@ -258,7 +271,7 @@ RSpec.describe Stoplight::Light::Config do
 
       let(:threshold) { 50 }
 
-      context "when an instance of TrafficControl::Base" do
+      context "when TrafficControl::ConsecutiveErrors" do
         let(:traffic_control) { Stoplight::TrafficControl::ConsecutiveErrors.new }
 
         it "returns the same traffic control object" do

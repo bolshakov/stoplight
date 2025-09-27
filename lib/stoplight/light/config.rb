@@ -82,6 +82,7 @@ module Stoplight
       # @return [Stoplight::Light::Config] The validated configuration object.
       def validate_config!
         validate_traffic_control_compatibility!
+        validate_traffic_recovery_compatibility!
         self
       end
 
