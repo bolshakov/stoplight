@@ -5,6 +5,14 @@ module Stoplight
     Base = Class.new(StandardError)
     ConfigurationError = Class.new(Base)
     IncorrectColor = Class.new(Base)
-    RedLight = Class.new(Base)
+
+    class RedLight < Base
+      attr_reader :config
+
+      def initialize(message, config: nil)
+        @config = config
+        super(message)
+      end
+    end
   end
 end

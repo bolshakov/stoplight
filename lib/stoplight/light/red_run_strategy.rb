@@ -19,7 +19,7 @@ module Stoplight
         if fallback
           fallback.call(nil)
         else
-          raise Error::RedLight, config.name
+          raise Error::RedLight.new(config.name, config: config)
         end
       end
     end

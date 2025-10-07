@@ -32,6 +32,14 @@ RSpec.describe Stoplight::Light::RedRunStrategy do
       it "records and raises the error" do
         expect { result }.to raise_error(Stoplight::Error::RedLight, config.name)
       end
+
+      context "with custom light config" do
+        let(:config) { Stoplight("bar", cool_off_time: 42).config }
+
+        it "attaches the config to the error" do
+          expect { result }.to raise_error { |error| expect(error.config.cool_off_time).to eq(42) }
+        end
+      end
     end
   end
 
