@@ -11,11 +11,11 @@ module Stoplight
       KEY_SEPARATOR = ":"
 
       def initialize
-        @errors = Hash.new { |h, k| h[k] = [] }
-        @successes = Hash.new { |h, k| h[k] = [] }
+        @errors = Hash.new { |errors, light_name| errors[light_name] = SlidingWindow.new }
+        @successes = Hash.new { |successes, light_name| successes[light_name] = SlidingWindow.new }
 
-        @recovery_probe_errors = Hash.new { |h, k| h[k] = [] }
-        @recovery_probe_successes = Hash.new { |h, k| h[k] = [] }
+        @recovery_probe_errors = Hash.new { |recovery_probe_errors, light_name| recovery_probe_errors[light_name] = SlidingWindow.new }
+        @recovery_probe_successes = Hash.new { |recovery_probe_successes, light_name| recovery_probe_successes[light_name] = SlidingWindow.new }
 
         @metadata = Hash.new { |h, k| h[k] = Metadata.new }
         super # MonitorMixin
@@ -30,50 +30,25 @@ module Stoplight
       # @return [Stoplight::Metadata]
       def get_metadata(config)
         light_name = config.name
-        current_time = self.current_time
-        recovery_window = (current_time - config.cool_off_time)..current_time
 
         synchronize do
+          current_time = self.current_time
+          recovery_window_start = (current_time - config.cool_off_time)
           recovered_at = @metadata[light_name].recovered_at
-          window = if config.window_size
-            window_start = [recovered_at, (current_time - config.window_size)].compact.max
-            (window_start..current_time)
+          window_start = if config.window_size
+            [recovered_at, (current_time - config.window_size)].compact.max
           else
-            (..current_time)
-          end
-
-          errors = @errors[config.name].count do |request_time|
-            window.cover?(request_time)
-          end
-
-          successes = @successes[config.name].count do |request_time|
-            window.cover?(request_time)
-          end
-
-          recovery_probe_errors = @recovery_probe_errors[config.name].count do |request_time|
-            recovery_window.cover?(request_time)
-          end
-          recovery_probe_successes = @recovery_probe_successes[config.name].count do |request_time|
-            recovery_window.cover?(request_time)
+            current_time
           end
 
           @metadata[light_name].with(
             current_time:,
-            errors:,
-            successes:,
-            recovery_probe_errors:,
-            recovery_probe_successes:
+            errors: @errors[config.name].sum_in_window(window_start),
+            successes: @successes[config.name].sum_in_window(window_start),
+            recovery_probe_errors: @recovery_probe_errors[config.name].sum_in_window(recovery_window_start),
+            recovery_probe_successes: @recovery_probe_successes[config.name].sum_in_window(recovery_window_start)
           )
         end
-      end
-
-      # @param metrics [<Time>]
-      # @param window_size [Numeric, nil]
-      # @return [void]
-      def cleanup(metrics, window_size:)
-        min_age = current_time - [window_size&.*(3), METRICS_RETENTION_TIME].compact.min
-
-        metrics.reject! { _1 < min_age }
       end
 
       # @param config [Stoplight::Light::Config]
@@ -84,9 +59,7 @@ module Stoplight
         light_name = config.name
 
         synchronize do
-          @errors[light_name].unshift(current_time) if config.window_size
-
-          cleanup(@errors[light_name], window_size: config.window_size)
+          @errors[light_name].increment if config.window_size
 
           metadata = @metadata[light_name]
           @metadata[light_name] = if metadata.last_error_at.nil? || current_time > metadata.last_error_at
@@ -113,8 +86,7 @@ module Stoplight
         current_time = self.current_time
 
         synchronize do
-          @successes[light_name].unshift(current_time) if config.window_size
-          cleanup(@successes[light_name], window_size: config.window_size)
+          @successes[light_name].increment if config.window_size
 
           metadata = @metadata[light_name]
           @metadata[light_name] = if metadata.last_success_at.nil? || current_time > metadata.last_success_at
@@ -140,8 +112,7 @@ module Stoplight
         current_time = self.current_time
 
         synchronize do
-          @recovery_probe_errors[light_name].unshift(current_time)
-          cleanup(@recovery_probe_errors[light_name], window_size: config.cool_off_time)
+          @recovery_probe_errors[light_name].increment
 
           metadata = @metadata[light_name]
           @metadata[light_name] = if metadata.last_error_at.nil? || current_time > metadata.last_error_at
@@ -168,8 +139,7 @@ module Stoplight
         current_time = self.current_time
 
         synchronize do
-          @recovery_probe_successes[light_name].unshift(current_time)
-          cleanup(@recovery_probe_successes[light_name], window_size: config.cool_off_time)
+          @recovery_probe_successes[light_name].increment
 
           metadata = @metadata[light_name]
           @metadata[light_name] = if metadata.last_success_at.nil? || current_time > metadata.last_success_at

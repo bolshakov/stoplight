@@ -3,7 +3,8 @@
 require "spec_helper"
 
 RSpec.describe Stoplight::DataStore::FailSafe do
-  let(:fail_safe) { described_class.new(data_store) }
+  let(:fail_safe) { described_class.new(data_store, failover_data_store:) }
+  let(:failover_data_store) { Stoplight::DataStore::Memory.new }
   let(:data_store) { instance_double(Stoplight::DataStore::Base) }
   let(:config) { Stoplight.default_config.with(name:, error_notifier:) }
   let(:error_notifier) { instance_double(Proc) }

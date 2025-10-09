@@ -39,9 +39,9 @@ module Stoplight
       private attr_reader :circuit_breaker
 
       # @param data_store [Stoplight::DataStore::Base]
-      def initialize(data_store)
+      def initialize(data_store, failover_data_store: Default::DATA_STORE)
         @data_store = data_store
-        @failover_data_store = Default::DATA_STORE
+        @failover_data_store = failover_data_store
         @circuit_breaker = Stoplight.system_light("stoplight:data_store:fail_safe:#{data_store.class.name}")
       end
 
