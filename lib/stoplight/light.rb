@@ -12,6 +12,10 @@ module Stoplight
     #   @api private
     attr_reader :config
 
+    # @!attribute [r] public_config
+    #   @return [Stoplight::Light::PublicConfig]
+    attr_reader :public_config
+
     # @!attribute [r] name
     #   The name of the light.
     #   @return [String]
@@ -20,6 +24,7 @@ module Stoplight
     # @param config [Stoplight::Light::Config]
     def initialize(config, green_run_strategy: nil, yellow_run_strategy: nil, red_run_strategy: nil)
       @config = config
+      @public_config = Stoplight::Light::PublicConfig.new(config)
       @green_run_strategy = green_run_strategy
       @yellow_run_strategy = yellow_run_strategy
       @red_run_strategy = red_run_strategy

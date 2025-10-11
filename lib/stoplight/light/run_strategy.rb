@@ -12,6 +12,10 @@ module Stoplight
       #   @return [Stoplight::Light::Config] The configuration for the light.
       private attr_reader :config
 
+      # @!attribute [r] public_config
+      #   @return [Stoplight::Light::PublicConfig] The configuration for the light.
+      private attr_reader :public_config
+
       # @!attribute [r] data_store
       #   @return [Stoplight::DataStore::Base] The data store associated with the light.
       private attr_reader :data_store
@@ -19,6 +23,7 @@ module Stoplight
       # @param config [Stoplight::Light::Config] The configuration for the light.
       def initialize(config)
         @config = config
+        @public_config = Stoplight::Light::PublicConfig.new(config)
         @data_store = config.data_store
       end
 
