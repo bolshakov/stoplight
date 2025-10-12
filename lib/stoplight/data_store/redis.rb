@@ -94,7 +94,6 @@ module Stoplight
       def get_metadata(config)
         detect_clock_skew
 
-        current_time = Time.now
         window_end_ts = current_time.to_i
         window_start_ts = window_end_ts - [config.window_size, Base::METRICS_RETENTION_TIME].compact.min.to_i
         recovery_window_start_ts = window_end_ts - config.cool_off_time.to_i
@@ -147,7 +146,7 @@ module Stoplight
       # @param failure [Stoplight::Failure] The failure to record.
       # @return [Stoplight::Metadata] The updated metadata after recording the failure.
       def record_failure(config, failure)
-        current_ts = failure.time.to_i
+        current_ts = current_time.to_i
         failure_json = failure.to_json
 
         @redis.then do |client|
@@ -163,16 +162,16 @@ module Stoplight
         get_metadata(config)
       end
 
-      def record_success(config, request_id: SecureRandom.hex(12), request_time: Time.now)
-        request_ts = request_time.to_i
+      def record_success(config, request_id: SecureRandom.hex(12))
+        current_ts = current_time.to_i
 
         @redis.then do |client|
           client.evalsha(
             record_success_sha,
-            argv: [request_ts, request_id, metrics_ttl, metadata_ttl],
+            argv: [current_ts, request_id, metrics_ttl, metadata_ttl],
             keys: [
               metadata_key(config),
-              config.window_size && successes_key(config, time: request_ts)
+              config.window_size && successes_key(config, time: current_ts)
             ].compact
           )
         end
@@ -184,7 +183,7 @@ module Stoplight
       # @param failure [Failure] The failure to record.
       # @return [Stoplight::Metadata] The updated metadata after recording the failure.
       def record_recovery_probe_failure(config, failure)
-        current_ts = failure.time.to_i
+        current_ts = current_time.to_i
         failure_json = failure.to_json
 
         @redis.then do |client|
@@ -204,18 +203,17 @@ module Stoplight
       #
       # @param config [Stoplight::Light::Config] The light configuration.
       # @param request_id [String] The unique identifier for the request
-      # @param request_time [Time] The time of the request
       # @return [Stoplight::Metadata] The updated metadata after recording the success.
-      def record_recovery_probe_success(config, request_id: SecureRandom.hex(12), request_time: Time.now)
-        request_ts = request_time.to_i
+      def record_recovery_probe_success(config, request_id: SecureRandom.hex(12))
+        current_ts = current_time.to_i
 
         @redis.then do |client|
           client.evalsha(
             record_success_sha,
-            argv: [request_ts, request_id, metrics_ttl, metadata_ttl],
+            argv: [current_ts, request_id, metrics_ttl, metadata_ttl],
             keys: [
               metadata_key(config),
-              recovery_probe_successes_key(config, time: request_ts)
+              recovery_probe_successes_key(config, time: current_ts)
             ].compact
           )
         end
@@ -237,18 +235,15 @@ module Stoplight
       #
       # @param config [Stoplight::Light::Config] The light configuration
       # @param color [String] The color to transition to ("green", "yellow", or "red")
-      # @param current_time [Time] Current timestamp
       # @return [Boolean] true if this is the first instance to detect this transition
-      def transition_to_color(config, color, current_time: Time.now)
-        current_time.to_i
-
+      def transition_to_color(config, color)
         case color
         when Color::GREEN
           transition_to_green(config)
         when Color::YELLOW
-          transition_to_yellow(config, current_time:)
+          transition_to_yellow(config)
         when Color::RED
-          transition_to_red(config, current_time:)
+          transition_to_red(config)
         else
           raise ArgumentError, "Invalid color: #{color}"
         end
@@ -258,7 +253,7 @@ module Stoplight
       #
       # @param config [Stoplight::Light::Config] The light configuration
       # @return [Boolean] true if this is the first instance to detect this transition
-      private def transition_to_green(config, current_time: Time.now)
+      private def transition_to_green(config)
         current_ts = current_time.to_i
         meta_key = metadata_key(config)
 
@@ -275,9 +270,8 @@ module Stoplight
       # Transitions to YELLOW (recovery) state and ensures only one notification
       #
       # @param config [Stoplight::Light::Config] The light configuration
-      # @param current_time [Time] Current timestamp
       # @return [Boolean] true if this is the first instance to detect this transition
-      private def transition_to_yellow(config, current_time: Time.now)
+      private def transition_to_yellow(config)
         current_ts = current_time.to_i
         meta_key = metadata_key(config)
 
@@ -294,9 +288,8 @@ module Stoplight
       # Transitions to RED state and ensures only one notification
       #
       # @param config [Stoplight::Light::Config] The light configuration
-      # @param current_time [Time] Current timestamp
       # @return [Boolean] true if this is the first instance to detect this transition
-      private def transition_to_red(config, current_time: Time.now)
+      private def transition_to_red(config)
         current_ts = current_time.to_i
         meta_key = metadata_key(config)
         recovery_scheduled_after_ts = current_ts + config.cool_off_time
@@ -399,7 +392,7 @@ module Stoplight
         return unless should_sample?(0.01) # 1% chance
 
         redis_seconds, _redis_millis = @redis.then(&:time)
-        app_seconds = Time.now.to_i
+        app_seconds = current_time.to_i
         if (redis_seconds - app_seconds).abs > SKEW_TOLERANCE
           warn("Detected clock skew between Redis and the application server. Redis time: #{redis_seconds}, Application time: #{app_seconds}. See https://github.com/bolshakov/stoplight/wiki/Clock-Skew-and-Stoplight-Reliability")
         end
@@ -443,6 +436,10 @@ module Stoplight
         @record_failure_sha ||= @redis.then do |client|
           client.script("load", Lua::RECORD_FAILURE)
         end
+      end
+
+      private def current_time
+        Time.now
       end
     end
   end
