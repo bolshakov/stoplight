@@ -71,7 +71,7 @@ module Stoplight
       end
 
       KEY_SEPARATOR = ":"
-      KEY_PREFIX = %w[stoplight v5].join(KEY_SEPARATOR)
+      KEY_PREFIX = %w[stoplight v6].join(KEY_SEPARATOR)
 
       # @param redis [::Redis, ConnectionPool<::Redis>]
       # @param warn_on_clock_skew [Boolean] (true) Whether to warn about clock skew between Redis and
@@ -95,51 +95,35 @@ module Stoplight
         detect_clock_skew
 
         window_end_ts = current_time.to_i
-        window_start_ts = window_end_ts - [config.window_size, Base::METRICS_RETENTION_TIME].compact.min.to_i
+        window_start_ts = config.window_size ? window_end_ts - config.window_size : window_end_ts
         recovery_window_start_ts = window_end_ts - config.cool_off_time.to_i
 
-        if config.window_size
-          failure_keys = failure_bucket_keys(config, window_end: window_end_ts)
-          success_keys = success_bucket_keys(config, window_end: window_end_ts)
-        else
-          failure_keys = []
-          success_keys = []
-        end
-        recovery_probe_failure_keys = recovery_probe_failure_bucket_keys(config, window_end: window_end_ts)
-        recovery_probe_success_keys = recovery_probe_success_bucket_keys(config, window_end: window_end_ts)
-
-        successes, errors, recovery_probe_successes, recovery_probe_errors, meta = @redis.with do |client|
+        meta = @redis.with do |client|
           client.evalsha(
             get_metadata_sha,
             argv: [
-              failure_keys.count,
-              recovery_probe_failure_keys.count,
               window_start_ts,
-              window_end_ts,
-              recovery_window_start_ts
+              recovery_window_start_ts,
+              (config.window_size ? 1 : 0)
             ],
             keys: [
               metadata_key(config),
-              *success_keys,
-              *failure_keys,
-              *recovery_probe_success_keys,
-              *recovery_probe_failure_keys
-            ]
+              recovery_probe_error_buckets_key(config),
+              recovery_probe_error_sliding_window_key(config),
+              recovery_probe_success_buckets_key(config),
+              recovery_probe_success_sliding_window_key(config),
+              config.window_size && error_buckets_key(config),
+              config.window_size && errors_sliding_window_key(config),
+              config.window_size && success_buckets_key(config),
+              config.window_size && successes_sliding_window_key(config),
+            ].compact
           )
         end
         meta_hash = meta.each_slice(2).to_h.transform_keys(&:to_sym)
         last_error_json = meta_hash.delete(:last_error_json)
         last_error = normalize_failure(last_error_json, config.error_notifier) if last_error_json
 
-        Metadata.new(
-          current_time:,
-          successes:,
-          errors:,
-          recovery_probe_successes:,
-          recovery_probe_errors:,
-          last_error:,
-          **meta_hash
-        )
+        Metadata.new(current_time:, last_error:, **meta_hash)
       end
 
       # @param config [Stoplight::Light::Config] The light configuration.
@@ -148,30 +132,34 @@ module Stoplight
       def record_failure(config, failure)
         current_ts = current_time.to_i
         failure_json = failure.to_json
+        bucket = current_ts
 
         @redis.then do |client|
           client.evalsha(
             record_failure_sha,
-            argv: [current_ts, SecureRandom.hex(12), failure_json, metrics_ttl, metadata_ttl],
+            argv: ["errors", current_ts, bucket, failure_json, metadata_ttl],
             keys: [
               metadata_key(config),
-              config.window_size && errors_key(config, time: current_ts)
+              config.window_size && error_buckets_key(config),
+              config.window_size && errors_sliding_window_key(config)
             ].compact
           )
         end
         get_metadata(config)
       end
 
-      def record_success(config, request_id: SecureRandom.hex(12))
+      def record_success(config)
         current_ts = current_time.to_i
+        bucket = current_ts
 
         @redis.then do |client|
           client.evalsha(
             record_success_sha,
-            argv: [current_ts, request_id, metrics_ttl, metadata_ttl],
+            argv: ["successes", current_ts, bucket, metadata_ttl],
             keys: [
               metadata_key(config),
-              config.window_size && successes_key(config, time: current_ts)
+              config.window_size && success_buckets_key(config),
+              config.window_size && successes_sliding_window_key(config)
             ].compact
           )
         end
@@ -185,14 +173,16 @@ module Stoplight
       def record_recovery_probe_failure(config, failure)
         current_ts = current_time.to_i
         failure_json = failure.to_json
+        bucket = current_ts
 
         @redis.then do |client|
           client.evalsha(
             record_failure_sha,
-            argv: [current_ts, SecureRandom.uuid, failure_json, metrics_ttl, metrics_ttl],
+            argv: ["recovery_probe_errors", current_ts, bucket, failure_json, metrics_ttl, metrics_ttl],
             keys: [
               metadata_key(config),
-              recovery_probe_errors_key(config, time: current_ts)
+              recovery_probe_error_buckets_key(config),
+              recovery_probe_error_sliding_window_key(config)
             ].compact
           )
         end
@@ -206,18 +196,52 @@ module Stoplight
       # @return [Stoplight::Metadata] The updated metadata after recording the success.
       def record_recovery_probe_success(config, request_id: SecureRandom.hex(12))
         current_ts = current_time.to_i
+        bucket = current_ts
 
         @redis.then do |client|
           client.evalsha(
             record_success_sha,
-            argv: [current_ts, request_id, metrics_ttl, metadata_ttl],
+            argv: ["recovery_probe_successes", current_ts, bucket, metrics_ttl, metadata_ttl],
             keys: [
               metadata_key(config),
-              recovery_probe_successes_key(config, time: current_ts)
+              recovery_probe_success_buckets_key(config),
+              recovery_probe_success_sliding_window_key(config)
             ].compact
           )
         end
         get_metadata(config)
+      end
+
+      def recovery_probe_success_buckets_key(config)
+        key("recovery_probe_success_buckets", config.name)
+      end
+
+      private def recovery_probe_success_sliding_window_key(config)
+        key("recovery_probe_success_sliding_window", config.name)
+      end
+
+      def recovery_probe_error_buckets_key(config)
+        key("recovery_probe_error_buckets", config.name)
+      end
+
+      private def recovery_probe_error_sliding_window_key(config)
+        key("recovery_probe_error_sliding_window", config.name)
+      end
+
+      private def error_buckets_key(config)
+        key("error_buckets", config.name)
+      end
+
+      private def errors_sliding_window_key(config)
+        key("errors_sliding_window", config.name)
+      end
+
+      private def success_buckets_key(config)
+        key("success_buckets", config.name)
+      end
+
+      private def successes_sliding_window_key(config)
+        key("successes_sliding_window", config.name)
       end
 
       def set_state(config, state)
