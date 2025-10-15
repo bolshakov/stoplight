@@ -18,8 +18,8 @@ if is_window_enabled then
   end
 
   -- Sure we need this?
-  redis.call('EXPIRE', sliding_window_key, metadata_ttl)
-  redis.call('EXPIRE', buckets_in_use_key, metadata_ttl)
+  --redis.call('EXPIRE', sliding_window_key, metadata_ttl)
+  --redis.call('EXPIRE', buckets_in_use_key, metadata_ttl)
 end
 
 -- Update metadata
