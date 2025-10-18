@@ -6,8 +6,8 @@
 
     <title>Stoplight Admin</title>
 
-    <script type="module" src="https://cdn.jsdelivr.net/npm/@hotwired/turbo@latest/dist/turbo.es2017-esm.min.js"></script>
-    <script type="module">
+    <script nonce="<%= nonce %>" type="module" src="https://cdn.jsdelivr.net/npm/@hotwired/turbo@latest/dist/turbo.es2017-esm.min.js"></script>
+    <script nonce="<%= nonce %>" type="module">
         document.addEventListener("turbo:load", () => {
             window.initFlowbite()
         })
@@ -63,6 +63,6 @@
       </footer>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
+    <script nonce="<%= nonce %>" src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
   </body>
 </html>

@@ -27,11 +27,12 @@ module Stoplight
     set :protection, except: %i[json_csrf]
     set :data_store, proc { Stoplight.default_config.data_store }
     set :views, File.join(__dir__, "admin", "views")
+    set :nonce, proc {|request| nil}
 
     get "/" do
       lights, stats = dependencies.stats_action.call
 
-      erb :index, locals: stats.merge(lights: lights)
+      erb :index, locals: stats.merge(lights: lights, nonce: settings.nonce(request))
     end
 
     get "/stats" do
