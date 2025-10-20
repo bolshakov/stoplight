@@ -1,57 +1,110 @@
 local window_start_ts = tonumber(ARGV[1])
 local recovery_window_start_ts = tonumber(ARGV[2])
-local window_enabled = tonumber(ARGV[3]) == 1
 
 local metadata_key = KEYS[1]
 local recovery_probe_buckets_in_use_key = KEYS[2]
-local recovery_probe_error_sliding_window_key = KEYS[3]
-local recovery_probe_success_sliding_window_key = KEYS[4]
-local buckets_in_use_key = KEYS[5]
-local error_sliding_window_key = KEYS[6]
-local success_sliding_window_key = KEYS[7]
+local sliding_window_buckets_key = KEYS[3]
+local buckets_in_use_key = KEYS[4]
+local is_window_enabled = buckets_in_use_key ~= nil
 
--- Slide the window by removing expired buckets and substracting their sums from the running sum
-local function substract_buckets(sliding_window_key, metric_name, expired_buckets)
-    local deleted_sums = redis.call('HGETDEL', sliding_window_key, "FIELDS", #expired_buckets, unpack(expired_buckets))
-    local total_removed = 0
-    for idx = 1, #deleted_sums do
-        total_removed = total_removed + (deleted_sums[idx] or 0)
+-- Splits a string by a given delimiter
+-- @param str The string to split
+-- @param delimiter The delimiter to split by
+-- @return A table containing the split parts
+-- @usage
+--   local parts = split("a,b,c", ",") -- parts = {"a", "b", "c"}
+local function split(str, delimiter)
+    local result = {}
+    for match in (str .. delimiter):gmatch("(.-)" .. delimiter) do
+        table.insert(result, match)
     end
-
-    redis.call("HINCRBY", metadata_key, metric_name, -total_removed)
+    return result
 end
 
-local function slide_window(buckets_key, start_at, metrics)
-  local expired_buckets = redis.call('ZRANGEBYSCORE', buckets_key, '-inf', '(' .. start_at)
+local function expire_buckets(buckets_key, start_at)
+  local expired_buckets = redis.call('ZRANGE', buckets_key, '-inf', '(' .. start_at, "BYSCORE")
 
   if #expired_buckets > 0 then
     redis.call("ZREMRANGEBYSCORE", buckets_key, '-inf', '(' .. start_at)
-
-    for sliding_window_key, metric_name in pairs(metrics) do
-        substract_buckets(sliding_window_key, metric_name, expired_buckets)
-    end
   end
+
+  return expired_buckets
 end
 
-slide_window(recovery_probe_buckets_in_use_key, recovery_window_start_ts, {
-    [recovery_probe_error_sliding_window_key] = "recovery_probe_errors",
-    [recovery_probe_success_sliding_window_key] = "recovery_probe_successes",
-})
+local expired_recovery_buckets = expire_buckets(recovery_probe_buckets_in_use_key, recovery_window_start_ts)
 
-if window_enabled then
-  -- It possible that after a successful recovery, Stoplight still see metrics
-  -- that are older than the recovery window. To prevent this from happening,
-  -- we need to limit the start time of the window to the time of the last recovery.
-  -- TODO: Needs testing, I don't think we have this behaviour for Memory data store
+local expired_buckets = {}
+
+if is_window_enabled then
   local recovered_at = redis.call('HGET', metadata_key, 'recovered_at')
   if recovered_at then
-      window_start_ts = math.max(window_start_ts, tonumber(recovered_at))
+    window_start_ts = math.max(window_start_ts, tonumber(recovered_at))
   end
 
-  slide_window(buckets_in_use_key, window_start_ts, {
-      [error_sliding_window_key] = "errors",
-      [success_sliding_window_key] = "successes",
-  })
+  expired_buckets = expire_buckets(buckets_in_use_key, window_start_ts)
+end
+
+local buckets_expired = #expired_buckets + #expired_recovery_buckets
+
+if buckets_expired > 0 then
+  local deleted_sums = redis.call(
+    'HGETDEL', sliding_window_buckets_key,
+    "FIELDS", #expired_buckets + #expired_recovery_buckets,
+    unpack(expired_buckets), unpack(expired_recovery_buckets)
+  )
+
+  local total_recovery_successes_removed = 0
+  local total_recovery_failures_removed = 0
+  local total_successes_removed = 0
+  local total_failures_removed = 0
+
+  for idx = 1, #expired_buckets do
+    local parts = split(expired_buckets[idx], ":")
+
+    if #parts == 2 then
+      if parts[1] == "errors" then
+        total_failures_removed = total_failures_removed + (deleted_sums[idx] or 0)
+      elseif parts[1] == "successes" then
+        total_successes_removed = total_successes_removed + (deleted_sums[idx] or 0)
+      else
+        error("Invalid bucket format in sliding window: " .. expired_buckets[idx])
+      end
+    else
+      error("Invalid bucket format in sliding window: " .. expired_buckets[idx])
+    end
+  end
+
+  for idx = 1, #expired_recovery_buckets do
+    local parts = split(expired_recovery_buckets[idx], ":")
+
+    if #parts == 2 then
+      if parts[1] == "recovery_probe_errors" then
+        total_recovery_failures_removed = total_recovery_failures_removed + (deleted_sums[idx + #expired_buckets] or 0)
+      elseif parts[1] == "recovery_probe_successes" then
+        total_recovery_successes_removed = total_recovery_successes_removed + (deleted_sums[idx + #expired_buckets] or 0)
+      else
+        error("Invalid bucket format in sliding window: " .. expired_recovery_buckets[idx])
+      end
+    else
+      error("Invalid bucket format in sliding window: " .. expired_recovery_buckets[idx])
+    end
+  end
+
+  if total_recovery_successes_removed > 0 then
+    redis.call("HINCRBY", metadata_key, "recovery_probe_successes", -total_recovery_successes_removed)
+  end
+
+  if total_recovery_failures_removed > 0 then
+    redis.call("HINCRBY", metadata_key, "recovery_probe_errors", -total_recovery_failures_removed)
+  end
+
+  if total_successes_removed > 0 then
+    redis.call("HINCRBY", metadata_key, "successes", -total_successes_removed)
+  end
+
+  if total_failures_removed > 0 then
+    redis.call("HINCRBY", metadata_key, "errors", -total_failures_removed)
+  end
 end
 
 return redis.call('HGETALL',  metadata_key)

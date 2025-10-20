@@ -5,12 +5,14 @@ local metadata_ttl = tonumber(ARGV[4])
 
 local metadata_key = KEYS[1]
 local buckets_in_use_key = KEYS[2]
-local sliding_window_key = KEYS[3]
-local is_window_enabled = sliding_window_key ~= nil and buckets_in_use_key ~= nil
+local sliding_window_buckets_key = KEYS[3]
+
+local is_window_enabled = sliding_window_buckets_key ~= nil and buckets_in_use_key ~= nil
 
 -- Record success
 if is_window_enabled then
-  local bucket_sum = redis.call('HINCRBY', sliding_window_key, bucket, 1)
+  local counter_name = metric_name .. ":" .. bucket
+  local bucket_sum = redis.call('HINCRBY', sliding_window_buckets_key, counter_name, 1)
   local is_new_bucket = bucket_sum == 1
 
   if is_new_bucket then

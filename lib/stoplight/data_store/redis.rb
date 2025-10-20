@@ -104,16 +104,12 @@ module Stoplight
             argv: [
               window_start_ts,
               recovery_window_start_ts,
-              (config.window_size ? 1 : 0)
             ],
             keys: [
               metadata_key(config),
-              recovery_probe_buckets_key(config),
-              recovery_probe_error_sliding_window_key(config),
-              recovery_probe_success_sliding_window_key(config),
-              config.window_size && buckets_key(config),
-              config.window_size && errors_sliding_window_key(config),
-              config.window_size && successes_sliding_window_key(config),
+              recovery_probe_bucket_names_key(config),
+              sliding_window_buckets_key(config),
+              config.window_size && bucket_names_key(config),
             ].compact
           )
         end
@@ -138,8 +134,8 @@ module Stoplight
             argv: ["errors", current_ts, bucket, failure_json, metadata_ttl],
             keys: [
               metadata_key(config),
-              config.window_size && buckets_key(config),
-              config.window_size && errors_sliding_window_key(config)
+              config.window_size && bucket_names_key(config),
+              config.window_size && sliding_window_buckets_key(config)
             ].compact
           )
         end
@@ -156,8 +152,8 @@ module Stoplight
             argv: ["successes", current_ts, bucket, metadata_ttl],
             keys: [
               metadata_key(config),
-              config.window_size && buckets_key(config),
-              config.window_size && successes_sliding_window_key(config)
+              config.window_size && bucket_names_key(config),
+              config.window_size && sliding_window_buckets_key(config)
             ].compact
           )
         end
@@ -179,8 +175,8 @@ module Stoplight
             argv: ["recovery_probe_errors", current_ts, bucket, failure_json, metrics_ttl, metrics_ttl],
             keys: [
               metadata_key(config),
-              recovery_probe_buckets_key(config),
-              recovery_probe_error_sliding_window_key(config)
+              recovery_probe_bucket_names_key(config),
+              sliding_window_buckets_key(config)
             ].compact
           )
         end
@@ -202,37 +198,24 @@ module Stoplight
             argv: ["recovery_probe_successes", current_ts, bucket, metrics_ttl, metadata_ttl],
             keys: [
               metadata_key(config),
-              recovery_probe_buckets_key(config),
-              recovery_probe_success_sliding_window_key(config)
+              recovery_probe_bucket_names_key(config),
+              sliding_window_buckets_key(config)
             ].compact
           )
         end
         get_metadata(config)
       end
 
-      private def buckets_key(config)
-        key("buckets", config.name)
+      private def bucket_names_key(config)
+        key("bucket_names", config.name)
       end
 
-      private def recovery_probe_buckets_key(config)
-        key("recovery_probe_buckets", config.name)
+      private def recovery_probe_bucket_names_key(config)
+        key("recovery_probe_bucket_names", config.name)
       end
 
-      private def recovery_probe_success_sliding_window_key(config)
-        key("recovery_probe_success_sliding_window", config.name)
-      end
-
-      private def recovery_probe_error_sliding_window_key(config)
-        key("recovery_probe_error_sliding_window", config.name)
-      end
-
-      private def errors_sliding_window_key(config)
-        key("errors_sliding_window", config.name)
-      end
-
-
-      private def successes_sliding_window_key(config)
-        key("successes_sliding_window", config.name)
+      private def sliding_window_buckets_key(config)
+        key("sliding_window_buckets", config.name)
       end
 
       def set_state(config, state)
