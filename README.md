@@ -99,6 +99,19 @@ light.run { 1 / 0 } #=> raises Stoplight::Error::RedLight: example-zero
 light.color # => "red"
 ```
 
+The `Stoplight::Error::RedLight` provides metadata about the error:
+
+```ruby
+def run_request
+  light = Stoplight("Example", cool_off_time: 10)
+  light.run { 1 / 0 }  #=> raises Stoplight::Error::RedLight
+rescue Stoplight::Error::RedLight => error
+  puts error.light_name #=> "Example"
+  puts error.cool_off_time #=> 10
+  puts error.retry_after   #=> Absolute Time when recovery will be attempted (e.g., "2025-10-21 15:39:50.672414 +0600")
+end
+```
+
 After one minute, the light transitions to yellow, allowing a test execution:
 
 ```ruby
