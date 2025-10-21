@@ -2,7 +2,7 @@
 
 require "spec_helper"
 
-RSpec.describe Stoplight::Light::RedRunStrategy do
+RSpec.describe Stoplight::Light::RedRunStrategy, :freeze do
   subject(:strategy) { described_class.new(config) }
 
   let(:config) { Stoplight.default_config.with(name: "foo", data_store:) }
