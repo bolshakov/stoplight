@@ -6,10 +6,27 @@ module Stoplight
     ConfigurationError = Class.new(Base)
     IncorrectColor = Class.new(Base)
     class RedLight < Base
-      attr_reader :light_name      # The circuit breaker's name
-      attr_reader :cool_off_time   # Cool-off period in seconds
-      attr_reader :retry_after     # Absolute Time when recovery will be attempted
+      # @!attribute light_name
+      #   @return [String] The light's name
+      attr_reader :light_name
 
+      # @!attribute cool_off_time
+      #   @return [Numeric] Cool-off period in seconds
+      attr_reader :cool_off_time
+
+      # @!attribute retry_after
+      #   @return [Time] Absolute Time when recovery will be attempted
+      attr_reader :retry_after
+
+      # Initializes a new RedLight error.
+      #
+      # @param light_name [String] The light's name
+      #
+      # @option cool_off_time [Numeric] Cool-off period in seconds
+      #
+      # @option retry_after [Time] Absolute Time when recovery will be attempted
+      #
+      # @return [Stoplight::Error::RedLight]
       def initialize(light_name, cool_off_time:, retry_after:)
         @light_name = light_name
         @cool_off_time = cool_off_time
