@@ -4,10 +4,16 @@ RSpec.shared_examples "data store metrics" do
   describe "Metadata#last_success_at" do
     let(:request_time) { Time.at(1746119141) }
 
+    around do |example|
+      Timecop.freeze(request_time) do
+        example.run
+      end
+    end
+
     context "when the success is recorded" do
       it "returns the time of the success" do
         expect do
-          data_store.record_success(config, request_time:)
+          data_store.record_success(config)
         end.to change { data_store.get_metadata(config).last_success_at }
           .from(nil)
           .to(request_time)
@@ -17,54 +23,41 @@ RSpec.shared_examples "data store metrics" do
     context "when the recovery probe success is recorded" do
       it "returns the time of the success" do
         expect do
-          data_store.record_recovery_probe_success(config, request_time:)
+          data_store.record_recovery_probe_success(config)
         end.to change { data_store.get_metadata(config).last_success_at }
           .from(nil)
           .to(request_time)
       end
     end
 
-    context "when an older request is recorded after a newer one" do
-      let(:older_request_time) { Time.at(1746110141) }
-
-      before do
-        data_store.record_success(config, request_time:)
-      end
-
-      it "returns the time of the latest successful request" do
-        expect do
-          data_store.record_success(config, request_time: older_request_time)
-        end.not_to change { data_store.get_metadata(config).last_success_at }
-          .from(request_time)
-      end
-    end
-
     context "when a newer request is recorded after an older one" do
-      let(:older_request_time) { Time.at(1746110141) }
-
       before do
-        data_store.record_success(config, request_time: older_request_time)
+        data_store.record_success(config)
       end
 
       it "returns the time of the latest request" do
         expect do
-          data_store.record_success(config, request_time:)
+          Timecop.freeze(request_time + 20) do
+            data_store.record_success(config)
+          end
         end.to change { data_store.get_metadata(config).last_success_at }
-          .from(older_request_time)
-          .to(request_time)
+          .from(request_time)
+          .to(request_time + 20)
       end
     end
 
     context "when a newer recovery probe success is recorded after a normal request" do
-      let(:recovery_probe_request_time) { Time.at(1746159141) }
+      let(:recovery_probe_request_time) { request_time + 20 }
 
       before do
-        data_store.record_success(config, request_time:)
+        data_store.record_success(config)
       end
 
       it "returns the time of the latest request" do
         expect do
-          data_store.record_recovery_probe_success(config, request_time: recovery_probe_request_time)
+          Timecop.freeze(recovery_probe_request_time) do
+            data_store.record_recovery_probe_success(config)
+          end
         end.to change { data_store.get_metadata(config).last_success_at }
           .from(request_time)
           .to(recovery_probe_request_time)
@@ -72,15 +65,17 @@ RSpec.shared_examples "data store metrics" do
     end
 
     context "when a success is recorded after a recovery probe success" do
-      let(:recovery_probe_request_time) { Time.at(1746110141) }
+      let(:recovery_probe_request_time) { request_time - 20 }
 
       before do
-        data_store.record_recovery_probe_success(config, request_time: recovery_probe_request_time)
+        Timecop.freeze(recovery_probe_request_time) do
+          data_store.record_recovery_probe_success(config)
+        end
       end
 
       it "returns the time of the latest request" do
         expect do
-          data_store.record_success(config, request_time:)
+          data_store.record_success(config)
         end.to change { data_store.get_metadata(config).last_success_at }
           .from(recovery_probe_request_time)
           .to(request_time)
@@ -88,40 +83,34 @@ RSpec.shared_examples "data store metrics" do
     end
 
     context "when a newer recovery probe success is recorded after another recovery probe success" do
-      let(:recovery_probe_request_time) { Time.at(1746159141) }
+      let(:recovery_probe_request_time) { request_time + 20 }
 
       before do
-        data_store.record_recovery_probe_success(config, request_time:)
+        data_store.record_recovery_probe_success(config)
       end
 
       it "returns the time of the latest request" do
         expect do
-          data_store.record_recovery_probe_success(config, request_time: recovery_probe_request_time)
+          Timecop.freeze(recovery_probe_request_time) do
+            data_store.record_recovery_probe_success(config)
+          end
         end.to change { data_store.get_metadata(config).last_success_at }
           .from(request_time)
           .to(recovery_probe_request_time)
-      end
-    end
-
-    context "when a newer recovery probe success is recorded after a newer recovery probe success" do
-      let(:recovery_probe_request_time) { request_time - 10 }
-
-      before do
-        data_store.record_recovery_probe_success(config, request_time:)
-      end
-
-      it "returns the time of the latest request" do
-        expect do
-          data_store.record_recovery_probe_success(config, request_time: recovery_probe_request_time)
-        end.not_to change { data_store.get_metadata(config).last_success_at }
-          .from(request_time)
       end
     end
   end
 
   describe "Metadata#last_error_at" do
     let(:failure) { Stoplight::Failure.from_error(error) }
+    let(:request_time) { failure.time }
     let(:error) { StandardError.new("Test error") }
+
+    around do |example|
+      Timecop.freeze(request_time) do
+        example.run
+      end
+    end
 
     context "when the failure is recorded" do
       it "returns the time of the failure" do
@@ -129,43 +118,51 @@ RSpec.shared_examples "data store metrics" do
           data_store.record_failure(config, failure)
         end.to change { data_store.get_metadata(config).last_error_at }
           .from(nil)
-          .to(failure.time)
+          .to(request_time)
       end
     end
 
     context "when an older failure is recorded after a newer one" do
       let(:older_failure) { Stoplight::Failure.from_error(error, time: Time.now - 1000) }
+      let(:older_failure_request_time) { request_time + 20 }
 
       before do
         data_store.record_failure(config, failure)
       end
 
-      it "returns the time of the latest failure" do
+      it "returns the time of the latest recorded failure" do
         expect do
-          data_store.record_failure(config, older_failure)
-        end.not_to change { data_store.get_metadata(config).last_error_at }
-          .from(failure.time)
+          Timecop.freeze(older_failure_request_time) do
+            data_store.record_failure(config, older_failure)
+          end
+        end.to change { data_store.get_metadata(config).last_error_at }
+          .from(request_time)
+          .to(older_failure_request_time)
       end
     end
 
     context "when a newer failure is recorded after an older one" do
       let(:older_failure) { Stoplight::Failure.from_error(error, time: Time.now - 1000) }
+      let(:older_failure_request_time) { request_time - 20 }
 
       before do
-        data_store.record_failure(config, older_failure)
+        Timecop.freeze(older_failure_request_time) do
+          data_store.record_failure(config, older_failure)
+        end
       end
 
       it "returns the time of the latest failure" do
         expect do
           data_store.record_failure(config, failure)
         end.to change { data_store.get_metadata(config).last_error_at }
-          .from(older_failure.time)
-          .to(failure.time)
+          .from(older_failure_request_time)
+          .to(request_time)
       end
     end
 
     context "when a newer recovery probe failure is recorded after a failure" do
       let(:recovery_probe_failure) { Stoplight::Failure.from_error(error, time: Time.now + 5000) }
+      let(:recovery_probe_failure_request_time) { request_time + 5000 }
 
       before do
         data_store.record_failure(config, failure)
@@ -173,26 +170,31 @@ RSpec.shared_examples "data store metrics" do
 
       it "returns the time of the latest failure" do
         expect do
-          data_store.record_recovery_probe_failure(config, recovery_probe_failure)
+          Timecop.freeze(recovery_probe_failure_request_time) do
+            data_store.record_recovery_probe_failure(config, recovery_probe_failure)
+          end
         end.to change { data_store.get_metadata(config).last_error_at }
-          .from(failure.time)
-          .to(recovery_probe_failure.time)
+          .from(request_time)
+          .to(recovery_probe_failure_request_time)
       end
     end
 
     context "when a failure is recorded after a recovery probe failure" do
       let(:recovery_probe_failure) { Stoplight::Failure.from_error(error, time: Time.now - 5000) }
+      let(:recovery_probe_failure_request_time) { request_time - 5000 }
 
       before do
-        data_store.record_recovery_probe_failure(config, recovery_probe_failure)
+        Timecop.freeze(recovery_probe_failure_request_time) do
+          data_store.record_recovery_probe_failure(config, recovery_probe_failure)
+        end
       end
 
       it "returns the time of the latest failure" do
         expect do
           data_store.record_failure(config, failure)
         end.to change { data_store.get_metadata(config).last_error_at }
-          .from(recovery_probe_failure.time)
-          .to(failure.time)
+          .from(recovery_probe_failure_request_time)
+          .to(request_time)
       end
     end
   end
@@ -212,29 +214,35 @@ RSpec.shared_examples "data store metrics" do
     end
 
     context "when an older failure is recorded after a newer one" do
-      let(:older_failure) { Stoplight::Failure.from_error(error, time: Time.now - 5000) }
+      let(:older_failure) { Stoplight::Failure.from_error(older_error, time: Time.now - 5000) }
+      let(:older_error) { StandardError.new("older error") }
 
       before do
         data_store.record_failure(config, failure)
       end
 
-      it "returns the latest failure" do
+      it "returns the latest recorded failure" do
         expect(data_store.get_metadata(config).last_error).to eq(failure)
 
-        data_store.record_failure(config, older_failure)
+        Timecop.freeze(Time.now + 1) do
+          metadata = data_store.record_failure(config, older_failure)
 
-        expect(data_store.get_metadata(config).last_error).to eq(failure)
+          expect(metadata.last_error).to eq(older_failure)
+        end
       end
     end
 
     context "when a newer failure is recorded after an older one" do
       let(:older_failure) { Stoplight::Failure.from_error(error, time: Time.now - 1000) }
+      let(:older_failure_request_time) { older_failure.time }
 
       before do
-        data_store.record_failure(config, older_failure)
+        Timecop.freeze(older_failure_request_time) do
+          data_store.record_failure(config, older_failure)
+        end
       end
 
-      it "returns the time of the latest failure" do
+      it "returns the time of the latest recorded failure" do
         expect(data_store.get_metadata(config).last_error).to eq(older_failure)
 
         data_store.record_failure(config, failure)
@@ -245,15 +253,18 @@ RSpec.shared_examples "data store metrics" do
 
     context "when a newer recovery probe failure is recorded after a failure" do
       let(:recovery_probe_failure) { Stoplight::Failure.from_error(error, time: Time.now + 5000) }
+      let(:recovery_probe_failure_request_time) { recovery_probe_failure.time }
 
       before do
         data_store.record_failure(config, failure)
       end
 
-      it "returns the time of the latest failure" do
+      it "returns the time of the latest recorded failure" do
         expect(data_store.get_metadata(config).last_error).to eq(failure)
 
-        data_store.record_recovery_probe_failure(config, recovery_probe_failure)
+        Timecop.freeze(recovery_probe_failure_request_time) do
+          data_store.record_recovery_probe_failure(config, recovery_probe_failure)
+        end
 
         expect(data_store.get_metadata(config).last_error).to eq(recovery_probe_failure)
       end
@@ -261,12 +272,15 @@ RSpec.shared_examples "data store metrics" do
 
     context "when a failure is recorded after a recovery probe failure" do
       let(:recovery_probe_failure) { Stoplight::Failure.from_error(error, time: Time.now - 5000) }
+      let(:recovery_probe_failure_request_time) { recovery_probe_failure.time }
 
       before do
-        data_store.record_recovery_probe_failure(config, recovery_probe_failure)
+        Timecop.freeze(recovery_probe_failure_request_time) do
+          data_store.record_recovery_probe_failure(config, recovery_probe_failure)
+        end
       end
 
-      it "returns the time of the latest failure" do
+      it "returns the time of the latest recorded failure" do
         expect(data_store.get_metadata(config).last_error).to eq(recovery_probe_failure)
 
         data_store.record_failure(config, failure)
@@ -321,7 +335,9 @@ RSpec.shared_examples "data store metrics" do
         let(:window_size) { 5000 }
 
         it "returns the the number of successful requests within the current window" do
-          data_store.record_success(config, request_time: Time.now - window_size - 1)
+          Timecop.freeze(Time.now - window_size - 1) do
+            data_store.record_success(config)
+          end
           data_store.record_success(config)
           data_store.record_success(config)
 
@@ -377,7 +393,9 @@ RSpec.shared_examples "data store metrics" do
         let(:window_size) { 5000 }
 
         it "returns the the number of successful requests within the current window" do
-          data_store.record_failure(config, outdated_failure)
+          Timecop.freeze(outdated_failure.time) do
+            data_store.record_failure(config, outdated_failure)
+          end
           data_store.record_failure(config, failure)
           data_store.record_failure(config, failure)
 
@@ -420,7 +438,9 @@ RSpec.shared_examples "data store metrics" do
       let(:window_size) { 5000 }
 
       it "returns the the number of successful requests within the current window" do
-        data_store.record_recovery_probe_success(config, request_time: Time.now - window_size - 1)
+        Timecop.freeze(Time.now - window_size - 1) do
+          data_store.record_recovery_probe_success(config)
+        end
         data_store.record_recovery_probe_success(config)
         data_store.record_recovery_probe_success(config)
 
@@ -463,7 +483,9 @@ RSpec.shared_examples "data store metrics" do
       let(:window_size) { 5000 }
 
       it "returns the the number of successful requests within the current window" do
-        data_store.record_recovery_probe_failure(config, outdated_failure)
+        Timecop.freeze(outdated_failure.time) do
+          data_store.record_recovery_probe_failure(config, outdated_failure)
+        end
         data_store.record_recovery_probe_failure(config, failure)
         data_store.record_recovery_probe_failure(config, failure)
 
@@ -504,7 +526,9 @@ RSpec.shared_examples "data store metrics" do
       let(:window_size) { 5000 }
 
       it "returns the the number of successful requests within the current window" do
-        data_store.record_success(config, request_time: Time.now - window_size - 1)
+        Timecop.freeze(Time.now - window_size - 1) do
+          data_store.record_success(config)
+        end
         data_store.record_success(config)
         data_store.record_success(config)
 
@@ -546,7 +570,9 @@ RSpec.shared_examples "data store metrics" do
       let(:window_size) { 5000 }
 
       it "returns the the number of successful requests within the current window" do
-        data_store.record_failure(config, outdated_failure)
+        Timecop.freeze(outdated_failure.time) do
+          data_store.record_failure(config, outdated_failure)
+        end
         data_store.record_failure(config, failure)
         data_store.record_failure(config, failure)
 
@@ -606,7 +632,9 @@ RSpec.shared_examples "data store metrics" do
         let(:window_size) { 300 }
 
         it "returns the the number of successful errors within the current window" do
-          data_store.record_failure(config, outdated_failure)
+          Timecop.freeze(outdated_failure.time) do
+            data_store.record_failure(config, outdated_failure)
+          end
           data_store.record_failure(config, failure)
           data_store.record_failure(config, failure)
 
@@ -623,7 +651,9 @@ RSpec.shared_examples "data store metrics" do
         let(:window_size) { 300 }
 
         it "returns the the number of successful errors within the current window after recovery" do
-          data_store.record_failure(config, outdated_failure)
+          Timecop.freeze(outdated_failure.time) do
+            data_store.record_failure(config, outdated_failure)
+          end
           data_store.transition_to_color(config, Stoplight::Color::RED)
           data_store.transition_to_color(config, Stoplight::Color::GREEN)
 
