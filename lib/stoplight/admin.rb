@@ -2,7 +2,6 @@
 
 begin
   require "sinatra/base"
-  require "sinatra/contrib"
   require "sinatra/json"
 rescue LoadError
   raise <<~WARN
