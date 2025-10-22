@@ -108,7 +108,7 @@ def run_request
 rescue Stoplight::Error::RedLight => error
   puts error.light_name #=> "Example"
   puts error.cool_off_time #=> 10
-  puts error.retry_after   #=> Absolute Time when recovery will be attempted (e.g., "2025-10-21 15:39:50.672414 +0600")
+  puts error.retry_after   #=> Absolute Time after which a recovery attempt can occur (e.g., "2025-10-21 15:39:50.672414 +0600")
 end
 ```
 
