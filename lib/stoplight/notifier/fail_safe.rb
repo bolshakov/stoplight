@@ -10,20 +10,27 @@ module Stoplight
     class FailSafe < Base
       # @!attribute [r] notifier
       #   @return [Stoplight::Notifier::Base] The underlying notifier being wrapped.
-      protected attr_reader :notifier
+      attr_reader :notifier
+
+      # @!attribute [r] error_notifier
+      #   @return [Stoplight::Notifier::Base] The underlying notifier being wrapped.
+      attr_reader :error_notifier
 
       class << self
         # Wraps a notifier with fail-safe mechanisms.
         #
         # @param notifier [Stoplight::Notifier::Base] The notifier to wrap.
+        # @param error_notifier [Proc] called when wrapped data store fails
         # @return [Stoplight::Notifier::FailSafe] The original notifier if it is already
         #   a +FailSafe+ instance, otherwise a new +FailSafe+ instance.
-        def wrap(notifier)
+        def wrap(notifier:, error_notifier:)
           case notifier
-          when FailSafe
+          in FailSafe if notifier.error_notifier == error_notifier
             notifier
+          in FailSafe
+            new(notifier: notifier.notifier, error_notifier:)
           else
-            new(notifier)
+            new(notifier:, error_notifier:)
           end
         end
       end
@@ -31,20 +38,22 @@ module Stoplight
       # Initializes a new instance of the +FailSafe+ class.
       #
       # @param notifier [Stoplight::Notifier::Base] The notifier to wrap.
-      def initialize(notifier)
+      # @param error_notifier [Proc] called when wrapped data store fails
+      def initialize(notifier:, error_notifier:)
         @notifier = notifier
+        @error_notifier = error_notifier
       end
 
       # Sends a notification using the wrapped notifier with fail-safe mechanisms.
       #
-      # @param config [Stoplight::Light::Config] The light configuration.
+      # @param config [Stoplight::Domain::Config] The light configuration.
       # @param from_color [String] The initial color of the light.
       # @param to_color [String] The target color of the light.
       # @param error [Exception, nil] An optional error to include in the notification.
       # @return [void]
       def notify(config, from_color, to_color, error = nil)
         fallback = proc do |exception|
-          config.error_notifier.call(exception) if exception
+          error_notifier.call(exception) if exception
           nil
         end
 

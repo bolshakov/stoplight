@@ -4,10 +4,10 @@ require "spec_helper"
 
 RSpec.describe Stoplight::Notifier::FailSafe do
   describe "#notify" do
-    subject(:fail_safe_notifier) { described_class.new(notifier) }
+    subject(:fail_safe_notifier) { described_class.new(notifier:, error_notifier:) }
 
     let(:notifier) { instance_double(Stoplight::Notifier::Base) }
-    let(:config) { instance_double(Stoplight::Light::Config, error_notifier: error_notifier) }
+    let(:config) { instance_double(Stoplight::Domain::Config) }
     let(:error_notifier) { instance_double(Proc) }
     let(:from_color) { "green" }
     let(:to_color) { "red" }
@@ -36,10 +36,16 @@ RSpec.describe Stoplight::Notifier::FailSafe do
   end
 
   describe ".wrap" do
-    subject(:fail_safe) { described_class.wrap(notifier) }
+    subject(:fail_safe) { described_class.wrap(notifier:, error_notifier:) }
+    let(:error_notifier) { instance_double(Proc) }
 
     context "when notifier is FailSafe already" do
-      let(:notifier) { Stoplight::Notifier::FailSafe.new(instance_double(Stoplight::Notifier::Base)) }
+      let(:notifier) do
+        Stoplight::Notifier::FailSafe.new(
+          notifier: instance_double(Stoplight::Notifier::Base),
+          error_notifier: error_notifier
+        )
+      end
 
       it "returns itself" do
         expect(fail_safe).to be(notifier)

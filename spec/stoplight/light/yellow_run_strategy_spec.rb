@@ -3,13 +3,21 @@
 require "spec_helper"
 
 RSpec.describe Stoplight::Light::YellowRunStrategy do
-  subject(:strategy) { described_class.new(config) }
+  subject(:strategy) do
+    described_class.new(
+      config:,
+      data_store:,
+      notifiers: [notifier],
+      traffic_recovery:
+    )
+  end
 
   let(:config) do
-    Stoplight.default_config.with(
-      data_store:,
-      traffic_recovery:,
-      notifiers: [notifier]
+    Stoplight::Domain::Config.empty.with(
+      name: "foo",
+      tracked_errors: [StandardError],
+      skipped_errors: [],
+      cool_off_time: 60
     )
   end
   let(:notifier) { instance_double(Stoplight::Notifier::Base) }

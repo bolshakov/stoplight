@@ -1,15 +1,27 @@
 # frozen_string_literal: true
 
 RSpec.describe Stoplight::Light do
-  let(:config) { Stoplight.default_config.with(name: random_string) }
-  let(:light) { Stoplight::Light.new(config) }
-  let(:failure) do
-    Stoplight::Failure.new(error.class_name, error.message, time)
+  let(:light) do
+    described_class.new(
+      config,
+      green_run_strategy:,
+      yellow_run_strategy:,
+      red_run_strategy:,
+      factory:,
+      data_store:
+    )
   end
-  let(:error) { error_class.new(error_message) }
-  let(:error_class) { Class.new(StandardError) }
-  let(:error_message) { random_string }
-  let(:time) { Time.new }
+  let(:factory) { instance_double(Stoplight::Domain::AbstractLightFactory) }
+  let(:config) do
+    Stoplight::Domain::Config.empty.with(
+      name: random_string,
+      cool_off_time: 60
+    )
+  end
+  let(:green_run_strategy) { instance_double(Stoplight::Light::GreenRunStrategy) }
+  let(:yellow_run_strategy) { instance_double(Stoplight::Light::YellowRunStrategy) }
+  let(:red_run_strategy) { instance_double(Stoplight::Light::RedRunStrategy) }
+  let(:data_store) { Stoplight::DataStore::Memory.new }
 
   def random_string
     ("a".."z").to_a.sample(8).join
@@ -19,13 +31,13 @@ RSpec.describe Stoplight::Light do
     let(:light) { Stoplight("foo") }
     let(:light_with_the_same_name) { Stoplight("foo") }
     let(:light_with_different_name) { Stoplight("bar") }
-    let(:light_with_different_config) { Stoplight("foo").with_cool_off_time(10) }
+    let(:light_with_different_config) { Stoplight("foo", cool_off_time: 10) }
 
     it "returns true when the lights have the same configuration" do
       expect(light == light_with_the_same_name).to eq(true)
       expect(light == light_with_different_name).to eq(false)
       expect(light == light_with_different_config).to eq(false)
-      expect(light.with_cool_off_time(10) == light_with_different_config).to eq(true)
+      expect(light.with(cool_off_time: 10) == light_with_different_config).to eq(true)
     end
   end
 
@@ -33,17 +45,13 @@ RSpec.describe Stoplight::Light do
     let(:color) { Stoplight::Color::GREEN }
 
     context "with correct color" do
-      it "returns the light" do
-        expect(light.lock(color)).to be_a Stoplight::Light
-      end
-
       context "with green color" do
         let(:color) { Stoplight::Color::GREEN }
 
         it "locks green color" do
-          expect(config.data_store).to receive(:set_state).with(config, Stoplight::State::LOCKED_GREEN)
+          expect(data_store).to receive(:set_state).with(config, Stoplight::State::LOCKED_GREEN)
 
-          light.lock(color)
+          expect(light.lock(color)).to be_a Stoplight::Light
         end
       end
 
@@ -51,9 +59,9 @@ RSpec.describe Stoplight::Light do
         let(:color) { Stoplight::Color::RED }
 
         it "locks red color" do
-          expect(config.data_store).to receive(:set_state).with(config, Stoplight::State::LOCKED_RED)
+          expect(data_store).to receive(:set_state).with(config, Stoplight::State::LOCKED_RED)
 
-          light.lock(color)
+          expect(light.lock(color)).to be_a Stoplight::Light
         end
       end
     end
@@ -66,7 +74,7 @@ RSpec.describe Stoplight::Light do
       end
 
       it "does not lock color" do
-        expect(config.data_store).to_not receive(:set_state)
+        expect(data_store).to_not receive(:set_state)
 
         suppress(Stoplight::Error::IncorrectColor) { light.lock(color) }
       end
@@ -74,17 +82,13 @@ RSpec.describe Stoplight::Light do
   end
 
   describe "#unlock" do
-    it "returns the light" do
-      expect(light.unlock).to be_a Stoplight::Light
-    end
-
     context "with locked green light" do
       before { light.lock(Stoplight::Color::GREEN) }
 
       it "unlocks light" do
-        expect(config.data_store).to receive(:set_state).with(config, Stoplight::State::UNLOCKED)
+        expect(data_store).to receive(:set_state).with(config, Stoplight::State::UNLOCKED)
 
-        light.unlock
+        expect(light.unlock).to be_a Stoplight::Light
       end
     end
 
@@ -92,15 +96,15 @@ RSpec.describe Stoplight::Light do
       before { light.lock(Stoplight::Color::RED) }
 
       it "unlocks light" do
-        expect(config.data_store).to receive(:set_state).with(config, Stoplight::State::UNLOCKED)
+        expect(data_store).to receive(:set_state).with(config, Stoplight::State::UNLOCKED)
 
-        light.unlock
+        expect(light.unlock).to be_a Stoplight::Light
       end
     end
 
     context "with unlocked light" do
       it "unlocks light" do
-        expect(config.data_store).to receive(:set_state).with(config, Stoplight::State::UNLOCKED)
+        expect(data_store).to receive(:set_state).with(config, Stoplight::State::UNLOCKED)
 
         light.unlock
       end
@@ -118,17 +122,16 @@ RSpec.describe Stoplight::Light do
       }
     end
 
-    subject(:with_combined_settings) { light.with(**settings) }
-
     it "applies all settings correctly" do
-      expect(with_combined_settings.config).to have_attributes(**settings)
+      new_light = instance_double(Stoplight::Light)
+      expect(factory).to receive(:build_with).with(**settings).and_return(new_light)
+
+      expect(light.with(**settings)).to eq(new_light)
     end
   end
 
   context "with memory data store" do
-    let(:config) { Stoplight.default_config.with(name: random_string, data_store:, notifiers: [notifier]) }
     let(:data_store) { Stoplight::DataStore::Memory.new }
-    let(:notifier) { instance_double(Stoplight::Notifier::Base) }
 
     it_behaves_like "Stoplight::Light#state"
     it_behaves_like "Stoplight::Light#color"
@@ -136,9 +139,7 @@ RSpec.describe Stoplight::Light do
   end
 
   context "with redis data store", :redis do
-    let(:config) { Stoplight.default_config.with(name: random_string, data_store:, notifiers: [notifier]) }
     let(:data_store) { Stoplight::DataStore::Redis.new(redis) }
-    let(:notifier) { instance_double(Stoplight::Notifier::Base) }
 
     it_behaves_like "Stoplight::Light#state"
     it_behaves_like "Stoplight::Light#color"

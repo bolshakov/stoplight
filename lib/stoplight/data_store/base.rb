@@ -16,7 +16,7 @@ module Stoplight
 
       # Retrieves metadata for a specific light configuration.
       #
-      # @param config [Stoplight::Light::Config] The light configuration.
+      # @param config [Stoplight::Domain::Config] The light configuration.
       # @return [Stoplight::Metadata] The metadata associated with the light.
       def get_metadata(config)
         raise NotImplementedError
@@ -24,7 +24,7 @@ module Stoplight
 
       # Records a failure for a specific light configuration.
       #
-      # @param config [Stoplight::Light::Config]
+      # @param config [Stoplight::Domain::Config]
       # @param failure [Failure] The failure to record.
       # @return [Stoplight::Metadata] The metadata associated with the light.
       def record_failure(config, failure)
@@ -33,7 +33,7 @@ module Stoplight
 
       # Records a success for a specific light configuration.
       #
-      # @param config [Stoplight::Light::Config]
+      # @param config [Stoplight::Domain::Config]
       # @return [void]
       def record_success(config)
         raise NotImplementedError
@@ -41,7 +41,7 @@ module Stoplight
 
       # Records a failed recovery probe for a specific light configuration.
       #
-      # @param config [Stoplight::Light::Config]
+      # @param config [Stoplight::Domain::Config]
       # @param failure [Failure]
       # @return [Stoplight::Metadata]
       def record_recovery_probe_failure(config, failure)
@@ -50,7 +50,7 @@ module Stoplight
 
       # Records a successful recovery probe for a specific light configuration.
       #
-      # @param config [Stoplight::Light::Config]
+      # @param config [Stoplight::Domain::Config]
       # @return [Stoplight::Metadata]
       def record_recovery_probe_success(config)
         raise NotImplementedError
@@ -58,7 +58,7 @@ module Stoplight
 
       # Sets the state of a specific light configuration.
       #
-      # @param config [Stoplight::Light::Config]
+      # @param config [Stoplight::Domain::Config]
       # @param state [String] The new state to set.
       # @return [String] The state that was set.
       def set_state(config, state)
@@ -72,7 +72,7 @@ module Stoplight
       # is considered the "first" to perform the transition (and therefore responsible for
       # triggering notifications).
       #
-      # @param config [Stoplight::Light::Config]
+      # @param config [Stoplight::Domain::Config]
       # @param color [String] The target color/state to transition to.
       #   Should be one of Stoplight::Color::GREEN, Stoplight::Color::YELLOW, or Stoplight::Color::RED.
       #

@@ -36,8 +36,8 @@ module Stoplight
     class Base
       # Checks if the strategy is compatible with the given Stoplight configuration.
       #
-      # @param config [Stoplight::Light::Config]
-      # @return [Stoplight::Config::CompatibilityResult]
+      # @param config [Stoplight::Domain::Config]
+      # @return [StopDomain::Config::CompatibilityResult]
       # :nocov:
       def check_compatibility(config)
         raise NotImplementedError
@@ -47,7 +47,7 @@ module Stoplight
       # Determines the appropriate recovery state based on the Stoplight's
       # current metrics and recovery progress.
       #
-      # @param config [Stoplight::Light::Config]
+      # @param config [Stoplight::Domain::Config]
       # @param metadata [Stoplight::Metadata]
       # @return [TrafficRecovery::Decision]
       # :nocov:
@@ -64,13 +64,13 @@ module Stoplight
 
       # Returns a compatibility result indicating the strategy is compatible.
       #
-      # @return [Stoplight::Config::CompatibilityResult] A compatible result.
+      # @return [StopDomain::Config::CompatibilityResult] A compatible result.
       private def compatible = Config::CompatibilityResult.compatible
 
       # Returns a compatibility result indicating the strategy is incompatible.
       #
       # @param errors [Array<String>] The list of error messages describing incompatibility.
-      # @return [Stoplight::Config::CompatibilityResult] An incompatible result.
+      # @return [StopDomain::Config::CompatibilityResult] An incompatible result.
       private def incompatible(*errors) = Config::CompatibilityResult.incompatible(*errors)
     end
   end

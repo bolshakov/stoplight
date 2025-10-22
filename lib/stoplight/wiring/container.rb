@@ -1,0 +1,65 @@
+# frozen_string_literal: true
+
+module Stoplight
+  module Wiring
+    # This container implements an instance of +Stoplight::Infrastructure::DependencyInjection::Container+
+    # with Stoplight-specific wiring knowledge. It defines how to construct and connect
+    # all the components needed for a circuit breaker to function.
+    #
+    # ## Default Configuration
+    #
+    # The container is pre-configured with sensible defaults:
+    # - Data Store - in-memory storage
+    # - STDERR notifier
+    # - No-op error notifier
+    # - Consecutive failure detection
+    # - Consecutive success recovery
+    #
+    # @see Infrastructure::DependencyInjection::Container Generic DI container
+    # @see Stoplight::Wiring::LightFactory Factory that uses this container
+    # @api private
+    Container = Infrastructure::DependencyInjection::Container.define do
+      register(:config, Wiring::Light::DefaultConfig)
+      register(:error_notifier, Stoplight::Default::ERROR_NOTIFIER)
+      register(:traffic_control, Stoplight::Default::TRAFFIC_CONTROL)
+      register(:traffic_recovery, Stoplight::Default::TRAFFIC_RECOVERY)
+
+      register(:data_store, Stoplight::Default::DATA_STORE) do |data_store|
+        DataStore::FailSafe.wrap(
+          data_store:,
+          error_notifier: resolve(:error_notifier)
+        )
+      end
+
+      register(:notifiers, Stoplight::Default::NOTIFIERS) do |notifiers|
+        error_notifier = resolve(:error_notifier)
+        notifiers.map { |notifier| Notifier::FailSafe.wrap(notifier:, error_notifier:) }
+      end
+
+      factory(:green_run_strategy) do
+        Stoplight::Light::GreenRunStrategy.new(
+          config: resolve(:config),
+          data_store: resolve(:data_store),
+          notifiers: resolve(:notifiers),
+          traffic_control: resolve(:traffic_control)
+        )
+      end
+
+      factory(:yellow_run_strategy) do
+        Stoplight::Light::YellowRunStrategy.new(
+          config: resolve(:config),
+          data_store: resolve(:data_store),
+          notifiers: resolve(:notifiers),
+          traffic_recovery: resolve(:traffic_recovery)
+        )
+      end
+
+      factory(:red_run_strategy) do
+        Stoplight::Light::RedRunStrategy.new(
+          config: resolve(:config),
+          data_store: resolve(:data_store)
+        )
+      end
+    end
+  end
+end

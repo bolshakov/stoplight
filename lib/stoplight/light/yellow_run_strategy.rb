@@ -10,6 +10,24 @@ module Stoplight
     #
     # @api private
     class YellowRunStrategy < RunStrategy
+      # @!attribute [r] traffic_recovery
+      #   @return [Stoplight::TrafficRecovery::Base]
+      protected attr_reader :traffic_recovery
+
+      # @!attribute [r] notifiers
+      #   @return [Stoplight::Notifier::Base]
+      protected attr_reader :notifiers
+
+      # @param config [Stoplight::Domain::Config]
+      # @param data_store [Stoplight::DataStore::Base]
+      # @param traffic_recovery [Stoplight::TrafficRecovery::Base]
+      # @param notifiers [Array<Stoplight::Notifier::Base>]
+      def initialize(config:, data_store:, traffic_recovery:, notifiers:)
+        super(config:, data_store:)
+        @traffic_recovery = traffic_recovery
+        @notifiers = notifiers
+      end
+
       # Executes the provided code block when the light is in the yellow state.
       #
       # @param fallback [Proc, nil] A fallback proc to execute in case of an error.
@@ -54,32 +72,32 @@ module Stoplight
       def transition_to_yellow(metadata:)
         return unless metadata.color == Color::YELLOW
 
-        if metadata.recovery_scheduled_after && config.data_store.transition_to_color(config, Color::YELLOW)
-          config.notifiers.each do |notifier|
+        if metadata.recovery_scheduled_after && data_store.transition_to_color(config, Color::YELLOW)
+          notifiers.each do |notifier|
             notifier.notify(config, Color::RED, Color::YELLOW, nil)
           end
         end
       end
 
       private def recover(metadata)
-        recovery_result = config.traffic_recovery.determine_color(config, metadata)
+        recovery_result = traffic_recovery.determine_color(config, metadata)
 
         case recovery_result
         when TrafficRecovery::GREEN
           if data_store.transition_to_color(config, Color::GREEN)
-            config.notifiers.each do |notifier|
+            notifiers.each do |notifier|
               notifier.notify(config, Color::YELLOW, Color::GREEN, nil)
             end
           end
         when TrafficRecovery::YELLOW
           if data_store.transition_to_color(config, Color::YELLOW)
-            config.notifiers.each do |notifier|
+            notifiers.each do |notifier|
               notifier.notify(config, Color::RED, Color::YELLOW, nil)
             end
           end
         when TrafficRecovery::RED
           if data_store.transition_to_color(config, Color::RED)
-            config.notifiers.each do |notifier|
+            notifiers.each do |notifier|
               notifier.notify(config, Color::YELLOW, Color::RED, nil)
             end
           end
@@ -88,6 +106,11 @@ module Stoplight
         else
           raise "recovery strategy returned an expected color: #{recovery_result}"
         end
+      end
+
+      # @return [Boolean]
+      def ==(other)
+        super && traffic_recovery == other.traffic_recovery && notifiers == other.notifiers
       end
     end
   end

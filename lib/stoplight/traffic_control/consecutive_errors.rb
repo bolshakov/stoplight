@@ -15,19 +15,19 @@ module Stoplight
     #
     # @example With window-based configuration
     #   traffic_control = Stoplight::TrafficControl::ConsecutiveErrors.new
-    #   config = Stoplight::Light::Config.new(threshold: 5, window_size: 60, traffic_control:)
+    #   config = Stoplight::Domain::Config.new(threshold: 5, window_size: 60, traffic_control:)
     #
     # Will switch to red if 5 consecutive failures occur within the 60-second window
     #
     # @example With total number of consecutive failures configuration
     #   traffic_control = Stoplight::TrafficControl::ConsecutiveErrors.new
-    #   config = Stoplight::Light::Config.new(threshold: 5, window_size: nil, traffic_control:)
+    #   config = Stoplight::Domain::Config.new(threshold: 5, window_size: nil, traffic_control:)
     #
     # Will switch to red only if 5 consecutive failures occur regardless of the time window
     # @api private
     class ConsecutiveErrors < Base
-      # @param config [Stoplight::Light::Config]
-      # @return [Stoplight::Config::CompatibilityResult]
+      # @param config [Stoplight::Domain::Config]
+      # @return [StopDomain::Config::CompatibilityResult]
       def check_compatibility(config)
         if config.threshold <= 0
           incompatible("`threshold` should be bigger than 0")
@@ -40,7 +40,7 @@ module Stoplight
 
       # Determines if traffic should be stopped based on failure counts.
       #
-      # @param config [Stoplight::Light::Config]
+      # @param config [Stoplight::Domain::Config]
       # @param metadata [Stoplight::Metadata]
       # @return [Boolean] true if failures have reached the threshold, false otherwise
       def stop_traffic?(config, metadata)

@@ -9,6 +9,24 @@ module Stoplight
     #
     # @api private
     class GreenRunStrategy < RunStrategy
+      # @!attribute [r] traffic_control
+      #   @return [Stoplight::TrafficControl::Base]
+      protected attr_reader :traffic_control
+
+      # @!attribute [r] notifiers
+      #   @return [Stoplight::Notifier::Base]
+      protected attr_reader :notifiers
+
+      # @param config [Stoplight::Domain::Config]
+      # @param data_store [Stoplight::DataStore::Base]
+      # @param traffic_control [Stoplight::TrafficControl::Base]
+      # @param notifiers [Array<Stoplight::Notifier::Base>]
+      def initialize(config:, data_store:, traffic_control:, notifiers:)
+        super(config:, data_store:)
+        @traffic_control = traffic_control
+        @notifiers = notifiers
+      end
+
       # Executes the provided code block when the light is in the green state.
       #
       # @param fallback [Proc, nil] A fallback proc to execute in case of an error.
@@ -39,8 +57,8 @@ module Stoplight
         failure = Stoplight::Failure.from_error(error)
         metadata = data_store.record_failure(config, failure)
 
-        if config.traffic_control.stop_traffic?(config, metadata) && data_store.transition_to_color(config, Color::RED)
-          config.notifiers.each do |notifier|
+        if traffic_control.stop_traffic?(config, metadata) && data_store.transition_to_color(config, Color::RED)
+          notifiers.each do |notifier|
             notifier.notify(config, Color::GREEN, Color::RED, error)
           end
         end
@@ -48,6 +66,11 @@ module Stoplight
 
       private def record_success
         data_store.record_success(config)
+      end
+
+      # @return [Boolean]
+      def ==(other)
+        super && traffic_control == other.traffic_control && notifiers == other.notifiers
       end
     end
   end

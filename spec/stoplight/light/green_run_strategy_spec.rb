@@ -1,14 +1,22 @@
 # frozen_string_literal: true
 
 RSpec.describe Stoplight::Light::GreenRunStrategy do
-  subject(:strategy) { described_class.new(config) }
+  subject(:strategy) do
+    Stoplight::Light::GreenRunStrategy.new(
+      config:,
+      traffic_control:,
+      data_store:,
+      notifiers: [notifier]
+    )
+  end
 
   let(:config) do
-    Stoplight.default_config.with(
+    Stoplight::Domain::Config.empty.with(
       name: "foo",
-      data_store:,
-      traffic_control:,
-      notifiers: [notifier]
+      tracked_errors: [StandardError],
+      skipped_errors: [],
+      cool_off_time: 60,
+      threshold: 3
     )
   end
   let(:notifier) { instance_double(Stoplight::Notifier::Base) }
@@ -147,13 +155,23 @@ RSpec.describe Stoplight::Light::GreenRunStrategy do
 
   context "with redis data store" do
     context "when redis is available", :redis do
-      let(:data_store) { Stoplight::DataStore::Redis.new(redis) }
+      let(:data_store) do
+        Stoplight::DataStore::FailSafe.wrap(
+          data_store: Stoplight::DataStore::Redis.new(redis),
+          error_notifier: ->(_) {}
+        )
+      end
 
       it_behaves_like Stoplight::Light::GreenRunStrategy
     end
 
     context "when redis is unreachable" do
-      let(:data_store) { Stoplight::DataStore::Redis.new(redis) }
+      let(:data_store) do
+        Stoplight::DataStore::FailSafe.wrap(
+          data_store: Stoplight::DataStore::Redis.new(redis),
+          error_notifier: ->(_) {}
+        )
+      end
       let(:redis) { Redis.new(url: "redis://561922f7-6b30-49d3-8148-324922d590d2:6379/0") }
 
       context "when code fails with fallback" do

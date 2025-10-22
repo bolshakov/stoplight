@@ -4,7 +4,7 @@ require "connection_pool"
 require "spec_helper"
 
 RSpec.describe Stoplight::DataStore::Redis, :redis do
-  let(:config) { Stoplight.default_config.with(name:, window_size:, cool_off_time:) }
+  let(:config) { Stoplight::Domain::Config.empty.with(name:, window_size:, cool_off_time:) }
   let(:name) { ("a".."z").to_a.shuffle.join }
   let(:failure) { Stoplight::Failure.new("class", "message", Time.new - 60) }
   let(:other) { Stoplight::Failure.new("class", "message 2", Time.new) }
@@ -144,26 +144,7 @@ RSpec.describe Stoplight::DataStore::Redis, :redis do
       end
     end
 
-    it_behaves_like "data store metrics" do
-      context "when JSON is invalid" do
-        let(:config) { Stoplight.default_config.with(name:, error_notifier: ->(_error) {}) }
-
-        it "handles it without an error" do
-          expect(failure).to receive(:to_json).and_return("invalid JSON")
-
-          expect { data_store.record_failure(config, failure) }
-            .to change { data_store.get_metadata(config) }
-            .to(
-              have_attributes(
-                last_error: have_attributes(
-                  error_class: "JSON::ParserError"
-                )
-              )
-            )
-        end
-      end
-    end
-
+    it_behaves_like "data store metrics"
     it_behaves_like "Stoplight::DataStore::Base"
     it_behaves_like "Stoplight::DataStore::Base#names"
     it_behaves_like "Stoplight::DataStore::Base#set_state"

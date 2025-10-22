@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require "ruby-prof"
-require "stoplight"
+require_relative "../lib/stoplight"
 require "redis"
 require "fileutils"
 

@@ -1,7 +1,16 @@
 # frozen_string_literal: true
 
 RSpec.shared_examples "Stoplight::Light#run" do
-  subject(:light) { Stoplight::Light.new(config, green_run_strategy:, yellow_run_strategy:, red_run_strategy:) }
+  subject(:light) do
+    Stoplight::Light.new(
+      config,
+      green_run_strategy:,
+      yellow_run_strategy:,
+      red_run_strategy:,
+      data_store:,
+      factory:
+    )
+  end
 
   let(:green_run_strategy) { instance_double(Stoplight::Light::RunStrategy) }
   let(:yellow_run_strategy) { instance_double(Stoplight::Light::RunStrategy) }

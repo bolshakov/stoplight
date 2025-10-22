@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Stoplight::Admin::LightsRepository, :redis do
-  subject(:repository) { described_class.new(data_store: data_store) }
+  subject(:repository) { described_class.new(data_store:) }
 
   let(:data_store) { Stoplight::DataStore::Redis.new(redis) }
   let(:name) { "lights-repository" }
@@ -43,8 +43,8 @@ RSpec.describe Stoplight::Admin::LightsRepository, :redis do
 
   describe "#with_color" do
     before do
-      Stoplight("red-light").with_data_store(data_store).lock("red")
-      Stoplight("green-light").with_data_store(data_store).lock("green")
+      Stoplight("red-light", data_store:).lock("red")
+      Stoplight("green-light", data_store:).lock("green")
     end
 
     it "returns light with requested color" do
