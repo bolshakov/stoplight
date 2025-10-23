@@ -19,7 +19,11 @@ module Stoplight
         if fallback
           fallback.call(nil)
         else
-          raise Error::RedLight, config.name
+          raise Error::RedLight.new(
+            config.name,
+            cool_off_time: config.cool_off_time,
+            retry_after: metadata.recovery_scheduled_after
+          )
         end
       end
     end

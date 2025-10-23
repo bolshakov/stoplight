@@ -10,10 +10,6 @@ module Stoplight
     #
     # @api private
     class FailSafe < Base
-      # @!attribute [r] data_store
-      #   @return [Stoplight::DataStore::Base] The underlying data store being wrapped.
-      protected attr_reader :data_store
-
       class << self
         # Wraps a data store with fail-safe mechanisms.
         #
@@ -30,62 +26,70 @@ module Stoplight
         end
       end
 
+      # @!attribute data_store
+      #  @return [Stoplight::DataStore::Base] The underlying primary data store being used
+      protected attr_reader :data_store
+
+      # @!attribute failover_data_store
+      #   @return [Stoplight::DataStore::Base] The fallback data store used when the primary fails.
+      private attr_reader :failover_data_store
+
+      # @!attribute circuit_breaker
+      #   @return [Stoplight::Light] The circuit breaker used to handle data store failures.
+      private attr_reader :circuit_breaker
+
       # @param data_store [Stoplight::DataStore::Base]
-      def initialize(data_store)
+      def initialize(data_store, failover_data_store: Default::DATA_STORE)
         @data_store = data_store
-        @circuit_breaker = Stoplight(
-          "stoplight:data_store:fail_safe:#{data_store.class.name}",
-          data_store: Default::DATA_STORE,
-          traffic_control: TrafficControl::ConsecutiveErrors.new,
-          threshold: Default::THRESHOLD
-        )
+        @failover_data_store = failover_data_store
+        @circuit_breaker = Stoplight.system_light("stoplight:data_store:fail_safe:#{data_store.class.name}")
       end
 
       def names
-        with_fallback([]) do
+        with_fallback(:names) do
           data_store.names
         end
       end
 
-      def get_metadata(config)
-        with_fallback(Metadata.new, config) do
-          data_store.get_metadata(config)
+      def get_metadata(config, *args, **kwargs)
+        with_fallback(:get_metadata, config, *args, **kwargs) do
+          data_store.get_metadata(config, *args, **kwargs)
         end
       end
 
-      def record_failure(config, failure)
-        with_fallback(Metadata.new, config) do
-          data_store.record_failure(config, failure)
+      def record_failure(config, *args, **kwargs)
+        with_fallback(:record_failure, config, *args, **kwargs) do
+          data_store.record_failure(config, *args, **kwargs)
         end
       end
 
-      def record_success(config, **args)
-        with_fallback(nil, config) do
-          data_store.record_success(config, **args)
+      def record_success(config, *args, **kwargs)
+        with_fallback(:record_success, config, *args, **kwargs) do
+          data_store.record_success(config, *args, **kwargs)
         end
       end
 
-      def record_recovery_probe_success(config, **args)
-        with_fallback(Metadata.new, config) do
-          data_store.record_recovery_probe_success(config, **args)
+      def record_recovery_probe_success(config, *args, **kwargs)
+        with_fallback(:record_recovery_probe_success, config, *args, **kwargs) do
+          data_store.record_recovery_probe_success(config, *args, **kwargs)
         end
       end
 
-      def record_recovery_probe_failure(config, failure)
-        with_fallback(Metadata.new, config) do
-          data_store.record_recovery_probe_failure(config, failure)
+      def record_recovery_probe_failure(config, *args, **kwargs)
+        with_fallback(:record_recovery_probe_failure, config, *args, **kwargs) do
+          data_store.record_recovery_probe_failure(config, *args, **kwargs)
         end
       end
 
-      def set_state(config, state)
-        with_fallback(State::UNLOCKED, config) do
-          data_store.set_state(config, state)
+      def set_state(config, *args, **kwargs)
+        with_fallback(:set_state, config, *args, **kwargs) do
+          data_store.set_state(config, *args, **kwargs)
         end
       end
 
-      def transition_to_color(config, color)
-        with_fallback(false, config) do
-          data_store.transition_to_color(config, color)
+      def transition_to_color(config, *args, **kwargs)
+        with_fallback(:transition_to_color, config, *args, **kwargs) do
+          data_store.transition_to_color(config, *args, **kwargs)
         end
       end
 
@@ -93,20 +97,15 @@ module Stoplight
         other.is_a?(self.class) && other.data_store == data_store
       end
 
-      # @param default [Object, nil]
-      # @param config [Stoplight::Light::Config]
-      private def with_fallback(default = nil, config = nil, &code)
+      # @param method_name [Symbol] protected method name
+      private def with_fallback(method_name, *args, **kwargs, &code)
         fallback = proc do |error|
+          config = args.first
           config.error_notifier.call(error) if config && error
-          default
+          @failover_data_store.public_send(method_name, *args, **kwargs)
         end
 
         circuit_breaker.run(fallback, &code)
-      end
-
-      # @return [Stoplight::Light] The circuit breaker used to handle failures.
-      private def circuit_breaker
-        @circuit_breaker ||= Stoplight.system_light("stoplight:data_store:fail_safe:#{data_store.class.name}")
       end
     end
   end

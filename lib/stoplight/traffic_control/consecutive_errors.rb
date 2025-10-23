@@ -14,13 +14,13 @@ module Stoplight
     #    reach the threshold.
     #
     # @example With window-based configuration
-    #   traffic_control = Stoplight::TrafficControlStrategy::ConsecutiveErrors.new
+    #   traffic_control = Stoplight::TrafficControl::ConsecutiveErrors.new
     #   config = Stoplight::Light::Config.new(threshold: 5, window_size: 60, traffic_control:)
     #
     # Will switch to red if 5 consecutive failures occur within the 60-second window
     #
     # @example With total number of consecutive failures configuration
-    #   traffic_control = Stoplight::TrafficControlStrategy::ConsecutiveErrors.new
+    #   traffic_control = Stoplight::TrafficControl::ConsecutiveErrors.new
     #   config = Stoplight::Light::Config.new(threshold: 5, window_size: nil, traffic_control:)
     #
     # Will switch to red only if 5 consecutive failures occur regardless of the time window

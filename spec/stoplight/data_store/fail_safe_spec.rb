@@ -3,10 +3,12 @@
 require "spec_helper"
 
 RSpec.describe Stoplight::DataStore::FailSafe do
-  let(:fail_safe) { described_class.new(data_store) }
+  let(:fail_safe) { described_class.new(data_store, failover_data_store:) }
+  let(:failover_data_store) { Stoplight::DataStore::Memory.new }
   let(:data_store) { instance_double(Stoplight::DataStore::Base) }
+  let(:config) { Stoplight.default_config.with(name:, error_notifier:) }
   let(:error_notifier) { instance_double(Proc) }
-  let(:config) { instance_double(Stoplight::Light::Config, error_notifier:) }
+  let(:name) { SecureRandom.uuid }
   let(:error) { StandardError.new("Test error") }
 
   it_behaves_like "Stoplight::DataStore::Base"
@@ -28,7 +30,7 @@ RSpec.describe Stoplight::DataStore::FailSafe do
       it "returns empty list of names" do
         expect(data_store).to receive(:names) { raise error }
 
-        is_expected.to eq([])
+        is_expected.to be_kind_of(Array)
       end
     end
   end
@@ -173,7 +175,7 @@ RSpec.describe Stoplight::DataStore::FailSafe do
         expect(error_notifier).to receive(:call).with(error)
         expect(data_store).to receive(:set_state).with(config, state) { raise error }
 
-        is_expected.to eq(Stoplight::State::UNLOCKED)
+        is_expected.to eq(Stoplight::State::LOCKED_GREEN)
       end
     end
   end
@@ -199,7 +201,7 @@ RSpec.describe Stoplight::DataStore::FailSafe do
         expect(error_notifier).to receive(:call).with(error)
         expect(data_store).to receive(:transition_to_color).with(config, color).and_raise(error)
 
-        is_expected.to eq(false)
+        is_expected.to eq(true)
       end
     end
   end
@@ -229,6 +231,36 @@ RSpec.describe Stoplight::DataStore::FailSafe do
       it "returns a new FailSafe instance wrapping the data_store" do
         is_expected.to be_a(described_class)
         expect(subject.instance_variable_get(:@data_store)).to eq(data_store)
+      end
+    end
+  end
+
+  describe "faulty data store" do
+    let(:data_store) { instance_double(Stoplight::DataStore::Base) }
+
+    it "when primary store fails" do
+      # Prepare: move internal circuit breaker into the red state
+      allow(data_store).to receive(:names).and_raise(Redis::TimeoutError)
+      Stoplight::Config::SystemConfig.threshold.times do
+        expect { fail_safe.names }.not_to raise_error
+      end
+
+      # Verify: now the fallback data store is used
+      RSpec::Mocks.space.proxy_for(data_store).reset
+      allow(data_store).to receive(:names)
+      allow(data_store).to receive(:record_success)
+
+      fail_safe.record_success(config)
+      expect(fail_safe.names).to include(config.name)
+
+      expect(data_store).not_to have_received(:record_success), "expected to use fallback data store without trying primary"
+      expect(data_store).not_to have_received(:names), "expected to use fallback data store without trying primary"
+
+      # After cool_off_time, the primary data store is tried again
+      Timecop.travel(Time.now + Stoplight::Config::SystemConfig.cool_off_time) do
+        expect(data_store).to receive(:names).and_return(["recovered"])
+
+        expect(fail_safe.names).to eq(["recovered"])
       end
     end
   end

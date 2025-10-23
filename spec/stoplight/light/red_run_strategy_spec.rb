@@ -2,11 +2,11 @@
 
 require "spec_helper"
 
-RSpec.describe Stoplight::Light::RedRunStrategy do
+RSpec.describe Stoplight::Light::RedRunStrategy, :freeze do
   subject(:strategy) { described_class.new(config) }
 
   let(:config) { Stoplight.default_config.with(name: "foo", data_store:) }
-  let(:metadata) { instance_double(Stoplight::Metadata) }
+  let(:metadata) { instance_double(Stoplight::Metadata, recovery_scheduled_after: Time.now) }
 
   shared_examples Stoplight::Light::RedRunStrategy do
     subject(:result) { strategy.execute(fallback, metadata:) { 42 } }
@@ -30,7 +30,10 @@ RSpec.describe Stoplight::Light::RedRunStrategy do
       let(:fallback) { nil }
 
       it "records and raises the error" do
-        expect { result }.to raise_error(Stoplight::Error::RedLight, config.name)
+        expect { result }.to raise_error(Stoplight::Error::RedLight, config.name) { |error|
+          expect(error.cool_off_time).to eq(config.cool_off_time)
+          expect(error.retry_after).to eq(metadata.recovery_scheduled_after)
+        }
       end
     end
   end

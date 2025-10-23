@@ -11,11 +11,11 @@ module Stoplight
       KEY_SEPARATOR = ":"
 
       def initialize
-        @errors = Hash.new { |h, k| h[k] = [] }
-        @successes = Hash.new { |h, k| h[k] = [] }
+        @errors = Hash.new { |errors, light_name| errors[light_name] = SlidingWindow.new }
+        @successes = Hash.new { |successes, light_name| successes[light_name] = SlidingWindow.new }
 
-        @recovery_probe_errors = Hash.new { |h, k| h[k] = [] }
-        @recovery_probe_successes = Hash.new { |h, k| h[k] = [] }
+        @recovery_probe_errors = Hash.new { |recovery_probe_errors, light_name| recovery_probe_errors[light_name] = SlidingWindow.new }
+        @recovery_probe_successes = Hash.new { |recovery_probe_successes, light_name| recovery_probe_successes[light_name] = SlidingWindow.new }
 
         @metadata = Hash.new { |h, k| h[k] = Metadata.new }
         super # MonitorMixin
@@ -32,65 +32,39 @@ module Stoplight
         light_name = config.name
 
         synchronize do
-          current_time = Time.now
-          recovery_window = (current_time - config.cool_off_time)..current_time
+          current_time = self.current_time
+          recovery_window_start = (current_time - config.cool_off_time)
           recovered_at = @metadata[light_name].recovered_at
-          window = if config.window_size
-            window_start = [recovered_at, (current_time - config.window_size)].compact.max
-            (window_start..current_time)
+          window_start = if config.window_size
+            [recovered_at, (current_time - config.window_size)].compact.max
           else
-            (..current_time)
-          end
-
-          errors = @errors[config.name].count do |request_time|
-            window.cover?(request_time)
-          end
-
-          successes = @successes[config.name].count do |request_time|
-            window.cover?(request_time)
-          end
-
-          recovery_probe_errors = @recovery_probe_errors[config.name].count do |request_time|
-            recovery_window.cover?(request_time)
-          end
-          recovery_probe_successes = @recovery_probe_successes[config.name].count do |request_time|
-            recovery_window.cover?(request_time)
+            current_time
           end
 
           @metadata[light_name].with(
             current_time:,
-            errors:,
-            successes:,
-            recovery_probe_errors:,
-            recovery_probe_successes:
+            errors: @errors[config.name].sum_in_window(window_start),
+            successes: @successes[config.name].sum_in_window(window_start),
+            recovery_probe_errors: @recovery_probe_errors[config.name].sum_in_window(recovery_window_start),
+            recovery_probe_successes: @recovery_probe_successes[config.name].sum_in_window(recovery_window_start)
           )
         end
-      end
-
-      # @param metrics [<Time>]
-      # @param window_size [Numeric, nil]
-      # @return [void]
-      def cleanup(metrics, window_size:)
-        min_age = Time.now - [window_size&.*(3), METRICS_RETENTION_TIME].compact.min
-
-        metrics.reject! { _1 < min_age }
       end
 
       # @param config [Stoplight::Light::Config]
       # @param failure [Stoplight::Failure]
       # @return [Stoplight::Metadata]
       def record_failure(config, failure)
+        current_time = self.current_time
         light_name = config.name
 
         synchronize do
-          @errors[light_name].unshift(failure.time) if config.window_size
-
-          cleanup(@errors[light_name], window_size: config.window_size)
+          @errors[light_name].increment if config.window_size
 
           metadata = @metadata[light_name]
-          @metadata[light_name] = if metadata.last_error_at.nil? || failure.time > metadata.last_error_at
+          @metadata[light_name] = if metadata.last_error_at.nil? || current_time > metadata.last_error_at
             metadata.with(
-              last_error_at: failure.time,
+              last_error_at: current_time,
               last_error: failure,
               consecutive_errors: metadata.consecutive_errors.succ,
               consecutive_successes: 0
@@ -106,20 +80,18 @@ module Stoplight
       end
 
       # @param config [Stoplight::Light::Config]
-      # @param request_id [String]
-      # @param request_time [Time]
       # @return [void]
-      def record_success(config, request_time: Time.now, request_id: SecureRandom.hex(12))
+      def record_success(config)
         light_name = config.name
+        current_time = self.current_time
 
         synchronize do
-          @successes[light_name].unshift(request_time) if config.window_size
-          cleanup(@successes[light_name], window_size: config.window_size)
+          @successes[light_name].increment if config.window_size
 
           metadata = @metadata[light_name]
-          @metadata[light_name] = if metadata.last_success_at.nil? || request_time > metadata.last_success_at
+          @metadata[light_name] = if metadata.last_success_at.nil? || current_time > metadata.last_success_at
             metadata.with(
-              last_success_at: request_time,
+              last_success_at: current_time,
               consecutive_errors: 0,
               consecutive_successes: metadata.consecutive_successes.succ
             )
@@ -137,15 +109,15 @@ module Stoplight
       # @return [Stoplight::Metadata]
       def record_recovery_probe_failure(config, failure)
         light_name = config.name
+        current_time = self.current_time
 
         synchronize do
-          @recovery_probe_errors[light_name].unshift(failure.time)
-          cleanup(@recovery_probe_errors[light_name], window_size: config.cool_off_time)
+          @recovery_probe_errors[light_name].increment
 
           metadata = @metadata[light_name]
-          @metadata[light_name] = if metadata.last_error_at.nil? || failure.time > metadata.last_error_at
+          @metadata[light_name] = if metadata.last_error_at.nil? || current_time > metadata.last_error_at
             metadata.with(
-              last_error_at: failure.time,
+              last_error_at: current_time,
               last_error: failure,
               consecutive_errors: metadata.consecutive_errors.succ,
               consecutive_successes: 0
@@ -161,20 +133,18 @@ module Stoplight
       end
 
       # @param config [Stoplight::Light::Config]
-      # @param request_id [String]
-      # @param request_time [Time]
       # @return [Stoplight::Metadata]
-      def record_recovery_probe_success(config, request_time: Time.now, request_id: SecureRandom.hex(12))
+      def record_recovery_probe_success(config)
         light_name = config.name
+        current_time = self.current_time
 
         synchronize do
-          @recovery_probe_successes[light_name].unshift(request_time)
-          cleanup(@recovery_probe_successes[light_name], window_size: config.cool_off_time)
+          @recovery_probe_successes[light_name].increment
 
           metadata = @metadata[light_name]
-          @metadata[light_name] = if metadata.last_success_at.nil? || request_time > metadata.last_success_at
+          @metadata[light_name] = if metadata.last_success_at.nil? || current_time > metadata.last_success_at
             metadata.with(
-              last_success_at: request_time,
+              last_success_at: current_time,
               consecutive_errors: 0,
               consecutive_successes: metadata.consecutive_successes.succ
             )
@@ -210,16 +180,15 @@ module Stoplight
       #
       # @param config [Stoplight::Light::Config] The light configuration
       # @param color [String] The color to transition to ("GREEN", "YELLOW", or "RED")
-      # @param current_time [Time]
       # @return [Boolean] true if this is the first instance to detect this transition
-      def transition_to_color(config, color, current_time: Time.now)
+      def transition_to_color(config, color)
         case color
         when Color::GREEN
           transition_to_green(config)
         when Color::YELLOW
-          transition_to_yellow(config, current_time:)
+          transition_to_yellow(config)
         when Color::RED
-          transition_to_red(config, current_time:)
+          transition_to_red(config)
         else
           raise ArgumentError, "Invalid color: #{color}"
         end
@@ -229,8 +198,9 @@ module Stoplight
       #
       # @param config [Stoplight::Light::Config] The light configuration
       # @return [Boolean] true if this is the first instance to detect this transition
-      private def transition_to_green(config, current_time: Time.now)
+      private def transition_to_green(config)
         light_name = config.name
+        current_time = self.current_time
 
         synchronize do
           metadata = @metadata[light_name]
@@ -251,10 +221,10 @@ module Stoplight
       # Transitions to YELLOW (recovery) state and ensures only one notification
       #
       # @param config [Stoplight::Light::Config] The light configuration
-      # @param current_time [Time]
       # @return [Boolean] true if this is the first instance to detect this transition
-      private def transition_to_yellow(config, current_time: Time.now)
+      private def transition_to_yellow(config)
         light_name = config.name
+        current_time = self.current_time
 
         synchronize do
           metadata = @metadata[light_name]
@@ -280,10 +250,10 @@ module Stoplight
       # Transitions to RED state and ensures only one notification
       #
       # @param config [Stoplight::Light::Config] The light configuration
-      # @param current_time [Time]
       # @return [Boolean] true if this is the first instance to detect this transition
-      private def transition_to_red(config, current_time: Time.now)
+      private def transition_to_red(config)
         light_name = config.name
+        current_time = self.current_time
         recovery_scheduled_after = current_time + config.cool_off_time
 
         synchronize do
@@ -305,6 +275,10 @@ module Stoplight
             true
           end
         end
+      end
+
+      private def current_time
+        Time.now
       end
     end
   end

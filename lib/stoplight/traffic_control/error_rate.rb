@@ -5,14 +5,14 @@ module Stoplight
     # A strategy that stops the traffic based on error rate.
     #
     # @example
-    #   traffic_control = Stoplight::TrafficControlStrategy::ErrorRate.new
+    #   traffic_control = Stoplight::TrafficControl::ErrorRate.new
     #   config = Stoplight::Light::Config.new(threshold: 0.6, window_size: 300, traffic_control:)
     #
     # Will switch to red if 60% error rate reached within the 5-minute (300 seconds) sliding window.
     # By default this traffic control strategy starts evaluating only after 10 requests have been made. You can
     # adjust this by passing a different value for `min_requests` when initializing the strategy.
     #
-    #   traffic_control = Stoplight::TrafficControlStrategy::ErrorRate.new(min_requests: 100)
+    #   traffic_control = Stoplight::TrafficControl::ErrorRate.new(min_requests: 100)
     #
     # @api private
     class ErrorRate < Base

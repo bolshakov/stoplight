@@ -99,6 +99,19 @@ light.run { 1 / 0 } #=> raises Stoplight::Error::RedLight: example-zero
 light.color # => "red"
 ```
 
+The `Stoplight::Error::RedLight` provides metadata about the error:
+
+```ruby
+def run_request
+  light = Stoplight("Example", cool_off_time: 10)
+  light.run { 1 / 0 }  #=> raises Stoplight::Error::RedLight
+rescue Stoplight::Error::RedLight => error
+  puts error.light_name #=> "Example"
+  puts error.cool_off_time #=> 10
+  puts error.retry_after   #=> Absolute Time after which a recovery attempt can occur (e.g., "2025-10-21 15:39:50.672414 +0600")
+end
+```
+
 After one minute, the light transitions to yellow, allowing a test execution:
 
 ```ruby
@@ -130,6 +143,8 @@ receives `nil`. In both cases, the return value of the fallback becomes the retu
 ## Admin Panel
 
 Stoplight comes with a built-in Admin Panel that can track all active Lights and manually lock them in the desired state (`Green` or `Red`). Locking lights in certain states might be helpful in scenarios like E2E testing.
+
+![Admin Panel Screenshot](assets/admin.png)
 
 To add Admin Panel protected by basic authentication to your Rails project, add this configuration to your `config/routes.rb` file.
 

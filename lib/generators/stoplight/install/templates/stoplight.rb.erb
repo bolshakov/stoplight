@@ -12,7 +12,9 @@ require "redis"
 #   "redis://admin:p4ssw0rd@10.0.1.1:6380/15"
 redis = Redis.new
 data_store = Stoplight::DataStore::Redis.new(redis)
+error_notifier = Rails.error.method(:report)
 
 Stoplight.configure do |config|
   config.data_store = data_store
+  config.error_notifier = error_notifier
 end
