@@ -20,7 +20,7 @@ module Stoplight
     :current_time
   ) do
     def initialize(
-      current_time: Time.now,
+      current_time: Time.now.utc,
       successes: 0,
       errors: 0,
       recovery_probe_successes: 0,
@@ -41,16 +41,16 @@ module Stoplight
         recovery_probe_errors: recovery_probe_errors.to_i,
         successes: successes.to_i,
         errors: errors.to_i,
-        last_error_at: (Time.at(Integer(last_error_at)) if last_error_at),
-        last_success_at: (Time.at(Integer(last_success_at)) if last_success_at),
+        last_error_at: (Time.at(Integer(last_error_at)).utc if last_error_at),
+        last_success_at: (Time.at(Integer(last_success_at)).utc if last_success_at),
         consecutive_errors: consecutive_errors.to_i,
         consecutive_successes: consecutive_successes.to_i,
         last_error:,
-        breached_at: (Time.at(Integer(breached_at)) if breached_at),
+        breached_at: (Time.at(Integer(breached_at)).utc if breached_at),
         locked_state: locked_state || State::UNLOCKED,
-        recovery_scheduled_after: (Time.at(Integer(recovery_scheduled_after)) if recovery_scheduled_after),
-        recovery_started_at: (Time.at(Integer(recovery_started_at)) if recovery_started_at),
-        recovered_at: (Time.at(Integer(recovered_at)) if recovered_at),
+        recovery_scheduled_after: (Time.at(Integer(recovery_scheduled_after)).utc if recovery_scheduled_after),
+        recovery_started_at: (Time.at(Integer(recovery_started_at)).utc if recovery_started_at),
+        recovered_at: (Time.at(Integer(recovered_at)).utc if recovered_at),
         current_time:,
       )
     end
@@ -62,7 +62,7 @@ module Stoplight
     # @param kwargs [Hash{Symbol => Object}]
     # @return [Metadata]
     def with(**kwargs)
-      self.class.new(**to_h.merge(current_time: Time.now, **kwargs))
+      self.class.new(**to_h.merge(current_time: Time.now.utc, **kwargs))
     end
 
     # @return [String] one of +Color::GREEN+, +Color::RED+, or +Color::YELLOW+

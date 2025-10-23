@@ -5,8 +5,6 @@ require "time"
 
 module Stoplight
   class Failure # rubocop:disable Style/Documentation
-    TIME_FORMAT = "%Y-%m-%dT%H:%M:%S.%N%:z"
-
     # @return [String]
     attr_reader :error_class
     # @return [String]
@@ -16,7 +14,7 @@ module Stoplight
 
     # @param error [Exception]
     # @return (see #initialize)
-    def self.from_error(error, time: Time.now)
+    def self.from_error(error, time: Time.now.utc)
       new(error.class.name, error.message, time)
     end
 
@@ -30,7 +28,7 @@ module Stoplight
 
       error_class = error_object["class"]
       error_message = error_object["message"]
-      time = Time.at(object["time"])
+      time = Time.at(object["time"]).utc
 
       new(error_class, error_message, time)
     end
@@ -41,7 +39,7 @@ module Stoplight
     def initialize(error_class, error_message, time)
       @error_class = error_class
       @error_message = error_message
-      @time = Time.at(time.to_i) # truncate to seconds
+      @time = Time.at(time.to_i).utc # truncate to seconds
     end
 
     # @param other [Failure]

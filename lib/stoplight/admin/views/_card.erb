@@ -96,7 +96,7 @@
       </div>
       <% if light.latest_failure %>
         <div class="whitespace-nowrap">
-          <%= Time.at(light.latest_failure.time).strftime("%T") %>
+          <%= light.latest_failure.time.strftime("%T") %>
         </div>
       <% end %>
     </div>

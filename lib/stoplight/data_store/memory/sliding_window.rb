@@ -65,7 +65,7 @@ module Stoplight
         end
 
         private def current_time
-          Time.now
+          Time.now.utc
         end
 
         def inspect

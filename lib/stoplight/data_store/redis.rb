@@ -71,7 +71,7 @@ module Stoplight
       end
 
       KEY_SEPARATOR = ":"
-      KEY_PREFIX = %w[stoplight v5].join(KEY_SEPARATOR)
+      KEY_PREFIX = %w[stoplight v6].join(KEY_SEPARATOR)
 
       # @param redis [::Redis, ConnectionPool<::Redis>]
       # @param warn_on_clock_skew [Boolean] (true) Whether to warn about clock skew between Redis and
@@ -439,7 +439,7 @@ module Stoplight
       end
 
       private def current_time
-        Time.now
+        Time.now.utc
       end
     end
   end
