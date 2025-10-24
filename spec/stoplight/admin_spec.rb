@@ -8,7 +8,7 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
 
   before do
     Stoplight.configure(trust_me_im_an_engineer: true) do |config|
-      config.data_store = Stoplight::DataStore::Redis.new(redis)
+      config.data_store = Stoplight::Infrastructure::DataStore::Redis.new(redis)
     end
   end
 

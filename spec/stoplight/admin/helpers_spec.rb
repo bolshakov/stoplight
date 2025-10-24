@@ -22,7 +22,7 @@ RSpec.describe Stoplight::Admin::Helpers do
     end
 
     context "with Redis data store" do
-      let(:data_store) { instance_double(Stoplight::DataStore::Redis) }
+      let(:data_store) { instance_double(Stoplight::Infrastructure::DataStore::Redis) }
 
       it "does not raise an error" do
         expect { helper.dependencies }.to_not raise_error

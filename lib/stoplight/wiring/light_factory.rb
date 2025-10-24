@@ -4,17 +4,17 @@ module Stoplight
   module Wiring
     # Concrete factory for building +Stoplight::Light++ instances with full dependency wiring.
     #
-    # This factory implements the +Stoplight::Domain::AbstractLightFactory+ protocol. It knows how to:
+    # This factory implements the +Stoplight::Domain::LightFactory+ protocol. It knows how to:
     #   1. Parse and transform user-provided settings
     #   2. Wire together all Light dependencies using a DI container
     #   3. Validate configuration compatibility
     #   4. Construct fully-functional Light instances
     #
-    # @see Stoplight::Domain::AbstractLightFactory
+    # @see Stoplight::Domain::LightFactory
     # @see Stoplight()
     # @api private
 
-    class LightFactory < Domain::AbstractLightFactory
+    class LightFactory < Domain::LightFactory
       # @!attribute [r] container
       #   The dependency injection container holding all component configurations.
       #   Contains config, data_store, notifiers, strategies, etc.
@@ -128,14 +128,14 @@ module Stoplight
 
       private def apply_traffic_control_dsl(traffic_control)
         case traffic_control
-        in Stoplight::TrafficControl::Base
+        in Stoplight::Domain::TrafficControl::Base
           traffic_control
         in :consecutive_errors
-          Stoplight::TrafficControl::ConsecutiveErrors.new
+          Stoplight::Domain::TrafficControl::ConsecutiveErrors.new
         in :error_rate
-          Stoplight::TrafficControl::ErrorRate.new
+          Stoplight::Domain::TrafficControl::ErrorRate.new
         in {error_rate: error_rate_settings}
-          Stoplight::TrafficControl::ErrorRate.new(**error_rate_settings)
+          Stoplight::Domain::TrafficControl::ErrorRate.new(**error_rate_settings)
         else
           raise Error::ConfigurationError, <<~ERROR
             unsupported traffic_control strategy provided (`#{traffic_control}`). Supported options:
@@ -147,10 +147,10 @@ module Stoplight
 
       def apply_traffic_recovery_dsl(traffic_recovery)
         case traffic_recovery
-        in Stoplight::TrafficRecovery::Base
+        in Stoplight::Domain::TrafficRecovery::Base
           traffic_recovery
         in :consecutive_successes
-          Stoplight::TrafficRecovery::ConsecutiveSuccesses.new
+          Stoplight::Domain::TrafficRecovery::ConsecutiveSuccesses.new
         else
           raise Error::ConfigurationError, <<~ERROR
             unsupported traffic_recovery strategy provided (`#{traffic_recovery}`). Supported options:

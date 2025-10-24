@@ -11,16 +11,16 @@ RSpec.describe Stoplight::Light do
       data_store:
     )
   end
-  let(:factory) { instance_double(Stoplight::Domain::AbstractLightFactory) }
+  let(:factory) { instance_double(Stoplight::Domain::LightFactory) }
   let(:config) do
     Stoplight::Domain::Config.empty.with(
       name: random_string,
       cool_off_time: 60
     )
   end
-  let(:green_run_strategy) { instance_double(Stoplight::Light::GreenRunStrategy) }
-  let(:yellow_run_strategy) { instance_double(Stoplight::Light::YellowRunStrategy) }
-  let(:red_run_strategy) { instance_double(Stoplight::Light::RedRunStrategy) }
+  let(:green_run_strategy) { instance_double(Stoplight::Domain::Strategies::GreenRunStrategy) }
+  let(:yellow_run_strategy) { instance_double(Stoplight::Domain::Strategies::YellowRunStrategy) }
+  let(:red_run_strategy) { instance_double(Stoplight::Domain::Strategies::RedRunStrategy) }
   let(:data_store) { Stoplight::DataStore::Memory.new }
 
   def random_string
@@ -139,7 +139,7 @@ RSpec.describe Stoplight::Light do
   end
 
   context "with redis data store", :redis do
-    let(:data_store) { Stoplight::DataStore::Redis.new(redis) }
+    let(:data_store) { Stoplight::Infrastructure::DataStore::Redis.new(redis) }
 
     it_behaves_like "Stoplight::Light#state"
     it_behaves_like "Stoplight::Light#color"

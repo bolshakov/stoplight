@@ -79,11 +79,11 @@ RSpec.describe Stoplight::Wiring::DefaultConfiguration do
       default_config.notifiers += [notifier]
     end
 
-    it { is_expected.to include(notifiers: [*Stoplight::Default::NOTIFIERS, notifier]) }
+    it { is_expected.to include(notifiers: [*Stoplight::Wiring::Default::NOTIFIERS, notifier]) }
   end
 
   context "when data_store is set" do
-    let(:data_store) { instance_double(Stoplight::DataStore::Base) }
+    let(:data_store) { instance_double(Stoplight::Domain::DataStore) }
 
     before do
       default_config.data_store = data_store
@@ -114,7 +114,7 @@ RSpec.describe Stoplight::Wiring::DefaultConfiguration do
 
   context "without any settings" do
     it "contains only default notifiers" do
-      is_expected.to eq({notifiers: Stoplight::Default::NOTIFIERS})
+      is_expected.to eq({notifiers: Stoplight::Wiring::Default::NOTIFIERS})
     end
   end
 end

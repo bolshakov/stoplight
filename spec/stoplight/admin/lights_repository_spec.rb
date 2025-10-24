@@ -3,7 +3,7 @@
 RSpec.describe Stoplight::Admin::LightsRepository, :redis do
   subject(:repository) { described_class.new(data_store:) }
 
-  let(:data_store) { Stoplight::DataStore::Redis.new(redis) }
+  let(:data_store) { Stoplight::Infrastructure::DataStore::Redis.new(redis) }
   let(:name) { "lights-repository" }
   let(:light) { Stoplight(name, data_store:) }
 

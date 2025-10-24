@@ -52,7 +52,7 @@ RSpec.describe "Stoplight" do
     end
     let(:data_store) { Stoplight::DataStore::Memory.new }
     let(:error_notifier) { ->(error) { warn error } }
-    let(:notifiers) { [Stoplight::Notifier::IO.new($stdout)] }
+    let(:notifiers) { [Stoplight::Infrastructure::Notifier::IO.new($stdout)] }
 
     it "instantiates with the correct settings" do
       expect(light).to eq(Stoplight.__stoplight__default_light_factory.build_with(name:, **settings))

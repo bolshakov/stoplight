@@ -17,7 +17,7 @@ class Notifications
 end
 
 # A stoplight notifier that captures notifications
-class TestNotifier < Stoplight::Notifier::Base
+class TestNotifier < Stoplight::Domain::StateTransitionNotifier
   def initialize(notifications)
     @notifications = notifications
   end

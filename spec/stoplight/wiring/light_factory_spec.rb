@@ -13,11 +13,11 @@ RSpec.describe Stoplight::Wiring::LightFactory do
     )
   end
 
-  let(:base_data_store) { instance_double(Stoplight::DataStore::Base) }
+  let(:base_data_store) { instance_double(Stoplight::Domain::DataStore) }
   let(:base_notifiers) { [] }
   let(:base_error_notifier) { ->(error) {} }
-  let(:base_traffic_control) { Stoplight::TrafficControl::ConsecutiveErrors.new }
-  let(:base_traffic_recovery) { Stoplight::TrafficRecovery::ConsecutiveSuccesses.new }
+  let(:base_traffic_control) { Stoplight::Domain::TrafficControl::ConsecutiveErrors.new }
+  let(:base_traffic_recovery) { Stoplight::Domain::TrafficRecovery::ConsecutiveSuccesses.new }
 
   let(:base_container) do
     Stoplight::Wiring::Container.with(
@@ -72,7 +72,7 @@ RSpec.describe Stoplight::Wiring::LightFactory do
       let(:light) { new_factory.build }
 
       context "when TrafficRecovery::ConsecutiveSuccesses" do
-        let(:traffic_recovery_in) { Stoplight::TrafficRecovery::ConsecutiveSuccesses.new }
+        let(:traffic_recovery_in) { Stoplight::Domain::TrafficRecovery::ConsecutiveSuccesses.new }
 
         it "returns the same traffic recovery object" do
           expect(traffic_recovery_out).to eq(traffic_recovery_in)
@@ -82,8 +82,8 @@ RSpec.describe Stoplight::Wiring::LightFactory do
       context "when :consecutive_successes" do
         let(:traffic_recovery_in) { :consecutive_successes }
 
-        it "returns an instance of Stoplight::TrafficRecovery::ConsecutiveSuccesses" do
-          is_expected.to eq(Stoplight::TrafficRecovery::ConsecutiveSuccesses.new)
+        it "returns an instance of Stoplight::Domain::TrafficRecovery::ConsecutiveSuccesses" do
+          is_expected.to eq(Stoplight::Domain::TrafficRecovery::ConsecutiveSuccesses.new)
         end
       end
 
@@ -108,7 +108,7 @@ RSpec.describe Stoplight::Wiring::LightFactory do
       let(:light) { new_factory.build }
 
       context "when TrafficControl::ConsecutiveErrors" do
-        let(:traffic_control_in) { Stoplight::TrafficControl::ConsecutiveErrors.new }
+        let(:traffic_control_in) { Stoplight::Domain::TrafficControl::ConsecutiveErrors.new }
         let(:config) { {threshold: 5} }
 
         it "returns the same traffic control object" do
@@ -120,8 +120,8 @@ RSpec.describe Stoplight::Wiring::LightFactory do
         let(:traffic_control_in) { :consecutive_errors }
         let(:config) { {threshold: 5} }
 
-        it "returns an instance of Stoplight::TrafficControl::ConsecutiveErrors" do
-          expect(traffic_control_out).to eq(Stoplight::TrafficControl::ConsecutiveErrors.new)
+        it "returns an instance of Stoplight::Domain::TrafficControl::ConsecutiveErrors" do
+          expect(traffic_control_out).to eq(Stoplight::Domain::TrafficControl::ConsecutiveErrors.new)
         end
       end
 
@@ -129,8 +129,8 @@ RSpec.describe Stoplight::Wiring::LightFactory do
         let(:traffic_control_in) { :error_rate }
         let(:config) { {threshold: 0.5, window_size: 60} }
 
-        it "returns an instance of Stoplight::TrafficControl::ErrorRate" do
-          expect(traffic_control_out).to eq(Stoplight::TrafficControl::ErrorRate.new)
+        it "returns an instance of Stoplight::Domain::TrafficControl::ErrorRate" do
+          expect(traffic_control_out).to eq(Stoplight::Domain::TrafficControl::ErrorRate.new)
         end
       end
 
@@ -138,8 +138,8 @@ RSpec.describe Stoplight::Wiring::LightFactory do
         let(:traffic_control_in) { {error_rate: {min_requests: 11}} }
         let(:config) { {threshold: 0.5, window_size: 60} }
 
-        it "returns an instance of Stoplight::TrafficControl::ErrorRate with min_requests" do
-          expect(traffic_control_out).to eq(Stoplight::TrafficControl::ErrorRate.new(min_requests: 11))
+        it "returns an instance of Stoplight::Domain::TrafficControl::ErrorRate with min_requests" do
+          expect(traffic_control_out).to eq(Stoplight::Domain::TrafficControl::ErrorRate.new(min_requests: 11))
         end
       end
 
@@ -159,12 +159,12 @@ RSpec.describe Stoplight::Wiring::LightFactory do
 
     context "when traffic control is not compatible with the config" do
       let(:new_factory) { factory.with(traffic_control:, threshold: 4, window_size: 60) }
-      let(:traffic_control) { Stoplight::TrafficControl::ErrorRate.new }
+      let(:traffic_control) { Stoplight::Domain::TrafficControl::ErrorRate.new }
 
       it "raises a configuration errors" do
         expect { light }.to raise_error(
           Stoplight::Error::ConfigurationError,
-          "Stoplight::TrafficControl::ErrorRate strategy is incompatible with the Stoplight configuration: " \
+          "Stoplight::Domain::TrafficControl::ErrorRate strategy is incompatible with the Stoplight configuration: " \
             "`threshold` should be between 0 and 1"
         )
       end
@@ -172,12 +172,12 @@ RSpec.describe Stoplight::Wiring::LightFactory do
 
     context "when traffic recovery is not compatible with the config" do
       let(:new_factory) { factory.with(traffic_recovery:, recovery_threshold: -1) }
-      let(:traffic_recovery) { Stoplight::TrafficRecovery::ConsecutiveSuccesses.new }
+      let(:traffic_recovery) { Stoplight::Domain::TrafficRecovery::ConsecutiveSuccesses.new }
 
       it "raises a configuration errors" do
         expect { light }.to raise_error(
           Stoplight::Error::ConfigurationError,
-          "Stoplight::TrafficRecovery::ConsecutiveSuccesses strategy is incompatible with the Stoplight configuration: " \
+          "Stoplight::Domain::TrafficRecovery::ConsecutiveSuccesses strategy is incompatible with the Stoplight configuration: " \
             "`recovery_threshold` should be bigger than 0"
         )
       end

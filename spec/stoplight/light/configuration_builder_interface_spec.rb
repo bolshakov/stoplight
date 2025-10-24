@@ -43,8 +43,8 @@ RSpec.describe Stoplight::Light::ConfigurationBuilderInterface do
   describe "#with_notifiers" do
     let(:notifiers) do
       [
-        Stoplight::Notifier::FailSafe.wrap(
-          notifier: Stoplight::Notifier::IO.new($stderr),
+        Stoplight::Wiring::FailSafeNotifier.wrap(
+          notifier: Stoplight::Infrastructure::Notifier::IO.new($stderr),
           error_notifier: ->(e) { puts "Notifier error: #{e.message}" }
         )
       ]
@@ -86,7 +86,7 @@ RSpec.describe Stoplight::Light::ConfigurationBuilderInterface do
 
     it "configures skipped errors" do
       expect(with_attribute.config.skipped_errors).to contain_exactly(*skipped_errors,
-        *Stoplight::Default::SKIPPED_ERRORS)
+        *Stoplight::Wiring::Default::SKIPPED_ERRORS)
     end
   end
 end
