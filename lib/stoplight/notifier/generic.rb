@@ -71,9 +71,11 @@ module Stoplight
       #
       # @param message [String] The notification message to be processed.
       # @raise [NotImplementedError] If the method is not implemented in a subclass.
+      # :nocov:
       def put(message)
         raise NotImplementedError
       end
+      # :nocov:
     end
   end
 end

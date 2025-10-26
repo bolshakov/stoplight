@@ -3,6 +3,7 @@
 require "stoplight"
 require_relative "stoplight_world"
 require_relative "configure_light_world"
+require_relative "stoplight_assertion_helpers"
 
 Before { reset! }
 After { Timecop.return }
@@ -12,4 +13,4 @@ Around do |_scenario, block|
   end
 end
 
-World(StoplightWorld, ConfigureLightWorld)
+World(StoplightWorld, ConfigureLightWorld, StoplightAssertionHelpers)

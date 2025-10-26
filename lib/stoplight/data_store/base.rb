@@ -3,6 +3,7 @@
 module Stoplight
   module DataStore
     # @abstract
+    # :nocov:
     class Base
       METRICS_RETENTION_TIME = 60 * 60 * 24 # 1 day
 
@@ -88,5 +89,6 @@ module Stoplight
         raise NotImplementedError
       end
     end
+    # :nocov:
   end
 end

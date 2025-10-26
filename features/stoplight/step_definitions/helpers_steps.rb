@@ -2,7 +2,7 @@
 
 require "timecop"
 
-When(/^(\d+) (seconds|minutes|hours|days) elapsed$/) do |seconds, unit|
+When(/^(\d+) (seconds|minutes|hours|days) have elapsed$/) do |seconds, unit|
   case unit
   when "seconds"
     seconds = seconds.to_i
@@ -18,11 +18,11 @@ When(/^(\d+) (seconds|minutes|hours|days) elapsed$/) do |seconds, unit|
   Timecop.travel(Time.now + seconds)
 end
 
-When(/^the protected service starts failing with "([^"]+)"(?: again)?$/) do |error_message|
+When(/^the service starts failing with "([^"]+)"(?: again)?$/) do |error_message|
   echo_service.fail_with(StandardError.new(error_message))
 end
 
-When(/^the protected service starts failing with:$/) do |table|
+When(/^the service starts failing with:$/) do |table|
   error_class = StandardError
   error_message = nil
   table.rows_hash.each_pair do |option, value|
@@ -43,6 +43,6 @@ When(/^the protected service starts failing with:$/) do |table|
   end
 end
 
-And(/^the protected service (?:recovers and starts|is) functioning normally$/) do
+And(/^the service (?:recovers and starts|is) functioning normally$/) do
   echo_service.recover
 end

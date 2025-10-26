@@ -45,9 +45,11 @@ module Stoplight
       # @param config [Stoplight::Light::Config]
       # @param metadata [Stoplight::Metadata]
       # @return [Boolean] true if traffic should be stopped (rec), false otherwise (green)
+      # :nocov:
       def stop_traffic?(config, metadata)
         raise NotImplementedError
       end
+      # :nocov:
 
       # @param other [any]
       # @return [Boolean]

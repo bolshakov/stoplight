@@ -7,6 +7,7 @@ module Stoplight
     #
     # @abstract Subclasses must implement the `notify` method to define custom notification logic.
     # @see +Stoplight::Notifier::Generic+
+    # :nocov:
     class Base
       # Sends a notification when a Stoplight changes state.
       #
@@ -20,5 +21,6 @@ module Stoplight
         raise NotImplementedError
       end
     end
+    # :nocov:
   end
 end
