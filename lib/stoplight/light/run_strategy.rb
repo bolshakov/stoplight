@@ -24,9 +24,11 @@ module Stoplight
 
       # @param fallback [Proc, nil] A fallback proc to execute in case of an error.
       # @param metadata [Stoplight::Metadata] Metadata capturing the current state of the light.
+      # :nocov:
       def execute(fallback, metadata:, &code)
         raise NotImplementedError, "Subclasses must implement the execute method"
       end
+      # :nocov:
     end
   end
 end

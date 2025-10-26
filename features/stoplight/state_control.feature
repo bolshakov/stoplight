@@ -4,34 +4,37 @@ Feature: Stoplight State Control
   So that I can override automatic behavior when needed
 
   Background:
-    Given a light "manual-control" exists with:
+    Given a light "manual-control" configured with:
       | Threshold     | 3     |
 
   Scenario: Light can be manually locked to green
-    Given the protected service starts failing with "connection-timeout"
+    Given the service starts failing with "connection-timeout"
     When I lock the light to green
-    And I make 3 requests to the service
-    And I make a request to the service
+    And 3 request are made
+    And 1 request is made
     Then the light fails with error:
       | Message     | connection-timeout |
     And the light color is green
-    When the protected service recovers and starts functioning normally
-    And I make 1 request to the service with "Hi! How are you?" message
+    When the service recovers and starts functioning normally
+    And 1 request is made with "Hi! How are you?" message
     Then the light returns "Service says: Hi! How are you?"
+    And the light is in "locked_green" state
 
   Scenario: Light can be manually locked to red
-    Given the protected service is functioning normally
+    Given the service is functioning normally
     When I lock the light to red
-    And I make 1 requests to the service
+    And 1 request is made
     Then the light fails with error:
       | Type        | Stoplight::Error::RedLight |
       | Message     | manual-control             |
     And the light color is red
+    And the light is in "locked_red" state
 
   Scenario: Light can be unlocked to resume normal operation
-    Given the protected service is functioning normally
+    Given the service is functioning normally
     When I lock the light to red
     And I unlock it
-    And I make 1 requests to the service with "Hi! How are you?" message
+    And 1 request is made with "Hi! How are you?" message
     Then the light returns "Service says: Hi! How are you?"
     And the light color is green
+    And the light is in "unlocked" state

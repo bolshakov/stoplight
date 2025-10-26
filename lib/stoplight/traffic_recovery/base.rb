@@ -50,9 +50,11 @@ module Stoplight
       # @param config [Stoplight::Light::Config]
       # @param metadata [Stoplight::Metadata]
       # @return [TrafficRecovery::Decision]
+      # :nocov:
       def determine_color(config, metadata)
         raise NotImplementedError
       end
+      # :nocov:
 
       # @param other [any]
       # @return [Boolean]

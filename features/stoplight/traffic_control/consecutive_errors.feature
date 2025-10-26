@@ -7,46 +7,51 @@ Feature: Consecutive Errors Traffic Control Strategy
     Given a light "basic-service" exists
 
   Scenario: Light transitions to red after threshold failures
-    Given the protected service starts failing with "connection-timeout"
-    When I make 3 request to the protected service
+    Given the service starts failing with "connection-timeout"
+    When 3 requests are made
     Then the light color is red
     And notification about transition from green to red is sent
 
   Scenario: Light remains green below threshold failures
-    Given the protected service starts failing with "connection-timeout"
-    When I make 1 request to the protected service
-    And the protected service recovers and starts functioning normally
-    And I make 1 request to the service
+    Given the service starts failing with "connection-timeout"
+    When 1 request is made
+    And the service recovers and starts functioning normally
+    And 1 request is made
     Then the light color is green
 
   Scenario: Light transitions to yellow after cool-off period
-    Given the protected service starts failing with "connection-timeout"
-    And the light enters the red state
-    When 61 seconds elapsed
+    Given a light "basic-service" configured with:
+      | Recovery Threshold | 2 |
+    And the service starts failing with "connection-timeout"
+    And the light enters red state
+    When 61 seconds have elapsed
     Then the light color is yellow
+    And the service recovers and starts functioning normally
+    When 1 request is made
+    And notification about transition from red to yellow is sent
 
   Scenario: Light transitions to green after success in yellow state
-    Given the protected service starts failing with "connection-timeout"
-    And the light enters the yellow state
-    And the protected service recovers and starts functioning normally
-    When I make a request to the protected service
+    Given the service starts failing with "connection-timeout"
+    And the light enters yellow state
+    And the service recovers and starts functioning normally
+    When 1 request is made
     Then the light color is green
     And notification about transition from yellow to green is sent
 
   Scenario: Light transitions to red after failure in yellow state
-    Given the protected service starts failing with "connection-timeout"
-    And the light enters the red state
+    Given the service starts failing with "connection-timeout"
+    And the light enters red state
     Then notification about transition from green to red is sent
-    And the light enters the yellow state
-    When I make 1 request to the service
+    And the light enters yellow state
+    When 1 request is made
     Then the light color is red
     And notification about transition from yellow to red is sent
 
   Scenario: Light resets failure count after success
-    Given the protected service starts failing with "connection-timeout"
-    When I make 2 requests to the protected service
-    And the protected service recovers and starts functioning normally
-    And I make a request to the protected service
-    And the protected service starts failing with "connection-timeout" again
-    When I make a request to the protected service
+    Given the service starts failing with "connection-timeout"
+    When 2 requests are made
+    And the service recovers and starts functioning normally
+    And 1 request is made
+    And the service starts failing with "connection-timeout" again
+    When 1 request is made
     Then the light color is green

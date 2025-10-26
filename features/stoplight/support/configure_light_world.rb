@@ -3,57 +3,71 @@
 # The ConfigureLightWorld module provides methods to configure a Stoplight::Light
 # instance with various options.
 module ConfigureLightWorld
-  def configure_light(light, table) # rubocop:disable Metrics/MethodLength
-    @with_configuration = {}
+  def configure_light(name, table = nil)
+    Stoplight(name, notifiers:, data_store:, **collect_settings(table))
+  end
+
+  def collect_settings(table)
+    return {} unless table
+    settings = {}
     table.rows_hash.each_pair do |option, value|
       case option
+      when "Tracked Errors"
+        configure_tracked_errors(value, settings)
       when "Skipped Errors"
-        configure_skipped_errors(value)
+        configure_skipped_errors(value, settings)
       when "Threshold"
-        configure_threshold(value)
+        configure_threshold(value, settings)
       when "Recovery Threshold"
-        configure_recovery_threshold(value)
+        configure_recovery_threshold(value, settings)
       when "Cool Off Time"
-        configure_cool_off_time(value)
+        configure_cool_off_time(value, settings)
       when "Window Size"
-        configure_window_size(value)
+        configure_window_size(value, settings)
       when "Traffic Control"
-        configure_traffic_control(value)
+        configure_traffic_control(value, settings)
       else
         raise ArgumentError, "Unknown option: #{option}"
       end
     end
-    light.with(**@with_configuration).tap do
-      @with_configuration = nil
+    settings
+  end
+
+  def configure_traffic_control(value, settings)
+    settings[:traffic_control] = value.sub(" ", "_").downcase.to_sym
+  end
+
+  def configure_window_size(value, settings)
+    settings[:window_size] = if value == "nil"
+      nil
+    else
+      value.to_f
     end
   end
 
-  def configure_traffic_control(value)
-    @with_configuration[:traffic_control] = value.sub(" ", "_").downcase.to_sym
+  def configure_cool_off_time(value, settings)
+    settings[:cool_off_time] = value.to_f
   end
 
-  def configure_window_size(value)
-    @with_configuration[:window_size] = value.to_f
-  end
-
-  def configure_cool_off_time(value)
-    @with_configuration[:cool_off_time] = value.to_f
-  end
-
-  def configure_threshold(value)
-    @with_configuration[:threshold] = if value.include?(".")
+  def configure_threshold(value, settings)
+    settings[:threshold] = if value.include?(".")
       value.to_f
     else
       value.to_i
     end
   end
 
-  def configure_recovery_threshold(value)
-    @with_configuration[:recovery_threshold] = value.to_i
+  def configure_recovery_threshold(value, settings)
+    settings[:recovery_threshold] = value.to_i
   end
 
-  def configure_skipped_errors(value)
+  def configure_tracked_errors(value, settings)
     exception_classes = value.split(",").map(&:strip).map { |name| Object.const_get(name) }
-    @with_configuration[:skipped_errors] = exception_classes
+    settings[:tracked_errors] = exception_classes
+  end
+
+  def configure_skipped_errors(value, settings)
+    exception_classes = value.split(",").map(&:strip).map { |name| Object.const_get(name) }
+    settings[:skipped_errors] = exception_classes
   end
 end
