@@ -11,7 +11,7 @@ module Stoplight
     class Base
       # Sends a notification when a Stoplight changes state.
       #
-      # @param config [Stoplight::Light::Config] The Stoplight instance triggering the notification.
+      # @param config [Stoplight::Domain::Config] The Stoplight instance triggering the notification.
       # @param from_color [String] The previous state color of the Stoplight.
       # @param to_color [String] The new state color of the Stoplight.
       # @param error [Exception, nil] The error (if any) that caused the state change.

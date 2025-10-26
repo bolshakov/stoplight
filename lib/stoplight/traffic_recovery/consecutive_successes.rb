@@ -10,7 +10,7 @@ module Stoplight
     # full traffic flow.
     #
     # @example Basic usage with 3 consecutive successes required
-    #   config = Stoplight::Light::Config.new(
+    #   config = Stoplight::Domain::Config.new(
     #     cool_off_time: 60,
     #     recovery_threshold: 3
     #   )
@@ -33,8 +33,8 @@ module Stoplight
     #
     # @api private
     class ConsecutiveSuccesses < Base
-      # @param config [Stoplight::Light::Config]
-      # @return [Stoplight::Config::CompatibilityResult]
+      # @param config [Stoplight::Domain::Config]
+      # @return [StopDomain::Config::CompatibilityResult]
       def check_compatibility(config)
         if config.recovery_threshold <= 0
           incompatible("`recovery_threshold` should be bigger than 0")
@@ -47,7 +47,7 @@ module Stoplight
 
       # Determines if traffic should be resumed based on successes counts.
       #
-      # @param config [Stoplight::Light::Config]
+      # @param config [Stoplight::Domain::Config]
       # @param metadata [Stoplight::Metadata]
       # @return [TrafficRecovery::Decision]
       def determine_color(config, metadata)

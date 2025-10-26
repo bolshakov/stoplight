@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "forwardable"
+
 module Stoplight
   #
   # @api private use +Stoplight()+ method instead
@@ -8,7 +10,7 @@ module Stoplight
     include ConfigurationBuilderInterface
 
     # @!attribute [r] config
-    #   @return [Stoplight::Light::Config]
+    #   @return [Stoplight::Domain::Config]
     #   @api private
     attr_reader :config
 
@@ -17,12 +19,34 @@ module Stoplight
     #   @return [String]
     def_delegator :config, :name
 
-    # @param config [Stoplight::Light::Config]
-    def initialize(config, green_run_strategy: nil, yellow_run_strategy: nil, red_run_strategy: nil)
+    # @!attribute [r] green_run_strategy
+    #   @return [Stoplight::Light::GreenRunStrategy]
+    protected attr_reader :green_run_strategy
+
+    # @!attribute [r] yellow_run_strategy
+    #   @return [Stoplight::Light::YellowRunStrategy]
+    protected attr_reader :yellow_run_strategy
+
+    # @!attribute [r] red_run_strategy
+    #   @return [Stoplight::Light::RedRunStrategy]
+    protected attr_reader :red_run_strategy
+
+    # @!attribute [r] data_store
+    #   @return [Stoplight::Light::Base]
+    protected attr_reader :data_store
+
+    # @!attribute [r] factory
+    #   @return [Stoplight::Domain::AbstractLightFactory]
+    protected attr_reader :factory
+
+    # @param config [Stoplight::Domain::Config]
+    def initialize(config, green_run_strategy:, yellow_run_strategy:, red_run_strategy:, data_store:, factory:)
       @config = config
+      @data_store = data_store
       @green_run_strategy = green_run_strategy
       @yellow_run_strategy = yellow_run_strategy
       @red_run_strategy = red_run_strategy
+      @factory = factory
     end
 
     # Returns the current state of the light:
@@ -87,7 +111,7 @@ module Stoplight
       else raise Error::IncorrectColor
       end
 
-      config.data_store.set_state(config, state)
+      data_store.set_state(config, state)
 
       self
     end
@@ -101,7 +125,7 @@ module Stoplight
     #
     # @return [Stoplight::Light] returns unlocked light (circuit breaker)
     def unlock
-      config.data_store.set_state(config, Stoplight::State::UNLOCKED)
+      data_store.set_state(config, Stoplight::State::UNLOCKED)
 
       self
     end
@@ -111,7 +135,9 @@ module Stoplight
     # @param other [any]
     # @return [Boolean]
     def ==(other)
-      other.is_a?(self.class) && config == other.config
+      other.is_a?(self.class) && config == other.config && data_store == other.data_store &&
+        green_run_strategy == other.green_run_strategy && yellow_run_strategy == other.yellow_run_strategy &&
+        red_run_strategy == other.red_run_strategy && factory == other.factory
     end
 
     # Reconfigures the light with updated settings and returns a new instance.
@@ -146,7 +172,7 @@ module Stoplight
     #   payment_light.run(->(error) { nil }) { call_payment_api }
     # @see +Stoplight()+
     def with(**settings)
-      reconfigure(config.with(**settings))
+      factory.build_with(**settings)
     end
 
     private
@@ -162,30 +188,9 @@ module Stoplight
       end
     end
 
-    # @return [Stoplight::Runnable::RunStrategy]
-    def green_run_strategy
-      @green_run_strategy ||= GreenRunStrategy.new(config)
-    end
-
-    # @return [Stoplight::Runnable::RunStrategy]
-    def yellow_run_strategy
-      @yellow_run_strategy ||= YellowRunStrategy.new(config)
-    end
-
-    # @return [Stoplight::Runnable::RunStrategy]
-    def red_run_strategy
-      @red_run_strategy ||= RedRunStrategy.new(config)
-    end
-
-    # @param config [Stoplight::Light::Config]
-    # @return [Stoplight::Light]
-    def reconfigure(config)
-      self.class.new(config)
-    end
-
     # @return [Stoplight::Metadata]
     def metadata
-      config.data_store.get_metadata(config)
+      data_store.get_metadata(config)
     end
   end
 end

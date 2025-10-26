@@ -16,7 +16,7 @@ module Stoplight
       # @return [Stoplight::Light]
       # @deprecated consider using +Light#with+ for reconfiguration
       def with_data_store(data_store)
-        reconfigure(config.with(data_store: data_store))
+        with(data_store:)
       end
 
       # Configures cool off time. Stoplight automatically tries to recover
@@ -30,7 +30,7 @@ module Stoplight
       # @return [Stoplight::Light]
       # @deprecated consider using +Light#with+ for reconfiguration
       def with_cool_off_time(cool_off_time)
-        reconfigure(config.with(cool_off_time: cool_off_time))
+        with(cool_off_time:)
       end
 
       # Configures custom threshold. After this number of failures Stoplight
@@ -44,7 +44,7 @@ module Stoplight
       # @return [Stoplight::Light]
       # @deprecated consider using +Light#with+ for reconfiguration
       def with_threshold(threshold)
-        reconfigure(config.with(threshold: threshold))
+        with(threshold:)
       end
 
       # Configures custom window size which Stoplight uses to count failures. For example,
@@ -61,7 +61,7 @@ module Stoplight
       # @return [Stoplight::Light]
       # @deprecated consider using +Light#with+ for reconfiguration
       def with_window_size(window_size)
-        reconfigure(config.with(window_size: window_size))
+        with(window_size:)
       end
 
       # Configures custom notifier
@@ -76,7 +76,7 @@ module Stoplight
       # @return [Stoplight::Light]
       # @deprecated consider using +Light#with+ for reconfiguration
       def with_notifiers(notifiers)
-        reconfigure(config.with(notifiers: notifiers))
+        with(notifiers:)
       end
 
       # @param error_notifier [Proc]
@@ -84,7 +84,7 @@ module Stoplight
       # @api private
       # @deprecated consider using +Light#with+ for reconfiguration
       def with_error_notifier(&error_notifier)
-        reconfigure(config.with(error_notifier: error_notifier))
+        with(error_notifier: error_notifier)
       end
 
       # Configures a custom list of tracked errors that counts toward the threshold.
@@ -102,7 +102,7 @@ module Stoplight
       # @return [Stoplight::Light]
       # @deprecated consider using +Light#with+ for reconfiguration
       def with_tracked_errors(*tracked_errors)
-        reconfigure(config.with(tracked_errors: tracked_errors.dup.freeze))
+        with(tracked_errors:)
       end
 
       # Configures a custom list of skipped errors that do not count toward the threshold.
@@ -121,7 +121,7 @@ module Stoplight
       # @return [Stoplight::Light]
       # @deprecated consider using +Light#with+ for reconfiguration
       def with_skipped_errors(*skipped_errors)
-        reconfigure(config.with(skipped_errors: skipped_errors))
+        with(skipped_errors:)
       end
     end
   end

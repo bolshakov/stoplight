@@ -1,28 +1,12 @@
 # frozen_string_literal: true
 
-require "forwardable"
-
 module Stoplight
-  module Config
-    # Represents user-defined default configuration for Stoplight.
-    #
-    # This class allows users to define default settings for various Stoplight
-    # parameters, such as cool-off time, data store, error notifier, and more.
-    # TODO: add evaluation/recovery strategy support
-    class UserDefaultConfig
-      extend Forwardable
-
+  module Wiring
+    # User-facing configuration interface
+    class DefaultConfiguration
       # @!attribute [w] cool_off_time
       #   @return [Integer, nil] The default cool-off time in seconds.
       attr_writer :cool_off_time
-
-      # @!attribute [w] error_notifier
-      #   @return [Proc, nil] The default error notifier (callable object).
-      attr_writer :error_notifier
-
-      # @!attribute [rw] notifiers
-      #   @return [Array<Stoplight::Notifier::Base>] The default list of notifiers.
-      attr_accessor :notifiers
 
       # @!attribute [w] threshold
       #   @return [Integer, Float, nil] The default failure threshold to trip the circuit breaker.
@@ -44,13 +28,25 @@ module Stoplight
       #   @return [Array<Class>, nil] The default list of errors to skip.
       attr_writer :skipped_errors
 
-      # @!attribute [w] data_store
+      # @!attribute [w] error_notifier
+      #   @return [Proc, nil] The default error notifier (callable object).
+      attr_writer :error_notifier
+
+      # @!attribute [rw] notifiers
+      #   @return [Array<Stoplight::Notifier::Base>] The default list of notifiers.
+      attr_accessor :notifiers
+
+      # @!attribute [rw] data_store
       #   @return [Stoplight::DataStore::Base] The default data store instance.
-      attr_writer :data_store
+      attr_accessor :data_store
 
       # @!attribute [w] traffic_control
-      #   @return [Stoplight::TrafficControl::Base, Symbol, Hash] The traffic control strategy.
+      #   @return [Stoplight::TrafficControl::Base] The traffic control strategy.
       attr_writer :traffic_control
+
+      # @!attribute [w] traffic_recovery
+      #   @return [Stoplight::TrafficRecovery::Base] The traffic recovery strategy.
+      attr_writer :traffic_recovery
 
       def initialize
         # This allows users appending notifiers to the default list,
@@ -65,21 +61,18 @@ module Stoplight
       def to_h
         {
           cool_off_time: @cool_off_time,
-          data_store: @data_store,
-          error_notifier: @error_notifier,
-          notifiers: @notifiers,
           threshold: @threshold,
           recovery_threshold: @recovery_threshold,
           window_size: @window_size,
           tracked_errors: @tracked_errors,
           skipped_errors: @skipped_errors,
-          traffic_control: @traffic_control
+          data_store: @data_store,
+          error_notifier: @error_notifier,
+          notifiers: @notifiers,
+          traffic_control: @traffic_control,
+          traffic_recovery: @traffic_recovery
         }.compact
       end
-
-      # @return [Boolean] True if the configuration hash is not empty, false otherwise.
-      # @api private
-      def_delegator :to_h, :any?
     end
   end
 end

@@ -8,7 +8,7 @@ RSpec.describe Stoplight::TrafficControl::ErrorRate do
   describe "#check_compatibility" do
     subject(:availability) { traffic_control.check_compatibility(config) }
 
-    let(:config) { instance_double(Stoplight::Light::Config, window_size:, threshold:) }
+    let(:config) { instance_double(Stoplight::Domain::Config, window_size:, threshold:) }
     let(:threshold) { 0.1 }
     let(:window_size) { 600 }
 
@@ -64,7 +64,7 @@ RSpec.describe Stoplight::TrafficControl::ErrorRate do
   describe "#stop_traffic?" do
     subject { traffic_control.stop_traffic?(config, metadata) }
 
-    let(:config) { instance_double(Stoplight::Light::Config, window_size: 300, threshold: 0.6) }
+    let(:config) { instance_double(Stoplight::Domain::Config, window_size: 300, threshold: 0.6) }
 
     let(:metadata) do
       Stoplight::Metadata.new(successes:, errors:, current_time:)

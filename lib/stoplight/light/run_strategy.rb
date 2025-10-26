@@ -9,17 +9,18 @@ module Stoplight
     # @abstract
     class RunStrategy
       # @!attribute [r] config
-      #   @return [Stoplight::Light::Config] The configuration for the light.
-      private attr_reader :config
+      #   @return [Stoplight::Domain::Config] The configuration for the light.
+      protected attr_reader :config
 
       # @!attribute [r] data_store
       #   @return [Stoplight::DataStore::Base] The data store associated with the light.
-      private attr_reader :data_store
+      protected attr_reader :data_store
 
-      # @param config [Stoplight::Light::Config] The configuration for the light.
-      def initialize(config)
+      # @param config [Stoplight::Domain::Config] The configuration for the light.
+      # @param data_store [Stoplight::DataStore::Base] The data store associated with the light.
+      def initialize(config:, data_store:)
         @config = config
-        @data_store = config.data_store
+        @data_store = data_store
       end
 
       # @param fallback [Proc, nil] A fallback proc to execute in case of an error.
@@ -29,6 +30,11 @@ module Stoplight
         raise NotImplementedError, "Subclasses must implement the execute method"
       end
       # :nocov:
+
+      # @return [Boolean]
+      def ==(other)
+        other.is_a?(self.class) && config == other.config && data_store == other.data_store
+      end
     end
   end
 end

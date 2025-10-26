@@ -4,7 +4,7 @@ RSpec.describe Stoplight::TrafficRecovery::ConsecutiveSuccesses do
   describe "#check_compatibility" do
     subject(:strategy) { described_class.new.check_compatibility(config) }
 
-    let(:config) { instance_double(Stoplight::Light::Config, recovery_threshold:) }
+    let(:config) { instance_double(Stoplight::Domain::Config, recovery_threshold:) }
     let(:recovery_threshold) { 42 }
 
     context "when recovery threshold is less then 1" do
@@ -31,7 +31,7 @@ RSpec.describe Stoplight::TrafficRecovery::ConsecutiveSuccesses do
   describe "#determine_color" do
     subject { described_class.new.determine_color(config, metadata) }
 
-    let(:config) { instance_double(Stoplight::Light::Config, recovery_threshold:) }
+    let(:config) { instance_double(Stoplight::Domain::Config, recovery_threshold:) }
     let(:recovery_threshold) { 2 }
 
     let(:metadata) do

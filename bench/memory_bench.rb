@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require "benchmark/ips"
-require "stoplight"
+require_relative "../lib/stoplight"
 cashed_stoplight = Stoplight("")
 
 Benchmark.ips do |b|

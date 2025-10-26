@@ -26,7 +26,7 @@ module Stoplight
         synchronize { @metadata.keys }
       end
 
-      # @param config [Stoplight::Light::Config]
+      # @param config [Stoplight::Domain::Config]
       # @return [Stoplight::Metadata]
       def get_metadata(config)
         light_name = config.name
@@ -51,7 +51,7 @@ module Stoplight
         end
       end
 
-      # @param config [Stoplight::Light::Config]
+      # @param config [Stoplight::Domain::Config]
       # @param failure [Stoplight::Failure]
       # @return [Stoplight::Metadata]
       def record_failure(config, failure)
@@ -79,7 +79,7 @@ module Stoplight
         end
       end
 
-      # @param config [Stoplight::Light::Config]
+      # @param config [Stoplight::Domain::Config]
       # @return [void]
       def record_success(config)
         light_name = config.name
@@ -104,7 +104,7 @@ module Stoplight
         end
       end
 
-      # @param config [Stoplight::Light::Config]
+      # @param config [Stoplight::Domain::Config]
       # @param failure [Stoplight::Failure]
       # @return [Stoplight::Metadata]
       def record_recovery_probe_failure(config, failure)
@@ -132,7 +132,7 @@ module Stoplight
         end
       end
 
-      # @param config [Stoplight::Light::Config]
+      # @param config [Stoplight::Domain::Config]
       # @return [Stoplight::Metadata]
       def record_recovery_probe_success(config)
         light_name = config.name
@@ -158,7 +158,7 @@ module Stoplight
         end
       end
 
-      # @param config [Stoplight::Light::Config]
+      # @param config [Stoplight::Domain::Config]
       # @param state [String]
       # @return [String]
       def set_state(config, state)
@@ -178,7 +178,7 @@ module Stoplight
 
       # Combined method that performs the state transition based on color
       #
-      # @param config [Stoplight::Light::Config] The light configuration
+      # @param config [Stoplight::Domain::Config] The light configuration
       # @param color [String] The color to transition to ("GREEN", "YELLOW", or "RED")
       # @return [Boolean] true if this is the first instance to detect this transition
       def transition_to_color(config, color)
@@ -196,7 +196,7 @@ module Stoplight
 
       # Transitions to GREEN state and ensures only one notification
       #
-      # @param config [Stoplight::Light::Config] The light configuration
+      # @param config [Stoplight::Domain::Config] The light configuration
       # @return [Boolean] true if this is the first instance to detect this transition
       private def transition_to_green(config)
         light_name = config.name
@@ -220,7 +220,7 @@ module Stoplight
 
       # Transitions to YELLOW (recovery) state and ensures only one notification
       #
-      # @param config [Stoplight::Light::Config] The light configuration
+      # @param config [Stoplight::Domain::Config] The light configuration
       # @return [Boolean] true if this is the first instance to detect this transition
       private def transition_to_yellow(config)
         light_name = config.name
@@ -249,7 +249,7 @@ module Stoplight
 
       # Transitions to RED state and ensures only one notification
       #
-      # @param config [Stoplight::Light::Config] The light configuration
+      # @param config [Stoplight::Domain::Config] The light configuration
       # @return [Boolean] true if this is the first instance to detect this transition
       private def transition_to_red(config)
         light_name = config.name

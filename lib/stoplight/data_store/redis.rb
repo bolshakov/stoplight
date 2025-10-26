@@ -129,7 +129,7 @@ module Stoplight
         end
         meta_hash = meta.each_slice(2).to_h.transform_keys(&:to_sym)
         last_error_json = meta_hash.delete(:last_error_json)
-        last_error = normalize_failure(last_error_json, config.error_notifier) if last_error_json
+        last_error = normalize_failure(last_error_json) if last_error_json
 
         Metadata.new(
           current_time:,
@@ -142,7 +142,7 @@ module Stoplight
         )
       end
 
-      # @param config [Stoplight::Light::Config] The light configuration.
+      # @param config [Stoplight::Domain::Config] The light configuration.
       # @param failure [Stoplight::Failure] The failure to record.
       # @return [Stoplight::Metadata] The updated metadata after recording the failure.
       def record_failure(config, failure)
@@ -179,7 +179,7 @@ module Stoplight
 
       # Records a failed recovery probe for a specific light configuration.
       #
-      # @param config [Stoplight::Light::Config] The light configuration.
+      # @param config [Stoplight::Domain::Config] The light configuration.
       # @param failure [Failure] The failure to record.
       # @return [Stoplight::Metadata] The updated metadata after recording the failure.
       def record_recovery_probe_failure(config, failure)
@@ -201,7 +201,7 @@ module Stoplight
 
       # Records a successful recovery probe for a specific light configuration.
       #
-      # @param config [Stoplight::Light::Config] The light configuration.
+      # @param config [Stoplight::Domain::Config] The light configuration.
       # @param request_id [String] The unique identifier for the request
       # @return [Stoplight::Metadata] The updated metadata after recording the success.
       def record_recovery_probe_success(config, request_id: SecureRandom.hex(12))
@@ -233,7 +233,7 @@ module Stoplight
 
       # Combined method that performs the state transition based on color
       #
-      # @param config [Stoplight::Light::Config] The light configuration
+      # @param config [Stoplight::Domain::Config] The light configuration
       # @param color [String] The color to transition to ("green", "yellow", or "red")
       # @return [Boolean] true if this is the first instance to detect this transition
       def transition_to_color(config, color)
@@ -251,7 +251,7 @@ module Stoplight
 
       # Transitions to GREEN state and ensures only one notification
       #
-      # @param config [Stoplight::Light::Config] The light configuration
+      # @param config [Stoplight::Domain::Config] The light configuration
       # @return [Boolean] true if this is the first instance to detect this transition
       private def transition_to_green(config)
         current_ts = current_time.to_i
@@ -269,7 +269,7 @@ module Stoplight
 
       # Transitions to YELLOW (recovery) state and ensures only one notification
       #
-      # @param config [Stoplight::Light::Config] The light configuration
+      # @param config [Stoplight::Domain::Config] The light configuration
       # @return [Boolean] true if this is the first instance to detect this transition
       private def transition_to_yellow(config)
         current_ts = current_time.to_i
@@ -287,7 +287,7 @@ module Stoplight
 
       # Transitions to RED state and ensures only one notification
       #
-      # @param config [Stoplight::Light::Config] The light configuration
+      # @param config [Stoplight::Domain::Config] The light configuration
       # @return [Boolean] true if this is the first instance to detect this transition
       private def transition_to_red(config)
         current_ts = current_time.to_i
@@ -305,11 +305,8 @@ module Stoplight
         became_red == 1
       end
 
-      private def normalize_failure(failure, error_notifier)
+      private def normalize_failure(failure)
         Failure.from_json(failure)
-      rescue => e
-        error_notifier.call(e)
-        Failure.from_error(e)
       end
 
       def_delegator "self.class", :key

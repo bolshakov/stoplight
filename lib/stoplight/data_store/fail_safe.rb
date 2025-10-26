@@ -14,21 +14,30 @@ module Stoplight
         # Wraps a data store with fail-safe mechanisms.
         #
         # @param data_store [Stoplight::DataStore::Base] The data store to wrap.
+        # @param error_notifier [Proc] called when wrapped data store fails
         # @return [Stoplight::DataStore::Base, FailSafe] The original data store if it is already
         #   a +Memory+ or +FailSafe+ instance, otherwise a new +FailSafe+ instance.
-        def wrap(data_store)
+        def wrap(data_store:, error_notifier:)
           case data_store
-          when Memory, FailSafe
+          in Memory
             data_store
+          in FailSafe if data_store.error_notifier == error_notifier
+            data_store
+          in FailSafe
+            new(data_store: data_store.data_store, error_notifier:)
           else
-            new(data_store)
+            new(data_store:, error_notifier:)
           end
         end
       end
 
       # @!attribute data_store
       #  @return [Stoplight::DataStore::Base] The underlying primary data store being used
-      protected attr_reader :data_store
+      attr_reader :data_store
+
+      # @!attribute error_notifier
+      #   @return [Proc]
+      attr_reader :error_notifier
 
       # @!attribute failover_data_store
       #   @return [Stoplight::DataStore::Base] The fallback data store used when the primary fails.
@@ -39,10 +48,12 @@ module Stoplight
       private attr_reader :circuit_breaker
 
       # @param data_store [Stoplight::DataStore::Base]
-      def initialize(data_store, failover_data_store: Default::DATA_STORE)
+      # @param error_notifier [Proc]
+      def initialize(data_store:, error_notifier:, failover_data_store: Default::DATA_STORE)
         @data_store = data_store
+        @error_notifier = error_notifier
         @failover_data_store = failover_data_store
-        @circuit_breaker = Stoplight.system_light("stoplight:data_store:fail_safe:#{data_store.class.name}")
+        @circuit_breaker = Stoplight.system_light("data_store:fail_safe:#{data_store.class.name}")
       end
 
       def names
@@ -94,14 +105,14 @@ module Stoplight
       end
 
       def ==(other)
-        other.is_a?(self.class) && other.data_store == data_store
+        other.is_a?(self.class) && other.data_store == data_store && other.error_notifier == error_notifier
       end
 
       # @param method_name [Symbol] protected method name
       private def with_fallback(method_name, *args, **kwargs, &code)
         fallback = proc do |error|
           config = args.first
-          config.error_notifier.call(error) if config && error
+          error_notifier.call(error) if config && error
           @failover_data_store.public_send(method_name, *args, **kwargs)
         end
 

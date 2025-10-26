@@ -3,9 +3,11 @@
 require "spec_helper"
 
 RSpec.describe Stoplight::Light::RedRunStrategy, :freeze do
-  subject(:strategy) { described_class.new(config) }
+  subject(:strategy) { described_class.new(config:, data_store:) }
 
-  let(:config) { Stoplight.default_config.with(name: "foo", data_store:) }
+  let(:config) do
+    Stoplight::Domain::Config.empty.with(name: "foo")
+  end
   let(:metadata) { instance_double(Stoplight::Metadata, recovery_scheduled_after: Time.now) }
 
   shared_examples Stoplight::Light::RedRunStrategy do

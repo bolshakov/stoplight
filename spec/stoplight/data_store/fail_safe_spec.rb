@@ -3,10 +3,10 @@
 require "spec_helper"
 
 RSpec.describe Stoplight::DataStore::FailSafe do
-  let(:fail_safe) { described_class.new(data_store, failover_data_store:) }
+  let(:fail_safe) { described_class.new(data_store:, error_notifier:, failover_data_store:) }
   let(:failover_data_store) { Stoplight::DataStore::Memory.new }
   let(:data_store) { instance_double(Stoplight::DataStore::Base) }
-  let(:config) { Stoplight.default_config.with(name:, error_notifier:) }
+  let(:config) { Stoplight::Domain::Config.empty.with(name:, window_size: 4, cool_off_time: 60, threshold: 3) }
   let(:error_notifier) { instance_double(Proc) }
   let(:name) { SecureRandom.uuid }
   let(:error) { StandardError.new("Test error") }
@@ -39,9 +39,7 @@ RSpec.describe Stoplight::DataStore::FailSafe do
     subject(:get_metadata) { fail_safe.get_metadata(config) }
 
     context "when data_store returns all data" do
-      let(:metadata) do
-        Stoplight::Metadata.new(current_time: Time.now).with(errors: 4)
-      end
+      let(:metadata) { Stoplight::Metadata.new(errors: 4) }
 
       it "returns all data from data_store" do
         expect(error_notifier).not_to receive(:call)
@@ -207,7 +205,7 @@ RSpec.describe Stoplight::DataStore::FailSafe do
   end
 
   describe ".wrap" do
-    subject { described_class.wrap(data_store) }
+    subject { described_class.wrap(data_store:, error_notifier:) }
 
     context "when data_store is a Memory instance" do
       let(:data_store) { Stoplight::DataStore::Memory.new }
@@ -217,11 +215,36 @@ RSpec.describe Stoplight::DataStore::FailSafe do
       end
     end
 
-    context "when data_store is a FailSafe instance" do
-      let(:data_store) { described_class.new(Stoplight::DataStore::Memory.new) }
+    context "when data_store is a FailSafe instance with the same error_notifier" do
+      let(:data_store) do
+        described_class.new(
+          data_store: Stoplight::DataStore::Memory.new,
+          error_notifier:
+        )
+      end
 
       it "returns the same data_store instance" do
         is_expected.to be(data_store)
+      end
+    end
+
+    context "when data_store is a FailSafe instance with a different error_notifier" do
+      let(:underlying_data_store) { Stoplight::DataStore::Memory.new }
+      let(:underlying_error_notifier) { ->(error) { warn error } }
+
+      let(:data_store) do
+        described_class.new(
+          data_store: underlying_data_store,
+          error_notifier: underlying_error_notifier
+        )
+      end
+
+      it "returns a new FailSafe instance wrapping the data_store" do
+        is_expected.to be_a(described_class)
+        is_expected.to have_attributes(
+          data_store: underlying_data_store,
+          error_notifier: error_notifier
+        )
       end
     end
 
@@ -230,7 +253,7 @@ RSpec.describe Stoplight::DataStore::FailSafe do
 
       it "returns a new FailSafe instance wrapping the data_store" do
         is_expected.to be_a(described_class)
-        expect(subject.instance_variable_get(:@data_store)).to eq(data_store)
+        is_expected.to have_attributes(data_store:, error_notifier:)
       end
     end
   end
@@ -241,7 +264,7 @@ RSpec.describe Stoplight::DataStore::FailSafe do
     it "when primary store fails" do
       # Prepare: move internal circuit breaker into the red state
       allow(data_store).to receive(:names).and_raise(Redis::TimeoutError)
-      Stoplight::Config::SystemConfig.threshold.times do
+      config.threshold.times do
         expect { fail_safe.names }.not_to raise_error
       end
 
@@ -257,7 +280,7 @@ RSpec.describe Stoplight::DataStore::FailSafe do
       expect(data_store).not_to have_received(:names), "expected to use fallback data store without trying primary"
 
       # After cool_off_time, the primary data store is tried again
-      Timecop.travel(Time.now + Stoplight::Config::SystemConfig.cool_off_time) do
+      Timecop.travel(Time.now + config.cool_off_time) do
         expect(data_store).to receive(:names).and_return(["recovered"])
 
         expect(fail_safe.names).to eq(["recovered"])

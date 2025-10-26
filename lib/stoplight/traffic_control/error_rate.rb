@@ -6,7 +6,7 @@ module Stoplight
     #
     # @example
     #   traffic_control = Stoplight::TrafficControl::ErrorRate.new
-    #   config = Stoplight::Light::Config.new(threshold: 0.6, window_size: 300, traffic_control:)
+    #   config = Stoplight::Domain::Config.new(threshold: 0.6, window_size: 300, traffic_control:)
     #
     # Will switch to red if 60% error rate reached within the 5-minute (300 seconds) sliding window.
     # By default this traffic control strategy starts evaluating only after 10 requests have been made. You can
@@ -26,8 +26,8 @@ module Stoplight
         @min_requests = min_requests
       end
 
-      # @param config [Stoplight::Light::Config]
-      # @return [Stoplight::Config::CompatibilityResult]
+      # @param config [Stoplight::Domain::Config]
+      # @return [StopDomain::Config::CompatibilityResult]
       def check_compatibility(config)
         if config.window_size.nil?
           incompatible("`window_size` should be set")
@@ -38,7 +38,7 @@ module Stoplight
         end
       end
 
-      # @param config [Stoplight::Light::Config]
+      # @param config [Stoplight::Domain::Config]
       # @param metadata [Stoplight::Metadata]
       # @return [Boolean]
       def stop_traffic?(config, metadata)

@@ -6,8 +6,9 @@ RSpec.describe "Stoplight" do
   let(:name) { ("a".."z").to_a.shuffle.join }
 
   it "creates a stoplight" do
-    config = Stoplight.default_config.with(name:)
-    expect(light).to eq(Stoplight::Light.new(config))
+    expected_light = Stoplight.__stoplight__default_light_factory.build_with(name:)
+
+    expect(light).to eq(expected_light)
   end
 
   it "is a class" do
@@ -20,19 +21,33 @@ RSpec.describe "Stoplight" do
     end
   end
 
+  describe ".system_light" do
+    subject(:light) { Stoplight.system_light(name) }
+
+    it "prefix name with __stoplight__" do
+      expect(light.name).to eq("__stoplight__#{name}")
+    end
+  end
+
   context "with settings" do
     subject(:light) { Stoplight(name, **settings) }
 
-    let(:settings) do
+    let(:settings) { {**config_settings, **dependencies_settings} }
+    let(:config_settings) do
       {
         cool_off_time: 1,
-        data_store: data_store,
-        error_notifier: error_notifier,
-        notifiers: notifiers,
         threshold: 4,
         window_size: 5,
         tracked_errors: [StandardError],
-        skipped_errors: [KeyError]
+        skipped_errors: [KeyError],
+        recovery_threshold: 3
+      }
+    end
+    let(:dependencies_settings) do
+      {
+        data_store: data_store,
+        error_notifier: error_notifier,
+        notifiers: notifiers
       }
     end
     let(:data_store) { Stoplight::DataStore::Memory.new }
@@ -40,8 +55,7 @@ RSpec.describe "Stoplight" do
     let(:notifiers) { [Stoplight::Notifier::IO.new($stdout)] }
 
     it "instantiates with the correct settings" do
-      config = Stoplight.default_config.with(name:, **settings)
-      expect(light).to eq(Stoplight::Light.new(config))
+      expect(light).to eq(Stoplight.__stoplight__default_light_factory.build_with(name:, **settings))
     end
 
     context "when unknown option is given" do
@@ -61,7 +75,7 @@ RSpec.describe "Stoplight" do
 
       expect do
         Stoplight.configure {}
-      end.to output(/Stoplight reconfigured. Existing circuit breakers will not see new configuration. New configuration/)
+      end.to output(/Stoplight reconfigured. Existing circuit breakers will not see new configuration/)
         .to_stderr
     end
 
@@ -69,9 +83,17 @@ RSpec.describe "Stoplight" do
       Stoplight.configure(trust_me_im_an_engineer: true) do |config|
         config.window_size = 94
       end
-      expect(Stoplight.default_config.with(name: "")).to have_attributes(
-        window_size: 94
-      )
+
+      light = Stoplight(SecureRandom.uuid)
+      expect(light.config.window_size).to eq(94)
+    end
+
+    it "validates default configuration" do
+      expect do
+        Stoplight.configure(trust_me_im_an_engineer: true) do |config|
+          config.traffic_control = :unexpected
+        end
+      end.to raise_error(Stoplight::Error::ConfigurationError, /unsupported traffic_control strategy provided/)
     end
   end
 end

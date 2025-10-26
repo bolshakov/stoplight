@@ -4,24 +4,7 @@ require "spec_helper"
 
 RSpec.describe Stoplight::Light::ConfigurationBuilderInterface do
   let(:name) { ("a".."z").to_a.shuffle.join }
-  let(:light) { Stoplight::Light.new(config) }
-
-  let(:config) do
-    Stoplight::Light::Config.new(
-      name: name,
-      data_store: Stoplight::Default::DATA_STORE,
-      notifiers: Stoplight::Default::NOTIFIERS,
-      error_notifier: Stoplight::Default::ERROR_NOTIFIER,
-      cool_off_time: Stoplight::Default::COOL_OFF_TIME,
-      threshold: Stoplight::Default::THRESHOLD,
-      recovery_threshold: Stoplight::Default::RECOVERY_THRESHOLD,
-      window_size: Stoplight::Default::WINDOW_SIZE,
-      tracked_errors: Stoplight::Default::TRACKED_ERRORS,
-      skipped_errors: Stoplight::Default::SKIPPED_ERRORS,
-      traffic_control: Stoplight::Default::TRAFFIC_CONTROL,
-      traffic_recovery: Stoplight::Default::TRAFFIC_RECOVERY
-    )
-  end
+  let(:light) { Stoplight(name) }
 
   shared_examples "configurable attribute" do |attribute|
     subject(:with_attribute) do
@@ -29,7 +12,7 @@ RSpec.describe Stoplight::Light::ConfigurationBuilderInterface do
     end
 
     it "configures #{attribute}" do
-      expect(with_attribute.config.__send__(attribute)).to eq(__send__(attribute))
+      expect(with_attribute).to eq(light.with(attribute => __send__(attribute)))
     end
   end
 
@@ -58,7 +41,14 @@ RSpec.describe Stoplight::Light::ConfigurationBuilderInterface do
   end
 
   describe "#with_notifiers" do
-    let(:notifiers) { [Stoplight::Notifier::FailSafe.wrap(Stoplight::Notifier::IO.new($stderr))] }
+    let(:notifiers) do
+      [
+        Stoplight::Notifier::FailSafe.wrap(
+          notifier: Stoplight::Notifier::IO.new($stderr),
+          error_notifier: ->(e) { puts "Notifier error: #{e.message}" }
+        )
+      ]
+    end
 
     include_examples "configurable attribute", :notifiers
   end
@@ -71,7 +61,7 @@ RSpec.describe Stoplight::Light::ConfigurationBuilderInterface do
     end
 
     it "configures error notifier" do
-      expect(with_attribute.config.error_notifier).to eq(error_notifier)
+      expect(with_attribute).to eq(light.with(error_notifier:))
     end
   end
 
