@@ -7,31 +7,31 @@ RSpec.describe Stoplight::Domain::Color do
 
   describe "::GREEN" do
     it "is a string" do
-      expect(Stoplight::Color::GREEN).to be_a(String)
+      expect(described_class::GREEN).to be_a(String)
     end
 
     it "is frozen" do
-      expect(Stoplight::Color::GREEN).to be_frozen
+      expect(described_class::GREEN).to be_frozen
     end
   end
 
   describe "::YELLOW" do
     it "is a string" do
-      expect(Stoplight::Color::YELLOW).to be_a(String)
+      expect(described_class::YELLOW).to be_a(String)
     end
 
     it "is frozen" do
-      expect(Stoplight::Color::YELLOW).to be_frozen
+      expect(described_class::YELLOW).to be_frozen
     end
   end
 
   describe "::RED" do
     it "is a string" do
-      expect(Stoplight::Color::RED).to be_a(String)
+      expect(described_class::RED).to be_a(String)
     end
 
     it "is frozen" do
-      expect(Stoplight::Color::RED).to be_frozen
+      expect(described_class::RED).to be_frozen
     end
   end
 end

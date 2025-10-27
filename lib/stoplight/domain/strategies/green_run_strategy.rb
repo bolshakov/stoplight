@@ -55,7 +55,7 @@ module Stoplight
         end
 
         private def record_error(error)
-          failure = Stoplight::Failure.from_error(error)
+          failure = Failure.from_error(error)
           metadata = data_store.record_failure(config, failure)
 
           if traffic_control.stop_traffic?(config, metadata) && data_store.transition_to_color(config, Color::RED)

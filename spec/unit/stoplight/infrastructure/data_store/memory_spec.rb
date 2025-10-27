@@ -6,7 +6,7 @@ RSpec.describe Stoplight::Infrastructure::DataStore::Memory do
   let(:name) { ("a".."z").to_a.shuffle.join }
   let(:failure) { Stoplight::Domain::Failure.new("class", "message", Time.new - 1) }
   let(:other) { Stoplight::Domain::Failure.new("class", "message 2", Time.new) }
-  let(:window_size) { Stoplight::Wiring::Default::WINDOW_SIZE }
+  let(:window_size) { 60 }
 
   it_behaves_like "data store metrics"
   it_behaves_like "Stoplight::Domain::DataStore"

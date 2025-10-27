@@ -6,14 +6,15 @@ module RuboCop
       class ArchitectureBoundaries < Base
         MSG = "%{current_layer} cannot depend on %{forbidden_layer}"
         MSG_SPEC = "%{current_layer} cannot depend on %{forbidden_layer} (use domain interface in test doubles instead)"
+        MSG_ROOT = "%{current_layer} cannot reference Stoplight composition root (use Domain::Light directly)"
 
         LAYER_NAMES = %i[Domain Infrastructure Wiring Admin].freeze
 
         LAYER_PATTERNS = {
-          domain: %r{(lib|spec)/stoplight/domain},
-          infrastructure: %r{(lib|spec)/stoplight/infrastructure},
-          wiring: %r{(lib|spec)/stoplight/wiring},
-          admin: %r{(lib|spec)/stoplight/admin}
+          domain: %r{(lib|spec/unit)/stoplight/domain},
+          infrastructure: %r{(lib|spec/unit)/stoplight/infrastructure},
+          wiring: %r{(lib|spec/unit)/stoplight/wiring},
+          admin: %r{(lib|spec/unit)/stoplight/admin}
         }.freeze
 
         ALLOWED_DEPENDENCIES = {
@@ -23,11 +24,8 @@ module RuboCop
           admin: [:domain, :infrastructure, :wiring]
         }.freeze
 
-        # Methods where the constant in describe/context is allowed
-        # (for describing what you're testing)
         RSPEC_DESCRIBE_METHODS = %i[describe context].to_set.freeze
 
-        # Methods where we allow the receiver but still check arguments
         RSPEC_STUB_METHODS = %i[
           allow allow_any_instance_of
           expect expect_any_instance_of
@@ -40,7 +38,7 @@ module RuboCop
 
           @allowed_layers = ALLOWED_DEPENDENCIES[@current_layer]
           @namespace_stack = []
-          @is_spec_file = processed_source.file_path.include?("spec/")
+          @is_spec_file = processed_source.file_path.include?("spec/unit")
         end
 
         def on_module(node)
@@ -69,21 +67,18 @@ module RuboCop
         end
 
         def on_send(node)
-          # Allow constants in describe/context blocks (for described_class)
+          # Check for Stoplight.light() or Stoplight() calls from domain
+          check_composition_root_calls(node)
+
           if RSPEC_DESCRIBE_METHODS.include?(node.method_name)
-            # Don't check the first argument (the class being described)
-            # but check everything else
             return
           end
 
-          # For stub methods, check the receiver is allowed but not the method name
           if RSPEC_STUB_METHODS.include?(node.method_name)
-            # Only process the receiver, not the arguments
             process(node.receiver) if node.receiver
             return
           end
 
-          # Check include/extend/prepend
           if [:include, :extend, :prepend].include?(node.method_name)
             node.arguments.each do |arg|
               check_constant_reference(arg) if arg.const_type?
@@ -93,15 +88,33 @@ module RuboCop
 
         private
 
+        def check_composition_root_calls(node)
+          return unless @current_layer == :domain
+          return unless node.receiver
+
+          # Check for Stoplight.light() or Stoplight.configure()
+          if node.receiver.const_type?
+            receiver_name = extract_constant_path(node.receiver)
+
+            if receiver_name == "Stoplight" &&
+                [:light, :system_light, :configure].include?(node.method_name)
+              add_offense(
+                node,
+                message: format(
+                  MSG_ROOT,
+                  current_layer: @current_layer
+                )
+              )
+            end
+          end
+        end
+
         def in_allowed_context?(node)
-          # Allow constants as first argument to describe/context
           parent = node.parent
           if parent&.send_type? && RSPEC_DESCRIBE_METHODS.include?(parent.method_name)
-            # Check if this const is the first argument
             return true if parent.arguments.first == node || parent.arguments.first&.children&.include?(node)
           end
 
-          # Allow constants in stub_const first argument (the string name)
           if parent&.send_type? && parent.method_name == :stub_const
             return true if parent.arguments.first == node
           end
@@ -128,13 +141,28 @@ module RuboCop
           const_path = extract_constant_path(node)
           return unless const_path
 
+          # Special case: Check for Stoplight::DataStore, Stoplight::Notifier, etc.
+          # These are aliases in the root namespace that shouldn't be used from Domain
+          if @current_layer == :domain && const_path.match?(/^Stoplight::(DataStore|Notifier|Light|Color|State|Error|Failure)/)
+            # Check if this is actually referencing the root alias vs Domain namespace
+            if !inside_stoplight_domain_namespace?
+              add_offense(
+                node,
+                message: format(
+                  MSG_ROOT,
+                  current_layer: @current_layer
+                )
+              )
+              return
+            end
+          end
+
           resolved_namespace = resolve_namespace(const_path)
           return unless resolved_namespace
 
           forbidden_layer = extract_forbidden_layer(resolved_namespace)
           return unless forbidden_layer
 
-          # Use different message for spec files vs production code
           message_template = @is_spec_file ? MSG_SPEC : MSG
 
           add_offense(
@@ -145,6 +173,11 @@ module RuboCop
               forbidden_layer: forbidden_layer
             )
           )
+        end
+
+        def inside_stoplight_domain_namespace?
+          # Check if we're inside module Stoplight::Domain
+          @namespace_stack.include?("Stoplight") && @namespace_stack.include?("Domain")
         end
 
         def extract_constant_path(node)

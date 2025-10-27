@@ -126,7 +126,7 @@ module Stoplight
       #
       # @return [Stoplight::Light] returns unlocked light (circuit breaker)
       def unlock
-        data_store.set_state(config, Stoplight::State::UNLOCKED)
+        data_store.set_state(config, State::UNLOCKED)
 
         self
       end

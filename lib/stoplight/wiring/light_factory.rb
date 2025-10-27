@@ -128,16 +128,16 @@ module Stoplight
 
       private def apply_traffic_control_dsl(traffic_control)
         case traffic_control
-        in Stoplight::Domain::TrafficControl::Base
+        in Domain::TrafficControl::Base
           traffic_control
         in :consecutive_errors
-          Stoplight::Domain::TrafficControl::ConsecutiveErrors.new
+          Domain::TrafficControl::ConsecutiveErrors.new
         in :error_rate
-          Stoplight::Domain::TrafficControl::ErrorRate.new
+          Domain::TrafficControl::ErrorRate.new
         in {error_rate: error_rate_settings}
-          Stoplight::Domain::TrafficControl::ErrorRate.new(**error_rate_settings)
+          Domain::TrafficControl::ErrorRate.new(**error_rate_settings)
         else
-          raise Error::ConfigurationError, <<~ERROR
+          raise Domain::Error::ConfigurationError, <<~ERROR
             unsupported traffic_control strategy provided (`#{traffic_control}`). Supported options:
               * :consecutive_errors
               * :error_rate
@@ -147,12 +147,12 @@ module Stoplight
 
       def apply_traffic_recovery_dsl(traffic_recovery)
         case traffic_recovery
-        in Stoplight::Domain::TrafficRecovery::Base
+        in Domain::TrafficRecovery::Base
           traffic_recovery
         in :consecutive_successes
-          Stoplight::Domain::TrafficRecovery::ConsecutiveSuccesses.new
+          Domain::TrafficRecovery::ConsecutiveSuccesses.new
         else
-          raise Error::ConfigurationError, <<~ERROR
+          raise Domain::Error::ConfigurationError, <<~ERROR
             unsupported traffic_recovery strategy provided (`#{traffic_recovery}`). Supported options:
               * :consecutive_successes
           ERROR
@@ -167,7 +167,7 @@ module Stoplight
       private def validate_traffic_control!(traffic_control, config)
         traffic_control.check_compatibility(config).then do |compatibility_result|
           if compatibility_result.incompatible?
-            raise Error::ConfigurationError.new(
+            raise Domain::Error::ConfigurationError.new(
               "#{traffic_control.class.name} strategy is incompatible with the Stoplight configuration: #{compatibility_result.error_messages}"
             )
           end
@@ -177,7 +177,7 @@ module Stoplight
       private def validate_traffic_recovery!(traffic_recovery, config)
         traffic_recovery.check_compatibility(config).then do |compatibility_result|
           if compatibility_result.incompatible?
-            raise Error::ConfigurationError.new(
+            raise Domain::Error::ConfigurationError.new(
               "#{traffic_recovery.class.name} strategy is incompatible with the Stoplight configuration: #{compatibility_result.error_messages}"
             )
           end

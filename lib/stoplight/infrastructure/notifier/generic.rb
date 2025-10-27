@@ -45,12 +45,19 @@ module Stoplight
         #   @see Stoplight::Default::FORMATTER
         attr_reader :formatter
 
+        DEFAULT_FORMATTER = lambda do |light, from_color, to_color, error|
+          words = ["Switching", light.name, "from", from_color, "to", to_color]
+          words += ["because", error.class, error.message] if error
+          words.join(" ")
+        end
+        public_constant :DEFAULT_FORMATTER
+
         # @param object [Object] The object used by the notifier (e.g., a logger or external service).
         # @param formatter [Proc, nil] A custom formatter for generating notification messages.
         #   If no formatter is provided, the default formatter is used.
         def initialize(object, formatter = nil)
           @object = object
-          @formatter = formatter || Wiring::Default::FORMATTER
+          @formatter = formatter || DEFAULT_FORMATTER
         end
 
         # Sends a notification when a Stoplight changes state.

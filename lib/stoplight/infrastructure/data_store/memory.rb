@@ -184,11 +184,11 @@ module Stoplight
         # @return [Boolean] true if this is the first instance to detect this transition
         def transition_to_color(config, color)
           case color
-          when Color::GREEN
+          when Domain::Color::GREEN
             transition_to_green(config)
-          when Color::YELLOW
+          when Domain::Color::YELLOW
             transition_to_yellow(config)
-          when Color::RED
+          when Domain::Color::RED
             transition_to_red(config)
           else
             raise ArgumentError, "Invalid color: #{color}"

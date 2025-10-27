@@ -2,7 +2,7 @@
 
 require "rubocop"
 require "rubocop/rspec/support"
-require_relative "../../rubocop/stoplight/architecture_boundaries"
+require_relative "../../../rubocop/stoplight/architecture_boundaries"
 
 RSpec.describe RuboCop::Cop::Stoplight::ArchitectureBoundaries, :config do
   let(:config) { RuboCop::Config.new }
@@ -244,8 +244,77 @@ RSpec.describe RuboCop::Cop::Stoplight::ArchitectureBoundaries, :config do
     end
   end
 
+  context "when domain references composition root" do
+    let(:filename) { "lib/stoplight/domain/circuit_manager.rb" }
+
+    it "detects Stoplight.light() call" do
+      expect_offense(<<~RUBY, filename)
+        module Stoplight::Domain
+          class CircuitManager
+            def create
+              Stoplight.light("test")
+              ^^^^^^^^^^^^^^^^^^^^^^^ Stoplight/ArchitectureBoundaries: domain cannot reference Stoplight composition root (use Domain::Light directly)
+            end
+          end
+        end
+      RUBY
+    end
+
+    it "detects Stoplight.configure() call" do
+      expect_offense(<<~RUBY, filename)
+        module Stoplight::Domain
+          class CircuitManager
+            def setup
+              Stoplight.configure do |config|
+              ^^^^^^^^^^^^^^^^^^^ Stoplight/ArchitectureBoundaries: domain cannot reference Stoplight composition root (use Domain::Light directly)
+                # ...
+              end
+            end
+          end
+        end
+      RUBY
+    end
+
+    it "detects Stoplight::DataStore::Memory reference" do
+      expect_offense(<<~RUBY, filename)
+        module Stoplight::Domain
+          class CircuitManager
+            def create_store
+              Stoplight::DataStore::Memory.new
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Stoplight/ArchitectureBoundaries: domain cannot reference Stoplight composition root (use Domain::Light directly)
+            end
+          end
+        end
+      RUBY
+    end
+
+    it "allows Domain::Light" do
+      expect_no_offenses(<<~RUBY, filename)
+        module Stoplight::Domain
+          class CircuitManager
+            def create
+              Domain::Light.new(name: "test")
+            end
+          end
+        end
+      RUBY
+    end
+
+    it "allows Stoplight::Domain::Light (explicit full path)" do
+      expect_no_offenses(<<~RUBY, filename)
+        module Stoplight::Domain
+          class CircuitManager
+            def create
+              Stoplight::Domain::Light.new(name: "test")
+            end
+          end
+        end
+      RUBY
+    end
+  end
+
   context "when in domain spec files" do
-    let(:filename) { "spec/stoplight/domain/light_spec.rb" }
+    let(:filename) { "spec/unit/stoplight/domain/light_spec.rb" }
 
     it "detects Infrastructure in instance_double" do
       expect_offense(<<~RUBY, filename)

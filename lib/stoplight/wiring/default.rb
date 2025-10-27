@@ -5,15 +5,11 @@ module Stoplight
     module Default
       COOL_OFF_TIME = 60.0
 
-      DATA_STORE = DataStore::Memory.new
+      DATA_STORE = Infrastructure::DataStore::Memory.new
 
       ERROR_NOTIFIER = ->(error) { warn error }
 
-      FORMATTER = lambda do |light, from_color, to_color, error|
-        words = ["Switching", light.name, "from", from_color, "to", to_color]
-        words += ["because", error.class, error.message] if error
-        words.join(" ")
-      end
+      FORMATTER = Infrastructure::Notifier::Generic::DEFAULT_FORMATTER
 
       NOTIFIERS = [Infrastructure::Notifier::IO.new($stderr)].freeze
 

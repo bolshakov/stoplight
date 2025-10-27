@@ -7,7 +7,7 @@ module Stoplight
     #
     # @abstract Subclasses must implement the `notify` method to define custom notification logic.
     # :nocov:
-    class StateTransitionNotifier
+    class StateTransitionNotifier # ColorTransition?????
       # Sends a notification when a Stoplight changes state.
       #
       # @param config [Stoplight::Domain::Config] The Stoplight instance triggering the notification.

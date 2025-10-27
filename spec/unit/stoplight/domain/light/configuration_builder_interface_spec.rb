@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
-require "spec_helper"
-
-RSpec.describe Stoplight::Light::ConfigurationBuilderInterface do
+RSpec.describe Stoplight::Domain::Light::ConfigurationBuilderInterface do
   let(:name) { ("a".."z").to_a.shuffle.join }
   let(:light) { Stoplight(name) }
 
@@ -17,7 +15,7 @@ RSpec.describe Stoplight::Light::ConfigurationBuilderInterface do
   end
 
   describe "#with_data_store" do
-    let(:data_store) { Stoplight::DataStore::Memory.new }
+    let(:data_store) { instance_double(Stoplight::Domain::DataStore) }
 
     include_examples "configurable attribute", :data_store
   end
@@ -41,14 +39,7 @@ RSpec.describe Stoplight::Light::ConfigurationBuilderInterface do
   end
 
   describe "#with_notifiers" do
-    let(:notifiers) do
-      [
-        Stoplight::Wiring::FailSafeNotifier.wrap(
-          notifier: Stoplight::Infrastructure::Notifier::IO.new($stderr),
-          error_notifier: ->(e) { puts "Notifier error: #{e.message}" }
-        )
-      ]
-    end
+    let(:notifiers) { [instance_double(Stoplight::Domain::StateTransitionNotifier)] }
 
     include_examples "configurable attribute", :notifiers
   end
@@ -85,8 +76,7 @@ RSpec.describe Stoplight::Light::ConfigurationBuilderInterface do
     end
 
     it "configures skipped errors" do
-      expect(with_attribute.config.skipped_errors).to contain_exactly(*skipped_errors,
-        *Stoplight::Wiring::Default::SKIPPED_ERRORS)
+      expect(with_attribute.config.skipped_errors).to eq(skipped_errors)
     end
   end
 end

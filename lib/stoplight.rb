@@ -14,26 +14,10 @@ loader.ignore("#{__dir__}/stoplight/rspec.rb", "#{__dir__}/stoplight/rspec")
 loader.setup
 
 module Stoplight # rubocop:disable Style/Documentation
+  include Wiring::PublicApi
+
   CONFIG_MUTEX = Mutex.new
   private_constant :CONFIG_MUTEX
-
-  # Public interface
-  Color = Domain::Color
-  Error = Domain::Error
-  Failure = Domain::Failure
-  State = Domain::State
-  Light = Domain::Light
-  module DataStore
-    Redis = Infrastructure::DataStore::Redis
-    Memory = Infrastructure::DataStore::Memory
-  end
-
-  module Notifier
-    Base = Domain::StateTransitionNotifier
-    Generic = Infrastructure::Notifier::Generic
-    IO = Infrastructure::Notifier::IO
-    Logger = Infrastructure::Notifier::Logger
-  end
 
   class << self
     # Configures the Stoplight library.

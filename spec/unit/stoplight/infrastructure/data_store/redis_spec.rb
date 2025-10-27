@@ -1,15 +1,14 @@
 # frozen_string_literal: true
 
 require "connection_pool"
-require "spec_helper"
 
 RSpec.describe Stoplight::Infrastructure::DataStore::Redis, :redis do
   let(:config) { Stoplight::Domain::Config.empty.with(name:, window_size:, cool_off_time:) }
   let(:name) { ("a".."z").to_a.shuffle.join }
   let(:failure) { Stoplight::Domain::Failure.new("class", "message", Time.new - 60) }
   let(:other) { Stoplight::Domain::Failure.new("class", "message 2", Time.new) }
-  let(:window_size) { Stoplight::Wiring::Default::WINDOW_SIZE }
-  let(:cool_off_time) { Stoplight::Wiring::Default::COOL_OFF_TIME }
+  let(:window_size) { 60 }
+  let(:cool_off_time) { 60 }
 
   describe ".buckets_for_window" do
     subject(:buckets) { described_class.buckets_for_window(light_name, metric:, window_end:, window_size:) }
@@ -60,6 +59,14 @@ RSpec.describe Stoplight::Infrastructure::DataStore::Redis, :redis do
       it "returns at most 144 buckets (1 day)" do
         is_expected.to have_attributes(count: 25)
       end
+    end
+  end
+
+  describe ".new" do
+    let(:redis_mock) { instance_double(Redis) }
+
+    it "does not communicate with redis on initialization" do
+      expect { described_class.new(redis_mock) }.not_to raise_error
     end
   end
 

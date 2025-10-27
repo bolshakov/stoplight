@@ -3,7 +3,7 @@
 module Stoplight
   module Infrastructure
     module DependencyInjection
-      class UnresolvedDependencyError < Error::Base
+      class UnresolvedDependencyError < Domain::Error::Base
         def initialize(key)
           super("Unable to resolve dependency: `#{key}`")
         end
