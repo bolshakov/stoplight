@@ -5,7 +5,7 @@ require "monitor"
 module Stoplight
   module Infrastructure
     module DataStore
-      # @see Base
+      # @see +Domain::DataStore+
       class Memory < Domain::DataStore
         include MonitorMixin
 
