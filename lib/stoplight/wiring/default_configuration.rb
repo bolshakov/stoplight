@@ -33,19 +33,19 @@ module Stoplight
       attr_writer :error_notifier
 
       # @!attribute [rw] notifiers
-      #   @return [Array<Stoplight::Notifier::Base>] The default list of notifiers.
+      #   @return [Array<Stoplight::Domain::StateTransitionNotifier>] The default list of notifiers.
       attr_accessor :notifiers
 
       # @!attribute [rw] data_store
-      #   @return [Stoplight::DataStore::Base] The default data store instance.
+      #   @return [Stoplight::Domain::DataStore] The default data store instance.
       attr_accessor :data_store
 
       # @!attribute [w] traffic_control
-      #   @return [Stoplight::TrafficControl::Base] The traffic control strategy.
+      #   @return [Stoplight::Domain::TrafficControl::Base] The traffic control strategy.
       attr_writer :traffic_control
 
       # @!attribute [w] traffic_recovery
-      #   @return [Stoplight::TrafficRecovery::Base] The traffic recovery strategy.
+      #   @return [Stoplight::Domain::TrafficRecovery::Base] The traffic recovery strategy.
       attr_writer :traffic_recovery
 
       def initialize

@@ -628,7 +628,7 @@ Example: "Ruby 3.2 reaches end-of-life in March 2026, so Stoplight 6.0 will requ
 
 After checking out the repo, run `bundle install` to install dependencies. Run tests with `bundle exec rspec` and check 
 code style with `bundle exec standardrb`. We follow a git flow branching strategy - see our [Git Flow wiki page] for 
-details on branch naming, releases, and contribution workflow.
+details on branch naming, releases, and contribution workflow. Also check our CONTRIBUTING.md guide for contributors.
 
 ## Credits
 

@@ -12,9 +12,9 @@ RSpec.shared_examples "Stoplight::Light#run" do
     )
   end
 
-  let(:green_run_strategy) { instance_double(Stoplight::Light::RunStrategy) }
-  let(:yellow_run_strategy) { instance_double(Stoplight::Light::RunStrategy) }
-  let(:red_run_strategy) { instance_double(Stoplight::Light::RunStrategy) }
+  let(:green_run_strategy) { instance_double(Stoplight::Domain::Strategies::RunStrategy) }
+  let(:yellow_run_strategy) { instance_double(Stoplight::Domain::Strategies::RunStrategy) }
+  let(:red_run_strategy) { instance_double(Stoplight::Domain::Strategies::RunStrategy) }
   let(:code) { -> { code_result } }
   let(:code_result) { random_string }
   let(:fallback) { instance_double(Proc) }

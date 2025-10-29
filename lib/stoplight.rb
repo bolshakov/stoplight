@@ -14,6 +14,8 @@ loader.ignore("#{__dir__}/stoplight/rspec.rb", "#{__dir__}/stoplight/rspec")
 loader.setup
 
 module Stoplight # rubocop:disable Style/Documentation
+  include Wiring::PublicApi
+
   CONFIG_MUTEX = Mutex.new
   private_constant :CONFIG_MUTEX
 
@@ -80,7 +82,7 @@ module Stoplight # rubocop:disable Style/Documentation
 
     # Retrieves the current default dependencies.
     #
-    # @return [Stoplight::Domain::AbstractLightFactory]
+    # @return [Stoplight::Domain::LightFactory]
     # @api private
     def __stoplight__default_light_factory
       ensure_configured
@@ -125,7 +127,7 @@ end
 #   @option settings [Numeric] :window_size The size of the rolling window for failure tracking.
 #   @option settings [Array<StandardError>] :tracked_errors A list of errors to track.
 #   @option settings [Array<Exception>] :skipped_errors A list of errors to skip.
-#   @option settings [Stoplight::TrafficControl::Base, Symbol, {Symbol, Hash{Symbol, any}}] :traffic_control The
+#   @option settings [Symbol, {Symbol, Hash{Symbol, any}}] :traffic_control The
 #     traffic control strategy to use.
 #
 # @return [Stoplight::Light] A new circuit breaker instance.

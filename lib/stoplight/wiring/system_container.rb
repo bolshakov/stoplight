@@ -3,7 +3,7 @@
 module Stoplight
   module Wiring
     SystemContainer = Container.with(
-      traffic_recovery: Stoplight::TrafficRecovery::ConsecutiveSuccesses.new
+      traffic_recovery: Domain::TrafficRecovery::ConsecutiveSuccesses.new
     )
   end
 end

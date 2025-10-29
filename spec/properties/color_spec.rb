@@ -82,7 +82,7 @@ RSpec.describe "Stoplight::Light#color" do
   end
 
   context "with redis data store", :redis do
-    let(:data_store) { Stoplight::DataStore::Redis.new(redis) }
+    let(:data_store) { Stoplight::Infrastructure::DataStore::Redis.new(redis) }
 
     it_behaves_like "transition to color"
     it_behaves_like "state machine"

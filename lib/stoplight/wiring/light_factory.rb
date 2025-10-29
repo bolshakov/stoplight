@@ -4,17 +4,17 @@ module Stoplight
   module Wiring
     # Concrete factory for building +Stoplight::Light++ instances with full dependency wiring.
     #
-    # This factory implements the +Stoplight::Domain::AbstractLightFactory+ protocol. It knows how to:
+    # This factory implements the +Stoplight::Domain::LightFactory+ protocol. It knows how to:
     #   1. Parse and transform user-provided settings
     #   2. Wire together all Light dependencies using a DI container
     #   3. Validate configuration compatibility
     #   4. Construct fully-functional Light instances
     #
-    # @see Stoplight::Domain::AbstractLightFactory
+    # @see Stoplight::Domain::LightFactory
     # @see Stoplight()
     # @api private
 
-    class LightFactory < Domain::AbstractLightFactory
+    class LightFactory < Domain::LightFactory
       # @!attribute [r] container
       #   The dependency injection container holding all component configurations.
       #   Contains config, data_store, notifiers, strategies, etc.
@@ -62,7 +62,7 @@ module Stoplight
       def build
         validate!
 
-        Stoplight::Light.new(
+        Stoplight::Domain::Light.new(
           container.resolve(:config),
           data_store: container.resolve(:data_store),
           green_run_strategy: container.resolve(:green_run_strategy),
@@ -128,16 +128,16 @@ module Stoplight
 
       private def apply_traffic_control_dsl(traffic_control)
         case traffic_control
-        in Stoplight::TrafficControl::Base
+        in Domain::TrafficControl::Base
           traffic_control
         in :consecutive_errors
-          Stoplight::TrafficControl::ConsecutiveErrors.new
+          Domain::TrafficControl::ConsecutiveErrors.new
         in :error_rate
-          Stoplight::TrafficControl::ErrorRate.new
+          Domain::TrafficControl::ErrorRate.new
         in {error_rate: error_rate_settings}
-          Stoplight::TrafficControl::ErrorRate.new(**error_rate_settings)
+          Domain::TrafficControl::ErrorRate.new(**error_rate_settings)
         else
-          raise Error::ConfigurationError, <<~ERROR
+          raise Domain::Error::ConfigurationError, <<~ERROR
             unsupported traffic_control strategy provided (`#{traffic_control}`). Supported options:
               * :consecutive_errors
               * :error_rate
@@ -147,12 +147,12 @@ module Stoplight
 
       def apply_traffic_recovery_dsl(traffic_recovery)
         case traffic_recovery
-        in Stoplight::TrafficRecovery::Base
+        in Domain::TrafficRecovery::Base
           traffic_recovery
         in :consecutive_successes
-          Stoplight::TrafficRecovery::ConsecutiveSuccesses.new
+          Domain::TrafficRecovery::ConsecutiveSuccesses.new
         else
-          raise Error::ConfigurationError, <<~ERROR
+          raise Domain::Error::ConfigurationError, <<~ERROR
             unsupported traffic_recovery strategy provided (`#{traffic_recovery}`). Supported options:
               * :consecutive_successes
           ERROR
@@ -167,7 +167,7 @@ module Stoplight
       private def validate_traffic_control!(traffic_control, config)
         traffic_control.check_compatibility(config).then do |compatibility_result|
           if compatibility_result.incompatible?
-            raise Error::ConfigurationError.new(
+            raise Domain::Error::ConfigurationError.new(
               "#{traffic_control.class.name} strategy is incompatible with the Stoplight configuration: #{compatibility_result.error_messages}"
             )
           end
@@ -177,7 +177,7 @@ module Stoplight
       private def validate_traffic_recovery!(traffic_recovery, config)
         traffic_recovery.check_compatibility(config).then do |compatibility_result|
           if compatibility_result.incompatible?
-            raise Error::ConfigurationError.new(
+            raise Domain::Error::ConfigurationError.new(
               "#{traffic_recovery.class.name} strategy is incompatible with the Stoplight configuration: #{compatibility_result.error_messages}"
             )
           end

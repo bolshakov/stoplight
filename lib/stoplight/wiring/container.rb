@@ -19,25 +19,25 @@ module Stoplight
     # @see Stoplight::Wiring::LightFactory Factory that uses this container
     # @api private
     Container = Infrastructure::DependencyInjection::Container.define do
-      register(:config, Wiring::Light::DefaultConfig)
-      register(:error_notifier, Stoplight::Default::ERROR_NOTIFIER)
-      register(:traffic_control, Stoplight::Default::TRAFFIC_CONTROL)
-      register(:traffic_recovery, Stoplight::Default::TRAFFIC_RECOVERY)
+      register(:config, Light::DefaultConfig)
+      register(:error_notifier, Default::ERROR_NOTIFIER)
+      register(:traffic_control, Default::TRAFFIC_CONTROL)
+      register(:traffic_recovery, Default::TRAFFIC_RECOVERY)
 
-      register(:data_store, Stoplight::Default::DATA_STORE) do |data_store|
-        DataStore::FailSafe.wrap(
+      register(:data_store, Default::DATA_STORE) do |data_store|
+        FailSafeDataStore.wrap(
           data_store:,
           error_notifier: resolve(:error_notifier)
         )
       end
 
-      register(:notifiers, Stoplight::Default::NOTIFIERS) do |notifiers|
+      register(:notifiers, Default::NOTIFIERS) do |notifiers|
         error_notifier = resolve(:error_notifier)
-        notifiers.map { |notifier| Notifier::FailSafe.wrap(notifier:, error_notifier:) }
+        notifiers.map { |notifier| Wiring::FailSafeNotifier.wrap(notifier:, error_notifier:) }
       end
 
       factory(:green_run_strategy) do
-        Stoplight::Light::GreenRunStrategy.new(
+        Domain::Strategies::GreenRunStrategy.new(
           config: resolve(:config),
           data_store: resolve(:data_store),
           notifiers: resolve(:notifiers),
@@ -46,7 +46,7 @@ module Stoplight
       end
 
       factory(:yellow_run_strategy) do
-        Stoplight::Light::YellowRunStrategy.new(
+        Domain::Strategies::YellowRunStrategy.new(
           config: resolve(:config),
           data_store: resolve(:data_store),
           notifiers: resolve(:notifiers),
@@ -55,7 +55,7 @@ module Stoplight
       end
 
       factory(:red_run_strategy) do
-        Stoplight::Light::RedRunStrategy.new(
+        Domain::Strategies::RedRunStrategy.new(
           config: resolve(:config),
           data_store: resolve(:data_store)
         )
