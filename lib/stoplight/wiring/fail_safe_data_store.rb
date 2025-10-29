@@ -47,7 +47,7 @@ module Stoplight
       #   @return [Stoplight::Light] The circuit breaker used to handle data store failures.
       private attr_reader :circuit_breaker
 
-      # @param data_store [Stoplight::DataStore::Base]
+      # @param data_store [Stoplight::Domain::DataStore]
       # @param error_notifier [Proc]
       def initialize(data_store:, error_notifier:, failover_data_store: Wiring::Default::DATA_STORE)
         @data_store = data_store
