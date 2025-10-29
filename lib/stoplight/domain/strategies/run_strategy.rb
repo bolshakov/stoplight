@@ -18,7 +18,7 @@ module Stoplight
         protected attr_reader :data_store
 
         # @param config [Stoplight::Domain::Config] The configuration for the light.
-        # @param data_store [Stoplight::DataStore::Base] The data store associated with the light.
+        # @param data_store [Stoplight::Domain::DataStore] The data store associated with the light.
         def initialize(config:, data_store:)
           @config = config
           @data_store = data_store
