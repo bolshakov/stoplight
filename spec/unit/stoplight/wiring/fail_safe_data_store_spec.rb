@@ -60,7 +60,7 @@ RSpec.describe Stoplight::Wiring::FailSafeDataStore do
   describe "#record_failure" do
     subject { fail_safe.record_failure(config, failure) }
 
-    let(:failure) { Stoplight::Failure.new("class", "message", Time.new) }
+    let(:failure) { Stoplight::Domain::Failure.new("class", "message", Time.new) }
 
     context "when data_store records failure" do
       it "returns total number of errors from data_store" do
@@ -106,7 +106,7 @@ RSpec.describe Stoplight::Wiring::FailSafeDataStore do
   describe "#record_recovery_probe_failure" do
     subject { fail_safe.record_recovery_probe_failure(config, failure) }
 
-    let(:failure) { Stoplight::Failure.new("class", "message", Time.new) }
+    let(:failure) { Stoplight::Domain::Failure.new("class", "message", Time.new) }
 
     context "when data_store records recovery probe failure" do
       let(:metadata) { Stoplight::Domain::Metadata.new(errors: 42, current_time: Time.now) }

@@ -12,7 +12,7 @@ RSpec.describe "Stoplight" do
   end
 
   it "is a class" do
-    expect(light).to be_kind_of(Stoplight::Light)
+    expect(light).to be_kind_of(Stoplight::Domain::Light)
   end
 
   describe "#name" do

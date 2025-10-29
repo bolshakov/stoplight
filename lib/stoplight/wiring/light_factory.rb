@@ -62,7 +62,7 @@ module Stoplight
       def build
         validate!
 
-        Stoplight::Light.new(
+        Stoplight::Domain::Light.new(
           container.resolve(:config),
           data_store: container.resolve(:data_store),
           green_run_strategy: container.resolve(:green_run_strategy),

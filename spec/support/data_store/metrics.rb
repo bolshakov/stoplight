@@ -102,7 +102,7 @@ RSpec.shared_examples "data store metrics" do
   end
 
   describe "Metadata#last_error_at" do
-    let(:failure) { Stoplight::Failure.from_error(error) }
+    let(:failure) { Stoplight::Domain::Failure.from_error(error) }
     let(:request_time) { failure.time }
     let(:error) { StandardError.new("Test error") }
 
@@ -123,7 +123,7 @@ RSpec.shared_examples "data store metrics" do
     end
 
     context "when an older failure is recorded after a newer one" do
-      let(:older_failure) { Stoplight::Failure.from_error(error, time: Time.now - 1000) }
+      let(:older_failure) { Stoplight::Domain::Failure.from_error(error, time: Time.now - 1000) }
       let(:older_failure_request_time) { request_time + 20 }
 
       before do
@@ -142,7 +142,7 @@ RSpec.shared_examples "data store metrics" do
     end
 
     context "when a newer failure is recorded after an older one" do
-      let(:older_failure) { Stoplight::Failure.from_error(error, time: Time.now - 1000) }
+      let(:older_failure) { Stoplight::Domain::Failure.from_error(error, time: Time.now - 1000) }
       let(:older_failure_request_time) { request_time - 20 }
 
       before do
@@ -161,7 +161,7 @@ RSpec.shared_examples "data store metrics" do
     end
 
     context "when a newer recovery probe failure is recorded after a failure" do
-      let(:recovery_probe_failure) { Stoplight::Failure.from_error(error, time: Time.now + 5000) }
+      let(:recovery_probe_failure) { Stoplight::Domain::Failure.from_error(error, time: Time.now + 5000) }
       let(:recovery_probe_failure_request_time) { request_time + 5000 }
 
       before do
@@ -180,7 +180,7 @@ RSpec.shared_examples "data store metrics" do
     end
 
     context "when a failure is recorded after a recovery probe failure" do
-      let(:recovery_probe_failure) { Stoplight::Failure.from_error(error, time: Time.now - 5000) }
+      let(:recovery_probe_failure) { Stoplight::Domain::Failure.from_error(error, time: Time.now - 5000) }
       let(:recovery_probe_failure_request_time) { request_time - 5000 }
 
       before do
@@ -200,7 +200,7 @@ RSpec.shared_examples "data store metrics" do
   end
 
   describe "Metadata#last_error" do
-    let(:failure) { Stoplight::Failure.from_error(error) }
+    let(:failure) { Stoplight::Domain::Failure.from_error(error) }
     let(:error) { StandardError.new("Test error") }
 
     context "when the failure is recorded" do
@@ -214,7 +214,7 @@ RSpec.shared_examples "data store metrics" do
     end
 
     context "when an older failure is recorded after a newer one" do
-      let(:older_failure) { Stoplight::Failure.from_error(older_error, time: Time.now - 5000) }
+      let(:older_failure) { Stoplight::Domain::Failure.from_error(older_error, time: Time.now - 5000) }
       let(:older_error) { StandardError.new("older error") }
 
       before do
@@ -233,7 +233,7 @@ RSpec.shared_examples "data store metrics" do
     end
 
     context "when a newer failure is recorded after an older one" do
-      let(:older_failure) { Stoplight::Failure.from_error(error, time: Time.now - 1000) }
+      let(:older_failure) { Stoplight::Domain::Failure.from_error(error, time: Time.now - 1000) }
       let(:older_failure_request_time) { older_failure.time }
 
       before do
@@ -252,7 +252,7 @@ RSpec.shared_examples "data store metrics" do
     end
 
     context "when a newer recovery probe failure is recorded after a failure" do
-      let(:recovery_probe_failure) { Stoplight::Failure.from_error(error, time: Time.now + 5000) }
+      let(:recovery_probe_failure) { Stoplight::Domain::Failure.from_error(error, time: Time.now + 5000) }
       let(:recovery_probe_failure_request_time) { recovery_probe_failure.time }
 
       before do
@@ -271,7 +271,7 @@ RSpec.shared_examples "data store metrics" do
     end
 
     context "when a failure is recorded after a recovery probe failure" do
-      let(:recovery_probe_failure) { Stoplight::Failure.from_error(error, time: Time.now - 5000) }
+      let(:recovery_probe_failure) { Stoplight::Domain::Failure.from_error(error, time: Time.now - 5000) }
       let(:recovery_probe_failure_request_time) { recovery_probe_failure.time }
 
       before do
@@ -291,7 +291,7 @@ RSpec.shared_examples "data store metrics" do
   end
 
   describe "Metadata#success" do
-    let(:failure) { Stoplight::Failure.from_error(error) }
+    let(:failure) { Stoplight::Domain::Failure.from_error(error) }
     let(:error) { StandardError.new("Test error") }
 
     context "without window_size" do
@@ -348,7 +348,7 @@ RSpec.shared_examples "data store metrics" do
   end
 
   describe "Metadata#errors" do
-    let(:failure) { Stoplight::Failure.from_error(error) }
+    let(:failure) { Stoplight::Domain::Failure.from_error(error) }
     let(:error) { StandardError.new("Test error") }
 
     context "without window_size" do
@@ -378,18 +378,18 @@ RSpec.shared_examples "data store metrics" do
 
       context "when a success is recorded after failure" do
         it "returns the the number of failed requests in total" do
-          data_store.record_failure(config, Stoplight::Failure.from_error(error))
+          data_store.record_failure(config, Stoplight::Domain::Failure.from_error(error))
 
           expect do
             data_store.record_success(config)
-            data_store.record_failure(config, Stoplight::Failure.from_error(error))
-            data_store.record_failure(config, Stoplight::Failure.from_error(error))
+            data_store.record_failure(config, Stoplight::Domain::Failure.from_error(error))
+            data_store.record_failure(config, Stoplight::Domain::Failure.from_error(error))
           end.to change { data_store.get_metadata(config).errors }.from(1).to(3)
         end
       end
 
       context "when a failure is outside of the running window" do
-        let(:outdated_failure) { Stoplight::Failure.from_error(error, time: Time.now - window_size - 1) }
+        let(:outdated_failure) { Stoplight::Domain::Failure.from_error(error, time: Time.now - window_size - 1) }
         let(:window_size) { 5000 }
 
         it "returns the the number of successful requests within the current window" do
@@ -406,7 +406,7 @@ RSpec.shared_examples "data store metrics" do
   end
 
   describe "Metadata#recovery_probe_successes" do
-    let(:failure) { Stoplight::Failure.from_error(error) }
+    let(:failure) { Stoplight::Domain::Failure.from_error(error) }
     let(:error) { StandardError.new("Test error") }
 
     context "when the success is recorded" do
@@ -450,7 +450,7 @@ RSpec.shared_examples "data store metrics" do
   end
 
   describe "Metadata#recovery_probe_errors" do
-    let(:failure) { Stoplight::Failure.from_error(error) }
+    let(:failure) { Stoplight::Domain::Failure.from_error(error) }
     let(:error) { StandardError.new("Test error") }
 
     context "when the failure is recorded" do
@@ -467,19 +467,19 @@ RSpec.shared_examples "data store metrics" do
 
     context "when a success is recorded after failure" do
       it "returns the the number of failed requests in total" do
-        data_store.record_recovery_probe_failure(config, Stoplight::Failure.from_error(error))
+        data_store.record_recovery_probe_failure(config, Stoplight::Domain::Failure.from_error(error))
 
         expect do
           data_store.record_recovery_probe_success(config)
-          data_store.record_failure(config, Stoplight::Failure.from_error(error)) # ignored
-          data_store.record_recovery_probe_failure(config, Stoplight::Failure.from_error(error))
-          data_store.record_recovery_probe_failure(config, Stoplight::Failure.from_error(error))
+          data_store.record_failure(config, Stoplight::Domain::Failure.from_error(error)) # ignored
+          data_store.record_recovery_probe_failure(config, Stoplight::Domain::Failure.from_error(error))
+          data_store.record_recovery_probe_failure(config, Stoplight::Domain::Failure.from_error(error))
         end.to change { data_store.get_metadata(config).recovery_probe_errors }.from(1).to(3)
       end
     end
 
     context "when a failure is outside of the running window" do
-      let(:outdated_failure) { Stoplight::Failure.from_error(error, time: Time.now - window_size - 1) }
+      let(:outdated_failure) { Stoplight::Domain::Failure.from_error(error, time: Time.now - window_size - 1) }
       let(:window_size) { 5000 }
 
       it "returns the the number of successful requests within the current window" do
@@ -495,7 +495,7 @@ RSpec.shared_examples "data store metrics" do
   end
 
   describe "Metadata#consecutive_successes" do
-    let(:failure) { Stoplight::Failure.from_error(error) }
+    let(:failure) { Stoplight::Domain::Failure.from_error(error) }
     let(:error) { StandardError.new("Test error") }
 
     context "when the success is recorded" do
@@ -538,7 +538,7 @@ RSpec.shared_examples "data store metrics" do
   end
 
   describe "Metadata#consecutive_errors" do
-    let(:failure) { Stoplight::Failure.from_error(error) }
+    let(:failure) { Stoplight::Domain::Failure.from_error(error) }
     let(:error) { StandardError.new("Test error") }
 
     context "when the failure is recorded" do
@@ -555,18 +555,18 @@ RSpec.shared_examples "data store metrics" do
 
     context "when a success is recorded after failure" do
       it "returns the the number of failed requests in total" do
-        data_store.record_failure(config, Stoplight::Failure.from_error(error))
+        data_store.record_failure(config, Stoplight::Domain::Failure.from_error(error))
 
         expect do
           data_store.record_success(config)
-          data_store.record_failure(config, Stoplight::Failure.from_error(error))
-          data_store.record_failure(config, Stoplight::Failure.from_error(error))
+          data_store.record_failure(config, Stoplight::Domain::Failure.from_error(error))
+          data_store.record_failure(config, Stoplight::Domain::Failure.from_error(error))
         end.to change { data_store.get_metadata(config).consecutive_errors }.from(1).to(2)
       end
     end
 
     context "when a failure is outside of the running window" do
-      let(:outdated_failure) { Stoplight::Failure.from_error(error, time: Time.now - window_size - 1) }
+      let(:outdated_failure) { Stoplight::Domain::Failure.from_error(error, time: Time.now - window_size - 1) }
       let(:window_size) { 5000 }
 
       it "returns the the number of successful requests within the current window" do
@@ -582,7 +582,7 @@ RSpec.shared_examples "data store metrics" do
   end
 
   describe "#record_failure" do
-    let(:failure) { Stoplight::Failure.from_error(error) }
+    let(:failure) { Stoplight::Domain::Failure.from_error(error) }
     let(:error) { StandardError.new("Test error") }
     let(:failure_time) { failure.time }
 
@@ -613,14 +613,14 @@ RSpec.shared_examples "data store metrics" do
 
       context "when a success is recorded after failure" do
         before do
-          data_store.record_failure(config, Stoplight::Failure.from_error(error))
+          data_store.record_failure(config, Stoplight::Domain::Failure.from_error(error))
         end
 
         it "returns the the number of failed requests in total" do
           expect do
             data_store.record_success(config)
-            data_store.record_failure(config, Stoplight::Failure.from_error(error))
-            data_store.record_failure(config, Stoplight::Failure.from_error(error))
+            data_store.record_failure(config, Stoplight::Domain::Failure.from_error(error))
+            data_store.record_failure(config, Stoplight::Domain::Failure.from_error(error))
           end.to change { data_store.get_metadata(config) }
             .from(have_attributes(errors: 1, successes: 0, consecutive_errors: 1))
             .to(have_attributes(errors: 3, successes: 1, consecutive_errors: 2))
@@ -628,7 +628,7 @@ RSpec.shared_examples "data store metrics" do
       end
 
       context "when a failure is outside of the running window" do
-        let(:outdated_failure) { Stoplight::Failure.from_error(error, time: Time.now - window_size - 1) }
+        let(:outdated_failure) { Stoplight::Domain::Failure.from_error(error, time: Time.now - window_size - 1) }
         let(:window_size) { 300 }
 
         it "returns the the number of successful errors within the current window" do
@@ -646,7 +646,7 @@ RSpec.shared_examples "data store metrics" do
       end
 
       context "when a failure after successful recovery" do
-        let(:outdated_failure) { Stoplight::Failure.from_error(error, time: Time.now - cool_off_time - 1) }
+        let(:outdated_failure) { Stoplight::Domain::Failure.from_error(error, time: Time.now - cool_off_time - 1) }
         let(:cool_off_time) { 60 }
         let(:window_size) { 300 }
 

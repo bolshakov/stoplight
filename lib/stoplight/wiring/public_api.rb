@@ -8,9 +8,7 @@ module Stoplight
       # Aliases for domain concepts
       Color = Domain::Color
       Error = Domain::Error
-      Failure = Domain::Failure
       State = Domain::State
-      Light = Domain::Light
 
       # Namespace aliases for data stores
       module DataStore
