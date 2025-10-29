@@ -78,10 +78,10 @@ graph TD
         Domain -->|depends on| Domain
     end
     
-    style DomainBad fill:#ffcdd2,stroke:#c62828,stroke-width:2px
-    style InfraBad fill:#ffcdd2,stroke:#c62828,stroke-width:2px
-    style Domain fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px
-    style Infra fill:#ffccbc,stroke:#d84315,stroke-width:2px
+    style DomainBad fill:#ffcdd2,stroke:#c62828,stroke-width:2px,color:#000
+    style InfraBad fill:#ffcdd2,stroke:#c62828,stroke-width:2px,color:#000
+    style Domain fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px,color:#000
+    style Infra fill:#ffccbc,stroke:#d84315,stroke-width:2px,color:#000
 ```
 
 Here is a real world example:
