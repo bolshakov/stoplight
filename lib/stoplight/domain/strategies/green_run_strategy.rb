@@ -19,7 +19,7 @@ module Stoplight
         protected attr_reader :notifiers
 
         # @param config [Stoplight::Domain::Config]
-        # @param data_store [Stoplight::DataStore::Base]
+        # @param data_store [Stoplight::Domain::DataStore]
         # @param traffic_control [Stoplight::Domain::TrafficControl::Base]
         # @param notifiers [Array<Stoplight::Domain::StateTransitionNotifier>]
         def initialize(config:, data_store:, traffic_control:, notifiers:)
