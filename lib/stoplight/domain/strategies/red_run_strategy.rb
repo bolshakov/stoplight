@@ -10,6 +10,14 @@ module Stoplight
       #
       # @api private
       class RedRunStrategy < RunStrategy
+        # @!attribute [r] config
+        #   @return [Stoplight::Domain::Config] The configuration for the light.
+        protected attr_reader :config
+
+        def initialize(config:)
+          @config = config
+        end
+
         # Executes the fallback proc when the light is in the red state.
         #
         # @param fallback [Proc, nil] A fallback proc to execute instead of the code block.

@@ -39,9 +39,7 @@ module Stoplight
       factory(:green_run_strategy) do
         Domain::Strategies::GreenRunStrategy.new(
           config: resolve(:config),
-          data_store: resolve(:data_store),
-          notifiers: resolve(:notifiers),
-          traffic_control: resolve(:traffic_control)
+          request_tracker: resolve(:request_tracker)
         )
       end
 
@@ -50,14 +48,31 @@ module Stoplight
           config: resolve(:config),
           data_store: resolve(:data_store),
           notifiers: resolve(:notifiers),
-          traffic_recovery: resolve(:traffic_recovery)
+          request_tracker: resolve(:recovery_probe_tracker)
         )
       end
 
       factory(:red_run_strategy) do
         Domain::Strategies::RedRunStrategy.new(
-          config: resolve(:config),
-          data_store: resolve(:data_store)
+          config: resolve(:config)
+        )
+      end
+
+      factory(:request_tracker) do
+        Domain::RequestTracker.new(
+          data_store: resolve(:data_store),
+          traffic_control: resolve(:traffic_control),
+          notifiers: resolve(:notifiers),
+          config: resolve(:config)
+        )
+      end
+
+      factory(:recovery_probe_tracker) do
+        Domain::RecoveryProbeTracker.new(
+          data_store: resolve(:data_store),
+          traffic_recovery: resolve(:traffic_recovery),
+          notifiers: resolve(:notifiers),
+          config: resolve(:config)
         )
       end
     end

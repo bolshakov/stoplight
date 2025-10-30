@@ -10,22 +10,19 @@ module Stoplight
       #
       # @api private
       class GreenRunStrategy < RunStrategy
-        # @!attribute [r] traffic_control
-        #   @return [Stoplight::Domain::TrafficControl::Base]
-        protected attr_reader :traffic_control
+        # @!attribute [r] request_tracker
+        #   @return [Stoplight::Domain::RequestTracker]
+        protected attr_reader :request_tracker
 
-        # @!attribute [r] notifiers
-        #   @return [Stoplight::Domain::StateTransitionNotifier]
-        protected attr_reader :notifiers
+        # @!attribute [r] config
+        #   @return [Stoplight::Domain::Config] The configuration for the light.
+        protected attr_reader :config
 
         # @param config [Stoplight::Domain::Config]
-        # @param data_store [Stoplight::Domain::DataStore]
-        # @param traffic_control [Stoplight::Domain::TrafficControl::Base]
-        # @param notifiers [Array<Stoplight::Domain::StateTransitionNotifier>]
-        def initialize(config:, data_store:, traffic_control:, notifiers:)
-          super(config:, data_store:)
-          @traffic_control = traffic_control
-          @notifiers = notifiers
+        # @param request_tracker [Stoplight::Domain::RequestTracker]
+        def initialize(config:, request_tracker:)
+          @config = config
+          @request_tracker = request_tracker
         end
 
         # Executes the provided code block when the light is in the green state.
@@ -55,23 +52,16 @@ module Stoplight
         end
 
         private def record_error(error)
-          failure = Failure.from_error(error)
-          metadata = data_store.record_failure(config, failure)
-
-          if traffic_control.stop_traffic?(config, metadata) && data_store.transition_to_color(config, Color::RED)
-            notifiers.each do |notifier|
-              notifier.notify(config, Color::GREEN, Color::RED, error)
-            end
-          end
+          request_tracker.record_failure(error)
         end
 
         private def record_success
-          data_store.record_success(config)
+          request_tracker.record_success
         end
 
         # @return [Boolean]
         def ==(other)
-          super && traffic_control == other.traffic_control && notifiers == other.notifiers
+          super && config == other.config && request_tracker == other.request_tracker
         end
       end
     end

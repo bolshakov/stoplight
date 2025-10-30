@@ -3,10 +3,9 @@
 RSpec.describe Stoplight::Domain::Strategies::RedRunStrategy, :freeze do
   subject(:result) { strategy.execute(fallback, metadata:) { 42 } }
 
-  let(:strategy) { described_class.new(config:, data_store:) }
+  let(:strategy) { described_class.new(config:) }
   let(:config) { Stoplight::Domain::Config.empty.with(name: "foo") }
   let(:metadata) { instance_double(Stoplight::Domain::Metadata, recovery_scheduled_after: Time.now) }
-  let(:data_store) { instance_double(Stoplight::Domain::DataStore) }
 
   context "when fallback is provided" do
     let(:fallback) {
