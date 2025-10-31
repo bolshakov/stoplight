@@ -25,9 +25,9 @@ module Stoplight
       # Records a failure for a specific light configuration.
       #
       # @param config [Stoplight::Domain::Config]
-      # @param failure [Failure] The failure to record.
+      # @param exception [Exception]
       # @return [Stoplight::Domain::Metadata] The metadata associated with the light.
-      def record_failure(config, failure)
+      def record_failure(config, exception)
         raise NotImplementedError
       end
 

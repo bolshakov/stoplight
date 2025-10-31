@@ -33,8 +33,7 @@ module Stoplight
 
         # @param exception [Exception]
         def record_failure(exception)
-          failure = Failure.from_error(exception)
-          metadata = data_store.record_recovery_probe_failure(config, failure)
+          metadata = data_store.record_recovery_probe_failure(config, exception)
 
           recover(metadata)
         end

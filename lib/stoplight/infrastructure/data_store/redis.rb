@@ -95,8 +95,8 @@ module Stoplight
         def get_metadata(config)
           detect_clock_skew
 
-          window_end_ts = current_time.to_i
-          window_start_ts = window_end_ts - [config.window_size, METRICS_RETENTION_TIME].compact.min.to_i
+          window_end_ts = current_time.to_f
+          window_start_ts = window_end_ts - [config.window_size, METRICS_RETENTION_TIME].compact.min.to_f
           recovery_window_start_ts = window_end_ts - config.cool_off_time.to_i
 
           if config.window_size
@@ -130,7 +130,7 @@ module Stoplight
           end
           meta_hash = meta.each_slice(2).to_h.transform_keys(&:to_sym)
           last_error_json = meta_hash.delete(:last_error_json)
-          last_error = normalize_failure(last_error_json) if last_error_json
+          last_error = deserialize_failure(last_error_json) if last_error_json
 
           Domain::Metadata.new(
             current_time:,
@@ -139,21 +139,30 @@ module Stoplight
             recovery_probe_successes:,
             recovery_probe_errors:,
             last_error:,
-            **meta_hash
+            last_error_at: (Time.at(meta_hash[:last_error_at].to_f) if meta_hash[:last_error_at]),
+            last_success_at: (Time.at(meta_hash[:last_success_at].to_f) if meta_hash[:last_success_at]),
+            consecutive_errors: meta_hash[:consecutive_errors].to_i,
+            consecutive_successes: meta_hash[:consecutive_successes].to_i,
+            breached_at: (Time.at(meta_hash[:breached_at].to_f) if meta_hash[:breached_at]),
+            locked_state: meta_hash[:locked_state] || Domain::State::UNLOCKED,
+            recovery_scheduled_after: (Time.at(meta_hash[:recovery_scheduled_after].to_f) if meta_hash[:recovery_scheduled_after]),
+            recovery_started_at: (Time.at(meta_hash[:recovery_started_at].to_f) if meta_hash[:recovery_started_at]),
+            recovered_at: (Time.at(meta_hash[:recovered_at].to_f) if meta_hash[:recovered_at])
           )
         end
 
         # @param config [Stoplight::Domain::Config] The light configuration.
-        # @param failure [Stoplight::Failure] The failure to record.
+        # @param exception [Exception]
         # @return [Stoplight::Domain::Metadata] The updated metadata after recording the failure.
-        def record_failure(config, failure)
-          current_ts = current_time.to_i
-          failure_json = failure.to_json
+        def record_failure(config, exception)
+          current_time = self.current_time
+          current_ts = current_time.to_f
+          failure = Domain::Failure.from_error(exception, time: current_time)
 
           @redis.then do |client|
             client.evalsha(
               record_failure_sha,
-              argv: [current_ts, SecureRandom.hex(12), failure_json, metrics_ttl, metadata_ttl],
+              argv: [current_ts, SecureRandom.hex(12), serialize_failure(failure), metrics_ttl, metadata_ttl],
               keys: [
                 metadata_key(config),
                 config.window_size && errors_key(config, time: current_ts)
@@ -164,7 +173,7 @@ module Stoplight
         end
 
         def record_success(config, request_id: SecureRandom.hex(12))
-          current_ts = current_time.to_i
+          current_ts = current_time.to_f
 
           @redis.then do |client|
             client.evalsha(
@@ -181,16 +190,17 @@ module Stoplight
         # Records a failed recovery probe for a specific light configuration.
         #
         # @param config [Stoplight::Domain::Config] The light configuration.
-        # @param failure [Failure] The failure to record.
+        # @param exception [Exception]
         # @return [Stoplight::Domain::Metadata] The updated metadata after recording the failure.
-        def record_recovery_probe_failure(config, failure)
-          current_ts = current_time.to_i
-          failure_json = failure.to_json
+        def record_recovery_probe_failure(config, exception)
+          current_time = self.current_time
+          current_ts = current_time.to_f
+          failure = Domain::Failure.from_error(exception, time: current_time)
 
           @redis.then do |client|
             client.evalsha(
               record_failure_sha,
-              argv: [current_ts, SecureRandom.uuid, failure_json, metrics_ttl, metrics_ttl],
+              argv: [current_ts, SecureRandom.uuid, serialize_failure(failure), metrics_ttl, metrics_ttl],
               keys: [
                 metadata_key(config),
                 recovery_probe_errors_key(config, time: current_ts)
@@ -206,7 +216,7 @@ module Stoplight
         # @param request_id [String] The unique identifier for the request
         # @return [Stoplight::Domain::Metadata] The updated metadata after recording the success.
         def record_recovery_probe_success(config, request_id: SecureRandom.hex(12))
-          current_ts = current_time.to_i
+          current_ts = current_time.to_f
 
           @redis.then do |client|
             client.evalsha(
@@ -255,7 +265,7 @@ module Stoplight
         # @param config [Stoplight::Domain::Config] The light configuration
         # @return [Boolean] true if this is the first instance to detect this transition
         private def transition_to_green(config)
-          current_ts = current_time.to_i
+          current_ts = current_time.to_f
           meta_key = metadata_key(config)
 
           became_green = @redis.then do |client|
@@ -306,8 +316,31 @@ module Stoplight
           became_red == 1
         end
 
-        private def normalize_failure(failure)
-          Domain::Failure.from_json(failure)
+        # @param failure_json [String]
+        # @return [Domain::Failure]
+        private def deserialize_failure(failure_json)
+          object = JSON.parse(failure_json)
+          error_object = object["error"]
+
+          error_class = error_object["class"]
+          error_message = error_object["message"]
+          time = Time.at(object["time"])
+
+          Domain::Failure.new(error_class, error_message, time)
+        end
+
+        # @param failure [Domain::Failure]
+        # @return [String]
+        private def serialize_failure(failure)
+          JSON.generate(
+            {
+              error: {
+                class: failure.error_class,
+                message: failure.error_message
+              },
+              time: failure.time.to_f
+            }
+          )
         end
 
         def_delegator "self.class", :key

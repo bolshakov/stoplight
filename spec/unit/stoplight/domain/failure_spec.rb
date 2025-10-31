@@ -27,15 +27,6 @@ RSpec.describe Stoplight::Domain::Failure do
     end
   end
 
-  describe ".from_json" do
-    it "parses JSON" do
-      failure = described_class.from_json(json)
-      expect(failure.error_class).to eql(error_class)
-      expect(failure.error_message).to eql(error_message)
-      expect(failure.time).to eql(time)
-    end
-  end
-
   describe "#==" do
     it "is true when they are equal" do
       failure = described_class.new(error_class, error_message, time)
@@ -97,28 +88,6 @@ RSpec.describe Stoplight::Domain::Failure do
       it "returns false" do
         expect(described_class.new(error_class, error_message, time)).not_to eq(other)
       end
-    end
-  end
-
-  describe "#to_json" do
-    it "generates JSON" do
-      expect(described_class.new(error_class, error_message, time).to_json)
-        .to eql(json)
-    end
-
-    it "generates JSON with options" do
-      expect(described_class.new(error_class, error_message, time).to_json({}))
-        .to eql(json)
-    end
-  end
-
-  describe "::TIME_FORMAT" do
-    it "is a string" do
-      expect(described_class::TIME_FORMAT).to be_a(String)
-    end
-
-    it "is frozen" do
-      expect(described_class::TIME_FORMAT).to be_frozen
     end
   end
 end

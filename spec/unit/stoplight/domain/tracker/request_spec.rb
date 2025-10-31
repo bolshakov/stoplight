@@ -18,10 +18,9 @@ RSpec.describe Stoplight::Domain::Tracker::Request do
   describe "#record_failure" do
     let(:exception) { KeyError.new("something went wrong") }
     let(:metadata) { instance_double(Stoplight::Domain::Metadata) }
-    let(:failure_matcher) { have_attributes(error_class: "KeyError", error_message: "something went wrong") }
 
     before do
-      allow(data_store).to receive(:record_failure).with(config, failure_matcher).and_return(metadata)
+      allow(data_store).to receive(:record_failure).with(config, exception).and_return(metadata)
     end
 
     context "when traffic control decides to stop the traffic" do

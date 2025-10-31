@@ -40,8 +40,7 @@ module Stoplight
         # @param exception [Exception]
         # @return [void]
         def record_failure(exception)
-          failure = Failure.from_error(exception)
-          metadata = data_store.record_failure(config, failure)
+          metadata = data_store.record_failure(config, exception)
 
           transition_to_red(exception, metadata:)
         end

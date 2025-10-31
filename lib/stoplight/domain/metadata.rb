@@ -20,42 +20,6 @@ module Stoplight
       :recovered_at,
       :current_time
     ) do
-      def initialize(
-        current_time: Time.now,
-        successes: 0,
-        errors: 0,
-        recovery_probe_successes: 0,
-        recovery_probe_errors: 0,
-        last_error_at: nil,
-        last_success_at: nil,
-        consecutive_errors: 0,
-        consecutive_successes: 0,
-        last_error: nil,
-        breached_at: nil,
-        locked_state: nil,
-        recovery_started_at: nil,
-        recovery_scheduled_after: nil,
-        recovered_at: nil
-      )
-        super(
-          recovery_probe_successes: recovery_probe_successes.to_i,
-          recovery_probe_errors: recovery_probe_errors.to_i,
-          successes: successes.to_i,
-          errors: errors.to_i,
-          last_error_at: (Time.at(Integer(last_error_at)) if last_error_at),
-          last_success_at: (Time.at(Integer(last_success_at)) if last_success_at),
-          consecutive_errors: consecutive_errors.to_i,
-          consecutive_successes: consecutive_successes.to_i,
-          last_error:,
-          breached_at: (Time.at(Integer(breached_at)) if breached_at),
-          locked_state: locked_state || State::UNLOCKED,
-          recovery_scheduled_after: (Time.at(Integer(recovery_scheduled_after)) if recovery_scheduled_after),
-          recovery_started_at: (Time.at(Integer(recovery_started_at)) if recovery_started_at),
-          recovered_at: (Time.at(Integer(recovered_at)) if recovered_at),
-          current_time:,
-        )
-      end
-
       # YELLOW color could be entered implicitly through a timeout
       # and explicitly through a transition.
       #
@@ -64,16 +28,6 @@ module Stoplight
       # @return [Boolean]
       def recovery_started?
         recovery_started_at && recovery_started_at <= current_time
-      end
-
-      # Creates a new Metadata instance with updated attributes. This method overrides
-      # the default +with+ method provided by +Data.define+ to ensure constructor
-      # logic is applied.
-      #
-      # @param kwargs [Hash{Symbol => Object}]
-      # @return [Metadata]
-      def with(**kwargs)
-        self.class.new(**to_h.merge(current_time: Time.now, **kwargs))
       end
 
       # @return [String] one of +Color::GREEN+, +Color::RED+, or +Color::YELLOW+

@@ -45,7 +45,25 @@ RSpec.describe Stoplight::Domain::TrafficControl::ConsecutiveErrors do
     subject { described_class.new.stop_traffic?(config, metadata) }
 
     let(:config) { Stoplight::Domain::Config.empty.with(threshold:, window_size:) }
-    let(:metadata) { instance_double(Stoplight::Domain::Metadata, consecutive_errors:, errors:) }
+    let(:metadata) do
+      Stoplight::Domain::Metadata.new(
+        errors:,
+        consecutive_errors:,
+        successes: nil,
+        current_time: nil,
+        recovery_probe_successes: nil,
+        recovery_probe_errors: nil,
+        last_error_at: nil,
+        last_success_at: nil,
+        consecutive_successes: nil,
+        last_error: nil,
+        breached_at: nil,
+        locked_state: nil,
+        recovery_scheduled_after: nil,
+        recovery_started_at: nil,
+        recovered_at: nil
+      )
+    end
 
     context "when the window size is not sent" do
       let(:window_size) { nil }
