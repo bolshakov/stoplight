@@ -46,7 +46,7 @@ module Stoplight
         # @return [Object] The result of the code block if successful.
         # @raise [Exception] Re-raises the error if it is not tracked or no fallback is provided.
         def execute(fallback, metadata:, &code)
-          enter_recovery_if_needed(metadata)
+          enter_recovery(metadata)
           # TODO: We need to employ a probabilistic approach here to avoid "thundering herd" problem
           code.call.tap { record_recovery_probe_success }
         rescue => error
@@ -74,7 +74,7 @@ module Stoplight
 
         # @param metadata [Stoplight::Domain::Metadata]
         # @return [void]
-        private def enter_recovery_if_needed(metadata)
+        private def enter_recovery(metadata)
           return if metadata.recovery_started?
 
           if data_store.transition_to_color(config, Color::YELLOW)

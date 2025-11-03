@@ -18,7 +18,7 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
 
   describe "#exceute" do
     before do
-      allow(strategy).to receive(:enter_recovery_if_needed)
+      allow(strategy).to receive(:enter_recovery)
     end
 
     context "when code executes successfully" do
@@ -87,8 +87,8 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
     end
   end
 
-  describe "#enter_recovery_if_needed" do
-    subject(:enter_recovery_if_needed) { strategy.__send__(:enter_recovery_if_needed, metadata) }
+  describe "#enter_recovery" do
+    subject(:enter_recovery) { strategy.__send__(:enter_recovery, metadata) }
 
     context "when recovery has already started" do
       let(:metadata) { instance_double(Stoplight::Domain::Metadata, recovery_started?: true) }
@@ -96,7 +96,7 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
       it "does not send notifications" do
         expect(notifier).not_to receive(:notify)
 
-        enter_recovery_if_needed
+        enter_recovery
       end
     end
 
@@ -107,14 +107,14 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
         expect(data_store).to receive(:transition_to_color).with(config, Stoplight::Domain::Color::YELLOW).and_return(true)
         expect(notifier).to receive(:notify).with(config, Stoplight::Domain::Color::RED, Stoplight::Domain::Color::YELLOW, nil)
 
-        enter_recovery_if_needed
+        enter_recovery
       end
 
       it "does not notifies if unable to transition to YELLO" do
         expect(data_store).to receive(:transition_to_color).with(config, Stoplight::Domain::Color::YELLOW).and_return(false)
         expect(notifier).not_to receive(:notify)
 
-        enter_recovery_if_needed
+        enter_recovery
       end
     end
   end

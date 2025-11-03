@@ -43,7 +43,7 @@ module Stoplight
           failure = Failure.from_error(exception)
           metadata = data_store.record_failure(config, failure)
 
-          transition_to_red_if_needed(exception, metadata:)
+          transition_to_red(exception, metadata:)
         end
 
         # @return [void]
@@ -51,7 +51,7 @@ module Stoplight
           data_store.record_success(config)
         end
 
-        private def transition_to_red_if_needed(exception, metadata:)
+        private def transition_to_red(exception, metadata:)
           if traffic_control.stop_traffic?(config, metadata)
             transition_and_notify(Color::GREEN, Color::RED, exception)
           end
