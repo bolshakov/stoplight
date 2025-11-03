@@ -284,4 +284,27 @@ RSpec.describe "Light" do
       end.to change(light, :state).to(Stoplight::State::UNLOCKED)
     end
   end
+
+  specify "basic functionality" do
+    Timecop.safe_mode = false
+    light = Stoplight("the-light", threshold: 5, data_store: Stoplight::DataStore::Memory.new)
+
+    light.run(->(_) {}) { raise } until light.color == Stoplight::Color::RED
+    expect(light.color).to eq(Stoplight::Color::RED)
+
+    Timecop.travel(Time.now + 1) until light.color == Stoplight::Color::YELLOW
+    expect(light.color).to eq(Stoplight::Color::YELLOW)
+
+    expect do
+      pp ">> yellow run"
+      light.run { raise KeyError }
+    end.to raise_error(KeyError)
+
+    expect do
+      pp ">> red run"
+      light.run { raise KeyError }
+    end.to raise_error(Stoplight::Error::RedLight)
+  ensure
+    Timecop.safe_mode = true
+  end
 end

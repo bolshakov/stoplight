@@ -66,7 +66,12 @@ RSpec.describe Stoplight::Wiring::LightFactory do
     end
 
     describe "traffic_recovery" do
-      subject(:traffic_recovery_out) { light.__send__(:yellow_run_strategy).__send__(:traffic_recovery) }
+      subject(:traffic_recovery_out) do
+        light
+          .__send__(:yellow_run_strategy)
+          .__send__(:request_tracker)
+          .__send__(:traffic_recovery)
+      end
 
       let(:new_factory) { factory.with(traffic_recovery: traffic_recovery_in, recovery_threshold: 2) }
       let(:light) { new_factory.build }
@@ -102,7 +107,12 @@ RSpec.describe Stoplight::Wiring::LightFactory do
     end
 
     describe "traffic_control" do
-      subject(:traffic_control_out) { light.__send__(:green_run_strategy).__send__(:traffic_control) }
+      subject(:traffic_control_out) do
+        light
+          .__send__(:green_run_strategy)
+          .__send__(:request_tracker)
+          .__send__(:traffic_control)
+      end
 
       let(:new_factory) { factory.with(traffic_control: traffic_control_in, **config) }
       let(:light) { new_factory.build }

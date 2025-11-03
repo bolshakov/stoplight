@@ -4,106 +4,46 @@ RSpec.describe Stoplight::Domain::Strategies::GreenRunStrategy do
   subject(:strategy) do
     described_class.new(
       config:,
-      traffic_control:,
-      data_store:,
-      notifiers: [notifier]
+      request_tracker:
     )
   end
 
-  let(:config) do
-    Stoplight::Domain::Config.empty.with(
-      name: "foo",
-      tracked_errors: [StandardError],
-      skipped_errors: [],
-      cool_off_time: 60,
-      threshold: 3
-    )
-  end
-  let(:notifier) { instance_double(Stoplight::Domain::StateTransitionNotifier) }
-  let(:traffic_control) { Stoplight::Domain::TrafficControl::ConsecutiveErrors.new }
-  let(:metadata) { instance_double(Stoplight::Domain::Metadata) }
-  let(:data_store) { instance_double(Stoplight::Domain::DataStore) }
+  let(:config) { instance_double(Stoplight::Domain::Config) }
+  let(:request_tracker) { instance_double(Stoplight::Domain::Tracker::Request) }
 
   context "when code executes successfully" do
-    subject(:result) { strategy.execute(nil, metadata:, &code) }
+    subject(:result) { strategy.execute(nil, metadata: nil, &code) }
 
     let(:code) { -> { "Success" } }
 
     it "returns result" do
-      expect(data_store).to receive(:record_success).with(config)
+      expect(request_tracker).to receive(:record_success)
 
       expect(result).to eq("Success")
     end
   end
 
   context "when code fails" do
-    subject(:result) { strategy.execute(fallback, metadata:, &code) }
+    subject(:result) { strategy.execute(fallback, metadata: nil, &code) }
 
     let(:error) { StandardError.new("Test error") }
     let(:code) { -> { raise error } }
     let(:metadata) { instance_double(Stoplight::Domain::Metadata) }
 
+    before do
+      allow(config).to receive(:track_error?).and_return(track_error)
+    end
+
     context "when error is tracked" do
-      let(:config) { super().with(tracked_errors: [error]) }
+      let(:track_error) { true }
 
       context "when fallback is not provided" do
         let(:fallback) { nil }
 
-        context "when threshold is breached" do
-          before do
-            expect(traffic_control).to receive(:stop_traffic?).with(config, metadata).and_return(true)
-          end
+        it "records failure, notify and raises the error" do
+          expect(request_tracker).to receive(:record_failure).with(error)
 
-          context "when transitions to red" do
-            before do
-              expect(data_store).to receive(:transition_to_color).with(config, Stoplight::Domain::Color::RED).and_return(true)
-            end
-
-            it "records failure, notify and raises the error" do
-              expect(notifier).to receive(:notify).with(config, Stoplight::Domain::Color::GREEN, Stoplight::Domain::Color::RED, error)
-
-              Timecop.freeze do
-                failure = Stoplight::Domain::Failure.from_error(error)
-                expect(data_store).to receive(:record_failure).with(config, failure).and_return(metadata)
-
-                expect { result }.to raise_error(error)
-              end
-            end
-          end
-
-          context "when does not transition to red" do
-            before do
-              expect(data_store).to receive(:transition_to_color).with(config, Stoplight::Domain::Color::RED).and_return(false)
-            end
-
-            it "records failure, does not notify and raises the error" do
-              expect(notifier).not_to receive(:notify)
-
-              Timecop.freeze do
-                failure = Stoplight::Domain::Failure.from_error(error)
-                expect(data_store).to receive(:record_failure).with(config, failure).and_return(metadata)
-
-                expect { result }.to raise_error(error)
-              end
-            end
-          end
-        end
-
-        context "when threshold is not breached" do
-          before do
-            expect(traffic_control).to receive(:stop_traffic?).with(config, metadata).and_return(false)
-          end
-
-          it "records failure and raises the error without a notification" do
-            expect(notifier).not_to receive(:notify)
-
-            Timecop.freeze do
-              failure = Stoplight::Domain::Failure.from_error(error)
-              expect(data_store).to receive(:record_failure).with(config, failure).and_return(metadata)
-
-              expect { result }.to raise_error(error)
-            end
-          end
+          expect { result }.to raise_error(error)
         end
       end
 
@@ -115,20 +55,10 @@ RSpec.describe Stoplight::Domain::Strategies::GreenRunStrategy do
           }
         end
 
-        before do
-          expect(traffic_control).to receive(:stop_traffic?).with(config, metadata).and_return(true)
-          expect(data_store).to receive(:transition_to_color).with(config, Stoplight::Domain::Color::RED).and_return(true)
-        end
-
         it "records failure, notify and returns the fallback" do
-          expect(notifier).to receive(:notify).with(config, Stoplight::Domain::Color::GREEN, Stoplight::Domain::Color::RED, error)
+          expect(request_tracker).to receive(:record_failure).with(error)
 
-          Timecop.freeze do
-            failure = Stoplight::Domain::Failure.from_error(error)
-            expect(data_store).to receive(:record_failure).with(config, failure).and_return(metadata)
-            expect(result).to eq("Fallback")
-          end
-
+          expect(result).to eq("Fallback")
           expect(@error).to eq(error)
         end
       end
@@ -136,13 +66,35 @@ RSpec.describe Stoplight::Domain::Strategies::GreenRunStrategy do
 
     context "when error is not tracked" do
       let(:fallback) { nil }
-      let(:config) { super().with(skipped_errors: [error]) }
+      let(:track_error) { false }
 
-      it "raises the error" do
-        expect(data_store).to receive(:record_success)
+      it "records success and raises the error" do
+        expect(request_tracker).to receive(:record_success)
 
         expect { result }.to raise_error(StandardError, "Test error")
       end
+    end
+  end
+
+  describe "#==" do
+    context "with the same arguments" do
+      let(:other) { described_class.new(config:, request_tracker:) }
+
+      it { is_expected.to eq(other) }
+    end
+
+    context "with different config" do
+      let(:other) { described_class.new(config: other_config, request_tracker:) }
+      let(:other_config) { instance_double(Stoplight::Domain::Config) }
+
+      it { is_expected.not_to eq(other) }
+    end
+
+    context "with different request recorder" do
+      let(:other) { described_class.new(config:, request_tracker: other_request_tracker) }
+      let(:other_request_tracker) { instance_double(Stoplight::Domain::Tracker::Request) }
+
+      it { is_expected.not_to eq(other) }
     end
   end
 end

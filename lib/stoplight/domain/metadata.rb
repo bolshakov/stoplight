@@ -56,6 +56,16 @@ module Stoplight
         )
       end
 
+      # YELLOW color could be entered implicitly through a timeout
+      # and explicitly through a transition.
+      #
+      # This method indicates whether the recovery has already started explicitly
+      #
+      # @return [Boolean]
+      def recovery_started?
+        recovery_started_at && recovery_started_at <= current_time
+      end
+
       # Creates a new Metadata instance with updated attributes. This method overrides
       # the default +with+ method provided by +Data.define+ to ensure constructor
       # logic is applied.
