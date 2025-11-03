@@ -5,9 +5,8 @@ require "time"
 
 module Stoplight
   module Domain
-    class Failure # rubocop:disable Style/Documentation
-      TIME_FORMAT = "%Y-%m-%dT%H:%M:%S.%N%:z"
-
+    # @api private
+    class Failure
       # @return [String]
       attr_reader :error_class
       # @return [String]
@@ -21,28 +20,13 @@ module Stoplight
         new(error.class.name, error.message, time)
       end
 
-      # @param json [String]
-      # @return (see #initialize)
-      # @raise [JSON::ParserError]
-      # @raise [ArgumentError]
-      def self.from_json(json)
-        object = JSON.parse(json)
-        error_object = object["error"]
-
-        error_class = error_object["class"]
-        error_message = error_object["message"]
-        time = Time.at(object["time"])
-
-        new(error_class, error_message, time)
-      end
-
       # @param error_class [String]
       # @param error_message [String]
       # @param time [Time]
       def initialize(error_class, error_message, time)
         @error_class = error_class
         @error_message = error_message
-        @time = Time.at(time.to_i) # truncate to seconds
+        @time = time
       end
 
       # @param other [Failure]
@@ -51,22 +35,7 @@ module Stoplight
         other.is_a?(self.class) &&
           error_class == other.error_class &&
           error_message == other.error_message &&
-          time.to_i == other.time.to_i
-      end
-
-      # @param options [Object, nil]
-      # @return [String]
-      def to_json(options = nil)
-        JSON.generate(
-          {
-            error: {
-              class: error_class,
-              message: error_message
-            },
-            time: time.to_i
-          },
-          options
-        )
+          time == other.time
       end
     end
   end

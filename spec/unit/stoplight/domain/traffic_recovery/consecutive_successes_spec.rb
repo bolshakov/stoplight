@@ -41,7 +41,16 @@ RSpec.describe Stoplight::Domain::TrafficRecovery::ConsecutiveSuccesses do
         last_error_at:,
         recovery_started_at:,
         recovery_scheduled_after:,
-        current_time: Time.now
+        current_time: Time.now,
+        successes: nil,
+        errors: nil,
+        recovery_probe_errors: nil,
+        last_success_at: nil,
+        consecutive_errors: nil,
+        last_error: nil,
+        breached_at: nil,
+        locked_state: nil,
+        recovered_at: nil
       )
     end
     let(:last_error_at) { recovery_started_at - 60 }

@@ -65,7 +65,25 @@ RSpec.describe Stoplight::Domain::TrafficControl::ErrorRate do
     subject { traffic_control.stop_traffic?(config, metadata) }
 
     let(:config) { Stoplight::Domain::Config.empty.with(window_size: 300, threshold: 0.6) }
-    let(:metadata) { Stoplight::Domain::Metadata.new(successes:, errors:, current_time:) }
+    let(:metadata) do
+      Stoplight::Domain::Metadata.new(
+        successes:,
+        errors:,
+        current_time:,
+        recovery_probe_successes: nil,
+        recovery_probe_errors: nil,
+        last_error_at: nil,
+        last_success_at: nil,
+        consecutive_errors: nil,
+        consecutive_successes: nil,
+        last_error: nil,
+        breached_at: nil,
+        locked_state: nil,
+        recovery_scheduled_after: nil,
+        recovery_started_at: nil,
+        recovered_at: nil
+      )
+    end
 
     context "when there are no requests" do
       let(:successes) { 0 }

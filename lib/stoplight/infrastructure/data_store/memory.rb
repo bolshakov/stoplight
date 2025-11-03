@@ -18,7 +18,25 @@ module Stoplight
           @recovery_probe_errors = Hash.new { |recovery_probe_errors, light_name| recovery_probe_errors[light_name] = SlidingWindow.new }
           @recovery_probe_successes = Hash.new { |recovery_probe_successes, light_name| recovery_probe_successes[light_name] = SlidingWindow.new }
 
-          @metadata = Hash.new { |h, k| h[k] = Domain::Metadata.new }
+          @metadata = Hash.new do |metadata, light_name|
+            metadata[light_name] = Domain::Metadata.new(
+              current_time: Time.now,
+              successes: 0,
+              errors: 0,
+              recovery_probe_successes: 0,
+              recovery_probe_errors: 0,
+              last_error: nil,
+              last_error_at: nil,
+              last_success_at: nil,
+              consecutive_errors: 0,
+              consecutive_successes: 0,
+              breached_at: nil,
+              locked_state: Domain::State::UNLOCKED,
+              recovery_scheduled_after: nil,
+              recovery_started_at: nil,
+              recovered_at: nil
+            )
+          end
           super # MonitorMixin
         end
 
@@ -53,11 +71,12 @@ module Stoplight
         end
 
         # @param config [Stoplight::Domain::Config]
-        # @param failure [Stoplight::Failure]
+        # @param exception [Exception]
         # @return [Stoplight::Domain::Metadata]
-        def record_failure(config, failure)
+        def record_failure(config, exception)
           current_time = self.current_time
           light_name = config.name
+          failure = Domain::Failure.from_error(exception, time: current_time)
 
           synchronize do
             @errors[light_name].increment if config.window_size
@@ -106,11 +125,12 @@ module Stoplight
         end
 
         # @param config [Stoplight::Domain::Config]
-        # @param failure [Stoplight::Failure]
+        # @param exception [Exception]
         # @return [Stoplight::Domain::Metadata]
-        def record_recovery_probe_failure(config, failure)
+        def record_recovery_probe_failure(config, exception)
           light_name = config.name
           current_time = self.current_time
+          failure = Domain::Failure.from_error(exception, time: current_time)
 
           synchronize do
             @recovery_probe_errors[light_name].increment

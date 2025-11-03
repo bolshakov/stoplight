@@ -99,10 +99,9 @@ RSpec.describe Stoplight::Domain::Tracker::RecoveryProbe do
     subject(:record_probe) { recorder.record_failure(exception) }
 
     let(:exception) { KeyError.new("bang") }
-    let(:failure_matcher) { have_attributes(error_class: "KeyError", error_message: "bang") }
 
     before do
-      allow(data_store).to receive(:record_recovery_probe_failure).with(config, failure_matcher).and_return(metadata_after_probe)
+      allow(data_store).to receive(:record_recovery_probe_failure).with(config, exception).and_return(metadata_after_probe)
     end
 
     include_examples "recovering after probe"

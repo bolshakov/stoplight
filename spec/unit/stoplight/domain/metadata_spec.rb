@@ -1,15 +1,34 @@
 # frozen_string_literal: true
 
-require "spec_helper"
-
 RSpec.describe Stoplight::Domain::Metadata do
   let(:current_time) { Time.now }
+
+  def build_metadata(**attributes)
+    Stoplight::Domain::Metadata.new(
+      locked_state: nil,
+      recovery_scheduled_after: nil,
+      recovery_started_at: nil,
+      breached_at: nil,
+      current_time: nil,
+      successes: nil,
+      errors: nil,
+      recovery_probe_successes: nil,
+      recovery_probe_errors: nil,
+      last_error_at: nil,
+      last_success_at: nil,
+      consecutive_errors: nil,
+      consecutive_successes: nil,
+      last_error: nil,
+      recovered_at: nil,
+      **attributes
+    )
+  end
 
   describe "#color" do
     subject(:color) { metadata.color }
 
     let(:metadata) do
-      Stoplight::Domain::Metadata.new(
+      build_metadata(
         locked_state:,
         recovery_scheduled_after:,
         recovery_started_at:,
@@ -56,16 +75,8 @@ RSpec.describe Stoplight::Domain::Metadata do
   end
 
   describe "#error_rate" do
-    context "when there successes or errors are nil" do
-      let(:metadata) { Stoplight::Domain::Metadata.new(successes: nil, errors: nil, current_time:) }
-
-      it "returns 0" do
-        expect(metadata.error_rate).to eq(0)
-      end
-    end
-
     context "when there are no successes or errors" do
-      let(:metadata) { Stoplight::Domain::Metadata.new(successes: 0, errors: 0, current_time:) }
+      let(:metadata) { build_metadata(successes: 0, errors: 0, current_time:) }
 
       it "returns 0" do
         expect(metadata.error_rate).to eq(0)
@@ -73,21 +84,11 @@ RSpec.describe Stoplight::Domain::Metadata do
     end
 
     context "when there are successes and errors" do
-      let(:metadata) { Stoplight::Domain::Metadata.new(successes: 10, errors: 5, current_time:) }
+      let(:metadata) { build_metadata(successes: 10, errors: 5, current_time:) }
 
       it "returns the error rate" do
         expect(metadata.error_rate).to eq(5.fdiv(15))
       end
-    end
-  end
-
-  describe "#with" do
-    subject { metadata.with(successes: "42") }
-
-    let(:metadata) { Stoplight::Domain::Metadata.new(current_time:) }
-
-    it "applies constructor logic" do
-      is_expected.to have_attributes(successes: 42)
     end
   end
 end

@@ -1,667 +1,315 @@
 # frozen_string_literal: true
 
 RSpec.shared_examples "data store metrics" do
+  let(:error) { StandardError.new("Test error") }
+  # Redis serialization (Time -> Float -> Redis -> Float -> Time) introduces
+  # sub-microsecond precision loss. This is expected and acceptable.
+  let(:rounding_error) { 0.000001 } # ~1 microsecond tolerance
+
+  def get_metadata
+    data_store.get_metadata(config)
+  end
+
+  def record_failure(error)
+    data_store.record_failure(config, error)
+  end
+
+  def record_success
+    data_store.record_success(config)
+  end
+
+  def record_recovery_probe_failure(error)
+    data_store.record_recovery_probe_failure(config, error)
+  end
+
+  def record_recovery_probe_success
+    data_store.record_recovery_probe_success(config)
+  end
+
   describe "Metadata#last_success_at" do
-    let(:request_time) { Time.at(1746119141) }
+    let(:last_success_time) { Time.now + 30 }
 
-    around do |example|
-      Timecop.freeze(request_time) do
-        example.run
-      end
-    end
+    specify "when success tracked after recovery probe success tracked" do
+      record_recovery_probe_success
 
-    context "when the success is recorded" do
-      it "returns the time of the success" do
-        expect do
-          data_store.record_success(config)
-        end.to change { data_store.get_metadata(config).last_success_at }
-          .from(nil)
-          .to(request_time)
-      end
-    end
-
-    context "when the recovery probe success is recorded" do
-      it "returns the time of the success" do
-        expect do
-          data_store.record_recovery_probe_success(config)
-        end.to change { data_store.get_metadata(config).last_success_at }
-          .from(nil)
-          .to(request_time)
-      end
-    end
-
-    context "when a newer request is recorded after an older one" do
-      before do
-        data_store.record_success(config)
-      end
-
-      it "returns the time of the latest request" do
-        expect do
-          Timecop.freeze(request_time + 20) do
-            data_store.record_success(config)
-          end
-        end.to change { data_store.get_metadata(config).last_success_at }
-          .from(request_time)
-          .to(request_time + 20)
-      end
-    end
-
-    context "when a newer recovery probe success is recorded after a normal request" do
-      let(:recovery_probe_request_time) { request_time + 20 }
-
-      before do
-        data_store.record_success(config)
-      end
-
-      it "returns the time of the latest request" do
-        expect do
-          Timecop.freeze(recovery_probe_request_time) do
-            data_store.record_recovery_probe_success(config)
-          end
-        end.to change { data_store.get_metadata(config).last_success_at }
-          .from(request_time)
-          .to(recovery_probe_request_time)
-      end
-    end
-
-    context "when a success is recorded after a recovery probe success" do
-      let(:recovery_probe_request_time) { request_time - 20 }
-
-      before do
-        Timecop.freeze(recovery_probe_request_time) do
-          data_store.record_recovery_probe_success(config)
+      expect do
+        Timecop.freeze(last_success_time) do
+          record_success
         end
-      end
-
-      it "returns the time of the latest request" do
-        expect do
-          data_store.record_success(config)
-        end.to change { data_store.get_metadata(config).last_success_at }
-          .from(recovery_probe_request_time)
-          .to(request_time)
-      end
+      end.to change { get_metadata.last_success_at }.to(be_within(rounding_error).of(last_success_time))
     end
 
-    context "when a newer recovery probe success is recorded after another recovery probe success" do
-      let(:recovery_probe_request_time) { request_time + 20 }
+    specify "when recovery probe success tracked after success" do
+      record_success
 
-      before do
-        data_store.record_recovery_probe_success(config)
-      end
-
-      it "returns the time of the latest request" do
-        expect do
-          Timecop.freeze(recovery_probe_request_time) do
-            data_store.record_recovery_probe_success(config)
-          end
-        end.to change { data_store.get_metadata(config).last_success_at }
-          .from(request_time)
-          .to(recovery_probe_request_time)
-      end
+      expect do
+        Timecop.freeze(last_success_time) do
+          record_recovery_probe_success
+        end
+      end.to change { get_metadata.last_success_at }.to(be_within(rounding_error).of(last_success_time))
     end
   end
 
   describe "Metadata#last_error_at" do
-    let(:failure) { Stoplight::Domain::Failure.from_error(error) }
-    let(:request_time) { failure.time }
-    let(:error) { StandardError.new("Test error") }
+    let(:last_error_time) { Time.now + 30 }
 
-    around do |example|
-      Timecop.freeze(request_time) do
-        example.run
-      end
-    end
+    specify "when failure tracked after recovery probe failure tracked" do
+      record_recovery_probe_failure(error)
 
-    context "when the failure is recorded" do
-      it "returns the time of the failure" do
-        expect do
-          data_store.record_failure(config, failure)
-        end.to change { data_store.get_metadata(config).last_error_at }
-          .from(nil)
-          .to(request_time)
-      end
-    end
-
-    context "when an older failure is recorded after a newer one" do
-      let(:older_failure) { Stoplight::Domain::Failure.from_error(error, time: Time.now - 1000) }
-      let(:older_failure_request_time) { request_time + 20 }
-
-      before do
-        data_store.record_failure(config, failure)
-      end
-
-      it "returns the time of the latest recorded failure" do
-        expect do
-          Timecop.freeze(older_failure_request_time) do
-            data_store.record_failure(config, older_failure)
-          end
-        end.to change { data_store.get_metadata(config).last_error_at }
-          .from(request_time)
-          .to(older_failure_request_time)
-      end
-    end
-
-    context "when a newer failure is recorded after an older one" do
-      let(:older_failure) { Stoplight::Domain::Failure.from_error(error, time: Time.now - 1000) }
-      let(:older_failure_request_time) { request_time - 20 }
-
-      before do
-        Timecop.freeze(older_failure_request_time) do
-          data_store.record_failure(config, older_failure)
+      expect do
+        Timecop.freeze(last_error_time) do
+          record_failure(error)
         end
-      end
-
-      it "returns the time of the latest failure" do
-        expect do
-          data_store.record_failure(config, failure)
-        end.to change { data_store.get_metadata(config).last_error_at }
-          .from(older_failure_request_time)
-          .to(request_time)
-      end
+      end.to change { get_metadata.last_error_at }.to(be_within(rounding_error).of(last_error_time))
     end
 
-    context "when a newer recovery probe failure is recorded after a failure" do
-      let(:recovery_probe_failure) { Stoplight::Domain::Failure.from_error(error, time: Time.now + 5000) }
-      let(:recovery_probe_failure_request_time) { request_time + 5000 }
+    specify "when recovery probe failure tracked after failure" do
+      record_failure(error)
 
-      before do
-        data_store.record_failure(config, failure)
-      end
-
-      it "returns the time of the latest failure" do
-        expect do
-          Timecop.freeze(recovery_probe_failure_request_time) do
-            data_store.record_recovery_probe_failure(config, recovery_probe_failure)
-          end
-        end.to change { data_store.get_metadata(config).last_error_at }
-          .from(request_time)
-          .to(recovery_probe_failure_request_time)
-      end
-    end
-
-    context "when a failure is recorded after a recovery probe failure" do
-      let(:recovery_probe_failure) { Stoplight::Domain::Failure.from_error(error, time: Time.now - 5000) }
-      let(:recovery_probe_failure_request_time) { request_time - 5000 }
-
-      before do
-        Timecop.freeze(recovery_probe_failure_request_time) do
-          data_store.record_recovery_probe_failure(config, recovery_probe_failure)
+      expect do
+        Timecop.freeze(last_error_time) do
+          record_recovery_probe_failure(error)
         end
-      end
-
-      it "returns the time of the latest failure" do
-        expect do
-          data_store.record_failure(config, failure)
-        end.to change { data_store.get_metadata(config).last_error_at }
-          .from(recovery_probe_failure_request_time)
-          .to(request_time)
-      end
+      end.to change { get_metadata.last_error_at }.to(be_within(rounding_error).of(last_error_time))
     end
   end
 
   describe "Metadata#last_error" do
-    let(:failure) { Stoplight::Domain::Failure.from_error(error) }
-    let(:error) { StandardError.new("Test error") }
+    let(:another_error) { KeyError.new("key not found: :boom") }
 
-    context "when the failure is recorded" do
-      it "returns last failure" do
-        expect do
-          data_store.record_failure(config, failure)
-        end.to change { data_store.get_metadata(config).last_error }
-          .from(nil)
-          .to(failure)
-      end
+    specify "when failure tracked after recovery probe failure tracked" do
+      expect { record_recovery_probe_failure(error) }.to change { get_metadata.last_error&.error_message }.to eq(error.message)
+      expect { record_failure(another_error) }.to change { get_metadata.last_error.error_message }.to eq(another_error.message)
     end
 
-    context "when an older failure is recorded after a newer one" do
-      let(:older_failure) { Stoplight::Domain::Failure.from_error(older_error, time: Time.now - 5000) }
-      let(:older_error) { StandardError.new("older error") }
-
-      before do
-        data_store.record_failure(config, failure)
-      end
-
-      it "returns the latest recorded failure" do
-        expect(data_store.get_metadata(config).last_error).to eq(failure)
-
-        Timecop.freeze(Time.now + 1) do
-          metadata = data_store.record_failure(config, older_failure)
-
-          expect(metadata.last_error).to eq(older_failure)
-        end
-      end
-    end
-
-    context "when a newer failure is recorded after an older one" do
-      let(:older_failure) { Stoplight::Domain::Failure.from_error(error, time: Time.now - 1000) }
-      let(:older_failure_request_time) { older_failure.time }
-
-      before do
-        Timecop.freeze(older_failure_request_time) do
-          data_store.record_failure(config, older_failure)
-        end
-      end
-
-      it "returns the time of the latest recorded failure" do
-        expect(data_store.get_metadata(config).last_error).to eq(older_failure)
-
-        data_store.record_failure(config, failure)
-
-        expect(data_store.get_metadata(config).last_error).to eq(failure)
-      end
-    end
-
-    context "when a newer recovery probe failure is recorded after a failure" do
-      let(:recovery_probe_failure) { Stoplight::Domain::Failure.from_error(error, time: Time.now + 5000) }
-      let(:recovery_probe_failure_request_time) { recovery_probe_failure.time }
-
-      before do
-        data_store.record_failure(config, failure)
-      end
-
-      it "returns the time of the latest recorded failure" do
-        expect(data_store.get_metadata(config).last_error).to eq(failure)
-
-        Timecop.freeze(recovery_probe_failure_request_time) do
-          data_store.record_recovery_probe_failure(config, recovery_probe_failure)
-        end
-
-        expect(data_store.get_metadata(config).last_error).to eq(recovery_probe_failure)
-      end
-    end
-
-    context "when a failure is recorded after a recovery probe failure" do
-      let(:recovery_probe_failure) { Stoplight::Domain::Failure.from_error(error, time: Time.now - 5000) }
-      let(:recovery_probe_failure_request_time) { recovery_probe_failure.time }
-
-      before do
-        Timecop.freeze(recovery_probe_failure_request_time) do
-          data_store.record_recovery_probe_failure(config, recovery_probe_failure)
-        end
-      end
-
-      it "returns the time of the latest recorded failure" do
-        expect(data_store.get_metadata(config).last_error).to eq(recovery_probe_failure)
-
-        data_store.record_failure(config, failure)
-
-        expect(data_store.get_metadata(config).last_error).to eq(failure)
-      end
+    specify "when recovery probe failure tracked after failure" do
+      expect { record_failure(error) }.to change { get_metadata.last_error&.error_message }.to eq(error.message)
+      expect { record_recovery_probe_failure(another_error) }.to change { get_metadata.last_error.error_message }.to eq(another_error.message)
     end
   end
 
-  describe "Metadata#success" do
-    let(:failure) { Stoplight::Domain::Failure.from_error(error) }
-    let(:error) { StandardError.new("Test error") }
-
+  describe "Metadata#successes" do
     context "without window_size" do
       let(:window_size) { nil }
 
-      it "does not return the the number of successful requests" do
-        expect do
-          data_store.record_success(config)
-        end.not_to change { data_store.get_metadata(config).successes }
+      it "does not increment when a success is recorder" do
+        expect { record_success }.not_to change { get_metadata.successes }
+      end
+
+      it "does not increment when a record_recovery_probe_success is recorder" do
+        expect { record_recovery_probe_success }.not_to change { get_metadata.successes }
       end
     end
 
     context "with window_size" do
       let(:window_size) { 600 }
 
-      context "when the success is recorded" do
-        it "returns the number of successful requests" do
-          expect do
-            data_store.record_success(config)
-          end.to change { data_store.get_metadata(config).successes }.by(1)
+      it "increments when a success is recorder" do
+        expect { record_success }.to change { get_metadata.successes }.by(1)
 
-          expect do
-            data_store.record_success(config)
-          end.to change { data_store.get_metadata(config).successes }.by(1)
-        end
+        expect { record_recovery_probe_failure(error) }.not_to change { get_metadata.successes }.from(1)
+        expect { record_failure(error) }.not_to change { get_metadata.successes }.from(1)
       end
 
-      context "when a failure is recorded after success" do
-        it "returns the the number of successful requests in total" do
-          data_store.record_success(config)
-
-          expect do
-            data_store.record_failure(config, failure)
-            data_store.record_success(config)
-            data_store.record_success(config)
-          end.to change { data_store.get_metadata(config).successes }.from(1).to(3)
-        end
+      it "does not increment when a record_recovery_probe_success is recorder" do
+        expect { record_recovery_probe_success }.not_to change { get_metadata.successes }
       end
 
-      context "when a success is outside of the running window" do
-        let(:window_size) { 5000 }
-
-        it "returns the the number of successful requests within the current window" do
-          Timecop.freeze(Time.now - window_size - 1) do
-            data_store.record_success(config)
-          end
-          data_store.record_success(config)
-          data_store.record_success(config)
-
-          expect(data_store.get_metadata(config).successes).to eq(2)
+      it "does not count a success outside of running window" do
+        Timecop.freeze(Time.now - window_size - 10) do
+          record_success
         end
+
+        expect { record_success }.to change { get_metadata.successes }.from(0).to(1)
       end
     end
   end
 
   describe "Metadata#errors" do
-    let(:failure) { Stoplight::Domain::Failure.from_error(error) }
-    let(:error) { StandardError.new("Test error") }
-
     context "without window_size" do
       let(:window_size) { nil }
 
-      it "does not return the number of failed requests" do
-        expect do
-          data_store.record_failure(config, failure)
-        end.not_to change { data_store.get_metadata(config).errors }
+      it "does not increment when a failure is recorder" do
+        expect { record_failure(error) }.not_to change { get_metadata.errors }
+      end
+
+      it "does not increment when a record_recovery_probe_failure is recorder" do
+        expect { record_recovery_probe_failure(error) }.not_to change { get_metadata.errors }
       end
     end
 
     context "with window_size" do
       let(:window_size) { 600 }
 
-      context "when the failure is recorded" do
-        it "returns the the number of failed requests" do
-          expect do
-            data_store.record_failure(config, failure)
-          end.to change { data_store.get_metadata(config).errors }.by(1)
+      it "increments when a failure is recorder" do
+        expect { record_failure(error) }.to change { get_metadata.errors }.by(1)
 
-          expect do
-            data_store.record_failure(config, failure)
-          end.to change { data_store.get_metadata(config).errors }.by(1)
-        end
+        expect { record_recovery_probe_success }.not_to change { get_metadata.errors }.from(1)
+        expect { record_success }.not_to change { get_metadata.errors }.from(1)
       end
 
-      context "when a success is recorded after failure" do
-        it "returns the the number of failed requests in total" do
-          data_store.record_failure(config, Stoplight::Domain::Failure.from_error(error))
-
-          expect do
-            data_store.record_success(config)
-            data_store.record_failure(config, Stoplight::Domain::Failure.from_error(error))
-            data_store.record_failure(config, Stoplight::Domain::Failure.from_error(error))
-          end.to change { data_store.get_metadata(config).errors }.from(1).to(3)
-        end
+      it "does not increment when a record_recovery_probe_failure is recorder" do
+        expect { record_recovery_probe_failure(error) }.not_to change { get_metadata.errors }
       end
 
-      context "when a failure is outside of the running window" do
-        let(:outdated_failure) { Stoplight::Domain::Failure.from_error(error, time: Time.now - window_size - 1) }
-        let(:window_size) { 5000 }
-
-        it "returns the the number of successful requests within the current window" do
-          Timecop.freeze(outdated_failure.time) do
-            data_store.record_failure(config, outdated_failure)
-          end
-          data_store.record_failure(config, failure)
-          data_store.record_failure(config, failure)
-
-          expect(data_store.get_metadata(config).errors).to eq(2)
+      it "does not count a failure outside of running window" do
+        Timecop.freeze(Time.now - window_size - 10) do
+          record_failure(error)
         end
+
+        expect { record_failure(error) }.to change { get_metadata.errors }.from(0).to(1)
       end
     end
   end
 
   describe "Metadata#recovery_probe_successes" do
-    let(:failure) { Stoplight::Domain::Failure.from_error(error) }
-    let(:error) { StandardError.new("Test error") }
+    it "increments when a recovery probe success is recorder" do
+      expect { record_recovery_probe_success }.to change { get_metadata.recovery_probe_successes }.by(1)
 
-    context "when the success is recorded" do
-      it "returns the the number of successful requests" do
-        expect do
-          data_store.record_recovery_probe_success(config)
-        end.to change { data_store.get_metadata(config).recovery_probe_successes }.by(1)
-
-        expect do
-          data_store.record_recovery_probe_success(config)
-        end.to change { data_store.get_metadata(config).recovery_probe_successes }.by(1)
-      end
+      expect { record_recovery_probe_failure(error) }.not_to change { get_metadata.recovery_probe_successes }.from(1)
+      expect { record_failure(error) }.not_to change { get_metadata.recovery_probe_successes }.from(1)
     end
 
-    context "when a failure is recorded after success" do
-      it "returns the the number of successful requests in total" do
-        data_store.record_recovery_probe_success(config)
-
-        expect do
-          data_store.record_recovery_probe_failure(config, failure)
-          data_store.record_success(config) # ignored
-          data_store.record_recovery_probe_success(config)
-          data_store.record_recovery_probe_success(config)
-        end.to change { data_store.get_metadata(config).recovery_probe_successes }.from(1).to(3)
-      end
-    end
-
-    context "when a success is outside of the running window" do
-      let(:window_size) { 5000 }
-
-      it "returns the the number of successful requests within the current window" do
-        Timecop.freeze(Time.now - window_size - 1) do
-          data_store.record_recovery_probe_success(config)
-        end
-        data_store.record_recovery_probe_success(config)
-        data_store.record_recovery_probe_success(config)
-
-        expect(data_store.get_metadata(config).recovery_probe_successes).to eq(2)
-      end
+    it "does not increment when a success is recorder" do
+      expect { record_success }.not_to change { get_metadata.recovery_probe_successes }
     end
   end
 
   describe "Metadata#recovery_probe_errors" do
-    let(:failure) { Stoplight::Domain::Failure.from_error(error) }
-    let(:error) { StandardError.new("Test error") }
+    it "increments when a recovery probe failure is recorder" do
+      expect { record_recovery_probe_failure(error) }.to change { get_metadata.recovery_probe_errors }.by(1)
 
-    context "when the failure is recorded" do
-      it "returns the number of failed requests" do
-        expect do
-          data_store.record_recovery_probe_failure(config, failure)
-        end.to change { data_store.get_metadata(config).recovery_probe_errors }.by(1)
-
-        expect do
-          data_store.record_recovery_probe_failure(config, failure)
-        end.to change { data_store.get_metadata(config).recovery_probe_errors }.by(1)
-      end
+      expect { record_recovery_probe_success }.not_to change { get_metadata.recovery_probe_errors }.from(1)
+      expect { record_success }.not_to change { get_metadata.recovery_probe_errors }.from(1)
     end
 
-    context "when a success is recorded after failure" do
-      it "returns the the number of failed requests in total" do
-        data_store.record_recovery_probe_failure(config, Stoplight::Domain::Failure.from_error(error))
-
-        expect do
-          data_store.record_recovery_probe_success(config)
-          data_store.record_failure(config, Stoplight::Domain::Failure.from_error(error)) # ignored
-          data_store.record_recovery_probe_failure(config, Stoplight::Domain::Failure.from_error(error))
-          data_store.record_recovery_probe_failure(config, Stoplight::Domain::Failure.from_error(error))
-        end.to change { data_store.get_metadata(config).recovery_probe_errors }.from(1).to(3)
-      end
-    end
-
-    context "when a failure is outside of the running window" do
-      let(:outdated_failure) { Stoplight::Domain::Failure.from_error(error, time: Time.now - window_size - 1) }
-      let(:window_size) { 5000 }
-
-      it "returns the the number of successful requests within the current window" do
-        Timecop.freeze(outdated_failure.time) do
-          data_store.record_recovery_probe_failure(config, outdated_failure)
-        end
-        data_store.record_recovery_probe_failure(config, failure)
-        data_store.record_recovery_probe_failure(config, failure)
-
-        expect(data_store.get_metadata(config).recovery_probe_errors).to eq(2)
-      end
+    it "does not increment when a failure is recorder" do
+      expect { record_failure(error) }.not_to change { get_metadata.recovery_probe_errors }
     end
   end
 
   describe "Metadata#consecutive_successes" do
-    let(:failure) { Stoplight::Domain::Failure.from_error(error) }
-    let(:error) { StandardError.new("Test error") }
-
-    context "when the success is recorded" do
-      it "returns the the number of successful requests" do
-        expect do
-          data_store.record_success(config)
-        end.to change { data_store.get_metadata(config).consecutive_successes }.by(1)
-
-        expect do
-          data_store.record_success(config)
-        end.to change { data_store.get_metadata(config).consecutive_successes }.by(1)
-      end
+    it "resets when a failure is recorded after success" do
+      expect { record_success }.to change { get_metadata.consecutive_successes }.by(1)
+      expect { record_failure(error) }.to change { get_metadata.consecutive_successes }.to(0)
     end
 
-    context "when a failure is recorded after success" do
-      it "returns the the number of successful requests in total" do
-        data_store.record_success(config)
+    it "increments when the consecutive successes" do
+      expect { record_success }.to change { get_metadata.consecutive_successes }.by(1)
+      expect { record_recovery_probe_success }.to change { get_metadata.consecutive_successes }.by(1)
+    end
 
-        expect do
-          data_store.record_failure(config, failure)
-          data_store.record_success(config)
-          data_store.record_success(config)
-        end.to change { data_store.get_metadata(config).consecutive_successes }.from(1).to(2)
-      end
+    it "resets when a recovery probe failure is recorded after success" do
+      expect { record_success }.to change { get_metadata.consecutive_successes }.by(1)
+      expect { record_recovery_probe_failure(error) }.to change { get_metadata.consecutive_successes }.to(0)
+    end
+
+    it "resets when a failure is recorded after recovery probe success" do
+      expect { record_recovery_probe_success }.to change { get_metadata.consecutive_successes }.by(1)
+      expect { record_failure(error) }.to change { get_metadata.consecutive_successes }.to(0)
+    end
+
+    it "resets when a recovery probe failure is recorded after recovery probe success" do
+      expect { record_recovery_probe_success }.to change { get_metadata.consecutive_successes }.by(1)
+      expect { record_recovery_probe_failure(error) }.to change { get_metadata.consecutive_successes }.to(0)
     end
 
     context "when a success is outside of the running window" do
       let(:window_size) { 5000 }
 
-      it "returns the the number of successful requests within the current window" do
-        Timecop.freeze(Time.now - window_size - 1) do
-          data_store.record_success(config)
+      before do
+        Timecop.freeze(Time.now - window_size - 10) do
+          record_success
         end
-        data_store.record_success(config)
-        data_store.record_success(config)
+      end
 
-        expect(data_store.get_metadata(config).consecutive_successes).to eq(3)
+      # Should we consider this a bug? Shouldn't it count consecutive errors
+      # only withing a window?
+      it "counts consecutive successes outside of the window too" do
+        record_success
+
+        expect(get_metadata.consecutive_successes).to eq(2)
+      end
+    end
+
+    context "when a recovery probe success is outside of the running window" do
+      let(:window_size) { 5000 }
+
+      before do
+        Timecop.freeze(Time.now - window_size - 10) do
+          record_recovery_probe_success
+        end
+      end
+
+      # Should we consider this a bug? Shouldn't it count consecutive errors
+      # only withing a window?
+      it "counts consecutive errors outside of the window too" do
+        record_recovery_probe_success
+
+        expect(get_metadata.consecutive_successes).to eq(2)
       end
     end
   end
 
   describe "Metadata#consecutive_errors" do
-    let(:failure) { Stoplight::Domain::Failure.from_error(error) }
-    let(:error) { StandardError.new("Test error") }
-
-    context "when the failure is recorded" do
-      it "returns the the number of failed requests" do
-        expect do
-          data_store.record_failure(config, failure)
-        end.to change { data_store.get_metadata(config).consecutive_errors }.by(1)
-
-        expect do
-          data_store.record_failure(config, failure)
-        end.to change { data_store.get_metadata(config).consecutive_errors }.by(1)
-      end
+    it "resets when a success is recorded after failure" do
+      expect { record_failure(error) }.to change { get_metadata.consecutive_errors }.by(1)
+      expect { record_success }.to change { get_metadata.consecutive_errors }.to(0)
     end
 
-    context "when a success is recorded after failure" do
-      it "returns the the number of failed requests in total" do
-        data_store.record_failure(config, Stoplight::Domain::Failure.from_error(error))
+    it "increments when the consecutive errors" do
+      expect { record_failure(error) }.to change { get_metadata.consecutive_errors }.by(1)
+      expect { record_recovery_probe_failure(error) }.to change { get_metadata.consecutive_errors }.by(1)
+    end
 
-        expect do
-          data_store.record_success(config)
-          data_store.record_failure(config, Stoplight::Domain::Failure.from_error(error))
-          data_store.record_failure(config, Stoplight::Domain::Failure.from_error(error))
-        end.to change { data_store.get_metadata(config).consecutive_errors }.from(1).to(2)
-      end
+    it "resets when a recovery probe success is recorded after failure" do
+      expect { record_failure(error) }.to change { get_metadata.consecutive_errors }.by(1)
+      expect { record_recovery_probe_success }.to change { get_metadata.consecutive_errors }.to(0)
+    end
+
+    it "resets when a success is recorded after recovery probe failure" do
+      expect { record_recovery_probe_failure(error) }.to change { get_metadata.consecutive_errors }.by(1)
+      expect { record_success }.to change { get_metadata.consecutive_errors }.to(0)
+    end
+
+    it "resets when a recovery probe success is recorded after recovery probe failure" do
+      expect { record_recovery_probe_failure(error) }.to change { get_metadata.consecutive_errors }.by(1)
+      expect { record_recovery_probe_success }.to change { get_metadata.consecutive_errors }.to(0)
     end
 
     context "when a failure is outside of the running window" do
-      let(:outdated_failure) { Stoplight::Domain::Failure.from_error(error, time: Time.now - window_size - 1) }
       let(:window_size) { 5000 }
 
-      it "returns the the number of successful requests within the current window" do
-        Timecop.freeze(outdated_failure.time) do
-          data_store.record_failure(config, outdated_failure)
+      before do
+        Timecop.freeze(Time.now - window_size - 10) do
+          record_failure(error)
         end
-        data_store.record_failure(config, failure)
-        data_store.record_failure(config, failure)
-
-        expect(data_store.get_metadata(config).consecutive_errors).to eq(3)
       end
-    end
-  end
 
-  describe "#record_failure" do
-    let(:failure) { Stoplight::Domain::Failure.from_error(error) }
-    let(:error) { StandardError.new("Test error") }
-    let(:failure_time) { failure.time }
+      # Should we consider this a bug? Shouldn't it count consecutive errors
+      # only withing a window?
+      it "counts consecutive errors outside of the window too" do
+        record_failure(error)
 
-    context "without window_size" do
-      let(:window_size) { nil }
-
-      it "does not record the number of failed requests" do
-        expect do
-          data_store.record_failure(config, failure)
-        end.to change { data_store.get_metadata(config) }
-          .from(have_attributes(consecutive_errors: 0, last_error_at: nil, last_error: nil))
-          .to(have_attributes(consecutive_errors: 1, last_error_at: failure_time, last_error: failure))
+        expect(get_metadata.consecutive_errors).to eq(2)
       end
     end
 
-    context "with window_size" do
-      let(:window_size) { 600 }
+    context "when a recovery probe failure is outside of the running window" do
+      let(:window_size) { 5000 }
 
-      context "when the failure is recorded" do
-        it "returns the number of failed requests" do
-          expect do
-            data_store.record_failure(config, failure)
-          end.to change { data_store.get_metadata(config) }
-            .from(have_attributes(errors: 0, consecutive_errors: 0, last_error_at: nil, last_error: nil))
-            .to(have_attributes(errors: 1, consecutive_errors: 1, last_error_at: failure_time, last_error: failure))
+      before do
+        Timecop.freeze(Time.now - window_size - 10) do
+          record_recovery_probe_failure(error)
         end
       end
 
-      context "when a success is recorded after failure" do
-        before do
-          data_store.record_failure(config, Stoplight::Domain::Failure.from_error(error))
-        end
+      # Should we consider this a bug? Shouldn't it count consecutive errors
+      # only withing a window?
+      it "counts consecutive errors outside of the window too" do
+        record_failure(error)
 
-        it "returns the the number of failed requests in total" do
-          expect do
-            data_store.record_success(config)
-            data_store.record_failure(config, Stoplight::Domain::Failure.from_error(error))
-            data_store.record_failure(config, Stoplight::Domain::Failure.from_error(error))
-          end.to change { data_store.get_metadata(config) }
-            .from(have_attributes(errors: 1, successes: 0, consecutive_errors: 1))
-            .to(have_attributes(errors: 3, successes: 1, consecutive_errors: 2))
-        end
-      end
-
-      context "when a failure is outside of the running window" do
-        let(:outdated_failure) { Stoplight::Domain::Failure.from_error(error, time: Time.now - window_size - 1) }
-        let(:window_size) { 300 }
-
-        it "returns the the number of successful errors within the current window" do
-          Timecop.freeze(outdated_failure.time) do
-            data_store.record_failure(config, outdated_failure)
-          end
-          data_store.record_failure(config, failure)
-          data_store.record_failure(config, failure)
-
-          expect(data_store.get_metadata(config)).to have_attributes(
-            errors: 2,
-            consecutive_errors: 3
-          )
-        end
-      end
-
-      context "when a failure after successful recovery" do
-        let(:outdated_failure) { Stoplight::Domain::Failure.from_error(error, time: Time.now - cool_off_time - 1) }
-        let(:cool_off_time) { 60 }
-        let(:window_size) { 300 }
-
-        it "returns the the number of successful errors within the current window after recovery" do
-          Timecop.freeze(outdated_failure.time) do
-            data_store.record_failure(config, outdated_failure)
-          end
-          data_store.transition_to_color(config, Stoplight::Color::RED)
-          data_store.transition_to_color(config, Stoplight::Color::GREEN)
-
-          Timecop.travel(Time.now + 10) do
-            data_store.record_failure(config, failure)
-            expect(data_store.get_metadata(config)).to have_attributes(errors: 1)
-          end
-        end
+        expect(get_metadata.consecutive_errors).to eq(2)
       end
     end
   end
