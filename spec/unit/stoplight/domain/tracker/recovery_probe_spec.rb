@@ -11,10 +11,11 @@ RSpec.describe Stoplight::Domain::Tracker::RecoveryProbe do
 
   shared_examples "when recover to" do |recover_to:, transition_from:, transition_to:|
     context "when recover to #{recover_to}" do
-      let(:metadata_after_probe) { instance_double(Stoplight::Domain::Metadata) }
+      let(:metrics_after_probe) { instance_double(Stoplight::Domain::Metrics) }
+      let(:state_snapshot_after_probe) { instance_double(Stoplight::Domain::StateSnapshot) }
 
       before do
-        allow(traffic_recovery).to receive(:determine_color).with(config, metadata_after_probe).and_return(recover_to)
+        allow(traffic_recovery).to receive(:determine_color).with(config, metrics_after_probe, state_snapshot_after_probe).and_return(recover_to)
         allow(data_store).to receive(:transition_to_color).with(config, transition_to).and_return(transition_outcome)
       end
 
@@ -57,11 +58,12 @@ RSpec.describe Stoplight::Domain::Tracker::RecoveryProbe do
       transition_to: Stoplight::Domain::Color::RED
 
     context "when recover to PASS" do
-      let(:metadata_after_probe) { instance_double(Stoplight::Domain::Metadata) }
+      let(:metrics_after_probe) { instance_double(Stoplight::Domain::Metrics) }
+      let(:state_snapshot_after_probe) { instance_double(Stoplight::Domain::StateSnapshot) }
       let(:recover_to) { Stoplight::Domain::TrafficRecovery::PASS }
 
       before do
-        allow(traffic_recovery).to receive(:determine_color).with(config, metadata_after_probe).and_return(recover_to)
+        allow(traffic_recovery).to receive(:determine_color).with(config, metrics_after_probe, state_snapshot_after_probe).and_return(recover_to)
       end
 
       it "does not send notifications" do
@@ -72,11 +74,12 @@ RSpec.describe Stoplight::Domain::Tracker::RecoveryProbe do
     end
 
     context "when recover to unexpected to outcome" do
-      let(:metadata_after_probe) { instance_double(Stoplight::Domain::Metadata) }
+      let(:metrics_after_probe) { instance_double(Stoplight::Domain::Metrics) }
+      let(:state_snapshot_after_probe) { instance_double(Stoplight::Domain::StateSnapshot) }
       let(:recover_to) { "unexpected" }
 
       before do
-        allow(traffic_recovery).to receive(:determine_color).with(config, metadata_after_probe).and_return(recover_to)
+        allow(traffic_recovery).to receive(:determine_color).with(config, metrics_after_probe, state_snapshot_after_probe).and_return(recover_to)
       end
 
       it "raises an error" do
@@ -89,7 +92,9 @@ RSpec.describe Stoplight::Domain::Tracker::RecoveryProbe do
     subject(:record_probe) { recorder.record_success }
 
     before do
-      allow(data_store).to receive(:record_recovery_probe_success).with(config).and_return(metadata_after_probe)
+      allow(data_store).to receive(:record_recovery_probe_success).with(config)
+      allow(data_store).to receive(:get_recovery_metrics).with(config).and_return(metrics_after_probe)
+      allow(data_store).to receive(:get_state_snapshot).with(config).and_return(state_snapshot_after_probe)
     end
 
     include_examples "recovering after probe"
@@ -101,7 +106,9 @@ RSpec.describe Stoplight::Domain::Tracker::RecoveryProbe do
     let(:exception) { KeyError.new("bang") }
 
     before do
-      allow(data_store).to receive(:record_recovery_probe_failure).with(config, exception).and_return(metadata_after_probe)
+      allow(data_store).to receive(:record_recovery_probe_failure).with(config, exception)
+      allow(data_store).to receive(:get_recovery_metrics).with(config).and_return(metrics_after_probe)
+      allow(data_store).to receive(:get_state_snapshot).with(config).and_return(state_snapshot_after_probe)
     end
 
     include_examples "recovering after probe"

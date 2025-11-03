@@ -41,12 +41,12 @@ module Stoplight
         # Executes the provided code block when the light is in the yellow state.
         #
         # @param fallback [Proc, nil] A fallback proc to execute in case of an error.
-        # @param metadata [Stoplight::Domain::Metadata] Metadata capturing the current state of the light.
+        # @param state_snapshot [Stoplight::Domain::StateSnapshot]
         # @yield The code block to execute.
         # @return [Object] The result of the code block if successful.
         # @raise [Exception] Re-raises the error if it is not tracked or no fallback is provided.
-        def execute(fallback, metadata:, &code)
-          enter_recovery(metadata)
+        def execute(fallback, state_snapshot:, &code)
+          enter_recovery(state_snapshot)
           # TODO: We need to employ a probabilistic approach here to avoid "thundering herd" problem
           code.call.tap { record_recovery_probe_success }
         rescue => error
@@ -72,12 +72,13 @@ module Stoplight
           request_tracker.record_failure(error)
         end
 
-        # @param metadata [Stoplight::Domain::Metadata]
+        # @param state_snapshot [Stoplight::Domain::StateSnapshot]
         # @return [void]
-        private def enter_recovery(metadata)
-          return if metadata.recovery_started?
+        private def enter_recovery(state_snapshot)
+          return if state_snapshot.recovery_started?
 
           if data_store.transition_to_color(config, Color::YELLOW)
+            data_store.clear_windowed_metrics(config)
             notifiers.each do |notifier|
               notifier.notify(config, Color::RED, Color::YELLOW, nil)
             end

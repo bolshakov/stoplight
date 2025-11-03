@@ -18,61 +18,90 @@ module Stoplight
           @recovery_probe_errors = Hash.new { |recovery_probe_errors, light_name| recovery_probe_errors[light_name] = SlidingWindow.new }
           @recovery_probe_successes = Hash.new { |recovery_probe_successes, light_name| recovery_probe_successes[light_name] = SlidingWindow.new }
 
-          @metadata = Hash.new do |metadata, light_name|
-            metadata[light_name] = Domain::Metadata.new(
-              current_time: Time.now,
-              successes: 0,
-              errors: 0,
-              recovery_probe_successes: 0,
-              recovery_probe_errors: 0,
-              last_error: nil,
-              last_error_at: nil,
-              last_success_at: nil,
-              consecutive_errors: 0,
-              consecutive_successes: 0,
-              breached_at: nil,
-              locked_state: Domain::State::UNLOCKED,
-              recovery_scheduled_after: nil,
-              recovery_started_at: nil,
-              recovered_at: nil
-            )
-          end
+          @states = Hash.new { |states, light_name| states[light_name] = State.new }
+          @metrics = Hash.new { |metrics, light_name| metrics[light_name] = Metrics.new }
+
           super # MonitorMixin
         end
 
         # @return [Array<String>]
         def names
-          synchronize { @metadata.keys }
+          synchronize { @metrics.keys | @states.keys }
         end
 
         # @param config [Stoplight::Domain::Config]
-        # @return [Stoplight::Domain::Metadata]
-        def get_metadata(config)
+        # @return [Stoplight::Domain::Metrics]
+        def get_metrics(config)
+          light_name = config.name
+
+          synchronize do
+            current_time = self.current_time
+            window_start = if config.window_size
+              (current_time - config.window_size)
+            else
+              current_time
+            end
+
+            metrics = @metrics[light_name]
+
+            errors = @errors[light_name].sum_in_window(window_start) if config.window_size
+            successes = @successes[light_name].sum_in_window(window_start) if config.window_size
+
+            Domain::Metrics.new(
+              errors:,
+              successes:,
+              total_consecutive_errors: metrics.consecutive_errors,
+              total_consecutive_successes: metrics.consecutive_successes,
+              last_error: metrics.last_error,
+              last_success_at: metrics.last_success_at
+            )
+          end
+        end
+
+        # @return [Stoplight::Domain::Metrics]
+        def get_recovery_metrics(config)
           light_name = config.name
 
           synchronize do
             current_time = self.current_time
             recovery_window_start = (current_time - config.cool_off_time)
-            recovered_at = @metadata[light_name].recovered_at
-            window_start = if config.window_size
-              [recovered_at, (current_time - config.window_size)].compact.max
+            if config.window_size
+              (current_time - config.window_size)
             else
               current_time
             end
 
-            @metadata[light_name].with(
-              current_time:,
-              errors: @errors[config.name].sum_in_window(window_start),
-              successes: @successes[config.name].sum_in_window(window_start),
-              recovery_probe_errors: @recovery_probe_errors[config.name].sum_in_window(recovery_window_start),
-              recovery_probe_successes: @recovery_probe_successes[config.name].sum_in_window(recovery_window_start)
+            metrics = @metrics[light_name]
+
+            Domain::Metrics.new(
+              errors: @recovery_probe_errors[light_name].sum_in_window(recovery_window_start),
+              successes: @recovery_probe_successes[light_name].sum_in_window(recovery_window_start),
+              total_consecutive_errors: metrics.consecutive_errors,
+              total_consecutive_successes: metrics.consecutive_successes,
+              last_error: metrics.last_error,
+              last_success_at: metrics.last_success_at
             )
           end
         end
 
+        # @return [Stoplight::Domain::StateSnapshot]
+        def get_state_snapshot(config)
+          time, state = synchronize do
+            [current_time, @states[config.name]]
+          end
+
+          Domain::StateSnapshot.new(
+            time:,
+            locked_state: state.locked_state,
+            recovery_scheduled_after: state.recovery_scheduled_after,
+            recovery_started_at: state.recovery_started_at,
+            breached_at: state.breached_at
+          )
+        end
+
         # @param config [Stoplight::Domain::Config]
         # @param exception [Exception]
-        # @return [Stoplight::Domain::Metadata]
+        # @return [void]
         def record_failure(config, exception)
           current_time = self.current_time
           light_name = config.name
@@ -81,21 +110,23 @@ module Stoplight
           synchronize do
             @errors[light_name].increment if config.window_size
 
-            metadata = @metadata[light_name]
-            @metadata[light_name] = if metadata.last_error_at.nil? || current_time > metadata.last_error_at
-              metadata.with(
-                last_error_at: current_time,
-                last_error: failure,
-                consecutive_errors: metadata.consecutive_errors.succ,
-                consecutive_successes: 0
-              )
-            else
-              metadata.with(
-                consecutive_errors: metadata.consecutive_errors.succ,
-                consecutive_successes: 0
-              )
+            metrics = @metrics[light_name]
+
+            if metrics.last_error_at.nil? || failure.occurred_at > metrics.last_error_at
+              metrics.last_error = failure
             end
-            get_metadata(config)
+
+            metrics.consecutive_errors += 1
+            metrics.consecutive_successes = 0
+          end
+        end
+
+        def clear_windowed_metrics(config)
+          if config.window_size
+            synchronize do
+              @errors[config.name] = SlidingWindow.new
+              @successes[config.name] = SlidingWindow.new
+            end
           end
         end
 
@@ -108,25 +139,20 @@ module Stoplight
           synchronize do
             @successes[light_name].increment if config.window_size
 
-            metadata = @metadata[light_name]
-            @metadata[light_name] = if metadata.last_success_at.nil? || current_time > metadata.last_success_at
-              metadata.with(
-                last_success_at: current_time,
-                consecutive_errors: 0,
-                consecutive_successes: metadata.consecutive_successes.succ
-              )
-            else
-              metadata.with(
-                consecutive_errors: 0,
-                consecutive_successes: metadata.consecutive_successes.succ
-              )
+            metrics = @metrics[light_name]
+
+            if metrics.last_success_at.nil? || current_time > metrics.last_success_at
+              metrics.last_success_at = current_time
             end
+
+            metrics.consecutive_errors = 0
+            metrics.consecutive_successes += 1
           end
         end
 
         # @param config [Stoplight::Domain::Config]
         # @param exception [Exception]
-        # @return [Stoplight::Domain::Metadata]
+        # @return [void]
         def record_recovery_probe_failure(config, exception)
           light_name = config.name
           current_time = self.current_time
@@ -135,26 +161,19 @@ module Stoplight
           synchronize do
             @recovery_probe_errors[light_name].increment
 
-            metadata = @metadata[light_name]
-            @metadata[light_name] = if metadata.last_error_at.nil? || current_time > metadata.last_error_at
-              metadata.with(
-                last_error_at: current_time,
-                last_error: failure,
-                consecutive_errors: metadata.consecutive_errors.succ,
-                consecutive_successes: 0
-              )
-            else
-              metadata.with(
-                consecutive_errors: metadata.consecutive_errors.succ,
-                consecutive_successes: 0
-              )
+            metrics = @metrics[light_name]
+
+            if metrics.last_error_at.nil? || failure.occurred_at > metrics.last_error_at
+              metrics.last_error = failure
             end
-            get_metadata(config)
+
+            metrics.consecutive_errors += 1
+            metrics.consecutive_successes = 0
           end
         end
 
         # @param config [Stoplight::Domain::Config]
-        # @return [Stoplight::Domain::Metadata]
+        # @return [void]
         def record_recovery_probe_success(config)
           light_name = config.name
           current_time = self.current_time
@@ -162,20 +181,13 @@ module Stoplight
           synchronize do
             @recovery_probe_successes[light_name].increment
 
-            metadata = @metadata[light_name]
-            @metadata[light_name] = if metadata.last_success_at.nil? || current_time > metadata.last_success_at
-              metadata.with(
-                last_success_at: current_time,
-                consecutive_errors: 0,
-                consecutive_successes: metadata.consecutive_successes.succ
-              )
-            else
-              metadata.with(
-                consecutive_errors: 0,
-                consecutive_successes: metadata.consecutive_successes.succ
-              )
+            metrics = @metrics[light_name]
+            if metrics.last_success_at.nil? || current_time > metrics.last_success_at
+              metrics.last_success_at = current_time
             end
-            get_metadata(config)
+
+            metrics.consecutive_errors = 0
+            metrics.consecutive_successes += 1
           end
         end
 
@@ -186,8 +198,7 @@ module Stoplight
           light_name = config.name
 
           synchronize do
-            metadata = @metadata[light_name]
-            @metadata[light_name] = metadata.with(locked_state: state)
+            @states[light_name].locked_state = state
           end
           state
         end
@@ -224,16 +235,15 @@ module Stoplight
           current_time = self.current_time
 
           synchronize do
-            metadata = @metadata[light_name]
-            if metadata.recovered_at
+            state = @states[light_name]
+
+            if state.recovered_at
               false
             else
-              @metadata[light_name] = metadata.with(
-                recovered_at: current_time,
-                recovery_started_at: nil,
-                breached_at: nil,
-                recovery_scheduled_after: nil
-              )
+              state.recovered_at = current_time
+              state.recovery_started_at = nil
+              state.breached_at = nil
+              state.recovery_scheduled_after = nil
               true
             end
           end
@@ -248,21 +258,17 @@ module Stoplight
           current_time = self.current_time
 
           synchronize do
-            metadata = @metadata[light_name]
-            if metadata.recovery_started_at.nil?
-              @metadata[light_name] = metadata.with(
-                recovery_started_at: current_time,
-                recovery_scheduled_after: nil,
-                recovered_at: nil,
-                breached_at: nil
-              )
+            state = @states[light_name]
+            if state.recovery_started_at.nil?
+              state.recovery_started_at = current_time
+              state.recovery_scheduled_after = nil
+              state.recovered_at = nil
+              state.breached_at = nil
               true
             else
-              @metadata[light_name] = metadata.with(
-                recovery_scheduled_after: nil,
-                recovered_at: nil,
-                breached_at: nil
-              )
+              state.recovery_scheduled_after = nil
+              state.recovered_at = nil
+              state.breached_at = nil
               false
             end
           end
@@ -278,21 +284,17 @@ module Stoplight
           recovery_scheduled_after = current_time + config.cool_off_time
 
           synchronize do
-            metadata = @metadata[light_name]
-            if metadata.breached_at
-              @metadata[light_name] = metadata.with(
-                recovery_scheduled_after: recovery_scheduled_after,
-                recovery_started_at: nil,
-                recovered_at: nil
-              )
+            state = @states[light_name]
+            if state.breached_at
+              state.recovery_scheduled_after = recovery_scheduled_after
+              state.recovery_started_at = nil
+              state.recovered_at = nil
               false
             else
-              @metadata[light_name] = metadata.with(
-                breached_at: current_time,
-                recovery_scheduled_after: recovery_scheduled_after,
-                recovery_started_at: nil,
-                recovered_at: nil
-              )
+              state.breached_at = current_time
+              state.recovery_scheduled_after = recovery_scheduled_after
+              state.recovery_started_at = nil
+              state.recovered_at = nil
               true
             end
           end

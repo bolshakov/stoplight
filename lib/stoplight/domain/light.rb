@@ -57,7 +57,7 @@ module Stoplight
       #
       # @return [String]
       def state
-        metadata.locked_state
+        state_snapshot.locked_state
       end
 
       # Returns current color:
@@ -71,7 +71,7 @@ module Stoplight
       #
       # @return [String] returns current light color
       def color
-        metadata.color
+        state_snapshot.color
       end
 
       # Runs the given block of code with this circuit breaker
@@ -91,9 +91,9 @@ module Stoplight
       def run(fallback = nil, &code)
         raise ArgumentError, "nothing to run. Please, pass a block into `Light#run`" unless block_given?
 
-        metadata.then do |metadata|
-          strategy = state_strategy_factory(metadata.color)
-          strategy.execute(fallback, metadata:, &code)
+        state_snapshot.then do |state_snapshot|
+          strategy = state_strategy_factory(state_snapshot.color)
+          strategy.execute(fallback, state_snapshot:, &code)
         end
       end
 
@@ -189,9 +189,8 @@ module Stoplight
         end
       end
 
-      # @return [Stoplight::Domain::Metadata]
-      def metadata
-        data_store.get_metadata(config)
+      def state_snapshot
+        data_store.get_state_snapshot(config)
       end
     end
   end

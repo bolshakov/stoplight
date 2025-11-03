@@ -40,10 +40,10 @@ module Stoplight
         end
 
         # @param config [Stoplight::Domain::Config]
-        # @param metadata [Stoplight::Domain::Metadata]
+        # @param metrics [Stoplight::Domain::Metrics]
         # @return [Boolean]
-        def stop_traffic?(config, metadata)
-          metadata.requests >= min_requests && metadata.error_rate >= config.threshold
+        def stop_traffic?(config, metrics)
+          metrics.requests >= min_requests && metrics.error_rate >= config.threshold
         end
       end
     end

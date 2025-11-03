@@ -10,9 +10,9 @@ module Stoplight
       # @abstract
       class RunStrategy
         # @param fallback [Proc, nil] A fallback proc to execute in case of an error.
-        # @param metadata [Stoplight::Domain::Metadata] Metadata capturing the current state of the light.
+        # @param state_snapshot [Stoplight::Domain::StateSnapshot]
         # :nocov:
-        def execute(fallback, metadata:, &code)
+        def execute(fallback, state_snapshot:, &code)
           raise NotImplementedError, "Subclasses must implement the execute method"
         end
         # :nocov:
