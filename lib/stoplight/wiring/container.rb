@@ -59,7 +59,7 @@ module Stoplight
       end
 
       factory(:request_tracker) do
-        Domain::RequestTracker.new(
+        Domain::Tracker::Request.new(
           data_store: resolve(:data_store),
           traffic_control: resolve(:traffic_control),
           notifiers: resolve(:notifiers),
@@ -68,7 +68,7 @@ module Stoplight
       end
 
       factory(:recovery_probe_tracker) do
-        Domain::RecoveryProbeTracker.new(
+        Domain::Tracker::RecoveryProbe.new(
           data_store: resolve(:data_store),
           traffic_recovery: resolve(:traffic_recovery),
           notifiers: resolve(:notifiers),

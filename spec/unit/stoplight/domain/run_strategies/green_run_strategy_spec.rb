@@ -9,7 +9,7 @@ RSpec.describe Stoplight::Domain::Strategies::GreenRunStrategy do
   end
 
   let(:config) { instance_double(Stoplight::Domain::Config) }
-  let(:request_tracker) { instance_double(Stoplight::Domain::RequestTracker) }
+  let(:request_tracker) { instance_double(Stoplight::Domain::Tracker::Request) }
 
   context "when code executes successfully" do
     subject(:result) { strategy.execute(nil, metadata: nil, &code) }
@@ -92,7 +92,7 @@ RSpec.describe Stoplight::Domain::Strategies::GreenRunStrategy do
 
     context "with different request recorder" do
       let(:other) { described_class.new(config:, request_tracker: other_request_tracker) }
-      let(:other_request_tracker) { instance_double(Stoplight::Domain::RequestTracker) }
+      let(:other_request_tracker) { instance_double(Stoplight::Domain::Tracker::Request) }
 
       it { is_expected.not_to eq(other) }
     end

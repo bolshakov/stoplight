@@ -30,7 +30,7 @@ module Stoplight
         # @param config [Stoplight::Domain::Config]
         # @param data_store [Stoplight::DataStore::Base]
         # @param notifiers [Array<Stoplight::Domain::StateTransitionNotifier>]
-        # @param request_tracker [Stoplight::Domain::RecoveryProbeTracker]
+        # @param request_tracker [Stoplight::Domain::Tracker::RecoveryProbe]
         def initialize(config:, data_store:, notifiers:, request_tracker:)
           @config = config
           @data_store = data_store

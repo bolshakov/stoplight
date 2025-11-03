@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Stoplight::Domain::RequestTracker do
+RSpec.describe Stoplight::Domain::Tracker::Request do
   subject(:request_tracker) { described_class.new(data_store:, traffic_control:, notifiers:, config:) }
 
   let(:data_store) { instance_double(Stoplight::Domain::DataStore) }

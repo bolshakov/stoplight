@@ -11,7 +11,7 @@ module Stoplight
       # @api private
       class GreenRunStrategy < RunStrategy
         # @!attribute [r] request_tracker
-        #   @return [Stoplight::Domain::RequestTracker]
+        #   @return [Stoplight::Domain::Tracker::Request]
         protected attr_reader :request_tracker
 
         # @!attribute [r] config
@@ -19,7 +19,7 @@ module Stoplight
         protected attr_reader :config
 
         # @param config [Stoplight::Domain::Config]
-        # @param request_tracker [Stoplight::Domain::RequestTracker]
+        # @param request_tracker [Stoplight::Domain::Tracker::Request
         def initialize(config:, request_tracker:)
           @config = config
           @request_tracker = request_tracker

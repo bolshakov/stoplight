@@ -14,7 +14,7 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
   let(:config) { instance_double(Stoplight::Domain::Config) }
   let(:notifier) { instance_double(Stoplight::Domain::StateTransitionNotifier) }
   let(:data_store) { instance_double(Stoplight::Domain::DataStore) }
-  let(:request_tracker) { instance_double(Stoplight::Domain::RecoveryProbeTracker) }
+  let(:request_tracker) { instance_double(Stoplight::Domain::Tracker::RecoveryProbe) }
 
   describe "#exceute" do
     before do
@@ -135,7 +135,7 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
 
     context "with different request recorder" do
       let(:other) { described_class.new(config:, data_store:, notifiers:, request_tracker: other_request_tracker) }
-      let(:other_request_tracker) { instance_double(Stoplight::Domain::RecoveryProbeTracker) }
+      let(:other_request_tracker) { instance_double(Stoplight::Domain::Tracker::RecoveryProbe) }
 
       it { is_expected.not_to eq(other) }
     end
