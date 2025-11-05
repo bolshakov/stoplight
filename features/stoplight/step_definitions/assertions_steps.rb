@@ -23,19 +23,18 @@ Then(/^(?:the light|it) returns "([^"]+)"$/) do |expected_result|
 end
 
 Then(/^(?:the light|it) fails with error:$/) do |table|
-  table.rows_hash.each_pair do |key, value|
-    case key
-    when "Type"
-      exception_class = Object.const_get(value)
-      expect(last_exception)
-        .to be_kind_of(exception_class),
-          "Expected exception to be of type #{value}, but got #{last_exception.inspect}"
-    when "Message"
-      expect(last_exception.message)
-        .to eq(value),
-          "Expected exception message to be '#{value}', but got '#{last_exception.message}'"
-    else
-      raise ArgumentError, "Unknown key: #{key}"
-    end
-  end
+  expect_error(last_exception, table)
+end
+
+Then(/^the fallback have received nil argument$/) do
+  expect(last_fallback_received_argument).to be_nil
+end
+
+Then(/^the fallback have received an error:$/) do |table|
+  expect(last_fallback_received_argument).not_to eq(:nothing), "Expected fallback to receive an instance of exception, but none was passed."
+  expect_error(last_fallback_received_argument, table)
+end
+
+Then(/^the light is in "([^"]+)" state$/) do |state|
+  expect(current_light.state).to eq(state)
 end

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require "benchmark/ips"
-require "stoplight"
+require_relative "../lib/stoplight"
 require "redis"
 
 redis = Redis.new

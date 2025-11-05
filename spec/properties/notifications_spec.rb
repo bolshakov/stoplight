@@ -9,7 +9,7 @@ RSpec.describe "Notifications" do
     let(:notifier) { notifier_class.new }
 
     let(:notifier_class) do
-      Class.new(Stoplight::Notifier::Base) do
+      Class.new(Stoplight::Domain::StateTransitionNotifier) do
         def initialize
           @notifications = Hash.new { |hash, key| hash[key] = [] }
         end
@@ -79,7 +79,7 @@ RSpec.describe "Notifications" do
   end
 
   context "with redis data store", :redis do
-    let(:data_store) { Stoplight::DataStore::Redis.new(redis, warn_on_clock_skew: false) }
+    let(:data_store) { Stoplight::Infrastructure::DataStore::Redis.new(redis, warn_on_clock_skew: false) }
 
     it_behaves_like "notify about state changes"
   end

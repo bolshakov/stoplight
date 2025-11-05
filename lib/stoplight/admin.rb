@@ -2,11 +2,10 @@
 
 begin
   require "sinatra/base"
-  require "sinatra/contrib"
   require "sinatra/json"
 rescue LoadError
   raise <<~WARN
-    "sinatra" and "sinatra-contrib" gems are unavailable and necessery for running Stoplight Admin panel
+    "sinatra" and "sinatra-contrib" gems are unavailable and necessary for running Stoplight Admin panel
     Please add them to your Gemfile and run `bundle install`:
       gem "sinatra", required: false
       gem "sinatra-contrib", require: false
@@ -25,13 +24,14 @@ module Stoplight
     helpers Helpers
 
     set :protection, except: %i[json_csrf]
-    set :data_store, proc { Stoplight.default_config.data_store }
+    set :data_store, proc { Stoplight.__stoplight__default_configuration.data_store }
     set :views, File.join(__dir__, "admin", "views")
+    set :nonce, proc { |request| }
 
     get "/" do
       lights, stats = dependencies.stats_action.call
 
-      erb :index, locals: stats.merge(lights: lights)
+      erb :index, locals: stats.merge(lights: lights, nonce: settings.nonce(request))
     end
 
     get "/stats" do

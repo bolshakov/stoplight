@@ -8,6 +8,19 @@ require_relative "notifications"
 
 # The StoplightWorld module provides a shared context for testing Stoplight functionality.
 module StoplightWorld
+  # @!attribute data_store
+  #   @return [Stoplight::DataStore::Base]
+  attr_reader :data_store
+
+  # @!attribute notifiers
+  #   @return [<Stoplight::Notifier::Base>]
+  attr_reader :notifiers
+
+  # Provides access to the notifications system used for testing.
+  #
+  # @return [Notifications] The notifications instance.
+  attr_reader :notifications
+
   # @!attribute current_light
   #   @return [Stoplight::Light, nil] The current Stoplight instance being tested
   attr_accessor :current_light
@@ -20,19 +33,14 @@ module StoplightWorld
   #   @return [StandardError, nil] The last exception raised during the operation
   attr_reader :last_exception
 
-  # Provides access to the notifications system used for testing.
-  #
-  # @return [Notifications] The notifications instance.
-  def notifications
-    @notifications ||= Notifications.new
-  end
+  # @!attribute last_fallback_received_argument
+  #   @return [any] the last argument received by a fallback function
+  attr_accessor :last_fallback_received_argument
 
   # Provides access to the echo service used for testing.
   #
   # @return [EchoService] The echo service instance.
-  def echo_service
-    @echo_service ||= EchoService.new
-  end
+  attr_reader :echo_service
 
   # Captures the result of a block execution, storing the result or exception.
   #
@@ -41,7 +49,7 @@ module StoplightWorld
   def capture_result
     @last_exception = nil
     @last_result = yield
-  rescue => e
+  rescue Exception => e # rubocop:disable Lint/RescueException
     @last_result = nil
     @last_exception = e
   end
@@ -51,24 +59,24 @@ module StoplightWorld
   #
   # @return [void]
   def reset!
-    @notifications = nil
+    @notifications = Notifications.new
     @current_light = nil
-    @echo_service = nil
+    @echo_service = EchoService.new
     @last_exception = nil
     @last_result = nil
+    @last_fallback_received_argument = :nothing
+    @data_store = case ENV.fetch("STOPLIGHT_DATA_STORE", "Memory")
+    when "Memory"
+      Stoplight::DataStore::Memory.new
+    when "Redis"
+      redis = Redis.new(url: ENV.fetch("STOPLIGHT_REDIS_URL", "redis://127.0.0.1:6379/0"))
 
-    Stoplight.configure(trust_me_im_an_engineer: true) do |config|
-      config.data_store = case ENV.fetch("STOPLIGHT_DATA_STORE", "Memory")
-      when "Memory"
-        Stoplight::DataStore::Memory.new
-      when "Redis"
-        redis = Redis.new(url: ENV.fetch("STOPLIGHT_REDIS_URL", "redis://127.0.0.1:6379/0"))
-
-        DatabaseCleaner[:redis].db = redis
-        DatabaseCleaner.clean_with(:deletion)
-        Stoplight::DataStore::Redis.new(redis)
-      end
-      config.notifiers = [TestNotifier.new(notifications)]
+      DatabaseCleaner[:redis].db = redis
+      DatabaseCleaner.clean_with(:deletion)
+      Stoplight::DataStore::Redis.new(redis)
+    else
+      raise ArgumentError, "unexpected data store"
     end
+    @notifiers = [TestNotifier.new(notifications)]
   end
 end
