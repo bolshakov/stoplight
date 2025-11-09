@@ -534,7 +534,7 @@ class ApplicationController < ActionController::Base
 
   def stoplight(&block)
     Stoplight("#{params[:controller]}##{params[:action]}")
-      .run(-> { render(nothing: true, status: :service_unavailable) }, &block)
+      .run(-> (*) { render(nothing: true, status: :service_unavailable) }, &block)
   end
 end
 ```
