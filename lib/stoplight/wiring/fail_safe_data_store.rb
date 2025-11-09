@@ -104,6 +104,12 @@ module Stoplight
         end
       end
 
+      def delete_light(config, *args, **kwargs)
+        with_fallback(:delete_light, config, *args, **kwargs) do
+          data_store.delete_light(config, *args, **kwargs)
+        end
+      end
+
       def ==(other)
         other.is_a?(self.class) && other.data_store == data_store && other.error_notifier == error_notifier
       end

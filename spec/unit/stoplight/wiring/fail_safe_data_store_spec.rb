@@ -33,6 +33,29 @@ RSpec.describe Stoplight::Wiring::FailSafeDataStore do
     end
   end
 
+  describe "#delete_light" do
+    subject(:delete_light) { fail_safe.delete_light(config) }
+
+    context "when data_store deletes metadata" do
+      it "delegates to data_store without notifying error_notifier" do
+        expect(error_notifier).not_to receive(:call)
+        expect(data_store).to receive(:delete_light).with(config)
+
+        delete_light
+      end
+    end
+
+    context "when data_store fails" do
+      it "uses failover data store and notifies error_notifier" do
+        expect(error_notifier).to receive(:call).with(error)
+        expect(data_store).to receive(:delete_light).with(config) { raise error }
+        expect(failover_data_store).to receive(:delete_light).with(config)
+
+        delete_light
+      end
+    end
+  end
+
   describe "#get_metadata" do
     subject(:get_metadata) { fail_safe.get_metadata(config) }
 

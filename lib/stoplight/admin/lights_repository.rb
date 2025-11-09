@@ -53,6 +53,14 @@ module Stoplight
         build_light(name).unlock
       end
 
+      # @param name [String] removes light metadata by its name
+      # @return [void]
+      def remove(name)
+        light = build_light(name)
+
+        data_store.delete_light(light.config)
+      end
+
       private def load_light(name)
         light = build_light(name)
         # failures, state
