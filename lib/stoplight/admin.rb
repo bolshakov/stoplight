@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "cgi" # Ruby 3.2 needs this
+
 begin
   require "sinatra/base"
   require "sinatra/json"
@@ -60,6 +62,12 @@ module Stoplight
 
     post "/green_all" do
       dependencies.green_all_action.call
+
+      redirect to("/")
+    end
+
+    post "/remove" do
+      dependencies.remove_action.call(params)
 
       redirect to("/")
     end

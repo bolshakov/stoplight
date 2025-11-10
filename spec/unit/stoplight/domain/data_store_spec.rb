@@ -54,11 +54,4 @@ RSpec.describe Stoplight::Domain::DataStore do
         .to raise_error(NotImplementedError)
     end
   end
-
-  describe "#get_metadata" do
-    it "is not implemented" do
-      expect { data_store.get_metadata(nil) }
-        .to raise_error(NotImplementedError)
-    end
-  end
 end

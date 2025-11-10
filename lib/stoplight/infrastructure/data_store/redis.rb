@@ -92,12 +92,13 @@ module Stoplight
           end
         end
 
-        def get_metadata(config)
-          detect_clock_skew
+        # @param config [Stoplight::Domain::Config]
+        # @return [Stoplight::Domain::Metrics]
+        def get_metrics(config)
+          config.name
 
           window_end_ts = current_time.to_f
-          window_start_ts = window_end_ts - [config.window_size, METRICS_RETENTION_TIME].compact.min.to_f
-          recovery_window_start_ts = window_end_ts - config.cool_off_time.to_i
+          window_start_ts = window_end_ts - config.window_size.to_i
 
           if config.window_size
             failure_keys = failure_bucket_keys(config, window_end: window_end_ts)
@@ -106,54 +107,121 @@ module Stoplight
             failure_keys = []
             success_keys = []
           end
-          recovery_probe_failure_keys = recovery_probe_failure_bucket_keys(config, window_end: window_end_ts)
-          recovery_probe_success_keys = recovery_probe_success_bucket_keys(config, window_end: window_end_ts)
 
-          successes, errors, recovery_probe_successes, recovery_probe_errors, meta = @redis.with do |client|
+          successes, errors, last_success_at, last_error_json, consecutive_errors, consecutive_successes = @redis.with do |client|
             client.evalsha(
-              get_metadata_sha,
+              get_metrics_sha,
               argv: [
                 failure_keys.count,
-                recovery_probe_failure_keys.count,
                 window_start_ts,
                 window_end_ts,
-                recovery_window_start_ts
+                "last_success_at", "last_error_json", "consecutive_errors", "consecutive_successes"
               ],
               keys: [
                 metadata_key(config),
                 *success_keys,
-                *failure_keys,
+                *failure_keys
+              ]
+            )
+          end
+
+          Domain::Metrics.new(
+            successes: (successes if config.window_size),
+            errors: (errors if config.window_size),
+            total_consecutive_errors: consecutive_errors.to_i,
+            total_consecutive_successes: consecutive_successes.to_i,
+            last_error: deserialize_failure(last_error_json),
+            last_success_at: (Time.at(last_success_at.to_f) if last_success_at)
+          )
+        end
+
+        # @param config [Stoplight::Domain::Config]
+        # @return [Stoplight::Domain::Metrics]
+        def get_recovery_metrics(config)
+          config.name
+
+          window_end_ts = current_time.to_f
+          window_start_ts = window_end_ts - config.cool_off_time
+
+          recovery_probe_failure_keys = recovery_probe_failure_bucket_keys(config, window_end: window_end_ts)
+          recovery_probe_success_keys = recovery_probe_success_bucket_keys(config, window_end: window_end_ts)
+
+          successes, errors, last_success_at, last_error_json, consecutive_errors, consecutive_successes = @redis.with do |client|
+            client.evalsha(
+              get_metrics_sha,
+              argv: [
+                recovery_probe_failure_keys.count,
+                window_start_ts,
+                window_end_ts,
+                "last_success_at", "last_error_json", "consecutive_errors", "consecutive_successes"
+              ],
+              keys: [
+                metadata_key(config),
                 *recovery_probe_success_keys,
                 *recovery_probe_failure_keys
               ]
             )
           end
-          meta_hash = meta.each_slice(2).to_h.transform_keys(&:to_sym)
-          last_error_json = meta_hash.delete(:last_error_json)
-          last_error = deserialize_failure(last_error_json) if last_error_json
 
-          Domain::Metadata.new(
-            current_time:,
+          Domain::Metrics.new(
             successes:,
             errors:,
-            recovery_probe_successes:,
-            recovery_probe_errors:,
-            last_error:,
-            last_error_at: (Time.at(meta_hash[:last_error_at].to_f) if meta_hash[:last_error_at]),
-            last_success_at: (Time.at(meta_hash[:last_success_at].to_f) if meta_hash[:last_success_at]),
-            consecutive_errors: meta_hash[:consecutive_errors].to_i,
-            consecutive_successes: meta_hash[:consecutive_successes].to_i,
-            breached_at: (Time.at(meta_hash[:breached_at].to_f) if meta_hash[:breached_at]),
-            locked_state: meta_hash[:locked_state] || Domain::State::UNLOCKED,
-            recovery_scheduled_after: (Time.at(meta_hash[:recovery_scheduled_after].to_f) if meta_hash[:recovery_scheduled_after]),
-            recovery_started_at: (Time.at(meta_hash[:recovery_started_at].to_f) if meta_hash[:recovery_started_at]),
-            recovered_at: (Time.at(meta_hash[:recovered_at].to_f) if meta_hash[:recovered_at])
+            total_consecutive_errors: consecutive_errors.to_i,
+            total_consecutive_successes: consecutive_successes.to_i,
+            last_error: deserialize_failure(last_error_json),
+            last_success_at: (Time.at(last_success_at.to_f) if last_success_at)
+          )
+        end
+
+        # @return [Stoplight::Domain::StateSnapshot]
+        def get_state_snapshot(config)
+          detect_clock_skew
+
+          breached_at_raw, locked_state, recovery_scheduled_after_raw, recovery_started_at_raw = @redis.with do |client|
+            client.hmget(metadata_key(config), :breached_at, :locked_state, :recovery_scheduled_after, :recovery_started_at)
+          end
+          breached_at = breached_at_raw&.to_f
+          recovery_scheduled_after = recovery_scheduled_after_raw&.to_f
+          recovery_started_at = recovery_started_at_raw&.to_f
+
+          Domain::StateSnapshot.new(
+            breached_at: (Time.at(breached_at) if breached_at),
+            locked_state: locked_state || Domain::State::UNLOCKED,
+            recovery_scheduled_after: (Time.at(recovery_scheduled_after) if recovery_scheduled_after),
+            recovery_started_at: (Time.at(recovery_started_at) if recovery_started_at),
+            time: current_time
+          )
+        end
+
+        def clear_windowed_metrics(config)
+          if config.window_size
+            window_end_ts = current_time.to_i
+            @redis.with do |client|
+              client.unlink(
+                *failure_bucket_keys(config, window_end: window_end_ts),
+                *success_bucket_keys(config, window_end: window_end_ts)
+              )
+            end
+          end
+        end
+
+        private def state_snapshot_from_hash(data, time: current_time)
+          breached_at = data[:breached_at]&.to_f
+          recovery_scheduled_after = data[:recovery_scheduled_after]&.to_f
+          recovery_started_at = data[:recovery_started_at]&.to_f
+
+          Domain::StateSnapshot.new(
+            breached_at: (Time.at(breached_at) if breached_at),
+            locked_state: data[:locked_state] || Domain::State::UNLOCKED,
+            recovery_scheduled_after: (Time.at(recovery_scheduled_after) if recovery_scheduled_after),
+            recovery_started_at: (Time.at(recovery_started_at) if recovery_started_at),
+            time:
           )
         end
 
         # @param config [Stoplight::Domain::Config] The light configuration.
         # @param exception [Exception]
-        # @return [Stoplight::Domain::Metadata] The updated metadata after recording the failure.
+        # @return [void]
         def record_failure(config, exception)
           current_time = self.current_time
           current_ts = current_time.to_f
@@ -169,7 +237,6 @@ module Stoplight
               ].compact
             )
           end
-          get_metadata(config)
         end
 
         def record_success(config, request_id: SecureRandom.hex(12))
@@ -191,7 +258,7 @@ module Stoplight
         #
         # @param config [Stoplight::Domain::Config] The light configuration.
         # @param exception [Exception]
-        # @return [Stoplight::Domain::Metadata] The updated metadata after recording the failure.
+        # @return [void]
         def record_recovery_probe_failure(config, exception)
           current_time = self.current_time
           current_ts = current_time.to_f
@@ -207,14 +274,13 @@ module Stoplight
               ].compact
             )
           end
-          get_metadata(config)
         end
 
         # Records a successful recovery probe for a specific light configuration.
         #
         # @param config [Stoplight::Domain::Config] The light configuration.
         # @param request_id [String] The unique identifier for the request
-        # @return [Stoplight::Domain::Metadata] The updated metadata after recording the success.
+        # @return [void]
         def record_recovery_probe_success(config, request_id: SecureRandom.hex(12))
           current_ts = current_time.to_f
 
@@ -228,7 +294,6 @@ module Stoplight
               ].compact
             )
           end
-          get_metadata(config)
         end
 
         def set_state(config, state)
@@ -283,7 +348,7 @@ module Stoplight
         # @param config [Stoplight::Domain::Config] The light configuration
         # @return [Boolean] true if this is the first instance to detect this transition
         private def transition_to_yellow(config)
-          current_ts = current_time.to_i
+          current_ts = current_time.to_f
           meta_key = metadata_key(config)
 
           became_yellow = @redis.then do |client|
@@ -301,7 +366,7 @@ module Stoplight
         # @param config [Stoplight::Domain::Config] The light configuration
         # @return [Boolean] true if this is the first instance to detect this transition
         private def transition_to_red(config)
-          current_ts = current_time.to_i
+          current_ts = current_time.to_f
           meta_key = metadata_key(config)
           recovery_scheduled_after_ts = current_ts + config.cool_off_time
 
@@ -316,9 +381,19 @@ module Stoplight
           became_red == 1
         end
 
-        # @param failure_json [String]
-        # @return [Domain::Failure]
+        # Removes all traces of a light from Redis metadata (metrics will expire by TTL).
+        #
+        # @param config [Stoplight::Domain::Config] The light configuration.
+        # @return [Integer] number of keys removed
+        def delete_light(config)
+          @redis.then { |client| client.del(metadata_key(config)) }
+        end
+
+        # @param failure_json [String, nil]
+        # @return [Domain::Failure, nil]
         private def deserialize_failure(failure_json)
+          return if failure_json.nil?
+
           object = JSON.parse(failure_json)
           error_object = object["error"]
 
@@ -439,9 +514,9 @@ module Stoplight
           end
         end
 
-        private def get_metadata_sha
-          @get_metadata_sha ||= @redis.then do |client|
-            client.script("load", Lua::GET_METADATA)
+        private def get_metrics_sha
+          @get_metrics_sha ||= @redis.then do |client|
+            client.script("load", Lua::GET_METRICS)
           end
         end
 

@@ -164,4 +164,27 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
       expect(green_light.state).to_not eq("locked_green")
     end
   end
+
+  describe "POST /remove" do
+    let(:another_light) { Stoplight("bar") }
+
+    before do
+      [light, another_light].each do |l|
+        l.run { raise "whoops" }
+      rescue
+        nil
+      end
+    end
+
+    it "removes the specified light metadata and redirects" do
+      post "/remove", names: "foo"
+
+      expect(last_response.status).to eq(302)
+      expect(last_response.headers["location"]).to include("#{last_request.env["HTTP_HOST"]}/")
+
+      get "/stats"
+      expect(last_response).to be_ok
+      expect(response_body.fetch("lights").map { |h| h.fetch("name") }).to contain_exactly("bar")
+    end
+  end
 end

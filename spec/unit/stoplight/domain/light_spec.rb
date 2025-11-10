@@ -199,26 +199,26 @@ RSpec.describe Stoplight::Domain::Light do
   end
 
   specify "#state" do
-    metadata = instance_double(Stoplight::Domain::Metadata, locked_state: "LOCKED_STATE")
-    expect(data_store).to receive(:get_metadata).and_return(metadata)
+    state_snapshot = instance_double(Stoplight::Domain::StateSnapshot, locked_state: "LOCKED_STATE")
+    expect(data_store).to receive(:get_state_snapshot).and_return(state_snapshot)
 
     expect(light.state).to eq("LOCKED_STATE")
   end
 
   specify "#color" do
-    metadata = instance_double(Stoplight::Domain::Metadata, color: "COLOR")
-    expect(data_store).to receive(:get_metadata).and_return(metadata)
+    state_snapshot = instance_double(Stoplight::Domain::StateSnapshot, color: "COLOR")
+    expect(data_store).to receive(:get_state_snapshot).and_return(state_snapshot)
 
     expect(light.color).to eq("COLOR")
   end
 
   describe "#run" do
-    let(:metadata) { instance_double(Stoplight::Domain::Metadata, color:) }
+    let(:state_snapshot) { instance_double(Stoplight::Domain::StateSnapshot, color:) }
     let(:fallback) { ->(_error) { "fallback" } }
     let(:code) { -> { "result" } }
 
     before do
-      expect(data_store).to receive(:get_metadata).with(config).and_return(metadata)
+      expect(data_store).to receive(:get_state_snapshot).with(config).and_return(state_snapshot)
     end
 
     shared_examples "delegates to the run strategy" do |current_color|
@@ -226,7 +226,7 @@ RSpec.describe Stoplight::Domain::Light do
         let(:color) { current_color }
 
         it "executes green run strategy" do
-          expect(strategy).to receive(:execute).with(fallback, metadata:) { |_, _, &block|
+          expect(strategy).to receive(:execute).with(fallback, state_snapshot:) { |_, _, &block|
             expect(block).to eq(code)
             "result"
           }

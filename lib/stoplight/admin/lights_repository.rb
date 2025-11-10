@@ -53,16 +53,25 @@ module Stoplight
         build_light(name).unlock
       end
 
+      # @param name [String] removes light metadata by its name
+      # @return [void]
+      def remove(name)
+        light = build_light(name)
+
+        data_store.delete_light(light.config)
+      end
+
       private def load_light(name)
         light = build_light(name)
         # failures, state
-        metadata = data_store.get_metadata(light.config)
+        state_snapshot = data_store.get_state_snapshot(light.config)
+        metrics = data_store.get_metrics(light.config)
 
         Light.new(
           name: name,
           color: light.color,
-          state: metadata.locked_state,
-          failures: [metadata.last_error].compact
+          state: state_snapshot.locked_state,
+          failures: [metrics.last_error].compact
         )
       end
 

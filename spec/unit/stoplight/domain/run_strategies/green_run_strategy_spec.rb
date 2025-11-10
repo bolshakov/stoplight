@@ -12,7 +12,7 @@ RSpec.describe Stoplight::Domain::Strategies::GreenRunStrategy do
   let(:request_tracker) { instance_double(Stoplight::Domain::Tracker::Request) }
 
   context "when code executes successfully" do
-    subject(:result) { strategy.execute(nil, metadata: nil, &code) }
+    subject(:result) { strategy.execute(nil, state_snapshot: nil, &code) }
 
     let(:code) { -> { "Success" } }
 
@@ -24,7 +24,7 @@ RSpec.describe Stoplight::Domain::Strategies::GreenRunStrategy do
   end
 
   context "when code fails" do
-    subject(:result) { strategy.execute(fallback, metadata: nil, &code) }
+    subject(:result) { strategy.execute(fallback, state_snapshot: nil, &code) }
 
     let(:error) { StandardError.new("Test error") }
     let(:code) { -> { raise error } }

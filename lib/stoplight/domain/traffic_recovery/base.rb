@@ -14,14 +14,14 @@ module Stoplight
       #       @min_samples = min_samples
       #     end
       #
-      #     def determine_color(config, metadata)
-      #       total_probes = metadata.recovery_probe_successes + metadata.recovery_probe_errors
+      #     def determine_color(config, metrics)
+      #       total_probes = metrics.recovery_probe_successes + metrics.recovery_probe_errors
       #
       #       if total_probes < @min_samples
       #         return Color::YELLOW # Keep recovering, not enough samples
       #       end
       #
-      #       success_rate = metadata.recovery_probe_successes.fdiv(total_probes)
+      #       success_rate = metrics.recovery_probe_successes.fdiv(total_probes)
       #       if success_rate >= @min_success_rate
       #         Color::GREEN # Recovery successful
       #       elsif success_rate <= 0.2
@@ -49,10 +49,11 @@ module Stoplight
         # current metrics and recovery progress.
         #
         # @param config [Stoplight::Domain::Config]
-        # @param metadata [Stoplight::Domain::Metadata]
+        # @param metrics [Stoplight::Domain::Metrics]
+        # @param state_snapshot [Stoplight::Domain::StateSnapshot]
         # @return [TrafficRecovery::Decision]
         # :nocov:
-        def determine_color(config, metadata)
+        def determine_color(config, metrics, state_snapshot)
           raise NotImplementedError
         end
         # :nocov:

@@ -14,11 +14,37 @@ module Stoplight
         raise NotImplementedError
       end
 
-      # Retrieves metadata for a specific light configuration.
+      # Retrieves metrics for a specific light configuration.
+      #
+      # @param config [Stoplight::Domain::Config]
+      # @return [Stoplight::Domain::Metrics]
+      def get_metrics(config)
+        raise NotImplementedError
+      end
+
+      # Retrieves recovery metrics for a specific light configuration.
+      #
+      # @param config [Stoplight::Domain::Config]
+      # @return [Stoplight::Domain::Metrics]
+      def get_recovery_metrics(config)
+        raise NotImplementedError
+      end
+
+      # Retrieves State Snapshot for a specific light configuration.
       #
       # @param config [Stoplight::Domain::Config] The light configuration.
-      # @return [Stoplight::Domain::Metadata] The metadata associated with the light.
-      def get_metadata(config)
+      # @return [Stoplight::Domain::StateSnapshot]
+      def get_state_snapshot(config)
+        raise NotImplementedError
+      end
+
+      # Clears windowed metrics (successes/errors) to prevent
+      # stale failures from before recovery from affecting post-recovery decisions.
+      # Consecutive counts are intentionally preserved as they track current streaks.
+      #
+      # @param config [Stoplight::Domain::Config] The light configuration.
+      # @return [void]
+      def clear_windowed_metrics(config)
         raise NotImplementedError
       end
 
@@ -26,7 +52,7 @@ module Stoplight
       #
       # @param config [Stoplight::Domain::Config]
       # @param exception [Exception]
-      # @return [Stoplight::Domain::Metadata] The metadata associated with the light.
+      # @return [void]
       def record_failure(config, exception)
         raise NotImplementedError
       end
@@ -43,7 +69,7 @@ module Stoplight
       #
       # @param config [Stoplight::Domain::Config]
       # @param failure [Failure]
-      # @return [Stoplight::Domain::Metadata]
+      # @return [void]
       def record_recovery_probe_failure(config, failure)
         raise NotImplementedError
       end
@@ -51,7 +77,7 @@ module Stoplight
       # Records a successful recovery probe for a specific light configuration.
       #
       # @param config [Stoplight::Domain::Config]
-      # @return [Stoplight::Domain::Metadata]
+      # @return [void]
       def record_recovery_probe_success(config)
         raise NotImplementedError
       end
@@ -86,6 +112,16 @@ module Stoplight
       #   be aware that the last operation may determine the final color of the light.
       #
       def transition_to_color(config, color)
+        raise NotImplementedError
+      end
+
+      # Deletes metadata (and related persistent state) for the given light.
+      #
+      # Implementations may choose to only remove metadata; metrics may expire via TTL.
+      #
+      # @param config [Stoplight::Domain::Config]
+      # @return [void]
+      def delete_light(config)
         raise NotImplementedError
       end
     end

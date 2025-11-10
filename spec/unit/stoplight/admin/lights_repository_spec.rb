@@ -114,4 +114,24 @@ RSpec.describe Stoplight::Admin::LightsRepository, :redis do
         .to("unlocked")
     end
   end
+
+  describe "#remove" do
+    subject(:remove) { repository.remove(light.name) }
+
+    before do
+      # Ensure metadata exists
+
+      light.run { raise "whoops" }
+    rescue
+      nil
+    end
+
+    it "removes the light metadata so it no longer appears in repository" do
+      expect(repository.all.map(&:name)).to include(light.name)
+
+      remove
+
+      expect(repository.all.map(&:name)).not_to include(light.name)
+    end
+  end
 end

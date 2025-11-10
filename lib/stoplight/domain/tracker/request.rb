@@ -40,9 +40,10 @@ module Stoplight
         # @param exception [Exception]
         # @return [void]
         def record_failure(exception)
-          metadata = data_store.record_failure(config, exception)
+          data_store.record_failure(config, exception)
+          metrics = data_store.get_metrics(config)
 
-          transition_to_red(exception, metadata:)
+          transition_to_red(exception, metrics:)
         end
 
         # @return [void]
@@ -50,8 +51,8 @@ module Stoplight
           data_store.record_success(config)
         end
 
-        private def transition_to_red(exception, metadata:)
-          if traffic_control.stop_traffic?(config, metadata)
+        private def transition_to_red(exception, metrics:)
+          if traffic_control.stop_traffic?(config, metrics)
             transition_and_notify(Color::GREEN, Color::RED, exception)
           end
         end

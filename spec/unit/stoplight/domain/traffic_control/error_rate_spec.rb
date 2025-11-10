@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 RSpec.describe Stoplight::Domain::TrafficControl::ErrorRate do
-  subject(:traffic_control) { described_class.new }
+  subject(:traffic_control) { described_class.new(min_requests:) }
 
-  let(:current_time) { Time.now }
+  let(:min_requests) { 10 }
 
   describe "#check_compatibility" do
     subject(:availability) { traffic_control.check_compatibility(config) }
@@ -64,67 +64,60 @@ RSpec.describe Stoplight::Domain::TrafficControl::ErrorRate do
   describe "#stop_traffic?" do
     subject { traffic_control.stop_traffic?(config, metadata) }
 
-    let(:config) { Stoplight::Domain::Config.empty.with(window_size: 300, threshold: 0.6) }
-    let(:metadata) do
-      Stoplight::Domain::Metadata.new(
-        successes:,
-        errors:,
-        current_time:,
-        recovery_probe_successes: nil,
-        recovery_probe_errors: nil,
-        last_error_at: nil,
-        last_success_at: nil,
-        consecutive_errors: nil,
-        consecutive_successes: nil,
-        last_error: nil,
-        breached_at: nil,
-        locked_state: nil,
-        recovery_scheduled_after: nil,
-        recovery_started_at: nil,
-        recovered_at: nil
-      )
-    end
+    let(:config) { instance_double(Stoplight::Domain::Config, threshold:) }
+    let(:metadata) { instance_double(Stoplight::Domain::Metrics, error_rate:, requests:) }
 
-    context "when there are no requests" do
-      let(:successes) { 0 }
-      let(:errors) { 0 }
+    let(:threshold) { 0.6 }
 
-      it "does not stop traffic" do
-        is_expected.to be(false)
-      end
-    end
+    context "when min requests satisfied" do
+      let(:requests) { min_requests + 1 }
 
-    context "when there is not enough requests" do
-      let(:successes) { 0 }
-      let(:errors) { 9 }
-
-      it "does not stop traffic" do
-        is_expected.to be(false)
-      end
-    end
-
-    context "when there is enough requests" do
-      context "when threshold is reached" do
-        let(:successes) { 40 }
-        let(:errors) { 60 }
+      context "when error rate reaches threshold" do
+        let(:error_rate) { threshold }
 
         it "stops traffic" do
           is_expected.to be(true)
         end
       end
 
-      context "when threshold is exceeded" do
-        let(:successes) { 30 }
-        let(:errors) { 70 }
+      context "when error rate exceeds threshold" do
+        let(:error_rate) { threshold + 0.00001 }
 
         it "stops traffic" do
           is_expected.to be(true)
         end
       end
 
-      context "when threshold is not reached" do
-        let(:successes) { 41 }
-        let(:errors) { 59 }
+      context "when error rate below threshold" do
+        let(:error_rate) { threshold - 0.00001 }
+
+        it "does not stop traffic" do
+          is_expected.to be(false)
+        end
+      end
+    end
+
+    context "when min requests not satisfied" do
+      let(:requests) { min_requests - 1 }
+
+      context "when error rate reaches threshold" do
+        let(:error_rate) { threshold }
+
+        it "does not stop traffic" do
+          is_expected.to be(false)
+        end
+      end
+
+      context "when error rate exceeds threshold" do
+        let(:error_rate) { threshold + 0.00001 }
+
+        it "does not stop traffic" do
+          is_expected.to be(false)
+        end
+      end
+
+      context "when error rate below threshold" do
+        let(:error_rate) { threshold - 0.00001 }
 
         it "does not stop traffic" do
           is_expected.to be(false)
