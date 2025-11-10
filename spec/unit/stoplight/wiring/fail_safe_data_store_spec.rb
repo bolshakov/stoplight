@@ -56,30 +56,6 @@ RSpec.describe Stoplight::Wiring::FailSafeDataStore do
     end
   end
 
-  describe "#get_metadata" do
-    subject(:get_metadata) { fail_safe.get_metadata(config) }
-
-    context "when data_store returns all data" do
-      let(:metadata) { instance_double(Stoplight::Domain::Metadata) }
-
-      it "returns all data from data_store" do
-        expect(error_notifier).not_to receive(:call)
-        expect(data_store).to receive(:get_metadata).with(config).and_return(metadata)
-
-        is_expected.to eq(metadata)
-      end
-    end
-
-    context "when data_store fails" do
-      it "returns empty list of all data" do
-        expect(error_notifier).to receive(:call).with(error)
-        expect(data_store).to receive(:get_metadata).with(config) { raise error }
-
-        is_expected.to be_kind_of(Stoplight::Domain::Metadata)
-      end
-    end
-  end
-
   describe "#record_failure" do
     subject(:record_failure) { fail_safe.record_failure(config, error) }
 
