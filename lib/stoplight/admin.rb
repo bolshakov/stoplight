@@ -63,5 +63,11 @@ module Stoplight
 
       redirect to("/")
     end
+
+    post "/remove" do
+      dependencies.remove_action.call(params)
+
+      redirect to("/")
+    end
   end
 end

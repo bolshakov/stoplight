@@ -45,6 +45,11 @@ module Stoplight
       def green_all_action
         Stoplight::Admin::Actions::LockAllGreen.new(lights_repository: lights_repository)
       end
+
+      # @return [Stoplight::Admin::Actions::Remove]
+      def remove_action
+        Stoplight::Admin::Actions::Remove.new(lights_repository: lights_repository)
+      end
     end
   end
 end

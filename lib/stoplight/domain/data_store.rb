@@ -88,6 +88,16 @@ module Stoplight
       def transition_to_color(config, color)
         raise NotImplementedError
       end
+
+      # Deletes metadata (and related persistent state) for the given light.
+      #
+      # Implementations may choose to only remove metadata; metrics may expire via TTL.
+      #
+      # @param config [Stoplight::Domain::Config]
+      # @return [void]
+      def delete_light(config)
+        raise NotImplementedError
+      end
     end
     # :nocov:
   end

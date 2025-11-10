@@ -316,6 +316,14 @@ module Stoplight
           became_red == 1
         end
 
+        # Removes all traces of a light from Redis metadata (metrics will expire by TTL).
+        #
+        # @param config [Stoplight::Domain::Config] The light configuration.
+        # @return [Integer] number of keys removed
+        def delete_light(config)
+          @redis.then { |client| client.del(metadata_key(config)) }
+        end
+
         # @param failure_json [String]
         # @return [Domain::Failure]
         private def deserialize_failure(failure_json)
