@@ -21,17 +21,17 @@ module Stoplight
         # Executes the fallback proc when the light is in the red state.
         #
         # @param fallback [Proc, nil] A fallback proc to execute instead of the code block.
-        # @param metadata [Stoplight::Domain::Metadata] Metadata capturing the current state of the light.
+        # @param state_snapshot [Stoplight::Domain::StateSnapshot]
         # @return [Object, nil] The result of the fallback proc if provided.
         # @raise [Stoplight::Error::RedLight] Raises an error if no fallback is provided.
-        def execute(fallback, metadata:)
+        def execute(fallback, state_snapshot:)
           if fallback
             fallback.call(nil)
           else
             raise Error::RedLight.new(
               config.name,
               cool_off_time: config.cool_off_time,
-              retry_after: metadata.recovery_scheduled_after
+              retry_after: state_snapshot.recovery_scheduled_after
             )
           end
         end

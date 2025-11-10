@@ -75,7 +75,7 @@ RSpec.describe "Stoplight::Light#color" do
   end
 
   context "with memory data store" do
-    let(:data_store) { Stoplight::DataStore::Memory.new }
+    let(:data_store) { Stoplight::Infrastructure::DataStore::Memory.new }
 
     it_behaves_like "transition to color"
     it_behaves_like "state machine"

@@ -33,15 +33,15 @@ module Stoplight
 
         # @param exception [Exception]
         def record_failure(exception)
-          metadata = data_store.record_recovery_probe_failure(config, exception)
+          data_store.record_recovery_probe_failure(config, exception)
 
-          recover(metadata)
+          recover
         end
 
         def record_success
-          metadata = data_store.record_recovery_probe_success(config)
+          data_store.record_recovery_probe_success(config)
 
-          recover(metadata)
+          recover
         end
         RECOVERY_TRANSITIONS = {
           TrafficRecovery::GREEN => [Color::YELLOW, Color::GREEN],
@@ -49,8 +49,11 @@ module Stoplight
           TrafficRecovery::RED => [Color::YELLOW, Color::RED]
         }.freeze
 
-        private def recover(metadata)
-          recovery_result = traffic_recovery.determine_color(config, metadata)
+        private def recover
+          recovery_metrics = data_store.get_recovery_metrics(config)
+          state_snapshot = data_store.get_state_snapshot(config) # TODO: is this really necessary?
+
+          recovery_result = traffic_recovery.determine_color(config, recovery_metrics, state_snapshot)
 
           return if recovery_result == TrafficRecovery::PASS
 

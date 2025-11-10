@@ -24,7 +24,7 @@ RSpec.shared_examples "Stoplight::Domain::DataStore#transition_to_color" do
           data_store.transition_to_color(config, Stoplight::Color::GREEN)
         end
 
-        expect(data_store.get_metadata(config)).to have_attributes(
+        expect(data_store.get_state_snapshot(config)).to have_attributes(
           recovery_started_at: nil,
           breached_at: nil,
           recovery_scheduled_after: nil
@@ -54,7 +54,7 @@ RSpec.shared_examples "Stoplight::Domain::DataStore#transition_to_color" do
           Timecop.freeze(current_time) do
             data_store.transition_to_color(config, Stoplight::Color::YELLOW)
           end
-        end.to change { data_store.get_metadata(config) }
+        end.to change { data_store.get_state_snapshot(config) }
           .from(have_attributes(recovery_started_at: nil))
           .to(have_attributes(recovery_started_at: current_time))
       end
@@ -82,7 +82,7 @@ RSpec.shared_examples "Stoplight::Domain::DataStore#transition_to_color" do
           Timecop.freeze(current_time) do
             data_store.transition_to_color(config, Stoplight::Color::RED)
           end
-        end.to change { data_store.get_metadata(config) }
+        end.to change { data_store.get_state_snapshot(config) }
           .from(have_attributes(breached_at: nil, recovery_scheduled_after: nil))
           .to(have_attributes(breached_at: current_time, recovery_scheduled_after: current_time + config.cool_off_time))
       end
@@ -100,7 +100,7 @@ RSpec.shared_examples "Stoplight::Domain::DataStore#transition_to_color" do
           Timecop.freeze(current_time) do
             data_store.transition_to_color(config, Stoplight::Color::RED)
           end
-        end.to change { data_store.get_metadata(config) }
+        end.to change { data_store.get_state_snapshot(config) }
           .from(have_attributes(breached_at: nil, recovery_scheduled_after: nil))
           .to(have_attributes(breached_at: current_time, recovery_scheduled_after: current_time + config.cool_off_time))
       end

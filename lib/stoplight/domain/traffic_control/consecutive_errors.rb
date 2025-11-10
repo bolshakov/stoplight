@@ -42,14 +42,10 @@ module Stoplight
         # Determines if traffic should be stopped based on failure counts.
         #
         # @param config [Stoplight::Domain::Config]
-        # @param metadata [Stoplight::Domain::Metadata]
+        # @param metrics [Stoplight::Domain::Metrics]
         # @return [Boolean] true if failures have reached the threshold, false otherwise
-        def stop_traffic?(config, metadata)
-          if config.window_size
-            [metadata.consecutive_errors, metadata.errors].min >= config.threshold
-          else
-            metadata.consecutive_errors >= config.threshold
-          end
+        def stop_traffic?(config, metrics)
+          metrics.consecutive_errors >= config.threshold
         end
       end
     end

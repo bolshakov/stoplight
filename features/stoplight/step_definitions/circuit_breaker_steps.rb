@@ -32,6 +32,15 @@ Given(/^(?:the light) enters yellow state$/) do
   expect(current_light.color).to eq(Stoplight::Color::YELLOW)
 end
 
+Given(/^(?:the light) enters green state$/) do
+  until current_light.color == Stoplight::Color::GREEN
+    capture_result do
+      current_light.run { echo_service.call("hello") }
+    end
+  end
+  expect(current_light.color).to eq(Stoplight::Color::GREEN)
+end
+
 And(/^(\d+) request(?:s)? (?:is|are) made(?: with "([^"]+)" message)?(?: (?:with|and) fallback "([^"]+)")?$/) do |count, message, fallback|
   if fallback
     fallback_proc = ->(error) do

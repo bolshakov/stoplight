@@ -22,7 +22,7 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
     end
 
     context "when code executes successfully" do
-      subject(:result) { strategy.execute(nil, metadata: nil, &code) }
+      subject(:result) { strategy.execute(nil, state_snapshot: nil, &code) }
 
       let(:code) { -> { "Success" } }
 
@@ -34,11 +34,10 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
     end
 
     context "when code fails" do
-      subject(:result) { strategy.execute(fallback, metadata: nil, &code) }
+      subject(:result) { strategy.execute(fallback, state_snapshot: nil, &code) }
 
       let(:error) { StandardError.new("Test error") }
       let(:code) { -> { raise error } }
-      let(:metadata) { instance_double(Stoplight::Domain::Metadata) }
 
       before do
         allow(config).to receive(:track_error?).and_return(track_error)
@@ -88,10 +87,10 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
   end
 
   describe "#enter_recovery" do
-    subject(:enter_recovery) { strategy.__send__(:enter_recovery, metadata) }
+    subject(:enter_recovery) { strategy.__send__(:enter_recovery, state_snapshot) }
 
     context "when recovery has already started" do
-      let(:metadata) { instance_double(Stoplight::Domain::Metadata, recovery_started?: true) }
+      let(:state_snapshot) { instance_double(Stoplight::Domain::StateSnapshot, recovery_started?: true) }
 
       it "does not send notifications" do
         expect(notifier).not_to receive(:notify)
@@ -101,9 +100,10 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
     end
 
     context "when recovery has not yet started" do
-      let(:metadata) { instance_double(Stoplight::Domain::Metadata, recovery_started?: false) }
+      let(:state_snapshot) { instance_double(Stoplight::Domain::StateSnapshot, recovery_started?: false) }
 
       it "notifies if able to transition to YELLO" do
+        expect(data_store).to receive(:clear_windowed_metrics).with(config)
         expect(data_store).to receive(:transition_to_color).with(config, Stoplight::Domain::Color::YELLOW).and_return(true)
         expect(notifier).to receive(:notify).with(config, Stoplight::Domain::Color::RED, Stoplight::Domain::Color::YELLOW, nil)
 

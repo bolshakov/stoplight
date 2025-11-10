@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 require "connection_pool"
+require_relative "recovery_metrics"
+require_relative "metrics"
 
 RSpec.describe Stoplight::Infrastructure::DataStore::Redis, :redis do
   let(:config) { Stoplight::Domain::Config.empty.with(name:, window_size:, cool_off_time:) }
@@ -96,7 +98,7 @@ RSpec.describe Stoplight::Infrastructure::DataStore::Redis, :redis do
 
           it "produces a warning" do
             expect do
-              data_store.get_metadata(config)
+              data_store.get_state_snapshot(config)
             end.to change(stderr, :string).to(include("Detected clock skew between Redis and the application server. Redis time:"))
           end
         end
@@ -108,7 +110,7 @@ RSpec.describe Stoplight::Infrastructure::DataStore::Redis, :redis do
 
           it "does not produce a warning" do
             expect do
-              data_store.get_metadata(config)
+              data_store.get_state_snapshot(config)
             end.not_to change(stderr, :string)
           end
         end
@@ -132,7 +134,7 @@ RSpec.describe Stoplight::Infrastructure::DataStore::Redis, :redis do
 
           it "does not produce a warning" do
             expect do
-              data_store.get_metadata(config)
+              data_store.get_state_snapshot(config)
             end.not_to change(stderr, :string)
           end
         end
@@ -144,15 +146,16 @@ RSpec.describe Stoplight::Infrastructure::DataStore::Redis, :redis do
 
           it "does not produce a warning" do
             expect do
-              data_store.get_metadata(config)
+              data_store.get_state_snapshot(config)
             end.not_to change(stderr, :string)
           end
         end
       end
     end
 
-    it_behaves_like "data store metrics"
     it_behaves_like "Stoplight::Domain::DataStore"
+    it_behaves_like "Stoplight::Domain::DataStore#get_metrics"
+    it_behaves_like "Stoplight::Domain::DataStore#get_recovery_metrics"
     it_behaves_like "Stoplight::Domain::DataStore#names"
     it_behaves_like "Stoplight::Domain::DataStore#set_state"
     it_behaves_like "Stoplight::Domain::DataStore#transition_to_color"

@@ -7,6 +7,7 @@ Feature: Error Rate Traffic Control Strategy
     Given a light "basic-service" configured with:
         | Threshold          | 0.4        |
         | Window Size        | 60 seconds |
+        | Cool Off Time      | 10 seconds |
         | Traffic Control    | Error Rate |
         | Recovery Threshold | 2          |
 
@@ -26,11 +27,21 @@ Feature: Error Rate Traffic Control Strategy
   Scenario: Light transitions to yellow after cool-off period
     Given the service starts failing with "connection-timeout"
     And the light enters red state
-    When 61 seconds have elapsed
+    When 11 seconds have elapsed
     Then the light color is yellow
     And the service recovers and starts functioning normally
     When 1 request is made
     And notification about transition from red to yellow is sent
+    And the light color is yellow
+
+  Scenario: Light does not see previous failures after cool-off period
+    Given the service starts failing with "connection-timeout"
+    And the light enters yellow state
+    And the service recovers and starts functioning normally
+    When the light enters green state
+    And the service starts failing with "connection-timeout"
+    And 1 request is made
+    Then the light color is green
 
   Scenario: Light transitions to green after success in yellow state
     Given the service starts failing with "connection-timeout"

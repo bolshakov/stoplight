@@ -17,15 +17,16 @@ RSpec.describe Stoplight::Domain::Tracker::Request do
 
   describe "#record_failure" do
     let(:exception) { KeyError.new("something went wrong") }
-    let(:metadata) { instance_double(Stoplight::Domain::Metadata) }
+    let(:metrics) { instance_double(Stoplight::Domain::Metrics) }
 
     before do
-      allow(data_store).to receive(:record_failure).with(config, exception).and_return(metadata)
+      allow(data_store).to receive(:record_failure).with(config, exception)
+      allow(data_store).to receive(:get_metrics).with(config).and_return(metrics)
     end
 
     context "when traffic control decides to stop the traffic" do
       before do
-        allow(traffic_control).to receive(:stop_traffic?).with(config, metadata).and_return(true)
+        allow(traffic_control).to receive(:stop_traffic?).with(config, metrics).and_return(true)
       end
 
       context "when successfully transitions to RED" do
@@ -48,7 +49,7 @@ RSpec.describe Stoplight::Domain::Tracker::Request do
     end
 
     specify "when traffic control decides to continue the traffic flow" do
-      expect(traffic_control).to receive(:stop_traffic?).with(config, metadata).and_return(false)
+      expect(traffic_control).to receive(:stop_traffic?).with(config, metrics).and_return(false)
 
       request_tracker.record_failure(exception)
     end

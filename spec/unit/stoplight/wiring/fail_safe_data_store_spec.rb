@@ -56,32 +56,8 @@ RSpec.describe Stoplight::Wiring::FailSafeDataStore do
     end
   end
 
-  describe "#get_metadata" do
-    subject(:get_metadata) { fail_safe.get_metadata(config) }
-
-    context "when data_store returns all data" do
-      let(:metadata) { instance_double(Stoplight::Domain::Metadata) }
-
-      it "returns all data from data_store" do
-        expect(error_notifier).not_to receive(:call)
-        expect(data_store).to receive(:get_metadata).with(config).and_return(metadata)
-
-        is_expected.to eq(metadata)
-      end
-    end
-
-    context "when data_store fails" do
-      it "returns empty list of all data" do
-        expect(error_notifier).to receive(:call).with(error)
-        expect(data_store).to receive(:get_metadata).with(config) { raise error }
-
-        is_expected.to be_kind_of(Stoplight::Domain::Metadata)
-      end
-    end
-  end
-
   describe "#record_failure" do
-    subject { fail_safe.record_failure(config, error) }
+    subject(:record_failure) { fail_safe.record_failure(config, error) }
 
     let(:error) { KeyError.new("unexpected key") }
 
@@ -99,7 +75,7 @@ RSpec.describe Stoplight::Wiring::FailSafeDataStore do
         expect(error_notifier).to receive(:call).with(error)
         expect(data_store).to receive(:record_failure).with(config, error) { raise error }
 
-        is_expected.to be_kind_of(Stoplight::Domain::Metadata)
+        record_failure
       end
     end
   end
@@ -127,51 +103,49 @@ RSpec.describe Stoplight::Wiring::FailSafeDataStore do
   end
 
   describe "#record_recovery_probe_failure" do
-    subject { fail_safe.record_recovery_probe_failure(config, error) }
+    subject(:record_recovery_probe_failure) { fail_safe.record_recovery_probe_failure(config, error) }
 
     let(:error) { KeyError.new("unexpected key") }
 
     context "when data_store records recovery probe failure" do
-      let(:metadata) { instance_double(Stoplight::Domain::Metadata) }
-
       it "returns metadata from data_store" do
         expect(error_notifier).not_to receive(:call)
-        expect(data_store).to receive(:record_recovery_probe_failure).with(config, error).and_return(metadata)
+        expect(data_store).to receive(:record_recovery_probe_failure).with(config, error)
 
-        is_expected.to eq(metadata)
+        record_recovery_probe_failure
       end
     end
 
     context "when data_store fails" do
-      it "returns empty metadata" do
+      it "notifies and fails over" do
         expect(error_notifier).to receive(:call).with(error)
+        expect(failover_data_store).to receive(:record_recovery_probe_failure).with(config, error)
         expect(data_store).to receive(:record_recovery_probe_failure).with(config, error) { raise error }
 
-        is_expected.to be_kind_of(Stoplight::Domain::Metadata)
+        record_recovery_probe_failure
       end
     end
   end
 
   describe "#record_recovery_probe_success" do
-    subject { fail_safe.record_recovery_probe_success(config) }
+    subject(:record_recovery_probe_success) { fail_safe.record_recovery_probe_success(config) }
 
     context "when data_store records recovery probe success" do
-      let(:metadata) { instance_double(Stoplight::Domain::Metadata) }
-
-      it "returns metadata from data_store" do
+      it "delegates to data store" do
         expect(error_notifier).not_to receive(:call)
-        expect(data_store).to receive(:record_recovery_probe_success).with(config).and_return(metadata)
+        expect(data_store).to receive(:record_recovery_probe_success).with(config)
 
-        is_expected.to eq(metadata)
+        record_recovery_probe_success
       end
     end
 
     context "when data_store fails" do
-      it "returns empty metadata" do
+      it "notifies and fallback" do
         expect(error_notifier).to receive(:call).with(error)
+        expect(failover_data_store).to receive(:record_recovery_probe_success).with(config)
         expect(data_store).to receive(:record_recovery_probe_success).with(config) { raise error }
 
-        is_expected.to be_kind_of(Stoplight::Domain::Metadata)
+        record_recovery_probe_success
       end
     end
   end

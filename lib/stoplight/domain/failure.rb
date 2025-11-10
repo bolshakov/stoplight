@@ -29,6 +29,8 @@ module Stoplight
         @time = time
       end
 
+      alias_method :occurred_at, :time
+
       # @param other [Failure]
       # @return [Boolean]
       def ==(other)

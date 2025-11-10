@@ -49,16 +49,18 @@ module Stoplight
         # Determines if traffic should be resumed based on successes counts.
         #
         # @param config [Stoplight::Domain::Config]
-        # @param metadata [Stoplight::Domain::Metadata]
+        # @param recovery_metrics [Stoplight::Domain::Metrics]
+        # @param state_snapshot [Stoplight::Domain::StateSnapshot]
         # @return [TrafficRecovery::Decision]
-        def determine_color(config, metadata)
-          return TrafficRecovery::PASS if metadata.color != Color::YELLOW
+        def determine_color(config, recovery_metrics, state_snapshot)
+          return TrafficRecovery::PASS if state_snapshot.color != Color::YELLOW
 
-          recovery_started_at = metadata.recovery_started_at || metadata.recovery_scheduled_after
+          recovery_started_at = state_snapshot.recovery_started_at || state_snapshot.recovery_scheduled_after
 
-          if metadata.last_error_at && metadata.last_error_at >= recovery_started_at
+          # TODO: Need to add metrics cleanup and we can just use recovery_metrics.errors > 0
+          if recovery_metrics.last_error_at && recovery_metrics.last_error_at >= recovery_started_at
             TrafficRecovery::RED
-          elsif [metadata.consecutive_successes, metadata.recovery_probe_successes].min >= config.recovery_threshold
+          elsif recovery_metrics.consecutive_successes >= config.recovery_threshold
             TrafficRecovery::GREEN
           else
             TrafficRecovery::YELLOW

@@ -62,9 +62,27 @@ module Stoplight
         end
       end
 
-      def get_metadata(config, *args, **kwargs)
-        with_fallback(:get_metadata, config, *args, **kwargs) do
-          data_store.get_metadata(config, *args, **kwargs)
+      def get_metrics(config, *args, **kwargs)
+        with_fallback(:get_metrics, config, *args, **kwargs) do
+          data_store.get_metrics(config, *args, **kwargs)
+        end
+      end
+
+      def get_recovery_metrics(config, *args, **kwargs)
+        with_fallback(:get_recovery_metrics, config, *args, **kwargs) do
+          data_store.get_recovery_metrics(config, *args, **kwargs)
+        end
+      end
+
+      def get_state_snapshot(config)
+        with_fallback(:get_state_snapshot, config) do
+          data_store.get_state_snapshot(config)
+        end
+      end
+
+      def clear_windowed_metrics(config)
+        with_fallback(:clear_windowed_metrics, config) do
+          data_store.clear_windowed_metrics(config)
         end
       end
 

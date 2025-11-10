@@ -81,7 +81,7 @@ Here is a real world example:
 # lib/stoplight/domain/data_store.rb
 module Stoplight::Domain
  class DataStore  # This is the interface
-   def get_metadata(config)
+   def get_metrics(config)
      raise NotImplementedError
    end
  end
@@ -93,7 +93,7 @@ end
 # lib/stoplight/infrastructure/data_store/memory.rb
 module Stoplight::Infrastructure::DataStore
  class Memory < Stoplight::Domain::DataStore
-   def get_metadata(config)
+   def get_metrics(config)
      # Concrete implementation
    end
  end
@@ -111,7 +111,7 @@ end
        end
        
        def run
-         metadata = @data_store.get_metadata(config)  # Calls interface
+         state = @data_store.get_state_snapshot(config)  # Calls interface
        end
      end
    end
@@ -154,7 +154,7 @@ sequenceDiagram
     
     API->>Light: run { block }
     Note over Light,IDataStore: Light depends on domain interface,<br/>not concrete implementation
-    Light->>IDataStore: get_metadata(config)
+    Light->>IDataStore: get_state_snapshot(config)
     IDataStore->>MemoryDS: (dispatched to implementation)
     MemoryDS-->>IDataStore: current state
     IDataStore-->>Light: current state
@@ -194,7 +194,8 @@ lib/stoplight/
 ├── domain/                          # 🟢 Business logic & core abstractions
 │   ├── config.rb                    # Circuit breaker configuration
 │   ├── light.rb                     # Core circuit breaker implementation
-│   ├── metadata.rb                  # State tracking data
+│   ├── state_snapshot.rb            # State tracking data
+│   ├── metrics.rb                   # Runtime Metrics
 │   ├── data_store.rb                # Abstract data store interface
 │   ├── state_transition_notifier.rb # Abstract notifier interface
 │   ├── traffic_control/             # Traffic control strategies
@@ -238,7 +239,7 @@ spec/
 **Contains:**
 - Core circuit breaker logic (`Light`)
 - Configuration value objects (`Config`)
-- State management (`Metadata`)
+- State management (`StateSnapshot`, `Metrics`)
 - Abstract interfaces (`DataStore`, `StateTransitionNotifier`)
 - Traffic Control strategies
 - Traffic Recovery strategies
@@ -256,7 +257,7 @@ module Stoplight
   module Domain
     # Abstract interface - domain defines the contract
     class DataStore
-      def get_metadata(config)
+      def get_metrics(config)
         raise NotImplementedError
       end
 
@@ -292,7 +293,7 @@ module Stoplight
     module DataStore
       # Concrete implementation using in-memory storage
       class Memory < Domain::DataStore
-        def get_metadata(config)
+        def get_metrics(config)
           # Implementation details...
         end
       end
@@ -354,7 +355,9 @@ We enforce architecture boundaries using a custom RuboCop cop. This prevents:
 classDiagram
     class DataStore {
         <<interface>>
-        +get_metadata(config)
+        +get_metrics(config)
+        +get_state_snapshot(config)
+        +get_recovery_metrics(config)
         +record_failure(config, failure)
         +record_success(config)
     }
@@ -365,13 +368,17 @@ classDiagram
     }
     
     class Memory {
-        +get_metadata(config)
+        +get_metrics(config)
+        +get_state_snapshot(config)
+        +get_recovery_metrics(config)
         +record_failure(config, failure)
         +record_success(config)
     }
     
     class Redis {
-        +get_metadata(config)
+        +get_metrics(config)
+        +get_state_snapshot(config)
+        +get_recovery_metrics(config)
         +record_failure(config, failure)
         +record_success(config)
     }

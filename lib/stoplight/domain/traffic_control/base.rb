@@ -18,11 +18,11 @@ module Stoplight
       #       end
       #     end
       #
-      #     def stop_traffic?(config, metadata)
-      #       total = metadata.successes + metadata.failures
+      #     def stop_traffic?(config, metrics)
+      #       total = metrics.successes + metrics.failures
       #       return false if total < 10 # Minimum sample size
       #
-      #       error_rate = metadata.failures.fdiv(total)
+      #       error_rate = metrics.failures.fdiv(total)
       #       error_rate >= 0.5 # Stop traffic when error rate reaches 50%
       #     end
       #   end
@@ -44,10 +44,10 @@ module Stoplight
         # current state and metrics.
         #
         # @param config [Stoplight::Domain::Config]
-        # @param metadata [Stoplight::Domain::Metadata]
+        # @param metrics [Stoplight::Domain::Metrics]
         # @return [Boolean] true if traffic should be stopped (rec), false otherwise (green)
         # :nocov:
-        def stop_traffic?(config, metadata)
+        def stop_traffic?(config, metrics)
           raise NotImplementedError
         end
         # :nocov:

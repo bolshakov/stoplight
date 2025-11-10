@@ -32,8 +32,8 @@ RSpec.describe "Redis drop-in compatibility", :redis, :freeze do
       end
 
       # Verify all 3 errors are counted
-      metadata = data_store.get_metadata(config)
-      expect(metadata.errors).to eq(3)
+      metrics = data_store.get_metrics(config)
+      expect(metrics.errors).to eq(3)
     end
 
     it "correctly queries windows with mixed timestamp types" do
@@ -53,12 +53,12 @@ RSpec.describe "Redis drop-in compatibility", :redis, :freeze do
       end
 
       # Should only count the 2 within window (300 seconds)
-      metadata = data_store.get_metadata(config)
-      expect(metadata.errors).to eq(2)
+      metrics = data_store.get_metrics(config)
+      expect(metrics.errors).to eq(2)
     end
 
-    it "correctly reads metadata fields with integer timestamps" do
-      # Simulate OLD version writing integer timestamp to metadata hash
+    it "correctly reads metrics fields with integer timestamps" do
+      # Simulate OLD version writing integer timestamp to metrics hash
       redis.hset(metadata_key, "last_error_at", Time.now.to_i)
       redis.hset(metadata_key, "consecutive_errors", "3")
       redis.hset(metadata_key, "last_error_json", JSON.generate({
@@ -70,10 +70,10 @@ RSpec.describe "Redis drop-in compatibility", :redis, :freeze do
       }))
 
       # NEW version should read it without issues
-      metadata = data_store.get_metadata(config)
-      expect(metadata.last_error_at).to be_a(Time)
-      expect(metadata.consecutive_errors).to eq(3)
-      expect(metadata.last_error).to have_attributes(
+      metrics = data_store.get_metrics(config)
+      expect(metrics.last_error_at).to be_within(1).of(base_time)
+      expect(metrics.total_consecutive_errors).to eq(3)
+      expect(metrics.last_error).to have_attributes(
         error_class: "StandardError",
         error_message: "something went wrong",
         time: Time.at(base_time.to_i)
