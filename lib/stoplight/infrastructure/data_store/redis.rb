@@ -62,7 +62,6 @@ module Stoplight
           def bucket_key(light_name, metric:, time:)
             key("metrics", light_name, metric, (time.to_i / bucket_size) * bucket_size)
           end
-
           BUCKET_SIZE = 3600 # 1h
           private_constant :BUCKET_SIZE
 
@@ -247,8 +246,7 @@ module Stoplight
               record_success_sha,
               argv: [current_ts, request_id, metrics_ttl, metadata_ttl],
               keys: [
-                metadata_key(config),
-                config.window_size && successes_key(config, time: current_ts)
+                metadata_key(config)
               ].compact
             )
           end
