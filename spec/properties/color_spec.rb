@@ -2,8 +2,6 @@
 
 require "rantly/rspec_extensions"
 
-require "spec_helper"
-
 RSpec.describe "Stoplight::Light#color" do
   shared_examples "transition to color" do
     specify "transition to color" do

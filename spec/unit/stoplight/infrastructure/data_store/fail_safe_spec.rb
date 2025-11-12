@@ -29,6 +29,48 @@ RSpec.describe Stoplight::Infrastructure::DataStore::FailSafe do
 
   it_behaves_like "Stoplight::Domain::DataStore"
 
+  describe "#clear_metrics" do
+    subject(:clear_metrics) { fail_safe.clear_metrics(config) }
+
+    context "when data_store does not fail" do
+      it "returns nothing" do
+        expect(data_store).to receive(:clear_metrics).with(config)
+
+        clear_metrics
+      end
+    end
+
+    context "when data_store fails" do
+      it "returns nothing" do
+        expect(error_notifier).to receive(:call).with(error)
+        expect(data_store).to receive(:clear_metrics).with(config) { raise error }
+
+        clear_metrics
+      end
+    end
+  end
+
+  describe "#clear_recovery_metrics" do
+    subject(:clear_recovery_metrics) { fail_safe.clear_recovery_metrics(config) }
+
+    context "when data_store does not fail" do
+      it "returns nothing" do
+        expect(data_store).to receive(:clear_recovery_metrics).with(config)
+
+        clear_recovery_metrics
+      end
+    end
+
+    context "when data_store fails" do
+      it "returns nothing" do
+        expect(error_notifier).to receive(:call).with(error)
+        expect(data_store).to receive(:clear_recovery_metrics).with(config) { raise error }
+
+        clear_recovery_metrics
+      end
+    end
+  end
+
   describe "#names" do
     subject { fail_safe.names }
 

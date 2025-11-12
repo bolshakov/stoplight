@@ -12,12 +12,12 @@ module Stoplight
     #   A number of errors withing requested window. Zero for non-windowed metrics
     #   @return [Integer]
     #
-    # @!attribute total_consecutive_errors
-    #   A total number of consecutive errors
+    # @!attribute consecutive_errors
+    #   A number of consecutive errors
     #   @return [Integer]
     #
-    # @!attribute total_consecutive_successes
-    #   A total number of consecutive successes
+    # @!attribute consecutive_successes
+    #   A number of consecutive successes
     #   @return [Integer]
     #
     # @!attribute last_error
@@ -30,32 +30,11 @@ module Stoplight
     Metrics = Data.define(
       :successes,
       :errors,
-      :total_consecutive_errors,
-      :total_consecutive_successes,
+      :consecutive_errors,
+      :consecutive_successes,
       :last_error,
       :last_success_at
     ) do
-      # A number of consecutive errors withing requested window
-      #
-      # @return [Integer]
-      def consecutive_errors
-        if errors # we effectively check if this is windowed metrics
-          [total_consecutive_errors, errors].min
-        else
-          total_consecutive_errors
-        end
-      end
-
-      # A number of consecutive successes withing requested window
-      #
-      def consecutive_successes
-        if successes # we effectively check if this is windowed metrics
-          [total_consecutive_successes, successes].min
-        else
-          total_consecutive_successes
-        end
-      end
-
       # Calculates the error rate based on the number of successes and errors.
       #
       # @return [Float]

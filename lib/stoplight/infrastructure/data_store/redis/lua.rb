@@ -14,6 +14,8 @@ module Stoplight
 
           RECORD_FAILURE = read_lua_file("record_failure")
           RECORD_SUCCESS = read_lua_file("record_success")
+          RECORD_RECOVERY_PROBE_SUCCESS = read_lua_file("record_recovery_probe_success")
+          RECORD_RECOVERY_PROBE_FAILURE = read_lua_file("record_recovery_probe_failure")
           GET_METRICS = read_lua_file("get_metrics")
           TRANSITION_TO_YELLOW = read_lua_file("transition_to_yellow")
           TRANSITION_TO_RED = read_lua_file("transition_to_red")

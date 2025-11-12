@@ -55,10 +55,7 @@ module Stoplight
         def determine_color(config, recovery_metrics, state_snapshot)
           return TrafficRecovery::PASS if state_snapshot.color != Color::YELLOW
 
-          recovery_started_at = state_snapshot.recovery_started_at || state_snapshot.recovery_scheduled_after
-
-          # TODO: Need to add metrics cleanup and we can just use recovery_metrics.errors > 0
-          if recovery_metrics.last_error_at && recovery_metrics.last_error_at >= recovery_started_at
+          if recovery_metrics.consecutive_errors > 0
             TrafficRecovery::RED
           elsif recovery_metrics.consecutive_successes >= config.recovery_threshold
             TrafficRecovery::GREEN

@@ -61,7 +61,11 @@ module Stoplight
             raise "recovery strategy returned unexpected color: #{recovery_result}"
           end
 
-          transition_and_notify(from_color, to_color, nil)
+          transition_and_notify(from_color, to_color, nil) do
+            if to_color != Color::YELLOW
+              data_store.clear_recovery_metrics(config)
+            end
+          end
         end
 
         # @param other [any]

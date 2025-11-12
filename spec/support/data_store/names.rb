@@ -7,6 +7,11 @@ RSpec.shared_examples "Stoplight::Domain::DataStore#names" do
     expect(data_store.names).to eql([])
   end
 
+  it "contains the name of a light with a recovery probe failure" do
+    data_store.record_recovery_probe_failure(config, exception)
+    expect(data_store.names).to eql([config.name])
+  end
+
   it "contains the name of a light with a failure" do
     data_store.record_failure(config, exception)
     expect(data_store.names).to eql([config.name])

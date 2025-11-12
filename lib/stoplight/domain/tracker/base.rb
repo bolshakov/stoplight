@@ -27,6 +27,7 @@ module Stoplight
 
         def transition_and_notify(from_color, to_color, error = nil)
           if data_store.transition_to_color(config, to_color)
+            yield if block_given?
             notifiers.each do |notifier|
               notifier.notify(config, from_color, to_color, error)
             end
