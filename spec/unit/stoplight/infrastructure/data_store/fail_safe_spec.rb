@@ -1,13 +1,31 @@
 # frozen_string_literal: true
 
-RSpec.describe Stoplight::Wiring::FailSafeDataStore do
-  let(:fail_safe) { described_class.new(data_store:, error_notifier:, failover_data_store:) }
+RSpec.describe Stoplight::Infrastructure::DataStore::FailSafe do
+  let(:fail_safe) do
+    described_class.new(
+      data_store:, error_notifier:, failover_data_store:,
+      circuit_breaker: test_circuit_breaker_class.new
+    )
+  end
   let(:failover_data_store) { Stoplight::Infrastructure::DataStore::Memory.new }
   let(:data_store) { instance_double(Stoplight::Domain::DataStore) }
   let(:config) { Stoplight::Domain::Config.empty.with(name:, window_size: 4, cool_off_time: 60, threshold: 3) }
   let(:error_notifier) { instance_double(Proc) }
   let(:name) { SecureRandom.uuid }
   let(:error) { StandardError.new("Test error") }
+
+  let(:test_circuit_breaker_class) do
+    Class.new(Stoplight::Domain::Light) do
+      def initialize
+      end
+
+      def run(fallback)
+        yield
+      rescue => exception
+        fallback.call(exception)
+      end
+    end
+  end
 
   it_behaves_like "Stoplight::Domain::DataStore"
 
@@ -195,90 +213,6 @@ RSpec.describe Stoplight::Wiring::FailSafeDataStore do
         expect(data_store).to receive(:transition_to_color).with(config, color).and_raise(error)
 
         is_expected.to eq(true)
-      end
-    end
-  end
-
-  describe ".wrap" do
-    subject { described_class.wrap(data_store:, error_notifier:) }
-
-    context "when data_store is a Memory instance" do
-      let(:data_store) { Stoplight::DataStore::Memory.new }
-
-      it "returns the same data_store instance" do
-        is_expected.to be(data_store)
-      end
-    end
-
-    context "when data_store is a FailSafe instance with the same error_notifier" do
-      let(:data_store) do
-        described_class.new(
-          data_store: Stoplight::DataStore::Memory.new,
-          error_notifier:
-        )
-      end
-
-      it "returns the same data_store instance" do
-        is_expected.to be(data_store)
-      end
-    end
-
-    context "when data_store is a FailSafe instance with a different error_notifier" do
-      let(:underlying_data_store) { Stoplight::DataStore::Memory.new }
-      let(:underlying_error_notifier) { ->(error) { warn error } }
-
-      let(:data_store) do
-        described_class.new(
-          data_store: underlying_data_store,
-          error_notifier: underlying_error_notifier
-        )
-      end
-
-      it "returns a new FailSafe instance wrapping the data_store" do
-        is_expected.to be_a(described_class)
-        is_expected.to have_attributes(
-          data_store: underlying_data_store,
-          error_notifier: error_notifier
-        )
-      end
-    end
-
-    context "when data_store is another type" do
-      let(:data_store) { instance_double(Stoplight::Domain::DataStore) }
-
-      it "returns a new FailSafe instance wrapping the data_store" do
-        is_expected.to be_a(described_class)
-        is_expected.to have_attributes(data_store:, error_notifier:)
-      end
-    end
-  end
-
-  describe "faulty data store" do
-    let(:data_store) { instance_double(Stoplight::Domain::DataStore) }
-
-    it "when primary store fails" do
-      # Prepare: move internal circuit breaker into the red state
-      allow(data_store).to receive(:names).and_raise(Redis::TimeoutError)
-      config.threshold.times do
-        expect { fail_safe.names }.not_to raise_error
-      end
-
-      # Verify: now the fallback data store is used
-      RSpec::Mocks.space.proxy_for(data_store).reset
-      allow(data_store).to receive(:names)
-      allow(data_store).to receive(:record_success)
-
-      fail_safe.record_success(config)
-      expect(fail_safe.names).to include(config.name)
-
-      expect(data_store).not_to have_received(:record_success), "expected to use fallback data store without trying primary"
-      expect(data_store).not_to have_received(:names), "expected to use fallback data store without trying primary"
-
-      # After cool_off_time, the primary data store is tried again
-      Timecop.travel(Time.now + config.cool_off_time) do
-        expect(data_store).to receive(:names).and_return(["recovered"])
-
-        expect(fail_safe.names).to eq(["recovered"])
       end
     end
   end

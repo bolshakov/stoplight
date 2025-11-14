@@ -320,15 +320,17 @@ end
 - Bridges between layers
 
 Example:
+
 ```ruby
+
 module Stoplight
   module Wiring
     # Compose dependencies
     class LightFactory
       def build_with(name:, data_store:, notifiers:, **config)
-        safe_data_store = FailSafeDataStore.wrap(data_store)
+        safe_data_store = FailSafe.wrap(data_store)
         safe_notifiers = notifiers.map { FailSafeNotifier.wrap(_1) }
-        
+
         # Build domain object
         Domain::Light.new(
           config: Domain::Config.new(name:, **config),
