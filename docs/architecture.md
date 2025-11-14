@@ -309,12 +309,10 @@ end
 **Contains:**
 - Dependency injection container
 - Factory classes for creating configured objects
-- Fail-safe wrappers for resilience
 - Public API composition
 
 **Rules:**
 - Composes domain and infrastructure components
-- Provides fail-safe wrappers
 - Handles configuration and defaults
 - Should not contain business logic
 - Bridges between layers
@@ -328,8 +326,8 @@ module Stoplight
     # Compose dependencies
     class LightFactory
       def build_with(name:, data_store:, notifiers:, **config)
-        safe_data_store = FailSafe.wrap(data_store)
-        safe_notifiers = notifiers.map { FailSafeNotifier.wrap(_1) }
+        safe_data_store = DataStoreFactory.create(data_store)
+        safe_notifiers = notifiers.map { NotifierFactory.create(_1) }
 
         # Build domain object
         Domain::Light.new(

@@ -43,7 +43,7 @@ RSpec.describe Stoplight::Wiring::Container do
     let(:notifier) { instance_double(Stoplight::Domain::StateTransitionNotifier) }
 
     it "wraps notifiers with fail safe" do
-      is_expected.to contain_exactly(Stoplight::Wiring::FailSafeNotifier.new(notifier:, error_notifier:))
+      is_expected.to contain_exactly(Stoplight::Infrastructure::Notifier::FailSafe.new(notifier:, error_notifier:))
     end
   end
 end

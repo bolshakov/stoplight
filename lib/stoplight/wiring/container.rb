@@ -31,7 +31,7 @@ module Stoplight
       # @return [Stoplight::DataStore::Base, FailSafe] The original data store if it is already
       #   a +Memory+ or +FailSafe+ instance, otherwise a new +FailSafe+ instance.
       register(:data_store, Default::DATA_STORE) do |data_store|
-        Stoplight::Wiring::DataStoreFactory.create(
+        DataStoreFactory.create(
           data_store: data_store,
           error_notifier: resolve(:error_notifier),
           failover_data_store: Wiring::Default::DATA_STORE
@@ -40,7 +40,7 @@ module Stoplight
 
       register(:notifiers, Default::NOTIFIERS) do |notifiers|
         error_notifier = resolve(:error_notifier)
-        notifiers.map { |notifier| Wiring::FailSafeNotifier.wrap(notifier:, error_notifier:) }
+        notifiers.map { |notifier| NotifierFactory.create(notifier:, error_notifier:) }
       end
 
       factory(:green_run_strategy) do
