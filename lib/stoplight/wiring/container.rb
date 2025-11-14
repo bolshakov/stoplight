@@ -24,16 +24,23 @@ module Stoplight
       register(:traffic_control, Default::TRAFFIC_CONTROL)
       register(:traffic_recovery, Default::TRAFFIC_RECOVERY)
 
+      # Wraps a data store with fail-safe mechanisms.
+      #
+      # @param data_store [Stoplight::DataStore::Base] The data store to wrap.
+      # @param error_notifier [Proc] called when wrapped data store fails
+      # @return [Stoplight::DataStore::Base, FailSafe] The original data store if it is already
+      #   a +Memory+ or +FailSafe+ instance, otherwise a new +FailSafe+ instance.
       register(:data_store, Default::DATA_STORE) do |data_store|
-        FailSafeDataStore.wrap(
-          data_store:,
-          error_notifier: resolve(:error_notifier)
+        DataStoreFactory.create(
+          data_store: data_store,
+          error_notifier: resolve(:error_notifier),
+          failover_data_store: Wiring::Default::DATA_STORE
         )
       end
 
       register(:notifiers, Default::NOTIFIERS) do |notifiers|
         error_notifier = resolve(:error_notifier)
-        notifiers.map { |notifier| Wiring::FailSafeNotifier.wrap(notifier:, error_notifier:) }
+        notifiers.map { |notifier| NotifierFactory.create(notifier:, error_notifier:) }
       end
 
       factory(:green_run_strategy) do

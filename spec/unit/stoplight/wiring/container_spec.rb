@@ -27,7 +27,12 @@ RSpec.describe Stoplight::Wiring::Container do
     let(:data_store) { instance_double(Stoplight::Domain::DataStore) }
 
     it "wraps data store with fail safe" do
-      is_expected.to eq(Stoplight::Wiring::FailSafeDataStore.new(data_store:, error_notifier:))
+      is_expected.to be_a(Stoplight::Infrastructure::DataStore::FailSafe)
+      is_expected.to have_attributes(
+        data_store:,
+        error_notifier:,
+        failover_data_store: Stoplight::Wiring::Default::DATA_STORE
+      )
     end
   end
 
@@ -38,7 +43,7 @@ RSpec.describe Stoplight::Wiring::Container do
     let(:notifier) { instance_double(Stoplight::Domain::StateTransitionNotifier) }
 
     it "wraps notifiers with fail safe" do
-      is_expected.to contain_exactly(Stoplight::Wiring::FailSafeNotifier.new(notifier:, error_notifier:))
+      is_expected.to contain_exactly(Stoplight::Infrastructure::Notifier::FailSafe.new(notifier:, error_notifier:))
     end
   end
 end
