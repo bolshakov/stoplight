@@ -121,7 +121,6 @@ end
 # @param settings [Hash] Optional settings to configure the circuit breaker.
 #   @option settings [Numeric] :cool_off_time The time to wait before resetting the circuit breaker.
 #   @option settings [Stoplight::DataStore::Base] :data_store The data store to use for storing state.
-#   @option settings [Proc] :error_notifier A proc to handle error notifications.
 #   @option settings [Array<Stoplight::Notifier::Base>] :notifiers A list of notifiers to use.
 #   @option settings [Numeric] :threshold The failure threshold to trip the circuit breaker.
 #   @option settings [Numeric] :window_size The size of the rolling window for failure tracking.
@@ -161,5 +160,19 @@ end
 #   light = Stoplight("Payment API", traffic_control: :error_rate, threshold: 0.666, window_size: 300)
 #
 def Stoplight(name, **settings) # rubocop:disable Naming/MethodName
+  Stoplight::Common::Deprecations.deprecate(<<~MSG) if settings.include?(:error_notifier)
+    Passing "error_notifier" to Stoplight('#{name}') is deprecated and will be removed in v6.0.0.
+
+    IMPORTANT: The `error_notifier` is NOT called for exceptions in your protected code.
+    It only reports internal Stoplight failures (e.g., Redis connection errors).
+
+    To fix: Move `error_notifier` to global configuration:
+
+      Stoplight.configure do |config|
+        config.error_notifier = ->(error) { Logger.warn(error) }
+      end
+
+    See: https://github.com/bolshakov/stoplight#error-notifiers
+  MSG
   Stoplight.light(name, **settings)
 end
