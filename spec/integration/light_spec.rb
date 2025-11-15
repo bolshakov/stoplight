@@ -51,6 +51,12 @@ RSpec.describe "Light" do
       let(:error_notifier) { instance_double(Proc) }
       let(:prototype) { Stoplight("prototype", error_notifier:, threshold: 1, traffic_control: :consecutive_errors) }
 
+      it "produces deprecation warning" do
+        expect { prototype }.to output(
+          include("Passing \"error_notifier\" to Stoplight('prototype') is deprecated and will be removed in v6.0.0.")
+        ).to_stderr
+      end
+
       context "when extended with data_store and error_notifier" do
         let(:updated_error_notifier) { instance_double(Proc) }
 
