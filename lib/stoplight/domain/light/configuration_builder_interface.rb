@@ -15,9 +15,22 @@ module Stoplight
         #
         # @param data_store [DataStore::Base]
         # @return [Stoplight::Light]
-        # @deprecated consider using +Light#with+ for reconfiguration
+        # @deprecated
         def with_data_store(data_store)
-          with(data_store:)
+          deprecate(<<~MSG)
+            Light#with_data_store is deprecated and will be removed in v6.0.0.
+
+            Circuit breakers should be configured once at creation, not cloned with
+            modifications.
+
+            Instead of:
+              light = Stoplight('api-call')
+              modified = light.with_data_store(data_stare)
+
+            Configure correctly from the start:
+              Stoplight('api-call', data_store:)
+          MSG
+          with_without_warning(data_store:)
         end
 
         # Configures cool off time. Stoplight automatically tries to recover
@@ -29,9 +42,22 @@ module Stoplight
         #
         # @param cool_off_time [Numeric] number of seconds
         # @return [Stoplight::Light]
-        # @deprecated consider using +Light#with+ for reconfiguration
+        # @deprecated
         def with_cool_off_time(cool_off_time)
-          with(cool_off_time:)
+          deprecate(<<~MSG)
+            Light#with_cool_off_time is deprecated and will be removed in v6.0.0.
+
+            Circuit breakers should be configured once at creation, not cloned with
+            modifications.
+
+            Instead of:
+              light = Stoplight('api-call')
+              modified = light.with_cool_off_time(cool_off_time)
+
+            Configure correctly from the start:
+              Stoplight('api-call', cool_off_time:)
+          MSG
+          with_without_warning(cool_off_time:)
         end
 
         # Configures custom threshold. After this number of failures Stoplight
@@ -43,9 +69,22 @@ module Stoplight
         #
         # @param threshold [Numeric]
         # @return [Stoplight::Light]
-        # @deprecated consider using +Light#with+ for reconfiguration
+        # @deprecated
         def with_threshold(threshold)
-          with(threshold:)
+          deprecate(<<~MSG)
+            Light#with_threshold is deprecated and will be removed in v6.0.0.
+
+            Circuit breakers should be configured once at creation, not cloned with
+            modifications.
+
+            Instead of:
+              light = Stoplight('api-call')
+              modified = light.with_threshold(threshold)
+
+            Configure correctly from the start:
+              Stoplight('api-call', threshold:)
+          MSG
+          with_without_warning(threshold:)
         end
 
         # Configures custom window size which Stoplight uses to count failures. For example,
@@ -60,9 +99,22 @@ module Stoplight
         #
         # @param window_size [Numeric] number of seconds
         # @return [Stoplight::Light]
-        # @deprecated consider using +Light#with+ for reconfiguration
+        # @deprecated
         def with_window_size(window_size)
-          with(window_size:)
+          deprecate(<<~MSG)
+            Light#with_window_size is deprecated and will be removed in v6.0.0.
+
+            Circuit breakers should be configured once at creation, not cloned with
+            modifications.
+
+            Instead of:
+              light = Stoplight('api-call')
+              modified = light.with_window_size(window_size)
+
+            Configure correctly from the start:
+              Stoplight('api-call', window_size:)
+          MSG
+          with_without_warning(window_size:)
         end
 
         # Configures custom notifier
@@ -75,17 +127,43 @@ module Stoplight
         #
         # @param notifiers [Array<Notifier::Base>]
         # @return [Stoplight::Light]
-        # @deprecated consider using +Light#with+ for reconfiguration
+        # @deprecated
         def with_notifiers(notifiers)
-          with(notifiers:)
+          deprecate(<<~MSG)
+            Light#with_notifiers is deprecated and will be removed in v6.0.0.
+
+            Circuit breakers should be configured once at creation, not cloned with
+            modifications.
+
+            Instead of:
+              light = Stoplight('api-call')
+              modified = light.with_notifiers(notifiers)
+
+            Configure correctly from the start:
+              Stoplight('api-call', notifiers:)
+          MSG
+          with_without_warning(notifiers:)
         end
 
         # @param error_notifier [Proc]
         # @return [Stoplight::Light]
         # @api private
-        # @deprecated consider using +Light#with+ for reconfiguration
+        # @deprecated
         def with_error_notifier(&error_notifier)
-          with(error_notifier: error_notifier)
+          deprecate(<<~MSG)
+            Light#with_error_notifier is deprecated and will be removed in v6.0.0.
+
+            Circuit breakers should be configured once at creation, not cloned with
+            modifications.
+
+            Instead of:
+              light = Stoplight('api-call')
+              modified = light.with_error_notifier { |error| warn error }
+
+            Configure correctly from the start:
+              Stoplight('api-call', error_notifier: ->(error) { warn error })
+          MSG
+          with_without_warning(error_notifier: error_notifier)
         end
 
         # Configures a custom list of tracked errors that counts toward the threshold.
@@ -101,9 +179,22 @@ module Stoplight
         #
         # @param tracked_errors [Array<StandardError>]
         # @return [Stoplight::Light]
-        # @deprecated consider using +Light#with+ for reconfiguration
+        # @deprecated
         def with_tracked_errors(*tracked_errors)
-          with(tracked_errors:)
+          deprecate(<<~MSG)
+            Light#with_tracked_errors is deprecated and will be removed in v6.0.0.
+
+            Circuit breakers should be configured once at creation, not cloned with
+            modifications.
+
+            Instead of:
+              light = Stoplight('api-call')
+              modified = light.with_tracked_errors(TimeoutError, NetworkError)
+
+            Configure correctly from the start:
+              Stoplight('api-call', tracked_errors: [TimeoutError, NetworkError])
+          MSG
+          with_without_warning(tracked_errors:)
         end
 
         # Configures a custom list of skipped errors that do not count toward the threshold.
@@ -120,9 +211,22 @@ module Stoplight
         #
         # @param skipped_errors [Array<Exception>]
         # @return [Stoplight::Light]
-        # @deprecated consider using +Light#with+ for reconfiguration
+        # @deprecated
         def with_skipped_errors(*skipped_errors)
-          with(skipped_errors:)
+          deprecate(<<~MSG)
+            Light#with_skipped_errors is deprecated and will be removed in v6.0.0.
+
+            Circuit breakers should be configured once at creation, not cloned with
+            modifications.
+
+            Instead of:
+              light = Stoplight('api-call')
+              modified = light.with_skipped_errors(ActiveRecord::RecordNotFound)
+
+            Configure correctly from the start:
+              Stoplight('api-call', skipped_errors: [ActiveRecord::RecordNotFound])
+          MSG
+          with_without_warning(skipped_errors:)
         end
       end
     end
