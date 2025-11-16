@@ -16,46 +16,28 @@ module Stoplight
         # - One mutex created per unique light_name (lazily)
         # - Mutexes persist for process lifetime (never GC'd)
         #
-        class RecoveryLock < Domain::RecoveryLock
-          # @!attribute data_store
-          #   @return [Stoplight::Infrastructure::DataStore::Memory]
-          private attr_reader :data_store
-
+        class RecoveryLockStore
           # @!attribute locks
           #   Stores one mutex per unique light_name for the lifetime of the process.
           #   Mutexes are never garbage collected.
           #   @return [Concurrent::Map<Thread::Mutex>]
           private attr_reader :locks
 
-          def initialize(data_store:)
-            @data_store = data_store
+          def initialize
             @locks = Concurrent::Map.new
           end
 
-          def with_lock(light_name)
+          # @param light_name [String]
+          # @return [Stoplight::Infrastructure::DataStore::Memory::RecoveryLockToken, nil]
+          def acquire_lock(light_name)
             lock = lock_for(light_name)
-            if acquire_lock(lock)
-              begin
-                yield data_store
-              ensure
-                release_lock(lock)
-              end
-              true
-            else
-              false
-            end
+            RecoveryLockToken.new(light_name:) if lock.try_lock
           end
 
-          # @param lock [Thread::Mutex]
-          # @return [Boolean]
-          private def acquire_lock(lock)
-            lock.try_lock
-          end
-
-          # @param lock [Thread::Mutex]
+          # @param recovery_lock_token [Stoplight::Infrastructure::DataStore::Memory::RecoveryLockToken]
           # @return [void]
-          private def release_lock(lock)
-            lock.unlock
+          def release_lock(recovery_lock_token)
+            lock_for(recovery_lock_token.light_name).unlock
           end
 
           # @param light_name [String]

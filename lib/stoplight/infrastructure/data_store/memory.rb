@@ -11,10 +11,10 @@ module Stoplight
 
         KEY_SEPARATOR = ":"
 
-        # @!attribute recovery_lock
-        #   @return [Stoplight::Infrastructure::DataStore::Memory::RecoveryLock]
+        # @!attribute recovery_lock_store
+        #   @return [Stoplight::Infrastructure::DataStore::Memory::RecoveryLockStore]
         #   @api private
-        private attr_reader :recovery_lock
+        private attr_reader :recovery_lock_store
 
         def initialize
           @errors = Hash.new { |errors, light_name| errors[light_name] = SlidingWindow.new }
@@ -28,11 +28,11 @@ module Stoplight
           super # MonitorMixin
         end
 
-        # Injects recovery lock factory
-        # @param recovery_lock_factory [Stoplight::Infrastructure::DataStore::Memory::RecoveryLockFactory]
+        # Injects recovery lock store factory
+        # @param recovery_lock_store_factory [Stoplight::Infrastructure::DataStore::Memory::RecoveryLockStoreFactory]
         # @return [void]
-        def recovery_lock_factory=(recovery_lock_factory)
-          @recovery_lock = recovery_lock_factory.resolve(data_store: self)
+        def recovery_lock_store_factory=(recovery_lock_store_factory)
+          @recovery_lock_store = recovery_lock_store_factory.resolve
         end
 
         # @return [Array<String>]
@@ -249,11 +249,15 @@ module Stoplight
         end
 
         # @param config [Stoplight::Domain::Config]
-        # @yieldparam [Stoplight::Domain::DataStore]
-        def with_recovery_lock(config)
-          recovery_lock.with_lock(config.name) do |data_store|
-            yield data_store
-          end
+        # @return [Stoplight::Infrastructure::DataStore::Memory::RecoveryLockToken, nil]
+        def acquire_recovery_lock(config)
+          recovery_lock_store.acquire_lock(config.name)
+        end
+
+        # @param lock [Stoplight::Infrastructure::DataStore::Memory::RecoveryLockToken]
+        # @return [void]
+        def release_recovery_lock(lock)
+          recovery_lock_store.release_lock(lock)
         end
 
         # Transitions to GREEN state and ensures only one notification

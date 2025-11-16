@@ -95,24 +95,17 @@ module Stoplight
         raise NotImplementedError
       end
 
-      # A lock used to linearize recovery run executions. The use of this lock
-      # guarantees that only one instance of Light is trying to perform recovery
-      # at a time, preventing Thundering Herd problem and race conditions during recovery.
+      # Acquires recovery lock for serializing probe execution.
       #
-      # It yields locked data store so operation withing the block, could use
-      # this data store instance.
       # @param config [Stoplight::Domain::Config]
-      # @yieldparam [Stoplight::Domain::DataStore]
-      #   Yields data store used through the whole recovery process
+      # @return [Stoplight::Domain::LockToken, nil] Lock if acquired, nil if contended
+      def acquire_recovery_lock(config) = raise NotImplementedError
+
+      # Releases previously acquired lock.
       #
-      # @example
-      #   data_store.with_recovery_lock do |locked_store|
-      #     locked_store.record_failure(config, failure)
-      #   end
-      #
-      def with_recovery_lock(config)
-        raise NotImplementedError
-      end
+      # @param lock [Stoplight::Domain::LockToken]
+      # @return [void]
+      def release_recovery_lock(lock) = raise NotImplementedError
 
       # Transitions the Stoplight to the specified color.
       #

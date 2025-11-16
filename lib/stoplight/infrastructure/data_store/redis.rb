@@ -74,12 +74,12 @@ module Stoplight
         KEY_SEPARATOR = ":"
         KEY_PREFIX = %w[stoplight v5].join(KEY_SEPARATOR)
 
-        # @!attribute recovery_lock_factory
+        # @!attribute recovery_lock_store_factory
         #   Dependency injection accessor
-        #   @return [Stoplight::Infrastructure::DataStore::Redis::RecoveryLockFactory]
+        #   @return [Stoplight::Infrastructure::DataStore::Redis::RecoveryLockStoreFactory]
         #   @api private
-        attr_accessor :recovery_lock_factory
-        private :recovery_lock_factory
+        attr_accessor :recovery_lock_store_factory
+        private :recovery_lock_store_factory
 
         # @param redis [::Redis, ConnectionPool<::Redis>]
         # @param warn_on_clock_skew [Boolean] (true) Whether to warn about clock skew between Redis and
@@ -326,11 +326,15 @@ module Stoplight
         end
 
         # @param config [Stoplight::Domain::Config]
-        # @yieldparam [Stoplight::Domain::DataStore]
-        def with_recovery_lock(config)
-          recovery_lock.with_lock(config.name) do |data_store|
-            yield data_store
-          end
+        # @return [Stoplight::Infrastructure::DataStore::Redis::RecoveryLockToken, nil]
+        def acquire_recovery_lock(config)
+          recovery_lock_store.acquire_lock(config.name)
+        end
+
+        # @param lock [Stoplight::Infrastructure::DataStore::Redis::RecoveryLockToken]
+        # @return [void]
+        def release_recovery_lock(lock)
+          recovery_lock_store.release_lock(lock)
         end
 
         # Transitions to GREEN state and ensures only one notification
@@ -566,8 +570,8 @@ module Stoplight
           Time.now
         end
 
-        private def recovery_lock
-          recovery_lock_factory.resolve(redis: @redis, data_store: self)
+        private def recovery_lock_store
+          recovery_lock_store_factory.resolve(redis: @redis)
         end
       end
     end
