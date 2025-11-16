@@ -11,6 +11,11 @@ module Stoplight
 
         KEY_SEPARATOR = ":"
 
+        # @!attribute recovery_lock
+        #   @return [Stoplight::Infrastructure::DataStore::Memory::RecoveryLock]
+        #   @api private
+        private attr_reader :recovery_lock
+
         def initialize
           @errors = Hash.new { |errors, light_name| errors[light_name] = SlidingWindow.new }
           @successes = Hash.new { |successes, light_name| successes[light_name] = SlidingWindow.new }
@@ -21,6 +26,13 @@ module Stoplight
           @states = Hash.new { |states, light_name| states[light_name] = State.new }
 
           super # MonitorMixin
+        end
+
+        # Injects recovery lock factory
+        # @param recovery_lock_factory [Stoplight::Infrastructure::DataStore::Memory::RecoveryLockFactory]
+        # @return [void]
+        def recovery_lock_factory=(recovery_lock_factory)
+          @recovery_lock = recovery_lock_factory.resolve(data_store: self)
         end
 
         # @return [Array<String>]
@@ -233,6 +245,14 @@ module Stoplight
             transition_to_red(config)
           else
             raise ArgumentError, "Invalid color: #{color}"
+          end
+        end
+
+        # @param config [Stoplight::Domain::Config]
+        # @yieldparam [Stoplight::Domain::DataStore]
+        def with_recovery_lock(config)
+          recovery_lock.with_lock(config.name) do |data_store|
+            yield data_store
           end
         end
 

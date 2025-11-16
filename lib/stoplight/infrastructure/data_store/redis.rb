@@ -74,7 +74,7 @@ module Stoplight
         KEY_SEPARATOR = ":"
         KEY_PREFIX = %w[stoplight v5].join(KEY_SEPARATOR)
 
-        # @!attribute recovery_lock
+        # @!attribute recovery_lock_factory
         #   Dependency injection accessor
         #   @return [Stoplight::Infrastructure::DataStore::Redis::RecoveryLockFactory]
         #   @api private

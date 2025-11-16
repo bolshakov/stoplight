@@ -76,23 +76,19 @@ module Stoplight
           end
 
           # @param token [String] only delete if token matches (prevent releasing others' locks)
-          # @return [Boolean] true if released
+          # @return [void]
           private def release_lock(lock_key, token)
             # TODO: Use Script Manager
-            released = redis.then do |client|
+            redis.then do |client|
               client.eval(<<~LUA, keys: [lock_key], argv: [token])
                 local token = ARGV[1] 
                 local lock_key = KEYS[1]
   
                 if redis.call("get", lock_key) == token then
                   return redis.call("del", lock_key)
-                else
-                  return 0
                 end
               LUA
             end
-
-            released == "1"
           end
         end
       end

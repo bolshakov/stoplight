@@ -16,4 +16,18 @@ RSpec.describe Stoplight::Infrastructure::DataStore::Memory do
   it_behaves_like "Stoplight::Domain::DataStore#names"
   it_behaves_like "Stoplight::Domain::DataStore#set_state"
   it_behaves_like "Stoplight::Domain::DataStore#transition_to_color"
+
+  describe "#with_recovery_lock" do
+    let(:recovery_lock_factory) { described_class::RecoveryLockFactory.new }
+
+    before do
+      data_store.recovery_lock_factory = recovery_lock_factory
+    end
+
+    it "passes control to recovery lock" do
+      expect do |recovery|
+        data_store.with_recovery_lock(config, &recovery)
+      end.to yield_with_args(data_store)
+    end
+  end
 end

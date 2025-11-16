@@ -26,4 +26,5 @@ Gem::Specification.new do |gem|
 
   gem.required_ruby_version = ">= 3.2"
   gem.add_runtime_dependency "zeitwerk"
+  gem.add_runtime_dependency "concurrent-ruby"
 end
