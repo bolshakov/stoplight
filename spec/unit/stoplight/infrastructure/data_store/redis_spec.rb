@@ -153,6 +153,22 @@ RSpec.describe Stoplight::Infrastructure::DataStore::Redis, :redis do
       end
     end
 
+    describe "#with_recovery_lock" do
+      let(:recovery_lock_factory) do
+        described_class::RecoveryLockFactory.new(lock_timeout: 200)
+      end
+
+      before do
+        data_store.recovery_lock_factory = recovery_lock_factory
+      end
+
+      it "passes control to recovery lock" do
+        expect do |recovery|
+          data_store.with_recovery_lock(config, &recovery)
+        end.to yield_with_args(data_store)
+      end
+    end
+
     it_behaves_like "Stoplight::Domain::DataStore"
     it_behaves_like "Stoplight::Domain::DataStore#get_metrics"
     it_behaves_like "Stoplight::Domain::DataStore#get_recovery_metrics"
