@@ -17,6 +17,7 @@ module Stoplight
         private attr_reader :recovery_lock_store
 
         def initialize
+          @init_mutex = Monitor.new
           @errors = Hash.new { |errors, light_name| errors[light_name] = SlidingWindow.new }
           @successes = Hash.new { |successes, light_name| successes[light_name] = SlidingWindow.new }
           @metrics = Hash.new { |metrics, light_name| metrics[light_name] = Metrics.new }
@@ -32,7 +33,9 @@ module Stoplight
         # @param recovery_lock_store_factory [Stoplight::Infrastructure::DataStore::Memory::RecoveryLockStoreFactory]
         # @return [void]
         def recovery_lock_store_factory=(recovery_lock_store_factory)
-          @recovery_lock_store = recovery_lock_store_factory.resolve
+          @init_mutex.synchronize do
+            @recovery_lock_store ||= recovery_lock_store_factory.resolve
+          end
         end
 
         # @return [Array<String>]

@@ -116,6 +116,33 @@ module Stoplight
           end
         end
 
+        # @param config [Stoplight::Domain::Config]
+        def acquire_recovery_lock(config)
+          with_fallback(:acquire_recovery_lock, config) do
+            data_store.acquire_recovery_lock(config)
+          end
+        end
+
+        # Routes release to correct store based on token type.
+        # Redis tokens release via primary (with error notification on failure).
+        # Memory tokens release via failover directly.
+        #
+        # @param recovery_lock_token [Stoplight::Domain::RecoveryLockToken]
+        def release_recovery_lock(recovery_lock_token)
+          case recovery_lock_token
+          in Redis::RecoveryLockToken
+            fallback = proc do |error|
+              error_notifier.call(error) if error
+            end
+
+            circuit_breaker.run(fallback) do
+              data_store.release_recovery_lock(recovery_lock_token)
+            end
+          in Memory::RecoveryLockToken
+            failover_data_store.release_recovery_lock(recovery_lock_token)
+          end
+        end
+
         def ==(other)
           other.is_a?(self.class) && other.data_store == data_store && other.error_notifier == error_notifier &&
             other.failover_data_store == failover_data_store

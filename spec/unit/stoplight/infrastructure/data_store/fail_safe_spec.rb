@@ -250,11 +250,76 @@ RSpec.describe Stoplight::Infrastructure::DataStore::FailSafe do
     end
 
     context "when data_store fails" do
-      it "returns false" do
+      it "returns true" do
         expect(error_notifier).to receive(:call).with(error)
         expect(data_store).to receive(:transition_to_color).with(config, color).and_raise(error)
 
         is_expected.to eq(true)
+      end
+    end
+  end
+
+  describe "#acquire_recovery_lock" do
+    subject { fail_safe.acquire_recovery_lock(config) }
+
+    context "when data_store does not fail" do
+      let(:recovery_token) { instance_double(Stoplight::Infrastructure::DataStore::Redis::RecoveryLockToken) }
+
+      it "returns the token" do
+        expect(error_notifier).not_to receive(:call)
+
+        expect(data_store).to receive(:acquire_recovery_lock).with(config).and_return(recovery_token)
+        is_expected.to eq(recovery_token)
+      end
+    end
+
+    context "when data_store fails" do
+      let(:failover_recovery_token) { instance_double(Stoplight::Infrastructure::DataStore::Memory::RecoveryLockToken) }
+
+      it "returns failover token" do
+        expect(error_notifier).to receive(:call).with(error)
+        expect(data_store).to receive(:acquire_recovery_lock).with(config).and_raise(error)
+        expect(failover_data_store).to receive(:acquire_recovery_lock).with(config).and_return(failover_recovery_token)
+
+        is_expected.to eq(failover_recovery_token)
+      end
+    end
+  end
+
+  describe "#release_recovery_lock" do
+    subject(:release_recovery_lock) { fail_safe.release_recovery_lock(recovery_lock_token) }
+
+    context "with primary recovery lock token" do
+      let(:recovery_lock_token) { Stoplight::Infrastructure::DataStore::Redis::RecoveryLockToken.new(light_name: name) }
+
+      context "when data_store does not fail" do
+        it "releases this token" do
+          expect(error_notifier).not_to receive(:call)
+          expect(data_store).to receive(:release_recovery_lock).with(recovery_lock_token)
+
+          release_recovery_lock
+        end
+      end
+
+      context "when data_store fails" do
+        it "notifies but does not call to failover" do
+          expect(error_notifier).to receive(:call).with(error)
+          expect(data_store).to receive(:release_recovery_lock).with(recovery_lock_token).and_raise(error)
+          expect(failover_data_store).not_to receive(:release_recovery_lock)
+
+          release_recovery_lock
+        end
+      end
+    end
+
+    context "with failover recovery lock token" do
+      let(:recovery_lock_token) { Stoplight::Infrastructure::DataStore::Memory::RecoveryLockToken.new(light_name: name) }
+
+      it "releases this token" do
+        expect(error_notifier).not_to receive(:call)
+        expect(failover_data_store).to receive(:release_recovery_lock).with(recovery_lock_token)
+
+        release_recovery_lock
       end
     end
   end
