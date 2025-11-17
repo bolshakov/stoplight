@@ -8,6 +8,7 @@ module Stoplight
     # @api private use +Stoplight()+ method instead
     class Light
       extend Forwardable
+      include Common::Deprecations
       include ConfigurationBuilderInterface
 
       # @!attribute [r] config
@@ -171,8 +172,26 @@ module Stoplight
       #   # Run the lights with their respective configurations
       #   invoices_light.run(->(error) { [] }) { call_invoices_api }
       #   payment_light.run(->(error) { nil }) { call_payment_api }
+      # @deprecated
       # @see +Stoplight()+
       def with(**settings)
+        deprecate(<<~MSG)
+          Light#with is deprecated and will be removed in v6.0.0.
+
+          Circuit breakers should be configured once at creation, not cloned with
+          modifications.
+
+          Instead of:
+            light = Stoplight('api-call', threshold: 5)
+            modified = light.with(threshold: 10)
+
+          Configure correctly from the start:
+            Stoplight('api-call', threshold: 10)
+        MSG
+        with_without_warning(**settings)
+      end
+
+      private def with_without_warning(**settings)
         factory.build_with(**settings)
       end
 
