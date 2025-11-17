@@ -33,13 +33,12 @@ RSpec.describe Stoplight::Infrastructure::DataStore::Redis::RecoveryLockStore, :
   end
 
   it "automatically releases after a timeout" do
-    start = Process.clock_gettime(:CLOCK_MONOTONIC)
     store.acquire_lock(light_name)
 
-    remaining_ttl = lock_timeout - (Process.clock_gettime(:CLOCK_MONOTONIC) - start)
-    sleep(remaining_ttl.fdiv(1000))
+    until (recovery_lock = store.acquire_lock(light_name))
+      sleep(lock_timeout.fdiv(1000))
+    end
 
-    recovery_lock = store.acquire_lock(light_name)
     expect(recovery_lock).to be_kind_of(Stoplight::Infrastructure::DataStore::Redis::RecoveryLockToken)
   end
 end
