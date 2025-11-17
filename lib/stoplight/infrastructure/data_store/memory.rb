@@ -11,7 +11,13 @@ module Stoplight
 
         KEY_SEPARATOR = ":"
 
+        # @!attribute recovery_lock_store
+        #   @return [Stoplight::Infrastructure::DataStore::Memory::RecoveryLockStore]
+        #   @api private
+        private attr_reader :recovery_lock_store
+
         def initialize
+          @init_mutex = Monitor.new
           @errors = Hash.new { |errors, light_name| errors[light_name] = SlidingWindow.new }
           @successes = Hash.new { |successes, light_name| successes[light_name] = SlidingWindow.new }
           @metrics = Hash.new { |metrics, light_name| metrics[light_name] = Metrics.new }
@@ -21,6 +27,15 @@ module Stoplight
           @states = Hash.new { |states, light_name| states[light_name] = State.new }
 
           super # MonitorMixin
+        end
+
+        # Injects recovery lock store factory
+        # @param recovery_lock_store_factory [Stoplight::Infrastructure::DataStore::Memory::RecoveryLockStoreFactory]
+        # @return [void]
+        def recovery_lock_store_factory=(recovery_lock_store_factory)
+          @init_mutex.synchronize do
+            @recovery_lock_store ||= recovery_lock_store_factory.resolve
+          end
         end
 
         # @return [Array<String>]
@@ -234,6 +249,18 @@ module Stoplight
           else
             raise ArgumentError, "Invalid color: #{color}"
           end
+        end
+
+        # @param config [Stoplight::Domain::Config]
+        # @return [Stoplight::Infrastructure::DataStore::Memory::RecoveryLockToken, nil]
+        def acquire_recovery_lock(config)
+          recovery_lock_store.acquire_lock(config.name)
+        end
+
+        # @param lock [Stoplight::Infrastructure::DataStore::Memory::RecoveryLockToken]
+        # @return [void]
+        def release_recovery_lock(lock)
+          recovery_lock_store.release_lock(lock)
         end
 
         # Transitions to GREEN state and ensures only one notification

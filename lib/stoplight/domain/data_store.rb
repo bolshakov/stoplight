@@ -95,6 +95,18 @@ module Stoplight
         raise NotImplementedError
       end
 
+      # Acquires recovery lock for serializing probe execution.
+      #
+      # @param config [Stoplight::Domain::Config]
+      # @return [Stoplight::Domain::LockToken, nil] Lock if acquired, nil if contended
+      def acquire_recovery_lock(config) = raise NotImplementedError
+
+      # Releases previously acquired lock.
+      #
+      # @param lock [Stoplight::Domain::LockToken]
+      # @return [void]
+      def release_recovery_lock(lock) = raise NotImplementedError
+
       # Transitions the Stoplight to the specified color.
       #
       # This method performs a color transition operation that works across distributed instances

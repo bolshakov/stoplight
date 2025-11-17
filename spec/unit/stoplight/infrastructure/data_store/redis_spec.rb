@@ -153,6 +153,41 @@ RSpec.describe Stoplight::Infrastructure::DataStore::Redis, :redis do
       end
     end
 
+    describe "#acquire_recovery_lock" do
+      let(:recovery_lock_store_factory) { instance_double(described_class::RecoveryLockStoreFactory) }
+      let(:recovery_lock_store) { instance_double(described_class::RecoveryLockStore) }
+      let(:recovery_lock) { instance_double(described_class::RecoveryLockToken) }
+
+      before do
+        data_store.recovery_lock_store_factory = recovery_lock_store_factory
+        allow(recovery_lock_store_factory).to receive(:resolve).with(redis: connection).and_return(recovery_lock_store)
+      end
+
+      it "passes control to recovery lock" do
+        expect(recovery_lock_store).to receive(:acquire_lock).with(name).and_return(recovery_lock)
+
+        acquired_lock = data_store.acquire_recovery_lock(config)
+        expect(acquired_lock).to eq(recovery_lock)
+      end
+    end
+
+    describe "#release_recovery_lock" do
+      let(:recovery_lock_store_factory) { instance_double(described_class::RecoveryLockStoreFactory) }
+      let(:recovery_lock_store) { instance_double(described_class::RecoveryLockStore) }
+      let(:recovery_lock) { instance_double(described_class::RecoveryLockToken) }
+
+      before do
+        data_store.recovery_lock_store_factory = recovery_lock_store_factory
+        allow(recovery_lock_store_factory).to receive(:resolve).with(redis: connection).and_return(recovery_lock_store)
+      end
+
+      it "passes control to recovery lock" do
+        expect(recovery_lock_store).to receive(:release_lock).with(recovery_lock)
+
+        data_store.release_recovery_lock(recovery_lock)
+      end
+    end
+
     it_behaves_like "Stoplight::Domain::DataStore"
     it_behaves_like "Stoplight::Domain::DataStore#get_metrics"
     it_behaves_like "Stoplight::Domain::DataStore#get_recovery_metrics"
@@ -162,11 +197,12 @@ RSpec.describe Stoplight::Infrastructure::DataStore::Redis, :redis do
   end
 
   it_behaves_like Stoplight::Infrastructure::DataStore::Redis do
-    let(:data_store) { described_class.new(redis, warn_on_clock_skew: warn_on_clock_skew) }
+    let(:data_store) { described_class.new(connection, warn_on_clock_skew: warn_on_clock_skew) }
+    let(:connection) { redis }
   end
 
   it_behaves_like Stoplight::Infrastructure::DataStore::Redis do
-    let(:data_store) { described_class.new(pool, warn_on_clock_skew: warn_on_clock_skew) }
-    let(:pool) { ConnectionPool.new(size: 1, timeout: 5, &redis_client_factory) }
+    let(:data_store) { described_class.new(connection, warn_on_clock_skew: warn_on_clock_skew) }
+    let(:connection) { ConnectionPool.new(size: 1, timeout: 5, &redis_client_factory) }
   end
 end

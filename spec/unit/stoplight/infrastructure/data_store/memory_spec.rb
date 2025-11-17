@@ -16,4 +16,39 @@ RSpec.describe Stoplight::Infrastructure::DataStore::Memory do
   it_behaves_like "Stoplight::Domain::DataStore#names"
   it_behaves_like "Stoplight::Domain::DataStore#set_state"
   it_behaves_like "Stoplight::Domain::DataStore#transition_to_color"
+
+  describe "#acquire_recovery_lock" do
+    let(:recovery_lock_store_factory) { instance_double(described_class::RecoveryLockStoreFactory) }
+    let(:recovery_lock_store) { instance_double(described_class::RecoveryLockStore) }
+    let(:recovery_lock) { instance_double(described_class::RecoveryLockToken) }
+
+    before do
+      allow(recovery_lock_store_factory).to receive(:resolve).and_return(recovery_lock_store)
+      data_store.recovery_lock_store_factory = recovery_lock_store_factory
+    end
+
+    it "passes control to recovery lock" do
+      expect(recovery_lock_store).to receive(:acquire_lock).with(name).and_return(recovery_lock)
+
+      acquired_lock = data_store.acquire_recovery_lock(config)
+      expect(acquired_lock).to eq(recovery_lock)
+    end
+  end
+
+  describe "#release_recovery_lock" do
+    let(:recovery_lock_store_factory) { instance_double(described_class::RecoveryLockStoreFactory) }
+    let(:recovery_lock_store) { instance_double(described_class::RecoveryLockStore) }
+    let(:recovery_lock) { instance_double(described_class::RecoveryLockToken) }
+
+    before do
+      allow(recovery_lock_store_factory).to receive(:resolve).and_return(recovery_lock_store)
+      data_store.recovery_lock_store_factory = recovery_lock_store_factory
+    end
+
+    it "passes control to recovery lock" do
+      expect(recovery_lock_store).to receive(:release_lock).with(recovery_lock)
+
+      data_store.release_recovery_lock(recovery_lock)
+    end
+  end
 end
