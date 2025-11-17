@@ -103,7 +103,7 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
       let(:state_snapshot) { instance_double(Stoplight::Domain::StateSnapshot, recovery_started?: false) }
 
       it "notifies if able to transition to YELLO" do
-        expect(data_store).to receive(:clear_windowed_metrics).with(config)
+        expect(data_store).to receive(:clear_metrics).with(config)
         expect(data_store).to receive(:transition_to_color).with(config, Stoplight::Domain::Color::YELLOW).and_return(true)
         expect(notifier).to receive(:notify).with(config, Stoplight::Domain::Color::RED, Stoplight::Domain::Color::YELLOW, nil)
 

@@ -44,7 +44,11 @@ module Stoplight
       #
       # @param config [Stoplight::Domain::Config] The light configuration.
       # @return [void]
-      def clear_windowed_metrics(config)
+      def clear_metrics(config)
+        raise NotImplementedError
+      end
+
+      def clear_recovery_metrics(config)
         raise NotImplementedError
       end
 

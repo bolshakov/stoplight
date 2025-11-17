@@ -19,17 +19,20 @@ RSpec.describe Stoplight::Domain::Tracker::RecoveryProbe do
         allow(data_store).to receive(:transition_to_color).with(config, transition_to).and_return(transition_outcome)
       end
 
-      context "when successfully transition to GREEN" do
+      context "when successfully transition to #{transition_to}" do
         let(:transition_outcome) { true }
 
         it "sends notifications" do
+          if transition_to != Stoplight::Domain::Color::YELLOW
+            expect(data_store).to receive(:clear_recovery_metrics).with(config)
+          end
           expect(notifier).to receive(:notify).with(config, transition_from, transition_to, nil)
 
           record_probe
         end
       end
 
-      context "when does not transition to GREEN" do
+      context "when does not transition to #{transition_to}" do
         let(:transition_outcome) { false }
 
         it "does not send notifications" do

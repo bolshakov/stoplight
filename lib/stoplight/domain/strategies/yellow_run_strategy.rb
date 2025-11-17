@@ -78,7 +78,7 @@ module Stoplight
           return if state_snapshot.recovery_started?
 
           if data_store.transition_to_color(config, Color::YELLOW)
-            data_store.clear_windowed_metrics(config)
+            data_store.clear_metrics(config)
             notifiers.each do |notifier|
               notifier.notify(config, Color::RED, Color::YELLOW, nil)
             end

@@ -62,9 +62,15 @@ module Stoplight
           end
         end
 
-        def clear_windowed_metrics(config)
-          with_fallback(:clear_windowed_metrics, config) do
-            data_store.clear_windowed_metrics(config)
+        def clear_metrics(config)
+          with_fallback(:clear_metrics, config) do
+            data_store.clear_metrics(config)
+          end
+        end
+
+        def clear_recovery_metrics(config)
+          with_fallback(:clear_recovery_metrics, config) do
+            data_store.clear_recovery_metrics(config)
           end
         end
 

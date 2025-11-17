@@ -58,6 +58,7 @@ RSpec.describe "Redis drop-in compatibility", :redis, :freeze do
     end
 
     it "correctly reads metrics fields with integer timestamps" do
+      4.times { redis.zadd(failure_key, Time.now.to_i, SecureRandom.uuid) }
       # Simulate OLD version writing integer timestamp to metrics hash
       redis.hset(metadata_key, "last_error_at", Time.now.to_i)
       redis.hset(metadata_key, "consecutive_errors", "3")
@@ -72,7 +73,7 @@ RSpec.describe "Redis drop-in compatibility", :redis, :freeze do
       # NEW version should read it without issues
       metrics = data_store.get_metrics(config)
       expect(metrics.last_error_at).to be_within(1).of(base_time)
-      expect(metrics.total_consecutive_errors).to eq(3)
+      expect(metrics.consecutive_errors).to eq(3)
       expect(metrics.last_error).to have_attributes(
         error_class: "StandardError",
         error_message: "something went wrong",

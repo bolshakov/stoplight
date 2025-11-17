@@ -34,34 +34,33 @@ RSpec.describe Stoplight::Domain::TrafficRecovery::ConsecutiveSuccesses do
     let(:config) { Stoplight::Domain::Config.empty.with(recovery_threshold:) }
     let(:recovery_threshold) { 2 }
 
-    let(:metrics) { instance_double(Stoplight::Domain::Metrics, consecutive_successes:, last_error_at:) }
-    let(:state_snapshot) { instance_double(Stoplight::Domain::StateSnapshot, recovery_started_at:, recovery_scheduled_after:, color:) }
-    let(:last_error_at) { recovery_started_at - 60 }
-    let(:recovery_started_at) { Time.now }
-    let(:recovery_scheduled_after) { nil }
+    let(:metrics) { instance_double(Stoplight::Domain::Metrics, consecutive_successes:, consecutive_errors:) }
+    let(:state_snapshot) { instance_double(Stoplight::Domain::StateSnapshot, color:) }
     let(:color) { Stoplight::Domain::Color::YELLOW }
 
-    context "when the last error happened after the recovery started" do
-      let(:last_error_at) { recovery_started_at + 2 }
-      let(:recovery_started_at) { Time.now }
-      let(:consecutive_successes) { 0 }
+    context "when has errors" do
+      let(:consecutive_errors) { 1 }
+      let(:consecutive_successes) { 2 }
 
       it { is_expected.to be(Stoplight::Domain::TrafficRecovery::RED) }
     end
 
     context "when the number of consecutive successes is greater than the threshold" do
+      let(:consecutive_errors) { 0 }
       let(:consecutive_successes) { recovery_threshold + 1 }
 
       it { is_expected.to be(Stoplight::Domain::TrafficRecovery::GREEN) }
     end
 
     context "when the number of consecutive successes equals to the threshold" do
+      let(:consecutive_errors) { 0 }
       let(:consecutive_successes) { recovery_threshold }
 
       it { is_expected.to be(Stoplight::Domain::TrafficRecovery::GREEN) }
     end
 
     context "when the number of consecutive successes is less than the threshold" do
+      let(:consecutive_errors) { 0 }
       let(:consecutive_successes) { recovery_threshold - 1 }
 
       it { is_expected.to be(Stoplight::Domain::TrafficRecovery::YELLOW) }
@@ -69,6 +68,7 @@ RSpec.describe Stoplight::Domain::TrafficRecovery::ConsecutiveSuccesses do
 
     context "when already recovered on another Stoplight instance" do
       let(:color) { Stoplight::Domain::Color::GREEN }
+      let(:consecutive_errors) { 0 }
       let(:consecutive_successes) { 0 }
 
       it { is_expected.to be(Stoplight::Domain::TrafficRecovery::PASS) }
