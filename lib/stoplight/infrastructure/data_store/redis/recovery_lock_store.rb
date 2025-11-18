@@ -27,17 +27,23 @@ module Stoplight
         class RecoveryLockStore
           # @!attribute redis
           #   @return [RedisClient]
-          private attr_reader :redis
+          protected attr_reader :redis
 
           # @!attribute lock_timeout
           #   @return [Integer]
-          private attr_reader :lock_timeout
+          protected attr_reader :lock_timeout
+
+          # @!attribute scripting
+          #   @return [Stoplight::Infrastructure::DataStore::Redis::Scripting]
+          protected attr_reader :scripting
 
           # @param redis [RedisClient | ConnectionPool]
           # @param lock_timeout [Integer] recovery_lock timeout in milliseconds
-          def initialize(redis:, lock_timeout:)
+          # @param scripting [Stoplight::Infrastructure::DataStore::Redis::Scripting]
+          def initialize(redis:, lock_timeout:, scripting:)
             @redis = redis
             @lock_timeout = lock_timeout
+            @scripting = scripting
           end
 
           # @param light_name [String]
@@ -55,17 +61,10 @@ module Stoplight
           # @param recovery_lock [Stoplight::Infrastructure::DataStore::Redis::RecoveryLockToken]
           # @return [void]
           def release_lock(recovery_lock)
-            # TODO: Use Script Manager
-            redis.then do |client|
-              client.eval(<<~LUA, keys: [recovery_lock.lock_key], argv: [recovery_lock.token])
-                local token = ARGV[1] 
-                local lock_key = KEYS[1]
-  
-                if redis.call("get", lock_key) == token then
-                  return redis.call("del", lock_key)
-                end
-              LUA
-            end
+            scripting.call(
+              :release_lock,
+              keys: [recovery_lock.lock_key], args: [recovery_lock.token]
+            )
           end
         end
       end

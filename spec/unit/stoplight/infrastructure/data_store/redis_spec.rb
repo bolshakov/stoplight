@@ -68,13 +68,14 @@ RSpec.describe Stoplight::Infrastructure::DataStore::Redis, :redis do
     let(:redis_mock) { instance_double(Redis) }
 
     it "does not communicate with redis on initialization" do
-      expect { described_class.new(redis: redis_mock, recovery_lock_store: nil) }.not_to raise_error
+      expect { described_class.new(redis: redis_mock, recovery_lock_store: nil, scripting: nil) }.not_to raise_error
     end
   end
 
   shared_examples Stoplight::Infrastructure::DataStore::Redis do
     let(:warn_on_clock_skew) { false }
     let(:recovery_lock_store) { instance_double(described_class::RecoveryLockStore) }
+    let(:scripting) { described_class::Scripting.new(redis: connection) }
 
     context "clock skew detection" do
       let(:stderr) { StringIO.new }
@@ -184,12 +185,26 @@ RSpec.describe Stoplight::Infrastructure::DataStore::Redis, :redis do
   end
 
   it_behaves_like Stoplight::Infrastructure::DataStore::Redis do
-    let(:data_store) { described_class.new(redis: connection, warn_on_clock_skew: warn_on_clock_skew, recovery_lock_store:) }
+    let(:data_store) do
+      described_class.new(
+        redis: connection,
+        warn_on_clock_skew: warn_on_clock_skew,
+        recovery_lock_store:,
+        scripting:
+      )
+    end
     let(:connection) { redis }
   end
 
   it_behaves_like Stoplight::Infrastructure::DataStore::Redis do
-    let(:data_store) { described_class.new(redis: connection, warn_on_clock_skew: warn_on_clock_skew, recovery_lock_store:) }
+    let(:data_store) do
+      described_class.new(
+        redis: connection,
+        warn_on_clock_skew: warn_on_clock_skew,
+        recovery_lock_store:,
+        scripting:
+      )
+    end
     let(:connection) { ConnectionPool.new(size: 1, timeout: 5, &redis_client_factory) }
   end
 end

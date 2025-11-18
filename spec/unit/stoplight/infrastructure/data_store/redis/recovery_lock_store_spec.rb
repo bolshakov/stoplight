@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 RSpec.describe Stoplight::Infrastructure::DataStore::Redis::RecoveryLockStore, :redis do
-  let(:store) { described_class.new(redis:, lock_timeout:) }
+  let(:store) { described_class.new(redis:, lock_timeout:, scripting:) }
+  let(:scripting) { Stoplight::Infrastructure::DataStore::Redis::Scripting.new(redis:) }
 
   let(:light_name) { SecureRandom.uuid }
   let(:lock_timeout) { 100 }
