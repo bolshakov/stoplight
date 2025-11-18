@@ -74,19 +74,18 @@ module Stoplight
         KEY_SEPARATOR = ":"
         KEY_PREFIX = %w[stoplight v5].join(KEY_SEPARATOR)
 
-        # @!attribute recovery_lock_store_factory
-        #   Dependency injection accessor
-        #   @return [Stoplight::Infrastructure::DataStore::Redis::RecoveryLockStoreFactory]
-        #   @api private
-        attr_accessor :recovery_lock_store_factory
-        private :recovery_lock_store_factory
+        # @!attribute recovery_lock_store
+        #   @return [Stoplight::Infrastructure::DataStore::Redis::RecoveryLockStore]
+        private attr_reader :recovery_lock_store
 
         # @param redis [::Redis, ConnectionPool<::Redis>]
+        # @param recovery_lock_store [Stoplight::Infrastructure::DataStore::Redis::RecoveryLockStore]
         # @param warn_on_clock_skew [Boolean] (true) Whether to warn about clock skew between Redis and
         #   the application server
-        def initialize(redis, warn_on_clock_skew: true)
+        def initialize(redis:, recovery_lock_store:, warn_on_clock_skew: true)
           @warn_on_clock_skew = warn_on_clock_skew
           @redis = redis
+          @recovery_lock_store = recovery_lock_store
         end
 
         def names
@@ -568,10 +567,6 @@ module Stoplight
 
         private def current_time
           Time.now
-        end
-
-        private def recovery_lock_store
-          recovery_lock_store_factory.resolve(redis: @redis)
         end
       end
     end

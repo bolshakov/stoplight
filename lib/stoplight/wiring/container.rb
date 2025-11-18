@@ -23,19 +23,16 @@ module Stoplight
       register(:error_notifier, Default::ERROR_NOTIFIER)
       register(:traffic_control, Default::TRAFFIC_CONTROL)
       register(:traffic_recovery, Default::TRAFFIC_RECOVERY)
+      register(:data_store_config, Default::DATA_STORE)
+      register(:failover_data_store_config, Stoplight::DataStore::Memory.new)
+      register(:data_store_factory, DataStoreFactory.new)
 
-      # Wraps a data store with fail-safe mechanisms.
-      #
-      # @param data_store [Stoplight::DataStore::Base] The data store to wrap.
-      # @param error_notifier [Proc] called when wrapped data store fails
-      # @return [Stoplight::DataStore::Base, FailSafe] The original data store if it is already
-      #   a +Memory+ or +FailSafe+ instance, otherwise a new +FailSafe+ instance.
-      register(:data_store, Default::DATA_STORE) do |data_store|
-        DataStoreFactory.create(
-          data_store: data_store,
-          error_notifier: resolve(:error_notifier),
-          failover_data_store: Wiring::Default::DATA_STORE
-        )
+      factory(:data_store) do
+        resolve(:data_store_factory).create(resolve(:data_store_config), self)
+      end
+
+      factory(:failover_data_store) do
+        resolve(:data_store_factory).create(resolve(:failover_data_store_config), self)
       end
 
       register(:notifiers, Default::NOTIFIERS) do |notifiers|
@@ -80,6 +77,17 @@ module Stoplight
           traffic_recovery: resolve(:traffic_recovery),
           notifiers: resolve(:notifiers),
           config: resolve(:config)
+        )
+      end
+
+      factory(:"data_store.memory.recovery_lock_store") do
+        Infrastructure::DataStore::Memory::RecoveryLockStore.new
+      end
+
+      factory(:"data_store.redis.recovery_lock_store") do
+        Infrastructure::DataStore::Redis::RecoveryLockStore.new(
+          redis: resolve(:data_store_config).redis,
+          lock_timeout: resolve(:config).cool_off_time
         )
       end
     end

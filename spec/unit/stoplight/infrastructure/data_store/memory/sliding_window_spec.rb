@@ -2,7 +2,7 @@
 
 require "spec_helper"
 
-RSpec.describe Stoplight::DataStore::Memory::SlidingWindow do
+RSpec.describe Stoplight::Infrastructure::DataStore::Memory::SlidingWindow do
   let(:counter) { described_class.new }
 
   around do |example|
