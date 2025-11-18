@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 RSpec.describe Stoplight::Admin::LightsRepository, :redis do
-  subject(:repository) { described_class.new(data_store:) }
+  subject(:repository) { described_class.new(data_store: light.__send__(:data_store)) }
 
-  let(:data_store) { Stoplight::Infrastructure::DataStore::Redis.new(redis) }
+  let(:data_store) { Stoplight::DataStore::Redis.new(redis) }
   let(:name) { "lights-repository" }
   let(:light) { Stoplight(name, data_store:) }
 
@@ -76,20 +76,8 @@ RSpec.describe Stoplight::Admin::LightsRepository, :redis do
 
     context "when the light is red" do
       before do
-        begin
-          light.run { raise }
-        rescue
-          nil
-        end
-        begin
-          light.run { raise }
-        rescue
-          nil
-        end
-        begin
-          light.run { raise }
-        rescue
-          nil
+        until light.color == Stoplight::Color::RED
+          light.run(->(_) {}) { raise }
         end
       end
 

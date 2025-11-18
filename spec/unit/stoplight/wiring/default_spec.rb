@@ -13,7 +13,7 @@ RSpec.describe Stoplight::Wiring::Default do
 
   describe "::DATA_STORE" do
     it "is a data store" do
-      expect(described_class::DATA_STORE).to be_a(Stoplight::Domain::DataStore)
+      expect(described_class::DATA_STORE).to be_a(Stoplight::DataStore::Memory)
     end
   end
 

@@ -5,6 +5,10 @@ RSpec.describe "Stoplight" do
 
   let(:name) { ("a".."z").to_a.shuffle.join }
 
+  before do
+    Stoplight.configure(trust_me_im_an_engineer: true) {}
+  end
+
   it "creates a stoplight" do
     expected_light = Stoplight.__stoplight__default_light_factory.build_with(name:)
 

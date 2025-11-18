@@ -21,9 +21,14 @@ module Stoplight
       #   @return [Stoplight::Wiring::Container]
       protected attr_reader :container
 
+      # @!attribute [r] Settings
+      #   @return [Hash]
+      protected attr_reader :settings
+
       # @param container [Stoplight::Wiring::Container]
-      def initialize(container)
+      def initialize(container, settings = {})
         @container = container
+        @settings = settings
       end
 
       # @param settings [Hash] Settings to override in the new factory
@@ -31,7 +36,8 @@ module Stoplight
       # @return [Stoplight::Wiring::LightFactory]
       # @see Stoplight()
       def with(**settings)
-        transformed_settings = transform_settings(settings)
+        new_settings = self.settings.merge(settings)
+        transformed_settings = transform_settings(new_settings)
         config_settings = extract_config_settings(transformed_settings)
         dependency_settings = extract_dependency_settings(transformed_settings)
 
@@ -40,7 +46,7 @@ module Stoplight
         new_config = container.resolve(:config).with(**config_settings)
         new_container = container.with(config: new_config, **dependency_settings)
 
-        self.class.new(new_container)
+        self.class.new(new_container, new_settings)
       end
 
       # Builds a fully-configured Light instance.
@@ -114,6 +120,10 @@ module Stoplight
       end
 
       private def transform_dependencies_settings!(settings)
+        if settings.key?(:data_store)
+          settings[:data_store_config] = settings.delete(:data_store)
+        end
+
         if settings.key?(:traffic_control)
           settings[:traffic_control] = apply_traffic_control_dsl(settings[:traffic_control])
         end

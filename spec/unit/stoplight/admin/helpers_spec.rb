@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Stoplight::Admin::Helpers do
+RSpec.describe Stoplight::Admin::Helpers, :redis do
   subject(:helper) { klass.new }
 
   let(:klass) do
@@ -9,7 +9,7 @@ RSpec.describe Stoplight::Admin::Helpers do
     end
   end
 
-  let(:data_store) { Redis.new }
+  let(:data_store) { Stoplight::DataStore::Redis.new(redis) }
   let(:settings) { Data.define(:data_store).new(data_store: data_store) }
 
   before do
@@ -22,9 +22,10 @@ RSpec.describe Stoplight::Admin::Helpers do
     end
 
     context "with Redis data store" do
-      let(:data_store) { instance_double(Stoplight::Infrastructure::DataStore::Redis) }
+      let(:data_store) { Stoplight::DataStore::Redis.new(redis) }
 
       it "does not raise an error" do
+        expect(data_store).to receive(:create)
         expect { helper.dependencies }.to_not raise_error
       end
     end
@@ -33,7 +34,7 @@ RSpec.describe Stoplight::Admin::Helpers do
       let(:data_store) { Stoplight::DataStore::Memory.new }
 
       it "raises an error" do
-        expect { helper.dependencies }.to raise_error StandardError
+        expect { helper.dependencies }.to raise_error StandardError, /Stoplight Admin requires a persistent data store/
       end
     end
   end

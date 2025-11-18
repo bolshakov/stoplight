@@ -1,62 +1,50 @@
 # frozen_string_literal: true
 
 RSpec.describe Stoplight::Wiring::DataStoreFactory do
-  subject { described_class.create(data_store:, error_notifier:, failover_data_store:) }
+  subject { factory.create(data_store_config, container) }
+  let(:factory) { described_class.new }
 
   let(:error_notifier) { Stoplight::Wiring::Default::ERROR_NOTIFIER }
-  let(:failover_data_store) { Stoplight::Infrastructure::DataStore::Memory.new }
+  let(:failover_data_store) { Stoplight::Infrastructure::DataStore::Memory.new(recovery_lock_store:) }
+  let(:recovery_lock_store) { nil }
+  let(:container) do
+    container = Stoplight::Infrastructure::DependencyInjection::Container.new
+    container.register(:error_notifier, error_notifier)
+    container.register(:failover_data_store, failover_data_store)
+    container
+  end
 
-  context "when data_store is a Memory instance" do
-    let(:data_store) { Stoplight::Infrastructure::DataStore::Memory.new }
+  context "with Stoplight::DataStore::Memory" do
+    let(:data_store_config) { Stoplight::DataStore::Memory.new }
 
-    it "returns the same data_store instance" do
-      is_expected.to be(data_store)
+    before do
+      container.register(:"data_store.memory.recovery_lock_store", recovery_lock_store)
+    end
+
+    it "returns data_store instance" do
+      is_expected.to be_kind_of(Stoplight::Infrastructure::DataStore::Memory)
+    end
+
+    it "returns the same data store instance for the same config instance" do
+      is_expected.to equal(factory.create(data_store_config, container))
     end
   end
 
-  context "when data_store is a FailSafe instance with the same error_notifier" do
-    let(:data_store) do
-      Stoplight::Infrastructure::DataStore::FailSafe.new(
-        data_store: Stoplight::Infrastructure::DataStore::Memory.new,
-        error_notifier:,
-        failover_data_store:,
-        circuit_breaker: nil
-      )
-    end
+  context "with Stoplight::DataStore::Redis", :redis do
+    let(:data_store_config) { Stoplight::DataStore::Redis.new(redis, warn_on_clock_skew:) }
+    let(:warn_on_clock_skew) { double("warn_on_clock_skew") }
 
-    it "returns the same data_store instance" do
-      is_expected.to be(data_store)
-    end
-  end
-
-  context "when data_store is a FailSafe instance with a different error_notifier" do
-    let(:underlying_data_store) { Stoplight::Infrastructure::DataStore::Memory.new }
-    let(:underlying_error_notifier) { ->(error) { warn error } }
-
-    let(:data_store) do
-      Stoplight::Infrastructure::DataStore::FailSafe.new(
-        data_store: underlying_data_store,
-        error_notifier: underlying_error_notifier,
-        failover_data_store:,
-        circuit_breaker: nil
-      )
+    before do
+      container.register(:"data_store.redis.recovery_lock_store", recovery_lock_store)
     end
 
     it "returns a new FailSafe instance wrapping the data_store" do
       is_expected.to be_a(Stoplight::Infrastructure::DataStore::FailSafe)
       is_expected.to have_attributes(
-        data_store: underlying_data_store,
-        error_notifier: error_notifier
+        data_store: be_kind_of(Stoplight::Infrastructure::DataStore::Redis),
+        error_notifier:,
+        failover_data_store:
       )
-    end
-  end
-
-  context "when data_store is another type" do
-    let(:data_store) { instance_double(Stoplight::Domain::DataStore) }
-
-    it "returns a new FailSafe instance wrapping the data_store" do
-      is_expected.to be_a(Stoplight::Infrastructure::DataStore::FailSafe)
-      is_expected.to have_attributes(data_store:, error_notifier:)
     end
   end
 end

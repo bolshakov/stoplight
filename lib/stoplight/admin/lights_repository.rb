@@ -4,11 +4,11 @@ module Stoplight
   class Admin
     class LightsRepository
       # @!attribute data_store
-      #   @return [Stoplight::DataStore::Base]
+      #   @return [Stoplight::Domain::DataStore]
       attr_reader :data_store
       private :data_store
 
-      #  @param data_store [Stoplight::DataStore::Base]
+      #  @param data_store [Stoplight::Domain::DataStore]
       def initialize(data_store:)
         @data_store = data_store
       end
@@ -37,46 +37,49 @@ module Stoplight
       #   color
       # @return [void]
       def lock(name, color = nil)
-        light = build_light(name)
+        config = build_config(name)
+        color ||= data_store.get_state_snapshot(config).color
 
-        case color || light.color
+        case color
         when Stoplight::Color::GREEN
-          light.lock(Stoplight::Color::GREEN)
+          data_store.set_state(config, Stoplight::State::LOCKED_GREEN)
         else
-          light.lock(Stoplight::Color::RED)
+          data_store.set_state(config, Stoplight::State::LOCKED_RED)
         end
       end
 
       # @param name [String] unlocks light by its name
       # @return [void]
       def unlock(name)
-        build_light(name).unlock
+        config = build_config(name)
+        data_store.set_state(config, Domain::State::UNLOCKED)
       end
 
       # @param name [String] removes light metadata by its name
       # @return [void]
       def remove(name)
-        light = build_light(name)
+        config = build_config(name)
 
-        data_store.delete_light(light.config)
+        data_store.delete_light(config)
       end
 
       private def load_light(name)
-        light = build_light(name)
+        config = build_config(name)
+
         # failures, state
-        state_snapshot = data_store.get_state_snapshot(light.config)
-        metrics = data_store.get_metrics(light.config)
+        state_snapshot = data_store.get_state_snapshot(config)
+        metrics = data_store.get_metrics(config)
 
         Light.new(
           name: name,
-          color: light.color,
+          color: state_snapshot.color,
           state: state_snapshot.locked_state,
           failures: [metrics.last_error].compact
         )
       end
 
-      private def build_light(name)
-        Stoplight(name, data_store: data_store)
+      private def build_config(name)
+        Wiring::Light::DefaultConfig.with(name:)
       end
     end
   end

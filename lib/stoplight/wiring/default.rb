@@ -5,7 +5,7 @@ module Stoplight
     module Default
       COOL_OFF_TIME = 60.0
 
-      DATA_STORE = Infrastructure::DataStore::Memory.new
+      DATA_STORE = Stoplight::DataStore::Memory.new
 
       ERROR_NOTIFIER = ->(error) { warn error }
 

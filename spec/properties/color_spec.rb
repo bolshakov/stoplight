@@ -12,7 +12,7 @@ RSpec.describe "Stoplight::Light#color" do
         config = light.config
 
         color_sequence.each do |color|
-          data_store.transition_to_color(config, color)
+          light.__send__(:data_store).transition_to_color(config, color)
         end
 
         expect(light.color).to eq(color_sequence.last)
@@ -73,14 +73,14 @@ RSpec.describe "Stoplight::Light#color" do
   end
 
   context "with memory data store" do
-    let(:data_store) { Stoplight::Infrastructure::DataStore::Memory.new }
+    let(:data_store) { Stoplight::DataStore::Memory.new }
 
     it_behaves_like "transition to color"
     it_behaves_like "state machine"
   end
 
   context "with redis data store", :redis do
-    let(:data_store) { Stoplight::Infrastructure::DataStore::Redis.new(redis) }
+    let(:data_store) { Stoplight::DataStore::Redis.new(redis) }
 
     it_behaves_like "transition to color"
     it_behaves_like "state machine"
