@@ -27,15 +27,21 @@ module Stoplight
         #   @return [Stoplight::Domain::RecoveryProbeRequestRecorder]
         protected attr_reader :request_tracker
 
+        # @!attribute [r] red_run_strategy
+        #   @return [Stoplight::Domain::Strategies::RedRunStrategy]
+        protected attr_reader :red_run_strategy
+
         # @param config [Stoplight::Domain::Config]
         # @param data_store [Stoplight::DataStore::Base]
         # @param notifiers [Array<Stoplight::Domain::StateTransitionNotifier>]
         # @param request_tracker [Stoplight::Domain::Tracker::RecoveryProbe]
-        def initialize(config:, data_store:, notifiers:, request_tracker:)
+        # @param red_run_strategy [Stoplight::Domain::Strategies::RedRunStrategy]
+        def initialize(config:, data_store:, notifiers:, request_tracker:, red_run_strategy:)
           @config = config
           @data_store = data_store
           @notifiers = notifiers
           @request_tracker = request_tracker
+          @red_run_strategy = red_run_strategy
         end
 
         # Executes the provided code block when the light is in the yellow state.
@@ -46,21 +52,41 @@ module Stoplight
         # @return [Object] The result of the code block if successful.
         # @raise [Exception] Re-raises the error if it is not tracked or no fallback is provided.
         def execute(fallback, state_snapshot:, &code)
-          enter_recovery(state_snapshot)
-          # TODO: We need to employ a probabilistic approach here to avoid "thundering herd" problem
-          code.call.tap { record_recovery_probe_success }
-        rescue => error
-          if config.track_error?(error)
-            record_recovery_probe_failure(error)
+          # Everything withing this block executed exclusively:
+          #   - enter recovery
+          #   - execute user's code
+          #   - record outcome
+          #   - transition to green or red if needed
+          with_recovery_lock(fallback:, state_snapshot:) do
+            enter_recovery(state_snapshot)
 
-            if fallback
-              fallback.call(error)
+            code.call.tap { record_recovery_probe_success }
+          rescue => error
+            if config.track_error?(error)
+              record_recovery_probe_failure(error)
+
+              if fallback
+                fallback.call(error)
+              else
+                raise
+              end
             else
+              record_recovery_probe_success
               raise
             end
-          else
-            record_recovery_probe_success
-            raise
+          end
+        end
+
+        def with_recovery_lock(fallback:, state_snapshot:)
+          recovery_lock_token = data_store.acquire_recovery_lock(config)
+          if recovery_lock_token.nil?
+            return red_run_strategy.execute(fallback, state_snapshot:)
+          end
+
+          begin
+            yield
+          ensure
+            data_store.release_recovery_lock(recovery_lock_token)
           end
         end
 
@@ -77,11 +103,10 @@ module Stoplight
         private def enter_recovery(state_snapshot)
           return if state_snapshot.recovery_started?
 
-          if data_store.transition_to_color(config, Color::YELLOW)
-            data_store.clear_metrics(config)
-            notifiers.each do |notifier|
-              notifier.notify(config, Color::RED, Color::YELLOW, nil)
-            end
+          data_store.transition_to_color(config, Color::YELLOW)
+          data_store.clear_metrics(config)
+          notifiers.each do |notifier|
+            notifier.notify(config, Color::RED, Color::YELLOW, nil)
           end
         end
 
@@ -91,7 +116,8 @@ module Stoplight
             config == other.config &&
             notifiers == other.notifiers &&
             data_store == other.data_store &&
-            request_tracker == other.request_tracker
+            request_tracker == other.request_tracker &&
+            red_run_strategy == other.red_run_strategy
         end
       end
     end

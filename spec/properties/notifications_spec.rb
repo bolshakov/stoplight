@@ -2,8 +2,6 @@
 
 require "rantly/rspec_extensions"
 
-require "spec_helper"
-
 RSpec.describe "Notifications" do
   shared_examples "notify about state changes" do
     let(:notifier) { notifier_class.new }

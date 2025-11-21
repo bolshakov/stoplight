@@ -121,7 +121,13 @@ module Stoplight
       end
 
       private def yellow_run_strategy
-        Domain::Strategies::YellowRunStrategy.new(config:, data_store:, notifiers:, request_tracker: recovery_probe_tracker)
+        Domain::Strategies::YellowRunStrategy.new(
+          config:,
+          data_store:,
+          notifiers:,
+          request_tracker: recovery_probe_tracker,
+          red_run_strategy:
+        )
       end
 
       private def red_run_strategy

@@ -53,7 +53,13 @@ module Stoplight
 
         private def transition_to_red(exception, metrics:)
           if traffic_control.stop_traffic?(config, metrics)
-            transition_and_notify(Color::GREEN, Color::RED, exception)
+            # Returns true only if not yet in red therefore preventing
+            # duplicate notifications
+            if data_store.transition_to_color(config, Color::RED)
+              notifiers.each do |notifier|
+                notifier.notify(config, Color::GREEN, Color::RED, exception)
+              end
+            end
           end
         end
 

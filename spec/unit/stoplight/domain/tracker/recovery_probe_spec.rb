@@ -12,34 +12,17 @@ RSpec.describe Stoplight::Domain::Tracker::RecoveryProbe do
   shared_examples "when recover to" do |recover_to:, transition_from:, transition_to:|
     context "when recover to #{recover_to}" do
       let(:metrics_after_probe) { instance_double(Stoplight::Domain::Metrics) }
-      let(:state_snapshot_after_probe) { instance_double(Stoplight::Domain::StateSnapshot) }
 
       before do
-        allow(traffic_recovery).to receive(:determine_color).with(config, metrics_after_probe, state_snapshot_after_probe).and_return(recover_to)
-        allow(data_store).to receive(:transition_to_color).with(config, transition_to).and_return(transition_outcome)
+        allow(traffic_recovery).to receive(:determine_color).with(config, metrics_after_probe).and_return(recover_to)
+        allow(data_store).to receive(:transition_to_color).with(config, transition_to)
       end
 
-      context "when successfully transition to #{transition_to}" do
-        let(:transition_outcome) { true }
+      it "sends notifications" do
+        expect(data_store).to receive(:clear_recovery_metrics).with(config)
+        expect(notifier).to receive(:notify).with(config, transition_from, transition_to, nil)
 
-        it "sends notifications" do
-          if transition_to != Stoplight::Domain::Color::YELLOW
-            expect(data_store).to receive(:clear_recovery_metrics).with(config)
-          end
-          expect(notifier).to receive(:notify).with(config, transition_from, transition_to, nil)
-
-          record_probe
-        end
-      end
-
-      context "when does not transition to #{transition_to}" do
-        let(:transition_outcome) { false }
-
-        it "does not send notifications" do
-          expect(notifier).not_to receive(:notify)
-
-          record_probe
-        end
+        record_probe
       end
     end
   end
@@ -51,42 +34,37 @@ RSpec.describe Stoplight::Domain::Tracker::RecoveryProbe do
       transition_to: Stoplight::Domain::Color::GREEN
 
     include_examples "when recover to",
-      recover_to: Stoplight::Domain::TrafficRecovery::YELLOW,
-      transition_from: Stoplight::Domain::Color::RED,
-      transition_to: Stoplight::Domain::Color::YELLOW
-
-    include_examples "when recover to",
       recover_to: Stoplight::Domain::TrafficRecovery::RED,
       transition_from: Stoplight::Domain::Color::YELLOW,
       transition_to: Stoplight::Domain::Color::RED
 
-    context "when recover to PASS" do
-      let(:metrics_after_probe) { instance_double(Stoplight::Domain::Metrics) }
-      let(:state_snapshot_after_probe) { instance_double(Stoplight::Domain::StateSnapshot) }
-      let(:recover_to) { Stoplight::Domain::TrafficRecovery::PASS }
-
-      before do
-        allow(traffic_recovery).to receive(:determine_color).with(config, metrics_after_probe, state_snapshot_after_probe).and_return(recover_to)
-      end
-
-      it "does not send notifications" do
-        expect(notifier).not_to receive(:notify)
-
-        record_probe
-      end
-    end
-
     context "when recover to unexpected to outcome" do
       let(:metrics_after_probe) { instance_double(Stoplight::Domain::Metrics) }
-      let(:state_snapshot_after_probe) { instance_double(Stoplight::Domain::StateSnapshot) }
       let(:recover_to) { "unexpected" }
 
       before do
-        allow(traffic_recovery).to receive(:determine_color).with(config, metrics_after_probe, state_snapshot_after_probe).and_return(recover_to)
+        allow(traffic_recovery).to receive(:determine_color).with(config, metrics_after_probe).and_return(recover_to)
       end
 
       it "raises an error" do
         expect { record_probe }.to raise_error(/recovery strategy returned unexpected color/)
+      end
+    end
+
+    context "when recover to YELLOW (needs more probes)" do
+      let(:metrics_after_probe) { instance_double(Stoplight::Domain::Metrics) }
+      let(:recover_to) { Stoplight::Domain::TrafficRecovery::YELLOW }
+
+      before do
+        allow(traffic_recovery).to receive(:determine_color).with(config, metrics_after_probe).and_return(recover_to)
+      end
+
+      it "don't transition" do
+        expect(data_store).not_to receive(:transition_to_color)
+        expect(data_store).not_to receive(:clear_recovery_metrics)
+        expect(notifier).not_to receive(:notify)
+
+        record_probe
       end
     end
   end
@@ -97,7 +75,6 @@ RSpec.describe Stoplight::Domain::Tracker::RecoveryProbe do
     before do
       allow(data_store).to receive(:record_recovery_probe_success).with(config)
       allow(data_store).to receive(:get_recovery_metrics).with(config).and_return(metrics_after_probe)
-      allow(data_store).to receive(:get_state_snapshot).with(config).and_return(state_snapshot_after_probe)
     end
 
     include_examples "recovering after probe"
@@ -111,7 +88,6 @@ RSpec.describe Stoplight::Domain::Tracker::RecoveryProbe do
     before do
       allow(data_store).to receive(:record_recovery_probe_failure).with(config, exception)
       allow(data_store).to receive(:get_recovery_metrics).with(config).and_return(metrics_after_probe)
-      allow(data_store).to receive(:get_state_snapshot).with(config).and_return(state_snapshot_after_probe)
     end
 
     include_examples "recovering after probe"
