@@ -137,9 +137,7 @@ module Stoplight
       # @param other [any]
       # @return [Boolean]
       def ==(other)
-        other.is_a?(self.class) && config == other.config && data_store == other.data_store &&
-          green_run_strategy == other.green_run_strategy && yellow_run_strategy == other.yellow_run_strategy &&
-          red_run_strategy == other.red_run_strategy && factory == other.factory
+        other.is_a?(self.class) && factory == other.factory
       end
 
       # Reconfigures the light with updated settings and returns a new instance.
