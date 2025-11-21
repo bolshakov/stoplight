@@ -55,9 +55,10 @@ module Stoplight # rubocop:disable Style/Documentation
         factory_builder = Wiring::DefaultFactoryBuilder.new
         yield factory_builder.configuration if block_given?
 
+        default_light_factory = factory_builder.build
+        default_light_factory.validate_configuration!
         @default_configuration = factory_builder.configuration
-        @default_light_factory = factory_builder.build
-        @default_light_factory.validate_configuration!
+        @default_light_factory = default_light_factory
       end
     end
 
