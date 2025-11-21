@@ -90,6 +90,12 @@ module Stoplight
       def ==(other)
         other.is_a?(self.class) && other.settings == settings
       end
+
+      alias_method :eql?, :==
+
+      def hash
+        [self.class, settings].hash
+      end
     end
   end
 end
