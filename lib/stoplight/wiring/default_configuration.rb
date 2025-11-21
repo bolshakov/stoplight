@@ -66,7 +66,7 @@ module Stoplight
           window_size: @window_size,
           tracked_errors: @tracked_errors,
           skipped_errors: @skipped_errors,
-          data_store_config: @data_store,
+          data_store: @data_store,
           error_notifier: @error_notifier,
           notifiers: @notifiers,
           traffic_control: @traffic_control,

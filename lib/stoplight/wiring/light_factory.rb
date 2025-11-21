@@ -15,20 +15,29 @@ module Stoplight
     # @api private
 
     class LightFactory < Domain::LightFactory
-      # @!attribute [r] container
-      #   The dependency injection container holding all component configurations.
-      #   Contains config, data_store, notifiers, strategies, etc.
-      #   @return [Stoplight::Wiring::Container]
-      protected attr_reader :container
+      DEPENDENCY_KEYS = %i[data_store traffic_recovery traffic_control notifiers error_notifier].freeze
+      private_constant :DEPENDENCY_KEYS
 
-      # @!attribute [r] Settings
+      CONFIG_KEYS = Domain::Config.members.freeze
+      private_constant :CONFIG_KEYS
+
+      # @!attribute [r] settings
       #   @return [Hash]
       protected attr_reader :settings
 
-      # @param container [Stoplight::Wiring::Container]
-      def initialize(container, settings = {})
-        @container = container
+      def initialize(settings = {})
         @settings = settings
+
+        validate_settings!
+      end
+
+      private def validate_settings!
+        recognized = CONFIG_KEYS + DEPENDENCY_KEYS
+        unknown = settings.keys - recognized
+
+        return if unknown.empty?
+
+        raise ArgumentError, "Unknown settings: #{unknown.join(", ")}", caller(2)
       end
 
       # @param settings [Hash] Settings to override in the new factory
@@ -36,17 +45,7 @@ module Stoplight
       # @return [Stoplight::Wiring::LightFactory]
       # @see Stoplight()
       def with(**settings)
-        new_settings = self.settings.merge(settings)
-        transformed_settings = transform_settings(new_settings)
-        config_settings = extract_config_settings(transformed_settings)
-        dependency_settings = extract_dependency_settings(transformed_settings)
-
-        validate_settings!(transformed_settings, config_settings, dependency_settings)
-
-        new_config = container.resolve(:config).with(**config_settings)
-        new_container = container.with(config: new_config, **dependency_settings)
-
-        self.class.new(new_container, new_settings)
+        self.class.new(self.settings.merge(settings))
       end
 
       # Builds a fully-configured Light instance.
@@ -66,132 +65,30 @@ module Stoplight
       #   light.run { api_call }
 
       def build
-        validate!
+        config_settings = settings.slice(*CONFIG_KEYS)
+        dependency_settings = settings.slice(*DEPENDENCY_KEYS)
 
-        Stoplight::Domain::Light.new(
-          container.resolve(:config),
-          data_store: container.resolve(:data_store),
-          green_run_strategy: container.resolve(:green_run_strategy),
-          yellow_run_strategy: container.resolve(:yellow_run_strategy),
-          red_run_strategy: container.resolve(:red_run_strategy),
-          factory: self
+        config, dependencies = ConfigurationPipeline.process(
+          config_settings,
+          dependency_settings
         )
+        LightBuilder.new(factory: self, config:, **dependencies).build
+      end
+
+      # @return [Stoplight::Error::ConfigurationError]
+      def validate_configuration!
+        config_settings = settings.slice(*CONFIG_KEYS)
+        dependency_settings = settings.slice(*DEPENDENCY_KEYS)
+
+        ConfigurationPipeline.process(
+          config_settings,
+          dependency_settings
+        )
+        nil
       end
 
       def ==(other)
-        other.is_a?(self.class) && other.container == container
-      end
-
-      private def extract_config_settings(settings)
-        settings.slice(*container.resolve(:config).members)
-      end
-
-      private def extract_dependency_settings(settings)
-        settings.slice(*container.keys)
-      end
-
-      private def validate_settings!(settings, config_settings, dependency_settings)
-        recognized_keys = config_settings.keys + dependency_settings.keys
-        unexpected_keys = settings.keys - recognized_keys
-
-        return if unexpected_keys.empty?
-        raise ArgumentError, "Unknown settings: #{unexpected_keys.join(", ")}"
-      end
-
-      private def transform_settings(settings)
-        settings.dup.tap do |transformed_settings|
-          transform_config_settings!(transformed_settings)
-          transform_dependencies_settings!(transformed_settings)
-        end
-      end
-
-      private def transform_config_settings!(settings)
-        if settings.key?(:tracked_errors)
-          settings[:tracked_errors] = normalize_array(settings[:tracked_errors])
-        end
-
-        if settings.key?(:skipped_errors)
-          settings[:skipped_errors] = normalize_array(settings[:skipped_errors])
-        end
-
-        if settings.key?(:cool_off_time)
-          settings[:cool_off_time] = normalize_cool_off_time(settings[:cool_off_time])
-        end
-      end
-
-      private def transform_dependencies_settings!(settings)
-        if settings.key?(:data_store)
-          settings[:data_store_config] = settings.delete(:data_store)
-        end
-
-        if settings.key?(:traffic_control)
-          settings[:traffic_control] = apply_traffic_control_dsl(settings[:traffic_control])
-        end
-
-        if settings.key?(:traffic_recovery)
-          settings[:traffic_recovery] = apply_traffic_recovery_dsl(settings[:traffic_recovery])
-        end
-      end
-
-      private def normalize_array(value) = Array(value)
-      private def normalize_cool_off_time(value) = value.to_i
-
-      private def apply_traffic_control_dsl(traffic_control)
-        case traffic_control
-        in Domain::TrafficControl::Base
-          traffic_control
-        in :consecutive_errors
-          Domain::TrafficControl::ConsecutiveErrors.new
-        in :error_rate
-          Domain::TrafficControl::ErrorRate.new
-        in {error_rate: error_rate_settings}
-          Domain::TrafficControl::ErrorRate.new(**error_rate_settings)
-        else
-          raise Domain::Error::ConfigurationError, <<~ERROR
-            unsupported traffic_control strategy provided (`#{traffic_control}`). Supported options:
-              * :consecutive_errors
-              * :error_rate
-          ERROR
-        end
-      end
-
-      def apply_traffic_recovery_dsl(traffic_recovery)
-        case traffic_recovery
-        in Domain::TrafficRecovery::Base
-          traffic_recovery
-        in :consecutive_successes
-          Domain::TrafficRecovery::ConsecutiveSuccesses.new
-        else
-          raise Domain::Error::ConfigurationError, <<~ERROR
-            unsupported traffic_recovery strategy provided (`#{traffic_recovery}`). Supported options:
-              * :consecutive_successes
-          ERROR
-        end
-      end
-
-      private def validate!
-        validate_traffic_control!(container.resolve(:traffic_control), container.resolve(:config))
-        validate_traffic_recovery!(container.resolve(:traffic_recovery), container.resolve(:config))
-      end
-
-      private def validate_traffic_control!(traffic_control, config)
-        traffic_control.check_compatibility(config).then do |compatibility_result|
-          if compatibility_result.incompatible?
-            raise Domain::Error::ConfigurationError.new(
-              "#{traffic_control.class.name} strategy is incompatible with the Stoplight configuration: #{compatibility_result.error_messages}"
-            )
-          end
-        end
-      end
-
-      private def validate_traffic_recovery!(traffic_recovery, config)
-        traffic_recovery.check_compatibility(config).then do |compatibility_result|
-          if compatibility_result.incompatible?
-            raise Domain::Error::ConfigurationError.new(
-              "#{traffic_recovery.class.name} strategy is incompatible with the Stoplight configuration: #{compatibility_result.error_messages}"
-            )
-          end
-        end
+        other.is_a?(self.class) && other.settings == settings
       end
     end
   end

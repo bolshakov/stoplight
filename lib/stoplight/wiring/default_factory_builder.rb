@@ -18,7 +18,7 @@ module Stoplight
       # @return [Stoplight::Wiring::LightFactory]
       # @api private the method is used internally by Stoplight
       def build
-        LightFactory.new(Wiring::Container).with(**configuration.to_h)
+        LightFactory.new(configuration.to_h)
       end
     end
   end

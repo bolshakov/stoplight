@@ -19,17 +19,6 @@ module Stoplight
           @warn_on_clock_skew = warn_on_clock_skew
           @redis = redis
         end
-
-        # @param container [Stoplight::Infrastructure::DependencyInjection::Container]
-        # @return [Stoplight::Infrastructure::DataStore::Redis]
-        # @api private
-        def create(container)
-          Stoplight::Infrastructure::DataStore::Redis.new(
-            redis: redis,
-            warn_on_clock_skew: warn_on_clock_skew,
-            recovery_lock_store: container.resolve(:"data_store.redis.recovery_lock_store")
-          )
-        end
       end
     end
   end
