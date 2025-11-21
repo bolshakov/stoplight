@@ -57,6 +57,7 @@ module Stoplight # rubocop:disable Style/Documentation
 
         @default_configuration = factory_builder.configuration
         @default_light_factory = factory_builder.build
+        @default_light_factory.validate_configuration!
       end
     end
 
@@ -67,7 +68,7 @@ module Stoplight # rubocop:disable Style/Documentation
     # @return [Stoplight::Light]
     # @api private
     def system_light(name, **settings)
-      Wiring::SystemLightFactory.build_with(name: "__stoplight__#{name}", **settings)
+      Wiring::LightFactory.new.with(name: "__stoplight__#{name}", **settings).build
     end
 
     # Create a Light with the user default configuration.

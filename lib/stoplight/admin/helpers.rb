@@ -19,9 +19,12 @@ module Stoplight
           raise "Stoplight Admin requires a persistent data store, but the current data store is Memory. " \
             "Please configure a different data store in your Stoplight configuration."
         else
-          Wiring::Container
-            .with(data_store_config: settings.data_store, config: Wiring::Light::DefaultConfig)
-            .resolve(:data_store)
+          Stoplight::Wiring::LightBuilder.new(
+            {
+              data_store: settings.data_store,
+              config: Wiring::Light::DefaultConfig
+            }
+          ).__send__(:data_store)
         end
       end
     end

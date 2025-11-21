@@ -89,7 +89,7 @@ RSpec.describe Stoplight::Wiring::DefaultConfiguration do
       default_config.data_store = data_store
     end
 
-    it { is_expected.to include(data_store_config: data_store) }
+    it { is_expected.to include(data_store: data_store) }
   end
 
   context "when traffic_control is set" do

@@ -29,7 +29,7 @@ RSpec.describe Stoplight::Wiring::LightFactory do
       traffic_recovery: base_traffic_recovery
     )
   end
-  let(:factory) { described_class.new(base_container) }
+  let(:factory) { described_class.new({}) }
 
   describe "transformations" do
     describe "tracked_errors" do
@@ -174,7 +174,7 @@ RSpec.describe Stoplight::Wiring::LightFactory do
       it "raises a configuration errors" do
         expect { light }.to raise_error(
           Stoplight::Error::ConfigurationError,
-          "Stoplight::Domain::TrafficControl::ErrorRate strategy is incompatible with the Stoplight configuration: " \
+          "Stoplight::Domain::TrafficControl::ErrorRate incompatible with config: " \
             "`threshold` should be between 0 and 1"
         )
       end
@@ -187,7 +187,7 @@ RSpec.describe Stoplight::Wiring::LightFactory do
       it "raises a configuration errors" do
         expect { light }.to raise_error(
           Stoplight::Error::ConfigurationError,
-          "Stoplight::Domain::TrafficRecovery::ConsecutiveSuccesses strategy is incompatible with the Stoplight configuration: " \
+          "Stoplight::Domain::TrafficRecovery::ConsecutiveSuccesses incompatible with config: " \
             "`recovery_threshold` should be bigger than 0"
         )
       end

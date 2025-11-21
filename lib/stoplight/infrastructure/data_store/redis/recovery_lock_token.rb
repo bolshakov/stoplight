@@ -27,7 +27,7 @@ module Stoplight
             @token = SecureRandom.uuid
           end
 
-          def lock_key = key(:recovery_lock, light_name)
+          def lock_key = key(:locks, :recovery, light_name)
         end
       end
     end
