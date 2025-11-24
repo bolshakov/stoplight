@@ -50,10 +50,9 @@ module Stoplight
         #
         # @param config [Stoplight::Domain::Config]
         # @param metrics [Stoplight::Domain::Metrics]
-        # @param state_snapshot [Stoplight::Domain::StateSnapshot]
         # @return [TrafficRecovery::Decision]
         # :nocov:
-        def determine_color(config, metrics, state_snapshot)
+        def determine_color(config, metrics)
           raise NotImplementedError
         end
         # :nocov:

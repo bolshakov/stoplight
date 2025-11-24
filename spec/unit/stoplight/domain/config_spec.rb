@@ -48,4 +48,13 @@ RSpec.describe Stoplight::Domain::Config do
       it { is_expected.to be false }
     end
   end
+
+  describe "#cool_off_time_in_milliseconds" do
+    subject { config.cool_off_time_in_milliseconds }
+
+    let(:config) { described_class.empty.with(cool_off_time:) }
+    let(:cool_off_time) { 1 }
+
+    it { is_expected.to eq(1_000) }
+  end
 end

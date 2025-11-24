@@ -7,7 +7,7 @@ module Stoplight
     # # @!attribute [r] name
     #   @return [String]
     #
-    # @!attribute [r] cool_off_time
+    # @!attribute [r] cool_off_time - cool-off time in seconds
     #   @return [Numeric]
     #
     # @!attribute [r] threshold
@@ -49,6 +49,10 @@ module Stoplight
         track = tracked_errors.any? { |klass| klass === error }
 
         !skip && track
+      end
+
+      def cool_off_time_in_milliseconds
+        cool_off_time * 1_000
       end
     end
   end

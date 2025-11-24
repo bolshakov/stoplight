@@ -29,13 +29,12 @@ RSpec.describe Stoplight::Domain::TrafficRecovery::ConsecutiveSuccesses do
   end
 
   describe "#determine_color" do
-    subject { described_class.new.determine_color(config, metrics, state_snapshot) }
+    subject { described_class.new.determine_color(config, metrics) }
 
     let(:config) { Stoplight::Domain::Config.empty.with(recovery_threshold:) }
     let(:recovery_threshold) { 2 }
 
     let(:metrics) { instance_double(Stoplight::Domain::Metrics, consecutive_successes:, consecutive_errors:) }
-    let(:state_snapshot) { instance_double(Stoplight::Domain::StateSnapshot, color:) }
     let(:color) { Stoplight::Domain::Color::YELLOW }
 
     context "when has errors" do
@@ -64,14 +63,6 @@ RSpec.describe Stoplight::Domain::TrafficRecovery::ConsecutiveSuccesses do
       let(:consecutive_successes) { recovery_threshold - 1 }
 
       it { is_expected.to be(Stoplight::Domain::TrafficRecovery::YELLOW) }
-    end
-
-    context "when already recovered on another Stoplight instance" do
-      let(:color) { Stoplight::Domain::Color::GREEN }
-      let(:consecutive_errors) { 0 }
-      let(:consecutive_successes) { 0 }
-
-      it { is_expected.to be(Stoplight::Domain::TrafficRecovery::PASS) }
     end
   end
 end

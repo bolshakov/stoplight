@@ -50,11 +50,8 @@ module Stoplight
         #
         # @param config [Stoplight::Domain::Config]
         # @param recovery_metrics [Stoplight::Domain::Metrics]
-        # @param state_snapshot [Stoplight::Domain::StateSnapshot]
         # @return [TrafficRecovery::Decision]
-        def determine_color(config, recovery_metrics, state_snapshot)
-          return TrafficRecovery::PASS if state_snapshot.color != Color::YELLOW
-
+        def determine_color(config, recovery_metrics)
           if recovery_metrics.consecutive_errors > 0
             TrafficRecovery::RED
           elsif recovery_metrics.consecutive_successes >= config.recovery_threshold

@@ -45,26 +45,23 @@ module Stoplight
         end
         RECOVERY_TRANSITIONS = {
           TrafficRecovery::GREEN => [Color::YELLOW, Color::GREEN],
-          TrafficRecovery::YELLOW => [Color::RED, Color::YELLOW],
           TrafficRecovery::RED => [Color::YELLOW, Color::RED]
         }.freeze
 
         private def recover
           recovery_metrics = data_store.get_recovery_metrics(config)
-          state_snapshot = data_store.get_state_snapshot(config) # TODO: is this really necessary?
+          recovery_result = traffic_recovery.determine_color(config, recovery_metrics)
 
-          recovery_result = traffic_recovery.determine_color(config, recovery_metrics, state_snapshot)
-
-          return if recovery_result == TrafficRecovery::PASS
+          return if recovery_result == TrafficRecovery::YELLOW
 
           from_color, to_color = RECOVERY_TRANSITIONS.fetch(recovery_result) do
             raise "recovery strategy returned unexpected color: #{recovery_result}"
           end
 
-          transition_and_notify(from_color, to_color, nil) do
-            if to_color != Color::YELLOW
-              data_store.clear_recovery_metrics(config)
-            end
+          data_store.transition_to_color(config, to_color)
+          data_store.clear_recovery_metrics(config)
+          notifiers.each do |notifier|
+            notifier.notify(config, from_color, to_color, nil)
           end
         end
 
