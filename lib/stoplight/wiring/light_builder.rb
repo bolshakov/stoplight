@@ -89,7 +89,7 @@ module Stoplight
       private def redis_recovery_lock_store
         Infrastructure::DataStore::Redis::RecoveryLockStore.new(
           redis: data_store_config.redis,
-          lock_timeout: config.cool_off_time,
+          lock_timeout: config.cool_off_time_in_milliseconds,
           scripting:
         )
       end
