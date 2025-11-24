@@ -240,10 +240,10 @@ RSpec.describe "Light" do
     let(:light_with_different_config) { Stoplight("foo", cool_off_time: 10) }
 
     it "returns true when the lights have the same configuration" do
-      expect(light == light_with_the_same_name).to eq(true)
-      expect(light == light_with_different_name).to eq(false)
-      expect(light == light_with_different_config).to eq(false)
-      expect(light.with(cool_off_time: 10) == light_with_different_config).to eq(true)
+      expect(light).to eq(light_with_the_same_name)
+      expect(light).not_to eq(light_with_different_name)
+      expect(light).not_to eq(light_with_different_config)
+      expect(light.with(cool_off_time: 10)).to eq(light_with_different_config)
     end
   end
 

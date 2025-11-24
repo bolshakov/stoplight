@@ -18,6 +18,39 @@ RSpec.describe Stoplight::Domain::Light do
   let(:red_run_strategy) { instance_double(Stoplight::Domain::Strategies::RedRunStrategy) }
   let(:data_store) { instance_double(Stoplight::Domain::DataStore) }
 
+  describe "#==" do
+    context "light with the different factory" do
+      let(:light_2) do
+        described_class.new(
+          config,
+          green_run_strategy:,
+          yellow_run_strategy:,
+          red_run_strategy:,
+          factory: factory2,
+          data_store:
+        )
+      end
+      let(:factory2) { instance_double(Stoplight::Domain::LightFactory) }
+
+      it { expect(light).not_to eq(light_2) }
+    end
+
+    context "light with the same factory" do
+      let(:light_2) do
+        described_class.new(
+          config,
+          green_run_strategy:,
+          yellow_run_strategy:,
+          red_run_strategy:,
+          factory:,
+          data_store:
+        )
+      end
+
+      it { expect(light).to eq(light_2) }
+    end
+  end
+
   describe "#lock" do
     let(:color) { Stoplight::Domain::Color::GREEN }
 
