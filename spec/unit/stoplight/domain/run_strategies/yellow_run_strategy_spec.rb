@@ -4,19 +4,19 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
   subject(:strategy) do
     described_class.new(
       config:,
-      data_store:,
       notifiers: notifiers,
       request_tracker:,
       red_run_strategy:,
       state_store:,
-      metrics_store:
+      metrics_store:,
+      recovery_lock_store:
     )
   end
 
   let(:notifiers) { [notifier] }
   let(:config) { instance_double(Stoplight::Domain::Config) }
   let(:notifier) { instance_double(Stoplight::Domain::StateTransitionNotifier) }
-  let(:data_store) { instance_double(Stoplight::Domain::DataStore) }
+  let(:recovery_lock_store) { instance_double(Stoplight::Domain::Storage::RecoveryLock) }
   let(:state_store) { instance_double(Stoplight::Domain::Storage::State) }
   let(:metrics_store) { instance_double(Stoplight::Domain::Storage::Metrics) }
   let(:request_tracker) { instance_double(Stoplight::Domain::Tracker::RecoveryProbe) }
@@ -31,7 +31,7 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
       let(:recovery_lock_token) { instance_double(Stoplight::Domain::RecoveryLockToken) }
 
       before do
-        allow(data_store).to receive(:acquire_recovery_lock).with(config).and_return(recovery_lock_token)
+        allow(recovery_lock_store).to receive(:acquire_lock).and_return(recovery_lock_token)
       end
 
       context "when code executes successfully" do
@@ -41,7 +41,7 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
 
         it "returns result" do
           expect(request_tracker).to receive(:record_success)
-          expect(data_store).to receive(:release_recovery_lock).with(recovery_lock_token)
+          expect(recovery_lock_store).to receive(:release_lock).with(recovery_lock_token)
 
           expect(result).to eq("Success")
         end
@@ -65,7 +65,7 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
 
             it "records failure, notify and raises the error" do
               expect(request_tracker).to receive(:record_failure).with(error)
-              expect(data_store).to receive(:release_recovery_lock).with(recovery_lock_token)
+              expect(recovery_lock_store).to receive(:release_lock).with(recovery_lock_token)
 
               expect { result }.to raise_error(error)
             end
@@ -81,7 +81,7 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
 
             it "records failure, notify and returns the fallback" do
               expect(request_tracker).to receive(:record_failure).with(error)
-              expect(data_store).to receive(:release_recovery_lock).with(recovery_lock_token)
+              expect(recovery_lock_store).to receive(:release_lock).with(recovery_lock_token)
 
               expect(result).to eq("Fallback")
               expect(@error).to eq(error)
@@ -95,7 +95,7 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
 
           it "records success and raises the error" do
             expect(request_tracker).to receive(:record_success)
-            expect(data_store).to receive(:release_recovery_lock).with(recovery_lock_token)
+            expect(recovery_lock_store).to receive(:release_lock).with(recovery_lock_token)
 
             expect { result }.to raise_error(StandardError, "Test error")
           end
@@ -109,7 +109,7 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
       let(:state_snapshot) { instance_double(Stoplight::Domain::StateSnapshot) }
 
       it "delegates to red_run_strategy" do
-        expect(data_store).to receive(:acquire_recovery_lock).with(config).and_return(nil)
+        expect(recovery_lock_store).to receive(:acquire_lock).and_return(nil)
         expect(red_run_strategy).to receive(:execute).with(fallback, state_snapshot:).and_return(value)
 
         expect do |code|

@@ -114,6 +114,10 @@ module Stoplight
         Stoplight::Infrastructure::Storage::CompatibilityMetrics.new(config:, data_store:)
       end
 
+      private def recovery_lock_store
+        Stoplight::Infrastructure::Storage::CompatibilityRecoveryLock.new(config:, data_store:)
+      end
+
       private def request_tracker
         Domain::Tracker::Request.new(traffic_control:, notifiers:, config:, metrics_store:, state_store:)
       end
@@ -139,12 +143,12 @@ module Stoplight
       private def yellow_run_strategy
         Domain::Strategies::YellowRunStrategy.new(
           config:,
-          data_store:,
           notifiers:,
           request_tracker: recovery_probe_tracker,
           red_run_strategy:,
           state_store:,
-          metrics_store:
+          metrics_store:,
+          recovery_lock_store:
         )
       end
 
