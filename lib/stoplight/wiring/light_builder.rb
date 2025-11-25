@@ -34,6 +34,9 @@ module Stoplight
       MEMORY_REGISTRY = Concurrent::Map.new
       private_constant :MEMORY_REGISTRY
 
+      MEMORY_RECOVERY_LOCKS = Concurrent::Map.new
+      private_constant :MEMORY_RECOVERY_LOCKS
+
       # @!attribute data_store_config
       #   @return [Stoplight::DataStore::Bose]
       private attr_reader :data_store_config
@@ -94,11 +97,18 @@ module Stoplight
       end
 
       private def redis_recovery_lock_store
-        Infrastructure::DataStore::Redis::RecoveryLockStore.new(
-          redis: data_store_config.redis,
-          lock_timeout: config.cool_off_time_in_milliseconds,
-          scripting:
-        )
+        case data_store_config
+        in Stoplight::DataStore::Memory
+          memory_recovery_locks.compute_if_absent(config.name) do
+            Stoplight::Infrastructure::Storage::Memory::RecoveryLock.new
+          end
+        in Stoplight::DataStore::Redis
+          Infrastructure::DataStore::Redis::RecoveryLockStore.new(
+            redis: data_store_config.redis,
+            lock_timeout: config.cool_off_time_in_milliseconds,
+            scripting:
+          )
+        end
       end
 
       private def scripting = Infrastructure::DataStore::Redis::Scripting.new(redis: data_store_config.redis)
@@ -187,6 +197,7 @@ module Stoplight
       end
 
       private def memory_registry = MEMORY_REGISTRY
+      private def memory_recovery_locks = MEMORY_RECOVERY_LOCKS
     end
   end
 end
