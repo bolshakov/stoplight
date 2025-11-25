@@ -26,30 +26,34 @@ module Stoplight
         #   @return [Stoplight::Domain::Config] The configuration for the light.
         protected attr_reader :config
 
+        # @!attribute metrics_store
+        #   @return [Stoplight::Storage::Metrics]
+        protected attr_reader :metrics_store
+
         # @param data_store [Stoplight::Domain::DataStore]
         # @param traffic_control [Stoplight::Domain::TrafficControl::Base]
         # @param notifiers [<Stoplight::Domain::StateTransitionNotifier>]
         # @param config [Stoplight::Domain::Config]
-        def initialize(data_store:, traffic_control:, notifiers:, config:)
+        # @param metrics_store [Stoplight::Storage::Metrics]
+        def initialize(data_store:, traffic_control:, notifiers:, config:, metrics_store:)
           @data_store = data_store
           @traffic_control = traffic_control
           @notifiers = notifiers
           @config = config
+          @metrics_store = metrics_store
         end
 
         # @param exception [Exception]
         # @return [void]
         def record_failure(exception)
-          data_store.record_failure(config, exception)
-          metrics = data_store.get_metrics(config)
+          metrics_store.record_failure(exception)
+          metrics = metrics_store.metrics_snapshot
 
           transition_to_red(exception, metrics:)
         end
 
         # @return [void]
-        def record_success
-          data_store.record_success(config)
-        end
+        def record_success = metrics_store.record_success
 
         private def transition_to_red(exception, metrics:)
           if traffic_control.stop_traffic?(config, metrics)
@@ -61,12 +65,6 @@ module Stoplight
               end
             end
           end
-        end
-
-        # @param other [any]
-        # @return [bool]
-        def ==(other)
-          super && traffic_control == other.traffic_control
         end
       end
     end

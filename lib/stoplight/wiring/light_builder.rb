@@ -108,12 +108,26 @@ module Stoplight
         create_data_store(data_store_config)
       end
 
+      private def metrics_store
+        Stoplight::Infrastructure::Storage::CompatibilityMetrics.new(config:, data_store:)
+      end
+
       private def request_tracker
-        Domain::Tracker::Request.new(data_store:, traffic_control:, notifiers:, config:)
+        Domain::Tracker::Request.new(data_store:, traffic_control:, notifiers:, config:, metrics_store:)
       end
 
       private def recovery_probe_tracker
-        Domain::Tracker::RecoveryProbe.new(data_store:, traffic_recovery:, notifiers:, config:)
+        Domain::Tracker::RecoveryProbe.new(
+          data_store:,
+          traffic_recovery:,
+          notifiers:,
+          config:,
+          metrics_store: recovery_metrics_store
+        )
+      end
+
+      private def recovery_metrics_store
+        Stoplight::Infrastructure::Storage::CompatibilityRecoveryMetrics.new(config:, data_store:)
       end
 
       private def green_run_strategy

@@ -20,26 +20,32 @@ module Stoplight
         #   @return [Stoplight::Domain::Config] The configuration for the light.
         protected attr_reader :config
 
+        # @!attribute [r] metrics_store
+        #   @return [Stoplight::Domain::Storage::Metrics]
+        protected attr_reader :metrics_store
+
         # @param data_store [Stoplight::Domain::DataStore]
         # @param traffic_recovery [Stoplight::Domain::TrafficRecovery::Base]
         # @param notifiers [<Stoplight::Domain::StateTransitionNotifier>]
         # @param config [Stoplight::Domain::Config]
-        def initialize(data_store:, traffic_recovery:, notifiers:, config:)
+        # @param metrics_store [Stoplight::Domain::Storage::Metrics]
+        def initialize(data_store:, traffic_recovery:, notifiers:, config:, metrics_store:)
           @data_store = data_store
           @traffic_recovery = traffic_recovery
           @notifiers = notifiers
           @config = config
+          @metrics_store = metrics_store
         end
 
         # @param exception [Exception]
         def record_failure(exception)
-          data_store.record_recovery_probe_failure(config, exception)
+          metrics_store.record_failure(exception)
 
           recover
         end
 
         def record_success
-          data_store.record_recovery_probe_success(config)
+          metrics_store.record_success
 
           recover
         end
@@ -49,7 +55,7 @@ module Stoplight
         }.freeze
 
         private def recover
-          recovery_metrics = data_store.get_recovery_metrics(config)
+          recovery_metrics = metrics_store.metrics_snapshot
           recovery_result = traffic_recovery.determine_color(config, recovery_metrics)
 
           return if recovery_result == TrafficRecovery::YELLOW
@@ -59,16 +65,10 @@ module Stoplight
           end
 
           data_store.transition_to_color(config, to_color)
-          data_store.clear_recovery_metrics(config)
+          metrics_store.clear
           notifiers.each do |notifier|
             notifier.notify(config, from_color, to_color, nil)
           end
-        end
-
-        # @param other [any]
-        # @return [bool]
-        def ==(other)
-          super && traffic_recovery == other.traffic_recovery
         end
       end
     end

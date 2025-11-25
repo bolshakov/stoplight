@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
 RSpec.describe Stoplight::Domain::Tracker::RecoveryProbe do
-  subject(:recorder) { described_class.new(data_store:, traffic_recovery:, notifiers:, config:) }
+  subject(:recorder) { described_class.new(data_store:, traffic_recovery:, notifiers:, config:, metrics_store:) }
 
+  let(:metrics_store) { instance_double(Stoplight::Domain::Storage::Metrics) }
   let(:data_store) { instance_double(Stoplight::Domain::DataStore) }
   let(:traffic_recovery) { instance_double(Stoplight::Domain::TrafficRecovery::Base) }
   let(:notifiers) { [notifier] }
@@ -19,7 +20,7 @@ RSpec.describe Stoplight::Domain::Tracker::RecoveryProbe do
       end
 
       it "sends notifications" do
-        expect(data_store).to receive(:clear_recovery_metrics).with(config)
+        expect(metrics_store).to receive(:clear)
         expect(notifier).to receive(:notify).with(config, transition_from, transition_to, nil)
 
         record_probe
@@ -61,7 +62,7 @@ RSpec.describe Stoplight::Domain::Tracker::RecoveryProbe do
 
       it "don't transition" do
         expect(data_store).not_to receive(:transition_to_color)
-        expect(data_store).not_to receive(:clear_recovery_metrics)
+        expect(metrics_store).not_to receive(:clear)
         expect(notifier).not_to receive(:notify)
 
         record_probe
@@ -73,8 +74,8 @@ RSpec.describe Stoplight::Domain::Tracker::RecoveryProbe do
     subject(:record_probe) { recorder.record_success }
 
     before do
-      allow(data_store).to receive(:record_recovery_probe_success).with(config)
-      allow(data_store).to receive(:get_recovery_metrics).with(config).and_return(metrics_after_probe)
+      allow(metrics_store).to receive(:record_success)
+      allow(metrics_store).to receive(:metrics_snapshot).and_return(metrics_after_probe)
     end
 
     include_examples "recovering after probe"
@@ -86,46 +87,10 @@ RSpec.describe Stoplight::Domain::Tracker::RecoveryProbe do
     let(:exception) { KeyError.new("bang") }
 
     before do
-      allow(data_store).to receive(:record_recovery_probe_failure).with(config, exception)
-      allow(data_store).to receive(:get_recovery_metrics).with(config).and_return(metrics_after_probe)
+      allow(metrics_store).to receive(:record_failure).with(exception)
+      allow(metrics_store).to receive(:metrics_snapshot).and_return(metrics_after_probe)
     end
 
     include_examples "recovering after probe"
-  end
-
-  describe "#==" do
-    context "with the same arguments" do
-      let(:other) { described_class.new(config:, data_store:, traffic_recovery:, notifiers:) }
-
-      it { expect(recorder).to eq(other) }
-    end
-
-    context "with different data_store" do
-      let(:other) { described_class.new(config:, data_store: data_store_2, traffic_recovery:, notifiers:) }
-      let(:data_store_2) { instance_double(Stoplight::Domain::DataStore) }
-
-      it { expect(recorder).not_to eq(other) }
-    end
-
-    context "with different traffic_control" do
-      let(:other) { described_class.new(config:, data_store:, traffic_recovery: traffic_recovery_2, notifiers:) }
-      let(:traffic_recovery_2) { instance_double(Stoplight::Domain::TrafficRecovery::Base) }
-
-      it { expect(recorder).not_to eq(other) }
-    end
-
-    context "with different notifiers" do
-      let(:other) { described_class.new(config:, data_store:, traffic_recovery:, notifiers: notifiers_2) }
-      let(:notifiers_2) { [] }
-
-      it { expect(recorder).not_to eq(other) }
-    end
-
-    context "with different config" do
-      let(:other) { described_class.new(config: config_2, data_store:, traffic_recovery:, notifiers:) }
-      let(:config_2) { instance_double(Stoplight::Domain::Config) }
-
-      it { expect(recorder).not_to eq(other) }
-    end
   end
 end

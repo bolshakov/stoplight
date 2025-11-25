@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
 RSpec.describe Stoplight::Domain::Tracker::Request do
-  subject(:request_tracker) { described_class.new(data_store:, traffic_control:, notifiers:, config:) }
+  subject(:request_tracker) { described_class.new(data_store:, traffic_control:, notifiers:, config:, metrics_store:) }
 
+  let(:metrics_store) { instance_double(Stoplight::Domain::Storage::Metrics) }
   let(:data_store) { instance_double(Stoplight::Domain::DataStore) }
   let(:traffic_control) { instance_double(Stoplight::Domain::TrafficControl::Base) }
   let(:notifiers) { [notifier] }
@@ -10,7 +11,7 @@ RSpec.describe Stoplight::Domain::Tracker::Request do
   let(:config) { instance_double(Stoplight::Domain::Config) }
 
   specify "#record_success" do
-    expect(data_store).to receive(:record_success).with(config)
+    expect(metrics_store).to receive(:record_success)
 
     request_tracker.record_success
   end
@@ -20,8 +21,8 @@ RSpec.describe Stoplight::Domain::Tracker::Request do
     let(:metrics) { instance_double(Stoplight::Domain::Metrics) }
 
     before do
-      allow(data_store).to receive(:record_failure).with(config, exception)
-      allow(data_store).to receive(:get_metrics).with(config).and_return(metrics)
+      allow(metrics_store).to receive(:record_failure).with(exception)
+      allow(metrics_store).to receive(:metrics_snapshot).and_return(metrics)
     end
 
     context "when traffic control decides to stop the traffic" do
@@ -52,52 +53,6 @@ RSpec.describe Stoplight::Domain::Tracker::Request do
       expect(traffic_control).to receive(:stop_traffic?).with(config, metrics).and_return(false)
 
       request_tracker.record_failure(exception)
-    end
-  end
-
-  describe "#==" do
-    context "with the same arguments" do
-      let(:request_tracker_2) { described_class.new(data_store:, traffic_control:, notifiers:, config:) }
-
-      it "returns true" do
-        expect(request_tracker).to eq(request_tracker_2)
-      end
-    end
-
-    context "with different data_store" do
-      let(:request_tracker_2) { described_class.new(data_store: data_store_2, traffic_control:, notifiers:, config:) }
-      let(:data_store_2) { instance_double(Stoplight::Domain::DataStore) }
-
-      it "returns true" do
-        expect(request_tracker).not_to eq(request_tracker_2)
-      end
-    end
-
-    context "with different traffic_control" do
-      let(:request_tracker_2) { described_class.new(data_store:, traffic_control: traffic_control_2, notifiers:, config:) }
-      let(:traffic_control_2) { instance_double(Stoplight::Domain::TrafficControl::Base) }
-
-      it "returns true" do
-        expect(request_tracker).not_to eq(request_tracker_2)
-      end
-    end
-
-    context "with different notifiers" do
-      let(:request_tracker_2) { described_class.new(data_store:, traffic_control:, notifiers: notifiers_2, config:) }
-      let(:notifiers_2) { [] }
-
-      it "returns true" do
-        expect(request_tracker).not_to eq(request_tracker_2)
-      end
-    end
-
-    context "with different config" do
-      let(:request_tracker_2) { described_class.new(data_store:, traffic_control:, notifiers:, config: config_2) }
-      let(:config_2) { instance_double(Stoplight::Domain::Config) }
-
-      it "returns true" do
-        expect(request_tracker).not_to eq(request_tracker_2)
-      end
     end
   end
 end
