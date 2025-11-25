@@ -10,10 +10,6 @@ module Stoplight
       #
       # @api private
       class Request < Base
-        # @!attribute [r] data_store
-        #   @return [Stoplight::DataStore::Base] The data store associated with the light.
-        protected attr_reader :data_store
-
         # @!attribute [r] traffic_control
         #   @return [Stoplight::Domain::TrafficControl::Base]
         protected attr_reader :traffic_control
@@ -30,17 +26,21 @@ module Stoplight
         #   @return [Stoplight::Storage::Metrics]
         protected attr_reader :metrics_store
 
-        # @param data_store [Stoplight::Domain::DataStore]
+        # @!attribute [r] state_store
+        #   @return [Stoplight::Domain::Storage::State]
+        protected attr_reader :state_store
+
         # @param traffic_control [Stoplight::Domain::TrafficControl::Base]
         # @param notifiers [<Stoplight::Domain::StateTransitionNotifier>]
         # @param config [Stoplight::Domain::Config]
         # @param metrics_store [Stoplight::Storage::Metrics]
-        def initialize(data_store:, traffic_control:, notifiers:, config:, metrics_store:)
-          @data_store = data_store
+        # @param state_store [Stoplight::Domain::Storage::State]
+        def initialize(traffic_control:, notifiers:, config:, metrics_store:, state_store:)
           @traffic_control = traffic_control
           @notifiers = notifiers
           @config = config
           @metrics_store = metrics_store
+          @state_store = state_store
         end
 
         # @param exception [Exception]
@@ -59,7 +59,7 @@ module Stoplight
           if traffic_control.stop_traffic?(config, metrics)
             # Returns true only if not yet in red therefore preventing
             # duplicate notifications
-            if data_store.transition_to_color(config, Color::RED)
+            if state_store.transition_to_color(Color::RED)
               notifiers.each do |notifier|
                 notifier.notify(config, Color::GREEN, Color::RED, exception)
               end

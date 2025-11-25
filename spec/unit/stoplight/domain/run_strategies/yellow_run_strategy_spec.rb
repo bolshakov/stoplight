@@ -7,7 +7,9 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
       data_store:,
       notifiers: notifiers,
       request_tracker:,
-      red_run_strategy:
+      red_run_strategy:,
+      state_store:,
+      metrics_store:
     )
   end
 
@@ -15,6 +17,8 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
   let(:config) { instance_double(Stoplight::Domain::Config) }
   let(:notifier) { instance_double(Stoplight::Domain::StateTransitionNotifier) }
   let(:data_store) { instance_double(Stoplight::Domain::DataStore) }
+  let(:state_store) { instance_double(Stoplight::Domain::Storage::State) }
+  let(:metrics_store) { instance_double(Stoplight::Domain::Storage::Metrics) }
   let(:request_tracker) { instance_double(Stoplight::Domain::Tracker::RecoveryProbe) }
   let(:red_run_strategy) { instance_double(Stoplight::Domain::Strategies::RedRunStrategy) }
 
@@ -133,55 +137,12 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
       let(:state_snapshot) { instance_double(Stoplight::Domain::StateSnapshot, recovery_started?: false) }
 
       it "notifies if able to transition to YELLO" do
-        expect(data_store).to receive(:clear_metrics).with(config)
-        expect(data_store).to receive(:transition_to_color).with(config, Stoplight::Domain::Color::YELLOW)
+        expect(metrics_store).to receive(:clear)
+        expect(state_store).to receive(:transition_to_color).with(Stoplight::Domain::Color::YELLOW)
         expect(notifier).to receive(:notify).with(config, Stoplight::Domain::Color::RED, Stoplight::Domain::Color::YELLOW, nil)
 
         enter_recovery
       end
-    end
-  end
-
-  describe "#==" do
-    context "with the same arguments" do
-      let(:other) { described_class.new(config:, data_store:, notifiers:, request_tracker:, red_run_strategy:) }
-
-      it { is_expected.to eq(other) }
-    end
-
-    context "with different config" do
-      let(:other) { described_class.new(config: other_config, data_store:, notifiers:, request_tracker:, red_run_strategy:) }
-      let(:other_config) { instance_double(Stoplight::Domain::Config) }
-
-      it { is_expected.not_to eq(other) }
-    end
-
-    context "with different request recorder" do
-      let(:other) { described_class.new(config:, data_store:, notifiers:, request_tracker: other_request_tracker, red_run_strategy:) }
-      let(:other_request_tracker) { instance_double(Stoplight::Domain::Tracker::RecoveryProbe) }
-
-      it { is_expected.not_to eq(other) }
-    end
-
-    context "with different data_store" do
-      let(:other) { described_class.new(config:, data_store: other_data_store, notifiers:, request_tracker:, red_run_strategy:) }
-      let(:other_data_store) { instance_double(Stoplight::Domain::DataStore) }
-
-      it { is_expected.not_to eq(other) }
-    end
-
-    context "with different notifiers" do
-      let(:other) { described_class.new(config:, data_store:, notifiers: other_notifiers, request_tracker:, red_run_strategy:) }
-      let(:other_notifiers) { [] }
-
-      it { is_expected.not_to eq(other) }
-    end
-
-    context "with red_run_strategy" do
-      let(:other) { described_class.new(config:, data_store:, notifiers:, request_tracker:, red_run_strategy: other_red_run_strategy) }
-      let(:other_red_run_strategy) { instance_double(Stoplight::Domain::Strategies::RedRunStrategy) }
-
-      it { is_expected.not_to eq(other) }
     end
   end
 end

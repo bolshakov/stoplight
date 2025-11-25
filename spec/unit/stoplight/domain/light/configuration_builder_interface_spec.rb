@@ -8,7 +8,7 @@ RSpec.describe Stoplight::Domain::Light::ConfigurationBuilderInterface do
       green_run_strategy: nil,
       yellow_run_strategy: nil,
       red_run_strategy: nil,
-      data_store: nil,
+      state_store: nil,
       factory:
     )
   end

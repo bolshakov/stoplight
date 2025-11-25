@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
 RSpec.describe Stoplight::Domain::Tracker::Request do
-  subject(:request_tracker) { described_class.new(data_store:, traffic_control:, notifiers:, config:, metrics_store:) }
+  subject(:request_tracker) { described_class.new(state_store:, traffic_control:, notifiers:, config:, metrics_store:) }
 
   let(:metrics_store) { instance_double(Stoplight::Domain::Storage::Metrics) }
-  let(:data_store) { instance_double(Stoplight::Domain::DataStore) }
+  let(:state_store) { instance_double(Stoplight::Domain::Storage::State) }
   let(:traffic_control) { instance_double(Stoplight::Domain::TrafficControl::Base) }
   let(:notifiers) { [notifier] }
   let(:notifier) { instance_double(Stoplight::Domain::StateTransitionNotifier) }
@@ -32,7 +32,7 @@ RSpec.describe Stoplight::Domain::Tracker::Request do
 
       context "when successfully transitions to RED" do
         it "sends notifications about transition" do
-          allow(data_store).to receive(:transition_to_color).with(config, Stoplight::Domain::Color::RED).and_return(true)
+          allow(state_store).to receive(:transition_to_color).with(Stoplight::Domain::Color::RED).and_return(true)
           expect(notifier).to receive(:notify).with(config, Stoplight::Domain::Color::GREEN, Stoplight::Domain::Color::RED, exception)
 
           request_tracker.record_failure(exception)
@@ -41,7 +41,7 @@ RSpec.describe Stoplight::Domain::Tracker::Request do
 
       context "when failed to transition to RED" do
         it "does not send notification about transition" do
-          allow(data_store).to receive(:transition_to_color).with(config, Stoplight::Domain::Color::RED).and_return(false)
+          allow(state_store).to receive(:transition_to_color).with(Stoplight::Domain::Color::RED).and_return(false)
           expect(notifier).not_to receive(:notify)
 
           request_tracker.record_failure(exception)

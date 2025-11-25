@@ -19,6 +19,14 @@ module Stoplight
         #   @return [Stoplight::DataStore::Base] The data store associated with the light.
         protected attr_reader :data_store
 
+        # @!attribute [r] stare_store
+        #   @return [Stoplight::Domain::Storage::State]
+        protected attr_reader :state_store
+
+        # @!attribute [r] metrics_store
+        #   @return [Stoplight::Domain::Storage::Metrics]
+        protected attr_reader :metrics_store
+
         # @!attribute [r] notifiers
         #   @return [Stoplight::Domain::StateTransitionNotifier]
         protected attr_reader :notifiers
@@ -36,12 +44,14 @@ module Stoplight
         # @param notifiers [Array<Stoplight::Domain::StateTransitionNotifier>]
         # @param request_tracker [Stoplight::Domain::Tracker::RecoveryProbe]
         # @param red_run_strategy [Stoplight::Domain::Strategies::RedRunStrategy]
-        def initialize(config:, data_store:, notifiers:, request_tracker:, red_run_strategy:)
+        def initialize(config:, data_store:, notifiers:, request_tracker:, red_run_strategy:, state_store:, metrics_store:)
           @config = config
           @data_store = data_store
           @notifiers = notifiers
           @request_tracker = request_tracker
           @red_run_strategy = red_run_strategy
+          @state_store = state_store
+          @metrics_store = metrics_store
         end
 
         # Executes the provided code block when the light is in the yellow state.
@@ -103,21 +113,11 @@ module Stoplight
         private def enter_recovery(state_snapshot)
           return if state_snapshot.recovery_started?
 
-          data_store.transition_to_color(config, Color::YELLOW)
-          data_store.clear_metrics(config)
+          state_store.transition_to_color(Color::YELLOW)
+          metrics_store.clear
           notifiers.each do |notifier|
             notifier.notify(config, Color::RED, Color::YELLOW, nil)
           end
-        end
-
-        # @return [Boolean]
-        def ==(other)
-          super &&
-            config == other.config &&
-            notifiers == other.notifiers &&
-            data_store == other.data_store &&
-            request_tracker == other.request_tracker &&
-            red_run_strategy == other.red_run_strategy
         end
       end
     end

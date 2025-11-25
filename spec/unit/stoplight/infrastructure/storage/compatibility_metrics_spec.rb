@@ -36,7 +36,7 @@ RSpec.describe Stoplight::Infrastructure::Storage::CompatibilityMetrics do
     end
   end
 
-  describe "#reset" do
+  describe "#clear" do
     it "delegates to data store" do
       expect(data_store).to receive(:clear_metrics).with(config)
 

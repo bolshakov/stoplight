@@ -9,10 +9,9 @@ RSpec.describe "Stoplight::Light#color" do
         array(10) { choose(Stoplight::Color::GREEN, Stoplight::Color::RED, Stoplight::Color::YELLOW) }
       }.check do |color_sequence|
         light = Stoplight(SecureRandom.uuid, data_store:)
-        config = light.config
 
         color_sequence.each do |color|
-          light.__send__(:data_store).transition_to_color(config, color)
+          light.__send__(:state_store).transition_to_color(color)
         end
 
         expect(light.color).to eq(color_sequence.last)

@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
 RSpec.describe Stoplight::Domain::Tracker::RecoveryProbe do
-  subject(:recorder) { described_class.new(data_store:, traffic_recovery:, notifiers:, config:, metrics_store:) }
+  subject(:recorder) { described_class.new(state_store:, traffic_recovery:, notifiers:, config:, metrics_store:) }
 
   let(:metrics_store) { instance_double(Stoplight::Domain::Storage::Metrics) }
-  let(:data_store) { instance_double(Stoplight::Domain::DataStore) }
+  let(:state_store) { instance_double(Stoplight::Domain::Storage::State) }
   let(:traffic_recovery) { instance_double(Stoplight::Domain::TrafficRecovery::Base) }
   let(:notifiers) { [notifier] }
   let(:notifier) { instance_double(Stoplight::Domain::StateTransitionNotifier) }
@@ -16,7 +16,7 @@ RSpec.describe Stoplight::Domain::Tracker::RecoveryProbe do
 
       before do
         allow(traffic_recovery).to receive(:determine_color).with(config, metrics_after_probe).and_return(recover_to)
-        allow(data_store).to receive(:transition_to_color).with(config, transition_to)
+        allow(state_store).to receive(:transition_to_color).with(transition_to)
       end
 
       it "sends notifications" do
@@ -61,7 +61,7 @@ RSpec.describe Stoplight::Domain::Tracker::RecoveryProbe do
       end
 
       it "don't transition" do
-        expect(data_store).not_to receive(:transition_to_color)
+        expect(state_store).not_to receive(:transition_to_color)
         expect(metrics_store).not_to receive(:clear)
         expect(notifier).not_to receive(:notify)
 

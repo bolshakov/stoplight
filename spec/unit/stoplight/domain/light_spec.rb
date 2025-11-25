@@ -8,7 +8,7 @@ RSpec.describe Stoplight::Domain::Light do
       yellow_run_strategy:,
       red_run_strategy:,
       factory:,
-      data_store:
+      state_store:
     )
   end
   let(:factory) { instance_double(Stoplight::Domain::LightFactory) }
@@ -16,7 +16,7 @@ RSpec.describe Stoplight::Domain::Light do
   let(:green_run_strategy) { instance_double(Stoplight::Domain::Strategies::GreenRunStrategy) }
   let(:yellow_run_strategy) { instance_double(Stoplight::Domain::Strategies::YellowRunStrategy) }
   let(:red_run_strategy) { instance_double(Stoplight::Domain::Strategies::RedRunStrategy) }
-  let(:data_store) { instance_double(Stoplight::Domain::DataStore) }
+  let(:state_store) { instance_double(Stoplight::Domain::Storage::State) }
 
   describe "#==" do
     context "light with the different factory" do
@@ -27,7 +27,7 @@ RSpec.describe Stoplight::Domain::Light do
           yellow_run_strategy:,
           red_run_strategy:,
           factory: factory2,
-          data_store:
+          state_store:
         )
       end
       let(:factory2) { instance_double(Stoplight::Domain::LightFactory) }
@@ -43,7 +43,7 @@ RSpec.describe Stoplight::Domain::Light do
           yellow_run_strategy:,
           red_run_strategy:,
           factory:,
-          data_store:
+          state_store:
         )
       end
 
@@ -59,7 +59,7 @@ RSpec.describe Stoplight::Domain::Light do
         let(:color) { Stoplight::Domain::Color::GREEN }
 
         it "locks green color" do
-          expect(data_store).to receive(:set_state).with(config, Stoplight::Domain::State::LOCKED_GREEN)
+          expect(state_store).to receive(:set_state).with(Stoplight::Domain::State::LOCKED_GREEN)
 
           expect(light.lock(color)).to be_a Stoplight::Domain::Light
         end
@@ -69,7 +69,7 @@ RSpec.describe Stoplight::Domain::Light do
         let(:color) { Stoplight::Domain::Color::RED }
 
         it "locks red color" do
-          expect(data_store).to receive(:set_state).with(config, Stoplight::Domain::State::LOCKED_RED)
+          expect(state_store).to receive(:set_state).with(Stoplight::Domain::State::LOCKED_RED)
 
           expect(light.lock(color)).to be_a Stoplight::Domain::Light
         end
@@ -84,7 +84,7 @@ RSpec.describe Stoplight::Domain::Light do
       end
 
       it "does not lock color" do
-        expect(data_store).to_not receive(:set_state)
+        expect(state_store).to_not receive(:set_state)
 
         suppress(Stoplight::Domain::Error::IncorrectColor) { light.lock(color) }
       end
@@ -92,7 +92,7 @@ RSpec.describe Stoplight::Domain::Light do
   end
 
   specify "#unlock" do
-    expect(data_store).to receive(:set_state).with(config, Stoplight::Domain::State::UNLOCKED)
+    expect(state_store).to receive(:set_state).with(Stoplight::Domain::State::UNLOCKED)
 
     expect(light.unlock).to be_a Stoplight::Domain::Light
   end
@@ -126,14 +126,14 @@ RSpec.describe Stoplight::Domain::Light do
 
   specify "#state" do
     state_snapshot = instance_double(Stoplight::Domain::StateSnapshot, locked_state: "LOCKED_STATE")
-    expect(data_store).to receive(:get_state_snapshot).and_return(state_snapshot)
+    expect(state_store).to receive(:state_snapshot).and_return(state_snapshot)
 
     expect(light.state).to eq("LOCKED_STATE")
   end
 
   specify "#color" do
     state_snapshot = instance_double(Stoplight::Domain::StateSnapshot, color: "COLOR")
-    expect(data_store).to receive(:get_state_snapshot).and_return(state_snapshot)
+    expect(state_store).to receive(:state_snapshot).and_return(state_snapshot)
 
     expect(light.color).to eq("COLOR")
   end
@@ -144,7 +144,7 @@ RSpec.describe Stoplight::Domain::Light do
     let(:code) { -> { "result" } }
 
     before do
-      expect(data_store).to receive(:get_state_snapshot).with(config).and_return(state_snapshot)
+      expect(state_store).to receive(:state_snapshot).and_return(state_snapshot)
     end
 
     shared_examples "delegates to the run strategy" do |current_color|

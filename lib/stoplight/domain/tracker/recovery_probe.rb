@@ -4,10 +4,6 @@ module Stoplight
   module Domain
     module Tracker
       class RecoveryProbe < Base
-        # @!attribute [r] data_store
-        #   @return [Stoplight::DataStore::Base] The data store associated with the light.
-        protected attr_reader :data_store
-
         # @!attribute [r] traffic_recovery
         #   @return [Stoplight::Domain::TrafficRecovery::Base]
         protected attr_reader :traffic_recovery
@@ -24,17 +20,21 @@ module Stoplight
         #   @return [Stoplight::Domain::Storage::Metrics]
         protected attr_reader :metrics_store
 
-        # @param data_store [Stoplight::Domain::DataStore]
+        # @!attribute [r] state_store
+        #   @return [Stoplight::Domain::Storage::State]
+        protected attr_reader :state_store
+
         # @param traffic_recovery [Stoplight::Domain::TrafficRecovery::Base]
         # @param notifiers [<Stoplight::Domain::StateTransitionNotifier>]
         # @param config [Stoplight::Domain::Config]
         # @param metrics_store [Stoplight::Domain::Storage::Metrics]
-        def initialize(data_store:, traffic_recovery:, notifiers:, config:, metrics_store:)
-          @data_store = data_store
+        # @param state_store [Stoplight::Domain::Storage::State]
+        def initialize(traffic_recovery:, notifiers:, config:, metrics_store:, state_store:)
           @traffic_recovery = traffic_recovery
           @notifiers = notifiers
           @config = config
           @metrics_store = metrics_store
+          @state_store = state_store
         end
 
         # @param exception [Exception]
@@ -64,7 +64,7 @@ module Stoplight
             raise "recovery strategy returned unexpected color: #{recovery_result}"
           end
 
-          data_store.transition_to_color(config, to_color)
+          state_store.transition_to_color(to_color)
           metrics_store.clear
           notifiers.each do |notifier|
             notifier.notify(config, from_color, to_color, nil)
