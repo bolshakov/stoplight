@@ -10,7 +10,7 @@ module Stoplight
         # Multiple processes/servers will NOT coordinate - each process
         # can send probes independently.
         #
-        class RecoveryLock
+        class RecoveryLock < Domain::Storage::RecoveryLock
           # @!attribute lock
           #   @return [Thread::Mutex]
           private attr_reader :lock

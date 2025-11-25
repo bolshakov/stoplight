@@ -1,12 +1,11 @@
 # frozen_string_literal: true
 
-require "securerandom"
 require "forwardable"
 
 module Stoplight
   module Infrastructure
-    module DataStore
-      class Redis
+    module Storage
+      module Redis
         # Distributed recovery lock using Redis SET NX (set-if-not-exists).
         #
         # Lock Acquisition:
@@ -24,35 +23,34 @@ module Stoplight
         # - Crashed holder: raises an error and let caller decide. Lock auto-expires after lock_timeout
         # - Release failure: Lock auto-expires after lock_timeout
         #
-        class RecoveryLockStore
-          # @!attribute redis
-          #   @return [RedisClient]
-          protected attr_reader :redis
+        class RecoveryLock < Domain::Storage::RecoveryLock
+          extend Forwardable
 
-          # @!attribute lock_timeout
-          #   @return [Integer]
-          protected attr_reader :lock_timeout
+          def_delegator "Stoplight::Infrastructure::DataStore::Redis", :key
+
+          # @!attribute config
+          #   @return [Stoplight::Domain::Config]
+          private attr_reader :config
+
+          # @!attribute redis
+          #   @return [::Redis | ConnectionPool<::Redis>]
+          private attr_reader :redis
 
           # @!attribute scripting
           #   @return [Stoplight::Infrastructure::DataStore::Redis::Scripting]
-          protected attr_reader :scripting
+          private attr_reader :scripting
 
-          # @param redis [RedisClient | ConnectionPool]
-          # @param lock_timeout [Integer] recovery_lock timeout in milliseconds
-          # @param scripting [Stoplight::Infrastructure::DataStore::Redis::Scripting]
-          def initialize(redis:, lock_timeout:, scripting:)
+          def initialize(config:, redis:, scripting:)
+            @config = config
             @redis = redis
-            @lock_timeout = lock_timeout
             @scripting = scripting
           end
 
-          # @param light_name [String]
-          # @return [Stoplight::Infrastructure::DataStore::Redis::RecoveryLockToken, nil]
-          def acquire_lock(light_name)
-            recovery_lock = RecoveryLockToken.new(light_name:)
+          def acquire_lock
+            recovery_lock = RecoveryLockToken.new
 
-            acquired = !!redis.then do |client|
-              client.set(recovery_lock.lock_key, recovery_lock.token, nx: true, px: lock_timeout)
+            acquired = redis.then do |client|
+              client.set(lock_key, recovery_lock.token, nx: true, px: lock_timeout)
             end
 
             recovery_lock if acquired
@@ -63,9 +61,13 @@ module Stoplight
           def release_lock(recovery_lock)
             scripting.call(
               :release_lock,
-              keys: [recovery_lock.lock_key], args: [recovery_lock.token]
+              keys: [lock_key], args: [recovery_lock.token]
             )
           end
+
+          private def lock_key = key(:locks, :recovery, config.name)
+
+          private def lock_timeout = config.cool_off_time_in_milliseconds
         end
       end
     end
