@@ -19,14 +19,14 @@ module Stoplight
             @lock = Thread::Mutex.new
           end
 
-          # @return [Stoplight::Domain::RecoveryLockToken, nil]
+          # @return [Stoplight::Infrastructure::Storage::Memory::RecoveryLockToken, nil]
           def acquire_lock
             if lock.try_lock
-              Domain::RecoveryLockToken.new
+              RecoveryLockToken.new
             end
           end
 
-          # @param _recovery_lock_token [Stoplight::Domain::RecoveryLockToken]
+          # @param _recovery_lock_token [Stoplight::Infrastructure::Storage::Memory::RecoveryLockToken]
           # @return [void]
           def release_lock(_recovery_lock_token)
             lock.unlock
