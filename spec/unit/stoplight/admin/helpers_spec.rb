@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "ostruct"
-
 RSpec.describe Stoplight::Admin::Helpers, :redis do
   subject(:helper) { klass.new }
 
@@ -12,7 +10,7 @@ RSpec.describe Stoplight::Admin::Helpers, :redis do
   end
 
   let(:data_store) { Stoplight::DataStore::Redis.new(redis) }
-  let(:settings) { OpenStruct.new(data_store: data_store) }
+  let(:settings) { class_double(Stoplight::Admin, data_store: data_store) }
 
   before do
     allow(helper).to receive(:settings).and_return(settings)
