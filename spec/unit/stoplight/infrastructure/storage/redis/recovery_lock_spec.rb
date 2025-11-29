@@ -1,11 +1,13 @@
 # frozen_string_literal: true
 
 RSpec.describe Stoplight::Infrastructure::Storage::Redis::RecoveryLock, :redis do
-  let(:store) { described_class.new(redis:, scripting:, config:) }
+  let(:store) { described_class.new(redis:, scripting:, config:, key_space:) }
   let(:scripting) { Stoplight::Infrastructure::DataStore::Redis::Scripting.new(redis:) }
-  let(:config) { instance_double(Stoplight::Domain::Config, name:, cool_off_time_in_milliseconds:) }
+  let(:config) { instance_double(Stoplight::Domain::Config, cool_off_time_in_milliseconds:) }
+  let(:key_space) { Stoplight::Infrastructure::Storage::Redis::KeySpace.build(light_name:, system_name:) }
 
-  let(:name) { SecureRandom.uuid }
+  let(:light_name) { SecureRandom.uuid }
+  let(:system_name) { SecureRandom.uuid }
   let(:cool_off_time_in_milliseconds) { 100 }
 
   it "acquires lock and return recovery lock" do

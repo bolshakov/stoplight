@@ -34,9 +34,6 @@ module Stoplight
       MEMORY_REGISTRY = Concurrent::Map.new
       private_constant :MEMORY_REGISTRY
 
-      MEMORY_RECOVERY_LOCKS = Concurrent::Map.new
-      private_constant :MEMORY_RECOVERY_LOCKS
-
       # @!attribute data_store_config
       #   @return [Stoplight::DataStore::Bose]
       private attr_reader :data_store_config
@@ -96,7 +93,19 @@ module Stoplight
         end
       end
 
+      private def redis_recovery_lock_store
+        Infrastructure::DataStore::Redis::RecoveryLockStore.new(
+          redis: data_store_config.redis,
+          lock_timeout: config.cool_off_time_in_milliseconds,
+          scripting:
+        )
+      end
+
       private def scripting = Infrastructure::DataStore::Redis::Scripting.new(redis: data_store_config.redis)
+
+      private def memory_recovery_lock_store
+        Infrastructure::DataStore::Memory::RecoveryLockStore.new
+      end
 
       private def failover_data_store
         create_data_store(FAILOVER_DATA_STORE_CONFIG)
@@ -110,23 +119,8 @@ module Stoplight
         Stoplight::Infrastructure::Storage::CompatibilityMetrics.new(config:, data_store:)
       end
 
-      private def recovery_lock_store = create_recovery_lock_store(data_store_config)
-
-      private def create_recovery_lock_store(data_store_config)
-        case data_store_config
-        in Stoplight::DataStore::Memory
-          memory_recovery_locks.compute_if_absent([data_store_config, config]) do
-            Infrastructure::Storage::Memory::RecoveryLock.new
-          end
-        in Stoplight::DataStore::Redis
-          Infrastructure::Storage::FailSafe::RecoveryLock.new(
-            primary_store: Infrastructure::Storage::Redis::RecoveryLock.new(config:, redis: data_store_config.redis, scripting:),
-            error_notifier:,
-            failover_store: create_recovery_lock_store(FAILOVER_DATA_STORE_CONFIG),
-            circuit_breaker:
-          )
-        end
-        # Stoplight::Infrastructure::Storage::CompatibilityRecoveryLock.new(config:, data_store:)
+      private def recovery_lock_store
+        Stoplight::Infrastructure::Storage::CompatibilityRecoveryLock.new(config:, data_store:)
       end
 
       private def request_tracker
@@ -170,7 +164,7 @@ module Stoplight
       private def create_data_store(data_store_config)
         case data_store_config
         in Stoplight::DataStore::Memory
-          memory_registry.compute_if_absent(data_store_config) do
+          memory_registry.compute_if_absent(data_store_config.object_id) do
             Infrastructure::DataStore::Memory.new(
               recovery_lock_store: memory_recovery_lock_store,
               clock:
@@ -187,27 +181,12 @@ module Stoplight
             ),
             error_notifier:,
             failover_data_store:,
-            circuit_breaker:
+            circuit_breaker: Stoplight.system_light("data_store:fail_safe:redis")
           )
         end
       end
 
-      private def circuit_breaker = Stoplight.system_light("data_store:fail_safe:redis")
-      private def redis_recovery_lock_store
-        Infrastructure::DataStore::Redis::RecoveryLockStore.new(
-          redis: data_store_config.redis,
-          lock_timeout: config.cool_off_time_in_milliseconds,
-          scripting:
-        )
-      end
-
-      private def memory_recovery_lock_store
-        Infrastructure::DataStore::Memory::RecoveryLockStore.new
-      end
-
       private def memory_registry = MEMORY_REGISTRY
-
-      private def memory_recovery_locks = MEMORY_RECOVERY_LOCKS
     end
   end
 end

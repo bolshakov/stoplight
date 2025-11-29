@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "forwardable"
-
 module Stoplight
   module Infrastructure
     module Storage
@@ -24,10 +22,6 @@ module Stoplight
         # - Release failure: Lock auto-expires after lock_timeout
         #
         class RecoveryLock < Domain::Storage::RecoveryLock
-          extend Forwardable
-
-          def_delegator "Stoplight::Infrastructure::DataStore::Redis", :key
-
           # @!attribute config
           #   @return [Stoplight::Domain::Config]
           private attr_reader :config
@@ -40,10 +34,19 @@ module Stoplight
           #   @return [Stoplight::Infrastructure::DataStore::Redis::Scripting]
           private attr_reader :scripting
 
-          def initialize(config:, redis:, scripting:)
+          # @!attribute key_space
+          #   @return [Stoplight::Infrastructure::Storage::Redis::KeySpace]
+          private attr_reader :key_space
+
+          # @param config [Stoplight::Domain::Config]
+          # @param redis [::Redis, ConnectionPool<::Redis>]
+          # @param scripting [Stoplight::Infrastructure::DataStore::Redis::Scripting]
+          # @param key_space [Stoplight::Infrastructure::DataStore::Redis::KeySpace]
+          def initialize(config:, redis:, scripting:, key_space:)
             @config = config
             @redis = redis
             @scripting = scripting
+            @key_space = key_space
           end
 
           def acquire_lock
@@ -65,7 +68,7 @@ module Stoplight
             )
           end
 
-          private def lock_key = key(:locks, :recovery, config.name)
+          private def lock_key = key_space.key(:locks, :recovery)
 
           private def lock_timeout = config.cool_off_time_in_milliseconds
         end

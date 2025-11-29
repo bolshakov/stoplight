@@ -39,6 +39,25 @@ module Stoplight
           end
         end
 
+        def recovery_lock_store
+          case data_store_config
+          in Stoplight::DataStore::Memory
+            Infrastructure::Storage::Memory::RecoveryLock.new
+          in Stoplight::DataStore::Redis
+            Infrastructure::Storage::FailSafe::RecoveryLock.new(
+              primary_store: Infrastructure::Storage::Redis::RecoveryLock.new(
+                config:,
+                redis: data_store_config.redis,
+                scripting:,
+                key_space:
+              ),
+              error_notifier:,
+              failover_store: Infrastructure::Storage::Memory::RecoveryLock.new,
+              circuit_breaker: failover_system.light("redis")
+            )
+          end
+        end
+
         private def redis = data_store_config
         private def storage_scripting = Infrastructure::Storage::Redis::Scripting.new(redis:)
         private def failover_system = @failover_system ||= Stoplight.__stoplight__system("failover-#{system.name}")
