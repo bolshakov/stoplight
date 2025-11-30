@@ -60,6 +60,32 @@ module Stoplight
         end
 
         private def redis = data_store_config
+        private def metrics_store
+          case data_store_config
+          in DataStore::Redis
+            redis_metrics_store
+          in DataStore::Memory
+            memory_metrics_store
+          end
+        end
+
+        private def redis_metrics_store
+          if config.window_size
+            Infrastructure::Storage::CompatibilityMetrics.new(config:, data_store:)
+          else
+            Infrastructure::Storage::Redis::UnboundedMetrics.new(redis:, scripting: storage_scripting, key_space:)
+          end
+        end
+
+        private def memory_metrics_store
+          if config.window_size
+            Infrastructure::Storage::CompatibilityMetrics.new(config:, data_store:)
+          else
+            Infrastructure::Storage::Memory::UnboundedMetrics.new
+          end
+        end
+
+        private def redis = data_store_config.redis
         private def storage_scripting = Infrastructure::Storage::Redis::Scripting.new(redis:)
         private def failover_system = @failover_system ||= Stoplight.__stoplight__system("failover-#{system.name}")
       end
