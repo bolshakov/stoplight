@@ -11,9 +11,9 @@ RSpec.describe Stoplight::Infrastructure::Storage::Redis::UnboundedMetrics, :red
   let(:light_name) { SecureRandom.uuid }
   let(:system_name) { SecureRandom.uuid }
 
-  def metrics_snapshot = unbounded_metrics.metrics_snapshot
-  def record_failure(error) = unbounded_metrics.record_failure(error)
-  def record_success = unbounded_metrics.record_success
-
-  it_behaves_like "a metrics snapshot"
+  it_behaves_like "a metrics snapshot" do
+    def metrics_snapshot = unbounded_metrics.metrics_snapshot
+    def record_failure(error) = unbounded_metrics.record_failure(error)
+    def record_success = unbounded_metrics.record_success
+  end
 end
