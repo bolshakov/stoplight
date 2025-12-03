@@ -16,11 +16,6 @@ module Stoplight
           raise NotImplementedError, "Subclasses must implement the execute method"
         end
         # :nocov:
-
-        # @return [Boolean]
-        def ==(other)
-          other.is_a?(self.class)
-        end
       end
     end
   end

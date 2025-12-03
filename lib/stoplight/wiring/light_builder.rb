@@ -71,13 +71,15 @@ module Stoplight
       def build
         Stoplight::Domain::Light.new(
           config,
-          data_store: data_store,
-          green_run_strategy: green_run_strategy,
-          yellow_run_strategy: yellow_run_strategy,
-          red_run_strategy: red_run_strategy,
-          factory: factory
+          state_store:,
+          green_run_strategy:,
+          yellow_run_strategy:,
+          red_run_strategy:,
+          factory:
         )
       end
+
+      private def state_store = Stoplight::Infrastructure::Storage::CompatibilityState.new(config:, data_store:)
 
       # @return [<Stoplight::Notifier::Base>]
       private def notifiers
@@ -108,12 +110,30 @@ module Stoplight
         create_data_store(data_store_config)
       end
 
+      private def metrics_store
+        Stoplight::Infrastructure::Storage::CompatibilityMetrics.new(config:, data_store:)
+      end
+
+      private def recovery_lock_store
+        Stoplight::Infrastructure::Storage::CompatibilityRecoveryLock.new(config:, data_store:)
+      end
+
       private def request_tracker
-        Domain::Tracker::Request.new(data_store:, traffic_control:, notifiers:, config:)
+        Domain::Tracker::Request.new(traffic_control:, notifiers:, config:, metrics_store:, state_store:)
       end
 
       private def recovery_probe_tracker
-        Domain::Tracker::RecoveryProbe.new(data_store:, traffic_recovery:, notifiers:, config:)
+        Domain::Tracker::RecoveryProbe.new(
+          traffic_recovery:,
+          notifiers:,
+          config:,
+          metrics_store: recovery_metrics_store,
+          state_store:
+        )
+      end
+
+      private def recovery_metrics_store
+        Stoplight::Infrastructure::Storage::CompatibilityRecoveryMetrics.new(config:, data_store:)
       end
 
       private def green_run_strategy
@@ -123,10 +143,12 @@ module Stoplight
       private def yellow_run_strategy
         Domain::Strategies::YellowRunStrategy.new(
           config:,
-          data_store:,
           notifiers:,
           request_tracker: recovery_probe_tracker,
-          red_run_strategy:
+          red_run_strategy:,
+          state_store:,
+          metrics_store:,
+          recovery_lock_store:
         )
       end
 

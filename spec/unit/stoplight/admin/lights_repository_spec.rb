@@ -1,11 +1,29 @@
 # frozen_string_literal: true
 
 RSpec.describe Stoplight::Admin::LightsRepository, :redis do
-  subject(:repository) { described_class.new(data_store: light.__send__(:data_store)) }
+  subject(:repository) { described_class.new(data_store:) }
 
-  let(:data_store) { Stoplight::DataStore::Redis.new(redis) }
+  let(:data_store) do
+    Stoplight::Infrastructure::DataStore::Redis.new(
+      redis:,
+      warn_on_clock_skew: false,
+      recovery_lock_store: redis_recovery_lock_store,
+      scripting:
+    )
+  end
+  let(:redis_recovery_lock_store) do
+    Stoplight::Infrastructure::DataStore::Redis::RecoveryLockStore.new(
+      redis:,
+      lock_timeout: 1,
+      scripting:
+    )
+  end
+  let(:scripting) do
+    Stoplight::Infrastructure::DataStore::Redis::Scripting.new(redis:)
+  end
+  let(:data_store_config) { Stoplight::DataStore::Redis.new(redis) }
   let(:name) { "lights-repository" }
-  let(:light) { Stoplight(name, data_store:) }
+  let(:light) { Stoplight(name, data_store: data_store_config) }
 
   describe "#all" do
     subject(:lights) { repository.all }
@@ -43,8 +61,8 @@ RSpec.describe Stoplight::Admin::LightsRepository, :redis do
 
   describe "#with_color" do
     before do
-      Stoplight("red-light", data_store:).lock("red")
-      Stoplight("green-light", data_store:).lock("green")
+      Stoplight("red-light", data_store: data_store_config).lock("red")
+      Stoplight("green-light", data_store: data_store_config).lock("green")
     end
 
     it "returns light with requested color" do

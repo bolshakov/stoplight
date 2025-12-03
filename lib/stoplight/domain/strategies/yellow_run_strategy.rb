@@ -15,9 +15,17 @@ module Stoplight
         #   @return [Stoplight::Domain::Config] The configuration for the light.
         protected attr_reader :config
 
-        # @!attribute [r] data_store
-        #   @return [Stoplight::DataStore::Base] The data store associated with the light.
-        protected attr_reader :data_store
+        # @!attribute [r] stare_store
+        #   @return [Stoplight::Domain::Storage::State]
+        protected attr_reader :state_store
+
+        # @!attribute [r] metrics_store
+        #   @return [Stoplight::Domain::Storage::Metrics]
+        protected attr_reader :metrics_store
+
+        # @!attribute [r] recovery_lock_store
+        #   @return [Stoplight::Domain::Storage::RecoveryLock]
+        protected attr_reader :recovery_lock_store
 
         # @!attribute [r] notifiers
         #   @return [Stoplight::Domain::StateTransitionNotifier]
@@ -32,16 +40,18 @@ module Stoplight
         protected attr_reader :red_run_strategy
 
         # @param config [Stoplight::Domain::Config]
-        # @param data_store [Stoplight::DataStore::Base]
         # @param notifiers [Array<Stoplight::Domain::StateTransitionNotifier>]
         # @param request_tracker [Stoplight::Domain::Tracker::RecoveryProbe]
         # @param red_run_strategy [Stoplight::Domain::Strategies::RedRunStrategy]
-        def initialize(config:, data_store:, notifiers:, request_tracker:, red_run_strategy:)
+        # @param recovery_lock_store [Stoplight::Domain::Storage::RecoveryLock]
+        def initialize(config:, notifiers:, request_tracker:, red_run_strategy:, state_store:, metrics_store:, recovery_lock_store:)
           @config = config
-          @data_store = data_store
           @notifiers = notifiers
           @request_tracker = request_tracker
           @red_run_strategy = red_run_strategy
+          @state_store = state_store
+          @metrics_store = metrics_store
+          @recovery_lock_store = recovery_lock_store
         end
 
         # Executes the provided code block when the light is in the yellow state.
@@ -78,7 +88,7 @@ module Stoplight
         end
 
         def with_recovery_lock(fallback:, state_snapshot:)
-          recovery_lock_token = data_store.acquire_recovery_lock(config)
+          recovery_lock_token = recovery_lock_store.acquire_lock
           if recovery_lock_token.nil?
             return red_run_strategy.execute(fallback, state_snapshot:)
           end
@@ -86,7 +96,7 @@ module Stoplight
           begin
             yield
           ensure
-            data_store.release_recovery_lock(recovery_lock_token)
+            recovery_lock_store.release_lock(recovery_lock_token)
           end
         end
 
@@ -103,21 +113,11 @@ module Stoplight
         private def enter_recovery(state_snapshot)
           return if state_snapshot.recovery_started?
 
-          data_store.transition_to_color(config, Color::YELLOW)
-          data_store.clear_metrics(config)
+          state_store.transition_to_color(Color::YELLOW)
+          metrics_store.clear
           notifiers.each do |notifier|
             notifier.notify(config, Color::RED, Color::YELLOW, nil)
           end
-        end
-
-        # @return [Boolean]
-        def ==(other)
-          super &&
-            config == other.config &&
-            notifiers == other.notifiers &&
-            data_store == other.data_store &&
-            request_tracker == other.request_tracker &&
-            red_run_strategy == other.red_run_strategy
         end
       end
     end

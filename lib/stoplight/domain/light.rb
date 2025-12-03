@@ -33,22 +33,22 @@ module Stoplight
       #   @return [Stoplight::Domain::Strategies::RedRunStrategy]
       protected attr_reader :red_run_strategy
 
-      # @!attribute [r] data_store
-      #   @return [Stoplight::Light::Base]
-      protected attr_reader :data_store
-
       # @!attribute [r] factory
       #   @return [Stoplight::Domain::LightFactory]
       protected attr_reader :factory
 
+      # @!attribute state_store
+      #   @param [Stoplight::Domain::Storage::State]
+      protected attr_reader :state_store
+
       # @param config [Stoplight::Domain::Config]
-      def initialize(config, green_run_strategy:, yellow_run_strategy:, red_run_strategy:, data_store:, factory:)
+      def initialize(config, green_run_strategy:, yellow_run_strategy:, red_run_strategy:, factory:, state_store:)
         @config = config
-        @data_store = data_store
         @green_run_strategy = green_run_strategy
         @yellow_run_strategy = yellow_run_strategy
         @red_run_strategy = red_run_strategy
         @factory = factory
+        @state_store = state_store
       end
 
       # Returns the current state of the light:
@@ -57,9 +57,7 @@ module Stoplight
       #  * +Stoplight::State::UNLOCKED+ -- light is not locked and follow the configured rules
       #
       # @return [String]
-      def state
-        state_snapshot.locked_state
-      end
+      def state = state_snapshot.locked_state
 
       # Returns current color:
       #   * +Stoplight::Color::GREEN+ -- circuit breaker is closed
@@ -71,9 +69,7 @@ module Stoplight
       #   light.color #=> Color::GREEN
       #
       # @return [String] returns current light color
-      def color
-        state_snapshot.color
-      end
+      def color = state_snapshot.color
 
       # Runs the given block of code with this circuit breaker
       #
@@ -113,7 +109,7 @@ module Stoplight
         else raise Error::IncorrectColor
         end
 
-        data_store.set_state(config, state)
+        state_store.set_state(state)
 
         self
       end
@@ -127,7 +123,7 @@ module Stoplight
       #
       # @return [Stoplight::Light] returns unlocked light (circuit breaker)
       def unlock
-        data_store.set_state(config, State::UNLOCKED)
+        state_store.set_state(State::UNLOCKED)
 
         self
       end
@@ -206,9 +202,7 @@ module Stoplight
         end
       end
 
-      def state_snapshot
-        data_store.get_state_snapshot(config)
-      end
+      def state_snapshot = state_store.state_snapshot
     end
   end
 end

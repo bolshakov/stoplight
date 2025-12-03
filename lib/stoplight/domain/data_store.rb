@@ -103,7 +103,7 @@ module Stoplight
 
       # Releases previously acquired lock.
       #
-      # @param lock [Stoplight::Domain::LockToken]
+      # @param lock [Stoplight::Domain::RecoveryLockToken]
       # @return [void]
       def release_recovery_lock(lock) = raise NotImplementedError
 
