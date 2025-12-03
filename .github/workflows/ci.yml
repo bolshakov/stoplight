@@ -22,7 +22,7 @@ jobs:
           egress-policy: audit
 
       - name: Checkout code
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
       - name: Standard Ruby
         uses: standardrb/standard-ruby-action@eecb3f730879f5b8830705348c2961e5aa26de78 # v1.5.0
         with:
@@ -58,7 +58,7 @@ jobs:
           egress-policy: audit
 
       - name: Checkout code
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@8aeb6ff8030dd539317f8e1769a044873b56ea71 # v1.268.0
@@ -106,7 +106,7 @@ jobs:
           egress-policy: audit
 
       - name: Checkout code
-        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@8aeb6ff8030dd539317f8e1769a044873b56ea71 # v1.268.0
