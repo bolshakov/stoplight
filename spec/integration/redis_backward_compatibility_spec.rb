@@ -2,7 +2,9 @@
 
 RSpec.describe "Redis drop-in compatibility", :redis, :freeze do
   let(:light_name) { SecureRandom.uuid }
-  let(:data_store) { Stoplight::Infrastructure::DataStore::Redis.new(redis) }
+  let(:data_store) { Stoplight::Infrastructure::DataStore::Redis.new(redis:, recovery_lock_store:, scripting:) }
+  let(:recovery_lock_store) { Stoplight::Infrastructure::DataStore::Redis::RecoveryLockStore.new(redis:, lock_timeout: 100, scripting:) }
+  let(:scripting) { Stoplight::Infrastructure::DataStore::Redis::Scripting.new(redis:) }
   let(:config) { Stoplight::Domain::Config.empty.with(name: light_name, window_size: 300) }
 
   def failure_key
@@ -58,6 +60,7 @@ RSpec.describe "Redis drop-in compatibility", :redis, :freeze do
     end
 
     it "correctly reads metrics fields with integer timestamps" do
+      4.times { redis.zadd(failure_key, Time.now.to_i, SecureRandom.uuid) }
       # Simulate OLD version writing integer timestamp to metrics hash
       redis.hset(metadata_key, "last_error_at", Time.now.to_i)
       redis.hset(metadata_key, "consecutive_errors", "3")
@@ -72,7 +75,7 @@ RSpec.describe "Redis drop-in compatibility", :redis, :freeze do
       # NEW version should read it without issues
       metrics = data_store.get_metrics(config)
       expect(metrics.last_error_at).to be_within(1).of(base_time)
-      expect(metrics.total_consecutive_errors).to eq(3)
+      expect(metrics.consecutive_errors).to eq(3)
       expect(metrics.last_error).to have_attributes(
         error_class: "StandardError",
         error_message: "something went wrong",

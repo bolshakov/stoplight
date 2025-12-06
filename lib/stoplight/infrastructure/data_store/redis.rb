@@ -74,22 +74,46 @@ module Stoplight
         KEY_SEPARATOR = ":"
         KEY_PREFIX = %w[stoplight v5].join(KEY_SEPARATOR)
 
+        # @!attribute recovery_lock_store
+        #   @return [Stoplight::Infrastructure::DataStore::Redis::RecoveryLockStore]
+        protected attr_reader :recovery_lock_store
+
+        # @!attribute scripting
+        #   @return [Stoplight::Infrastructure::DataStore::Redis::Scripting]
+        protected attr_reader :scripting
+
+        # @!attribute redis
+        #   @return [::Redis | ConnectionPool<::Redis>]
+        protected attr_reader :redis
+
+        # @!attribute warn_on_clock_skew
+        #   @return [Boolean]
+        protected attr_reader :warn_on_clock_skew
+
         # @param redis [::Redis, ConnectionPool<::Redis>]
+        # @param recovery_lock_store [Stoplight::Infrastructure::DataStore::Redis::RecoveryLockStore]
         # @param warn_on_clock_skew [Boolean] (true) Whether to warn about clock skew between Redis and
+        # @param scripting [Stoplight::Infrastructure::DataStore::Redis::Scripting]
         #   the application server
-        def initialize(redis, warn_on_clock_skew: true)
+        def initialize(redis:, recovery_lock_store:, scripting:, warn_on_clock_skew: true)
           @warn_on_clock_skew = warn_on_clock_skew
           @redis = redis
+          @recovery_lock_store = recovery_lock_store
+          @scripting = scripting
         end
 
         def names
-          pattern = key("metadata", "*")
-          prefix_regex = /^#{key("metadata", "")}/
-          @redis.then do |client|
-            client.scan_each(match: pattern).to_a.map do |key|
-              key.sub(prefix_regex, "")
+          metadata, recovery_metrics = @redis.then do |client|
+            [
+              [key("metadata", "*"), /^#{key("metadata", "")}/],
+              [key("recovery_metrics", "*"), /^#{key("recovery_metrics", "")}/]
+            ].map do |(pattern, prefix_regex)|
+              client.scan_each(match: pattern).to_a.map do |key|
+                key.sub(prefix_regex, "")
+              end
             end
           end
+          metadata + recovery_metrics
         end
 
         # @param config [Stoplight::Domain::Config]
@@ -108,28 +132,28 @@ module Stoplight
             success_keys = []
           end
 
-          successes, errors, last_success_at, last_error_json, consecutive_errors, consecutive_successes = @redis.with do |client|
-            client.evalsha(
-              get_metrics_sha,
-              argv: [
-                failure_keys.count,
-                window_start_ts,
-                window_end_ts,
-                "last_success_at", "last_error_json", "consecutive_errors", "consecutive_successes"
-              ],
-              keys: [
-                metadata_key(config),
-                *success_keys,
-                *failure_keys
-              ]
-            )
-          end
+          successes, errors, last_success_at, last_error_json, consecutive_errors, consecutive_successes = scripting.call(
+            :get_metrics,
+            args: [
+              failure_keys.count,
+              window_start_ts,
+              window_end_ts,
+              "last_success_at", "last_error_json", "consecutive_errors", "consecutive_successes"
+            ],
+            keys: [
+              metadata_key(config),
+              *success_keys,
+              *failure_keys
+            ]
+          )
+          consecutive_errors = config.window_size ? [consecutive_errors.to_i, errors].min : consecutive_errors.to_i
+          consecutive_successes = config.window_size ? [consecutive_successes.to_i, successes].min : consecutive_successes.to_i
 
           Domain::Metrics.new(
             successes: (successes if config.window_size),
             errors: (errors if config.window_size),
-            total_consecutive_errors: consecutive_errors.to_i,
-            total_consecutive_successes: consecutive_successes.to_i,
+            consecutive_errors:,
+            consecutive_successes:,
             last_error: deserialize_failure(last_error_json),
             last_success_at: (Time.at(last_success_at.to_f) if last_success_at)
           )
@@ -138,36 +162,17 @@ module Stoplight
         # @param config [Stoplight::Domain::Config]
         # @return [Stoplight::Domain::Metrics]
         def get_recovery_metrics(config)
-          config.name
-
-          window_end_ts = current_time.to_f
-          window_start_ts = window_end_ts - config.cool_off_time
-
-          recovery_probe_failure_keys = recovery_probe_failure_bucket_keys(config, window_end: window_end_ts)
-          recovery_probe_success_keys = recovery_probe_success_bucket_keys(config, window_end: window_end_ts)
-
-          successes, errors, last_success_at, last_error_json, consecutive_errors, consecutive_successes = @redis.with do |client|
-            client.evalsha(
-              get_metrics_sha,
-              argv: [
-                recovery_probe_failure_keys.count,
-                window_start_ts,
-                window_end_ts,
-                "last_success_at", "last_error_json", "consecutive_errors", "consecutive_successes"
-              ],
-              keys: [
-                metadata_key(config),
-                *recovery_probe_success_keys,
-                *recovery_probe_failure_keys
-              ]
+          last_success_at, last_error_json, consecutive_errors, consecutive_successes = @redis.with do |client|
+            client.hmget(
+              recovery_metrics_key(config),
+              "last_success_at", "last_error_json", "consecutive_errors", "consecutive_successes"
             )
           end
 
           Domain::Metrics.new(
-            successes:,
-            errors:,
-            total_consecutive_errors: consecutive_errors.to_i,
-            total_consecutive_successes: consecutive_successes.to_i,
+            successes: nil, errors: nil,
+            consecutive_errors: consecutive_errors.to_i,
+            consecutive_successes: consecutive_successes.to_i,
             last_error: deserialize_failure(last_error_json),
             last_success_at: (Time.at(last_success_at.to_f) if last_success_at)
           )
@@ -193,15 +198,28 @@ module Stoplight
           )
         end
 
-        def clear_windowed_metrics(config)
+        def clear_metrics(config)
           if config.window_size
             window_end_ts = current_time.to_i
             @redis.with do |client|
-              client.unlink(
-                *failure_bucket_keys(config, window_end: window_end_ts),
-                *success_bucket_keys(config, window_end: window_end_ts)
-              )
+              client.multi do |tx|
+                tx.unlink(
+                  *failure_bucket_keys(config, window_end: window_end_ts),
+                  *success_bucket_keys(config, window_end: window_end_ts)
+                )
+                tx.hdel(metadata_key(config), "last_success_at", "last_error_json", "consecutive_errors", "consecutive_successes")
+              end
             end
+          else
+            @redis.with do |client|
+              client.hdel(metadata_key(config), "last_success_at", "last_error_json", "consecutive_errors", "consecutive_successes")
+            end
+          end
+        end
+
+        def clear_recovery_metrics(config)
+          @redis.with do |client|
+            client.del(recovery_metrics_key(config))
           end
         end
 
@@ -227,31 +245,27 @@ module Stoplight
           current_ts = current_time.to_f
           failure = Domain::Failure.from_error(exception, time: current_time)
 
-          @redis.then do |client|
-            client.evalsha(
-              record_failure_sha,
-              argv: [current_ts, SecureRandom.hex(12), serialize_failure(failure), metrics_ttl, metadata_ttl],
-              keys: [
-                metadata_key(config),
-                config.window_size && errors_key(config, time: current_ts)
-              ].compact
-            )
-          end
+          scripting.call(
+            :record_failure,
+            args: [current_ts, SecureRandom.hex(12), serialize_failure(failure), metrics_ttl, metadata_ttl],
+            keys: [
+              metadata_key(config),
+              config.window_size && errors_key(config, time: current_ts)
+            ].compact
+          )
         end
 
         def record_success(config, request_id: SecureRandom.hex(12))
           current_ts = current_time.to_f
 
-          @redis.then do |client|
-            client.evalsha(
-              record_success_sha,
-              argv: [current_ts, request_id, metrics_ttl, metadata_ttl],
-              keys: [
-                metadata_key(config),
-                config.window_size && successes_key(config, time: current_ts)
-              ].compact
-            )
-          end
+          scripting.call(
+            :record_success,
+            args: [current_ts, request_id, metrics_ttl, metadata_ttl],
+            keys: [
+              metadata_key(config),
+              config.window_size && successes_key(config, time: current_ts)
+            ].compact
+          )
         end
 
         # Records a failed recovery probe for a specific light configuration.
@@ -264,36 +278,25 @@ module Stoplight
           current_ts = current_time.to_f
           failure = Domain::Failure.from_error(exception, time: current_time)
 
-          @redis.then do |client|
-            client.evalsha(
-              record_failure_sha,
-              argv: [current_ts, SecureRandom.uuid, serialize_failure(failure), metrics_ttl, metrics_ttl],
-              keys: [
-                metadata_key(config),
-                recovery_probe_errors_key(config, time: current_ts)
-              ].compact
-            )
-          end
+          scripting.call(
+            :record_recovery_probe_failure,
+            args: [current_ts, serialize_failure(failure)],
+            keys: [recovery_metrics_key(config)]
+          )
         end
 
         # Records a successful recovery probe for a specific light configuration.
         #
         # @param config [Stoplight::Domain::Config] The light configuration.
-        # @param request_id [String] The unique identifier for the request
         # @return [void]
-        def record_recovery_probe_success(config, request_id: SecureRandom.hex(12))
+        def record_recovery_probe_success(config)
           current_ts = current_time.to_f
 
-          @redis.then do |client|
-            client.evalsha(
-              record_success_sha,
-              argv: [current_ts, request_id, metrics_ttl, metadata_ttl],
-              keys: [
-                metadata_key(config),
-                recovery_probe_successes_key(config, time: current_ts)
-              ].compact
-            )
-          end
+          scripting.call(
+            :record_recovery_probe_success,
+            args: [current_ts],
+            keys: [recovery_metrics_key(config)]
+          )
         end
 
         def set_state(config, state)
@@ -325,6 +328,18 @@ module Stoplight
           end
         end
 
+        # @param config [Stoplight::Domain::Config]
+        # @return [Stoplight::Infrastructure::DataStore::Redis::RecoveryLockToken, nil]
+        def acquire_recovery_lock(config)
+          recovery_lock_store.acquire_lock(config.name)
+        end
+
+        # @param lock [Stoplight::Infrastructure::DataStore::Redis::RecoveryLockToken]
+        # @return [void]
+        def release_recovery_lock(lock)
+          recovery_lock_store.release_lock(lock)
+        end
+
         # Transitions to GREEN state and ensures only one notification
         #
         # @param config [Stoplight::Domain::Config] The light configuration
@@ -333,13 +348,11 @@ module Stoplight
           current_ts = current_time.to_f
           meta_key = metadata_key(config)
 
-          became_green = @redis.then do |client|
-            client.evalsha(
-              transition_to_green_sha,
-              argv: [current_ts],
-              keys: [meta_key]
-            )
-          end
+          became_green = scripting.call(
+            :transition_to_green,
+            args: [current_ts],
+            keys: [meta_key]
+          )
           became_green == 1
         end
 
@@ -351,13 +364,11 @@ module Stoplight
           current_ts = current_time.to_f
           meta_key = metadata_key(config)
 
-          became_yellow = @redis.then do |client|
-            client.evalsha(
-              transition_to_yellow_sha,
-              argv: [current_ts],
-              keys: [meta_key]
-            )
-          end
+          became_yellow = scripting.call(
+            :transition_to_yellow,
+            args: [current_ts],
+            keys: [meta_key]
+          )
           became_yellow == 1
         end
 
@@ -370,13 +381,11 @@ module Stoplight
           meta_key = metadata_key(config)
           recovery_scheduled_after_ts = current_ts + config.cool_off_time
 
-          became_red = @redis.then do |client|
-            client.evalsha(
-              transition_to_red_sha,
-              argv: [current_ts, recovery_scheduled_after_ts],
-              keys: [meta_key]
-            )
-          end
+          became_red = scripting.call(
+            :transition_to_red,
+            args: [current_ts, recovery_scheduled_after_ts],
+            keys: [meta_key]
+          )
 
           became_red == 1
         end
@@ -384,9 +393,11 @@ module Stoplight
         # Removes all traces of a light from Redis metadata (metrics will expire by TTL).
         #
         # @param config [Stoplight::Domain::Config] The light configuration.
-        # @return [Integer] number of keys removed
+        # @return [void]
         def delete_light(config)
-          @redis.then { |client| client.del(metadata_key(config)) }
+          @redis.then do |client|
+            client.del(metadata_key(config), recovery_metrics_key(config))
+          end
         end
 
         # @param failure_json [String, nil]
@@ -464,12 +475,8 @@ module Stoplight
           self.class.bucket_key(config.name, metric: "failure", time:)
         end
 
-        private def recovery_probe_successes_key(config, time:)
-          self.class.bucket_key(config.name, metric: "recovery_probe_success", time:)
-        end
-
-        private def recovery_probe_errors_key(config, time:)
-          self.class.bucket_key(config.name, metric: "recovery_probe_failure", time:)
+        private def recovery_metrics_key(config)
+          key("recovery_metrics", config.name)
         end
 
         private def metadata_key(config)
@@ -506,42 +513,6 @@ module Stoplight
 
         private def should_sample?(probability)
           rand <= probability
-        end
-
-        private def record_success_sha
-          @record_success_sha ||= @redis.then do |client|
-            client.script("load", Lua::RECORD_SUCCESS)
-          end
-        end
-
-        private def get_metrics_sha
-          @get_metrics_sha ||= @redis.then do |client|
-            client.script("load", Lua::GET_METRICS)
-          end
-        end
-
-        private def transition_to_yellow_sha
-          @transition_to_yellow_sha ||= @redis.then do |client|
-            client.script("load", Lua::TRANSITION_TO_YELLOW)
-          end
-        end
-
-        private def transition_to_red_sha
-          @transition_to_red_sha ||= @redis.then do |client|
-            client.script("load", Lua::TRANSITION_TO_RED)
-          end
-        end
-
-        private def transition_to_green_sha
-          @transition_to_green_sha ||= @redis.then do |client|
-            client.script("load", Lua::TRANSITION_TO_GREEN)
-          end
-        end
-
-        private def record_failure_sha
-          @record_failure_sha ||= @redis.then do |client|
-            client.script("load", Lua::RECORD_FAILURE)
-          end
         end
 
         private def current_time

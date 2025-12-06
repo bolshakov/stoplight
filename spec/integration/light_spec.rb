@@ -51,6 +51,12 @@ RSpec.describe "Light" do
       let(:error_notifier) { instance_double(Proc) }
       let(:prototype) { Stoplight("prototype", error_notifier:, threshold: 1, traffic_control: :consecutive_errors) }
 
+      it "produces deprecation warning" do
+        expect { prototype }.to output(
+          include("Passing \"error_notifier\" to Stoplight('prototype') is deprecated and will be removed in v6.0.0.")
+        ).to_stderr
+      end
+
       context "when extended with data_store and error_notifier" do
         let(:updated_error_notifier) { instance_double(Proc) }
 
@@ -234,10 +240,10 @@ RSpec.describe "Light" do
     let(:light_with_different_config) { Stoplight("foo", cool_off_time: 10) }
 
     it "returns true when the lights have the same configuration" do
-      expect(light == light_with_the_same_name).to eq(true)
-      expect(light == light_with_different_name).to eq(false)
-      expect(light == light_with_different_config).to eq(false)
-      expect(light.with(cool_off_time: 10) == light_with_different_config).to eq(true)
+      expect(light).to eq(light_with_the_same_name)
+      expect(light).not_to eq(light_with_different_name)
+      expect(light).not_to eq(light_with_different_config)
+      expect(light.with(cool_off_time: 10)).to eq(light_with_different_config)
     end
   end
 

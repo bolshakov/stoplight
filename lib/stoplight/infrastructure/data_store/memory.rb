@@ -11,22 +11,28 @@ module Stoplight
 
         KEY_SEPARATOR = ":"
 
-        def initialize
+        # @!attribute recovery_lock_store
+        #   @return [Stoplight::Infrastructure::DataStore::Memory::RecoveryLockStore]
+        #   @api private
+        private attr_reader :recovery_lock_store
+
+        # @param recovery_lock_store [Stoplight::Infrastructure::DataStore::Memory::RecoveryLockStore]
+        def initialize(recovery_lock_store:)
+          @recovery_lock_store = recovery_lock_store
           @errors = Hash.new { |errors, light_name| errors[light_name] = SlidingWindow.new }
           @successes = Hash.new { |successes, light_name| successes[light_name] = SlidingWindow.new }
-
-          @recovery_probe_errors = Hash.new { |recovery_probe_errors, light_name| recovery_probe_errors[light_name] = SlidingWindow.new }
-          @recovery_probe_successes = Hash.new { |recovery_probe_successes, light_name| recovery_probe_successes[light_name] = SlidingWindow.new }
-
-          @states = Hash.new { |states, light_name| states[light_name] = State.new }
           @metrics = Hash.new { |metrics, light_name| metrics[light_name] = Metrics.new }
 
-          super # MonitorMixin
+          @recovery_metrics = Hash.new { |metrics, light_name| metrics[light_name] = Metrics.new }
+
+          @states = Hash.new { |states, light_name| states[light_name] = State.new }
+
+          super() # MonitorMixin
         end
 
         # @return [Array<String>]
         def names
-          synchronize { @metrics.keys | @states.keys }
+          synchronize { @metrics.keys | @states.keys | @recovery_metrics.keys }
         end
 
         # @param config [Stoplight::Domain::Config]
@@ -46,12 +52,14 @@ module Stoplight
 
             errors = @errors[light_name].sum_in_window(window_start) if config.window_size
             successes = @successes[light_name].sum_in_window(window_start) if config.window_size
+            consecutive_errors = config.window_size ? [metrics.consecutive_errors, errors].min : metrics.consecutive_errors
+            consecutive_successes = config.window_size ? [metrics.consecutive_successes.to_i, successes].min : metrics.consecutive_successes.to_i
 
             Domain::Metrics.new(
               errors:,
               successes:,
-              total_consecutive_errors: metrics.consecutive_errors,
-              total_consecutive_successes: metrics.consecutive_successes,
+              consecutive_errors:,
+              consecutive_successes:,
               last_error: metrics.last_error,
               last_success_at: metrics.last_success_at
             )
@@ -63,21 +71,12 @@ module Stoplight
           light_name = config.name
 
           synchronize do
-            current_time = self.current_time
-            recovery_window_start = (current_time - config.cool_off_time)
-            if config.window_size
-              (current_time - config.window_size)
-            else
-              current_time
-            end
-
-            metrics = @metrics[light_name]
+            metrics = @recovery_metrics[light_name]
 
             Domain::Metrics.new(
-              errors: @recovery_probe_errors[light_name].sum_in_window(recovery_window_start),
-              successes: @recovery_probe_successes[light_name].sum_in_window(recovery_window_start),
-              total_consecutive_errors: metrics.consecutive_errors,
-              total_consecutive_successes: metrics.consecutive_successes,
+              errors: nil, successes: nil,
+              consecutive_errors: metrics.consecutive_errors,
+              consecutive_successes: metrics.consecutive_successes,
               last_error: metrics.last_error,
               last_success_at: metrics.last_success_at
             )
@@ -121,12 +120,20 @@ module Stoplight
           end
         end
 
-        def clear_windowed_metrics(config)
-          if config.window_size
-            synchronize do
-              @errors[config.name] = SlidingWindow.new
-              @successes[config.name] = SlidingWindow.new
+        def clear_metrics(config)
+          light_name = config.name
+          synchronize do
+            if config.window_size
+              @errors[light_name] = SlidingWindow.new
+              @successes[light_name] = SlidingWindow.new
             end
+            @metrics[light_name] = Metrics.new
+          end
+        end
+
+        def clear_recovery_metrics(config)
+          synchronize do
+            @recovery_metrics[config.name] = Metrics.new
           end
         end
 
@@ -159,9 +166,7 @@ module Stoplight
           failure = Domain::Failure.from_error(exception, time: current_time)
 
           synchronize do
-            @recovery_probe_errors[light_name].increment
-
-            metrics = @metrics[light_name]
+            metrics = @recovery_metrics[light_name]
 
             if metrics.last_error_at.nil? || failure.occurred_at > metrics.last_error_at
               metrics.last_error = failure
@@ -179,9 +184,7 @@ module Stoplight
           current_time = self.current_time
 
           synchronize do
-            @recovery_probe_successes[light_name].increment
-
-            metrics = @metrics[light_name]
+            metrics = @recovery_metrics[light_name]
             if metrics.last_success_at.nil? || current_time > metrics.last_success_at
               metrics.last_success_at = current_time
             end
@@ -208,6 +211,20 @@ module Stoplight
           "#<#{self.class.name}>"
         end
 
+        # @param config [Stoplight::Domain::Config]
+        # @return [void]
+        def delete_light(config)
+          light_name = config.name
+
+          synchronize do
+            @states.delete(light_name)
+            @recovery_metrics.delete(light_name)
+            @metrics.delete(light_name)
+            @errors.delete(light_name)
+            @successes.delete(light_name)
+          end
+        end
+
         # Combined method that performs the state transition based on color
         #
         # @param config [Stoplight::Domain::Config] The light configuration
@@ -224,6 +241,18 @@ module Stoplight
           else
             raise ArgumentError, "Invalid color: #{color}"
           end
+        end
+
+        # @param config [Stoplight::Domain::Config]
+        # @return [Stoplight::Infrastructure::DataStore::Memory::RecoveryLockToken, nil]
+        def acquire_recovery_lock(config)
+          recovery_lock_store.acquire_lock(config.name)
+        end
+
+        # @param lock [Stoplight::Infrastructure::DataStore::Memory::RecoveryLockToken]
+        # @return [void]
+        def release_recovery_lock(lock)
+          recovery_lock_store.release_lock(lock)
         end
 
         # Transitions to GREEN state and ensures only one notification

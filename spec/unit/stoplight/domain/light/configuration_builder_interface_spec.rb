@@ -2,15 +2,34 @@
 
 RSpec.describe Stoplight::Domain::Light::ConfigurationBuilderInterface do
   let(:name) { ("a".."z").to_a.shuffle.join }
-  let(:light) { Stoplight(name) }
+  let(:light) do
+    Stoplight::Domain::Light.new(
+      nil,
+      green_run_strategy: nil,
+      yellow_run_strategy: nil,
+      red_run_strategy: nil,
+      state_store: nil,
+      factory:
+    )
+  end
+  let(:factory) { instance_double(Stoplight::Domain::LightFactory) }
 
   shared_examples "configurable attribute" do |attribute|
-    subject(:with_attribute) do
-      light.__send__(:"with_#{attribute}", __send__(attribute))
+    subject(:light_with_attribute) do
+      if as_list
+        light.__send__(:"with_#{attribute}", *attribute_value)
+      else
+        light.__send__(:"with_#{attribute}", attribute_value)
+      end
     end
 
+    let(:attribute_value) { __send__(attribute) }
+    let(:as_list) { false }
+
     it "configures #{attribute}" do
-      expect(with_attribute).to eq(light.with(attribute => __send__(attribute)))
+      expect(factory).to receive(:build_with).with(attribute => attribute_value)
+
+      light_with_attribute
     end
   end
 
@@ -47,36 +66,30 @@ RSpec.describe Stoplight::Domain::Light::ConfigurationBuilderInterface do
   describe "#with_error_notifier" do
     let(:error_notifier) { ->(x) { x } }
 
-    subject(:with_attribute) do
+    subject(:light_with_attribute) do
       light.with_error_notifier(&error_notifier)
     end
 
     it "configures error notifier" do
-      expect(with_attribute).to eq(light.with(error_notifier:))
+      expect(factory).to receive(:build_with).with(error_notifier: error_notifier)
+
+      light_with_attribute
     end
   end
 
   describe "#with_tracked_errors" do
     let(:tracked_errors) { [RuntimeError, KeyError] }
 
-    subject(:with_attribute) do
-      light.with_tracked_errors(*tracked_errors)
-    end
-
-    it "configures tracked errors" do
-      expect(with_attribute.config.tracked_errors).to contain_exactly(*tracked_errors)
+    include_examples "configurable attribute", :tracked_errors do
+      let(:as_list) { true }
     end
   end
 
   describe "#with_skipped_errors" do
     let(:skipped_errors) { [RuntimeError, KeyError] }
 
-    subject(:with_attribute) do
-      light.with_skipped_errors(*skipped_errors)
-    end
-
-    it "configures skipped errors" do
-      expect(with_attribute.config.skipped_errors).to eq(skipped_errors)
+    include_examples "configurable attribute", :skipped_errors do
+      let(:as_list) { true }
     end
   end
 end

@@ -83,13 +83,13 @@ RSpec.describe Stoplight::Wiring::DefaultConfiguration do
   end
 
   context "when data_store is set" do
-    let(:data_store) { instance_double(Stoplight::Domain::DataStore) }
+    let(:data_store) { instance_double(Stoplight::DataStore::Base) }
 
     before do
       default_config.data_store = data_store
     end
 
-    it { is_expected.to include(data_store:) }
+    it { is_expected.to include(data_store: data_store) }
   end
 
   context "when traffic_control is set" do

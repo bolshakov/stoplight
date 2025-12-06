@@ -8,6 +8,7 @@ module Stoplight
     # @api private use +Stoplight()+ method instead
     class Light
       extend Forwardable
+      include Common::Deprecations
       include ConfigurationBuilderInterface
 
       # @!attribute [r] config
@@ -32,22 +33,22 @@ module Stoplight
       #   @return [Stoplight::Domain::Strategies::RedRunStrategy]
       protected attr_reader :red_run_strategy
 
-      # @!attribute [r] data_store
-      #   @return [Stoplight::Light::Base]
-      protected attr_reader :data_store
-
       # @!attribute [r] factory
       #   @return [Stoplight::Domain::LightFactory]
       protected attr_reader :factory
 
+      # @!attribute state_store
+      #   @param [Stoplight::Domain::Storage::State]
+      protected attr_reader :state_store
+
       # @param config [Stoplight::Domain::Config]
-      def initialize(config, green_run_strategy:, yellow_run_strategy:, red_run_strategy:, data_store:, factory:)
+      def initialize(config, green_run_strategy:, yellow_run_strategy:, red_run_strategy:, factory:, state_store:)
         @config = config
-        @data_store = data_store
         @green_run_strategy = green_run_strategy
         @yellow_run_strategy = yellow_run_strategy
         @red_run_strategy = red_run_strategy
         @factory = factory
+        @state_store = state_store
       end
 
       # Returns the current state of the light:
@@ -56,9 +57,7 @@ module Stoplight
       #  * +Stoplight::State::UNLOCKED+ -- light is not locked and follow the configured rules
       #
       # @return [String]
-      def state
-        state_snapshot.locked_state
-      end
+      def state = state_snapshot.locked_state
 
       # Returns current color:
       #   * +Stoplight::Color::GREEN+ -- circuit breaker is closed
@@ -70,9 +69,7 @@ module Stoplight
       #   light.color #=> Color::GREEN
       #
       # @return [String] returns current light color
-      def color
-        state_snapshot.color
-      end
+      def color = state_snapshot.color
 
       # Runs the given block of code with this circuit breaker
       #
@@ -112,7 +109,7 @@ module Stoplight
         else raise Error::IncorrectColor
         end
 
-        data_store.set_state(config, state)
+        state_store.set_state(state)
 
         self
       end
@@ -126,7 +123,7 @@ module Stoplight
       #
       # @return [Stoplight::Light] returns unlocked light (circuit breaker)
       def unlock
-        data_store.set_state(config, State::UNLOCKED)
+        state_store.set_state(State::UNLOCKED)
 
         self
       end
@@ -136,9 +133,7 @@ module Stoplight
       # @param other [any]
       # @return [Boolean]
       def ==(other)
-        other.is_a?(self.class) && config == other.config && data_store == other.data_store &&
-          green_run_strategy == other.green_run_strategy && yellow_run_strategy == other.yellow_run_strategy &&
-          red_run_strategy == other.red_run_strategy && factory == other.factory
+        other.is_a?(self.class) && factory == other.factory
       end
 
       # Reconfigures the light with updated settings and returns a new instance.
@@ -171,8 +166,26 @@ module Stoplight
       #   # Run the lights with their respective configurations
       #   invoices_light.run(->(error) { [] }) { call_invoices_api }
       #   payment_light.run(->(error) { nil }) { call_payment_api }
+      # @deprecated
       # @see +Stoplight()+
       def with(**settings)
+        deprecate(<<~MSG)
+          Light#with is deprecated and will be removed in v6.0.0.
+
+          Circuit breakers should be configured once at creation, not cloned with
+          modifications.
+
+          Instead of:
+            light = Stoplight('api-call', threshold: 5)
+            modified = light.with(threshold: 10)
+
+          Configure correctly from the start:
+            Stoplight('api-call', threshold: 10)
+        MSG
+        with_without_warning(**settings)
+      end
+
+      private def with_without_warning(**settings)
         factory.build_with(**settings)
       end
 
@@ -189,9 +202,7 @@ module Stoplight
         end
       end
 
-      def state_snapshot
-        data_store.get_state_snapshot(config)
-      end
+      def state_snapshot = state_store.state_snapshot
     end
   end
 end

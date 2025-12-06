@@ -5,6 +5,10 @@ RSpec.describe "Stoplight" do
 
   let(:name) { ("a".."z").to_a.shuffle.join }
 
+  before do
+    Stoplight.configure(trust_me_im_an_engineer: true) {}
+  end
+
   it "creates a stoplight" do
     expected_light = Stoplight.__stoplight__default_light_factory.build_with(name:)
 
@@ -88,12 +92,14 @@ RSpec.describe "Stoplight" do
       expect(light.config.window_size).to eq(94)
     end
 
-    it "validates default configuration" do
+    it "validates default configuration and does not apply invalid one" do
       expect do
         Stoplight.configure(trust_me_im_an_engineer: true) do |config|
           config.traffic_control = :unexpected
         end
       end.to raise_error(Stoplight::Error::ConfigurationError, /unsupported traffic_control strategy provided/)
+
+      expect { Stoplight(SecureRandom.uuid) }.not_to raise_error
     end
   end
 end

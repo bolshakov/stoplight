@@ -44,7 +44,11 @@ module Stoplight
       #
       # @param config [Stoplight::Domain::Config] The light configuration.
       # @return [void]
-      def clear_windowed_metrics(config)
+      def clear_metrics(config)
+        raise NotImplementedError
+      end
+
+      def clear_recovery_metrics(config)
         raise NotImplementedError
       end
 
@@ -90,6 +94,18 @@ module Stoplight
       def set_state(config, state)
         raise NotImplementedError
       end
+
+      # Acquires recovery lock for serializing probe execution.
+      #
+      # @param config [Stoplight::Domain::Config]
+      # @return [Stoplight::Domain::LockToken, nil] Lock if acquired, nil if contended
+      def acquire_recovery_lock(config) = raise NotImplementedError
+
+      # Releases previously acquired lock.
+      #
+      # @param lock [Stoplight::Domain::RecoveryLockToken]
+      # @return [void]
+      def release_recovery_lock(lock) = raise NotImplementedError
 
       # Transitions the Stoplight to the specified color.
       #

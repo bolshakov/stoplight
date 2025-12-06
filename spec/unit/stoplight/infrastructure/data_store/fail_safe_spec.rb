@@ -1,15 +1,76 @@
 # frozen_string_literal: true
 
-RSpec.describe Stoplight::Wiring::FailSafeDataStore do
-  let(:fail_safe) { described_class.new(data_store:, error_notifier:, failover_data_store:) }
-  let(:failover_data_store) { Stoplight::Infrastructure::DataStore::Memory.new }
+RSpec.describe Stoplight::Infrastructure::DataStore::FailSafe do
+  let(:fail_safe) do
+    described_class.new(
+      data_store:, error_notifier:, failover_data_store:,
+      circuit_breaker: test_circuit_breaker_class.new
+    )
+  end
+  let(:failover_data_store) { Stoplight::Infrastructure::DataStore::Memory.new(recovery_lock_store:) }
+  let(:recovery_lock_store) { Stoplight::Infrastructure::DataStore::Memory::RecoveryLockStore.new }
   let(:data_store) { instance_double(Stoplight::Domain::DataStore) }
   let(:config) { Stoplight::Domain::Config.empty.with(name:, window_size: 4, cool_off_time: 60, threshold: 3) }
   let(:error_notifier) { instance_double(Proc) }
   let(:name) { SecureRandom.uuid }
   let(:error) { StandardError.new("Test error") }
 
+  let(:test_circuit_breaker_class) do
+    Class.new(Stoplight::Domain::Light) do
+      def initialize
+      end
+
+      def run(fallback)
+        yield
+      rescue => exception
+        fallback.call(exception)
+      end
+    end
+  end
+
   it_behaves_like "Stoplight::Domain::DataStore"
+
+  describe "#clear_metrics" do
+    subject(:clear_metrics) { fail_safe.clear_metrics(config) }
+
+    context "when data_store does not fail" do
+      it "returns nothing" do
+        expect(data_store).to receive(:clear_metrics).with(config)
+
+        clear_metrics
+      end
+    end
+
+    context "when data_store fails" do
+      it "returns nothing" do
+        expect(error_notifier).to receive(:call).with(error)
+        expect(data_store).to receive(:clear_metrics).with(config) { raise error }
+
+        clear_metrics
+      end
+    end
+  end
+
+  describe "#clear_recovery_metrics" do
+    subject(:clear_recovery_metrics) { fail_safe.clear_recovery_metrics(config) }
+
+    context "when data_store does not fail" do
+      it "returns nothing" do
+        expect(data_store).to receive(:clear_recovery_metrics).with(config)
+
+        clear_recovery_metrics
+      end
+    end
+
+    context "when data_store fails" do
+      it "returns nothing" do
+        expect(error_notifier).to receive(:call).with(error)
+        expect(data_store).to receive(:clear_recovery_metrics).with(config) { raise error }
+
+        clear_recovery_metrics
+      end
+    end
+  end
 
   describe "#names" do
     subject { fail_safe.names }
@@ -190,7 +251,7 @@ RSpec.describe Stoplight::Wiring::FailSafeDataStore do
     end
 
     context "when data_store fails" do
-      it "returns false" do
+      it "returns true" do
         expect(error_notifier).to receive(:call).with(error)
         expect(data_store).to receive(:transition_to_color).with(config, color).and_raise(error)
 
@@ -199,86 +260,67 @@ RSpec.describe Stoplight::Wiring::FailSafeDataStore do
     end
   end
 
-  describe ".wrap" do
-    subject { described_class.wrap(data_store:, error_notifier:) }
+  describe "#acquire_recovery_lock" do
+    subject { fail_safe.acquire_recovery_lock(config) }
 
-    context "when data_store is a Memory instance" do
-      let(:data_store) { Stoplight::DataStore::Memory.new }
+    context "when data_store does not fail" do
+      let(:recovery_token) { instance_double(Stoplight::Infrastructure::DataStore::Redis::RecoveryLockToken) }
 
-      it "returns the same data_store instance" do
-        is_expected.to be(data_store)
+      it "returns the token" do
+        expect(error_notifier).not_to receive(:call)
+
+        expect(data_store).to receive(:acquire_recovery_lock).with(config).and_return(recovery_token)
+        is_expected.to eq(recovery_token)
       end
     end
 
-    context "when data_store is a FailSafe instance with the same error_notifier" do
-      let(:data_store) do
-        described_class.new(
-          data_store: Stoplight::DataStore::Memory.new,
-          error_notifier:
-        )
-      end
+    context "when data_store fails" do
+      let(:failover_recovery_token) { instance_double(Stoplight::Infrastructure::DataStore::Memory::RecoveryLockToken) }
 
-      it "returns the same data_store instance" do
-        is_expected.to be(data_store)
-      end
-    end
+      it "returns failover token" do
+        expect(error_notifier).to receive(:call).with(error)
+        expect(data_store).to receive(:acquire_recovery_lock).with(config).and_raise(error)
+        expect(failover_data_store).to receive(:acquire_recovery_lock).with(config).and_return(failover_recovery_token)
 
-    context "when data_store is a FailSafe instance with a different error_notifier" do
-      let(:underlying_data_store) { Stoplight::DataStore::Memory.new }
-      let(:underlying_error_notifier) { ->(error) { warn error } }
-
-      let(:data_store) do
-        described_class.new(
-          data_store: underlying_data_store,
-          error_notifier: underlying_error_notifier
-        )
-      end
-
-      it "returns a new FailSafe instance wrapping the data_store" do
-        is_expected.to be_a(described_class)
-        is_expected.to have_attributes(
-          data_store: underlying_data_store,
-          error_notifier: error_notifier
-        )
-      end
-    end
-
-    context "when data_store is another type" do
-      let(:data_store) { instance_double(Stoplight::Domain::DataStore) }
-
-      it "returns a new FailSafe instance wrapping the data_store" do
-        is_expected.to be_a(described_class)
-        is_expected.to have_attributes(data_store:, error_notifier:)
+        is_expected.to eq(failover_recovery_token)
       end
     end
   end
 
-  describe "faulty data store" do
-    let(:data_store) { instance_double(Stoplight::Domain::DataStore) }
+  describe "#release_recovery_lock" do
+    subject(:release_recovery_lock) { fail_safe.release_recovery_lock(recovery_lock_token) }
 
-    it "when primary store fails" do
-      # Prepare: move internal circuit breaker into the red state
-      allow(data_store).to receive(:names).and_raise(Redis::TimeoutError)
-      config.threshold.times do
-        expect { fail_safe.names }.not_to raise_error
+    context "with primary recovery lock token" do
+      let(:recovery_lock_token) { Stoplight::Infrastructure::DataStore::Redis::RecoveryLockToken.new(light_name: name) }
+
+      context "when data_store does not fail" do
+        it "releases this token" do
+          expect(error_notifier).not_to receive(:call)
+          expect(data_store).to receive(:release_recovery_lock).with(recovery_lock_token)
+
+          release_recovery_lock
+        end
       end
 
-      # Verify: now the fallback data store is used
-      RSpec::Mocks.space.proxy_for(data_store).reset
-      allow(data_store).to receive(:names)
-      allow(data_store).to receive(:record_success)
+      context "when data_store fails" do
+        it "notifies but does not call to failover" do
+          expect(error_notifier).to receive(:call).with(error)
+          expect(data_store).to receive(:release_recovery_lock).with(recovery_lock_token).and_raise(error)
+          expect(failover_data_store).not_to receive(:release_recovery_lock)
 
-      fail_safe.record_success(config)
-      expect(fail_safe.names).to include(config.name)
+          release_recovery_lock
+        end
+      end
+    end
 
-      expect(data_store).not_to have_received(:record_success), "expected to use fallback data store without trying primary"
-      expect(data_store).not_to have_received(:names), "expected to use fallback data store without trying primary"
+    context "with failover recovery lock token" do
+      let(:recovery_lock_token) { Stoplight::Infrastructure::DataStore::Memory::RecoveryLockToken.new(light_name: name) }
 
-      # After cool_off_time, the primary data store is tried again
-      Timecop.travel(Time.now + config.cool_off_time) do
-        expect(data_store).to receive(:names).and_return(["recovered"])
+      it "releases this token" do
+        expect(error_notifier).not_to receive(:call)
+        expect(failover_data_store).to receive(:release_recovery_lock).with(recovery_lock_token)
 
-        expect(fail_safe.names).to eq(["recovered"])
+        release_recovery_lock
       end
     end
   end

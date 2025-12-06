@@ -7,7 +7,6 @@ module Stoplight
       GREEN = Decision.new("green")
       YELLOW = Decision.new("yellow")
       RED = Decision.new("red")
-      PASS = Decision.new("pass")
     end
   end
 end

@@ -75,26 +75,4 @@ RSpec.describe Stoplight::Domain::Strategies::GreenRunStrategy do
       end
     end
   end
-
-  describe "#==" do
-    context "with the same arguments" do
-      let(:other) { described_class.new(config:, request_tracker:) }
-
-      it { is_expected.to eq(other) }
-    end
-
-    context "with different config" do
-      let(:other) { described_class.new(config: other_config, request_tracker:) }
-      let(:other_config) { instance_double(Stoplight::Domain::Config) }
-
-      it { is_expected.not_to eq(other) }
-    end
-
-    context "with different request recorder" do
-      let(:other) { described_class.new(config:, request_tracker: other_request_tracker) }
-      let(:other_request_tracker) { instance_double(Stoplight::Domain::Tracker::Request) }
-
-      it { is_expected.not_to eq(other) }
-    end
-  end
 end

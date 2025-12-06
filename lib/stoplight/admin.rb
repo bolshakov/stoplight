@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
-require "cgi" # Ruby 3.2 needs this
+require "cgi/escape"
+require "cgi/util" if RUBY_VERSION < "3.5"
 
 begin
   require "sinatra/base"

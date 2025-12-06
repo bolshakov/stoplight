@@ -37,7 +37,7 @@ module Stoplight
       attr_accessor :notifiers
 
       # @!attribute [rw] data_store
-      #   @return [Stoplight::Domain::DataStore] The default data store instance.
+      #   @return [Stoplight::Wiring::DataStore::Base] The default data store instance.
       attr_accessor :data_store
 
       # @!attribute [w] traffic_control

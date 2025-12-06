@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Stoplight::Wiring::FailSafeNotifier do
+RSpec.describe Stoplight::Infrastructure::Notifier::FailSafe do
   describe "#notify" do
     subject(:fail_safe_notifier) { described_class.new(notifier:, error_notifier:) }
 
@@ -29,32 +29,6 @@ RSpec.describe Stoplight::Wiring::FailSafeNotifier do
         fail_safe_notifier.notify(config, from_color, to_color, error)
 
         expect(error_notifier).to have_received(:call).with(error)
-      end
-    end
-  end
-
-  describe ".wrap" do
-    subject(:fail_safe) { described_class.wrap(notifier:, error_notifier:) }
-    let(:error_notifier) { instance_double(Proc) }
-
-    context "when notifier is FailSafe already" do
-      let(:notifier) do
-        described_class.new(
-          notifier: instance_double(Stoplight::Domain::StateTransitionNotifier),
-          error_notifier: error_notifier
-        )
-      end
-
-      it "returns itself" do
-        expect(fail_safe).to be(notifier)
-      end
-    end
-
-    context "when notifier is not FailSafe" do
-      let(:notifier) { instance_double(Stoplight::Domain::StateTransitionNotifier) }
-
-      it "returns a new FailSafe instance" do
-        expect(fail_safe).to be_a(described_class)
       end
     end
   end

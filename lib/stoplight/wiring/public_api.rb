@@ -12,8 +12,9 @@ module Stoplight
 
       # Namespace aliases for data stores
       module DataStore
-        Redis = Infrastructure::DataStore::Redis
-        Memory = Infrastructure::DataStore::Memory
+        Base = Stoplight::Wiring::DataStore::Base
+        Redis = Stoplight::Wiring::DataStore::Redis
+        Memory = Stoplight::Wiring::DataStore::Memory
       end
 
       # Namespace aliases for notifiers

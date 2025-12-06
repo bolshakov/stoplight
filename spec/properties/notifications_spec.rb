@@ -2,8 +2,6 @@
 
 require "rantly/rspec_extensions"
 
-require "spec_helper"
-
 RSpec.describe "Notifications" do
   shared_examples "notify about state changes" do
     let(:notifier) { notifier_class.new }
@@ -79,7 +77,7 @@ RSpec.describe "Notifications" do
   end
 
   context "with redis data store", :redis do
-    let(:data_store) { Stoplight::Infrastructure::DataStore::Redis.new(redis, warn_on_clock_skew: false) }
+    let(:data_store) { Stoplight::DataStore::Redis.new(redis, warn_on_clock_skew: false) }
 
     it_behaves_like "notify about state changes"
   end
