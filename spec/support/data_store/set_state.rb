@@ -4,12 +4,12 @@ RSpec.shared_examples "Stoplight::Domain::DataStore#set_state" do
   let(:state) { "state" }
 
   it "returns the state" do
-    expect(data_store.set_state(config, state)).to eql(state)
+    expect(set_state(state)).to eql(state)
   end
 
   it "persists the state" do
-    data_store.set_state(config, state)
+    set_state(state)
 
-    expect(data_store.get_state_snapshot(config).locked_state).to eql(state)
+    expect(get_state_snapshot.locked_state).to eql(state)
   end
 end

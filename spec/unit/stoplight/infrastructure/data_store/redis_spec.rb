@@ -181,7 +181,10 @@ RSpec.describe Stoplight::Infrastructure::DataStore::Redis, :redis do
     it_behaves_like "Stoplight::Domain::DataStore#get_metrics"
     it_behaves_like "Stoplight::Domain::DataStore#get_recovery_metrics"
     it_behaves_like "Stoplight::Domain::DataStore#names"
-    it_behaves_like "Stoplight::Domain::DataStore#set_state"
+    it_behaves_like "Stoplight::Domain::DataStore#set_state" do
+      def set_state(state) = data_store.set_state(config, state)
+      def get_state_snapshot = data_store.get_state_snapshot(config)
+    end
     it_behaves_like "Stoplight::Domain::DataStore#transition_to_color"
   end
 
