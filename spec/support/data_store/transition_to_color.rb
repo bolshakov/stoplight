@@ -58,6 +58,16 @@ RSpec.shared_examples "Stoplight::Domain::DataStore#transition_to_color" do
           .from(have_attributes(recovery_started_at: nil))
           .to(have_attributes(recovery_started_at: current_time))
       end
+
+      context "when cleared" do
+        it "looses persisted state" do
+          Timecop.freeze(current_time) do
+            transition_to_color(Stoplight::Color::YELLOW)
+          end
+          clear
+          expect(state_snapshot).to have_attributes(recovery_started_at: nil)
+        end
+      end
     end
   end
 
@@ -86,6 +96,16 @@ RSpec.shared_examples "Stoplight::Domain::DataStore#transition_to_color" do
           .from(have_attributes(breached_at: nil, recovery_scheduled_after: nil))
           .to(have_attributes(breached_at: current_time, recovery_scheduled_after: current_time + config.cool_off_time))
       end
+
+      context "when cleared" do
+        it "looses persisted state" do
+          Timecop.freeze(current_time) do
+            transition_to_color(Stoplight::Color::YELLOW)
+          end
+          clear
+          expect(state_snapshot).to have_attributes(breached_at: nil, recovery_scheduled_after: nil)
+        end
+      end
     end
 
     context "when the color is GREEN" do
@@ -103,6 +123,16 @@ RSpec.shared_examples "Stoplight::Domain::DataStore#transition_to_color" do
         end.to change { state_snapshot }
           .from(have_attributes(breached_at: nil, recovery_scheduled_after: nil))
           .to(have_attributes(breached_at: current_time, recovery_scheduled_after: current_time + config.cool_off_time))
+      end
+
+      context "when cleared" do
+        it "looses persisted state" do
+          Timecop.freeze(current_time) do
+            transition_to_color(Stoplight::Color::YELLOW)
+          end
+          clear
+          expect(state_snapshot).to have_attributes(breached_at: nil, recovery_scheduled_after: nil)
+        end
       end
     end
 

@@ -12,4 +12,12 @@ RSpec.shared_examples "Stoplight::Domain::DataStore#set_state" do
 
     expect(state_snapshot.locked_state).to eql(state)
   end
+
+  context "when cleared" do
+    it "looses persisted state" do
+      set_state(state)
+      clear
+      expect(state_snapshot.locked_state).to eql(Stoplight::State::UNLOCKED)
+    end
+  end
 end
