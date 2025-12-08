@@ -10,6 +10,6 @@ RSpec.shared_examples "Stoplight::Domain::DataStore#set_state" do
   it "persists the state" do
     set_state(state)
 
-    expect(get_state_snapshot.locked_state).to eql(state)
+    expect(state_snapshot.locked_state).to eql(state)
   end
 end
