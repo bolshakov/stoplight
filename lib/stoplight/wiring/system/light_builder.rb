@@ -12,10 +12,32 @@ module Stoplight
           super(settings)
         end
 
-        def key_space = Infrastructure::Storage::Redis::KeySpace.build(
+        def key_space = @key_space ||= Infrastructure::Storage::Redis::KeySpace.build(
           system_name: system.name,
           light_name: config.name
         )
+
+        def cool_off_time = config.cool_off_time
+
+        private def state_store
+          @state_store ||= case data_store_config
+          in Stoplight::DataStore::Memory
+            Infrastructure::Storage::Memory::State.new(clock:, cool_off_time:)
+          in Stoplight::DataStore::Redis
+            Infrastructure::Storage::FailSafe::State.new(
+              primary_store: Infrastructure::Storage::Redis::State.new(
+                redis: data_store_config.redis,
+                scripting:,
+                key_space:,
+                cool_off_time:,
+                clock:
+              ),
+              error_notifier:,
+              failover_store: Infrastructure::Storage::Memory::State.new(clock:, cool_off_time:),
+              circuit_breaker: failover_system.light("redis")
+            )
+          end
+        end
 
         private def redis = data_store_config
         private def storage_scripting = Infrastructure::Storage::Redis::Scripting.new(redis:)

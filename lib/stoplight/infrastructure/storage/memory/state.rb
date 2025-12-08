@@ -30,13 +30,13 @@ module Stoplight
         # @see Stoplight::Domain::Storage::State for the interface contract
         #
         class State < Domain::Storage::State
-          # @!attribute recovered_at
-          #   @return [Time, nil]
-          private attr_accessor :recovered_at
-
           # @!attribute locked_state
           #   @return [String]
           private attr_accessor :locked_state
+
+          # @!attribute recovered_at
+          #   @return [Time, nil]
+          private attr_accessor :recovered_at
 
           # @!attribute recovery_scheduled_after
           #   @return [Time, nil]
@@ -72,7 +72,7 @@ module Stoplight
           end
 
           # @param state [String]
-          # @return [void]
+          # @return [String]
           def set_state(state)
             mutex.synchronize do
               self.locked_state = state

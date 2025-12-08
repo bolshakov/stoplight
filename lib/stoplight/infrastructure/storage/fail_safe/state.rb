@@ -26,9 +26,9 @@ module Stoplight
           #   @return [Stoplight::Light] The circuit breaker used to handle store failures.
           private attr_reader :circuit_breaker
 
-          # @param primary_store [Stoplight::Domain::Storage::RecoveryLock]
+          # @param primary_store [Stoplight::Domain::Storage::State]
           # @param error_notifier [Proc]
-          # @param failover_store [Stoplight::Domain::Storage::RecoveryLock]
+          # @param failover_store [Stoplight::Domain::Storage::State]
           # @param circuit_breaker [Stoplight::Domain::Light]
           def initialize(primary_store:, error_notifier:, failover_store:, circuit_breaker:)
             @primary_store = primary_store
@@ -45,6 +45,7 @@ module Stoplight
             end
           end
 
+          # @return [Stoplight::Domain::StateSnapshot]
           def state_snapshot
             circuit_breaker.run(fallback { failover_store.state_snapshot }) do
               primary_store.state_snapshot
