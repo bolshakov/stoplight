@@ -25,6 +25,8 @@ RSpec.configure do |rspec|
   rspec.include ExceptionHelpers
   rspec.include RouteHelpers, type: :request
 
+  rspec.before { Stoplight.__stoplight__reset! }
+
   rspec.filter_run_when_matching :focus
   rspec.color = true
   rspec.disable_monkey_patching!

@@ -102,4 +102,24 @@ RSpec.describe "Stoplight" do
       expect { Stoplight(SecureRandom.uuid) }.not_to raise_error
     end
   end
+
+  describe ".__stoplight__system" do
+    context "name is not in use yet" do
+      subject(:system) { Stoplight.__stoplight__system(SecureRandom.uuid) }
+
+      it { is_expected.to be_kind_of(Stoplight::Wiring::System) }
+    end
+
+    context "name is already in use" do
+      subject(:system) { Stoplight.__stoplight__system(name) }
+
+      let(:name) { SecureRandom.uuid }
+
+      it "raises argument error" do
+        Stoplight.__stoplight__system(name)
+
+        expect { system }.to raise_error(ArgumentError)
+      end
+    end
+  end
 end

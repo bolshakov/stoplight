@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "concurrent/map"
 require "zeitwerk"
 
 loader = Zeitwerk::Loader.for_gem
@@ -18,6 +19,7 @@ module Stoplight # rubocop:disable Style/Documentation
 
   CONFIG_MUTEX = Mutex.new
   private_constant :CONFIG_MUTEX
+  @systems = Concurrent::Map.new
 
   class << self
     # Configures the Stoplight library.
@@ -80,6 +82,72 @@ module Stoplight # rubocop:disable Style/Documentation
     # @api private
     def light(name, **settings)
       __stoplight__default_light_factory.build_with(name:, **settings)
+    end
+
+    # Creates a new named system with the given configuration.
+    #
+    # Systems are composition roots that own infrastructure (data store, notifiers)
+    # and enforce configuration consistency for all lights created within them.
+    #
+    # @param name [String] Unique identifier for the system
+    # @param settings [Hash] Configuration options that override global defaults.
+    #   @see Stoplight() documentation
+    #
+    # @return [Stoplight::Wiring::System] A new system instance.
+    #
+    # @raise [ArgumentError] If a system with the given name already exists.
+    #
+    # @note Systems are not cached for reuse. Assign the returned system to a constant
+    #   for repeated access. Calling this method twice with the same name raises an error.
+    #
+    # @example Creating a system for payment services
+    #   Payments = Stoplight.__stoplight__system(:payments, threshold: 3, cool_off_time: 30)
+    #   Payments.light("stripe").run { process_payment }
+    #
+    # @example Isolated system with dedicated data store
+    #   Analytics = Stoplight.__stoplight__system(:analytics, data_store: analytics_redis)
+    #
+    # @api private
+    def __stoplight__system(name, **settings)
+      ensure_configured
+
+      @systems.compute(name.to_s) do |existing_system|
+        if existing_system
+          raise ArgumentError, "system `#{name}` is already in use"
+        else
+          Stoplight::Wiring::System.new(name.to_s, **@default_configuration.to_h.merge(settings))
+        end
+      end
+    end
+
+    # Resets Stoplight to an unconfigured state.
+    #
+    # Clears all registered systems, default configuration, and the default light factory.
+    # After calling this method, the next call to +Stoplight()+ or +configure+ will
+    # initialize fresh state.
+    #
+    # @return [void]
+    #
+    # @note This method is intended for test suite setup/teardown. Do not use in production
+    #   code, as it orphans any existing light or system references, leading to split-brain
+    #   scenarios where different lights with the same name use different data stores.
+    #
+    # @note This method does not clean up state in external data stores (e.g., Redis keys).
+    #   It only resets in-process configuration.
+    #
+    # @example RSpec test setup
+    #   RSpec.configure do |config|
+    #     config.before do
+    #       Stoplight.__stoplight__reset!
+    #     end
+    #   end
+    #
+    # @api private
+    def __stoplight__reset!
+      @systems = Concurrent::Map.new
+      @default_configuration = nil
+      @default_light_factory = nil
+      @configured = nil
     end
 
     # Retrieves the current default dependencies.
