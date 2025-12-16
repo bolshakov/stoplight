@@ -72,7 +72,7 @@ module Stoplight
           config_settings,
           dependency_settings
         )
-        light_builder_class.new(factory: light_factory, config:, **dependencies).build
+        light_builder(config, dependencies).build
       end
 
       # @return [Stoplight::Error::ConfigurationError]
@@ -97,7 +97,9 @@ module Stoplight
         [self.class, settings].hash
       end
 
-      private def light_builder_class = LightBuilder
+      private def light_builder(config, dependencies)
+        LightBuilder.new({factory: light_factory, config:, **dependencies})
+      end
 
       private def light_factory = self
     end

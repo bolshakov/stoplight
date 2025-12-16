@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "concurrent/map"
+
 module Stoplight
   module Wiring
     # 🚧UNDER CONSTRUCTION 🚧
@@ -44,12 +45,13 @@ module Stoplight
     #
     # @api private
     class System
+      attr_reader :name
       private attr_reader :light_factory
       private attr_reader :lights
 
       # @api private
       def initialize(name, **defaults)
-        @name = name
+        @name = name.to_s
         @light_factory = LightFactory.new(library_default_dependencies.merge(defaults))
         @lights = Concurrent::Map.new
 
@@ -111,6 +113,7 @@ module Stoplight
       private def normalize_settings(settings) = settings.sort.to_h
 
       private def library_default_dependencies = {
+        system: self,
         data_store: Default::DATA_STORE,
         traffic_recovery: Default::TRAFFIC_RECOVERY,
         traffic_control: Default::TRAFFIC_CONTROL,
