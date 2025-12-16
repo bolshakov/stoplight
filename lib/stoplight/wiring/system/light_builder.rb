@@ -13,6 +13,11 @@ module Stoplight
 
           super(settings)
         end
+
+        def key_space = Infrastructure::Storage::Redis::KeySpace.build(
+          system_name: system.name,
+          light_name: config.name
+        )
       end
     end
   end
