@@ -73,7 +73,16 @@ module Stoplight
           if config.window_size
             Infrastructure::Storage::CompatibilityMetrics.new(config:, data_store:)
           else
-            Infrastructure::Storage::Redis::UnboundedMetrics.new(redis:, scripting: storage_scripting, key_space:)
+            Infrastructure::Storage::FailSafe::Metrics.new(
+              error_notifier:,
+              primary_store: Infrastructure::Storage::Redis::UnboundedMetrics.new(
+                redis:,
+                scripting: storage_scripting,
+                key_space:
+              ),
+              failover_store: Infrastructure::Storage::Memory::UnboundedMetrics.new,
+              circuit_breaker: failover_system.light("redis")
+            )
           end
         end
 
