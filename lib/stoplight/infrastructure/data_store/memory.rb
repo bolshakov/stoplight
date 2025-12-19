@@ -16,11 +16,16 @@ module Stoplight
         #   @api private
         private attr_reader :recovery_lock_store
 
+        # @!attribute clock
+        #   @return [Stoplight::Domain::Clock]
+        private attr_reader :clock
+
         # @param recovery_lock_store [Stoplight::Infrastructure::DataStore::Memory::RecoveryLockStore]
-        def initialize(recovery_lock_store:)
+        def initialize(recovery_lock_store:, clock:)
+          @clock = clock
           @recovery_lock_store = recovery_lock_store
-          @errors = Hash.new { |errors, light_name| errors[light_name] = SlidingWindow.new }
-          @successes = Hash.new { |successes, light_name| successes[light_name] = SlidingWindow.new }
+          @errors = Hash.new { |errors, light_name| errors[light_name] = SlidingWindow.new(clock:) }
+          @successes = Hash.new { |successes, light_name| successes[light_name] = SlidingWindow.new(clock:) }
           @metrics = Hash.new { |metrics, light_name| metrics[light_name] = Metrics.new }
 
           @recovery_metrics = Hash.new { |metrics, light_name| metrics[light_name] = Metrics.new }
@@ -124,8 +129,8 @@ module Stoplight
           light_name = config.name
           synchronize do
             if config.window_size
-              @errors[light_name] = SlidingWindow.new
-              @successes[light_name] = SlidingWindow.new
+              @errors[light_name] = SlidingWindow.new(clock:)
+              @successes[light_name] = SlidingWindow.new(clock:)
             end
             @metrics[light_name] = Metrics.new
           end

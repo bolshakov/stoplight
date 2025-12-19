@@ -58,6 +58,10 @@ module Stoplight
       #   @return [Stoplight::Domain::LightFactory]
       private attr_reader :factory
 
+      # @!attribute clock
+      #   @return [Stoplight::Domain::Clock]
+      private attr_reader :clock
+
       def initialize(settings)
         @notifiers = settings[:notifiers]
         @data_store_config = settings[:data_store]
@@ -66,6 +70,7 @@ module Stoplight
         @traffic_control = settings[:traffic_control]
         @config = settings[:config]
         @factory = settings[:factory]
+        @clock = Infrastructure::SystemClock.new
       end
 
       def build
@@ -161,7 +166,8 @@ module Stoplight
         in Stoplight::DataStore::Memory
           memory_registry.compute_if_absent(data_store_config.object_id) do
             Infrastructure::DataStore::Memory.new(
-              recovery_lock_store: memory_recovery_lock_store
+              recovery_lock_store: memory_recovery_lock_store,
+              clock:
             )
           end
         in Stoplight::DataStore::Redis

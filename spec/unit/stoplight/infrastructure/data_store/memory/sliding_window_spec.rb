@@ -1,9 +1,8 @@
 # frozen_string_literal: true
 
-require "spec_helper"
-
 RSpec.describe Stoplight::Infrastructure::DataStore::Memory::SlidingWindow do
-  let(:counter) { described_class.new }
+  let(:counter) { described_class.new(clock:) }
+  let(:clock) { Stoplight::Infrastructure::SystemClock.new }
 
   around do |example|
     Timecop.freeze do
