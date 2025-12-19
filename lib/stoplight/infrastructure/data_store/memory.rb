@@ -21,6 +21,7 @@ module Stoplight
         private attr_reader :clock
 
         # @param recovery_lock_store [Stoplight::Infrastructure::DataStore::Memory::RecoveryLockStore]
+        # @param clock [Stoplight::Domain::Clock]
         def initialize(recovery_lock_store:, clock:)
           @clock = clock
           @recovery_lock_store = recovery_lock_store

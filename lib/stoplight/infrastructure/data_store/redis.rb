@@ -90,12 +90,18 @@ module Stoplight
         #   @return [Boolean]
         protected attr_reader :warn_on_clock_skew
 
+        # @!attribute clock
+        #   @return [Stoplight::Domain::Clock]
+        private attr_reader :clock
+
         # @param redis [::Redis, ConnectionPool<::Redis>]
         # @param recovery_lock_store [Stoplight::Infrastructure::DataStore::Redis::RecoveryLockStore]
         # @param warn_on_clock_skew [Boolean] (true) Whether to warn about clock skew between Redis and
         # @param scripting [Stoplight::Infrastructure::DataStore::Redis::Scripting]
+        # @param clock [Stoplight::Domain::Clock]
         #   the application server
-        def initialize(redis:, recovery_lock_store:, scripting:, warn_on_clock_skew: true)
+        def initialize(redis:, recovery_lock_store:, scripting:, clock:, warn_on_clock_skew: true)
+          @clock = clock
           @warn_on_clock_skew = warn_on_clock_skew
           @redis = redis
           @recovery_lock_store = recovery_lock_store
@@ -121,7 +127,7 @@ module Stoplight
         def get_metrics(config)
           config.name
 
-          window_end_ts = current_time.to_f
+          window_end_ts = clock.current_time.to_f
           window_start_ts = window_end_ts - config.window_size.to_i
 
           if config.window_size
@@ -155,7 +161,7 @@ module Stoplight
             consecutive_errors:,
             consecutive_successes:,
             last_error: deserialize_failure(last_error_json),
-            last_success_at: (Time.at(last_success_at.to_f) if last_success_at)
+            last_success_at: (clock.at(last_success_at.to_f) if last_success_at)
           )
         end
 
@@ -174,7 +180,7 @@ module Stoplight
             consecutive_errors: consecutive_errors.to_i,
             consecutive_successes: consecutive_successes.to_i,
             last_error: deserialize_failure(last_error_json),
-            last_success_at: (Time.at(last_success_at.to_f) if last_success_at)
+            last_success_at: (clock.at(last_success_at.to_f) if last_success_at)
           )
         end
 
@@ -190,17 +196,17 @@ module Stoplight
           recovery_started_at = recovery_started_at_raw&.to_f
 
           Domain::StateSnapshot.new(
-            breached_at: (Time.at(breached_at) if breached_at),
+            breached_at: (clock.at(breached_at) if breached_at),
             locked_state: locked_state || Domain::State::UNLOCKED,
-            recovery_scheduled_after: (Time.at(recovery_scheduled_after) if recovery_scheduled_after),
-            recovery_started_at: (Time.at(recovery_started_at) if recovery_started_at),
-            time: current_time
+            recovery_scheduled_after: (clock.at(recovery_scheduled_after) if recovery_scheduled_after),
+            recovery_started_at: (clock.at(recovery_started_at) if recovery_started_at),
+            time: clock.current_time
           )
         end
 
         def clear_metrics(config)
           if config.window_size
-            window_end_ts = current_time.to_i
+            window_end_ts = clock.current_time.to_i
             @redis.with do |client|
               client.multi do |tx|
                 tx.unlink(
@@ -223,16 +229,16 @@ module Stoplight
           end
         end
 
-        private def state_snapshot_from_hash(data, time: current_time)
+        private def state_snapshot_from_hash(data, time: clock.current_time)
           breached_at = data[:breached_at]&.to_f
           recovery_scheduled_after = data[:recovery_scheduled_after]&.to_f
           recovery_started_at = data[:recovery_started_at]&.to_f
 
           Domain::StateSnapshot.new(
-            breached_at: (Time.at(breached_at) if breached_at),
+            breached_at: (clock.at(breached_at) if breached_at),
             locked_state: data[:locked_state] || Domain::State::UNLOCKED,
-            recovery_scheduled_after: (Time.at(recovery_scheduled_after) if recovery_scheduled_after),
-            recovery_started_at: (Time.at(recovery_started_at) if recovery_started_at),
+            recovery_scheduled_after: (clock.at(recovery_scheduled_after) if recovery_scheduled_after),
+            recovery_started_at: (clock.at(recovery_started_at) if recovery_started_at),
             time:
           )
         end
@@ -241,8 +247,8 @@ module Stoplight
         # @param exception [Exception]
         # @return [void]
         def record_failure(config, exception)
-          current_time = self.current_time
-          current_ts = current_time.to_f
+          current_time = clock.current_time
+          current_ts = clock.current_time.to_f
           failure = Domain::Failure.from_error(exception, time: current_time)
 
           scripting.call(
@@ -256,7 +262,7 @@ module Stoplight
         end
 
         def record_success(config, request_id: SecureRandom.hex(12))
-          current_ts = current_time.to_f
+          current_ts = clock.current_time.to_f
 
           scripting.call(
             :record_success,
@@ -274,8 +280,8 @@ module Stoplight
         # @param exception [Exception]
         # @return [void]
         def record_recovery_probe_failure(config, exception)
-          current_time = self.current_time
-          current_ts = current_time.to_f
+          current_time = clock.current_time
+          current_ts = clock.current_time.to_f
           failure = Domain::Failure.from_error(exception, time: current_time)
 
           scripting.call(
@@ -290,7 +296,7 @@ module Stoplight
         # @param config [Stoplight::Domain::Config] The light configuration.
         # @return [void]
         def record_recovery_probe_success(config)
-          current_ts = current_time.to_f
+          current_ts = clock.current_time.to_f
 
           scripting.call(
             :record_recovery_probe_success,
@@ -345,7 +351,7 @@ module Stoplight
         # @param config [Stoplight::Domain::Config] The light configuration
         # @return [Boolean] true if this is the first instance to detect this transition
         private def transition_to_green(config)
-          current_ts = current_time.to_f
+          current_ts = clock.current_time.to_f
           meta_key = metadata_key(config)
 
           became_green = scripting.call(
@@ -361,7 +367,7 @@ module Stoplight
         # @param config [Stoplight::Domain::Config] The light configuration
         # @return [Boolean] true if this is the first instance to detect this transition
         private def transition_to_yellow(config)
-          current_ts = current_time.to_f
+          current_ts = clock.current_time.to_f
           meta_key = metadata_key(config)
 
           became_yellow = scripting.call(
@@ -377,7 +383,7 @@ module Stoplight
         # @param config [Stoplight::Domain::Config] The light configuration
         # @return [Boolean] true if this is the first instance to detect this transition
         private def transition_to_red(config)
-          current_ts = current_time.to_f
+          current_ts = clock.current_time.to_f
           meta_key = metadata_key(config)
           recovery_scheduled_after_ts = current_ts + config.cool_off_time
 
@@ -410,7 +416,7 @@ module Stoplight
 
           error_class = error_object["class"]
           error_message = error_object["message"]
-          time = Time.at(object["time"])
+          time = clock.at(object["time"])
 
           Domain::Failure.new(error_class, error_message, time)
         end
@@ -505,7 +511,7 @@ module Stoplight
           return unless should_sample?(0.01) # 1% chance
 
           redis_seconds, _redis_millis = @redis.then(&:time)
-          app_seconds = current_time.to_i
+          app_seconds = clock.current_time.to_i
           if (redis_seconds - app_seconds).abs > SKEW_TOLERANCE
             warn("Detected clock skew between Redis and the application server. Redis time: #{redis_seconds}, Application time: #{app_seconds}. See https://github.com/bolshakov/stoplight/wiki/Clock-Skew-and-Stoplight-Reliability")
           end
@@ -513,10 +519,6 @@ module Stoplight
 
         private def should_sample?(probability)
           rand <= probability
-        end
-
-        private def current_time
-          Time.now
         end
       end
     end

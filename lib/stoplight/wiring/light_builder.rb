@@ -173,6 +173,7 @@ module Stoplight
         in Stoplight::DataStore::Redis
           Infrastructure::DataStore::FailSafe.new(
             data_store: Stoplight::Infrastructure::DataStore::Redis.new(
+              clock:,
               redis: data_store_config.redis,
               warn_on_clock_skew: data_store_config.warn_on_clock_skew,
               recovery_lock_store: redis_recovery_lock_store,

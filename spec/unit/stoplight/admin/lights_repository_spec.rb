@@ -5,6 +5,7 @@ RSpec.describe Stoplight::Admin::LightsRepository, :redis do
 
   let(:data_store) do
     Stoplight::Infrastructure::DataStore::Redis.new(
+      clock:,
       redis:,
       warn_on_clock_skew: false,
       recovery_lock_store: redis_recovery_lock_store,
@@ -18,6 +19,7 @@ RSpec.describe Stoplight::Admin::LightsRepository, :redis do
       scripting:
     )
   end
+  let(:clock) { Stoplight::Infrastructure::SystemClock.new }
   let(:scripting) do
     Stoplight::Infrastructure::DataStore::Redis::Scripting.new(redis:)
   end

@@ -11,6 +11,7 @@ RSpec.describe Stoplight::Infrastructure::DataStore::Redis, :redis do
   let(:other) { Stoplight::Domain::Failure.new("class", "message 2", Time.new) }
   let(:window_size) { 60 }
   let(:cool_off_time) { 60 }
+  let(:clock) { Stoplight::Infrastructure::SystemClock.new }
 
   describe ".buckets_for_window" do
     subject(:buckets) { described_class.buckets_for_window(light_name, metric:, window_end:, window_size:) }
@@ -68,7 +69,7 @@ RSpec.describe Stoplight::Infrastructure::DataStore::Redis, :redis do
     let(:redis_mock) { instance_double(Redis) }
 
     it "does not communicate with redis on initialization" do
-      expect { described_class.new(redis: redis_mock, recovery_lock_store: nil, scripting: nil) }.not_to raise_error
+      expect { described_class.new(redis: redis_mock, recovery_lock_store: nil, scripting: nil, clock:) }.not_to raise_error
     end
   end
 
@@ -187,6 +188,7 @@ RSpec.describe Stoplight::Infrastructure::DataStore::Redis, :redis do
   it_behaves_like Stoplight::Infrastructure::DataStore::Redis do
     let(:data_store) do
       described_class.new(
+        clock:,
         redis: connection,
         warn_on_clock_skew: warn_on_clock_skew,
         recovery_lock_store:,
@@ -199,6 +201,7 @@ RSpec.describe Stoplight::Infrastructure::DataStore::Redis, :redis do
   it_behaves_like Stoplight::Infrastructure::DataStore::Redis do
     let(:data_store) do
       described_class.new(
+        clock:,
         redis: connection,
         warn_on_clock_skew: warn_on_clock_skew,
         recovery_lock_store:,
