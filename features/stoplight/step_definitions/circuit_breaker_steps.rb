@@ -65,7 +65,3 @@ end
 When(/^I unlock (?:the light|it$)/) do
   current_light.unlock
 end
-
-Given(/^(?:the light|it) is configured with:$/) do |table|
-  self.current_light = configure_light(current_light, table)
-end
