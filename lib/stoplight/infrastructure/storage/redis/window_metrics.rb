@@ -4,6 +4,38 @@ module Stoplight
   module Infrastructure
     module Storage
       module Redis
+        # Distributed storage for time-windowed light metrics using Redis.
+        #
+        # This class implements sliding window metrics using Redis sorted sets (ZSETs)
+        # for efficient time-range queries. Events are bucketed by hour to bound memory
+        # usage and enable automatic expiration via Redis TTLs.
+        #
+        # == Storage Structure
+        #
+        # Events are stored in hourly buckets as ZSETs:
+        #   stoplight:{version}:{system}:{light}:window_metrics:success:1696154400
+        #   stoplight:{version}:{system}:{light}:window_metrics:failure:1696154400
+        #
+        # Each ZSET member is a unique event ID with its timestamp as the score,
+        # enabling O(log N) range queries via ZCOUNT.
+        #
+        # Metadata (consecutive counters, last error) is stored in a hash:
+        #   stoplight:{version}:{system}:{light}:window_metrics
+        #
+        # == Bucket Strategy
+        #
+        # Fixed 1-hour buckets provide a balance between:
+        # - Query efficiency: At most ~25 buckets for a 24-hour window
+        # - Memory efficiency: Natural expiration without manual cleanup
+        # - Precision: Sub-bucket accuracy via ZSET scores
+        #
+        # == Atomicity
+        #
+        # All operations use Lua scripts to ensure atomicity:
+        # - record_success: Increments counter and updates metadata in one round-trip
+        # - record_failure: Same, plus stores serialized error details
+        # - metrics_snapshot: Aggregates across buckets atomically
+        #
         class WindowMetrics < Metrics
           # @!attribute config
           #   @return [Stoplight::Domain::Config]
@@ -14,7 +46,7 @@ module Stoplight
           private attr_reader :redis
 
           # @!attribute scripting
-          #   @return [Stoplight::Infrastructure::DataStore::Redis::Scripting]
+          #   @return [Stoplight::Infrastructure::Storage::Redis::Scripting]
           private attr_reader :scripting
 
           # @!attribute metrics_key
@@ -29,6 +61,11 @@ module Stoplight
           #   @return [Stoplight::Infrastructure::Storage::Redis::KeySpace]
           private attr_reader :key_space
 
+          # @param redis [Redis, ConnectionPool<Redis>] Redis client or connection pool
+          # @param scripting [Stoplight::Infrastructure::Storage::Redis::Scripting] Lua script executor
+          # @param config [Stoplight::Domain::Config]
+          # @param clock [Stoplight::Domain::Clock]
+          # @param key_space [Stoplight::Infrastructure::Storage::Redis::KeySpace]
           def initialize(redis:, scripting:, config:, clock:, key_space:)
             @clock = clock
             @scripting = scripting
@@ -120,8 +157,7 @@ module Stoplight
           end
 
           private def bucket_size = 3600 # 1 hour
-          private def bucket_ttl = bucket_size
-          private def metrics_ttl = 86400 # 1 day
+          private def bucket_ttl = config.window_size + bucket_size
 
           # Retrieves the list of Redis bucket keys required to cover a specific time window.
           #

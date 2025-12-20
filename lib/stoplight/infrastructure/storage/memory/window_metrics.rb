@@ -4,6 +4,18 @@ module Stoplight
   module Infrastructure
     module Storage
       module Memory
+        # Thread-safe in-memory storage for time-windowed light metrics.
+        #
+        # This class tracks success and failure counts within a sliding time window,
+        # along with consecutive counters and the most recent error. It's designed
+        # for single-process deployments where distributed coordination isn't needed.
+        #
+        # The sliding window approach provides more accurate error rate calculations
+        # than consecutive-error counting, as it considers the full picture of
+        # recent traffic rather than just the most recent streak.
+        #
+        # @note All public methods are synchronized via mutex to ensure thread safety.
+        #
         class WindowMetrics < Domain::Storage::Metrics
           # @!attribute metrics
           #   @return [Stoplight::Infrastructure::DataStore::Memory::Metrics]
