@@ -26,6 +26,7 @@ Feature: Stoplight configuration - Window Size
     When 1 request is made
     Then the light color is green
 
+  @global_configuration
   Scenario: Global window size doesn't affect already-created lights
     Given a light configured with:
       | Window Size | 30 |
