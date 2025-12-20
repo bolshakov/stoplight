@@ -3,11 +3,8 @@ Feature: Stoplight Custom Configuration
   I want to customize circuit breaker behavior
   So that it fits my specific service needs
 
-  Background:
-    Given a light "custom-config" exists
-
   Scenario: Light with custom error handler ignores specific errors
-    Given the light is configured with:
+    Given a light configured with:
       | Skipped Errors | KeyError |
     When the service starts failing with:
       | Type        | KeyError |
@@ -18,14 +15,14 @@ Feature: Stoplight Custom Configuration
       | Message     | key not found: "foo" |
 
   Scenario: Light with custom error handler counts not ignored errors
-    Given the light is configured with:
+    Given a light configured with:
       | Skipped Errors | KeyError |
     When the service starts failing with "connection-timeout"
     And 3 requests are made
     Then the light color is red
 
   Scenario: Light with custom threshold transitions after specified failures
-    Given the light is configured with:
+    Given a light configured with:
       | Threshold | 5 |
     When the service starts failing with "connection-timeout"
     And 4 requests are made
@@ -34,7 +31,7 @@ Feature: Stoplight Custom Configuration
     Then the light color is red
 
   Scenario: Light with custom recovery threshold recovers after specified successes
-    Given the light is configured with:
+    Given a light configured with:
       | Recovery Threshold | 5 |
     And the service starts failing with "connection-timeout"
     And the light enters red state
@@ -46,7 +43,7 @@ Feature: Stoplight Custom Configuration
     Then the light color is green
 
   Scenario: Light with custom window size only counts recent failures
-    Given the light is configured with:
+    Given a light configured with:
       | Window Size | 10s |
     And the service starts failing with "connection-timeout"
     And 2 request is made
@@ -57,7 +54,7 @@ Feature: Stoplight Custom Configuration
     Then the light color is red
 
   Scenario: Light with custom cool-off time recovers after specified period
-    Given the light is configured with:
+    Given a light configured with:
       | Cool Off Time | 5s |
     And the service starts failing with "connection-timeout"
     And the light enters red state
@@ -65,7 +62,7 @@ Feature: Stoplight Custom Configuration
     Then the light color is yellow
 
   Scenario: Light with tracked_errors only counts specified errors
-    Given the light is configured with:
+    Given a light configured with:
       | Tracked Errors | Timeout::Error,KeyError |
       | Threshold      | 1                       |
     When the service starts failing with:
@@ -80,7 +77,7 @@ Feature: Stoplight Custom Configuration
     And the light color is red
 
   Scenario: Skipped errors take precedence over tracked errors
-    Given the light is configured with:
+    Given a light configured with:
       | Tracked Errors | StandardError   |
       | Skipped Errors | Timeout::Error  |
       | Threshold      | 1               |
@@ -90,7 +87,7 @@ Feature: Stoplight Custom Configuration
     Then the light color is green
 
   Scenario: System-level exceptions don't trigger circuit breaker
-    Given the light is configured with:
+    Given a light configured with:
       | Threshold   | 1             |
     When the service starts failing with:
       | Type        | NoMemoryError |
