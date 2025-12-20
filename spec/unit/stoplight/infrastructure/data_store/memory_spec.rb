@@ -4,8 +4,9 @@ require_relative "recovery_metrics"
 require_relative "metrics"
 
 RSpec.describe Stoplight::Infrastructure::DataStore::Memory do
-  let(:data_store) { described_class.new(recovery_lock_store:) }
+  let(:data_store) { described_class.new(recovery_lock_store:, clock:) }
   let(:recovery_lock_store) { instance_double(described_class::RecoveryLockStore) }
+  let(:clock) { Stoplight::Infrastructure::SystemClock.new }
 
   let(:config) { Stoplight::Domain::Config.empty.with(name:, window_size:, cool_off_time:) }
   let(:name) { ("a".."z").to_a.shuffle.join }

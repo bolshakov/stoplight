@@ -25,9 +25,15 @@ module Stoplight
           #   @return [Integer] The running sum of all increments in the current window
           private attr_accessor :running_sum
 
-          def initialize
+          # @!attribute clock
+          #   @return [Stoplight::Domain::Clock]
+          private attr_reader :clock
+
+          # @param clock [Stoplight::Domain::Clock]
+          def initialize(clock:)
             @buckets = Hash.new { |buckets, bucket| buckets[bucket] = 0 }
             @running_sum = 0
+            @clock = clock
           end
 
           # Increment the count at a given timestamp
@@ -58,15 +64,11 @@ module Stoplight
           end
 
           private def current_bucket
-            bucket_for_time(current_time)
+            bucket_for_time(clock.current_time)
           end
 
           private def bucket_for_time(time)
             time.to_i
-          end
-
-          private def current_time
-            Time.now
           end
 
           def inspect

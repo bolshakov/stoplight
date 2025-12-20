@@ -10,7 +10,7 @@ RSpec.describe Stoplight::Admin::LightsRepository::Light do
     )
   end
   let(:failures) { [latest_failure] }
-  let(:latest_failure) { Stoplight::Domain::Failure.from_error(latest_exception) }
+  let(:latest_failure) { Stoplight::Domain::Failure.from_error(latest_exception, time: Time.now) }
   let(:latest_exception) { StandardError.new("bang!") }
   let(:color) { "green" }
   let(:name) { "light-specs" }
@@ -85,7 +85,7 @@ RSpec.describe Stoplight::Admin::LightsRepository::Light do
     subject { light.last_check_in_words }
 
     context "when the last check was more than a second ago" do
-      let(:latest_failure) { Stoplight::Domain::Failure.from_error(StandardError.new) }
+      let(:latest_failure) { Stoplight::Domain::Failure.from_error(StandardError.new, time: Time.now) }
 
       it { is_expected.to eq("just now") }
     end

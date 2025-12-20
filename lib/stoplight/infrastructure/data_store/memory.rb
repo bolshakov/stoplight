@@ -16,11 +16,17 @@ module Stoplight
         #   @api private
         private attr_reader :recovery_lock_store
 
+        # @!attribute clock
+        #   @return [Stoplight::Domain::Clock]
+        private attr_reader :clock
+
         # @param recovery_lock_store [Stoplight::Infrastructure::DataStore::Memory::RecoveryLockStore]
-        def initialize(recovery_lock_store:)
+        # @param clock [Stoplight::Domain::Clock]
+        def initialize(recovery_lock_store:, clock:)
+          @clock = clock
           @recovery_lock_store = recovery_lock_store
-          @errors = Hash.new { |errors, light_name| errors[light_name] = SlidingWindow.new }
-          @successes = Hash.new { |successes, light_name| successes[light_name] = SlidingWindow.new }
+          @errors = Hash.new { |errors, light_name| errors[light_name] = SlidingWindow.new(clock:) }
+          @successes = Hash.new { |successes, light_name| successes[light_name] = SlidingWindow.new(clock:) }
           @metrics = Hash.new { |metrics, light_name| metrics[light_name] = Metrics.new }
 
           @recovery_metrics = Hash.new { |metrics, light_name| metrics[light_name] = Metrics.new }
@@ -41,7 +47,7 @@ module Stoplight
           light_name = config.name
 
           synchronize do
-            current_time = self.current_time
+            current_time = clock.current_time
             window_start = if config.window_size
               (current_time - config.window_size)
             else
@@ -86,7 +92,7 @@ module Stoplight
         # @return [Stoplight::Domain::StateSnapshot]
         def get_state_snapshot(config)
           time, state = synchronize do
-            [current_time, @states[config.name]]
+            [clock.current_time, @states[config.name]]
           end
 
           Domain::StateSnapshot.new(
@@ -102,7 +108,7 @@ module Stoplight
         # @param exception [Exception]
         # @return [void]
         def record_failure(config, exception)
-          current_time = self.current_time
+          current_time = clock.current_time
           light_name = config.name
           failure = Domain::Failure.from_error(exception, time: current_time)
 
@@ -124,8 +130,8 @@ module Stoplight
           light_name = config.name
           synchronize do
             if config.window_size
-              @errors[light_name] = SlidingWindow.new
-              @successes[light_name] = SlidingWindow.new
+              @errors[light_name] = SlidingWindow.new(clock:)
+              @successes[light_name] = SlidingWindow.new(clock:)
             end
             @metrics[light_name] = Metrics.new
           end
@@ -141,7 +147,7 @@ module Stoplight
         # @return [void]
         def record_success(config)
           light_name = config.name
-          current_time = self.current_time
+          current_time = clock.current_time
 
           synchronize do
             @successes[light_name].increment if config.window_size
@@ -162,7 +168,7 @@ module Stoplight
         # @return [void]
         def record_recovery_probe_failure(config, exception)
           light_name = config.name
-          current_time = self.current_time
+          current_time = clock.current_time
           failure = Domain::Failure.from_error(exception, time: current_time)
 
           synchronize do
@@ -181,7 +187,7 @@ module Stoplight
         # @return [void]
         def record_recovery_probe_success(config)
           light_name = config.name
-          current_time = self.current_time
+          current_time = clock.current_time
 
           synchronize do
             metrics = @recovery_metrics[light_name]
@@ -261,7 +267,7 @@ module Stoplight
         # @return [Boolean] true if this is the first instance to detect this transition
         private def transition_to_green(config)
           light_name = config.name
-          current_time = self.current_time
+          current_time = clock.current_time
 
           synchronize do
             state = @states[light_name]
@@ -284,7 +290,7 @@ module Stoplight
         # @return [Boolean] true if this is the first instance to detect this transition
         private def transition_to_yellow(config)
           light_name = config.name
-          current_time = self.current_time
+          current_time = clock.current_time
 
           synchronize do
             state = @states[light_name]
@@ -309,7 +315,7 @@ module Stoplight
         # @return [Boolean] true if this is the first instance to detect this transition
         private def transition_to_red(config)
           light_name = config.name
-          current_time = self.current_time
+          current_time = clock.current_time
           recovery_scheduled_after = current_time + config.cool_off_time
 
           synchronize do
@@ -327,10 +333,6 @@ module Stoplight
               true
             end
           end
-        end
-
-        private def current_time
-          Time.now
         end
       end
     end
