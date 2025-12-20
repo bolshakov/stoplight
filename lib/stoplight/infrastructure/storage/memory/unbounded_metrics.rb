@@ -13,7 +13,12 @@ module Stoplight
           #   @return [Mutex]
           private attr_reader :mutex
 
-          def initialize
+          # @!attribute clock
+          #   @return [Stoplight::Domain::Clock]
+          private attr_reader :clock
+
+          def initialize(clock:)
+            @clock = clock
             @mutex = Mutex.new
             @metrics = DataStore::Memory::Metrics.new
           end
@@ -38,7 +43,7 @@ module Stoplight
           #
           # @return [void]
           def record_success
-            current_time = self.current_time
+            current_time = clock.current_time
 
             mutex.synchronize do
               if metrics.last_success_at.nil? || current_time > metrics.last_success_at
@@ -55,7 +60,7 @@ module Stoplight
           # @param exception [StandardError]
           # @return [void]
           def record_failure(exception)
-            current_time = self.current_time
+            current_time = clock.current_time
             failure = Domain::Failure.from_error(exception, time: current_time)
 
             mutex.synchronize do
@@ -73,8 +78,6 @@ module Stoplight
               self.metrics = DataStore::Memory::Metrics.new
             end
           end
-
-          private def current_time = Time.now
         end
       end
     end

@@ -3,7 +3,9 @@
 require_relative "../../data_store/metrics_snapshot"
 
 RSpec.describe Stoplight::Infrastructure::Storage::Memory::UnboundedMetrics do
-  subject(:unbounded_metrics) { described_class.new }
+  subject(:unbounded_metrics) { described_class.new(clock:) }
+
+  let(:clock) { Stoplight::Infrastructure::SystemClock.new }
 
   it_behaves_like "a metrics snapshot" do
     def metrics_snapshot = unbounded_metrics.metrics_snapshot

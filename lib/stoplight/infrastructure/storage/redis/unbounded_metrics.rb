@@ -17,7 +17,12 @@ module Stoplight
           #   @return [String]
           private attr_reader :metrics_key
 
-          def initialize(redis:, scripting:, key_space:)
+          # @!attribute clock
+          #   @return [Stoplight::Domain::Clock]
+          private attr_reader :clock
+
+          def initialize(redis:, scripting:, key_space:, clock:)
+            @clock = clock
             @scripting = scripting
             @redis = redis
             @metrics_key = key_space.key(:metadata)
@@ -27,7 +32,7 @@ module Stoplight
           #
           # @return [Stoplight::Domain::Metrics]
           def metrics_snapshot
-            last_success_at, last_error_json, consecutive_errors, consecutive_successes = redis.then do |client|
+            last_success_at, last_error_json, consecutive_errors, consecutive_successes = redis.with do |client|
               client.hmget(
                 metrics_key,
                 "last_success_at", "last_error_json", "consecutive_errors", "consecutive_successes"
@@ -39,7 +44,7 @@ module Stoplight
               consecutive_errors: consecutive_errors.to_i,
               consecutive_successes: consecutive_successes.to_i,
               last_error: deserialize_failure(last_error_json),
-              last_success_at: (Time.at(last_success_at.to_f) if last_success_at)
+              last_success_at: (clock.at(last_success_at.to_f) if last_success_at)
             )
           end
 
@@ -47,11 +52,11 @@ module Stoplight
           #
           # @return [void]
           def record_success
-            timestamp = current_time.to_f
+            timestamp = clock.current_time.to_f
 
             scripting.call(
               :"unbounded_metrics/record_success",
-              args: [timestamp, metadata_ttl],
+              args: [timestamp, metrics_ttl],
               keys: [metrics_key]
             )
           end
@@ -61,11 +66,11 @@ module Stoplight
           # @param exception [StandardError]
           # @return [void]
           def record_failure(exception)
-            timestamp = current_time.to_f
+            timestamp = clock.current_time.to_f
 
             scripting.call(
               :"unbounded_metrics/record_failure",
-              args: [timestamp, serialize_exception(exception, timestamp:), metadata_ttl],
+              args: [timestamp, serialize_exception(exception, timestamp:), metrics_ttl],
               keys: [metrics_key]
             )
           end
