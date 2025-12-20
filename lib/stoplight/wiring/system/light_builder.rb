@@ -5,11 +5,9 @@ module Stoplight
     class System
       class LightBuilder < Wiring::LightBuilder
         private attr_reader :system
-        private attr_reader :failover_system
 
         def initialize(system, settings)
           @system = system
-          @failover_system = Stoplight.__stoplight__system("failover-#{system.name}")
 
           super(settings)
         end
@@ -18,6 +16,8 @@ module Stoplight
           system_name: system.name,
           light_name: config.name
         )
+
+        def failover_system = @failover_system ||= Stoplight.__stoplight__system("failover-#{system.name}")
       end
     end
   end

@@ -28,6 +28,7 @@ Feature: Stoplight configuration - Recovery Threshold
     When 1 request is made
     Then the light color is green
 
+  @global_configuration
   Scenario: Global threshold doesn't affect already-created lights
     Given a light configured with:
       | Recovery Threshold | 3 |

@@ -9,7 +9,6 @@ module ConfigureLightWorld
     when "Stoplight()"
       Stoplight(name, notifiers:, data_store:, **collect_settings(table))
     when "System#light"
-      system = Stoplight.__stoplight__system(SecureRandom.uuid, notifiers:, data_store:)
       system.light(name, **collect_settings(table))
     else
       raise ArgumentError, "unexpected light creation method: `#{factory_method}`"
