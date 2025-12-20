@@ -17,6 +17,12 @@ module Stoplight
         # @note Script files must be named `<script_name>.lua` and located in scripts_root
         class Scripting
           SCRIPTS_ROOT = File.join(__dir__, "lua_scripts")
+          private_constant :SCRIPTS_ROOT
+
+          class << self
+            def default_scripts_root = SCRIPTS_ROOT
+          end
+
           # @!attribute scripts_root
           #   @return [String]
           protected attr_reader :scripts_root
@@ -31,7 +37,7 @@ module Stoplight
 
           # @param redis [RedisClient | ConnectionPool]
           # @param scripts_root [String]
-          def initialize(redis:, scripts_root: SCRIPTS_ROOT)
+          def initialize(redis:, scripts_root: self.class.default_scripts_root)
             @scripts_root = scripts_root
             @redis = redis
             @shas = {}

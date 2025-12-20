@@ -17,7 +17,9 @@ module Stoplight
           light_name: config.name
         )
 
-        def failover_system = @failover_system ||= Stoplight.__stoplight__system("failover-#{system.name}")
+        private def redis = data_store_config
+        private def storage_scripting = Infrastructure::Storage::Redis::Scripting.new(redis:)
+        private def failover_system = @failover_system ||= Stoplight.__stoplight__system("failover-#{system.name}")
       end
     end
   end
