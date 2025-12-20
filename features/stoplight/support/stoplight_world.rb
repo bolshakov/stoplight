@@ -59,6 +59,7 @@ module StoplightWorld
   #
   # @return [void]
   def reset!
+    @system = nil
     @notifications = Notifications.new
     @current_light = nil
     @echo_service = EchoService.new
@@ -79,4 +80,6 @@ module StoplightWorld
     end
     @notifiers = [TestNotifier.new(notifications)]
   end
+
+  def system = @system ||= Stoplight.__stoplight__system(SecureRandom.uuid, notifiers:, data_store:)
 end

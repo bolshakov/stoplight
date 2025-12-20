@@ -100,7 +100,13 @@ module Stoplight
             if normalized_settings.empty? || normalized_settings == existing_normalized_settings
               [existing_light, existing_normalized_settings]
             else
-              raise Stoplight::Error::ConfigurationError
+              raise Stoplight::Error::ConfigurationError, <<~MSG
+                Light name `#{name}` reused with different settings:
+                  existing settings: #{existing_normalized_settings}
+                  new settings: #{normalized_settings}
+
+                You cannot use the same light name with different settings.
+              MSG
             end
           else
             [light_factory.build_with(name:, **settings), normalized_settings]

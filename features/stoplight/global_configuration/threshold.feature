@@ -24,6 +24,7 @@ Feature: Stoplight configuration - Threshold
     When 1 request is made
     Then the light color is red
 
+  @global_configuration
   Scenario: Global threshold doesn't affect already-created lights
     Given a light configured with:
       | Threshold | 3 |

@@ -25,6 +25,7 @@ Feature: Stoplight configuration - Cool Off Time
     Then the light color is yellow
 
 
+  @global_configuration
   Scenario: Global cool off time doesn't affect already-created lights
     Given a light configured with:
       | Cool Off Time | 10 |
