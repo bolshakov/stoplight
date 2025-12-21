@@ -54,9 +54,8 @@ module Stoplight
           #
           # @return [Stoplight::Domain::Metrics]
           def metrics_snapshot
-            window_start = (clock.current_time - config.window_size)
-
             mutex.synchronize do
+              window_start = (clock.current_time - config.window_size)
               errors = self.errors.sum_in_window(window_start)
               successes = self.successes.sum_in_window(window_start)
 
@@ -75,9 +74,8 @@ module Stoplight
           #
           # @return [void]
           def record_success
-            current_time = clock.current_time
-
             mutex.synchronize do
+              current_time = clock.current_time
               successes.increment
 
               if metrics.last_success_at.nil? || current_time > metrics.last_success_at
@@ -94,10 +92,9 @@ module Stoplight
           # @param exception [StandardError]
           # @return [void]
           def record_failure(exception)
-            current_time = clock.current_time
-            failure = Domain::Failure.from_error(exception, time: current_time)
-
             mutex.synchronize do
+              current_time = clock.current_time
+              failure = Domain::Failure.from_error(exception, time: current_time)
               errors.increment
 
               if metrics.last_error_at.nil? || failure.occurred_at > metrics.last_error_at
