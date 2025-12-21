@@ -4,6 +4,21 @@ module Stoplight
   module Infrastructure
     module Storage
       module Memory
+        # Thread-safe metrics storage for consecutive-error light strategies.
+        #
+        # Unlike +WindowMetrics+, this class does not track event counts within
+        # a time window. It only maintains:
+        # - Consecutive success/failure counters (reset on opposite outcome)
+        # - Most recent error with timestamp
+        # - Most recent success timestamp
+        #
+        # This is appropriate for circuit breakers using threshold-based strategies
+        # (e.g., "open after 5 consecutive failures") rather than rate-based
+        # strategies (e.g., "open when error rate exceeds 50%").
+        #
+        # @note The +#errors+ and +#successes+ fields in the returned +Stoplight::Domain::Metrics+
+        #   are always +nil+ since totals aren't tracked.
+        #
         class UnboundedMetrics < Domain::Storage::Metrics
           # @!attribute metrics
           #   @return [Stoplight::Infrastructure::DataStore::Memory::Metrics]
