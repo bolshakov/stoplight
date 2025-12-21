@@ -40,7 +40,7 @@ module Stoplight
         end
 
         def recovery_lock_store
-          case data_store_config
+          @recovery_lock_store ||= case data_store_config
           in Stoplight::DataStore::Memory
             Infrastructure::Storage::Memory::RecoveryLock.new
           in Stoplight::DataStore::Redis
