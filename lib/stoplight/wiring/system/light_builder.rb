@@ -59,9 +59,8 @@ module Stoplight
           end
         end
 
-        private def redis = data_store_config
         private def metrics_store
-          case data_store_config
+          @metrics_store ||= case data_store_config
           in DataStore::Redis
             redis_metrics_store
           in DataStore::Memory
