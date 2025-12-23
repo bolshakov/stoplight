@@ -4,7 +4,6 @@ module Stoplight
   module Wiring
     class System
       class LightBuilder < Wiring::LightBuilder
-        # @dynamic system
         private attr_reader :system
 
         def initialize(system, settings)
@@ -57,6 +56,33 @@ module Stoplight
               circuit_breaker: failover_system.light("redis")
             )
           end
+        end
+
+        private def recovery_metrics_store
+          @recovery_metrics_store ||= case data_store_config
+          in DataStore::Redis
+            redis_recovery_metrics_store
+          in DataStore::Memory
+            memory_recovery_metrics_store
+          end
+        end
+
+        private def redis_recovery_metrics_store
+          Infrastructure::Storage::FailSafe::Metrics.new(
+            error_notifier:,
+            primary_store: Infrastructure::Storage::Redis::RecoveryMetrics.new(
+              clock:,
+              redis:,
+              scripting: storage_scripting,
+              key_space:
+            ),
+            failover_store: Infrastructure::Storage::Memory::RecoveryMetrics.new(clock:),
+            circuit_breaker: failover_system.light("redis")
+          )
+        end
+
+        private def memory_recovery_metrics_store
+          Infrastructure::Storage::Memory::RecoveryMetrics.new(clock:)
         end
 
         private def metrics_store
