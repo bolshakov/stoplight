@@ -1,0 +1,12 @@
+# frozen_string_literal: true
+
+module Stoplight
+  module Infrastructure
+    module Storage
+      module Memory
+        class RecoveryMetrics < UnboundedMetrics
+        end
+      end
+    end
+  end
+end
