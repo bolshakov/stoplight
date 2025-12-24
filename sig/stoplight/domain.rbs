@@ -1,0 +1,6 @@
+module Stoplight
+  module Domain
+    type traffic_control = Symbol | Hash[Symbol, Hash[Symbol, Integer]]
+    type traffic_recovery = Symbol
+  end
+end

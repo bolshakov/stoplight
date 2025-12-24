@@ -1,0 +1,19 @@
+module Stoplight
+  module Domain
+    module TrafficRecovery
+      class Decision[T] < Data
+        attr_reader decision: T
+
+        def initialize: (decision: T) -> Decision[T]
+      end
+      type green = Decision["green"]
+      type yellow = Decision["yellow"]
+      type red = Decision["red"]
+
+      GREEN: green
+      YELLOW: yellow
+      RED: red
+      type decision = green | yellow | red
+    end
+  end
+end

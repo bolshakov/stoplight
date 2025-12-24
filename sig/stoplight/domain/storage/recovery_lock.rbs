@@ -1,0 +1,12 @@
+# frozen_string_literal: true
+
+module Stoplight
+  module Domain
+    module Storage
+      class RecoveryLock[Token < RecoveryLockToken]
+        def acquire_lock: -> Token?
+        def release_lock: (Token) -> void
+      end
+    end
+  end
+end

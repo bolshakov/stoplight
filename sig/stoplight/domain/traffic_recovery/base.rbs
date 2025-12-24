@@ -1,0 +1,15 @@
+module Stoplight
+  module Domain
+    module TrafficRecovery
+      class Base
+        def check_compatibility: (Config config) -> CompatibilityResult
+
+        def determine_color: (Config config, Domain::Metrics metrics) -> decision
+        def ==: (untyped) -> bool
+
+        private def compatible: -> CompatibilityResult
+        private def incompatible: -> CompatibilityResult
+      end
+    end
+  end
+end

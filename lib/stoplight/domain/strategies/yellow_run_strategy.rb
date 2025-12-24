@@ -87,7 +87,7 @@ module Stoplight
           end
         end
 
-        def with_recovery_lock(fallback:, state_snapshot:)
+        private def with_recovery_lock(fallback:, state_snapshot:)
           recovery_lock_token = recovery_lock_store.acquire_lock
           if recovery_lock_token.nil?
             return red_run_strategy.execute(fallback, state_snapshot:)

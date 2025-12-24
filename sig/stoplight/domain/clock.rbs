@@ -1,0 +1,9 @@
+module Stoplight
+  module Domain
+    class Clock
+      def current_time: () -> Time
+
+      def at: ((Integer | Float) timestamp) -> Time
+    end
+  end
+end

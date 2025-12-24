@@ -1,0 +1,37 @@
+module Stoplight
+  module Domain
+    class Light[T]
+      attr_reader config: Config
+      attr_reader green_run_strategy: Strategies::GreenRunStrategy[T]
+      attr_reader yellow_run_strategy: Strategies::YellowRunStrategy[T, RecoveryLockToken]
+      attr_reader red_run_strategy: Strategies::RedRunStrategy[T]
+      attr_reader state_store: Storage::State
+
+      def initialize: (
+        Config config,
+        green_run_strategy: Strategies::GreenRunStrategy[T],
+        yellow_run_strategy: Strategies::YellowRunStrategy[T, RecoveryLockToken],
+        red_run_strategy: Strategies::RedRunStrategy[T],
+        factory: untyped,
+        state_store: Storage::State
+      ) -> void
+
+      def name: -> String
+
+      def state: -> state
+
+      def color: -> color
+
+      def run: (^(StandardError?) -> T) { () -> T } -> T
+
+      def lock: (color color) -> Light[T]
+
+      def unlock: -> Light[T]
+
+      def ==: (untyped) -> bool
+
+      private def state_strategy_factory: (color color) -> Strategies::RunStrategy[T]
+      private def state_snapshot: -> StateSnapshot
+    end
+  end
+end
