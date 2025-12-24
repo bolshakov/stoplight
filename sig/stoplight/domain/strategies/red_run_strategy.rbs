@@ -1,0 +1,14 @@
+module Stoplight
+  module Domain
+    module Strategies
+      class RedRunStrategy[T] < RunStrategy[T]
+        attr_reader config: Config
+
+        def initialize: (config: Config) -> void
+
+        private def record_error: (StandardError) -> void
+        private def record_success: -> void
+      end
+    end
+  end
+end

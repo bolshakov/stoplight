@@ -1,0 +1,18 @@
+# frozen_string_literal: true
+
+module Stoplight
+  module Domain
+    class CompatibilityResult
+      def self.compatible: -> CompatibilityResult
+      def self.incompatible: -> CompatibilityResult
+
+      attr_reader errors: Array[String]
+
+      def initialize: (errors: Array[String]) -> void
+
+      def compatible?: -> bool
+      def incompatible?: -> bool
+      def error_messages: -> String?
+    end
+  end
+end

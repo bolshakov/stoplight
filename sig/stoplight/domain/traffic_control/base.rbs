@@ -1,0 +1,15 @@
+module Stoplight
+  module Domain
+    module TrafficControl
+      class Base
+        def check_compatibility: (Config config) -> CompatibilityResult
+
+        def stop_traffic?: (Config config, Domain::Metrics metrics) -> bool
+        def ==: (untyped) -> bool
+
+        private def compatible: -> CompatibilityResult
+        private def incompatible: -> CompatibilityResult
+      end
+    end
+  end
+end

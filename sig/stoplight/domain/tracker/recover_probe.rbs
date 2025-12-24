@@ -1,0 +1,22 @@
+module Stoplight
+  module Domain
+    module Tracker
+      class RecoveryProbe < Base
+        def initialize: (
+          config: Domain::Config,
+          traffic_recovery: TrafficRecovery::Base,
+          notifiers: Array[StateTransitionNotifier],
+          metrics_store: Storage::Metrics,
+          state_store: Storage::State,
+        ) -> void
+
+        def record_failure: (StandardError exception) -> void
+        def record_success: -> void
+
+        RECOVERY_TRANSITIONS: Hash[TrafficRecovery::decision, color]
+
+        private def recover: -> void
+      end
+    end
+  end
+end

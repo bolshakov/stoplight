@@ -1,0 +1,27 @@
+module Stoplight
+  module Domain
+    class Metrics < Data
+      attr_reader successes: Integer?
+      attr_reader errors: Integer?
+      attr_reader consecutive_errors: Integer
+      attr_reader consecutive_successes: Integer
+      attr_reader last_error: Failure?
+      attr_reader last_success_at: Time?
+
+      def initialize: (
+        successes: Integer?,
+        errors: Integer?,
+        consecutive_errors: Integer,
+        consecutive_successes: Integer,
+        last_error: Failure?,
+        last_success_at: Time?
+      ) -> void
+
+      def error_rate: () -> Float?
+
+      def requests: () -> Integer?
+
+      def last_error_at: () -> Time?
+    end
+  end
+end

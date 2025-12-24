@@ -1,0 +1,15 @@
+module Stoplight
+  module Domain
+    module Storage
+      class Metrics
+        def metrics_snapshot: () -> Domain::Metrics
+
+        def record_success: () -> void
+
+        def record_failure: (StandardError error) -> void
+
+        def clear: () -> void
+      end
+    end
+  end
+end

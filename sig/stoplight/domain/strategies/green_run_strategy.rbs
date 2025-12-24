@@ -1,0 +1,12 @@
+module Stoplight
+  module Domain
+    module Strategies
+      class GreenRunStrategy[T] < RunStrategy[T]
+        def initialize: (config: Config, request_tracker: Tracker::Request) -> void
+
+        private def record_error: (StandardError) -> void
+        private def record_success: -> void
+      end
+    end
+  end
+end

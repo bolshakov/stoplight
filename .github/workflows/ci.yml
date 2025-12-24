@@ -9,6 +9,20 @@ permissions:  # added using https://github.com/step-security/secure-repo
   contents: read
 
 jobs:
+  steep:
+    name: Type Check 🔍
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@d354de180d0c9e813cfddfcbdc079945d4be589b # v1.275.0
+        with:
+          ruby-version: 3.3.4
+          bundler-cache: true
+      - run: |
+          bundle exec steep check --format=github
+
   rubocop:
     name: Standard 👮
     runs-on: ubuntu-latest

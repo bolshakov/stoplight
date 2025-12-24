@@ -28,5 +28,7 @@ group :development do
   gem "simplecov", "~> 0.22"
   gem "simplecov-lcov", "~> 0.9"
   gem "standard"
+  gem "steep", require: false
   gem "timecop", "~> 0.9"
+  gem "yard"
 end
