@@ -3,7 +3,7 @@ module Stoplight
     class Failure
       attr_reader error_class: String
       attr_reader error_message: String
-      attr_reader time: String
+      attr_reader time: Time
       attr_reader occured_at: String
 
       def self.from_error: (StandardError error, time: Time) -> Failure

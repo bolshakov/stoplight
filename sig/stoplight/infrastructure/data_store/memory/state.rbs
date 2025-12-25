@@ -1,0 +1,19 @@
+# frozen_string_literal: true
+
+module Stoplight
+  module Infrastructure
+    module DataStore
+      class Memory
+        class State
+          attr_accessor recovered_at: Time?
+          attr_accessor locked_state: Domain::state
+          attr_accessor recovery_scheduled_after: Time?
+          attr_accessor recovery_started_at: Time?
+          attr_accessor breached_at: Time?
+
+          def initialize: -> void
+        end
+      end
+    end
+  end
+end

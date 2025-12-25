@@ -1,0 +1,29 @@
+module Stoplight
+  module Infrastructure
+    module DataStore
+      class Memory < Domain::DataStore[Memory::RecoveryLockToken]
+        include MonitorMixin
+
+        KEY_SEPARATOR: String
+
+        @errors: Hash[String, SlidingWindow]
+        @successes: Hash[String, SlidingWindow]
+        @metrics: Hash[String, Metrics]
+        @recovery_metrics: Hash[String, Metrics]
+        @states: Hash[String, State]
+
+        private attr_reader recovery_lock_store: RecoveryLockStore
+        private attr_reader clock: Domain::Clock
+
+        def initialize: (
+          recovery_lock_store: RecoveryLockStore,
+          clock: Domain::Clock
+        ) -> void
+
+        private def transition_to_green: (Domain::Config config) -> bool
+        private def transition_to_yellow: (Domain::Config config) -> bool
+        private def transition_to_red: (Domain::Config config) -> bool
+      end
+    end
+  end
+end

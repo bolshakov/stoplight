@@ -229,20 +229,6 @@ module Stoplight
           end
         end
 
-        private def state_snapshot_from_hash(data, time: clock.current_time)
-          breached_at = data[:breached_at]&.to_f
-          recovery_scheduled_after = data[:recovery_scheduled_after]&.to_f
-          recovery_started_at = data[:recovery_started_at]&.to_f
-
-          Domain::StateSnapshot.new(
-            breached_at: (clock.at(breached_at) if breached_at),
-            locked_state: data[:locked_state] || Domain::State::UNLOCKED,
-            recovery_scheduled_after: (clock.at(recovery_scheduled_after) if recovery_scheduled_after),
-            recovery_started_at: (clock.at(recovery_started_at) if recovery_started_at),
-            time:
-          )
-        end
-
         # @param config [Stoplight::Domain::Config] The light configuration.
         # @param exception [Exception]
         # @return [void]

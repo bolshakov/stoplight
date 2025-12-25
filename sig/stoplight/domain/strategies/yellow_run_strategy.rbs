@@ -1,18 +1,18 @@
 module Stoplight
   module Domain
     module Strategies
-      class YellowRunStrategy[T, RT < RecoveryLockToken] < RunStrategy[T]
+      class YellowRunStrategy[RT < RecoveryLockToken] < RunStrategy
         def initialize: (
           config: Config,
           notifiers: Array[StateTransitionNotifier],
           request_tracker: Tracker::RecoveryProbe,
-          red_run_strategy: RedRunStrategy[T],
+          red_run_strategy: RedRunStrategy,
           state_store: Storage::State,
           metrics_store: Storage::Metrics,
           recovery_lock_store: Storage::RecoveryLock[RT]
         ) -> void
 
-        private def with_rocevery_lock: (fallback: ^(StandardError?) -> T, state_snapshot: StateSnapshot) -> T
+        private def with_rocevery_lock: [T] (fallback: ^(StandardError?) -> T, state_snapshot: StateSnapshot) -> T
         private def record_recovery_probe_success: -> void
         private def record_recovery_probe_failure: (StandardError error) -> void
         private def enter_recovery: (StateSnapshot state_snapshot) -> void

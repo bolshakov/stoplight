@@ -1,0 +1,19 @@
+module Stoplight
+  module Infrastructure
+    module DataStore
+      class Memory
+        class RecoveryLockStore
+          private attr_reader locks: Concurrent::Map[String, Mutex]
+
+          def initialize: -> void
+
+          def acquire_lock: (String light_name) -> RecoveryLockToken?
+
+          def release_lock: (RecoveryLockToken recovery_lock_token) -> void
+
+          private def lock_for: (String light_name) -> Mutex
+        end
+      end
+    end
+  end
+end
