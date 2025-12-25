@@ -1,0 +1,15 @@
+# frozen_string_literal: true
+
+module Stoplight
+  module Infrastructure
+    module DataStore
+      class Memory
+        class RecoveryLockToken < Domain::RecoveryLockToken
+          attr_reader light_name: String
+
+          def initialize: (light_name: String) -> void
+        end
+      end
+    end
+  end
+end

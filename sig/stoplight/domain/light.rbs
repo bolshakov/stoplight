@@ -1,17 +1,17 @@
 module Stoplight
   module Domain
-    class Light[T]
+    class Light
       attr_reader config: Config
-      attr_reader green_run_strategy: Strategies::GreenRunStrategy[T]
-      attr_reader yellow_run_strategy: Strategies::YellowRunStrategy[T, RecoveryLockToken]
-      attr_reader red_run_strategy: Strategies::RedRunStrategy[T]
+      attr_reader green_run_strategy: Strategies::GreenRunStrategy
+      attr_reader yellow_run_strategy: Strategies::YellowRunStrategy[RecoveryLockToken]
+      attr_reader red_run_strategy: Strategies::RedRunStrategy
       attr_reader state_store: Storage::State
 
       def initialize: (
         Config config,
-        green_run_strategy: Strategies::GreenRunStrategy[T],
-        yellow_run_strategy: Strategies::YellowRunStrategy[T, RecoveryLockToken],
-        red_run_strategy: Strategies::RedRunStrategy[T],
+        green_run_strategy: Strategies::GreenRunStrategy,
+        yellow_run_strategy: Strategies::YellowRunStrategy[RecoveryLockToken],
+        red_run_strategy: Strategies::RedRunStrategy,
         factory: untyped,
         state_store: Storage::State
       ) -> void
@@ -22,15 +22,15 @@ module Stoplight
 
       def color: -> color
 
-      def run: (^(StandardError?) -> T) { () -> T } -> T
+      def run: [T] (^(StandardError?) -> T) { () -> T } -> T
 
-      def lock: (color color) -> Light[T]
+      def lock: (color color) -> Light
 
-      def unlock: -> Light[T]
+      def unlock: -> Light
 
       def ==: (untyped) -> bool
 
-      private def state_strategy_factory: (color color) -> Strategies::RunStrategy[T]
+      private def state_strategy_factory: (color color) -> Strategies::RunStrategy
       private def state_snapshot: -> StateSnapshot
     end
   end

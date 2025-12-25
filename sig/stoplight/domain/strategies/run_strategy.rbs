@@ -1,8 +1,8 @@
 module Stoplight
   module Domain
     module Strategies
-      class RunStrategy[T]
-        def execute:(
+      class RunStrategy
+        def execute: [T] (
           ^(StandardError?) -> T,
           state_snapshot: StateSnapshot
         ) { () -> T } -> T

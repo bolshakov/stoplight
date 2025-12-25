@@ -1,0 +1,13 @@
+module Stoplight
+  module Infrastructure
+    module Notifier
+      class Logger < Domain::StateTransitionNotifier
+        include Generic[::Logger]
+
+        def logger: -> ::Logger
+
+        def put: (String message) -> void
+      end
+    end
+  end
+end

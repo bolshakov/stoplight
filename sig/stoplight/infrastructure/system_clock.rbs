@@ -1,0 +1,9 @@
+module Stoplight
+  module Infrastructure
+    class SystemClock < Domain::Clock
+      def current_time: -> Time
+
+      def at: ((Integer | Float) timestamp) -> Time
+    end
+  end
+end

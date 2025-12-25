@@ -1,0 +1,25 @@
+module Stoplight
+  module Infrastructure
+    module DataStore
+      class FailSafe < Domain::DataStore[Domain::RecoveryLockToken]
+        attr_reader data_store: DataStore::Redis
+        attr_reader failover_data_store: DataStore::Memory
+        attr_reader error_notifier: error_notifier
+        private attr_reader circuit_breaker: Domain::Light
+
+        def initialize: (
+          data_store: DataStore::Redis,
+          error_notifier: error_notifier,
+          failover_data_store: DataStore::Memory,
+          circuit_breaker: Domain::Light
+        ) -> void
+
+        private def with_fallback: [T] (
+          String method_name,
+          *Object,
+          **Object,
+        ) { () -> T } -> T
+      end
+    end
+  end
+end

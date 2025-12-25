@@ -1,0 +1,29 @@
+# frozen_string_literal: true
+
+module Stoplight
+  module Infrastructure
+    module DataStore
+      class Memory < Domain::DataStore[Memory::RecoveryLockToken]
+        class SlidingWindow
+          private attr_reader buckets: Hash[Integer, Integer]
+          private attr_accessor running_sum: Integer
+          private attr_reader clock: Domain::Clock
+
+          def initialize: (clock: Domain::Clock) -> void
+
+          def increment: -> void
+
+          def sum_in_window: (Time window_start) -> Integer
+
+          private def slide_window!: (Time window_start) -> void
+
+          private def current_bucket: -> Integer
+
+          private def bucket_for_time: (Time time) -> Integer
+
+          def inspect: -> String
+        end
+      end
+    end
+  end
+end

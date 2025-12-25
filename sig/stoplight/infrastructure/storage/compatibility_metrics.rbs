@@ -1,0 +1,15 @@
+module Stoplight
+  module Infrastructure
+    module Storage
+      class CompatibilityMetrics < Domain::Storage::Metrics
+        private attr_reader data_store: Domain::DataStore[Domain::RecoveryLockToken]
+        private attr_reader config: Domain::Config
+
+        def initialize: (
+          data_store: Domain::DataStore[Domain::RecoveryLockToken],
+          config: Domain::Config,
+        ) -> void
+      end
+    end
+  end
+end
