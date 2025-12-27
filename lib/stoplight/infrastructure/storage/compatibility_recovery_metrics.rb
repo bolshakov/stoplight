@@ -23,7 +23,9 @@ module Stoplight
       #
       # @see Stoplight::Domain::Storage::Metrics
       class CompatibilityRecoveryMetrics < Domain::Storage::Metrics
+        # @dynamic data_store
         private attr_reader :data_store
+        # @dynamic config
         private attr_reader :config
 
         # @param data_store [Stoplight::Domain::DataStore]

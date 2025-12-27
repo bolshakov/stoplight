@@ -36,30 +36,37 @@ module Stoplight
 
       # @!attribute data_store_config
       #   @return [Stoplight::DataStore::Bose]
+      # @dynamic data_store_config
       private attr_reader :data_store_config
 
       # @!attribute error_notifier
       #   @return [Proc]
+      # @dynamic error_notifier
       private attr_reader :error_notifier
 
       # @!attribute traffic_recovery
       #   @return [Stoplight::Domain::TrafficRecovery::Base]
+      # @dynamic traffic_recovery
       private attr_reader :traffic_recovery
 
       # @!attribute traffic_control
       #   @return [Stoplight::Domain::TrafficControl::Base]
+      # @dynamic traffic_control
       private attr_reader :traffic_control
 
       # @!attribute config
       #   @return [Stoplight::Domain::Config]
+      # @dynamic config
       private attr_reader :config
 
       # @!attribute factory
       #   @return [Stoplight::Domain::LightFactory]
+      # @dynamic factory
       private attr_reader :factory
 
       # @!attribute clock
       #   @return [Stoplight::Domain::Clock]
+      # @dynamic clock
       private attr_reader :clock
 
       def initialize(settings)
@@ -163,14 +170,14 @@ module Stoplight
 
       private def create_data_store(data_store_config)
         case data_store_config
-        in Stoplight::DataStore::Memory
+        when Stoplight::DataStore::Memory
           memory_registry.compute_if_absent(data_store_config.object_id) do
             Infrastructure::DataStore::Memory.new(
               recovery_lock_store: memory_recovery_lock_store,
               clock:
             )
           end
-        in Stoplight::DataStore::Redis
+        when Stoplight::DataStore::Redis
           Infrastructure::DataStore::FailSafe.new(
             data_store: Stoplight::Infrastructure::DataStore::Redis.new(
               clock:,
@@ -183,6 +190,8 @@ module Stoplight
             failover_data_store:,
             circuit_breaker: Stoplight.system_light("data_store:fail_safe:redis")
           )
+        else
+          raise NoMatchingPatternError, data_store_config
         end
       end
 

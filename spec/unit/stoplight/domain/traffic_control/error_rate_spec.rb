@@ -8,7 +8,7 @@ RSpec.describe Stoplight::Domain::TrafficControl::ErrorRate do
   describe "#check_compatibility" do
     subject(:availability) { traffic_control.check_compatibility(config) }
 
-    let(:config) { Stoplight::Domain::Config.empty.with(window_size:, threshold:) }
+    let(:config) { instance_double(Stoplight::Domain::Config, window_size:, threshold:) }
     let(:threshold) { 0.1 }
     let(:window_size) { 600 }
 

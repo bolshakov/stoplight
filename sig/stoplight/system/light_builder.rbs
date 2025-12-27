@@ -2,7 +2,8 @@ module Stoplight
   module Wiring
     class System
       class LightBuilder < Wiring::LightBuilder
-        private attr_reader system: System
+        @system: System
+        @failover_system: System
 
         def initialize: (System, settings) -> void
 

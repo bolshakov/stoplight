@@ -3,7 +3,7 @@ module Stoplight
     module Strategies
       class RunStrategy
         def execute: [T] (
-          ^(StandardError?) -> T,
+          (^(StandardError?) -> T)?,
           state_snapshot: StateSnapshot
         ) { () -> T } -> T
       end

@@ -12,18 +12,22 @@ module Stoplight
         class Metrics < Domain::Storage::Metrics
           # @!attribute primary_store
           #  @return [Stoplight::Domain::Storage::RecoveryLock] The underlying primary store being used
+          # @dynamic primary_store
           attr_reader :primary_store
 
           # @!attribute error_notifier
           #   @return [Proc]
+          # @dynamic error_notifier
           attr_reader :error_notifier
 
           # @!attribute failover_store
           #   @return [Stoplight::Domain::Storage::RecoveryLock] The fallback store used when the primary fails.
+          # @dynamic failover_store
           attr_reader :failover_store
 
           # @!attribute circuit_breaker
           #   @return [Stoplight::Light] The circuit breaker used to handle store failures.
+          # @dynamic circuit_breaker
           private attr_reader :circuit_breaker
 
           # @param primary_store [Stoplight::Domain::Storage::Metrics]

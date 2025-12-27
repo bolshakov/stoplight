@@ -5,7 +5,7 @@ require_relative "recovery_metrics"
 require_relative "metrics"
 
 RSpec.describe Stoplight::Infrastructure::DataStore::Redis, :redis do
-  let(:config) { Stoplight::Domain::Config.empty.with(name:, window_size:, cool_off_time:) }
+  let(:config) { instance_double(Stoplight::Domain::Config, name:, window_size:, cool_off_time:) }
   let(:name) { ("a".."z").to_a.shuffle.join }
   let(:failure) { Stoplight::Domain::Failure.new("class", "message", Time.new - 60) }
   let(:other) { Stoplight::Domain::Failure.new("class", "message 2", Time.new) }

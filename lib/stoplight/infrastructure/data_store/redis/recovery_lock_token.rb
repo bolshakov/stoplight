@@ -15,10 +15,12 @@ module Stoplight
 
           # @!attribute light_name
           #   @return [String]
+          # @dynamic light_name
           attr_reader :light_name
 
           # @!attribute token
           #   @return [String]
+          # @dynamic token
           attr_reader :token
 
           # @param light_name [String]

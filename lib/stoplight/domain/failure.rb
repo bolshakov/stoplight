@@ -8,10 +8,13 @@ module Stoplight
     # @api private
     class Failure
       # @return [String]
+      # @dynamic error_class
       attr_reader :error_class
       # @return [String]
+      # @dynamic error_message
       attr_reader :error_message
       # @return [Time]
+      # @dynamic time
       attr_reader :time
 
       # @param error [Exception]

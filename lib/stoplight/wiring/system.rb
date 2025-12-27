@@ -45,8 +45,11 @@ module Stoplight
     #
     # @api private
     class System
+      # @dynamic name
       attr_reader :name
+      # @dynamic light_factory
       private attr_reader :light_factory
+      # @dynamic lights
       private attr_reader :lights
 
       # @api private

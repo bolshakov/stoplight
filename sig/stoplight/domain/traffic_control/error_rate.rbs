@@ -1,0 +1,11 @@
+module Stoplight
+  module Domain
+    module TrafficControl
+      class ErrorRate < Base
+        attr_reader min_requests: Integer
+
+        def initialize: (?min_requests: Integer) -> void
+      end
+    end
+  end
+end

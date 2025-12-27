@@ -9,6 +9,7 @@ module Stoplight
       # @!attribute [r] configuration
       #  @return [Stoplight::Wiring::DefaultConfiguration]
       #
+      # @dynamic configuration
       attr_reader :configuration
 
       def initialize

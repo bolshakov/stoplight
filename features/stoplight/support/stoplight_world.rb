@@ -10,36 +10,44 @@ require_relative "notifications"
 module StoplightWorld
   # @!attribute data_store
   #   @return [Stoplight::DataStore::Base]
+  # @dynamic data_store
   attr_reader :data_store
 
   # @!attribute notifiers
   #   @return [<Stoplight::Notifier::Base>]
+  # @dynamic notifiers
   attr_reader :notifiers
 
   # Provides access to the notifications system used for testing.
   #
   # @return [Notifications] The notifications instance.
+  # @dynamic notifications
   attr_reader :notifications
 
   # @!attribute current_light
   #   @return [Stoplight::Light, nil] The current Stoplight instance being tested
+  # @dynamic current_light
   attr_accessor :current_light
 
   # @!attribute last_result
   #  @return [Object, nil] The result of the last operation performed in the Stoplight
+  # @dynamic last_result
   attr_reader :last_result
 
   # @!attribute last_exception
   #   @return [StandardError, nil] The last exception raised during the operation
+  # @dynamic last_exception
   attr_reader :last_exception
 
   # @!attribute last_fallback_received_argument
   #   @return [any] the last argument received by a fallback function
+  # @dynamic last_fallback_received_argument
   attr_accessor :last_fallback_received_argument
 
   # Provides access to the echo service used for testing.
   #
   # @return [EchoService] The echo service instance.
+  # @dynamic echo_service
   attr_reader :echo_service
 
   # Captures the result of a block execution, storing the result or exception.

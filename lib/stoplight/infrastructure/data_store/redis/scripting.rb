@@ -25,14 +25,17 @@ module Stoplight
 
           # @!attribute scripts_root
           #   @return [String]
+          # @dynamic scripts_root
           protected attr_reader :scripts_root
 
           # @!attribute shas
           #   @return [Hash{Symbol, String}]
+          # @dynamic shas
           private attr_reader :shas
 
           # @!attribute redis
           #   @return [RedisClient | ConnectionPool]
+          # @dynamic redis
           protected attr_reader :redis
 
           # @param redis [RedisClient | ConnectionPool]

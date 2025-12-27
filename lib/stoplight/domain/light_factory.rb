@@ -19,6 +19,7 @@ module Stoplight
     #
     # @abstract Subclasses must implement +#with+ and +#build+
     # @api private
+    # steep:ignore:start
     class LightFactory
       # Creates a new factory with modified settings.
       #
@@ -71,5 +72,6 @@ module Stoplight
         with(**settings).build
       end
     end
+    # steep:ignore:end
   end
 end

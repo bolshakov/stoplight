@@ -14,22 +14,27 @@ module Stoplight
 
         # @!attribute id
         #   @return [String]
+        # @dynamic id
         attr_reader :id
 
         # @!attribute name
         #   @return [String]
+        # @dynamic name
         attr_reader :name
 
         # @!attribute color
         #   @return [String]
+        # @dynamic color
         attr_reader :color
 
         # @!attribute state
         #   @return [String]
+        # @dynamic state
         attr_reader :state
 
         # @!attribute failures
         #   @return [<Stoplight::Failure>]
+        # @dynamic failures
         attr_reader :failures
 
         # @param name [String]

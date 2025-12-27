@@ -1,12 +1,21 @@
 # frozen_string_literal: true
 
 RSpec.describe Stoplight::Domain::Config do
-  let(:config) { described_class.empty.with(**settings) }
-
+  def config_factory(**settings)
+    described_class.new(
+      name: "PROTITYPE",
+      cool_off_time: Stoplight::Wiring::Default::COOL_OFF_TIME,
+      threshold: Stoplight::Wiring::Default::THRESHOLD,
+      recovery_threshold: Stoplight::Wiring::Default::RECOVERY_THRESHOLD,
+      window_size: Stoplight::Wiring::Default::WINDOW_SIZE,
+      tracked_errors: Stoplight::Wiring::Default::TRACKED_ERRORS,
+      skipped_errors: Stoplight::Wiring::Default::SKIPPED_ERRORS, **settings
+    )
+  end
   describe "#track_error?" do
     subject { config.track_error?(error) }
 
-    let(:config) { described_class.empty.with(skipped_errors:, tracked_errors:) }
+    let(:config) { config_factory(skipped_errors:, tracked_errors:) }
 
     context "when the error is in skipped_errors" do
       let(:error) { skipped_errors.first.new }
@@ -52,7 +61,7 @@ RSpec.describe Stoplight::Domain::Config do
   describe "#cool_off_time_in_milliseconds" do
     subject { config.cool_off_time_in_milliseconds }
 
-    let(:config) { described_class.empty.with(cool_off_time:) }
+    let(:config) { config_factory(cool_off_time:) }
     let(:cool_off_time) { 1 }
 
     it { is_expected.to eq(1_000) }

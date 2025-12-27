@@ -17,6 +17,7 @@ module Stoplight
         ].freeze
         private_constant :ALLOWED_LIGHT_SETTINGS
 
+        # @dynamic system
         attr_reader :system
 
         def initialize(settings)

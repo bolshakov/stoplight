@@ -2,40 +2,40 @@ module Stoplight
   module Wiring
     class LightBuilder
       FAILOVER_DATA_STORE_CONFIG: Stoplight::DataStore::Memory
-      MEMORY_REGISTRY: Concurrent::Map[Integer, Stoplight::DataStore::Memory]
+      MEMORY_REGISTRY: Concurrent::Map[Integer, Infrastructure::DataStore::Memory]
 
-      private attr_reader data_store_config: Domain::DataStoreConfig
-      private attr_reader error_notifier: error_notifier
-      private attr_reader traffic_recovery: traffic_recovery
-      private attr_reader traffic_control: traffic_control
-      private attr_reader config: Domain::Config
-      private attr_reader factory: untyped
-      private attr_reader clock: Domain::Clock
+      attr_reader data_store_config: Domain::DataStoreConfig
+      attr_reader error_notifier: error_notifier
+      attr_reader traffic_recovery: traffic_recovery
+      attr_reader traffic_control: traffic_control
+      attr_reader config: Domain::Config
+      attr_reader factory: untyped
+      attr_reader clock: Domain::Clock
 
       def initialize: (Hash[Symbol, untyped]) -> void
 
       def build: -> Domain::Light
 
-      private def state_store: -> Domain::Storage::State
-      private def notifiers: -> Array[Domain::StateTransitionNotifier]
-      private def redis_recovery_lock_store: -> Infrastructure::DataStore::Redis::RecoveryLockStore
-      private def scripting: -> Infrastructure::DataStore::Redis::Scripting
+      def state_store: -> Domain::Storage::State
+      def notifiers: -> Array[Domain::StateTransitionNotifier]
+      def redis_recovery_lock_store: -> Infrastructure::DataStore::Redis::RecoveryLockStore
+      def scripting: -> Infrastructure::DataStore::Redis::Scripting
 
-      private def memory_recovery_lock_store: -> Infrastructure::DataStore::Memory::RecoveryLockStore
-      private def failover_data_store: -> Domain::DataStore[Domain::RecoveryLockToken]
-      private def data_store: -> Domain::DataStore[Domain::RecoveryLockToken]
+      def memory_recovery_lock_store: -> Infrastructure::DataStore::Memory::RecoveryLockStore
+      def failover_data_store: -> Domain::DataStore[Domain::RecoveryLockToken]
+      def data_store: -> Domain::DataStore[Domain::RecoveryLockToken]
 
-      private def metrics_store: -> Domain::Storage::Metrics
-      private def recovery_lock_store: -> Domain::Storage::RecoveryLock[Domain::RecoveryLockToken]
-      private def request_tracker: -> Domain::Tracker::Request
-      private def recovery_probe_tracker: -> Domain::Tracker::RecoveryProbe
-      private def recovery_metrics_store: -> Domain::Storage::Metrics
+      def metrics_store: -> Domain::Storage::Metrics
+      def recovery_lock_store: -> Domain::Storage::RecoveryLock[Domain::RecoveryLockToken]
+      def request_tracker: -> Domain::Tracker::Request
+      def recovery_probe_tracker: -> Domain::Tracker::RecoveryProbe
+      def recovery_metrics_store: -> Domain::Storage::Metrics
 
-      private def green_run_strategy: -> Domain::Strategies::GreenRunStrategy
-      private def yellow_run_strategy: -> Domain::Strategies::YellowRunStrategy[Domain::RecoveryLockToken]
-      private def red_run_strategy: -> Domain::Strategies::RedRunStrategy
-      private def create_data_store: (Domain::DataStoreConfig data_store_config) -> Domain::DataStore[Domain::RecoveryLockToken]
-      private def memory_registry: -> Concurrent::Map[Integer, Stoplight::DataStore::Memory]
+      def green_run_strategy: -> Domain::Strategies::GreenRunStrategy
+      def yellow_run_strategy: -> Domain::Strategies::YellowRunStrategy[Domain::RecoveryLockToken]
+      def red_run_strategy: -> Domain::Strategies::RedRunStrategy
+      def create_data_store: (Domain::DataStoreConfig data_store_config) -> Domain::DataStore[Domain::RecoveryLockToken]
+      def memory_registry: -> Concurrent::Map[Integer, Infrastructure::DataStore::Memory]
     end
   end
 end

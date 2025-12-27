@@ -13,30 +13,37 @@ module Stoplight
       class YellowRunStrategy < RunStrategy
         # @!attribute [r] config
         #   @return [Stoplight::Domain::Config] The configuration for the light.
+        # @dynamic config
         protected attr_reader :config
 
         # @!attribute [r] stare_store
         #   @return [Stoplight::Domain::Storage::State]
+        # @dynamic state_store
         protected attr_reader :state_store
 
         # @!attribute [r] metrics_store
         #   @return [Stoplight::Domain::Storage::Metrics]
+        # @dynamic metrics_store
         protected attr_reader :metrics_store
 
         # @!attribute [r] recovery_lock_store
         #   @return [Stoplight::Domain::Storage::RecoveryLock]
+        # @dynamic recovery_lock_store
         protected attr_reader :recovery_lock_store
 
         # @!attribute [r] notifiers
         #   @return [Stoplight::Domain::StateTransitionNotifier]
+        # @dynamic notifiers
         protected attr_reader :notifiers
 
         # @!attribute [r] request_tracker
         #   @return [Stoplight::Domain::RecoveryProbeRequestRecorder]
+        # @dynamic request_tracker
         protected attr_reader :request_tracker
 
         # @!attribute [r] red_run_strategy
         #   @return [Stoplight::Domain::Strategies::RedRunStrategy]
+        # @dynamic red_run_strategy
         protected attr_reader :red_run_strategy
 
         # @param config [Stoplight::Domain::Config]
@@ -67,10 +74,12 @@ module Stoplight
           #   - execute user's code
           #   - record outcome
           #   - transition to green or red if needed
-          with_recovery_lock(fallback:, state_snapshot:) do
+          with_recovery_lock(fallback:, state_snapshot:, code:) do
             enter_recovery(state_snapshot)
 
-            code.call.tap { record_recovery_probe_success }
+            result = code.call
+            record_recovery_probe_success
+            result
           rescue => error
             if config.track_error?(error)
               record_recovery_probe_failure(error)
@@ -87,10 +96,10 @@ module Stoplight
           end
         end
 
-        private def with_recovery_lock(fallback:, state_snapshot:)
+        private def with_recovery_lock(fallback:, state_snapshot:, code:)
           recovery_lock_token = recovery_lock_store.acquire_lock
           if recovery_lock_token.nil?
-            return red_run_strategy.execute(fallback, state_snapshot:)
+            return red_run_strategy.execute(fallback, state_snapshot:, &code)
           end
 
           begin

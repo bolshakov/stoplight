@@ -5,7 +5,7 @@ RSpec.describe Stoplight::Wiring::LightFactory::CompatibilityValidator do
 
   let(:dependencies) { {traffic_control:, traffic_recovery:} }
 
-  let(:config) { Stoplight::Domain::Config.empty.with(threshold:, window_size:, recovery_threshold:) }
+  let(:config) { instance_double(Stoplight::Domain::Config, threshold:, window_size:, recovery_threshold:) }
   let(:threshold) { 3 }
   let(:window_size) { nil }
   let(:recovery_threshold) { 1 }

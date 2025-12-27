@@ -13,7 +13,9 @@ module Stoplight
       #
       # @raise [Stoplight::Error::ConfigurationError] if incompatible
       class CompatibilityValidator
+        # @dynamic dependencies
         private attr_reader :dependencies
+        # @dynamic config
         private attr_reader :config
 
         class << self

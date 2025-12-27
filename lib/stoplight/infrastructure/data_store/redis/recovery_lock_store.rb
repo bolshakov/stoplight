@@ -27,14 +27,17 @@ module Stoplight
         class RecoveryLockStore
           # @!attribute redis
           #   @return [RedisClient]
+          # @dynamic redis
           protected attr_reader :redis
 
           # @!attribute lock_timeout
           #   @return [Integer]
+          # @dynamic lock_timeout
           protected attr_reader :lock_timeout
 
           # @!attribute scripting
           #   @return [Stoplight::Infrastructure::DataStore::Redis::Scripting]
+          # @dynamic scripting
           protected attr_reader :scripting
 
           # @param redis [RedisClient | ConnectionPool]

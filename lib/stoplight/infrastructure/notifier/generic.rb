@@ -43,6 +43,7 @@ module Stoplight
         # @!attribute [r] formatter
         #   @return [Proc] The formatter used to generate notification messages.
         #   @see Stoplight::Default::FORMATTER
+        # @dynamic formatter
         attr_reader :formatter
 
         DEFAULT_FORMATTER = lambda do |light, from_color, to_color, error|

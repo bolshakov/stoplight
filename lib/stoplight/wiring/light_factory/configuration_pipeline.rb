@@ -14,7 +14,9 @@ module Stoplight
       #
       # @api private
       class ConfigurationPipeline
+        # @dynamic dependency_settings
         private attr_reader :dependency_settings
+        # @dynamic config_settings
         private attr_reader :config_settings
 
         def self.process(config_settings, dependency_settings)

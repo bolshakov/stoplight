@@ -6,22 +6,27 @@ module Stoplight
       class RecoveryProbe < Base
         # @!attribute [r] traffic_recovery
         #   @return [Stoplight::Domain::TrafficRecovery::Base]
+        # @dynamic traffic_recovery
         protected attr_reader :traffic_recovery
 
         # @!attribute [r] traffic_control
         #   @return [Stoplight::Domain::TrafficControl::Base]
+        # @dynamic notifiers
         protected attr_reader :notifiers
 
         # @!attribute [r] config
         #   @return [Stoplight::Domain::Config] The configuration for the light.
+        # @dynamic config
         protected attr_reader :config
 
         # @!attribute [r] metrics_store
         #   @return [Stoplight::Domain::Storage::Metrics]
+        # @dynamic metrics_store
         protected attr_reader :metrics_store
 
         # @!attribute [r] state_store
         #   @return [Stoplight::Domain::Storage::State]
+        # @dynamic state_store
         protected attr_reader :state_store
 
         # @param traffic_recovery [Stoplight::Domain::TrafficRecovery::Base]
@@ -49,10 +54,6 @@ module Stoplight
 
           recover
         end
-        RECOVERY_TRANSITIONS = {
-          TrafficRecovery::GREEN => [Color::YELLOW, Color::GREEN],
-          TrafficRecovery::RED => [Color::YELLOW, Color::RED]
-        }.freeze
 
         private def recover
           recovery_metrics = metrics_store.metrics_snapshot
@@ -60,7 +61,10 @@ module Stoplight
 
           return if recovery_result == TrafficRecovery::YELLOW
 
-          from_color, to_color = RECOVERY_TRANSITIONS.fetch(recovery_result) do
+          from_color, to_color = case recovery_result
+          when TrafficRecovery::GREEN then [Color::YELLOW, Color::GREEN]
+          when TrafficRecovery::RED then [Color::YELLOW, Color::RED]
+          else
             raise "recovery strategy returned unexpected color: #{recovery_result}"
           end
 

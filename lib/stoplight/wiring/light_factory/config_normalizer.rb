@@ -27,6 +27,7 @@ module Stoplight
 
         # @!attribute config
         #   @return [Stoplight::Domain::Config]
+        # @dynamic config
         private attr_reader :config
 
         # @param [Stoplight::Domain::Config]

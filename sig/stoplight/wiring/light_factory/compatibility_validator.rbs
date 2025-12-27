@@ -4,12 +4,12 @@ module Stoplight
   module Wiring
     class LightFactory
       class CompatibilityValidator
-        private attr_reader dependencies: dependency_params
+        private attr_reader dependencies: dependencies
         private attr_reader config: Domain::Config
 
-        def self.call: (Domain::Config, dependency_params) -> void
+        def self.call: (Domain::Config, dependencies) -> void
 
-        def initialize: (Domain::Config, dependency_params) -> void
+        def initialize: (Domain::Config, dependencies) -> void
 
         def call: -> void
 

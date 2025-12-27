@@ -8,7 +8,7 @@ module Stoplight
         def ==: (untyped) -> bool
 
         private def compatible: -> CompatibilityResult
-        private def incompatible: -> CompatibilityResult
+        private def incompatible: (*String)-> CompatibilityResult
       end
     end
   end

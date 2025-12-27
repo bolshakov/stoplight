@@ -23,6 +23,7 @@ module Stoplight
 
       # @!attribute [r] settings
       #   @return [Hash]
+      # @dynamic settings
       protected attr_reader :settings
 
       def initialize(settings = {})

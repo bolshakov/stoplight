@@ -2,8 +2,8 @@ module Stoplight
   module Wiring
     class LightFactory
       class ConfigurationPipeline
-        private attr_reader dependency_settings: dependency_overrides
-        private attr_reader config_settings: Domain::config_overrides
+        attr_reader dependency_settings: dependency_overrides
+        attr_reader config_settings: Domain::config_overrides
 
         def self.process: (Domain::config_overrides, dependency_overrides) -> [Domain::Config, dependencies]
 

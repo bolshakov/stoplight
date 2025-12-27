@@ -8,7 +8,7 @@ RSpec.describe Stoplight::Infrastructure::DataStore::Memory do
   let(:recovery_lock_store) { instance_double(described_class::RecoveryLockStore) }
   let(:clock) { Stoplight::Infrastructure::SystemClock.new }
 
-  let(:config) { Stoplight::Domain::Config.empty.with(name:, window_size:, cool_off_time:) }
+  let(:config) { instance_double(Stoplight::Domain::Config, name:, window_size:, cool_off_time:) }
   let(:name) { ("a".."z").to_a.shuffle.join }
   let(:cool_off_time) { 60 }
   let(:window_size) { 60 }

@@ -5,7 +5,8 @@ module Stoplight
     module Light
       # Provides default settings for the Stoplight library.
       # @api private
-      DefaultConfig = Domain::Config.empty.with(
+      DefaultConfig = Domain::Config.new(
+        name: "PROTITYPE",
         cool_off_time: Default::COOL_OFF_TIME,
         threshold: Default::THRESHOLD,
         recovery_threshold: Default::RECOVERY_THRESHOLD,

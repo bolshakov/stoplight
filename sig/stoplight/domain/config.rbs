@@ -1,8 +1,6 @@
 module Stoplight
   module Domain
     class Config < Data
-      def self.empty: () -> Config
-
       attr_reader threshold: threshold
       attr_reader window_size: Integer?
       attr_reader tracked_errors: Array[StandardError]
@@ -17,7 +15,15 @@ module Stoplight
 
       def cool_off_time_in_milliseconds: () -> Integer
 
-      def with: (**config_overrides) -> Config
+      def with: (
+          ?name: String,
+          ?cool_off_time: Integer,
+          ?threshold: threshold,
+          ?recovery_threshold: Integer,
+          ?window_size: Integer?,
+          ?tracked_errors: Array[StandardError],
+          ?skipped_errors: Array[StandardError]
+      ) -> Config
     end
   end
 end

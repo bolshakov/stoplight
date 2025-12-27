@@ -12,6 +12,7 @@ module Stoplight
       class RedRunStrategy < RunStrategy
         # @!attribute [r] config
         #   @return [Stoplight::Domain::Config] The configuration for the light.
+        # @dynamic config
         protected attr_reader :config
 
         def initialize(config:)
@@ -31,7 +32,7 @@ module Stoplight
             raise Error::RedLight.new(
               config.name,
               cool_off_time: config.cool_off_time,
-              retry_after: state_snapshot.recovery_scheduled_after
+              retry_after: state_snapshot.recovery_scheduled_after!
             )
           end
         end

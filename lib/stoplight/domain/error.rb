@@ -3,21 +3,29 @@
 module Stoplight
   module Domain
     module Error
-      Base = Class.new(StandardError)
-      ConfigurationError = Class.new(Base)
-      IncorrectColor = Class.new(Base)
+      class Base < StandardError
+      end
+
+      class ConfigurationError < Base
+      end
+
+      class IncorrectColor < Base
+      end
 
       class RedLight < Base
         # @!attribute light_name
         #   @return [String] The light's name
+        # @dynamic light_name
         attr_reader :light_name
 
         # @!attribute cool_off_time
         #   @return [Numeric] Cool-off period in seconds
+        # @dynamic cool_off_time
         attr_reader :cool_off_time
 
         # @!attribute retry_after
         #   @return [Time] Absolute Time after which a recovery attempt can occur
+        # @dynamic retry_after
         attr_reader :retry_after
 
         # Initializes a new RedLight error.

@@ -12,10 +12,12 @@ module Stoplight
       class GreenRunStrategy < RunStrategy
         # @!attribute [r] request_tracker
         #   @return [Stoplight::Domain::Tracker::Request]
+        # @dynamic request_tracker
         protected attr_reader :request_tracker
 
         # @!attribute [r] config
         #   @return [Stoplight::Domain::Config] The configuration for the light.
+        # @dynamic config
         protected attr_reader :config
 
         # @param config [Stoplight::Domain::Config]
@@ -34,7 +36,9 @@ module Stoplight
         # @raise [Exception] Re-raises the error if it is not tracked or no fallback is provided.
         def execute(fallback, state_snapshot:, &code)
           # TODO: Consider implementing sampling rate to limit the memory footprint
-          code.call.tap { record_success }
+          result = code.call
+          record_success
+          result
         rescue => error
           if config.track_error?(error)
             record_error(error)

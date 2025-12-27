@@ -11,7 +11,7 @@ RSpec.describe Stoplight::Infrastructure::DataStore::FailSafe do
   let(:recovery_lock_store) { Stoplight::Infrastructure::DataStore::Memory::RecoveryLockStore.new }
   let(:clock) { Stoplight::Infrastructure::SystemClock.new }
   let(:data_store) { instance_double(Stoplight::Domain::DataStore) }
-  let(:config) { Stoplight::Domain::Config.empty.with(name:, window_size: 4, cool_off_time: 60, threshold: 3) }
+  let(:config) { instance_double(Stoplight::Domain::Config, name:, window_size: 4, cool_off_time: 60, threshold: 3) }
   let(:error_notifier) { instance_double(Proc) }
   let(:name) { SecureRandom.uuid }
   let(:error) { StandardError.new("Test error") }
