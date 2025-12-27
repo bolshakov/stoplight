@@ -1,0 +1,34 @@
+module Stoplight
+  module Domain
+    class LightFactory
+      def with: (
+          ?cool_off_time: Integer,
+          ?threshold: (Integer | Float),
+          ?recovery_threshold: Integer,
+          ?window_size: Integer,
+          ?tracked_errors: Array[StandardError],
+          ?skipped_errors: Array[StandardError],
+          ?error_notifier: Infrastructure::error_notifier,
+          ?notifiers: Array[Notifier::Base],
+          ?data_store: Domain::DataStoreConfig,
+          ?traffic_control: traffic_control,
+          ?traffic_recovery: traffic_recovery,
+      ) -> LightFactory
+      def build: -> Light
+
+      def build_with: (
+          ?cool_off_time: Integer,
+          ?threshold: (Integer | Float),
+          ?recovery_threshold: Integer,
+          ?window_size: Integer,
+          ?tracked_errors: Array[StandardError],
+          ?skipped_errors: Array[StandardError],
+          ?error_notifier: Infrastructure::error_notifier,
+          ?notifiers: Array[Notifier::Base],
+          ?data_store: Domain::DataStoreConfig,
+          ?traffic_control: traffic_control,
+          ?traffic_recovery: traffic_recovery,
+      ) -> Light
+    end
+  end
+end

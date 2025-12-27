@@ -1,0 +1,12 @@
+module Stoplight
+  module Wiring
+    module DataStore
+      class Redis < Domain::DataStoreConfig
+        attr_reader redis: ::Redis | ConnectionPool[::Redis]
+        attr_reader warn_on_clock_skew: bool
+
+        def initialize: (::Redis | ConnectionPool[::Redis] redis, warn_on_clock_skew: bool) -> void
+      end
+    end
+  end
+end

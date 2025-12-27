@@ -3,7 +3,7 @@
 module Stoplight
   module Wiring
     module DataStore
-      class Redis < Base
+      class Redis < Domain::DataStoreConfig
         # @!attribute redis
         #   @return [::Redis, ConnectionPool<::Redis>]
         attr_reader :redis

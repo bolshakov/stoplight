@@ -1,0 +1,23 @@
+# frozen_string_literal: true
+
+module Stoplight
+  module Wiring
+    class LightFactory
+      class ConfigNormalizer
+        def self.call: (Domain::Config config) -> Domain::Config
+
+        private attr_reader config: Domain::Config
+
+        def initialize: (Domain::Config config) -> void
+
+        def call: -> Domain::Config
+
+        private def normalize_tracked_errors: (Domain::Config config) -> Domain::Config
+
+        private def normalize_skipped_errors: (Domain::Config config) -> Domain::Config
+
+        private def normalize_cool_off_time: (Domain::Config config) -> Domain::Config
+      end
+    end
+  end
+end

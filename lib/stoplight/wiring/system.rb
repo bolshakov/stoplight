@@ -52,7 +52,16 @@ module Stoplight
       # @api private
       def initialize(name, **defaults)
         @name = name.to_s
-        @light_factory = LightFactory.new(library_default_dependencies.merge(defaults))
+        @light_factory = LightFactory.new(
+          {
+            system: self,
+            data_store: defaults.fetch(:data_store, Default::DATA_STORE),
+            traffic_recovery: defaults.fetch(:traffic_recovery, Default::TRAFFIC_RECOVERY),
+            traffic_control: defaults.fetch(:traffic_control, Default::TRAFFIC_CONTROL),
+            notifiers: defaults.fetch(:notifiers, Default::NOTIFIERS),
+            error_notifier: defaults.fetch(:error_notifier, Default::ERROR_NOTIFIER)
+          }
+        )
         @lights = Concurrent::Map.new
 
         light_factory.validate_configuration!
@@ -116,16 +125,9 @@ module Stoplight
       end
 
       # @param settings [Hash]
-      private def normalize_settings(settings) = settings.sort.to_h
-
-      private def library_default_dependencies = {
-        system: self,
-        data_store: Default::DATA_STORE,
-        traffic_recovery: Default::TRAFFIC_RECOVERY,
-        traffic_control: Default::TRAFFIC_CONTROL,
-        notifiers: Default::NOTIFIERS,
-        error_notifier: Default::ERROR_NOTIFIER
-      }.freeze
+      private def normalize_settings(settings)
+        settings.sort.to_h #: Domain::config_overrides
+      end
     end
   end
 end

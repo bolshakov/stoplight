@@ -1,0 +1,10 @@
+module Stoplight
+  module Wiring
+    class NotifierFactory
+      def self.create: (
+        notifier: Domain::StateTransitionNotifier,
+        error_notifier: Infrastructure::error_notifier,
+      ) -> Domain::StateTransitionNotifier
+    end
+  end
+end

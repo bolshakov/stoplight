@@ -115,7 +115,19 @@ module Stoplight # rubocop:disable Style/Documentation
         if existing_system
           raise ArgumentError, "system `#{name}` is already in use"
         else
-          Stoplight::Wiring::System.new(name.to_s, **@default_configuration.to_h.merge(settings))
+          Stoplight::Wiring::System.new(name.to_s, **{
+            cool_off_time: @default_configuration.cool_off_time,
+            threshold: @default_configuration.threshold,
+            recovery_threshold: @default_configuration.recovery_threshold,
+            window_size: @default_configuration.window_size,
+            tracked_errors: @default_configuration.tracked_errors,
+            skipped_errors: @default_configuration.skipped_errors,
+            data_store: @default_configuration.data_store,
+            error_notifier: @default_configuration.error_notifier,
+            notifiers: @default_configuration.notifiers,
+            traffic_control: @default_configuration.traffic_control,
+            traffic_recovery: @default_configuration.traffic_recovery
+          }.compact.merge(settings))
         end
       end
     end

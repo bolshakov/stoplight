@@ -19,7 +19,7 @@ module Stoplight
 
         attr_reader :system
 
-        def initialize(settings = {})
+        def initialize(settings)
           @system = settings.delete(:system)
 
           super

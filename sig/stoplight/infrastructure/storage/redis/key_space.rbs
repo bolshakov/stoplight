@@ -1,0 +1,16 @@
+module Stoplight
+  module Infrastructure
+    module Storage
+      module Redis
+        class KeySpace
+          def self.build: (system_name: _StringLike, light_name: _StringLike) -> KeySpace
+
+          def self.hash_name: (_StringLike) -> String
+
+          def initialize: (system_id: String, light_id: String) -> void
+          def key: (*_StringLike) -> String
+        end
+      end
+    end
+  end
+end

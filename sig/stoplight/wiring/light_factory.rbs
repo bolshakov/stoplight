@@ -1,0 +1,32 @@
+module Stoplight
+  module Wiring
+    class LightFactory < Domain::LightFactory
+      DEPENDENCY_KEYS: Array[Symbol]
+      CONFIG_KEYS: Array[Symbol]
+
+      attr_reader settings: settings_overrides
+
+      def initialize: (settings_overrides) -> void
+
+      def validate_configuration!: -> void
+
+      def ==: (untyped other) -> bool
+      def eql: (untyped other) -> bool
+      def hash: -> Integer
+
+      private def validate_settings!: -> void
+      private def light_builder: (
+          Domain::Config config,
+          {
+            ?error_notifier: Infrastructure::error_notifier,
+            ?notifiers: Array[Notifier::Base],
+            ?data_store: Domain::DataStoreConfig,
+            ?traffic_control: traffic_control,
+            ?traffic_recovery: traffic_recovery,
+          } dependencies
+        ) -> LightBuilder
+
+      private def light_factory: -> LightFactory
+    end
+  end
+end

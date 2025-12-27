@@ -40,7 +40,7 @@ module Stoplight
             #
             # @param name [String, Symbol]
             # @return [String] 12-char hex string
-            def hash_name(name) = Digest::SHA256.hexdigest(name.to_s)[0, 12]
+            def hash_name(name) = Digest::SHA256.hexdigest(name.to_s)[0, 12] #: String
           end
 
           # Builds a Redis key within this namespace.

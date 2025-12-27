@@ -1,0 +1,22 @@
+# frozen_string_literal: true
+
+module Stoplight
+  module Wiring
+    class LightFactory
+      class CompatibilityValidator
+        private attr_reader dependencies: dependency_params
+        private attr_reader config: Domain::Config
+
+        def self.call: (Domain::Config, dependency_params) -> void
+
+        def initialize: (Domain::Config, dependency_params) -> void
+
+        def call: -> void
+
+        private def validate_traffic_control!: -> void
+
+        def validate_traffic_recovery!: -> void
+      end
+    end
+  end
+end

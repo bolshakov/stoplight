@@ -2,10 +2,8 @@
 
 module Stoplight
   module Wiring
-    module DataStore
-      # @abstract
-      class Base
-      end
+    module Light
+      SystemConfig: Domain::Config
     end
   end
 end

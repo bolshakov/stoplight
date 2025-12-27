@@ -2,9 +2,8 @@
 
 module Stoplight
   module Wiring
-    module DataStore
-      class Memory < Domain::DataStoreConfig
-      end
+    module Light
+      DefaultConfig: Domain::Config
     end
   end
 end

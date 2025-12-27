@@ -1,6 +1,25 @@
 module Stoplight
   module Domain
+    type threshold = (Float | Integer)
     type traffic_control = Symbol | Hash[Symbol, Hash[Symbol, Integer]]
     type traffic_recovery = Symbol
+    type config_params = {
+        name: String,
+        cool_off_time: Integer,
+        threshold: threshold,
+        recovery_threshold: Integer,
+        window_size: Integer?,
+        tracked_errors: Array[StandardError],
+        skipped_errors: Array[StandardError]
+      }
+    type config_overrides = {
+        ?name: String,
+        ?cool_off_time: Integer,
+        ?threshold: threshold,
+        ?recovery_threshold: Integer,
+        ?window_size: Integer?,
+        ?tracked_errors: Array[StandardError],
+        ?skipped_errors: Array[StandardError]
+    }
   end
 end

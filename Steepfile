@@ -15,6 +15,8 @@ target :strict do
 
   check "lib/stoplight/domain"
   check "lib/stoplight/infrastructure"
+  check "lib/stoplight/wiring"
+  check "lib/stoplight.rb"
 
   configure_code_diagnostics(Steep::Diagnostic::Ruby.all_error)
 end

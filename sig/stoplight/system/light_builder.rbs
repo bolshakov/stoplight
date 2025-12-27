@@ -1,0 +1,17 @@
+module Stoplight
+  module Wiring
+    class System
+      class LightBuilder < Wiring::LightBuilder
+        private attr_reader system: System
+
+        def initialize: (System, settings) -> void
+
+        def key_space: -> Infrastructure::Storage::Redis::KeySpace
+
+        private def redis: -> Domain::DataStoreConfig
+        private def storage_scripting: -> Infrastructure::Storage::Redis::Scripting
+        private def failover_system: -> System
+      end
+    end
+  end
+end

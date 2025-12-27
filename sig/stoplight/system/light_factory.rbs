@@ -1,0 +1,15 @@
+# frozen_string_literal: true
+
+module Stoplight
+  module Wiring
+    class System
+      class LightFactory < Wiring::LightFactory
+        ALLOWED_LIGHT_SETTINGS: Array[Symbol]
+
+        attr_reader system: System
+
+        def initialize: ((dependency_overrides & Domain::config_overrides & {system: System})) -> void
+      end
+    end
+  end
+end

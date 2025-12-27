@@ -1,0 +1,7 @@
+module Stoplight
+  module Wiring
+    class LightFactory
+      TrafficControlDsl: ^(traffic_control) -> Domain::TrafficControl::Base
+    end
+  end
+end

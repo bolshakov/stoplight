@@ -1,0 +1,27 @@
+module Stoplight
+  module Wiring
+    type dependency_overrides = {
+        ?error_notifier: Infrastructure::error_notifier,
+        ?notifiers: Array[Notifier::Base],
+        ?data_store: Domain::DataStoreConfig,
+        ?traffic_control: traffic_control,
+        ?traffic_recovery: traffic_recovery,
+      }
+    type dependency_params = {
+        error_notifier: Infrastructure::error_notifier,
+        notifiers: Array[Notifier::Base],
+        data_store: Domain::DataStoreConfig,
+        traffic_control: traffic_control,
+        traffic_recovery: traffic_recovery,
+      }
+    type dependencies = {
+        error_notifier: Infrastructure::error_notifier,
+        notifiers: Array[Notifier::Base],
+        data_store: Domain::DataStoreConfig,
+        traffic_control: Domain::TrafficControl::Base,
+        traffic_recovery: Domain::TrafficRecovery::Base,
+    }
+    type settings_overrides = (dependency_overrides & Domain::config_overrides)
+    type settings = dependencies & Domain::config_params
+  end
+end
