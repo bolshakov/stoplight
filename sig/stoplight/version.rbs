@@ -1,0 +1,3 @@
+module Stoplight
+  VERSION: Gem::Version
+end

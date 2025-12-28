@@ -57,9 +57,9 @@ module Stoplight
           def release_lock(recovery_lock_token)
             case recovery_lock_token
             in Redis::RecoveryLockToken
-              fallback = proc do |error|
+              fallback = -> { |error|
                 error_notifier.call(error) if error
-              end
+              }
 
               circuit_breaker.run(fallback) do
                 primary_store.release_lock(recovery_lock_token)

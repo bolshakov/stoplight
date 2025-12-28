@@ -8,7 +8,7 @@ module Stoplight
 
         def initialize: (notifier: Domain::StateTransitionNotifier, error_notifier: error_notifier) -> void
 
-        def notify: (Domain::Config, Domain::color, Domain::color, StandardError?) -> void
+        def notify: (Domain::Config, Domain::color, Domain::color, ?StandardError?) -> void
 
         def ==: (Object other) -> bool
 

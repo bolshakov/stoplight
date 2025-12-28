@@ -9,6 +9,14 @@ module Stoplight
       def recovery_started_at!: -> Time
       def time: -> Time
 
+      def self.new: (
+          breached_at: Time?,
+          locked_state: state,
+          recovery_scheduled_after: Time?,
+          recovery_started_at: Time?,
+          time: Time
+        ) -> instance
+
       def initialize: (
         breached_at: Time?,
         locked_state: state,

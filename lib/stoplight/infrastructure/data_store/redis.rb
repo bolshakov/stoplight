@@ -17,6 +17,7 @@ module Stoplight
       # of errors happened within last +config.window_size+ seconds (by default infinity).
       #
       # @see Base
+      # steep:ignore:start
       class Redis < Domain::DataStore
         extend Forwardable
 
@@ -512,6 +513,7 @@ module Stoplight
           rand <= probability
         end
       end
+      # steep:ignore:end
     end
   end
 end

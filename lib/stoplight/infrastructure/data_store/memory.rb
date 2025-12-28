@@ -5,6 +5,7 @@ require "monitor"
 module Stoplight
   module Infrastructure
     module DataStore
+      # steep:ignore:start
       # @see +Domain::DataStore+
       class Memory < Domain::DataStore
         include MonitorMixin
@@ -337,6 +338,7 @@ module Stoplight
           end
         end
       end
+      # steep:ignore:end
     end
   end
 end

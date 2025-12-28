@@ -1,16 +1,16 @@
 module Stoplight
   module Wiring
     class System
-      attr_reader name: _StringLike
+      attr_reader name: _ToS
       private attr_reader light_factory: LightFactory
       private attr_reader lights: Concurrent::Map[
-          _StringLike ,
+          _ToS,
           [Domain::Light, Domain::config_overrides]
       ]
 
-      def initialize: (_StringLike, **settings_overrides) -> void
+      def initialize: (_ToS, **settings_overrides) -> void
 
-      def light: (_StringLike name, **Domain::config_overrides) -> Domain::Light
+      def light: (_ToS name, **Domain::config_overrides) -> Domain::Light
 
       private def normalize_settings: (Domain::config_overrides) -> Domain::config_overrides
     end

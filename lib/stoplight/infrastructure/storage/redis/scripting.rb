@@ -5,7 +5,7 @@ module Stoplight
     module Storage
       module Redis
         class Scripting < DataStore::Redis::Scripting
-          SCRIPTS_ROOT = __dir__
+          SCRIPTS_ROOT = __dir__ => String
           private_constant :SCRIPTS_ROOT
 
           class << self

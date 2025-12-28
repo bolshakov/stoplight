@@ -60,7 +60,7 @@ module Stoplight
               if timestamp.nil? || timestamp >= window_start_ts
                 break
               else
-                self.running_sum -= sum
+                self.running_sum -= sum.to_i
                 buckets.shift
               end
             end

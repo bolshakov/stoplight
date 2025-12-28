@@ -9,7 +9,7 @@ module Stoplight
         METADATA_TTL: Integer
         SKEW_TOLERANCE: Integer
 
-        def self.key: (*String) -> String
+        def self.key: (*_ToS) -> String
 
         def self.buckets_for_window: (
           String light_name,
@@ -28,12 +28,12 @@ module Stoplight
 
         private attr_reader recovery_lock_store: RecoveryLockStore
         private attr_reader scripting: Scripting
-        private attr_reader redis: ::Redis | ConnectionPool[::Redis]
+        private attr_reader redis: redis
         private attr_reader warn_on_clock_skew: bool
         private attr_reader clock: Domain::Clock
 
         def initialize: (
-          redis: ::Redis | ConnectionPool[::Redis],
+          redis: redis,
           recovery_lock_store: RecoveryLockStore,
           scripting: Scripting,
           warn_on_clock_skew: bool,
@@ -57,7 +57,7 @@ module Stoplight
         private def metrics_ttl: -> Integer
         private def metadata_ttl: -> Integer
         private def detect_clock_skew: -> void
-        private def should_samply?: (Float) -> bool
+        private def should_sample?: (Float) -> bool
       end
     end
   end

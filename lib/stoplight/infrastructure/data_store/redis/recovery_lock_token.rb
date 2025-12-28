@@ -1,17 +1,15 @@
 # frozen_string_literal: true
 
 require "securerandom"
-require "forwardable"
 
 module Stoplight
   module Infrastructure
     module DataStore
       class Redis
         class RecoveryLockToken < Domain::RecoveryLockToken
-          extend Forwardable
-
-          def_delegator "Stoplight::Infrastructure::DataStore::Redis", :key
-          private :key
+          private def key(*parts)
+            Stoplight::Infrastructure::DataStore::Redis.key(*parts)
+          end
 
           # @!attribute light_name
           #   @return [String]

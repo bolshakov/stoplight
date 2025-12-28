@@ -16,7 +16,8 @@ module Stoplight
         # @note Scripts are loaded lazily on first use and cached in memory
         # @note Script files must be named `<script_name>.lua` and located in scripts_root
         class Scripting
-          SCRIPTS_ROOT = File.join(__dir__, "lua_scripts")
+          current_dir = __dir__ or raise "Cannot determine script directory"
+          SCRIPTS_ROOT = File.join(current_dir, "lua_scripts")
           private_constant :SCRIPTS_ROOT
 
           class << self
@@ -48,7 +49,7 @@ module Stoplight
 
           def call(script_name, keys: [], args: [])
             redis.then do |client|
-              client.evalsha(script_sha(script_name), keys: keys, argv: args)
+              client.evalsha(script_sha(script_name), keys: keys.map(&:to_s), argv: args.map(&:to_s))
             end
           rescue ::Redis::CommandError => error
             if error.message.include?("NOSCRIPT")
@@ -70,7 +71,7 @@ module Stoplight
             else
               script = File.read(File.join(scripts_root, "#{script_name}.lua"))
 
-              shas[script_name] = redis.then { |client| client.script("load", script) }
+              shas[script_name] = redis.then { |client| client.script(:load, script) }
             end
           end
         end

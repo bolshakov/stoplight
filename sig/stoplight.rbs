@@ -1,7 +1,6 @@
 module Stoplight
-  interface _StringLike
-    def to_s: () -> String
-  end
+  type timestamp = Float | Integer
+  type redis = ::Redis | ConnectionPool[::Redis]
 
   type color = Domain::color
   type state = Domain::state
@@ -24,4 +23,9 @@ module Stoplight
     class IO = Infrastructure::Notifier::IO
     class Logger = Infrastructure::Notifier::Logger
   end
+
+  def self.system_light: (
+      String name,
+      ?notifiers: Array[Domain::StateTransitionNotifier]
+    ) -> Domain::Light
 end

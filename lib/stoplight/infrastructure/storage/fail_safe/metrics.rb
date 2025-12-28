@@ -71,10 +71,10 @@ module Stoplight
           end
 
           private def fallback(&fallback)
-            proc do |error|
+            -> { |error|
               error_notifier.call(error) if error
               fallback.call
-            end
+            }
           end
         end
       end
