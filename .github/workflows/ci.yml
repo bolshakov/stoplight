@@ -40,6 +40,7 @@ jobs:
       - name: Standard Ruby
         uses: standardrb/standard-ruby-action@eecb3f730879f5b8830705348c2961e5aa26de78 # v1.5.0
         with:
+          ruby-version: '3.4'
           autofix: false
 
   features:
