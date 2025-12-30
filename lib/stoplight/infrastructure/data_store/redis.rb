@@ -24,10 +24,15 @@ module Stoplight
           # Generates a Redis key by joining the prefix with the provided pieces.
           #
           # @param pieces [Array<String, Integer>] Parts of the key to be joined.
+          # @param cluster_mode [Boolean] Whether to use hash tags for cluster compatibility
           # @return [String] The generated Redis key.
           # @api private
-          def key(*pieces)
-            [KEY_PREFIX, *pieces].join(KEY_SEPARATOR)
+          def key(*pieces, cluster_mode: false)
+            if cluster_mode && pieces.length >= 2
+              [KEY_PREFIX, pieces[0], "{#{pieces[1]}}", *pieces[2..]].join(KEY_SEPARATOR)
+            else
+              [KEY_PREFIX, *pieces].join(KEY_SEPARATOR)
+            end
           end
 
           # Retrieves the list of Redis bucket keys required to cover a specific time window.
@@ -38,7 +43,7 @@ module Stoplight
           # @param window_size [Numeric] The size of the time window in seconds.
           # @return [Array<String>] A list of Redis keys for the buckets that cover the time window.
           # @api private
-          def buckets_for_window(light_name, metric:, window_end:, window_size:)
+          def buckets_for_window(light_name, metric:, window_end:, window_size:, cluster_mode: false)
             window_end_ts = window_end.to_i
             window_start_ts = window_end_ts - [window_size, Domain::DataStore::METRICS_RETENTION_TIME].compact.min.to_i
 
@@ -49,7 +54,7 @@ module Stoplight
             end_bucket = ((window_end_ts - 1) / bucket_size) * bucket_size
 
             (start_bucket..end_bucket).step(bucket_size).map do |bucket_start|
-              bucket_key(light_name, metric: metric, time: bucket_start)
+              bucket_key(light_name, metric: metric, time: bucket_start, cluster_mode: cluster_mode)
             end
           end
 
@@ -58,9 +63,10 @@ module Stoplight
           # @param light_name [String] The name of the light.
           # @param metric [String] The metric type (e.g., "errors").
           # @param time [Time, Numeric] The time for which to generate the key.
+          # @param cluster_mode [Boolean] Whether to use hash tags for cluster compatibility
           # @return [String] The generated Redis key.
-          def bucket_key(light_name, metric:, time:)
-            key("metrics", light_name, metric, (time.to_i / bucket_size) * bucket_size)
+          def bucket_key(light_name, metric:, time:, cluster_mode: false)
+            key("metrics", light_name, metric, (time.to_i / bucket_size) * bucket_size, cluster_mode: cluster_mode)
           end
 
           BUCKET_SIZE = 3600 # 1h
@@ -97,12 +103,14 @@ module Stoplight
         # @param redis [::Redis, ConnectionPool<::Redis>]
         # @param recovery_lock_store [Stoplight::Infrastructure::DataStore::Redis::RecoveryLockStore]
         # @param warn_on_clock_skew [Boolean] (true) Whether to warn about clock skew between Redis and
+        # @param cluster_mode [Boolean] (false) Use hash tags for Redis Cluster
         # @param scripting [Stoplight::Infrastructure::DataStore::Redis::Scripting]
         # @param clock [Stoplight::Domain::Clock]
         #   the application server
-        def initialize(redis:, recovery_lock_store:, scripting:, clock:, warn_on_clock_skew: true)
+        def initialize(redis:, recovery_lock_store:, scripting:, clock:, warn_on_clock_skew: true, cluster_mode: false)
           @clock = clock
           @warn_on_clock_skew = warn_on_clock_skew
+          @cluster_mode = cluster_mode
           @redis = redis
           @recovery_lock_store = recovery_lock_store
           @scripting = scripting
@@ -114,8 +122,10 @@ module Stoplight
               [key("metadata", "*"), /^#{key("metadata", "")}/],
               [key("recovery_metrics", "*"), /^#{key("recovery_metrics", "")}/]
             ].map do |(pattern, prefix_regex)|
-              client.scan_each(match: pattern).to_a.map do |key|
-                key.sub(prefix_regex, "")
+              if @cluster_mode
+                scan_all_cluster_nodes(client, pattern).map { |key| key.sub(prefix_regex, "") }
+              else
+                client.scan_each(match: pattern).to_a.map { |key| key.sub(prefix_regex, "") }
               end
             end
           end
@@ -421,14 +431,17 @@ module Stoplight
           )
         end
 
-        def_delegator "self.class", :key
+        private def key(*pieces)
+          self.class.key(*pieces, cluster_mode: @cluster_mode)
+        end
 
         private def failure_bucket_keys(config, window_end:)
           self.class.buckets_for_window(
             config.name,
             metric: "failure",
             window_end: window_end,
-            window_size: config.window_size
+            window_size: config.window_size,
+            cluster_mode: @cluster_mode
           )
         end
 
@@ -437,7 +450,8 @@ module Stoplight
             config.name,
             metric: "success",
             window_end: window_end,
-            window_size: config.window_size
+            window_size: config.window_size,
+            cluster_mode: @cluster_mode
           )
         end
 
@@ -446,7 +460,8 @@ module Stoplight
             config.name,
             metric: "recovery_probe_failure",
             window_end: window_end,
-            window_size: config.cool_off_time
+            window_size: config.cool_off_time,
+            cluster_mode: @cluster_mode
           )
         end
 
@@ -455,16 +470,17 @@ module Stoplight
             config.name,
             metric: "recovery_probe_success",
             window_end: window_end,
-            window_size: config.cool_off_time
+            window_size: config.cool_off_time,
+            cluster_mode: @cluster_mode
           )
         end
 
         private def successes_key(config, time:)
-          self.class.bucket_key(config.name, metric: "success", time:)
+          self.class.bucket_key(config.name, metric: "success", time: time, cluster_mode: @cluster_mode)
         end
 
         private def errors_key(config, time:)
-          self.class.bucket_key(config.name, metric: "failure", time:)
+          self.class.bucket_key(config.name, metric: "failure", time: time, cluster_mode: @cluster_mode)
         end
 
         private def recovery_metrics_key(config)
@@ -505,6 +521,30 @@ module Stoplight
 
         private def should_sample?(probability)
           rand <= probability
+        end
+
+        private def scan_all_cluster_nodes(client, pattern)
+          all_keys = []
+
+          nodes_info = client.call("CLUSTER", "NODES")
+          master_lines = nodes_info.split("\n").select { |line| line.include?("master") && !line.include?("fail") }
+
+          master_lines.each do |node_line|
+            node_id = node_line.split[0]
+            cursor = "0"
+
+            loop do
+              result = client.call("SCAN", cursor, "MATCH", pattern, "COUNT", "1000", node: node_id)
+              cursor, keys = result
+              all_keys.concat(keys) if keys
+              break if cursor == "0"
+            end
+          end
+
+          all_keys
+        rescue => e
+          warn("Cluster SCAN failed: #{e.message}. Admin panel may show incomplete results.")
+          []
         end
       end
     end
