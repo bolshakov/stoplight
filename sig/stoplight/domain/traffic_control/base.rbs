@@ -4,7 +4,7 @@ module Stoplight
       class Base
         def check_compatibility: (Config config) -> CompatibilityResult
 
-        def stop_traffic?: (Config config, Domain::Metrics metrics) -> bool
+        def stop_traffic?: (Config config, Domain::MetricsSnapshot metrics) -> bool
         def ==: (untyped) -> bool
 
         private def compatible: -> CompatibilityResult

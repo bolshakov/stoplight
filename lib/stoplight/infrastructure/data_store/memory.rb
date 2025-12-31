@@ -45,7 +45,7 @@ module Stoplight
         end
 
         # @param config [Stoplight::Domain::Config]
-        # @return [Stoplight::Domain::Metrics]
+        # @return [Stoplight::Domain::MetricsSnapshot]
         def get_metrics(config)
           light_name = config.name
 
@@ -64,7 +64,7 @@ module Stoplight
             consecutive_errors = config.window_size ? [metrics.consecutive_errors, errors].min : metrics.consecutive_errors
             consecutive_successes = config.window_size ? [metrics.consecutive_successes.to_i, successes].min : metrics.consecutive_successes.to_i
 
-            Domain::Metrics.new(
+            Domain::MetricsSnapshot.new(
               errors:,
               successes:,
               consecutive_errors:,
@@ -75,14 +75,14 @@ module Stoplight
           end
         end
 
-        # @return [Stoplight::Domain::Metrics]
+        # @return [Stoplight::Domain::MetricsSnapshot]
         def get_recovery_metrics(config)
           light_name = config.name
 
           synchronize do
             metrics = @recovery_metrics[light_name]
 
-            Domain::Metrics.new(
+            Domain::MetricsSnapshot.new(
               errors: nil, successes: nil,
               consecutive_errors: metrics.consecutive_errors,
               consecutive_successes: metrics.consecutive_successes,

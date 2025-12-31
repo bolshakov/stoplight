@@ -45,7 +45,7 @@ RSpec.describe Stoplight::Domain::TrafficControl::ConsecutiveErrors do
     subject { described_class.new.stop_traffic?(config, metadata) }
 
     let(:config) { instance_double(Stoplight::Domain::Config, threshold:, window_size:) }
-    let(:metadata) { instance_double(Stoplight::Domain::Metrics, consecutive_errors:) }
+    let(:metadata) { instance_double(Stoplight::Domain::MetricsSnapshot, consecutive_errors:) }
 
     context "when the window size is not sent" do
       let(:window_size) { nil }

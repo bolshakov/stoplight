@@ -26,7 +26,7 @@ module Stoplight
         protected attr_reader :config
 
         # @!attribute metrics_store
-        #   @return [Stoplight::Storage::Metrics]
+        #   @return [Stoplight::Storage::MetricsSnapshot]
         # @dynamic metrics_store
         protected attr_reader :metrics_store
 
@@ -38,7 +38,7 @@ module Stoplight
         # @param traffic_control [Stoplight::Domain::TrafficControl::Base]
         # @param notifiers [<Stoplight::Domain::StateTransitionNotifier>]
         # @param config [Stoplight::Domain::Config]
-        # @param metrics_store [Stoplight::Storage::Metrics]
+        # @param metrics_store [Stoplight::Storage::MetricsSnapshot]
         # @param state_store [Stoplight::Domain::Storage::State]
         def initialize(traffic_control:, notifiers:, config:, metrics_store:, state_store:)
           @traffic_control = traffic_control

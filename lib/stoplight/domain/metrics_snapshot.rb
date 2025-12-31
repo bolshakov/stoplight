@@ -5,7 +5,7 @@ module Stoplight
     # Request metrics over a given window.
     #
     # @api private
-    Metrics = Data.define(
+    MetricsSnapshot = Data.define(
       :successes,
       :errors,
       :consecutive_errors,
@@ -14,7 +14,7 @@ module Stoplight
       :last_success_at
     )
 
-    class Metrics
+    class MetricsSnapshot
       # @!attribute successes
       #   A number of successes withing requested window. Zero for non-windowed metrics
       #   @return [Integer]

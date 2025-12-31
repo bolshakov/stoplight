@@ -17,7 +17,7 @@ module Stoplight
       # Retrieves metrics for a specific light configuration.
       #
       # @param config [Stoplight::Domain::Config]
-      # @return [Stoplight::Domain::Metrics]
+      # @return [Stoplight::Domain::MetricsSnapshot]
       def get_metrics(config)
         raise NotImplementedError
       end
@@ -25,7 +25,7 @@ module Stoplight
       # Retrieves recovery metrics for a specific light configuration.
       #
       # @param config [Stoplight::Domain::Config]
-      # @return [Stoplight::Domain::Metrics]
+      # @return [Stoplight::Domain::MetricsSnapshot]
       def get_recovery_metrics(config)
         raise NotImplementedError
       end

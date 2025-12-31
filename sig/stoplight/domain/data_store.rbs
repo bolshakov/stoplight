@@ -7,9 +7,9 @@ module Stoplight
 
       def names: -> Array[String]
 
-      def get_metrics: (Config config) -> Domain::Metrics
+      def get_metrics: (Config config) -> Domain::MetricsSnapshot
 
-      def get_recovery_metrics: (Config config) -> Domain::Metrics
+      def get_recovery_metrics: (Config config) -> Domain::MetricsSnapshot
 
       def get_state_snapshot: (Config config) -> StateSnapshot
 

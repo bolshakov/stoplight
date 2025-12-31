@@ -65,7 +65,7 @@ RSpec.describe Stoplight::Domain::TrafficControl::ErrorRate do
     subject { traffic_control.stop_traffic?(config, metadata) }
 
     let(:config) { instance_double(Stoplight::Domain::Config, threshold:) }
-    let(:metadata) { instance_double(Stoplight::Domain::Metrics, error_rate:, requests:) }
+    let(:metadata) { instance_double(Stoplight::Domain::MetricsSnapshot, error_rate:, requests:) }
 
     let(:threshold) { 0.6 }
 

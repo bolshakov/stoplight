@@ -49,7 +49,7 @@ module Stoplight
         # current metrics and recovery progress.
         #
         # @param config [Stoplight::Domain::Config]
-        # @param metrics [Stoplight::Domain::Metrics]
+        # @param metrics [Stoplight::Domain::MetricsSnapshot]
         # @return [TrafficRecovery::Decision]
         # :nocov:
         def determine_color(config, metrics)

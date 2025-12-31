@@ -44,7 +44,7 @@ module Stoplight
         # current state and metrics.
         #
         # @param config [Stoplight::Domain::Config]
-        # @param metrics [Stoplight::Domain::Metrics]
+        # @param metrics [Stoplight::Domain::MetricsSnapshot]
         # @return [Boolean] true if traffic should be stopped (rec), false otherwise (green)
         # :nocov:
         def stop_traffic?(config, metrics)
