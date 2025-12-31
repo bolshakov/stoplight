@@ -40,10 +40,10 @@ module Stoplight
           end
 
           def acquire_lock
-            fallback = proc do |error|
+            fallback = ->(error) {
               error_notifier.call(error) if error
               failover_store.acquire_lock
-            end
+            }
             circuit_breaker.run(fallback) do
               primary_store.acquire_lock
             end
@@ -57,7 +57,7 @@ module Stoplight
           def release_lock(recovery_lock_token)
             case recovery_lock_token
             in Redis::RecoveryLockToken
-              fallback = -> { |error|
+              fallback = ->(error) {
                 error_notifier.call(error) if error
               }
 

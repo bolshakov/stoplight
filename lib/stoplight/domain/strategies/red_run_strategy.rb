@@ -32,7 +32,7 @@ module Stoplight
             raise Error::RedLight.new(
               config.name,
               cool_off_time: config.cool_off_time,
-              retry_after: state_snapshot.recovery_scheduled_after!
+              retry_after: state_snapshot.recovery_scheduled_after
             )
           end
         end

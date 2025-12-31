@@ -58,6 +58,7 @@ module Stoplight
         @light_factory = LightFactory.new(
           {
             system: self,
+            **defaults,
             data_store: defaults.fetch(:data_store, Default::DATA_STORE),
             traffic_recovery: defaults.fetch(:traffic_recovery, Default::TRAFFIC_RECOVERY),
             traffic_control: defaults.fetch(:traffic_control, Default::TRAFFIC_CONTROL),

@@ -15,7 +15,7 @@ module Stoplight
             circuit_breaker: Domain::Light,
           ) -> void
 
-          def fallback: [T] { (StandardError?) -> T } -> ^(StandardError?) -> T
+          def fallback: [T] { () -> T } -> ^(StandardError?) -> T
         end
       end
     end

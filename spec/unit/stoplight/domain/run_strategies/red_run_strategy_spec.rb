@@ -4,7 +4,7 @@ RSpec.describe Stoplight::Domain::Strategies::RedRunStrategy, :freeze do
   subject(:result) { strategy.execute(fallback, state_snapshot:) { 42 } }
 
   let(:strategy) { described_class.new(config:) }
-  let(:config) { instance_double(Stoplight::Domain::Config, name: "foo") }
+  let(:config) { instance_double(Stoplight::Domain::Config, name: "foo", cool_off_time: 60) }
   let(:state_snapshot) { instance_double(Stoplight::Domain::StateSnapshot, recovery_scheduled_after: Time.now) }
 
   context "when fallback is provided" do

@@ -24,7 +24,8 @@ module Stoplight
         attr_reader :cool_off_time
 
         # @!attribute retry_after
-        #   @return [Time] Absolute Time after which a recovery attempt can occur
+        #   @return [Time | nil] Absolute Time after which a recovery attempt can occur
+        #     could be nil if the light is locked red
         # @dynamic retry_after
         attr_reader :retry_after
 
@@ -34,7 +35,7 @@ module Stoplight
         #
         # @option cool_off_time [Numeric] Cool-off period in seconds
         #
-        # @option retry_after [Time] Absolute Time after which a recovery attempt can occur
+        # @option retry_after [Time | nil] Absolute Time after which a recovery attempt can occur
         #
         # @return [Stoplight::Error::RedLight]
         def initialize(light_name, cool_off_time:, retry_after:)

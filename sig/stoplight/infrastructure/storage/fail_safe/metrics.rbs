@@ -15,11 +15,11 @@ module Stoplight
             circuit_breaker: Domain::Light
           ) -> void
 
-          def metrics_snapshot: -> Domain::StateSnapshot
+          def metrics_snapshot: -> Domain::Metrics
           def record_success: -> void
           def record_failure: (StandardError) -> void
           def clear: -> void
-          def fallback: [T] { (StandardError?) -> T } -> ^(StandardError?) -> T
+          def fallback: [T] { () -> T } -> ^(StandardError?) -> T
         end
       end
     end

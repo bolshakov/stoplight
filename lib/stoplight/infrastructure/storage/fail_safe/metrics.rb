@@ -71,7 +71,7 @@ module Stoplight
           end
 
           private def fallback(&fallback)
-            -> { |error|
+            ->(error) {
               error_notifier.call(error) if error
               fallback.call
             }

@@ -4,12 +4,13 @@ RSpec.describe Stoplight::Domain::Config do
   def config_factory(**settings)
     described_class.new(
       name: "PROTITYPE",
-      cool_off_time: Stoplight::Wiring::Default::COOL_OFF_TIME,
-      threshold: Stoplight::Wiring::Default::THRESHOLD,
-      recovery_threshold: Stoplight::Wiring::Default::RECOVERY_THRESHOLD,
-      window_size: Stoplight::Wiring::Default::WINDOW_SIZE,
-      tracked_errors: Stoplight::Wiring::Default::TRACKED_ERRORS,
-      skipped_errors: Stoplight::Wiring::Default::SKIPPED_ERRORS, **settings
+      cool_off_time: 60,
+      threshold: 3,
+      recovery_threshold: 1,
+      window_size: nil,
+      tracked_errors: [StandardError],
+      skipped_errors: [],
+      **settings
     )
   end
   describe "#track_error?" do

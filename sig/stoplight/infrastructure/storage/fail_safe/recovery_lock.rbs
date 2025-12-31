@@ -2,16 +2,16 @@ module Stoplight
   module Infrastructure
     module Storage
       module FailSafe
-        class RecoveryLock < Domain::Storage::RecoveryLock[Memory::RecoveryLockToken | Redis::RecoveryLockToken]
-          attr_reader primary_store: Redis::RecoveryLock
+        class RecoveryLock < Domain::Storage::RecoveryLock[Domain::RecoveryLockToken]
+          attr_reader primary_store: Domain::Storage::RecoveryLock[Domain::RecoveryLockToken]
           attr_reader error_notifier: error_notifier
-          attr_reader failover_store: Memory::RecoveryLock
+          attr_reader failover_store: Domain::Storage::RecoveryLock[Domain::RecoveryLockToken]
           attr_reader circuit_breaker: Domain::Light
 
           def initialize: (
-            primary_store: Redis::RecoveryLock,
+            primary_store: Domain::Storage::RecoveryLock[Domain::RecoveryLockToken],
             error_notifier: error_notifier,
-            failover_store: Memory::RecoveryLock,
+            failover_store: Domain::Storage::RecoveryLock[Domain::RecoveryLockToken],
             circuit_breaker: Domain::Light
           ) -> void
         end
