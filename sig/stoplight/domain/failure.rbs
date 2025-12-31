@@ -4,9 +4,9 @@ module Stoplight
       attr_reader error_class: String
       attr_reader error_message: String
       attr_reader time: Time
-      attr_reader occured_at: String
+      alias occurred_at time
 
-      def self.from_error: (StandardError error, time: Time) -> Failure
+      def self.from_error: (StandardError error, time: Time) -> instance
 
       def initialize: (String error_class, String error_message, Time time) -> void
 

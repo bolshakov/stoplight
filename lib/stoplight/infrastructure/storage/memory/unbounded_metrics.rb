@@ -43,7 +43,7 @@ module Stoplight
           # @return [Stoplight::Domain::Metrics]
           def metrics_snapshot
             mutex.synchronize do
-              Domain::Metrics.new(
+              Domain::MetricsSnapshot.new(
                 errors: nil,
                 successes: nil,
                 consecutive_errors: metrics.consecutive_errors.to_i,
@@ -77,9 +77,10 @@ module Stoplight
           def record_failure(exception)
             current_time = clock.current_time
             failure = Domain::Failure.from_error(exception, time: current_time)
+            last_error_at = metrics.last_error_at
 
             mutex.synchronize do
-              if metrics.last_error_at.nil? || failure.occurred_at > metrics.last_error_at
+              if last_error_at.nil? || failure.occurred_at > last_error_at
                 metrics.last_error = failure
               end
 

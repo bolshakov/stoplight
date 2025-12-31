@@ -1,0 +1,15 @@
+module Stoplight
+  module Infrastructure
+    module Storage
+      module Memory
+        class UnboundedMetrics < Domain::Storage::Metrics
+          attr_accessor metrics: DataStore::Memory::Metrics
+          attr_reader mutex: Mutex
+          attr_reader clock: Domain::Clock
+
+          def initialize: (clock: Domain::Clock) -> void
+        end
+      end
+    end
+  end
+end

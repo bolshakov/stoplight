@@ -88,7 +88,7 @@ module Stoplight
               )
             end
 
-            Domain::Metrics.new(
+            Domain::MetricsSnapshot.new(
               successes: nil, errors: nil,
               consecutive_errors: consecutive_errors.to_i,
               consecutive_successes: consecutive_successes.to_i,
