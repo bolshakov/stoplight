@@ -28,7 +28,7 @@ RSpec.describe Stoplight::Infrastructure::Storage::FailSafe::Metrics do
     subject { fail_safe.metrics_snapshot }
 
     context "when primary store does not fail" do
-      let(:metrics_snapshot) { instance_double(Stoplight::Domain::Metrics) }
+      let(:metrics_snapshot) { instance_double(Stoplight::Domain::MetricsSnapshot) }
 
       it "returns metrics snapshot from primary store" do
         expect(primary_store).to receive(:metrics_snapshot).and_return(metrics_snapshot)
@@ -39,7 +39,7 @@ RSpec.describe Stoplight::Infrastructure::Storage::FailSafe::Metrics do
 
     context "when store fails" do
       let(:error) { StandardError.new("Test error") }
-      let(:failover_metrics_snapshot) { instance_double(Stoplight::Domain::Metrics) }
+      let(:failover_metrics_snapshot) { instance_double(Stoplight::Domain::MetricsSnapshot) }
 
       it "sets state on failover state" do
         expect(error_notifier).to receive(:call).with(error)

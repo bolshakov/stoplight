@@ -19,7 +19,7 @@ module Stoplight
       class Metrics
         # Retrieves a snapshot of current metrics for decision-making.
         #
-        # @return [Stoplight::Domain::Metrics]
+        # @return [Stoplight::Domain::MetricsSnapshot]
         def metrics_snapshot = raise NotImplementedError
 
         # Records a successful circuit breaker execution

@@ -18,7 +18,7 @@ RSpec.describe Stoplight::Domain::Tracker::Request do
 
   describe "#record_failure" do
     let(:exception) { KeyError.new("something went wrong") }
-    let(:metrics) { instance_double(Stoplight::Domain::Metrics) }
+    let(:metrics) { instance_double(Stoplight::Domain::MetricsSnapshot) }
 
     before do
       allow(metrics_store).to receive(:record_failure).with(exception)

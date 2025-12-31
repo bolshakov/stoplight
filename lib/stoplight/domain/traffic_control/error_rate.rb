@@ -41,7 +41,7 @@ module Stoplight
         end
 
         # @param config [Stoplight::Domain::Config]
-        # @param metrics [Stoplight::Domain::Metrics]
+        # @param metrics [Stoplight::Domain::MetricsSnapshot]
         # @return [Boolean]
         def stop_traffic?(config, metrics)
           error_rate = metrics.error_rate

@@ -34,7 +34,7 @@ RSpec.describe Stoplight::Domain::TrafficRecovery::ConsecutiveSuccesses do
     let(:config) { instance_double(Stoplight::Domain::Config, recovery_threshold:) }
     let(:recovery_threshold) { 2 }
 
-    let(:metrics) { instance_double(Stoplight::Domain::Metrics, consecutive_successes:, consecutive_errors:) }
+    let(:metrics) { instance_double(Stoplight::Domain::MetricsSnapshot, consecutive_successes:, consecutive_errors:) }
     let(:color) { Stoplight::Domain::Color::YELLOW }
 
     context "when has errors" do

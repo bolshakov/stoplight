@@ -12,7 +12,7 @@ RSpec.describe Stoplight::Domain::Tracker::RecoveryProbe do
 
   shared_examples "when recover to" do |recover_to:, transition_from:, transition_to:|
     context "when recover to #{recover_to}" do
-      let(:metrics_after_probe) { instance_double(Stoplight::Domain::Metrics) }
+      let(:metrics_after_probe) { instance_double(Stoplight::Domain::MetricsSnapshot) }
 
       before do
         allow(traffic_recovery).to receive(:determine_color).with(config, metrics_after_probe).and_return(recover_to)
@@ -40,7 +40,7 @@ RSpec.describe Stoplight::Domain::Tracker::RecoveryProbe do
       transition_to: Stoplight::Domain::Color::RED
 
     context "when recover to unexpected to outcome" do
-      let(:metrics_after_probe) { instance_double(Stoplight::Domain::Metrics) }
+      let(:metrics_after_probe) { instance_double(Stoplight::Domain::MetricsSnapshot) }
       let(:recover_to) { "unexpected" }
 
       before do
@@ -53,7 +53,7 @@ RSpec.describe Stoplight::Domain::Tracker::RecoveryProbe do
     end
 
     context "when recover to YELLOW (needs more probes)" do
-      let(:metrics_after_probe) { instance_double(Stoplight::Domain::Metrics) }
+      let(:metrics_after_probe) { instance_double(Stoplight::Domain::MetricsSnapshot) }
       let(:recover_to) { Stoplight::Domain::TrafficRecovery::YELLOW }
 
       before do

@@ -9,7 +9,7 @@ RSpec.describe Stoplight::Infrastructure::Storage::CompatibilityRecoveryMetrics 
   describe "#metrics_snapshot" do
     subject { store.metrics_snapshot }
 
-    let(:metrics) { instance_double(Stoplight::Domain::Metrics) }
+    let(:metrics) { instance_double(Stoplight::Domain::MetricsSnapshot) }
 
     it "delegates to data store" do
       expect(data_store).to receive(:get_recovery_metrics).with(config).and_return(metrics)

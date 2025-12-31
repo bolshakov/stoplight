@@ -1,6 +1,6 @@
 module Stoplight
   module Domain
-    class Metrics < Data
+    class MetricsSnapshot < Data
       def successes: -> Integer?
       def successes!: -> Integer
       def errors!: -> Integer

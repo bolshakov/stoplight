@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-RSpec.describe Stoplight::Domain::Metrics do
+RSpec.describe Stoplight::Domain::MetricsSnapshot do
   def build_metrics(**attributes)
-    Stoplight::Domain::Metrics.new(
+    Stoplight::Domain::MetricsSnapshot.new(
       successes: nil,
       errors: nil,
       consecutive_errors: nil,

@@ -129,7 +129,7 @@ module Stoplight
         end
 
         # @param config [Stoplight::Domain::Config]
-        # @return [Stoplight::Domain::Metrics]
+        # @return [Stoplight::Domain::MetricsSnapshot]
         def get_metrics(config)
           config.name
 
@@ -161,7 +161,7 @@ module Stoplight
           consecutive_errors = config.window_size ? [consecutive_errors.to_i, errors].min : consecutive_errors.to_i
           consecutive_successes = config.window_size ? [consecutive_successes.to_i, successes].min : consecutive_successes.to_i
 
-          Domain::Metrics.new(
+          Domain::MetricsSnapshot.new(
             successes: (successes if config.window_size),
             errors: (errors if config.window_size),
             consecutive_errors:,
@@ -172,7 +172,7 @@ module Stoplight
         end
 
         # @param config [Stoplight::Domain::Config]
-        # @return [Stoplight::Domain::Metrics]
+        # @return [Stoplight::Domain::MetricsSnapshot]
         def get_recovery_metrics(config)
           last_success_at, last_error_json, consecutive_errors, consecutive_successes = @redis.with do |client|
             client.hmget(
@@ -181,7 +181,7 @@ module Stoplight
             )
           end
 
-          Domain::Metrics.new(
+          Domain::MetricsSnapshot.new(
             successes: nil, errors: nil,
             consecutive_errors: consecutive_errors.to_i,
             consecutive_successes: consecutive_successes.to_i,

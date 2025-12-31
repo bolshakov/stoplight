@@ -49,7 +49,7 @@ module Stoplight
         # Determines if traffic should be resumed based on successes counts.
         #
         # @param config [Stoplight::Domain::Config]
-        # @param recovery_metrics [Stoplight::Domain::Metrics]
+        # @param recovery_metrics [Stoplight::Domain::MetricsSnapshot]
         # @return [TrafficRecovery::Decision]
         def determine_color(config, recovery_metrics)
           if recovery_metrics.consecutive_errors > 0

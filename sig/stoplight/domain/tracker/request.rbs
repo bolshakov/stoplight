@@ -19,7 +19,7 @@ module Stoplight
         def record_failure: (StandardError exception) -> void
         def record_success: -> void
 
-        private def transition_to_red: (StandardError exception, metrics: Domain::Metrics) -> void
+        private def transition_to_red: (StandardError exception, metrics: Domain::MetricsSnapshot) -> void
       end
     end
   end

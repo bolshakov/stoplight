@@ -2,7 +2,7 @@ module Stoplight
   module Domain
     module Storage
       class Metrics
-        def metrics_snapshot: () -> Domain::Metrics
+        def metrics_snapshot: () -> Domain::MetricsSnapshot
 
         def record_success: () -> void
 

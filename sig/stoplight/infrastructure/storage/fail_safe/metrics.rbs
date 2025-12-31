@@ -15,7 +15,7 @@ module Stoplight
             circuit_breaker: Domain::Light
           ) -> void
 
-          def metrics_snapshot: -> Domain::Metrics
+          def metrics_snapshot: -> Domain::MetricsSnapshot
           def record_success: -> void
           def record_failure: (StandardError) -> void
           def clear: -> void
