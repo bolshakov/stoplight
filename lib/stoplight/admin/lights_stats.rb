@@ -10,6 +10,7 @@ module Stoplight
 
       # @!attribute lights
       #   @return [<Stoplight::Admin::LightsRepository::Light>]
+      # @dynamic lights
       attr_reader :lights
       private :lights
 

@@ -6,7 +6,7 @@ RSpec.describe "Redis drop-in compatibility", :redis, :freeze do
   let(:clock) { Stoplight::Infrastructure::SystemClock.new }
   let(:recovery_lock_store) { Stoplight::Infrastructure::DataStore::Redis::RecoveryLockStore.new(redis:, lock_timeout: 100, scripting:) }
   let(:scripting) { Stoplight::Infrastructure::DataStore::Redis::Scripting.new(redis:) }
-  let(:config) { Stoplight::Domain::Config.empty.with(name: light_name, window_size: 300) }
+  let(:config) { instance_double(Stoplight::Domain::Config, name: light_name, window_size: 300) }
 
   def failure_key
     Stoplight::Infrastructure::DataStore::Redis.bucket_key(light_name, metric: "failure", time: Time.now)

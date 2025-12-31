@@ -1,13 +1,29 @@
 module Stoplight
   module Domain
     class StateSnapshot < Data
+      def breached_at: -> Time?
+      def locked_state: -> state
+      def recovery_scheduled_after: -> Time?
+      def recovery_scheduled_after!: -> Time
+      def recovery_started_at: -> Time?
+      def recovery_started_at!: -> Time
+      def time: -> Time
+
+      def self.new: (
+          breached_at: Time?,
+          locked_state: state,
+          recovery_scheduled_after: Time?,
+          recovery_started_at: Time?,
+          time: Time
+        ) -> instance
+
       def initialize: (
         breached_at: Time?,
         locked_state: state,
         recovery_scheduled_after: Time?,
         recovery_started_at: Time?,
         time: Time
-      ) -> void
+        ) -> void
 
       def color: -> color
       def recovery_started?: -> bool

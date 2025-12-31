@@ -17,6 +17,7 @@ module Stoplight
       # of errors happened within last +config.window_size+ seconds (by default infinity).
       #
       # @see Base
+      # steep:ignore:start
       class Redis < Domain::DataStore
         extend Forwardable
 
@@ -76,22 +77,27 @@ module Stoplight
 
         # @!attribute recovery_lock_store
         #   @return [Stoplight::Infrastructure::DataStore::Redis::RecoveryLockStore]
+        # @dynamic recovery_lock_store
         protected attr_reader :recovery_lock_store
 
         # @!attribute scripting
         #   @return [Stoplight::Infrastructure::DataStore::Redis::Scripting]
+        # @dynamic scripting
         protected attr_reader :scripting
 
         # @!attribute redis
         #   @return [::Redis | ConnectionPool<::Redis>]
+        # @dynamic redis
         protected attr_reader :redis
 
         # @!attribute warn_on_clock_skew
         #   @return [Boolean]
+        # @dynamic warn_on_clock_skew
         protected attr_reader :warn_on_clock_skew
 
         # @!attribute clock
         #   @return [Stoplight::Domain::Clock]
+        # @dynamic clock
         private attr_reader :clock
 
         # @param redis [::Redis, ConnectionPool<::Redis>]
@@ -507,6 +513,7 @@ module Stoplight
           rand <= probability
         end
       end
+      # steep:ignore:end
     end
   end
 end

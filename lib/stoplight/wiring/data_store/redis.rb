@@ -3,13 +3,15 @@
 module Stoplight
   module Wiring
     module DataStore
-      class Redis < Base
+      class Redis < Domain::DataStoreConfig
         # @!attribute redis
         #   @return [::Redis, ConnectionPool<::Redis>]
+        # @dynamic redis
         attr_reader :redis
 
         # @!attribute warn_on_clock_skew
         #   @return [Boolean]
+        # @dynamic warn_on_clock_skew
         attr_reader :warn_on_clock_skew
 
         # @param redis [::Redis, ConnectionPool<::Redis>]

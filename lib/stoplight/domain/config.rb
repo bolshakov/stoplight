@@ -4,24 +4,6 @@ module Stoplight
   module Domain
     # A +Stoplight::Light+ configuration object.
     #
-    # # @!attribute [r] name
-    #   @return [String]
-    #
-    # @!attribute [r] cool_off_time - cool-off time in seconds
-    #   @return [Numeric]
-    #
-    # @!attribute [r] threshold
-    #   @return [Numeric]
-    #
-    # @!attribute [r] window_size
-    #   @return [Numeric]
-    #
-    # @!attribute [r] tracked_errors
-    #   @return [Array<StandardError>]
-    #
-    # @!attribute [r] skipped_errors
-    #  @return [Array<Exception>]
-    #
     # @api private
     Config = Data.define(
       :name,
@@ -31,14 +13,25 @@ module Stoplight
       :window_size,
       :tracked_errors,
       :skipped_errors
-    ) do
-      class << self
-        # Creates a new NULL configuration object.
-        # @return [Stoplight::Domain::Config]
-        def empty
-          new(**members.map { |key| [key, nil] }.to_h)
-        end
-      end
+    )
+    class Config
+      # # @!attribute [r] name
+      #   @return [String]
+      #
+      # @!attribute [r] cool_off_time - cool-off time in seconds
+      #   @return [Numeric]
+      #
+      # @!attribute [r] threshold
+      #   @return [Numeric]
+      #
+      # @!attribute [r] window_size
+      #   @return [Numeric]
+      #
+      # @!attribute [r] tracked_errors
+      #   @return [Array<StandardError>]
+      #
+      # @!attribute [r] skipped_errors
+      #  @return [Array<Exception>]
 
       # Checks if the given error should be tracked
       #

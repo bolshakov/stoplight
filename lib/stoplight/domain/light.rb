@@ -1,44 +1,47 @@
 # frozen_string_literal: true
 
-require "forwardable"
-
 module Stoplight
   module Domain
     #
     # @api private use +Stoplight()+ method instead
     class Light
-      extend Forwardable
       include Common::Deprecations
-      include ConfigurationBuilderInterface
+      include ConfigurationBuilderInterface # steep:ignore
 
       # @!attribute [r] config
       #   @return [Stoplight::Domain::Config]
       #   @api private
+      # @dynamic config
       attr_reader :config
 
       # @!attribute [r] name
       #   The name of the light.
       #   @return [String]
-      def_delegator :config, :name
+      def name = config.name
 
       # @!attribute [r] green_run_strategy
       #   @return [Stoplight::Domain::Strategies::GreenRunStrategy]
+      # @dynamic green_run_strategy
       protected attr_reader :green_run_strategy
 
       # @!attribute [r] yellow_run_strategy
       #   @return [Stoplight::Domain::Strategies::YellowRunStrategy]
+      # @dynamic yellow_run_strategy
       protected attr_reader :yellow_run_strategy
 
       # @!attribute [r] red_run_strategy
       #   @return [Stoplight::Domain::Strategies::RedRunStrategy]
+      # @dynamic red_run_strategy
       protected attr_reader :red_run_strategy
 
       # @!attribute [r] factory
       #   @return [Stoplight::Domain::LightFactory]
+      # @dynamic factory
       protected attr_reader :factory
 
       # @!attribute state_store
       #   @param [Stoplight::Domain::Storage::State]
+      # @dynamic state_store
       protected attr_reader :state_store
 
       # @param config [Stoplight::Domain::Config]
@@ -168,6 +171,7 @@ module Stoplight
       #   payment_light.run(->(error) { nil }) { call_payment_api }
       # @deprecated
       # @see +Stoplight()+
+      # steep:ignore:start
       def with(**settings)
         deprecate(<<~MSG)
           Light#with is deprecated and will be removed in v6.0.0.
@@ -188,6 +192,7 @@ module Stoplight
       private def with_without_warning(**settings)
         factory.build_with(**settings)
       end
+      # steep:ignore:end
 
       private
 

@@ -14,16 +14,9 @@ module Stoplight
       #
       # @api private
       class ConfigurationPipeline
-        BASE_DEPENDENCIES = {
-          data_store: Default::DATA_STORE,
-          traffic_recovery: Default::TRAFFIC_RECOVERY,
-          traffic_control: Default::TRAFFIC_CONTROL,
-          notifiers: Default::NOTIFIERS,
-          error_notifier: Default::ERROR_NOTIFIER
-        }.freeze
-        private_constant :BASE_DEPENDENCIES
-
+        # @dynamic dependency_settings
         private attr_reader :dependency_settings
+        # @dynamic config_settings
         private attr_reader :config_settings
 
         def self.process(config_settings, dependency_settings)
@@ -51,21 +44,18 @@ module Stoplight
         end
 
         def build_dependencies
-          base_dependencies
-            .merge(dependency_settings)
-            .then { |deps| interpret_dsl(deps) }
-        end
-
-        def interpret_dsl(dependencies)
-          dependencies.merge(
-            traffic_control: TrafficControlDsl.call(dependencies.fetch(:traffic_control)),
-            traffic_recovery: TrafficRecoveryDsl.call(dependencies.fetch(:traffic_recovery))
-          )
+          traffic_recovery = dependency_settings.fetch(:traffic_recovery, Default::TRAFFIC_RECOVERY)
+          traffic_control = dependency_settings.fetch(:traffic_control, Default::TRAFFIC_CONTROL)
+          {
+            error_notifier: dependency_settings.fetch(:error_notifier, Default::ERROR_NOTIFIER),
+            notifiers: dependency_settings.fetch(:notifiers, Default::NOTIFIERS),
+            data_store: dependency_settings.fetch(:data_store, Default::DATA_STORE),
+            traffic_control: TrafficControlDsl.call(traffic_control),
+            traffic_recovery: TrafficRecoveryDsl.call(traffic_recovery)
+          }
         end
 
         def base_config = Light::DefaultConfig
-
-        def base_dependencies = BASE_DEPENDENCIES
       end
     end
   end

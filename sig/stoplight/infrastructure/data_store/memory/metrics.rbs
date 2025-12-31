@@ -11,10 +11,10 @@ module Stoplight
           attr_accessor last_success_at: Time?
 
           def initialize: (
-            consecutive_errors: Integer,
-            consecutive_successes: Integer,
-            last_error: Domain::Failure?,
-            last_success_at: Time?
+            ?consecutive_errors: Integer,
+            ?consecutive_successes: Integer,
+            ?last_error: Domain::Failure?,
+            ?last_success_at: Time?
           ) -> void
 
           def last_error_at: -> Time?

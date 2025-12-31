@@ -12,7 +12,7 @@ module Stoplight
 
       # Namespace aliases for data stores
       module DataStore
-        Base = Stoplight::Wiring::DataStore::Base
+        Base = Stoplight::Domain::DataStoreConfig
         Redis = Stoplight::Wiring::DataStore::Redis
         Memory = Stoplight::Wiring::DataStore::Memory
       end

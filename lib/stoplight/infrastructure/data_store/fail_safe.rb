@@ -10,21 +10,26 @@ module Stoplight
       # handle failures by falling back to default values when necessary.
       #
       # @api private
+      # steep:ignore:start
       class FailSafe < Domain::DataStore
         # @!attribute data_store
         #  @return [Stoplight::DataStore::Base] The underlying primary data store being used
+        # @dynamic data_store
         attr_reader :data_store
 
         # @!attribute error_notifier
         #   @return [Proc]
+        # @dynamic error_notifier
         attr_reader :error_notifier
 
         # @!attribute failover_data_store
         #   @return [Stoplight::DataStore::Base] The fallback data store used when the primary fails.
+        # @dynamic failover_data_store
         attr_reader :failover_data_store
 
         # @!attribute circuit_breaker
         #   @return [Stoplight::Light] The circuit breaker used to handle data store failures.
+        # @dynamic circuit_breaker
         private attr_reader :circuit_breaker
 
         # @param data_store [Stoplight::Domain::DataStore]
@@ -159,6 +164,7 @@ module Stoplight
           circuit_breaker.run(fallback, &code)
         end
       end
+      # steep:ignore:end
     end
   end
 end

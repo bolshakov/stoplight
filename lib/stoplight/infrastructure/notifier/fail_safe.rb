@@ -11,10 +11,12 @@ module Stoplight
       class FailSafe < Domain::StateTransitionNotifier
         # @!attribute [r] notifier
         #   @return [Stoplight::Domain::StateTransitionNotifier] The underlying notifier being wrapped.
+        # @dynamic notifier
         attr_reader :notifier
 
         # @!attribute [r] error_notifier
         #   @return [Stoplight::Domain::StateTransitionNotifier] The underlying notifier being wrapped.
+        # @dynamic error_notifier
         attr_reader :error_notifier
 
         # Initializes a new instance of the +FailSafe+ class.
@@ -37,11 +39,11 @@ module Stoplight
           fallback = proc do |exception|
             error_notifier.call(exception) if exception
             nil
-          end
+          end #: ^(StandardError?) -> void
 
           circuit_breaker.run(fallback) do
             notifier.notify(config, from_color, to_color, error)
-          end
+          end #: void
         end
 
         # @return [Boolean]

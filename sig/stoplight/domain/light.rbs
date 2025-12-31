@@ -6,13 +6,14 @@ module Stoplight
       attr_reader yellow_run_strategy: Strategies::YellowRunStrategy[RecoveryLockToken]
       attr_reader red_run_strategy: Strategies::RedRunStrategy
       attr_reader state_store: Storage::State
+      attr_reader factory: LightFactory
 
       def initialize: (
         Config config,
         green_run_strategy: Strategies::GreenRunStrategy,
         yellow_run_strategy: Strategies::YellowRunStrategy[RecoveryLockToken],
         red_run_strategy: Strategies::RedRunStrategy,
-        factory: untyped,
+        factory: LightFactory,
         state_store: Storage::State
       ) -> void
 
@@ -22,7 +23,7 @@ module Stoplight
 
       def color: -> color
 
-      def run: [T] (^(StandardError?) -> T) { () -> T } -> T
+      def run: [T] (?(^(StandardError?) -> T)?) { () -> T } -> T
 
       def lock: (color color) -> Light
 

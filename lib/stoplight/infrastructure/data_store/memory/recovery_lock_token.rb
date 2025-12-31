@@ -7,6 +7,7 @@ module Stoplight
         class RecoveryLockToken < Domain::RecoveryLockToken
           # @!attribute light_name
           #   @return [String]
+          # @dynamic light_name
           attr_reader :light_name
 
           # @param light_name [String]

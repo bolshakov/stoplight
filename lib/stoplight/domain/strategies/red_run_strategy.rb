@@ -12,6 +12,7 @@ module Stoplight
       class RedRunStrategy < RunStrategy
         # @!attribute [r] config
         #   @return [Stoplight::Domain::Config] The configuration for the light.
+        # @dynamic config
         protected attr_reader :config
 
         def initialize(config:)

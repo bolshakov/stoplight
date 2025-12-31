@@ -19,14 +19,17 @@ module Stoplight
         class SlidingWindow
           # @!attribute buckets
           #   @return [Hash<Integer, Integer>] A hash mapping time buckets to their counts
+          # @dynamic buckets
           private attr_reader :buckets
 
           # @!attribute running_sum
           #   @return [Integer] The running sum of all increments in the current window
+          # @dynamic running_sum
           private attr_accessor :running_sum
 
           # @!attribute clock
           #   @return [Stoplight::Domain::Clock]
+          # @dynamic clock
           private attr_reader :clock
 
           # @param clock [Stoplight::Domain::Clock]
@@ -57,7 +60,7 @@ module Stoplight
               if timestamp.nil? || timestamp >= window_start_ts
                 break
               else
-                self.running_sum -= sum
+                self.running_sum -= sum.to_i
                 buckets.shift
               end
             end

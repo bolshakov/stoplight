@@ -1,0 +1,27 @@
+module Stoplight
+  module Wiring
+    class DefaultConfiguration
+      attr_accessor cool_off_time: Integer?
+
+      attr_accessor threshold: Integer?
+
+      attr_accessor recovery_threshold: Integer?
+
+      attr_accessor window_size: Integer?
+
+      attr_accessor tracked_errors: Array[StandardError]
+
+      attr_accessor skipped_errors: Array[StandardError]
+
+      attr_accessor error_notifier: Infrastructure::error_notifier
+
+      attr_accessor notifiers: Array[Notifier::Base]
+
+      attr_accessor data_store: Domain::DataStoreConfig
+
+      attr_accessor traffic_control: traffic_control
+
+      attr_accessor traffic_recovery: traffic_recovery
+    end
+  end
+end

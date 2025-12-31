@@ -1,0 +1,27 @@
+module Stoplight
+  module Infrastructure
+    module Storage
+      module FailSafe
+        class Metrics < Domain::Storage::Metrics
+          attr_reader primary_store: Domain::Storage::Metrics
+          attr_reader error_notifier: error_notifier
+          attr_reader failover_store: Domain::Storage::Metrics
+          attr_reader circuit_breaker: Domain::Light
+
+          def initialize: (
+            primary_store: Domain::Storage::Metrics,
+            error_notifier: error_notifier,
+            failover_store: Domain::Storage::Metrics,
+            circuit_breaker: Domain::Light
+          ) -> void
+
+          def metrics_snapshot: -> Domain::Metrics
+          def record_success: -> void
+          def record_failure: (StandardError) -> void
+          def clear: -> void
+          def fallback: [T] { () -> T } -> ^(StandardError?) -> T
+        end
+      end
+    end
+  end
+end

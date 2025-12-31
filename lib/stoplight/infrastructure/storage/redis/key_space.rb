@@ -20,13 +20,17 @@ module Stoplight
         #   key_space = KeySpace.build(system_name: "payments", light_name: "stripe-api")
         #   key_space.key(:locks, :recovery)  #=> "stoplight:v6:df384ae97c77:cfe6861fa39e:locks:recovery"
         #
-        # @!attribute system_id
-        #   @return [String] 12-char hex identifier for the system
-        #
-        # @!attribute light_id
-        #   @return [String] 12-char hex identifier for the light
-        #
-        KeySpace = Data.define(:system_id, :light_id) do
+        KeySpace = Data.define(:system_id, :light_id)
+
+        class KeySpace
+          # @!attribute system_id
+          #   @return [String] 12-char hex identifier for the system
+          #   @dynamic system_id
+          #
+          # @!attribute light_id
+          #   @return [String] 12-char hex identifier for the light
+          #   @dynamic light_id
+
           class << self
             # @param system_name [String, Symbol]
             # @param light_name [String, Symbol]
@@ -40,7 +44,7 @@ module Stoplight
             #
             # @param name [String, Symbol]
             # @return [String] 12-char hex string
-            def hash_name(name) = Digest::SHA256.hexdigest(name.to_s)[0, 12]
+            def hash_name(name) = Digest::SHA256.hexdigest(name.to_s)[0, 12] #: String
           end
 
           # Builds a Redis key within this namespace.

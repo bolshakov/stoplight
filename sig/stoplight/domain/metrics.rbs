@@ -1,12 +1,14 @@
 module Stoplight
   module Domain
     class Metrics < Data
-      attr_reader successes: Integer?
-      attr_reader errors: Integer?
-      attr_reader consecutive_errors: Integer
-      attr_reader consecutive_successes: Integer
-      attr_reader last_error: Failure?
-      attr_reader last_success_at: Time?
+      def successes: -> Integer?
+      def successes!: -> Integer
+      def errors!: -> Integer
+      def errors: -> Integer?
+      def consecutive_errors: -> Integer
+      def consecutive_successes: -> Integer
+      def last_error: -> Failure?
+      def last_success_at: -> Time?
 
       def initialize: (
         successes: Integer?,

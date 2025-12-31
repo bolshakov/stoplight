@@ -23,10 +23,12 @@ module Stoplight
       class CompatibilityState < Domain::Storage::State
         # @!attribute data_store
         #   @return [Stoplight::Domain::DataStore]
+        # @dynamic data_store
         private attr_reader :data_store
 
         # @!attribute config
         #   @return [Stoplight::Domain::Config]
+        # @dynamic config
         private attr_reader :config
 
         # @param data_store [Stoplight::Domain::DataStore]

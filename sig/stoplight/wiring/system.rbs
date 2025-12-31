@@ -1,0 +1,18 @@
+module Stoplight
+  module Wiring
+    class System
+      attr_reader name: _ToS
+      private attr_reader light_factory: LightFactory
+      private attr_reader lights: Concurrent::Map[
+          _ToS,
+          [Domain::Light, Domain::config_overrides]
+      ]
+
+      def initialize: (_ToS, **settings_overrides) -> void
+
+      def light: (_ToS name, **Domain::config_overrides) -> Domain::Light
+
+      private def normalize_settings: (Domain::config_overrides) -> Domain::config_overrides
+    end
+  end
+end

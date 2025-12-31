@@ -21,6 +21,7 @@ module Stoplight
           #   Stores one mutex per unique light_name for the lifetime of the process.
           #   Mutexes are never garbage collected.
           #   @return [Concurrent::Map<Thread::Mutex>]
+          # @dynamic locks
           private attr_reader :locks
 
           def initialize

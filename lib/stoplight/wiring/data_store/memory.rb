@@ -3,7 +3,7 @@
 module Stoplight
   module Wiring
     module DataStore
-      class Memory < Base
+      class Memory < Domain::DataStoreConfig
       end
     end
   end

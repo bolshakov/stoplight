@@ -4,6 +4,7 @@ module Stoplight
   module Wiring
     class System
       class LightBuilder < Wiring::LightBuilder
+        # @dynamic system
         private attr_reader :system
 
         def initialize(system, settings)

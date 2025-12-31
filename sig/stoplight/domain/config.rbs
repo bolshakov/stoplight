@@ -1,38 +1,29 @@
-# frozen_string_literal: true
-
 module Stoplight
   module Domain
     class Config < Data
-      def self.empty: () -> Config
+      attr_reader threshold: threshold
+      attr_reader window_size: Integer?
+      attr_reader tracked_errors: Array[StandardError]
+      attr_reader skipped_errors: Array[StandardError]
+      attr_reader name: String
+      attr_reader cool_off_time: Integer
+      attr_reader recovery_threshold: Integer
+
+      def initialize: (**config_params) -> void
 
       def track_error?: ((Class)  error) -> bool
 
       def cool_off_time_in_milliseconds: () -> Integer
 
-
-      attr_reader threshold: (Integer | Float)
-
-      attr_reader window_size: Integer
-
-      attr_reader tracked_errors: Array[StandardError]
-
-      attr_reader skipped_errors: Array[StandardError]
-
-      attr_reader name: String
-
-      attr_reader cool_off_time: Integer
-
-      attr_reader recovery_threshold: Integer
-
-      def initialize: (
-        name: String,
-        cool_off_time: Integer,
-        threshold: (Integer | Float),
-        recovery_threshold: Integer,
-        window_size: Integer,
-        tracked_errors: Array[StandardError],
-        skipped_errors: Array[StandardError]
-      ) -> void
+      def with: (
+          ?name: String,
+          ?cool_off_time: Integer,
+          ?threshold: threshold,
+          ?recovery_threshold: Integer,
+          ?window_size: Integer?,
+          ?tracked_errors: Array[StandardError],
+          ?skipped_errors: Array[StandardError]
+      ) -> Config
     end
   end
 end

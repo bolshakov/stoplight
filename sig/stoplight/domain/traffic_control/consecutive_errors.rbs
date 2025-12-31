@@ -1,0 +1,8 @@
+module Stoplight
+  module Domain
+    module TrafficControl
+      class ConsecutiveErrors < Base
+      end
+    end
+  end
+end

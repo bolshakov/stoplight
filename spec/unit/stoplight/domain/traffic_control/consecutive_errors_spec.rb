@@ -4,7 +4,7 @@ RSpec.describe Stoplight::Domain::TrafficControl::ConsecutiveErrors do
   describe "#check_compatibility" do
     subject(:strategy) { described_class.new.check_compatibility(config) }
 
-    let(:config) { Stoplight::Domain::Config.empty.with(window_size:, threshold:) }
+    let(:config) { instance_double(Stoplight::Domain::Config, window_size:, threshold:) }
     let(:threshold) { 42 }
     let(:window_size) { nil }
 
@@ -44,7 +44,7 @@ RSpec.describe Stoplight::Domain::TrafficControl::ConsecutiveErrors do
   describe "#stop_traffic?" do
     subject { described_class.new.stop_traffic?(config, metadata) }
 
-    let(:config) { Stoplight::Domain::Config.empty.with(threshold:, window_size:) }
+    let(:config) { instance_double(Stoplight::Domain::Config, threshold:, window_size:) }
     let(:metadata) { instance_double(Stoplight::Domain::Metrics, consecutive_errors:) }
 
     context "when the window size is not sent" do

@@ -11,7 +11,7 @@ module Stoplight
 
           def lock_key: -> String
 
-          private def key: (*(String | Symbol)) -> String
+          private def key: (*_ToS) -> String
         end
       end
     end

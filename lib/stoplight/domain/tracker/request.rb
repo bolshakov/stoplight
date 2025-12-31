@@ -12,22 +12,27 @@ module Stoplight
       class Request < Base
         # @!attribute [r] traffic_control
         #   @return [Stoplight::Domain::TrafficControl::Base]
+        # @dynamic traffic_control
         protected attr_reader :traffic_control
 
         # @!attribute [r] traffic_control
         #   @return [Stoplight::Domain::TrafficControl::Base]
+        # @dynamic notifiers
         protected attr_reader :notifiers
 
         # @!attribute [r] config
         #   @return [Stoplight::Domain::Config] The configuration for the light.
+        # @dynamic config
         protected attr_reader :config
 
         # @!attribute metrics_store
         #   @return [Stoplight::Storage::Metrics]
+        # @dynamic metrics_store
         protected attr_reader :metrics_store
 
         # @!attribute [r] state_store
         #   @return [Stoplight::Domain::Storage::State]
+        # @dynamic state_store
         protected attr_reader :state_store
 
         # @param traffic_control [Stoplight::Domain::TrafficControl::Base]

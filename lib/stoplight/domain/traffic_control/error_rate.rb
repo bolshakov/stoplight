@@ -19,6 +19,7 @@ module Stoplight
       class ErrorRate < Base
         # @!attribute min_requests
         #   @return [Integer]
+        # @dynamic min_requests
         attr_reader :min_requests
 
         # @param min_requests [Integer] Minimum number of requests before traffic control is applied.
@@ -43,7 +44,12 @@ module Stoplight
         # @param metrics [Stoplight::Domain::Metrics]
         # @return [Boolean]
         def stop_traffic?(config, metrics)
-          metrics.requests >= min_requests && metrics.error_rate >= config.threshold
+          error_rate = metrics.error_rate
+          requests = metrics.requests
+
+          raise ArgumentError, "accepts only windowed metrics" if error_rate.nil? || requests.nil?
+
+          requests >= min_requests && error_rate >= config.threshold
         end
       end
     end

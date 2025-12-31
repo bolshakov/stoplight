@@ -3,13 +3,13 @@ module Stoplight
     module DataStore
       class Redis
         class RecoveryLockStore
-          attr_reader redis: ::Redis | ConnectionPool[::Redis]
+          attr_reader redis: redis
 
           attr_reader lock_timeout: Integer
           attr_reader scripting: Scripting
 
           def initialize: (
-            redis: ::Redis | ConnectionPool[::Redis],
+            redis: redis,
             lock_timeout: Integer,
             scripting: Scripting
           ) -> void

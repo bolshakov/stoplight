@@ -1,0 +1,31 @@
+module Stoplight
+  type timestamp = Float | Integer
+  type redis = ::Redis | ConnectionPool[::Redis]
+
+  type color = Domain::color
+  type state = Domain::state
+  type error_notifier = Infrastructure::error_notifier
+  type traffic_control = Symbol | Hash[Symbol, Hash[Symbol, Integer]]
+  type traffic_recovery = Symbol
+
+  module Color = Domain::Color
+  module State = Domain::State
+
+  module DataStore
+    class Base = Domain::DataStoreConfig
+    class Redis = Wiring::DataStore::Redis
+    class Memory = Wiring::DataStore::Memory
+  end
+
+  module Notifier
+    class Base = Domain::StateTransitionNotifier
+    module Generic = Infrastructure::Notifier::Generic
+    class IO = Infrastructure::Notifier::IO
+    class Logger = Infrastructure::Notifier::Logger
+  end
+
+  def self.system_light: (
+      String name,
+      ?notifiers: Array[Domain::StateTransitionNotifier]
+    ) -> Domain::Light
+end
