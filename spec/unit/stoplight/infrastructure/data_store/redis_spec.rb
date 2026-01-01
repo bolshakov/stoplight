@@ -179,7 +179,11 @@ RSpec.describe Stoplight::Infrastructure::DataStore::Redis, :redis do
 
     it_behaves_like "Stoplight::Domain::DataStore"
     it_behaves_like "Stoplight::Domain::DataStore#get_metrics"
-    it_behaves_like "Stoplight::Domain::DataStore#get_recovery_metrics"
+    it_behaves_like "Stoplight::Domain::DataStore#get_recovery_metrics" do
+      def get_metrics = data_store.get_recovery_metrics(config)
+      def record_failure(error) = data_store.record_recovery_probe_failure(config, error)
+      def record_success = data_store.record_recovery_probe_success(config)
+    end
     it_behaves_like "Stoplight::Domain::DataStore#names"
     it_behaves_like "Stoplight::Domain::DataStore#set_state" do
       def set_state(state) = data_store.set_state(config, state)

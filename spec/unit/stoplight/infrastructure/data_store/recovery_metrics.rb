@@ -6,18 +6,6 @@ RSpec.shared_examples "Stoplight::Domain::DataStore#get_recovery_metrics" do
   # sub-microsecond precision loss. This is expected and acceptable.
   let(:rounding_error) { 0.000001 } # ~1 microsecond tolerance
 
-  def get_metrics
-    data_store.get_recovery_metrics(config)
-  end
-
-  def record_failure(error)
-    data_store.record_recovery_probe_failure(config, error)
-  end
-
-  def record_success
-    data_store.record_recovery_probe_success(config)
-  end
-
   describe "#last_success_at" do
     let(:last_success_time) { Time.now + 30 }
 
