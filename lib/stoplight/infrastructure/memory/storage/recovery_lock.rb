@@ -2,8 +2,8 @@
 
 module Stoplight
   module Infrastructure
-    module Storage
-      module Memory
+    module Memory
+      module Storage
         # Process-local recovery lock using Ruby's Thread::Mutex.
         #
         # This only serializes recovery within a single Ruby process.
@@ -19,14 +19,14 @@ module Stoplight
             @lock = Thread::Mutex.new
           end
 
-          # @return [Stoplight::Infrastructure::Storage::Memory::RecoveryLockToken, nil]
+          # @return [Stoplight::Infrastructure::Memory::Storage::RecoveryLockToken, nil]
           def acquire_lock
             if lock.try_lock
               RecoveryLockToken.new
             end
           end
 
-          # @param _recovery_lock_token [Stoplight::Infrastructure::Storage::Memory::RecoveryLockToken]
+          # @param _recovery_lock_token [Stoplight::Infrastructure::Memory::Storage::RecoveryLockToken]
           # @return [void]
           def release_lock(_recovery_lock_token)
             lock.unlock

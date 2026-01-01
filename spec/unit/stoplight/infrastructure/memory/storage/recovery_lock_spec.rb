@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Stoplight::Infrastructure::Storage::Memory::RecoveryLock do
+RSpec.describe Stoplight::Infrastructure::Memory::Storage::RecoveryLock do
   let(:store) { described_class.new }
 
   it "does not acquire if lock is already acquired" do

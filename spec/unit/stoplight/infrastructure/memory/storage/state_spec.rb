@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Stoplight::Infrastructure::Storage::Memory::State do
+RSpec.describe Stoplight::Infrastructure::Memory::Storage::State do
   subject(:storage) { described_class.new(clock:, cool_off_time:) }
 
   let(:clock) { Stoplight::Infrastructure::SystemClock.new }

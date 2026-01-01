@@ -83,7 +83,7 @@ RSpec.describe Stoplight::Infrastructure::Storage::FailSafe::RecoveryLock do
     end
 
     context "with failover recovery lock token" do
-      let(:recovery_lock_token) { Stoplight::Infrastructure::Storage::Memory::RecoveryLockToken.new }
+      let(:recovery_lock_token) { Stoplight::Infrastructure::Memory::RecoveryLockToken.new }
 
       it "releases this token" do
         expect(error_notifier).not_to receive(:call)

@@ -2,7 +2,7 @@
 
 require_relative "../../data_store/window_metrics_snapshot"
 
-RSpec.describe Stoplight::Infrastructure::Storage::Memory::WindowMetrics do
+RSpec.describe Stoplight::Infrastructure::Memory::Storage::WindowMetrics do
   subject(:metrics) { described_class.new(config:, clock:) }
 
   let(:clock) { Stoplight::Infrastructure::SystemClock.new }

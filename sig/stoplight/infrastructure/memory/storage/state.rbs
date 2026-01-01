@@ -1,7 +1,7 @@
 module Stoplight
   module Infrastructure
-    module Storage
-      module Memory
+    module Memory
+      module Storage
         class State < Domain::Storage::State
           attr_accessor locked_state: state
           attr_accessor recovered_at: Time?

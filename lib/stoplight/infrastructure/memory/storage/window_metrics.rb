@@ -2,8 +2,8 @@
 
 module Stoplight
   module Infrastructure
-    module Storage
-      module Memory
+    module Memory
+      module Storage
         # Thread-safe in-memory storage for time-windowed light @
         #
         # This class tracks success and failure counts within a sliding time window,

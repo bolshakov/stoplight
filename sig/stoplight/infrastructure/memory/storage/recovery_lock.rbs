@@ -1,7 +1,7 @@
 module Stoplight
   module Infrastructure
-    module Storage
-      module Memory
+    module Memory
+      module Storage
         class RecoveryLock < Domain::Storage::RecoveryLock[RecoveryLockToken]
           private attr_reader lock: Mutex
 

@@ -2,8 +2,8 @@
 
 module Stoplight
   module Infrastructure
-    module Storage
-      module Memory
+    module Memory
+      module Storage
         # Thread-safe in-memory state storage for a single light.
         #
         # Manages light state transitions and ensures notification

@@ -4,10 +4,8 @@ require "securerandom"
 
 module Stoplight
   module Infrastructure
-    module Storage
-      module Memory
-        class RecoveryLockToken < Domain::RecoveryLockToken
-        end
+    module Memory
+      class RecoveryLockToken < Domain::RecoveryLockToken
       end
     end
   end

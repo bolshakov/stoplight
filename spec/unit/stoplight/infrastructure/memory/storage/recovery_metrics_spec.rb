@@ -2,7 +2,7 @@
 
 require_relative "../../data_store/recovery_metrics"
 
-RSpec.describe Stoplight::Infrastructure::Storage::Memory::RecoveryMetrics do
+RSpec.describe Stoplight::Infrastructure::Memory::Storage::RecoveryMetrics do
   subject(:metrics_store) { described_class.new(clock:) }
 
   let(:clock) { Stoplight::Infrastructure::SystemClock.new }

@@ -2,8 +2,8 @@
 
 module Stoplight
   module Infrastructure
-    module Storage
-      module Memory
+    module Memory
+      module Storage
         # Thread-safe metrics storage for consecutive-error light strategies.
         #
         # Unlike +WindowMetrics+, this class does not track event counts within

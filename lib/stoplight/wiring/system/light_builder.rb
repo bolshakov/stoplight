@@ -22,7 +22,7 @@ module Stoplight
         private def state_store
           @state_store ||= case data_store_config
           in Stoplight::DataStore::Memory
-            Infrastructure::Storage::Memory::State.new(clock:, cool_off_time:)
+            Infrastructure::Memory::Storage::State.new(clock:, cool_off_time:)
           in Stoplight::DataStore::Redis
             Infrastructure::Storage::FailSafe::State.new(
               primary_store: Infrastructure::Storage::Redis::State.new(
@@ -33,7 +33,7 @@ module Stoplight
                 clock:
               ),
               error_notifier:,
-              failover_store: Infrastructure::Storage::Memory::State.new(clock:, cool_off_time:),
+              failover_store: Infrastructure::Memory::Storage::State.new(clock:, cool_off_time:),
               circuit_breaker: failover_system.light("redis")
             )
           end
@@ -42,7 +42,7 @@ module Stoplight
         def recovery_lock_store
           @recovery_lock_store ||= case data_store_config
           in Stoplight::DataStore::Memory
-            Infrastructure::Storage::Memory::RecoveryLock.new
+            Infrastructure::Memory::Storage::RecoveryLock.new
           in Stoplight::DataStore::Redis
             Infrastructure::Storage::FailSafe::RecoveryLock.new(
               primary_store: Infrastructure::Storage::Redis::RecoveryLock.new(
@@ -52,7 +52,7 @@ module Stoplight
                 key_space:
               ),
               error_notifier:,
-              failover_store: Infrastructure::Storage::Memory::RecoveryLock.new,
+              failover_store: Infrastructure::Memory::Storage::RecoveryLock.new,
               circuit_breaker: failover_system.light("redis")
             )
           end
@@ -76,13 +76,13 @@ module Stoplight
               scripting: storage_scripting,
               key_space:
             ),
-            failover_store: Infrastructure::Storage::Memory::RecoveryMetrics.new(clock:),
+            failover_store: Infrastructure::Memory::Storage::RecoveryMetrics.new(clock:),
             circuit_breaker: failover_system.light("redis")
           )
         end
 
         private def memory_recovery_metrics_store
-          Infrastructure::Storage::Memory::RecoveryMetrics.new(clock:)
+          Infrastructure::Memory::Storage::RecoveryMetrics.new(clock:)
         end
 
         private def metrics_store
@@ -105,7 +105,7 @@ module Stoplight
                 clock:,
                 key_space:
               ),
-              failover_store: Infrastructure::Storage::Memory::WindowMetrics.new(config:, clock:),
+              failover_store: Infrastructure::Memory::Storage::WindowMetrics.new(config:, clock:),
               circuit_breaker: failover_system.light("redis")
             )
           else
@@ -117,7 +117,7 @@ module Stoplight
                 scripting: storage_scripting,
                 key_space:
               ),
-              failover_store: Infrastructure::Storage::Memory::UnboundedMetrics.new(clock:),
+              failover_store: Infrastructure::Memory::Storage::UnboundedMetrics.new(clock:),
               circuit_breaker: failover_system.light("redis")
             )
           end
@@ -125,9 +125,9 @@ module Stoplight
 
         private def memory_metrics_store
           if config.window_size
-            Infrastructure::Storage::Memory::WindowMetrics.new(config:, clock:)
+            Infrastructure::Memory::Storage::WindowMetrics.new(config:, clock:)
           else
-            Infrastructure::Storage::Memory::UnboundedMetrics.new(clock:)
+            Infrastructure::Memory::Storage::UnboundedMetrics.new(clock:)
           end
         end
 
