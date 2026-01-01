@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Stoplight::Infrastructure::DataStore::Redis::Scripting, :redis do
+RSpec.describe Stoplight::Infrastructure::Redis::DataStore::Scripting, :redis do
   subject(:script_manager) { described_class.new(redis:, scripts_root:) }
 
   let(:script_file) { Tempfile.create(["script", ".lua"]) }

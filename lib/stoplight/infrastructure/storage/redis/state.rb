@@ -44,7 +44,7 @@ module Stoplight
           private attr_reader :redis
 
           # @!attribute scripting
-          #   @return [Stoplight::Infrastructure::DataStore::Redis::Scripting]
+          #   @return [Stoplight::Infrastructure::Redis::DataStore::Scripting]
           private attr_reader :scripting
 
           # @!attribute key_space
@@ -65,8 +65,8 @@ module Stoplight
 
           # @param clock [Stoplight::Domain::Clock]
           # @param redis [::Redis, ConnectionPool<::Redis>]
-          # @param scripting [Stoplight::Infrastructure::DataStore::Redis::Scripting]
-          # @param key_space [Stoplight::Infrastructure::DataStore::Redis::KeySpace]
+          # @param scripting [Stoplight::Infrastructure::Redis::DataStore::Scripting]
+          # @param key_space [Stoplight::Infrastructure::Redis::DataStore::KeySpace]
           # @param cool_off_time [Integer]
           def initialize(clock:, redis:, scripting:, key_space:, cool_off_time:)
             @redis = redis

@@ -2,8 +2,8 @@
 
 module Stoplight
   module Infrastructure
-    module DataStore
-      class Redis
+    module Redis
+      class DataStore
         # Manages Lua scripts for Redis operations.
         #
         # This class provides execution of Lua scripts by caching their SHA digests

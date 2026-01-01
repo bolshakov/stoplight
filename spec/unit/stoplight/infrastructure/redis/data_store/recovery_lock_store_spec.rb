@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-RSpec.describe Stoplight::Infrastructure::DataStore::Redis::RecoveryLockStore, :redis do
+RSpec.describe Stoplight::Infrastructure::Redis::DataStore::RecoveryLockStore, :redis do
   let(:store) { described_class.new(redis:, lock_timeout:, scripting:) }
-  let(:scripting) { Stoplight::Infrastructure::DataStore::Redis::Scripting.new(redis:) }
+  let(:scripting) { Stoplight::Infrastructure::Redis::DataStore::Scripting.new(redis:) }
 
   let(:light_name) { SecureRandom.uuid }
   let(:lock_timeout) { 100 }
@@ -10,7 +10,7 @@ RSpec.describe Stoplight::Infrastructure::DataStore::Redis::RecoveryLockStore, :
   it "acquires lock and return recovery lock" do
     recovery_lock = store.acquire_lock(light_name)
 
-    expect(recovery_lock).to be_kind_of(Stoplight::Infrastructure::DataStore::Redis::RecoveryLockToken)
+    expect(recovery_lock).to be_kind_of(Stoplight::Infrastructure::Redis::DataStore::RecoveryLockToken)
     expect(recovery_lock.light_name).to eq(light_name)
   end
 
@@ -28,7 +28,7 @@ RSpec.describe Stoplight::Infrastructure::DataStore::Redis::RecoveryLockStore, :
     store.release_lock(recovery_lock)
 
     recovery_lock2 = store.acquire_lock(light_name)
-    expect(recovery_lock2).to be_kind_of(Stoplight::Infrastructure::DataStore::Redis::RecoveryLockToken)
+    expect(recovery_lock2).to be_kind_of(Stoplight::Infrastructure::Redis::DataStore::RecoveryLockToken)
     expect(recovery_lock2.light_name).to eq(light_name)
     expect(recovery_lock2.token).not_to eq(recovery_lock.token)
   end
@@ -40,6 +40,6 @@ RSpec.describe Stoplight::Infrastructure::DataStore::Redis::RecoveryLockStore, :
       sleep(lock_timeout.fdiv(1000))
     end
 
-    expect(recovery_lock).to be_kind_of(Stoplight::Infrastructure::DataStore::Redis::RecoveryLockToken)
+    expect(recovery_lock).to be_kind_of(Stoplight::Infrastructure::Redis::DataStore::RecoveryLockToken)
   end
 end

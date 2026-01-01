@@ -72,7 +72,7 @@ end
 Use real dependencies when testing infrastructure
 
 ```ruby
-RSpec.describe Stoplight::Infrastructure::DataStore::Redis do
+RSpec.describe Stoplight::Infrastructure::Redis::DataStore do
   let(:data_store) { described_class.new(redis) }
   let(:redis) { Redis.new(url: connection_string) } # connects to the real database
   
@@ -91,7 +91,7 @@ it's tricky to use gherkin language for testing, you can opt out to using integr
 ```ruby
 RSpec.describe "Concurrency testing" do
   # Use real implementations
-  let(:data_store) { Stoplight::Infrastructure::DataStore::Redis.new }
+  let(:data_store) { Stoplight::Infrastructure::Redis::DataStore.new }
   
   it "persists state across instances" do
     # Test actual integration

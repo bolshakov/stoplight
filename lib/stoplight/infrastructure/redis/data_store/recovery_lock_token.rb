@@ -4,11 +4,11 @@ require "securerandom"
 
 module Stoplight
   module Infrastructure
-    module DataStore
-      class Redis
+    module Redis
+      class DataStore
         class RecoveryLockToken < Domain::RecoveryLockToken
           private def key(*parts)
-            Stoplight::Infrastructure::DataStore::Redis.key(*parts)
+            Stoplight::Infrastructure::Redis::DataStore.key(*parts)
           end
 
           # @!attribute light_name

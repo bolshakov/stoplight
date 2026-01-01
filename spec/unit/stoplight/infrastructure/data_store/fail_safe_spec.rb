@@ -265,7 +265,7 @@ RSpec.describe Stoplight::Infrastructure::DataStore::FailSafe do
     subject { fail_safe.acquire_recovery_lock(config) }
 
     context "when data_store does not fail" do
-      let(:recovery_token) { instance_double(Stoplight::Infrastructure::DataStore::Redis::RecoveryLockToken) }
+      let(:recovery_token) { instance_double(Stoplight::Infrastructure::Redis::DataStore::RecoveryLockToken) }
 
       it "returns the token" do
         expect(error_notifier).not_to receive(:call)
@@ -292,7 +292,7 @@ RSpec.describe Stoplight::Infrastructure::DataStore::FailSafe do
     subject(:release_recovery_lock) { fail_safe.release_recovery_lock(recovery_lock_token) }
 
     context "with primary recovery lock token" do
-      let(:recovery_lock_token) { Stoplight::Infrastructure::DataStore::Redis::RecoveryLockToken.new(light_name: name) }
+      let(:recovery_lock_token) { Stoplight::Infrastructure::Redis::DataStore::RecoveryLockToken.new(light_name: name) }
 
       context "when data_store does not fail" do
         it "releases this token" do

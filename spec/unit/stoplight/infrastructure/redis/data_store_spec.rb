@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
 require "connection_pool"
-require_relative "recovery_metrics"
-require_relative "metrics"
+require_relative "../data_store/recovery_metrics"
+require_relative "../data_store/metrics"
 
-RSpec.describe Stoplight::Infrastructure::DataStore::Redis, :redis do
+RSpec.describe Stoplight::Infrastructure::Redis::DataStore, :redis do
   let(:config) { instance_double(Stoplight::Domain::Config, name:, window_size:, cool_off_time:) }
   let(:name) { ("a".."z").to_a.shuffle.join }
   let(:failure) { Stoplight::Domain::Failure.new("class", "message", Time.new - 60) }
@@ -73,7 +73,7 @@ RSpec.describe Stoplight::Infrastructure::DataStore::Redis, :redis do
     end
   end
 
-  shared_examples Stoplight::Infrastructure::DataStore::Redis do
+  shared_examples Stoplight::Infrastructure::Redis::DataStore do
     let(:warn_on_clock_skew) { false }
     let(:recovery_lock_store) { instance_double(described_class::RecoveryLockStore) }
     let(:scripting) { described_class::Scripting.new(redis: connection) }
@@ -197,7 +197,7 @@ RSpec.describe Stoplight::Infrastructure::DataStore::Redis, :redis do
     end
   end
 
-  it_behaves_like Stoplight::Infrastructure::DataStore::Redis do
+  it_behaves_like Stoplight::Infrastructure::Redis::DataStore do
     let(:data_store) do
       described_class.new(
         clock:,
@@ -210,7 +210,7 @@ RSpec.describe Stoplight::Infrastructure::DataStore::Redis, :redis do
     let(:connection) { redis }
   end
 
-  it_behaves_like Stoplight::Infrastructure::DataStore::Redis do
+  it_behaves_like Stoplight::Infrastructure::Redis::DataStore do
     let(:data_store) do
       described_class.new(
         clock:,

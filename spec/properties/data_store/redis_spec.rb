@@ -1,7 +1,7 @@
 require "rantly/rspec_extensions"
 require "spec_helper"
 
-RSpec.describe "Stoplight::Infrastructure::DataStore::Redis#buckets_for_window", :redis do
+RSpec.describe "Stoplight::Infrastructure::Redis::DataStore#buckets_for_window", :redis do
   let(:light_name) { "test_circuit" }
   let(:metric) { "failures" }
   let(:bucket_size) { 3600 }
@@ -17,7 +17,7 @@ RSpec.describe "Stoplight::Infrastructure::DataStore::Redis#buckets_for_window",
       window_start = window_end - window_size
 
       # Get buckets for this window
-      buckets = Stoplight::Infrastructure::DataStore::Redis.buckets_for_window(
+      buckets = Stoplight::Infrastructure::Redis::DataStore.buckets_for_window(
         light_name, metric: metric,
         window_end: window_end,
         window_size: window_size
@@ -53,7 +53,7 @@ RSpec.describe "Stoplight::Infrastructure::DataStore::Redis#buckets_for_window",
       window_end = base_ts + offset * bucket_size
       window_size *= bucket_size
 
-      buckets = Stoplight::Infrastructure::DataStore::Redis.buckets_for_window(
+      buckets = Stoplight::Infrastructure::Redis::DataStore.buckets_for_window(
         light_name, metric: metric,
         window_end: window_end,
         window_size: window_size
@@ -71,7 +71,7 @@ RSpec.describe "Stoplight::Infrastructure::DataStore::Redis#buckets_for_window",
       window_end = Time.now.to_i
       [window_size, window_end]
     }.check do |window_size, window_end|
-      buckets = Stoplight::Infrastructure::DataStore::Redis.buckets_for_window(
+      buckets = Stoplight::Infrastructure::Redis::DataStore.buckets_for_window(
         light_name, metric: metric,
         window_end: window_end,
         window_size: window_size

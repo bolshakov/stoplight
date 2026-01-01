@@ -59,7 +59,7 @@ module Stoplight
           private attr_reader :redis
 
           # @!attribute scripting
-          #   @return [Stoplight::Infrastructure::DataStore::Redis::Scripting]
+          #   @return [Stoplight::Infrastructure::Redis::DataStore::Scripting]
           private attr_reader :scripting
 
           # @!attribute metrics_key

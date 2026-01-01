@@ -4,7 +4,7 @@ require "forwardable"
 
 module Stoplight
   module Infrastructure
-    module DataStore
+    module Redis
       # == Errors
       # All errors are stored in the sorted set where keys are serialized errors and
       # values (Redis uses "score" term) contain integer representations of the time
@@ -18,7 +18,7 @@ module Stoplight
       #
       # @see Base
       # steep:ignore:start
-      class Redis < Domain::DataStore
+      class DataStore < Domain::DataStore
         extend Forwardable
 
         class << self
@@ -76,12 +76,12 @@ module Stoplight
         KEY_PREFIX = %w[stoplight v5].join(KEY_SEPARATOR)
 
         # @!attribute recovery_lock_store
-        #   @return [Stoplight::Infrastructure::DataStore::Redis::RecoveryLockStore]
+        #   @return [Stoplight::Infrastructure::Redis::DataStore::RecoveryLockStore]
         # @dynamic recovery_lock_store
         protected attr_reader :recovery_lock_store
 
         # @!attribute scripting
-        #   @return [Stoplight::Infrastructure::DataStore::Redis::Scripting]
+        #   @return [Stoplight::Infrastructure::Redis::DataStore::Scripting]
         # @dynamic scripting
         protected attr_reader :scripting
 
@@ -101,9 +101,9 @@ module Stoplight
         private attr_reader :clock
 
         # @param redis [::Redis, ConnectionPool<::Redis>]
-        # @param recovery_lock_store [Stoplight::Infrastructure::DataStore::Redis::RecoveryLockStore]
+        # @param recovery_lock_store [Stoplight::Infrastructure::Redis::DataStore::RecoveryLockStore]
         # @param warn_on_clock_skew [Boolean] (true) Whether to warn about clock skew between Redis and
-        # @param scripting [Stoplight::Infrastructure::DataStore::Redis::Scripting]
+        # @param scripting [Stoplight::Infrastructure::Redis::DataStore::Scripting]
         # @param clock [Stoplight::Domain::Clock]
         #   the application server
         def initialize(redis:, recovery_lock_store:, scripting:, clock:, warn_on_clock_skew: true)
@@ -327,12 +327,12 @@ module Stoplight
         end
 
         # @param config [Stoplight::Domain::Config]
-        # @return [Stoplight::Infrastructure::DataStore::Redis::RecoveryLockToken, nil]
+        # @return [Stoplight::Infrastructure::Redis::DataStore::RecoveryLockToken, nil]
         def acquire_recovery_lock(config)
           recovery_lock_store.acquire_lock(config.name)
         end
 
-        # @param lock [Stoplight::Infrastructure::DataStore::Redis::RecoveryLockToken]
+        # @param lock [Stoplight::Infrastructure::Redis::DataStore::RecoveryLockToken]
         # @return [void]
         def release_recovery_lock(lock)
           recovery_lock_store.release_lock(lock)

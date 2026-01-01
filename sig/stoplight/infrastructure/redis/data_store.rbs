@@ -1,7 +1,7 @@
 module Stoplight
   module Infrastructure
-    module DataStore
-      class Redis < Domain::DataStore[Redis::RecoveryLockToken]
+    module Redis
+      class DataStore < Domain::DataStore[DataStore::RecoveryLockToken]
         BUCKET_SIZE: Integer
         KEY_SEPARATOR: String
         KEY_PREFIX: String

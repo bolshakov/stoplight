@@ -31,7 +31,7 @@ module Stoplight
           private attr_reader :redis
 
           # @!attribute scripting
-          #   @return [Stoplight::Infrastructure::DataStore::Redis::Scripting]
+          #   @return [Stoplight::Infrastructure::Redis::DataStore::Scripting]
           private attr_reader :scripting
 
           # @!attribute key_space
@@ -40,8 +40,8 @@ module Stoplight
 
           # @param config [Stoplight::Domain::Config]
           # @param redis [::Redis, ConnectionPool<::Redis>]
-          # @param scripting [Stoplight::Infrastructure::DataStore::Redis::Scripting]
-          # @param key_space [Stoplight::Infrastructure::DataStore::Redis::KeySpace]
+          # @param scripting [Stoplight::Infrastructure::Redis::DataStore::Scripting]
+          # @param key_space [Stoplight::Infrastructure::Redis::DataStore::KeySpace]
           def initialize(config:, redis:, scripting:, key_space:)
             @config = config
             @redis = redis
@@ -59,7 +59,7 @@ module Stoplight
             recovery_lock if acquired
           end
 
-          # @param recovery_lock [Stoplight::Infrastructure::DataStore::Redis::RecoveryLockToken]
+          # @param recovery_lock [Stoplight::Infrastructure::Redis::DataStore::RecoveryLockToken]
           # @return [void]
           def release_lock(recovery_lock)
             scripting.call(

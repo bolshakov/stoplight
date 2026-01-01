@@ -101,14 +101,14 @@ module Stoplight
       end
 
       private def redis_recovery_lock_store
-        Infrastructure::DataStore::Redis::RecoveryLockStore.new(
+        Infrastructure::Redis::DataStore::RecoveryLockStore.new(
           redis: data_store_config.redis,
           lock_timeout: config.cool_off_time_in_milliseconds,
           scripting:
         )
       end
 
-      private def scripting = Infrastructure::DataStore::Redis::Scripting.new(redis: data_store_config.redis)
+      private def scripting = Infrastructure::Redis::DataStore::Scripting.new(redis: data_store_config.redis)
 
       private def memory_recovery_lock_store
         Infrastructure::Memory::DataStore::RecoveryLockStore.new
@@ -179,7 +179,7 @@ module Stoplight
           end
         when Stoplight::DataStore::Redis
           Infrastructure::DataStore::FailSafe.new(
-            data_store: Stoplight::Infrastructure::DataStore::Redis.new(
+            data_store: Stoplight::Infrastructure::Redis::DataStore.new(
               clock:,
               redis: data_store_config.redis,
               warn_on_clock_skew: data_store_config.warn_on_clock_skew,

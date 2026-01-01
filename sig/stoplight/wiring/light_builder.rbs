@@ -18,8 +18,8 @@ module Stoplight
 
       def state_store: -> Domain::Storage::State
       def notifiers: -> Array[Domain::StateTransitionNotifier]
-      def redis_recovery_lock_store: -> Infrastructure::DataStore::Redis::RecoveryLockStore
-      def scripting: -> Infrastructure::DataStore::Redis::Scripting
+      def redis_recovery_lock_store: -> Infrastructure::Redis::DataStore::RecoveryLockStore
+      def scripting: -> Infrastructure::Redis::DataStore::Scripting
 
       def memory_recovery_lock_store: -> Infrastructure::Memory::DataStore::RecoveryLockStore
       def failover_data_store: -> Domain::DataStore[Domain::RecoveryLockToken]

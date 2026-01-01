@@ -1,7 +1,7 @@
 module Stoplight
   module Infrastructure
-    module DataStore
-      class Redis
+    module Redis
+      class DataStore
         class RecoveryLockStore
           attr_reader redis: redis
 
