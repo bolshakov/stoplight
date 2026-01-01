@@ -7,8 +7,8 @@ RSpec.describe Stoplight::Infrastructure::DataStore::FailSafe do
       circuit_breaker: test_circuit_breaker_class.new
     )
   end
-  let(:failover_data_store) { Stoplight::Infrastructure::DataStore::Memory.new(recovery_lock_store:, clock:) }
-  let(:recovery_lock_store) { Stoplight::Infrastructure::DataStore::Memory::RecoveryLockStore.new }
+  let(:failover_data_store) { Stoplight::Infrastructure::Memory::DataStore.new(recovery_lock_store:, clock:) }
+  let(:recovery_lock_store) { Stoplight::Infrastructure::Memory::DataStore::RecoveryLockStore.new }
   let(:clock) { Stoplight::Infrastructure::SystemClock.new }
   let(:data_store) { instance_double(Stoplight::Domain::DataStore) }
   let(:config) { instance_double(Stoplight::Domain::Config, name:, window_size: 4, cool_off_time: 60, threshold: 3) }
@@ -276,7 +276,7 @@ RSpec.describe Stoplight::Infrastructure::DataStore::FailSafe do
     end
 
     context "when data_store fails" do
-      let(:failover_recovery_token) { instance_double(Stoplight::Infrastructure::DataStore::Memory::RecoveryLockToken) }
+      let(:failover_recovery_token) { instance_double(Stoplight::Infrastructure::Memory::DataStore::RecoveryLockToken) }
 
       it "returns failover token" do
         expect(error_notifier).to receive(:call).with(error)
@@ -315,7 +315,7 @@ RSpec.describe Stoplight::Infrastructure::DataStore::FailSafe do
     end
 
     context "with failover recovery lock token" do
-      let(:recovery_lock_token) { Stoplight::Infrastructure::DataStore::Memory::RecoveryLockToken.new(light_name: name) }
+      let(:recovery_lock_token) { Stoplight::Infrastructure::Memory::DataStore::RecoveryLockToken.new(light_name: name) }
 
       it "releases this token" do
         expect(error_notifier).not_to receive(:call)

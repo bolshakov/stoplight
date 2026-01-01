@@ -11,8 +11,8 @@ module Stoplight
           @consecutive_successes: Integer
           @last_error: Domain::Failure?
           @last_success_at: Time?
-          @successes: DataStore::Memory::SlidingWindow
-          @errors: DataStore::Memory::SlidingWindow
+          @successes: Infrastructure::Memory::DataStore::SlidingWindow
+          @errors: Infrastructure::Memory::DataStore::SlidingWindow
 
           def initialize: (config: Domain::Config, clock: Domain::Clock) -> void
 

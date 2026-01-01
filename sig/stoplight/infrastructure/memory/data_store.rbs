@@ -1,7 +1,7 @@
 module Stoplight
   module Infrastructure
-    module DataStore
-      class Memory < Domain::DataStore[Memory::RecoveryLockToken]
+    module Memory
+      class DataStore < Domain::DataStore[DataStore::RecoveryLockToken]
         include MonitorMixin
 
         KEY_SEPARATOR: String

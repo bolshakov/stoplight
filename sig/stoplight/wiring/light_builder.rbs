@@ -2,7 +2,7 @@ module Stoplight
   module Wiring
     class LightBuilder
       FAILOVER_DATA_STORE_CONFIG: Stoplight::DataStore::Memory
-      MEMORY_REGISTRY: Concurrent::Map[Integer, Infrastructure::DataStore::Memory]
+      MEMORY_REGISTRY: Concurrent::Map[Integer, Infrastructure::Memory::DataStore]
 
       attr_reader data_store_config: Domain::DataStoreConfig
       attr_reader error_notifier: error_notifier
@@ -21,7 +21,7 @@ module Stoplight
       def redis_recovery_lock_store: -> Infrastructure::DataStore::Redis::RecoveryLockStore
       def scripting: -> Infrastructure::DataStore::Redis::Scripting
 
-      def memory_recovery_lock_store: -> Infrastructure::DataStore::Memory::RecoveryLockStore
+      def memory_recovery_lock_store: -> Infrastructure::Memory::DataStore::RecoveryLockStore
       def failover_data_store: -> Domain::DataStore[Domain::RecoveryLockToken]
       def data_store: -> Domain::DataStore[Domain::RecoveryLockToken]
 
@@ -35,7 +35,7 @@ module Stoplight
       def yellow_run_strategy: -> Domain::Strategies::YellowRunStrategy[Domain::RecoveryLockToken]
       def red_run_strategy: -> Domain::Strategies::RedRunStrategy
       def create_data_store: (Domain::DataStoreConfig data_store_config) -> Domain::DataStore[Domain::RecoveryLockToken]
-      def memory_registry: -> Concurrent::Map[Integer, Infrastructure::DataStore::Memory]
+      def memory_registry: -> Concurrent::Map[Integer, Infrastructure::Memory::DataStore]
     end
   end
 end

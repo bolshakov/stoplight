@@ -4,8 +4,8 @@ require "concurrent/map"
 
 module Stoplight
   module Infrastructure
-    module DataStore
-      class Memory
+    module Memory
+      class DataStore
         # Process-local recovery lock using Ruby's Thread::Mutex.
         #
         # This only serializes recovery within a single Ruby process.
@@ -29,13 +29,13 @@ module Stoplight
           end
 
           # @param light_name [String]
-          # @return [Stoplight::Infrastructure::DataStore::Memory::RecoveryLockToken, nil]
+          # @return [Stoplight::Infrastructure::Memory::DataStore::RecoveryLockToken, nil]
           def acquire_lock(light_name)
             lock = lock_for(light_name)
             RecoveryLockToken.new(light_name:) if lock.try_lock
           end
 
-          # @param recovery_lock_token [Stoplight::Infrastructure::DataStore::Memory::RecoveryLockToken]
+          # @param recovery_lock_token [Stoplight::Infrastructure::Memory::DataStore::RecoveryLockToken]
           # @return [void]
           def release_lock(recovery_lock_token)
             lock_for(recovery_lock_token.light_name).unlock

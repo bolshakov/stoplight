@@ -120,7 +120,7 @@ end
 4. Wiring layer injects implementations:
 ```ruby
 # lib/stoplight/wiring/light_factory.rb
-concrete_store = Infrastructure::DataStore::Memory.new
+concrete_store = Infrastructure::Memory::DataStore.new
 light = Domain::Light.new(data_store: concrete_store)
 ```
 

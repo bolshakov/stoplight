@@ -4,16 +4,16 @@ require "monitor"
 
 module Stoplight
   module Infrastructure
-    module DataStore
+    module Memory
       # steep:ignore:start
       # @see +Domain::DataStore+
-      class Memory < Domain::DataStore
+      class DataStore < Domain::DataStore
         include MonitorMixin
 
         KEY_SEPARATOR = ":"
 
         # @!attribute recovery_lock_store
-        #   @return [Stoplight::Infrastructure::DataStore::Memory::RecoveryLockStore]
+        #   @return [Stoplight::Infrastructure::Memory::DataStore::RecoveryLockStore]
         #   @api private
         # @dynamic recovery_lock_store
         private attr_reader :recovery_lock_store
@@ -23,7 +23,7 @@ module Stoplight
         # @dynamic clock
         private attr_reader :clock
 
-        # @param recovery_lock_store [Stoplight::Infrastructure::DataStore::Memory::RecoveryLockStore]
+        # @param recovery_lock_store [Stoplight::Infrastructure::Memory::DataStore::RecoveryLockStore]
         # @param clock [Stoplight::Domain::Clock]
         def initialize(recovery_lock_store:, clock:)
           @clock = clock
@@ -253,12 +253,12 @@ module Stoplight
         end
 
         # @param config [Stoplight::Domain::Config]
-        # @return [Stoplight::Infrastructure::DataStore::Memory::RecoveryLockToken, nil]
+        # @return [Stoplight::Infrastructure::Memory::DataStore::RecoveryLockToken, nil]
         def acquire_recovery_lock(config)
           recovery_lock_store.acquire_lock(config.name)
         end
 
-        # @param lock [Stoplight::Infrastructure::DataStore::Memory::RecoveryLockToken]
+        # @param lock [Stoplight::Infrastructure::Memory::DataStore::RecoveryLockToken]
         # @return [void]
         def release_recovery_lock(lock)
           recovery_lock_store.release_lock(lock)

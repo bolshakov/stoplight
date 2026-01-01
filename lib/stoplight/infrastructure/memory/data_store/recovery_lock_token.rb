@@ -2,8 +2,8 @@
 
 module Stoplight
   module Infrastructure
-    module DataStore
-      class Memory
+    module Memory
+      class DataStore
         class RecoveryLockToken < Domain::RecoveryLockToken
           # @!attribute light_name
           #   @return [String]

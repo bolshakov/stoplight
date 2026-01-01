@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Stoplight::Infrastructure::DataStore::Memory::RecoveryLockStore do
+RSpec.describe Stoplight::Infrastructure::Memory::DataStore::RecoveryLockStore do
   let(:store) { described_class.new }
 
   let(:data_store) { instance_double(Stoplight::Domain::DataStore) }
@@ -9,7 +9,7 @@ RSpec.describe Stoplight::Infrastructure::DataStore::Memory::RecoveryLockStore d
   it "acquires lock and return recovery lock" do
     recovery_lock = store.acquire_lock(light_name)
 
-    expect(recovery_lock).to be_kind_of(Stoplight::Infrastructure::DataStore::Memory::RecoveryLockToken)
+    expect(recovery_lock).to be_kind_of(Stoplight::Infrastructure::Memory::DataStore::RecoveryLockToken)
   end
 
   it "cannot acquire a lock that is already acquired" do
@@ -26,6 +26,6 @@ RSpec.describe Stoplight::Infrastructure::DataStore::Memory::RecoveryLockStore d
     store.release_lock(recovery_lock)
 
     recovery_lock2 = store.acquire_lock(light_name)
-    expect(recovery_lock2).to be_kind_of(Stoplight::Infrastructure::DataStore::Memory::RecoveryLockToken)
+    expect(recovery_lock2).to be_kind_of(Stoplight::Infrastructure::Memory::DataStore::RecoveryLockToken)
   end
 end

@@ -2,8 +2,8 @@
 
 module Stoplight
   module Infrastructure
-    module DataStore
-      class Memory
+    module Memory
+      class DataStore
         class Metrics
           # @dynamic consecutive_errors
           attr_accessor :consecutive_errors

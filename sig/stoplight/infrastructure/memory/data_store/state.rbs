@@ -2,8 +2,8 @@
 
 module Stoplight
   module Infrastructure
-    module DataStore
-      class Memory
+    module Memory
+      class DataStore
         class State
           attr_accessor recovered_at: Time?
           attr_accessor locked_state: Domain::state

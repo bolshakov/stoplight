@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-require_relative "recovery_metrics"
-require_relative "metrics"
+require_relative "../data_store/recovery_metrics"
+require_relative "../data_store/metrics"
 
-RSpec.describe Stoplight::Infrastructure::DataStore::Memory do
+RSpec.describe Stoplight::Infrastructure::Memory::DataStore do
   let(:data_store) { described_class.new(recovery_lock_store:, clock:) }
   let(:recovery_lock_store) { instance_double(described_class::RecoveryLockStore) }
   let(:clock) { Stoplight::Infrastructure::SystemClock.new }

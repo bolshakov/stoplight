@@ -2,8 +2,8 @@
 
 module Stoplight
   module Infrastructure
-    module DataStore
-      class Memory
+    module Memory
+      class DataStore
         class State
           # @dynamic recovered_at
           attr_accessor :recovered_at

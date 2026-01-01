@@ -2,8 +2,8 @@
 
 module Stoplight
   module Infrastructure
-    module DataStore
-      class Memory < Domain::DataStore
+    module Memory
+      class DataStore
         # Hash-based sliding window for O(1) amortized operations.
         #
         # Maintains a running sum and stores per-second counts in a Hash. Ruby's Hash

@@ -143,7 +143,7 @@ module Stoplight
             circuit_breaker.run(fallback) do
               data_store.release_recovery_lock(recovery_lock_token)
             end
-          in Memory::RecoveryLockToken
+          in Memory::DataStore::RecoveryLockToken
             failover_data_store.release_recovery_lock(recovery_lock_token)
           end
         end

@@ -111,7 +111,7 @@ module Stoplight
       private def scripting = Infrastructure::DataStore::Redis::Scripting.new(redis: data_store_config.redis)
 
       private def memory_recovery_lock_store
-        Infrastructure::DataStore::Memory::RecoveryLockStore.new
+        Infrastructure::Memory::DataStore::RecoveryLockStore.new
       end
 
       private def failover_data_store
@@ -172,7 +172,7 @@ module Stoplight
         case data_store_config
         when Stoplight::DataStore::Memory
           memory_registry.compute_if_absent(data_store_config.object_id) do
-            Infrastructure::DataStore::Memory.new(
+            Infrastructure::Memory::DataStore.new(
               recovery_lock_store: memory_recovery_lock_store,
               clock:
             )
