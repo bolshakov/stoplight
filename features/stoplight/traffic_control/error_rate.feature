@@ -4,7 +4,7 @@ Feature: Error Rate Traffic Control Strategy
   So that my application can respond appropriately to service failures
 
   Background:
-    Given a light "basic-service" configured with:
+    Given a light configured with:
         | Threshold          | 0.4        |
         | Window Size        | 60 seconds |
         | Cool Off Time      | 10 seconds |

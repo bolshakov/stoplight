@@ -1,0 +1,24 @@
+module Stoplight
+  module Infrastructure
+    module Storage
+      module Memory
+        class WindowMetrics < Domain::Storage::Metrics
+          attr_reader mutex: Mutex
+          attr_reader clock: Domain::Clock
+
+          @window_size: Integer
+          @consecutive_errors: Integer
+          @consecutive_successes: Integer
+          @last_error: Domain::Failure?
+          @last_success_at: Time?
+          @successes: DataStore::Memory::SlidingWindow
+          @errors: DataStore::Memory::SlidingWindow
+
+          def initialize: (config: Domain::Config, clock: Domain::Clock) -> void
+
+          def initialize_metrics: -> void
+        end
+      end
+    end
+  end
+end

@@ -17,6 +17,8 @@ loader.setup
 module Stoplight # rubocop:disable Style/Documentation
   include Wiring::PublicApi
 
+  T = Types
+
   CONFIG_MUTEX = Mutex.new
   private_constant :CONFIG_MUTEX
   @systems = Concurrent::Map.new
