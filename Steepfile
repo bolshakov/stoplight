@@ -7,8 +7,18 @@ target :lib do
   ignore "lib/stoplight/admin.rb"
   ignore "lib/stoplight/rspec"
   ignore "lib/stoplight/rspec.rb"
-  ignore "lib/stoplight/wiring"
-  ignore "lib/stoplight/wiring.rb"
+
+  ignore "lib/stoplight/wiring/data_store"
+  ignore "lib/stoplight/wiring/default.rb"
+  ignore "lib/stoplight/wiring/default_factory_builder.rb"
+  ignore "lib/stoplight/wiring/light"
+  ignore "lib/stoplight/wiring/light_builder.rb"
+  ignore "lib/stoplight/wiring/light_factory"
+  ignore "lib/stoplight/wiring/light_factory.rb"
+  ignore "lib/stoplight/wiring/public_api.rb"
+  ignore "lib/stoplight/wiring/system"
+  ignore "lib/stoplight/wiring/system.rb"
+
   ignore "lib/stoplight.rb"
 
   # library "pathname"              # Standard libraries

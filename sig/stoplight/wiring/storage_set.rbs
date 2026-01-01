@@ -1,0 +1,24 @@
+module Stoplight
+  module Wiring
+    class StorageSet[T < Domain::RecoveryLockToken] < Data
+      attr_reader metrics_store: Domain::Storage::Metrics
+      attr_reader recovery_metrics_store: Domain::Storage::Metrics
+      attr_reader state_state: Domain::Storage::State
+      attr_reader recovery_lock_store: Domain::Storage::RecoveryLock[T]
+
+      def self.new: [T < Domain::RecoveryLockToken] (
+        metrics_store: Domain::Storage::Metrics,
+        recovery_metrics_store: Domain::Storage::Metrics,
+        state_state: Domain::Storage::State,
+        recovery_lock_store: Domain::Storage::RecoveryLock[T]
+      ) -> instance
+
+      def initialize: [T < Domain::RecoveryLockToken] (
+          metrics_store: Domain::Storage::Metrics,
+          recovery_metrics_store: Domain::Storage::Metrics,
+          state_state: Domain::Storage::State,
+          recovery_lock_store: Domain::Storage::RecoveryLock[T]
+        ) -> void
+    end
+  end
+end
