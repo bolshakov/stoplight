@@ -1,0 +1,34 @@
+module Stoplight
+  module Infrastructure
+    module Redis
+      module Storage
+        class WindowMetrics < Metrics
+          attr_reader config: Domain::Config
+          attr_reader redis: redis
+          attr_reader scripting: Scripting
+          attr_reader metrics_key: String
+          attr_reader clock: Domain::Clock
+          attr_reader key_space: KeySpace
+          @window_size: Integer
+
+          def initialize: (
+            redis: redis,
+            scripting: Scripting,
+            config: Domain::Config,
+            clock: Domain::Clock,
+            key_space: KeySpace
+          ) -> void
+
+          def bucket_key: (metric: Symbol, time: _ToI) -> String
+          def bucket_size: -> Integer
+          def bucket_ttl: -> Integer
+          def buckets_for_window: (metric: Symbol, window_end: _ToI) -> Array[String]
+          def successes_key: (time: _ToI) -> String
+          def errors_key: (time: _ToI) -> String
+          def failure_bucket_keys: (_ToI window_end) -> Array[String]
+          def success_bucket_keys: (_ToI window_end) -> Array[String]
+        end
+      end
+    end
+  end
+end

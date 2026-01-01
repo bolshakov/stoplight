@@ -1,0 +1,23 @@
+module Stoplight
+  module Infrastructure
+    module FailSafe
+      module Storage
+        class State < Domain::Storage::State
+          attr_reader primary_store: Domain::Storage::State
+          attr_reader error_notifier: error_notifier
+          attr_reader failover_store: Domain::Storage::State
+          attr_reader circuit_breaker: Domain::Light
+
+          def initialize: (
+            primary_store: Domain::Storage::State,
+            error_notifier: error_notifier,
+            failover_store: Domain::Storage::State,
+            circuit_breaker: Domain::Light,
+          ) -> void
+
+          def fallback: [T] { () -> T } -> ^(StandardError?) -> T
+        end
+      end
+    end
+  end
+end

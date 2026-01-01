@@ -1,0 +1,18 @@
+# frozen_string_literal: true
+
+module Stoplight
+  module Infrastructure
+    module Redis
+      module Storage
+        class Scripting < Infrastructure::Redis::DataStore::Scripting
+          SCRIPTS_ROOT = __dir__ => String
+          private_constant :SCRIPTS_ROOT
+
+          class << self
+            def default_scripts_root = SCRIPTS_ROOT
+          end
+        end
+      end
+    end
+  end
+end

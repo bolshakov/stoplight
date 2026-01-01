@@ -1,0 +1,24 @@
+module Stoplight
+  module Infrastructure
+    module Redis
+      module Storage
+        class RecoveryLock < Domain::Storage::RecoveryLock[RecoveryLockToken]
+          attr_reader config: Domain::Config
+          attr_reader redis: redis
+          attr_reader scripting: Scripting
+          attr_reader key_space: KeySpace
+
+          def initialize: (
+            config: Domain::Config,
+            redis: redis,
+            scripting: Scripting,
+            key_space: KeySpace
+          ) -> void
+
+          def lock_key: -> String
+          def lock_timeout: -> Integer
+        end
+      end
+    end
+  end
+end

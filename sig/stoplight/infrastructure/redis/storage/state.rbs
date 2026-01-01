@@ -1,0 +1,30 @@
+module Stoplight
+  module Infrastructure
+    module Redis
+      module Storage
+        class State < Domain::Storage::State
+          attr_reader redis: redis
+          attr_reader scripting: Scripting
+          attr_reader key_space: KeySpace
+          attr_reader clock: Domain::Clock
+          attr_reader cool_off_time: timestamp
+          attr_reader state_key: String
+
+          def initialize: (
+            clock: Domain::Clock,
+            redis: redis,
+            scripting: Scripting,
+            key_space: KeySpace,
+            cool_off_time: timestamp
+          ) -> void
+
+          def transition_to_green: -> bool
+
+          def transition_to_yellow: -> bool
+
+          def transition_to_red: -> bool
+        end
+      end
+    end
+  end
+end

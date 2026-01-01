@@ -1,0 +1,19 @@
+module Stoplight
+  module Infrastructure
+    module Redis
+      class DataStore
+        class RecoveryLockToken < Domain::RecoveryLockToken
+          attr_reader light_name: String
+
+          attr_reader token: String
+
+          def initialize: (light_name: String) -> void
+
+          def lock_key: -> String
+
+          private def key: (*_ToS) -> String
+        end
+      end
+    end
+  end
+end

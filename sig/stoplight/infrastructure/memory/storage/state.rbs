@@ -1,0 +1,26 @@
+module Stoplight
+  module Infrastructure
+    module Memory
+      module Storage
+        class State < Domain::Storage::State
+          attr_accessor locked_state: state
+          attr_accessor recovered_at: Time?
+          attr_accessor recovery_scheduled_after: Time?
+          attr_accessor recovery_started_at: Time?
+          attr_accessor breached_at: Time?
+          attr_reader mutex: Mutex
+          attr_reader clock: Domain::Clock
+          attr_reader cool_off_time: timestamp
+
+          def initialize: (clock: Domain::Clock, cool_off_time: timestamp) -> void
+
+          def transition_to_green: -> bool
+
+          def transition_to_yellow: -> bool
+
+          def transition_to_red: -> bool
+        end
+      end
+    end
+  end
+end

@@ -4,7 +4,7 @@ RSpec.describe Stoplight::Admin::LightsRepository, :redis do
   subject(:repository) { described_class.new(data_store:) }
 
   let(:data_store) do
-    Stoplight::Infrastructure::DataStore::Redis.new(
+    Stoplight::Infrastructure::Redis::DataStore.new(
       clock:,
       redis:,
       warn_on_clock_skew: false,
@@ -13,7 +13,7 @@ RSpec.describe Stoplight::Admin::LightsRepository, :redis do
     )
   end
   let(:redis_recovery_lock_store) do
-    Stoplight::Infrastructure::DataStore::Redis::RecoveryLockStore.new(
+    Stoplight::Infrastructure::Redis::DataStore::RecoveryLockStore.new(
       redis:,
       lock_timeout: 1,
       scripting:
@@ -21,7 +21,7 @@ RSpec.describe Stoplight::Admin::LightsRepository, :redis do
   end
   let(:clock) { Stoplight::Infrastructure::SystemClock.new }
   let(:scripting) do
-    Stoplight::Infrastructure::DataStore::Redis::Scripting.new(redis:)
+    Stoplight::Infrastructure::Redis::DataStore::Scripting.new(redis:)
   end
   let(:data_store_config) { Stoplight::DataStore::Redis.new(redis) }
   let(:name) { "lights-repository" }
