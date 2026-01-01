@@ -1,7 +1,7 @@
 module Stoplight
   module Infrastructure
-    module Storage
-      module Redis
+    module Redis
+      module Storage
         class State < Domain::Storage::State
           attr_reader redis: redis
           attr_reader scripting: Scripting

@@ -1,8 +1,8 @@
 module Stoplight
   module Infrastructure
-    module Storage
-      module Redis
-        class UnboundedMetrics < Redis::Metrics
+    module Redis
+      module Storage
+        class UnboundedMetrics < Metrics
           attr_reader redis: redis
           attr_reader scripting: Scripting
           attr_reader metrics_key: String

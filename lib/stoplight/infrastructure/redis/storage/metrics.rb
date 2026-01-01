@@ -4,8 +4,8 @@ require "json"
 
 module Stoplight
   module Infrastructure
-    module Storage
-      module Redis
+    module Redis
+      module Storage
         class Metrics < Domain::Storage::Metrics
           # @param exception [StandardError]
           # @param timestamp [Float]

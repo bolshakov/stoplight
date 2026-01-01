@@ -2,8 +2,8 @@
 
 module Stoplight
   module Infrastructure
-    module Storage
-      module Redis
+    module Redis
+      module Storage
         # Distributed storage for time-windowed light metrics using Redis.
         #
         # This class implements sliding window metrics using Redis sorted sets (ZSETs)
@@ -42,7 +42,7 @@ module Stoplight
           private attr_reader :redis
 
           # @!attribute scripting
-          #   @return [Stoplight::Infrastructure::Storage::Redis::Scripting]
+          #   @return [Stoplight::Infrastructure::Redis::Storage::Scripting]
           private attr_reader :scripting
 
           # @!attribute metrics_key
@@ -54,14 +54,14 @@ module Stoplight
           private attr_reader :clock
 
           # @!attribute key_space
-          #   @return [Stoplight::Infrastructure::Storage::Redis::KeySpace]
+          #   @return [Stoplight::Infrastructure::Redis::Storage::KeySpace]
           private attr_reader :key_space
 
           # @param redis [Redis, ConnectionPool<Redis>] Redis client or connection pool
-          # @param scripting [Stoplight::Infrastructure::Storage::Redis::Scripting] Lua script executor
+          # @param scripting [Stoplight::Infrastructure::Redis::Storage::Scripting] Lua script executor
           # @param config [Stoplight::Domain::Config]
           # @param clock [Stoplight::Domain::Clock]
-          # @param key_space [Stoplight::Infrastructure::Storage::Redis::KeySpace]
+          # @param key_space [Stoplight::Infrastructure::Redis::Storage::KeySpace]
           def initialize(redis:, scripting:, config:, clock:, key_space:)
             @clock = clock
             @scripting = scripting

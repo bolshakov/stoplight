@@ -2,8 +2,8 @@
 
 module Stoplight
   module Infrastructure
-    module Storage
-      module Redis
+    module Redis
+      module Storage
         # Redis-backed state storage for a single circuit breaker.
         #
         # Manages circuit breaker state transitions using Redis hashes and Lua scripts
@@ -48,7 +48,7 @@ module Stoplight
           private attr_reader :scripting
 
           # @!attribute key_space
-          #   @return [Stoplight::Infrastructure::Storage::Redis::KeySpace]
+          #   @return [Stoplight::Infrastructure::Redis::Storage::KeySpace]
           private attr_reader :key_space
 
           # @!attribute clock

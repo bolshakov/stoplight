@@ -2,8 +2,8 @@
 
 module Stoplight
   module Infrastructure
-    module Storage
-      module Redis
+    module Redis
+      module Storage
         # Distributed metrics storage for consecutive-error light strategies.
         #
         # This class provides a lightweight alternative to +WindowMetrics+ for circuit

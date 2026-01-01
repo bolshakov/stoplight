@@ -7,10 +7,10 @@ module Stoplight
 
         def initialize: (System, settings) -> void
 
-        def key_space: -> Infrastructure::Storage::Redis::KeySpace
+        def key_space: -> Infrastructure::Redis::Storage::KeySpace
 
         private def redis: -> Domain::DataStoreConfig
-        private def storage_scripting: -> Infrastructure::Storage::Redis::Scripting
+        private def storage_scripting: -> Infrastructure::Redis::Storage::Scripting
         private def failover_system: -> System
       end
     end

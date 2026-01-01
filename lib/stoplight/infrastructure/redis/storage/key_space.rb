@@ -4,8 +4,8 @@ require "digest"
 
 module Stoplight
   module Infrastructure
-    module Storage
-      module Redis
+    module Redis
+      module Storage
         # Immutable key namespace for a light within a system.
         #
         # Produces keys following entity-first structure:
@@ -34,7 +34,7 @@ module Stoplight
           class << self
             # @param system_name [String, Symbol]
             # @param light_name [String, Symbol]
-            # @return [Stoplight::Infrastructure::Storage::Redis::KeySpace]
+            # @return [Stoplight::Infrastructure::Redis::Storage::KeySpace]
             def build(system_name:, light_name:) = new(
               system_id: hash_name(system_name),
               light_id: hash_name(light_name)

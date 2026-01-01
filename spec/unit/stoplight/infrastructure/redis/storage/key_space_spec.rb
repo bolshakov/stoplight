@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Stoplight::Infrastructure::Storage::Redis::KeySpace do
+RSpec.describe Stoplight::Infrastructure::Redis::Storage::KeySpace do
   describe ".build" do
     subject(:key_space) { described_class.build(system_name:, light_name:) }
 

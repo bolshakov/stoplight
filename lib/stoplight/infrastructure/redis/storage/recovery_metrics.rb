@@ -2,8 +2,8 @@
 
 module Stoplight
   module Infrastructure
-    module Storage
-      module Redis
+    module Redis
+      module Storage
         # When a circuit is RED (open), Stoplight periodically sends "recovery probes"
         # to test whether the protected service has recovered. These test requests have
         # different semantics than normal requests and their metrics are tracked separately.

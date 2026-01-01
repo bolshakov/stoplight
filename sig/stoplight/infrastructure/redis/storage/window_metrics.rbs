@@ -1,7 +1,7 @@
 module Stoplight
   module Infrastructure
-    module Storage
-      module Redis
+    module Redis
+      module Storage
         class WindowMetrics < Metrics
           attr_reader config: Domain::Config
           attr_reader redis: redis

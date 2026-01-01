@@ -1,7 +1,7 @@
 module Stoplight
   module Infrastructure
-    module Storage
-      module Redis
+    module Redis
+      module Storage
         class Metrics < Domain::Storage::Metrics
           def serialize_exception: (StandardError, timestamp: Float) -> String
 

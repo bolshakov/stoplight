@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Stoplight::Infrastructure::Storage::Redis::Metrics do
+RSpec.describe Stoplight::Infrastructure::Redis::Storage::Metrics do
   let(:metrics) { described_class.new }
 
   let(:timestamp) { Time.now.to_f }

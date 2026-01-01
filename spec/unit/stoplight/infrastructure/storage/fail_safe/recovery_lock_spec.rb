@@ -60,7 +60,7 @@ RSpec.describe Stoplight::Infrastructure::Storage::FailSafe::RecoveryLock do
     subject(:release_lock) { fail_safe.release_lock(recovery_lock_token) }
 
     context "with primary recovery lock token" do
-      let(:recovery_lock_token) { Stoplight::Infrastructure::Storage::Redis::RecoveryLockToken.new }
+      let(:recovery_lock_token) { Stoplight::Infrastructure::Redis::RecoveryLockToken.new }
 
       context "when store does not fail" do
         it "releases this token" do

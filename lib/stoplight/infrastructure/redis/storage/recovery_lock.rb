@@ -2,8 +2,8 @@
 
 module Stoplight
   module Infrastructure
-    module Storage
-      module Redis
+    module Redis
+      module Storage
         # Distributed recovery lock using Redis SET NX (set-if-not-exists).
         #
         # Lock Acquisition:
@@ -35,7 +35,7 @@ module Stoplight
           private attr_reader :scripting
 
           # @!attribute key_space
-          #   @return [Stoplight::Infrastructure::Storage::Redis::KeySpace]
+          #   @return [Stoplight::Infrastructure::Redis::Storage::KeySpace]
           private attr_reader :key_space
 
           # @param config [Stoplight::Domain::Config]

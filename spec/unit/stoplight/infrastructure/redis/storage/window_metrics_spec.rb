@@ -2,13 +2,13 @@
 
 require_relative "../../data_store/window_metrics_snapshot"
 
-RSpec.describe Stoplight::Infrastructure::Storage::Redis::WindowMetrics, :redis do
+RSpec.describe Stoplight::Infrastructure::Redis::Storage::WindowMetrics, :redis do
   subject(:metrics) { described_class.new(scripting:, redis:, config:, clock:, key_space:) }
 
-  let(:key_space) { Stoplight::Infrastructure::Storage::Redis::KeySpace.build(light_name:, system_name:) }
+  let(:key_space) { Stoplight::Infrastructure::Redis::Storage::KeySpace.build(light_name:, system_name:) }
   let(:clock) { Stoplight::Infrastructure::SystemClock.new }
   let(:config) { instance_double(Stoplight::Domain::Config, window_size:) }
-  let(:scripting) { Stoplight::Infrastructure::Storage::Redis::Scripting.new(redis:) }
+  let(:scripting) { Stoplight::Infrastructure::Redis::Storage::Scripting.new(redis:) }
   let(:window_size) { 300 }
 
   let(:light_name) { SecureRandom.uuid }
