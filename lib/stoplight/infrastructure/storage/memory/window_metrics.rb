@@ -59,7 +59,7 @@ module Stoplight
               errors = self.errors.sum_in_window(window_start)
               successes = self.successes.sum_in_window(window_start)
 
-              Domain::Metrics.new(
+              Domain::MetricsSnapshot.new(
                 errors: errors,
                 successes: successes,
                 consecutive_errors: [metrics.consecutive_errors, errors].min,

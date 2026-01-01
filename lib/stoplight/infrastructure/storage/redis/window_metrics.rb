@@ -98,7 +98,7 @@ module Stoplight
                 *failure_keys
               ]
             )
-            Domain::Metrics.new(
+            Domain::MetricsSnapshot.new(
               successes:, errors:,
               consecutive_errors: [consecutive_errors.to_i, errors].min,
               consecutive_successes: [consecutive_successes.to_i, successes].min,
