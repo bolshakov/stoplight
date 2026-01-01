@@ -69,7 +69,7 @@ module Stoplight
             @config = config
             @key_space = key_space
             @metrics_key = key_space.key(:window_metrics)
-            @window_size = T.must(config.window_size)
+            @window_size = T.must(config.window_size).to_i
           end
 
           # Get metrics for the current light
