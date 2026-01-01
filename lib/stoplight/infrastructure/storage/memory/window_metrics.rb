@@ -48,6 +48,7 @@ module Stoplight
             @metrics = DataStore::Memory::Metrics.new
             @successes = DataStore::Memory::SlidingWindow.new(clock:)
             @errors = DataStore::Memory::SlidingWindow.new(clock:)
+            @window_size = T.must(config.window_size)
           end
 
           # Get metrics for the current light
@@ -55,7 +56,7 @@ module Stoplight
           # @return [Stoplight::Domain::Metrics]
           def metrics_snapshot
             mutex.synchronize do
-              window_start = (clock.current_time - config.window_size)
+              window_start = (clock.current_time - @window_size)
               errors = self.errors.sum_in_window(window_start)
               successes = self.successes.sum_in_window(window_start)
 
@@ -78,7 +79,7 @@ module Stoplight
               current_time = clock.current_time
               successes.increment
 
-              if metrics.last_success_at.nil? || current_time > metrics.last_success_at
+              if metrics.last_success_at.nil? || current_time > T.must(metrics.last_success_at)
                 metrics.last_success_at = current_time
               end
 
@@ -97,7 +98,7 @@ module Stoplight
               failure = Domain::Failure.from_error(exception, time: current_time)
               errors.increment
 
-              if metrics.last_error_at.nil? || failure.occurred_at > metrics.last_error_at
+              if metrics.last_error_at.nil? || failure.occurred_at > T.must(metrics.last_error_at)
                 metrics.last_error = failure
               end
 

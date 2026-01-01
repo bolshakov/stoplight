@@ -37,10 +37,6 @@ module Stoplight
         # - metrics_snapshot: Aggregates across buckets atomically
         #
         class WindowMetrics < Metrics
-          # @!attribute config
-          #   @return [Stoplight::Domain::Config]
-          private attr_reader :config
-
           # @!attribute redis
           #   @return [::Redis | ConnectionPool<::Redis>]
           private attr_reader :redis
@@ -73,6 +69,7 @@ module Stoplight
             @config = config
             @key_space = key_space
             @metrics_key = key_space.key(:window_metrics)
+            @window_size = T.must(config.window_size)
           end
 
           # Get metrics for the current light
@@ -80,7 +77,7 @@ module Stoplight
           # @return [Stoplight::Domain::Metrics]
           def metrics_snapshot
             window_end_ts = clock.current_time.to_f
-            window_start_ts = window_end_ts - config.window_size
+            window_start_ts = window_end_ts - @window_size
             failure_keys = failure_bucket_keys(window_end_ts)
             success_keys = success_bucket_keys(window_end_ts)
 
@@ -157,7 +154,7 @@ module Stoplight
           end
 
           private def bucket_size = 3600 # 1 hour
-          private def bucket_ttl = config.window_size + bucket_size
+          private def bucket_ttl = @window_size + bucket_size
 
           # Retrieves the list of Redis bucket keys required to cover a specific time window.
           #
@@ -167,7 +164,7 @@ module Stoplight
           # @api private
           def buckets_for_window(metric:, window_end:)
             window_end_ts = window_end.to_i
-            window_start_ts = window_end_ts - config.window_size.to_i
+            window_start_ts = window_end_ts - @window_size
 
             # Find bucket timestamps that contain any part of the window
             start_bucket = (window_start_ts / bucket_size) * bucket_size

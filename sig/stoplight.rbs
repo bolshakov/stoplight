@@ -1,4 +1,5 @@
 module Stoplight
+  T: singleton(Types)
   type timestamp = Float | Integer
   type redis = ::Redis | ConnectionPool[::Redis]
 
