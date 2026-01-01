@@ -178,7 +178,7 @@ module Stoplight
             )
           end
         when Stoplight::DataStore::Redis
-          Infrastructure::DataStore::FailSafe.new(
+          Infrastructure::FailSafe::DataStore.new(
             data_store: Stoplight::Infrastructure::Redis::DataStore.new(
               clock:,
               redis: data_store_config.redis,

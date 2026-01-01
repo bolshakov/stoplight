@@ -1,7 +1,7 @@
 module Stoplight
   module Infrastructure
-    module DataStore
-      class FailSafe < Domain::DataStore[Domain::RecoveryLockToken]
+    module FailSafe
+      class DataStore < Domain::DataStore[Domain::RecoveryLockToken]
         attr_reader data_store: Infrastructure::Redis::DataStore
         attr_reader failover_data_store: Infrastructure::Memory::DataStore
         attr_reader error_notifier: error_notifier

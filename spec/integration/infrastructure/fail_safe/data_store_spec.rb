@@ -2,7 +2,7 @@
 
 require "securerandom"
 
-RSpec.describe Stoplight::Infrastructure::DataStore::FailSafe do
+RSpec.describe Stoplight::Infrastructure::FailSafe::DataStore do
   let(:fail_safe) { described_class.new(data_store:, error_notifier:, failover_data_store:, circuit_breaker:) }
   let(:failover_data_store) { Stoplight::Infrastructure::Memory::DataStore.new(recovery_lock_store:, clock:) }
   let(:clock) { Stoplight::Infrastructure::SystemClock.new }

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Stoplight::Infrastructure::DataStore::FailSafe do
+RSpec.describe Stoplight::Infrastructure::FailSafe::DataStore do
   let(:fail_safe) do
     described_class.new(
       data_store:, error_notifier:, failover_data_store:,

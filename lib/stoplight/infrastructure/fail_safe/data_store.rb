@@ -4,14 +4,14 @@ require "securerandom"
 
 module Stoplight
   module Infrastructure
-    module DataStore
+    module FailSafe
       # A wrapper around a data store that provides fail-safe mechanisms using a
       # circuit breaker. It ensures that operations on the data store can gracefully
       # handle failures by falling back to default values when necessary.
       #
       # @api private
       # steep:ignore:start
-      class FailSafe < Domain::DataStore
+      class DataStore < Domain::DataStore
         # @!attribute data_store
         #  @return [Stoplight::DataStore::Base] The underlying primary data store being used
         # @dynamic data_store
