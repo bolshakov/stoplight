@@ -4,8 +4,8 @@ require "securerandom"
 
 module Stoplight
   module Infrastructure
-    module Storage
-      module FailSafe
+    module FailSafe
+      module Storage
         # A wrapper around a store that provides fail-safe mechanisms using a
         # circuit breaker. It ensures that operations on the store can gracefully
         # handle failures by falling back to default values when necessary.

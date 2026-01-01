@@ -1,7 +1,7 @@
 module Stoplight
   module Infrastructure
-    module Storage
-      module FailSafe
+    module FailSafe
+      module Storage
         class Metrics < Domain::Storage::Metrics
           attr_reader primary_store: Domain::Storage::Metrics
           attr_reader error_notifier: error_notifier

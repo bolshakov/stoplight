@@ -24,7 +24,7 @@ module Stoplight
           in Stoplight::DataStore::Memory
             Infrastructure::Memory::Storage::State.new(clock:, cool_off_time:)
           in Stoplight::DataStore::Redis
-            Infrastructure::Storage::FailSafe::State.new(
+            Infrastructure::FailSafe::Storage::State.new(
               primary_store: Infrastructure::Redis::Storage::State.new(
                 redis: data_store_config.redis,
                 scripting:,
@@ -44,7 +44,7 @@ module Stoplight
           in Stoplight::DataStore::Memory
             Infrastructure::Memory::Storage::RecoveryLock.new
           in Stoplight::DataStore::Redis
-            Infrastructure::Storage::FailSafe::RecoveryLock.new(
+            Infrastructure::FailSafe::Storage::RecoveryLock.new(
               primary_store: Infrastructure::Redis::Storage::RecoveryLock.new(
                 config:,
                 redis: data_store_config.redis,
@@ -68,7 +68,7 @@ module Stoplight
         end
 
         private def redis_recovery_metrics_store
-          Infrastructure::Storage::FailSafe::Metrics.new(
+          Infrastructure::FailSafe::Storage::Metrics.new(
             error_notifier:,
             primary_store: Infrastructure::Redis::Storage::RecoveryMetrics.new(
               clock:,
@@ -96,7 +96,7 @@ module Stoplight
 
         private def redis_metrics_store
           if config.window_size
-            Infrastructure::Storage::FailSafe::Metrics.new(
+            Infrastructure::FailSafe::Storage::Metrics.new(
               error_notifier:,
               primary_store: Infrastructure::Redis::Storage::WindowMetrics.new(
                 config:,
@@ -109,7 +109,7 @@ module Stoplight
               circuit_breaker: failover_system.light("redis")
             )
           else
-            Infrastructure::Storage::FailSafe::Metrics.new(
+            Infrastructure::FailSafe::Storage::Metrics.new(
               error_notifier:,
               primary_store: Infrastructure::Redis::Storage::UnboundedMetrics.new(
                 clock:,
