@@ -1,0 +1,17 @@
+module Stoplight
+  module Infrastructure
+    module FailSafe
+      module Storage
+        class RecoveryLockToken < Domain::RecoveryLockToken
+          attr_reader underlying_token: Domain::RecoveryLockToken
+          attr_reader origin: :primary | :failover
+
+          def initialize: (
+            underlying_token: Domain::RecoveryLockToken,
+            origin: (:primary | :failover)
+          ) -> void
+        end
+      end
+    end
+  end
+end

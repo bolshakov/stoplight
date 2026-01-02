@@ -27,7 +27,7 @@ module Stoplight
         end
 
         # @return [Stoplight::Domain::RecoveryLockToken, nil]
-        def acquire_lock = data_store.acquire_recovery_lock(config)
+        def acquire_lock = data_store.acquire_recovery_lock(config) #: Domain::Storage::RecoveryLockToken?
 
         # @param lock [Stoplight::Domain::LockToken]
         # @return [void]

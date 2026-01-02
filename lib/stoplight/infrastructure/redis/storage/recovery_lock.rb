@@ -50,7 +50,7 @@ module Stoplight
           end
 
           def acquire_lock
-            recovery_lock = RecoveryLockToken.new
+            recovery_lock = Domain::Storage::RecoveryLockToken.new
 
             acquired = redis.then do |client|
               client.set(lock_key, recovery_lock.token, nx: true, px: lock_timeout)

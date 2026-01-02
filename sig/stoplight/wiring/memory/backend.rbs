@@ -1,7 +1,7 @@
 module Stoplight
   module Wiring
     module Memory
-      class Backend < DataStoreBackend[Infrastructure::Memory::RecoveryLockToken]
+      class Backend < DataStoreBackend
         @clock: Domain::Clock
         @config: Domain::Config
         @state_store: Infrastructure::Memory::Storage::State

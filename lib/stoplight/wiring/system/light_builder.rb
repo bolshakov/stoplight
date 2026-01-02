@@ -105,7 +105,7 @@ module Stoplight
                 clock:,
                 key_space:
               ),
-              failover_store: Infrastructure::Memory::Storage::WindowMetrics.new(config:, clock:),
+              failover_store: Infrastructure::Memory::Storage::WindowMetrics.new(window_size: T.must(config.window_size), clock:),
               circuit_breaker: failover_system.light("redis")
             )
           else

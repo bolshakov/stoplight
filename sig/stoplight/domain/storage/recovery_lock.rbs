@@ -3,9 +3,9 @@
 module Stoplight
   module Domain
     module Storage
-      class RecoveryLock[Token < RecoveryLockToken]
-        def acquire_lock: -> Token?
-        def release_lock: (Token) -> void
+      class RecoveryLock
+        def acquire_lock: -> Storage::RecoveryLockToken?
+        def release_lock: (Storage::RecoveryLockToken) -> void
       end
     end
   end

@@ -30,7 +30,7 @@ RSpec.describe Stoplight::Infrastructure::FailSafe::Storage::RecoveryLock do
   end
 
   describe "#acquire_lock" do
-    subject { fail_safe.acquire_lock }
+    subject(:acquired_lock_token) { fail_safe.acquire_lock }
 
     context "when primary store does not fail" do
       let(:recovery_token) { instance_double(Stoplight::Domain::RecoveryLockToken) }
@@ -39,7 +39,10 @@ RSpec.describe Stoplight::Infrastructure::FailSafe::Storage::RecoveryLock do
         expect(error_notifier).not_to receive(:call)
 
         expect(primary_store).to receive(:acquire_lock).and_return(recovery_token)
-        is_expected.to eq(recovery_token)
+        expect(acquired_lock_token).to have_attributes(
+          origin: :primary,
+          underlying_token: recovery_token
+        )
       end
     end
 
@@ -51,7 +54,10 @@ RSpec.describe Stoplight::Infrastructure::FailSafe::Storage::RecoveryLock do
         expect(primary_store).to receive(:acquire_lock).and_raise(error)
         expect(failover_store).to receive(:acquire_lock).and_return(failover_recovery_token)
 
-        is_expected.to eq(failover_recovery_token)
+        expect(acquired_lock_token).to have_attributes(
+          origin: :failover,
+          underlying_token: failover_recovery_token
+        )
       end
     end
   end
@@ -60,12 +66,18 @@ RSpec.describe Stoplight::Infrastructure::FailSafe::Storage::RecoveryLock do
     subject(:release_lock) { fail_safe.release_lock(recovery_lock_token) }
 
     context "with primary recovery lock token" do
-      let(:recovery_lock_token) { Stoplight::Infrastructure::Redis::RecoveryLockToken.new }
+      let(:underlying_token) { Stoplight::Domain::Storage::RecoveryLockToken.new }
+      let(:recovery_lock_token) do
+        Stoplight::Infrastructure::FailSafe::Storage::RecoveryLockToken.new(
+          origin: :primary,
+          underlying_token:
+        )
+      end
 
       context "when store does not fail" do
         it "releases this token" do
           expect(error_notifier).not_to receive(:call)
-          expect(primary_store).to receive(:release_lock).with(recovery_lock_token)
+          expect(primary_store).to receive(:release_lock).with(underlying_token)
 
           release_lock
         end
@@ -74,7 +86,7 @@ RSpec.describe Stoplight::Infrastructure::FailSafe::Storage::RecoveryLock do
       context "when primary fails" do
         it "notifies but does not call to failover" do
           expect(error_notifier).to receive(:call).with(error)
-          expect(primary_store).to receive(:release_lock).with(recovery_lock_token).and_raise(error)
+          expect(primary_store).to receive(:release_lock).with(underlying_token).and_raise(error)
           expect(failover_store).not_to receive(:release_lock)
 
           release_lock
@@ -83,11 +95,17 @@ RSpec.describe Stoplight::Infrastructure::FailSafe::Storage::RecoveryLock do
     end
 
     context "with failover recovery lock token" do
-      let(:recovery_lock_token) { Stoplight::Infrastructure::Memory::RecoveryLockToken.new }
+      let(:underlying_token) { Stoplight::Domain::Storage::RecoveryLockToken.new }
+      let(:recovery_lock_token) do
+        Stoplight::Infrastructure::FailSafe::Storage::RecoveryLockToken.new(
+          origin: :failover,
+          underlying_token:
+        )
+      end
 
       it "releases this token" do
         expect(error_notifier).not_to receive(:call)
-        expect(failover_store).to receive(:release_lock).with(recovery_lock_token)
+        expect(failover_store).to receive(:release_lock).with(underlying_token)
 
         release_lock
       end

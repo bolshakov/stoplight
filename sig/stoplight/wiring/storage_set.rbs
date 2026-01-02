@@ -4,20 +4,20 @@ module Stoplight
       attr_reader metrics_store: Domain::Storage::Metrics
       attr_reader recovery_metrics_store: Domain::Storage::Metrics
       attr_reader state_state: Domain::Storage::State
-      attr_reader recovery_lock_store: Domain::Storage::RecoveryLock[T]
+      attr_reader recovery_lock_store: Domain::Storage::RecoveryLock
 
-      def self.new: [T < Domain::RecoveryLockToken] (
+      def self.new: (
         metrics_store: Domain::Storage::Metrics,
         recovery_metrics_store: Domain::Storage::Metrics,
         state_state: Domain::Storage::State,
-        recovery_lock_store: Domain::Storage::RecoveryLock[T]
+        recovery_lock_store: Domain::Storage::RecoveryLock
       ) -> instance
 
-      def initialize: [T < Domain::RecoveryLockToken] (
+      def initialize: (
           metrics_store: Domain::Storage::Metrics,
           recovery_metrics_store: Domain::Storage::Metrics,
           state_state: Domain::Storage::State,
-          recovery_lock_store: Domain::Storage::RecoveryLock[T]
+          recovery_lock_store: Domain::Storage::RecoveryLock
         ) -> void
     end
   end
