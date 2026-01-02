@@ -25,10 +25,10 @@ module Stoplight
           #   @return [Stoplight::Domain::Clock]
           private attr_reader :clock
 
-          def initialize(config:, clock:)
+          def initialize(window_size:, clock:)
             @clock = clock
             @mutex = Mutex.new
-            @window_size = T.must(config.window_size)
+            @window_size = window_size
 
             initialize_metrics
           end

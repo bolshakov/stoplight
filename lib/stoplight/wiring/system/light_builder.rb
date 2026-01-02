@@ -125,7 +125,10 @@ module Stoplight
 
         private def memory_metrics_store
           if config.window_size
-            Infrastructure::Memory::Storage::WindowMetrics.new(config:, clock:)
+            Infrastructure::Memory::Storage::WindowMetrics.new(
+              window_size: config.window_size,
+              clock:
+            )
           else
             Infrastructure::Memory::Storage::UnboundedMetrics.new(clock:)
           end

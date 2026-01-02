@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Stoplight::Wiring::MemoryBackend do
+RSpec.describe Stoplight::Wiring::Memory::Backend do
   let(:backend) { described_class.new(clock:, config:) }
   let(:clock) { instance_double(Stoplight::Domain::Clock) }
 
