@@ -29,4 +29,6 @@ module Stoplight
       String name,
       ?notifiers: Array[Domain::StateTransitionNotifier]
     ) -> Domain::Light
+
+  def self.__stoplight__system: (String name) -> Wiring::System
 end

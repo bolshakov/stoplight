@@ -3,7 +3,7 @@ module Stoplight
     class Light
       attr_reader config: Config
       attr_reader green_run_strategy: Strategies::GreenRunStrategy
-      attr_reader yellow_run_strategy: Strategies::YellowRunStrategy[RecoveryLockToken]
+      attr_reader yellow_run_strategy: Strategies::YellowRunStrategy
       attr_reader red_run_strategy: Strategies::RedRunStrategy
       attr_reader state_store: Storage::State
       attr_reader factory: LightFactory
@@ -11,7 +11,7 @@ module Stoplight
       def initialize: (
         Config config,
         green_run_strategy: Strategies::GreenRunStrategy,
-        yellow_run_strategy: Strategies::YellowRunStrategy[RecoveryLockToken],
+        yellow_run_strategy: Strategies::YellowRunStrategy,
         red_run_strategy: Strategies::RedRunStrategy,
         factory: LightFactory,
         state_store: Storage::State

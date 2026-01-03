@@ -22,7 +22,7 @@ module Stoplight
           # @return [Stoplight::Infrastructure::Memory::Storage::RecoveryLockToken, nil]
           def acquire_lock
             if lock.try_lock
-              RecoveryLockToken.new
+              Domain::Storage::RecoveryLockToken.new
             end
           end
 

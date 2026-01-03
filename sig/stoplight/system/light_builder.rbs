@@ -2,16 +2,20 @@ module Stoplight
   module Wiring
     class System
       class LightBuilder < Wiring::LightBuilder
-        @system: System
+        attr_reader system: System
         @failover_system: System
+        @storage_set: StorageSet
+        @key_space: Infrastructure::Redis::Storage::KeySpace
 
         def initialize: (System, settings) -> void
 
         def key_space: -> Infrastructure::Redis::Storage::KeySpace
 
-        private def redis: -> Domain::DataStoreConfig
+        private def redis: -> redis
         private def storage_scripting: -> Infrastructure::Redis::Storage::Scripting
         private def failover_system: -> System
+        private def storage_set: -> StorageSet
+        private def build_backend: -> DataStoreBackend
       end
     end
   end

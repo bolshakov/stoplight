@@ -14,7 +14,7 @@ module Stoplight
           @successes: Infrastructure::Memory::DataStore::SlidingWindow
           @errors: Infrastructure::Memory::DataStore::SlidingWindow
 
-          def initialize: (config: Domain::Config, clock: Domain::Clock) -> void
+          def initialize: (window_size: Integer, clock: Domain::Clock) -> void
 
           def initialize_metrics: -> void
         end

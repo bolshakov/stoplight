@@ -26,13 +26,13 @@ module Stoplight
       def data_store: -> Domain::DataStore[Domain::RecoveryLockToken]
 
       def metrics_store: -> Domain::Storage::Metrics
-      def recovery_lock_store: -> Domain::Storage::RecoveryLock[Domain::RecoveryLockToken]
+      def recovery_lock_store: -> Domain::Storage::RecoveryLock
       def request_tracker: -> Domain::Tracker::Request
       def recovery_probe_tracker: -> Domain::Tracker::RecoveryProbe
       def recovery_metrics_store: -> Domain::Storage::Metrics
 
       def green_run_strategy: -> Domain::Strategies::GreenRunStrategy
-      def yellow_run_strategy: -> Domain::Strategies::YellowRunStrategy[Domain::RecoveryLockToken]
+      def yellow_run_strategy: -> Domain::Strategies::YellowRunStrategy
       def red_run_strategy: -> Domain::Strategies::RedRunStrategy
       def create_data_store: (Domain::DataStoreConfig data_store_config) -> Domain::DataStore[Domain::RecoveryLockToken]
       def memory_registry: -> Concurrent::Map[Integer, Infrastructure::Memory::DataStore]

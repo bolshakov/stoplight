@@ -2,7 +2,7 @@ module Stoplight
   module Infrastructure
     module Redis
       module Storage
-        class RecoveryLock < Domain::Storage::RecoveryLock[RecoveryLockToken]
+        class RecoveryLock < Domain::Storage::RecoveryLock
           attr_reader config: Domain::Config
           attr_reader redis: redis
           attr_reader scripting: Scripting

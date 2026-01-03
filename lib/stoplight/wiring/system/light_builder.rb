@@ -17,123 +17,37 @@ module Stoplight
           light_name: config.name
         )
 
-        def cool_off_time = config.cool_off_time
+        private def state_store = storage_set.state_store
+        private def recovery_lock_store = storage_set.recovery_lock_store
+        private def recovery_metrics_store = storage_set.recovery_metrics_store
+        private def metrics_store = storage_set.metrics_store
 
-        private def state_store
-          @state_store ||= case data_store_config
-          in Stoplight::DataStore::Memory
-            Infrastructure::Memory::Storage::State.new(clock:, cool_off_time:)
-          in Stoplight::DataStore::Redis
-            Infrastructure::FailSafe::Storage::State.new(
-              primary_store: Infrastructure::Redis::Storage::State.new(
-                redis: data_store_config.redis,
-                scripting:,
-                key_space:,
-                cool_off_time:,
-                clock:
-              ),
-              error_notifier:,
-              failover_store: Infrastructure::Memory::Storage::State.new(clock:, cool_off_time:),
-              circuit_breaker: failover_system.light("redis")
-            )
-          end
-        end
-
-        def recovery_lock_store
-          @recovery_lock_store ||= case data_store_config
-          in Stoplight::DataStore::Memory
-            Infrastructure::Memory::Storage::RecoveryLock.new
-          in Stoplight::DataStore::Redis
-            Infrastructure::FailSafe::Storage::RecoveryLock.new(
-              primary_store: Infrastructure::Redis::Storage::RecoveryLock.new(
-                config:,
-                redis: data_store_config.redis,
-                scripting:,
-                key_space:
-              ),
-              error_notifier:,
-              failover_store: Infrastructure::Memory::Storage::RecoveryLock.new,
-              circuit_breaker: failover_system.light("redis")
-            )
-          end
-        end
-
-        private def recovery_metrics_store
-          @recovery_metrics_store ||= case data_store_config
-          in DataStore::Redis
-            redis_recovery_metrics_store
-          in DataStore::Memory
-            memory_recovery_metrics_store
-          end
-        end
-
-        private def redis_recovery_metrics_store
-          Infrastructure::FailSafe::Storage::Metrics.new(
-            error_notifier:,
-            primary_store: Infrastructure::Redis::Storage::RecoveryMetrics.new(
-              clock:,
-              redis:,
-              scripting: storage_scripting,
-              key_space:
-            ),
-            failover_store: Infrastructure::Memory::Storage::RecoveryMetrics.new(clock:),
-            circuit_breaker: failover_system.light("redis")
-          )
-        end
-
-        private def memory_recovery_metrics_store
-          Infrastructure::Memory::Storage::RecoveryMetrics.new(clock:)
-        end
-
-        private def metrics_store
-          @metrics_store ||= case data_store_config
-          in DataStore::Redis
-            redis_metrics_store
-          in DataStore::Memory
-            memory_metrics_store
-          end
-        end
-
-        private def redis_metrics_store
-          if config.window_size
-            Infrastructure::FailSafe::Storage::Metrics.new(
-              error_notifier:,
-              primary_store: Infrastructure::Redis::Storage::WindowMetrics.new(
-                config:,
-                redis:,
-                scripting: storage_scripting,
-                clock:,
-                key_space:
-              ),
-              failover_store: Infrastructure::Memory::Storage::WindowMetrics.new(config:, clock:),
-              circuit_breaker: failover_system.light("redis")
-            )
+        private def redis
+          case data_store_config
+          when DataStore::Redis
+            data_store_config.redis
           else
-            Infrastructure::FailSafe::Storage::Metrics.new(
-              error_notifier:,
-              primary_store: Infrastructure::Redis::Storage::UnboundedMetrics.new(
-                clock:,
-                redis:,
-                scripting: storage_scripting,
-                key_space:
-              ),
-              failover_store: Infrastructure::Memory::Storage::UnboundedMetrics.new(clock:),
-              circuit_breaker: failover_system.light("redis")
-            )
+            raise TypeError, "should be redis"
           end
         end
-
-        private def memory_metrics_store
-          if config.window_size
-            Infrastructure::Memory::Storage::WindowMetrics.new(config:, clock:)
-          else
-            Infrastructure::Memory::Storage::UnboundedMetrics.new(clock:)
-          end
-        end
-
-        private def redis = data_store_config.redis
         private def storage_scripting = Infrastructure::Redis::Storage::Scripting.new(redis:)
         private def failover_system = @failover_system ||= Stoplight.__stoplight__system("failover-#{system.name}")
+
+        def storage_set
+          @storage_set ||= StorageSetBuilder.new(backend: build_backend, windowed: !config.window_size.nil?).build
+        end
+
+        private def build_backend
+          case data_store_config
+          in DataStore::Memory
+            Memory::Backend.new(clock:, config:)
+          in DataStore::Redis
+            Redis::Backend.new(
+              redis:, scripting: storage_scripting, key_space:, clock:, config:, error_notifier:,
+              failover_light: failover_system.light("redis")
+            )
+          end
+        end
       end
     end
   end

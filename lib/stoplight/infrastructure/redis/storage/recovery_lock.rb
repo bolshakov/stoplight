@@ -50,7 +50,7 @@ module Stoplight
           end
 
           def acquire_lock
-            recovery_lock = RecoveryLockToken.new
+            recovery_lock = Domain::Storage::RecoveryLockToken.new
 
             acquired = redis.then do |client|
               client.set(lock_key, recovery_lock.token, nx: true, px: lock_timeout)
@@ -63,7 +63,7 @@ module Stoplight
           # @return [void]
           def release_lock(recovery_lock)
             scripting.call(
-              :release_lock,
+              :"recovery_lock/release_lock",
               keys: [lock_key], args: [recovery_lock.token]
             )
           end

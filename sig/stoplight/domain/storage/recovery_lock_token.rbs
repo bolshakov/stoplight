@@ -1,7 +1,10 @@
 module Stoplight
-  module Infrastructure
-    module Memory
+  module Domain
+    module Storage
       class RecoveryLockToken < Domain::RecoveryLockToken
+        attr_reader token: String
+
+        def initialize: -> void
       end
     end
   end

@@ -1,0 +1,15 @@
+# frozen_string_literal: true
+
+module Stoplight
+  module Wiring
+    class StorageSetBuilder
+      attr_reader backend: DataStoreBackend
+      attr_reader windowed: bool
+
+      def initialize: (backend: DataStoreBackend, windowed: bool) -> void
+
+      def build: -> StorageSet
+      def metrics_store: -> Domain::Storage::Metrics
+    end
+  end
+end

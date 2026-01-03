@@ -11,12 +11,12 @@ module Stoplight
     # @example Validating required configuration
     #   @window_size = T.must(config.window_size)
     #
-    # @raise [ArgumentError] if value is nil
+    # @raise [TypeError] if value is nil
     # @return [T] the non-nil value
     #
     def self.must(value)
       if value.nil?
-        raise ArgumentError, "must not have nil value"
+        raise TypeError, "must not have nil value"
       else
         value
       end

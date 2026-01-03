@@ -42,10 +42,10 @@ module Stoplight
           def acquire_lock
             fallback = ->(error) {
               error_notifier.call(error) if error
-              failover_store.acquire_lock
+              wrap_token(:failover, failover_store.acquire_lock)
             }
             circuit_breaker.run(fallback) do
-              primary_store.acquire_lock
+              wrap_token(:primary, primary_store.acquire_lock)
             end
           end
 
@@ -55,18 +55,22 @@ module Stoplight
           #
           # @param recovery_lock_token [Stoplight::Domain::RecoveryLockToken]
           def release_lock(recovery_lock_token)
-            case recovery_lock_token
-            in Redis::RecoveryLockToken
+            case recovery_lock_token.origin
+            in :primary
               fallback = ->(error) {
                 error_notifier.call(error) if error
               }
 
               circuit_breaker.run(fallback) do
-                primary_store.release_lock(recovery_lock_token)
+                primary_store.release_lock(recovery_lock_token.underlying_token)
               end
-            in Memory::RecoveryLockToken
-              failover_store.release_lock(recovery_lock_token)
+            in :failover
+              failover_store.release_lock(recovery_lock_token.underlying_token)
             end
+          end
+
+          private def wrap_token(origin, token)
+            RecoveryLockToken.new(origin:, underlying_token: token) if token
           end
         end
       end

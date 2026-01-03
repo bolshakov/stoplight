@@ -3,10 +3,9 @@
 require_relative "../../data_store/window_metrics_snapshot"
 
 RSpec.describe Stoplight::Infrastructure::Memory::Storage::WindowMetrics do
-  subject(:metrics) { described_class.new(config:, clock:) }
+  subject(:metrics) { described_class.new(window_size:, clock:) }
 
   let(:clock) { Stoplight::Infrastructure::SystemClock.new }
-  let(:config) { instance_double(Stoplight::Domain::Config, window_size:) }
   let(:window_size) { 300 }
 
   it_behaves_like "a window metrics snapshot" do

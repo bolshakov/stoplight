@@ -1,13 +1,9 @@
 # frozen_string_literal: true
 
-require "securerandom"
-
 module Stoplight
-  module Infrastructure
-    module Redis
+  module Domain
+    module Storage
       class RecoveryLockToken < Domain::RecoveryLockToken
-        # @!attribute token
-        #   @return [String]
         attr_reader :token
 
         def initialize
