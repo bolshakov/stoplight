@@ -3,6 +3,19 @@
 module Stoplight
   module Wiring
     module Memory
+      # In-memory storage backend for single-process deployments.
+      #
+      # All storage components use thread-safe in-memory data structures.
+      # State is not shared across processes and is lost on restart.
+      #
+      # Memory backend is also used as the fallback layer for Redis backend
+      # when Redis is unavailable.
+      #
+      # @example
+      #   backend = Memory::Backend.new(clock: SystemClock.new, config:)
+      #   backend.state_store #=> Memory::Storage::State
+      #
+      # @api private
       class Backend < DataStoreBackend
         def initialize(clock:, config:)
           @clock = clock

@@ -1,22 +1,36 @@
 module Stoplight
   module Wiring
-    class StorageSet[T < Domain::RecoveryLockToken] < Data
+    # Immutable container for all storage components required by a Light.
+    #
+    # StorageSet groups the four storage interfaces that a circuit breaker needs:
+    # metrics tracking, recovery metrics, state persistence, and recovery locking.
+    # This allows the storage layer to be constructed once and passed as a unit,
+    # making dependencies explicit and simplifying Light construction.
+    #
+    # @example
+    #   storage_set = StorageSetBuilder.new(backend:, windowed: true).build
+    #   storage_set.metrics_store      #=> WindowMetrics instance
+    #   storage_set.state_store        #=> State instance
+    #
+    # @see StorageSetBuilder
+    # @api private
+    class StorageSet < Data
       attr_reader metrics_store: Domain::Storage::Metrics
       attr_reader recovery_metrics_store: Domain::Storage::Metrics
-      attr_reader state_state: Domain::Storage::State
+      attr_reader state_store: Domain::Storage::State
       attr_reader recovery_lock_store: Domain::Storage::RecoveryLock
 
       def self.new: (
         metrics_store: Domain::Storage::Metrics,
         recovery_metrics_store: Domain::Storage::Metrics,
-        state_state: Domain::Storage::State,
+        state_store: Domain::Storage::State,
         recovery_lock_store: Domain::Storage::RecoveryLock
       ) -> instance
 
       def initialize: (
           metrics_store: Domain::Storage::Metrics,
           recovery_metrics_store: Domain::Storage::Metrics,
-          state_state: Domain::Storage::State,
+          state_store: Domain::Storage::State,
           recovery_lock_store: Domain::Storage::RecoveryLock
         ) -> void
     end

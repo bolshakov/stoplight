@@ -3,6 +3,30 @@
 module Stoplight
   module Wiring
     module Redis
+      # Redis storage backend with automatic failover to in-memory storage.
+      #
+      # Every storage component is wrapped in a FailSafe decorator that catches
+      # Redis connection errors and falls back to a Memory backend. This ensures
+      # circuit breakers remain functional even when Redis is unavailable.
+      #
+      # The failover behavior is coordinated through a dedicated circuit breaker
+      # (`failover_light`) that prevents repeated Redis connection attempts during
+      # an outage.
+      #
+      # @example
+      #   backend = Redis::Backend.new(
+      #     redis: redis_connection,
+      #     scripting: Scripting.new(redis:),
+      #     key_space: KeySpace.build(system_name: "payments", light_name: "stripe"),
+      #     config: light_config,
+      #     error_notifier: ->(e) { Logger.error(e) },
+      #     failover_light: Stoplight("redis-failover"),
+      #     clock: SystemClock.new
+      #   )
+      #
+      #   backend.state_store #=> FailSafe::State wrapping Redis::State
+      #
+      # @api private
       class Backend < DataStoreBackend
         def initialize(redis:, scripting:, key_space:, config:, error_notifier:, failover_light:, clock:)
           @redis = redis
