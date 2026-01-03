@@ -4,7 +4,7 @@ RSpec.describe Stoplight::Infrastructure::Redis::Storage::State, :redis do
   shared_examples Stoplight::Infrastructure::Redis::Storage::State do
     subject(:storage) { described_class.new(clock:, redis: connection, scripting:, key_space:, cool_off_time:) }
 
-    let(:scripting) { Stoplight::Infrastructure::Redis::DataStore::Scripting.new(redis:) }
+    let(:scripting) { Stoplight::Infrastructure::Redis::Storage::Scripting.new(redis:) }
     let(:key_space) { Stoplight::Infrastructure::Redis::Storage::KeySpace.build(light_name:, system_name:) }
     let(:clock) { Stoplight::Infrastructure::SystemClock.new }
 

@@ -2,7 +2,7 @@
 
 RSpec.describe Stoplight::Infrastructure::Redis::Storage::RecoveryLock, :redis do
   let(:store) { described_class.new(redis:, scripting:, config:, key_space:) }
-  let(:scripting) { Stoplight::Infrastructure::Redis::DataStore::Scripting.new(redis:) }
+  let(:scripting) { Stoplight::Infrastructure::Redis::Storage::Scripting.new(redis:) }
   let(:config) { instance_double(Stoplight::Domain::Config, cool_off_time_in_milliseconds:) }
   let(:key_space) { Stoplight::Infrastructure::Redis::Storage::KeySpace.build(light_name:, system_name:) }
 

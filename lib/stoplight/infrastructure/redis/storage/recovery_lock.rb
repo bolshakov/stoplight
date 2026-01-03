@@ -63,7 +63,7 @@ module Stoplight
           # @return [void]
           def release_lock(recovery_lock)
             scripting.call(
-              :release_lock,
+              :"recovery_lock/release_lock",
               keys: [lock_key], args: [recovery_lock.token]
             )
           end
