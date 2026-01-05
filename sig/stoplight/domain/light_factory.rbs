@@ -2,32 +2,35 @@ module Stoplight
   module Domain
     class LightFactory
       def with: (
-          ?cool_off_time: Integer,
-          ?threshold: (Integer | Float),
-          ?recovery_threshold: Integer,
-          ?window_size: Integer,
-          ?tracked_errors: Array[StandardError],
-          ?skipped_errors: Array[StandardError],
-          ?error_notifier: Infrastructure::error_notifier,
-          ?notifiers: Array[Notifier::Base],
-          ?data_store: Domain::DataStoreConfig,
-          ?traffic_control: traffic_control,
-          ?traffic_recovery: traffic_recovery,
+          ?name: String | undefined,
+          ?cool_off_time: cool_off_time | undefined,
+          ?threshold: threshold | undefined,
+          ?recovery_threshold: recovery_threshold | undefined,
+          ?window_size: window_size | undefined,
+          ?tracked_errors: errors | undefined,
+          ?skipped_errors: errors | undefined,
+          ?error_notifier: error_notifier | undefined,
+          ?notifiers: notifiers | undefined,
+          ?data_store: data_store | undefined,
+          ?traffic_control: traffic_control | undefined,
+          ?traffic_recovery: traffic_recovery | undefined,
       ) -> LightFactory
+
       def build: -> Light
 
       def build_with: (
-          ?cool_off_time: Integer,
-          ?threshold: (Integer | Float),
-          ?recovery_threshold: Integer,
-          ?window_size: Integer,
-          ?tracked_errors: Array[StandardError],
-          ?skipped_errors: Array[StandardError],
-          ?error_notifier: Infrastructure::error_notifier,
-          ?notifiers: Array[Notifier::Base],
-          ?data_store: Domain::DataStoreConfig,
-          ?traffic_control: traffic_control,
-          ?traffic_recovery: traffic_recovery,
+          name: String | undefined,
+          cool_off_time: cool_off_time | undefined,
+          threshold: threshold | undefined,
+          recovery_threshold: recovery_threshold | undefined,
+          window_size: window_size | undefined,
+          tracked_errors: errors | undefined,
+          skipped_errors: errors | undefined,
+          error_notifier: error_notifier | undefined,
+          notifiers: notifiers | undefined,
+          data_store: data_store | undefined,
+          traffic_control: traffic_control | undefined,
+          traffic_recovery: traffic_recovery | undefined,
       ) -> Light
     end
   end

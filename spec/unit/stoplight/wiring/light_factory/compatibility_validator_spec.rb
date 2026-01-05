@@ -1,11 +1,18 @@
 # frozen_string_literal: true
 
 RSpec.describe Stoplight::Wiring::LightFactory::CompatibilityValidator do
-  subject(:validate) { described_class.call(config, dependencies) }
+  subject(:validate) { described_class.call(config:) }
 
-  let(:dependencies) { {traffic_control:, traffic_recovery:} }
-
-  let(:config) { instance_double(Stoplight::Domain::Config, threshold:, window_size:, recovery_threshold:) }
+  let(:config) do
+    instance_double(
+      Stoplight::Domain::Config,
+      threshold:,
+      window_size:,
+      recovery_threshold:,
+      traffic_control:,
+      traffic_recovery:
+    )
+  end
   let(:threshold) { 3 }
   let(:window_size) { nil }
   let(:recovery_threshold) { 1 }

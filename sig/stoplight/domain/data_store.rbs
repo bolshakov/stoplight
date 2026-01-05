@@ -2,7 +2,7 @@
 
 module Stoplight
   module Domain
-    class DataStore[T < RecoveryLockToken]
+    class DataStore
       METRICS_RETENTION_TIME: Integer
 
       def names: -> Array[String]
@@ -27,9 +27,9 @@ module Stoplight
 
       def set_state: (Config config, state state) -> state
 
-      def acquire_recovery_lock: (Config config) -> T?
+      def acquire_recovery_lock: (Config config) -> RecoveryLockToken?
 
-      def release_recovery_lock: (T lock) -> void
+      def release_recovery_lock: (RecoveryLockToken lock) -> void
 
       def transition_to_color: (Config config, color color) -> bool
 

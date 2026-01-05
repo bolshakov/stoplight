@@ -33,7 +33,20 @@ module Stoplight
       # @raise [NotImplementedError] Must be implemented by subclass
       # @abstract
       # :nocov:
-      def with(**settings)
+      def with(
+        name: T.undefined,
+        cool_off_time: T.undefined,
+        threshold: T.undefined,
+        recovery_threshold: T.undefined,
+        window_size: T.undefined,
+        tracked_errors: T.undefined,
+        skipped_errors: T.undefined,
+        data_store: T.undefined,
+        error_notifier: T.undefined,
+        notifiers: T.undefined,
+        traffic_control: T.undefined,
+        traffic_recovery: T.undefined
+      )
         raise NotImplementedError
       end
 
@@ -68,8 +81,34 @@ module Stoplight
       #
       #   # You can do:
       #   light = factory.build_with(threshold: 10)
-      def build_with(**settings)
-        with(**settings).build
+      def build_with(
+        name: T.undefined,
+        cool_off_time: T.undefined,
+        threshold: T.undefined,
+        recovery_threshold: T.undefined,
+        window_size: T.undefined,
+        tracked_errors: T.undefined,
+        skipped_errors: T.undefined,
+        data_store: T.undefined,
+        error_notifier: T.undefined,
+        notifiers: T.undefined,
+        traffic_control: T.undefined,
+        traffic_recovery: T.undefined
+      )
+        with(
+          name:,
+          cool_off_time:,
+          threshold:,
+          recovery_threshold:,
+          window_size:,
+          tracked_errors:,
+          skipped_errors:,
+          data_store:,
+          error_notifier:,
+          notifiers:,
+          traffic_control:,
+          traffic_recovery:
+        ).build
       end
     end
     # steep:ignore:end

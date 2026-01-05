@@ -4,11 +4,13 @@ module Stoplight
   module Wiring
     class System
       class LightFactory < Wiring::LightFactory
-        ALLOWED_LIGHT_SETTINGS: Array[Symbol]
+        class InternalLightFactory < Domain::LightFactory
+        end
 
         attr_reader system: System
+        attr_reader settings: Settings
 
-        def initialize: ((dependency_overrides & Domain::config_overrides & {system: System})) -> void
+        def initialize: (system: System, settings: Settings) -> void
       end
     end
   end

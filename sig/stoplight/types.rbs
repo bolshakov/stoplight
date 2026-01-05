@@ -1,5 +1,14 @@
 module Stoplight
   module Types
+    class Undefined
+      include Singleton
+
+      def self.instance: -> instance
+      def inspect: -> String
+      def to_s: -> String
+    end
+
+    def self.undefined: -> undefined
     def self.must: [T < Object] (T? value) -> T
   end
 end

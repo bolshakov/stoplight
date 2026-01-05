@@ -1,0 +1,54 @@
+module Stoplight
+  module Wiring
+    class Settings
+      attr_reader name: option[String]
+      attr_reader cool_off_time: option[cool_off_time]
+      attr_reader threshold: option[threshold]
+      attr_reader recovery_threshold: option[recovery_threshold]
+      attr_reader window_size: option[window_size]
+      attr_reader skipped_errors: option[errors]
+      attr_reader tracked_errors: option[errors]
+      attr_reader traffic_control: option[traffic_control]
+      attr_reader traffic_recovery: option[traffic_recovery]
+      attr_reader error_notifier: option[error_notifier]
+      attr_reader notifiers: option[notifiers]
+      attr_reader data_store: option[data_store]
+
+      EMPTY: Settings
+      def self.empty: -> Settings
+
+      def initialize: (
+          name: option[String],
+          cool_off_time: option[cool_off_time],
+          threshold: option[threshold],
+          recovery_threshold: option[recovery_threshold],
+          window_size: option[window_size],
+          skipped_errors: option[errors],
+          tracked_errors: option[errors],
+          traffic_control: option[traffic_control],
+          traffic_recovery: option[traffic_recovery],
+          error_notifier: option[error_notifier],
+          notifiers: option[notifiers],
+          data_store: option[data_store]
+        ) -> void
+
+      def extend_with: (
+          ?name: String | undefined,
+          ?cool_off_time: cool_off_time | undefined,
+          ?threshold: threshold | undefined,
+          ?recovery_threshold: recovery_threshold | undefined,
+          ?window_size: window_size | undefined,
+          ?skipped_errors: errors | undefined,
+          ?tracked_errors: errors | undefined,
+          ?traffic_control: traffic_control | undefined,
+          ?traffic_recovery: traffic_recovery | undefined,
+          ?error_notifier: error_notifier | undefined,
+          ?notifiers: notifiers | undefined,
+          ?data_store: data_store | undefined
+        ) -> Settings
+
+      def empty?: -> bool
+      def to_h: -> Hash[Symbol, option[untyped]]
+    end
+  end
+end

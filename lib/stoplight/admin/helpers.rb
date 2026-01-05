@@ -20,10 +20,10 @@ module Stoplight
             "Please configure a different data store in your Stoplight configuration."
         else
           Stoplight::Wiring::LightBuilder.new(
-            {
-              data_store: settings.data_store,
-              config: Wiring::Light::DefaultConfig
-            }
+            config: Wiring::Light::DefaultConfig.with(
+              data_store: settings.data_store
+            ),
+            factory: nil
           ).__send__(:data_store)
         end
       end

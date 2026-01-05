@@ -1,5 +1,11 @@
 module Stoplight
+  include Wiring::PublicApi
+
   T: singleton(Types)
+  CONFIG_MUTEX: Mutex
+
+  type undefined = Types::Undefined
+
   type timestamp = Float | Integer
   type redis = ::Redis | ConnectionPool[::Redis]
 
@@ -8,6 +14,13 @@ module Stoplight
   type error_notifier = Infrastructure::error_notifier
   type traffic_control = Symbol | Hash[Symbol, Hash[Symbol, Integer]]
   type traffic_recovery = Symbol
+  type cool_off_time = (Float | Integer)
+  type threshold = (Float | Integer)
+  type recovery_threshold = Integer
+  type window_size = Integer?
+  type errors = Array[singleton(StandardError)]
+  type data_store = Domain::DataStoreConfig
+  type notifiers = Array[Domain::StateTransitionNotifier]
 
   module Color = Domain::Color
   module State = Domain::State
@@ -25,10 +38,82 @@ module Stoplight
     class Logger = Infrastructure::Notifier::Logger
   end
 
-  def self.system_light: (
+  self.@configured:  bool?
+  self.@default_configuration: Wiring::DefaultConfiguration?
+  self.@systems: Concurrent::Map[String, Domain::System]
+  self.@default_light_factory: Wiring::LightFactory?
+
+  def self.configure: (?trust_me_im_an_engineer: bool) ?{ (Wiring::DefaultConfiguration) -> void } -> void
+  def self.warn_if_reconfiguring: (bool) { () -> void } -> void
+  def self.configured?: -> bool
+  def self.__stoplight__reset!: -> void
+
+  def self.light: (
       String name,
-      ?notifiers: Array[Domain::StateTransitionNotifier]
+      ?cool_off_time: cool_off_time | undefined,
+      ?threshold: threshold | undefined,
+      ?recovery_threshold: recovery_threshold | undefined,
+      ?window_size: window_size | undefined,
+      ?tracked_errors: errors | undefined,
+      ?skipped_errors: errors | undefined,
+      ?data_store: data_store | undefined,
+      ?error_notifier: error_notifier | undefined,
+      ?notifiers: notifiers | undefined,
+      ?traffic_control: traffic_control | undefined,
+      ?traffic_recovery: traffic_recovery | undefined,
     ) -> Domain::Light
 
-  def self.__stoplight__system: (String name) -> Wiring::System
+  def self.system_light: (
+      String name,
+      ?cool_off_time: cool_off_time | undefined,
+      ?threshold: threshold | undefined,
+      ?recovery_threshold: recovery_threshold | undefined,
+      ?window_size: window_size | undefined,
+      ?tracked_errors: errors | undefined,
+      ?skipped_errors: errors | undefined,
+      ?data_store: data_store | undefined,
+      ?error_notifier: error_notifier | undefined,
+      ?notifiers: notifiers | undefined,
+      ?traffic_control: traffic_control | undefined,
+      ?traffic_recovery: traffic_recovery | undefined,
+    ) -> Domain::Light
+
+  def self.systems: -> Concurrent::Map[String, Domain::System]
+  def self.default_configuration: -> Wiring::DefaultConfiguration
+  def self.ensure_configured: -> void
+  def self.__stoplight__system: (
+      _ToS name,
+      ?cool_off_time: cool_off_time | undefined,
+      ?threshold: threshold | undefined,
+      ?recovery_threshold: recovery_threshold | undefined,
+      ?window_size: window_size | undefined,
+      ?tracked_errors: errors | undefined,
+      ?skipped_errors: errors | undefined,
+      ?data_store: data_store | undefined,
+      ?error_notifier: error_notifier | undefined,
+      ?notifiers: notifiers | undefined,
+      ?traffic_control: traffic_control | undefined,
+      ?traffic_recovery: traffic_recovery | undefined,
+    ) -> Domain::System
+  def self.__stoplight__default_configuration: -> Wiring::DefaultConfiguration
+  def self.__stoplight__default_light_factory: -> Wiring::LightFactory
 end
+
+module Kernel
+  # For a method usable both as Kernel.Stoplight() and just Stoplight()
+  def self?.Stoplight: (
+      String name,
+      ?cool_off_time: Stoplight::cool_off_time | Stoplight::undefined,
+      ?threshold: Stoplight::threshold | Stoplight::undefined,
+      ?recovery_threshold: Stoplight::recovery_threshold | Stoplight::undefined,
+      ?window_size: Stoplight::window_size | Stoplight::undefined,
+      ?tracked_errors: Stoplight::errors | Stoplight::undefined,
+      ?skipped_errors: Stoplight::errors | Stoplight::undefined,
+      ?data_store: Stoplight::data_store | Stoplight::undefined,
+      ?error_notifier: Stoplight::error_notifier | Stoplight::undefined,
+      ?notifiers: Stoplight::notifiers | Stoplight::undefined,
+      ?traffic_control: Stoplight::traffic_control | Stoplight::undefined,
+      ?traffic_recovery: Stoplight::traffic_recovery | Stoplight::undefined,
+  ) -> Stoplight::Domain::Light
+end
+

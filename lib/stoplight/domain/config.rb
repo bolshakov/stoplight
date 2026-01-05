@@ -12,7 +12,12 @@ module Stoplight
       :recovery_threshold,
       :window_size,
       :tracked_errors,
-      :skipped_errors
+      :skipped_errors,
+      :traffic_control,
+      :traffic_recovery,
+      :error_notifier,
+      :notifiers,
+      :data_store
     )
     class Config
       # # @!attribute [r] name
@@ -45,7 +50,7 @@ module Stoplight
       end
 
       def cool_off_time_in_milliseconds
-        cool_off_time * 1_000
+        (cool_off_time * 1_000).to_i
       end
     end
   end

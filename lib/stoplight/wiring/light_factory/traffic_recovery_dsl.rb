@@ -3,7 +3,7 @@
 module Stoplight
   module Wiring
     class LightFactory
-      TrafficRecoveryDsl = proc do |value|
+      TrafficRecoveryDsl = ->(value) {
         case value
         in Domain::TrafficRecovery::Base
           value
@@ -15,7 +15,7 @@ module Stoplight
               * :consecutive_successes
           ERROR
         end
-      end
+      }
     end
   end
 end
