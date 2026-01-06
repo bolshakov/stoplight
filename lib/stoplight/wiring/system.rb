@@ -44,31 +44,22 @@ module Stoplight
     #   the same name returns the cached instance.
     #
     # @api private
-    class System
-      # @dynamic name
+    class System < Domain::System
       attr_reader :name
-      # @dynamic light_factory
-      private attr_reader :light_factory
-      # @dynamic lights
       private attr_reader :lights
+      private attr_reader :settings
 
       # @api private
-      def initialize(name, **defaults)
-        @name = name.to_s
-        @light_factory = LightFactory.new(
-          {
-            system: self,
-            **defaults,
-            data_store: defaults.fetch(:data_store, Default::DATA_STORE),
-            traffic_recovery: defaults.fetch(:traffic_recovery, Default::TRAFFIC_RECOVERY),
-            traffic_control: defaults.fetch(:traffic_control, Default::TRAFFIC_CONTROL),
-            notifiers: defaults.fetch(:notifiers, Default::NOTIFIERS),
-            error_notifier: defaults.fetch(:error_notifier, Default::ERROR_NOTIFIER)
-          }
-        )
+      def initialize(name, settings:)
+        @name = name
+        @settings = settings
         @lights = Concurrent::Map.new
 
-        light_factory.validate_configuration!
+        validate_configuration!
+      end
+
+      private def validate_configuration!
+        LightFactory.new(system: self, settings:).validate_configuration!
       end
 
       # Creates or retrieves a light.
@@ -105,32 +96,47 @@ module Stoplight
       #
       # @note Thread-safe: multiple threads can safely call this method concurrently
       #
-      def light(name, **settings)
-        light, _ = lights.compute(name) do |(existing_light, existing_normalized_settings)|
-          normalized_settings = normalize_settings(settings)
-
-          if existing_light
-            if normalized_settings.empty? || normalized_settings == existing_normalized_settings
-              [existing_light, existing_normalized_settings]
+      def light(
+        name,
+        cool_off_time: T.undefined,
+        threshold: T.undefined,
+        recovery_threshold: T.undefined,
+        window_size: T.undefined,
+        tracked_errors: T.undefined,
+        skipped_errors: T.undefined,
+        traffic_control: T.undefined,
+        traffic_recovery: T.undefined
+      )
+        light_settings = settings.extend_with(
+          name:,
+          cool_off_time:,
+          threshold:,
+          recovery_threshold:,
+          window_size:,
+          tracked_errors:,
+          skipped_errors:,
+          traffic_control:,
+          traffic_recovery:
+        )
+        light, _ = lights.compute(name) do |existing|
+          if existing
+            existing_light, existing_settings = existing
+            if light_settings.empty? || light_settings == existing_settings
+              [existing_light, existing_settings]
             else
               raise Stoplight::Error::ConfigurationError, <<~MSG
                 Light name `#{name}` reused with different settings:
-                  existing settings: #{existing_normalized_settings}
-                  new settings: #{normalized_settings}
+                  existing settings: #{existing_settings}
+                  new settings:      #{light_settings}
 
                 You cannot use the same light name with different settings.
               MSG
             end
           else
-            [light_factory.build_with(name:, **settings), normalized_settings]
+            [LightFactory.new(system: self, settings: light_settings).build, light_settings]
           end
         end
         light
-      end
-
-      # @param settings [Hash]
-      private def normalize_settings(settings)
-        settings.sort.to_h #: Domain::config_overrides
       end
     end
   end

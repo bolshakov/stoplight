@@ -6,7 +6,7 @@ module Stoplight
       attr_reader time: Time
       alias occurred_at time
 
-      def self.from_error: (StandardError error, time: Time) -> instance
+      def self.from_error: (StandardError error, time: Time) -> Failure
 
       def initialize: (String error_class, String error_message, Time time) -> void
 

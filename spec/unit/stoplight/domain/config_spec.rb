@@ -10,6 +10,11 @@ RSpec.describe Stoplight::Domain::Config do
       window_size: nil,
       tracked_errors: [StandardError],
       skipped_errors: [],
+      traffic_control: instance_double(Stoplight::Domain::TrafficControl::Base),
+      traffic_recovery: instance_double(Stoplight::Domain::TrafficRecovery::Base),
+      error_notifier: ->(e) {},
+      notifiers: [],
+      data_store: instance_double(Stoplight::Domain::DataStoreConfig),
       **settings
     )
   end

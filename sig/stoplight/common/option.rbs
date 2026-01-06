@@ -1,0 +1,29 @@
+module Stoplight
+  module Common
+    type option[T] = Common::Some[T] | Common::None
+
+    class Some[T]
+      attr_reader value: T
+
+      def initialize: (T value) -> void
+
+      def get_or_else: [U] { () -> untyped } -> T
+      def map: [U] { (T) -> U } -> Some[U]
+      def ==: (untyped) -> bool
+      def empty?: -> false
+    end
+
+    class None
+      def get_or_else: [U] { () -> U } -> U
+      def map: [U] { (untyped) -> U } -> None
+      def ==: (untyped) -> bool
+      def empty?: -> true
+    end
+
+    def self.some: [T] (T value) -> Some[T]
+    def self.none: -> None
+    # def self.option: [T] (T? value) -> option[T]
+    # def self.provided: (undefined) -> None
+    #                  | [T] (T value) -> Some[T]
+  end
+end

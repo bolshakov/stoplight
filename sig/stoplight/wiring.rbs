@@ -1,5 +1,7 @@
 module Stoplight
   module Wiring
+    type option[T] = Common::option[T]
+
     type dependency_overrides = {
         ?error_notifier: Infrastructure::error_notifier,
         ?notifiers: Array[Notifier::Base],

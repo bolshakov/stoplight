@@ -13,18 +13,14 @@ module Stoplight
       #
       # @raise [Stoplight::Error::ConfigurationError] if incompatible
       class CompatibilityValidator
-        # @dynamic dependencies
-        private attr_reader :dependencies
-        # @dynamic config
         private attr_reader :config
 
         class << self
-          def call(config, dependencies) = new(config, dependencies).call
+          def call(config:) = new(config:).call
         end
 
-        def initialize(config, dependencies)
+        def initialize(config:)
           @config = config
-          @dependencies = dependencies
         end
 
         def call
@@ -33,7 +29,7 @@ module Stoplight
         end
 
         private def validate_traffic_control!
-          traffic_control = dependencies.fetch(:traffic_control)
+          traffic_control = config.traffic_control
           traffic_control.check_compatibility(config).then do |compatibility_result|
             if compatibility_result.incompatible?
               raise Domain::Error::ConfigurationError,
@@ -44,7 +40,7 @@ module Stoplight
         end
 
         def validate_traffic_recovery!
-          traffic_recovery = dependencies.fetch(:traffic_recovery)
+          traffic_recovery = config.traffic_recovery
           traffic_recovery.check_compatibility(config).then do |compatibility_result|
             if compatibility_result.incompatible?
               raise Domain::Error::ConfigurationError,

@@ -34,50 +34,23 @@ module Stoplight
       MEMORY_REGISTRY = Concurrent::Map.new
       private_constant :MEMORY_REGISTRY
 
-      # @!attribute data_store_config
-      #   @return [Stoplight::DataStore::Bose]
-      # @dynamic data_store_config
       private attr_reader :data_store_config
-
-      # @!attribute error_notifier
-      #   @return [Proc]
-      # @dynamic error_notifier
       private attr_reader :error_notifier
-
-      # @!attribute traffic_recovery
-      #   @return [Stoplight::Domain::TrafficRecovery::Base]
-      # @dynamic traffic_recovery
+      private attr_reader :config
+      private attr_reader :factory
+      private attr_reader :clock
+      private attr_reader :traffic_control
       private attr_reader :traffic_recovery
 
-      # @!attribute traffic_control
-      #   @return [Stoplight::Domain::TrafficControl::Base]
-      # @dynamic traffic_control
-      private attr_reader :traffic_control
-
-      # @!attribute config
-      #   @return [Stoplight::Domain::Config]
-      # @dynamic config
-      private attr_reader :config
-
-      # @!attribute factory
-      #   @return [Stoplight::Domain::LightFactory]
-      # @dynamic factory
-      private attr_reader :factory
-
-      # @!attribute clock
-      #   @return [Stoplight::Domain::Clock]
-      # @dynamic clock
-      private attr_reader :clock
-
-      def initialize(settings)
-        @notifiers = settings[:notifiers]
-        @data_store_config = settings[:data_store]
-        @error_notifier = settings[:error_notifier]
-        @traffic_recovery = settings[:traffic_recovery]
-        @traffic_control = settings[:traffic_control]
-        @config = settings[:config]
-        @factory = settings[:factory]
+      def initialize(config:, factory:)
         @clock = Infrastructure::SystemClock.new
+        @config = config
+        @data_store_config = config.data_store
+        @error_notifier = config.error_notifier
+        @factory = factory
+        @notifiers = config.notifiers
+        @traffic_recovery = config.traffic_recovery
+        @traffic_control = config.traffic_control
       end
 
       def build
@@ -102,13 +75,13 @@ module Stoplight
 
       private def redis_recovery_lock_store
         Infrastructure::Redis::DataStore::RecoveryLockStore.new(
-          redis: data_store_config.redis,
+          redis:,
           lock_timeout: config.cool_off_time_in_milliseconds,
           scripting:
         )
       end
 
-      private def scripting = Infrastructure::Redis::DataStore::Scripting.new(redis: data_store_config.redis)
+      private def scripting = Infrastructure::Redis::DataStore::Scripting.new(redis:)
 
       private def memory_recovery_lock_store
         Infrastructure::Memory::DataStore::RecoveryLockStore.new
@@ -192,6 +165,15 @@ module Stoplight
           )
         else
           raise NoMatchingPatternError, data_store_config
+        end
+      end
+
+      private def redis
+        case data_store_config
+        when DataStore::Redis
+          data_store_config.redis
+        else
+          raise TypeError, "Expected Stoplight::DataStore::Redis, got #{data_store_config.class}"
         end
       end
 

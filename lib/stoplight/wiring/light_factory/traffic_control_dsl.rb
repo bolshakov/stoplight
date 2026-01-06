@@ -3,7 +3,7 @@
 module Stoplight
   module Wiring
     class LightFactory
-      TrafficControlDsl = proc do |value|
+      TrafficControlDsl = ->(value) {
         case value
         in Domain::TrafficControl::Base
           value
@@ -20,7 +20,7 @@ module Stoplight
               * :error_rate
           ERROR
         end
-      end
+      }
     end
   end
 end

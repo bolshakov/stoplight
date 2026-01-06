@@ -1,42 +1,15 @@
 # frozen_string_literal: true
 
 RSpec.describe Stoplight::Wiring::LightFactory do
-  let(:base_config) do
-    Stoplight::Domain::Config.new(
-      name: "test-light",
-      threshold: 5,
-      window_size: 300,
-      cool_off_time: 60,
-      tracked_errors: [StandardError],
-      skipped_errors: [],
-      recovery_threshold: 2
-    )
-  end
-
-  let(:base_data_store) { instance_double(Stoplight::Domain::DataStore) }
-  let(:base_notifiers) { [] }
-  let(:base_error_notifier) { ->(error) {} }
-  let(:base_traffic_control) { Stoplight::Domain::TrafficControl::ConsecutiveErrors.new }
-  let(:base_traffic_recovery) { Stoplight::Domain::TrafficRecovery::ConsecutiveSuccesses.new }
-
-  let(:base_container) do
-    Stoplight::Wiring::Container.with(
-      config: base_config,
-      data_store: base_data_store,
-      notifiers: base_notifiers,
-      error_notifier: base_error_notifier,
-      traffic_control: base_traffic_control,
-      traffic_recovery: base_traffic_recovery
-    )
-  end
-  let(:factory) { described_class.new({}) }
+  let(:settings) { Stoplight::Wiring::Settings.empty.extend_with(name: SecureRandom.uuid) }
+  let(:factory) { described_class.new(settings:) }
+  let(:light) { factory.build }
 
   describe "transformations" do
     describe "tracked_errors" do
       subject(:tracked_errors) { light.config.tracked_errors }
 
-      let(:new_factory) { factory.with(tracked_errors: Timeout::Error) }
-      let(:light) { new_factory.build }
+      let(:settings) { super().extend_with(tracked_errors: [Timeout::Error]) }
 
       it "normalizes tracked_errors to array" do
         expect(tracked_errors).to eq([Timeout::Error])
@@ -46,8 +19,7 @@ RSpec.describe Stoplight::Wiring::LightFactory do
     describe "skipped_errors" do
       subject(:skipped_errors) { light.config.skipped_errors }
 
-      let(:new_factory) { factory.with(skipped_errors: Timeout::Error) }
-      let(:light) { new_factory.build }
+      let(:settings) { super().extend_with(skipped_errors: [Timeout::Error]) }
 
       it "normalizes skipped_errors to array" do
         expect(skipped_errors).to eq([Timeout::Error])
@@ -57,8 +29,7 @@ RSpec.describe Stoplight::Wiring::LightFactory do
     describe "cool_off_time" do
       subject(:cool_off_time) { light.config.cool_off_time }
 
-      let(:new_factory) { factory.with(cool_off_time: 120.0) }
-      let(:light) { new_factory.build }
+      let(:settings) { super().extend_with(cool_off_time: 120) }
 
       it "converts cool_off_time to integer" do
         expect(cool_off_time).to eq(120)
@@ -73,8 +44,7 @@ RSpec.describe Stoplight::Wiring::LightFactory do
           .__send__(:traffic_recovery)
       end
 
-      let(:new_factory) { factory.with(traffic_recovery: traffic_recovery_in, recovery_threshold: 2) }
-      let(:light) { new_factory.build }
+      let(:settings) { super().extend_with(traffic_recovery: traffic_recovery_in, recovery_threshold: 2) }
 
       context "when TrafficRecovery::ConsecutiveSuccesses" do
         let(:traffic_recovery_in) { Stoplight::Domain::TrafficRecovery::ConsecutiveSuccesses.new }
@@ -114,8 +84,7 @@ RSpec.describe Stoplight::Wiring::LightFactory do
           .__send__(:traffic_control)
       end
 
-      let(:new_factory) { factory.with(traffic_control: traffic_control_in, **config) }
-      let(:light) { new_factory.build }
+      let(:settings) { super().extend_with(traffic_control: traffic_control_in, **config) }
 
       context "when TrafficControl::ConsecutiveErrors" do
         let(:traffic_control_in) { Stoplight::Domain::TrafficControl::ConsecutiveErrors.new }
@@ -165,10 +134,8 @@ RSpec.describe Stoplight::Wiring::LightFactory do
   end
 
   describe "validation" do
-    subject(:light) { new_factory.build }
-
     context "when traffic control is not compatible with the config" do
-      let(:new_factory) { factory.with(traffic_control:, threshold: 4, window_size: 60) }
+      let(:settings) { super().extend_with(traffic_control:, threshold: 4, window_size: 60) }
       let(:traffic_control) { Stoplight::Domain::TrafficControl::ErrorRate.new }
 
       it "raises a configuration errors" do
@@ -181,7 +148,7 @@ RSpec.describe Stoplight::Wiring::LightFactory do
     end
 
     context "when traffic recovery is not compatible with the config" do
-      let(:new_factory) { factory.with(traffic_recovery:, recovery_threshold: -1) }
+      let(:settings) { super().extend_with(traffic_recovery:, recovery_threshold: -1) }
       let(:traffic_recovery) { Stoplight::Domain::TrafficRecovery::ConsecutiveSuccesses.new }
 
       it "raises a configuration errors" do
@@ -190,14 +157,6 @@ RSpec.describe Stoplight::Wiring::LightFactory do
           "Stoplight::Domain::TrafficRecovery::ConsecutiveSuccesses incompatible with config: " \
             "`recovery_threshold` should be bigger than 0"
         )
-      end
-    end
-
-    context "when unexpected setting provider" do
-      it "raises an ArgumentError" do
-        expect {
-          factory.with(unexpected: 42, another_unexpected: 43)
-        }.to raise_error(ArgumentError, "Unknown settings: unexpected, another_unexpected")
       end
     end
   end

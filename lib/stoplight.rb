@@ -3,6 +3,7 @@
 require "concurrent/map"
 require "zeitwerk"
 
+# steep:ignore:start
 loader = Zeitwerk::Loader.for_gem
 loader.inflector.inflect("io" => "IO")
 loader.do_not_eager_load(
@@ -13,6 +14,7 @@ loader.do_not_eager_load(
 loader.ignore("#{__dir__}/generators")
 loader.ignore("#{__dir__}/stoplight/rspec.rb", "#{__dir__}/stoplight/rspec")
 loader.setup
+# steep:ignore:end
 
 module Stoplight # rubocop:disable Style/Documentation
   include Wiring::PublicApi
@@ -66,24 +68,69 @@ module Stoplight # rubocop:disable Style/Documentation
       end
     end
 
-    # Creates a Light for internal use.
-    #
-    # @param name [String]
-    # @param settings [Hash]
-    # @return [Stoplight::Light]
     # @api private
-    def system_light(name, **settings)
-      Wiring::LightFactory.new.with(name: "__stoplight__#{name}", **settings).build
+    def system_light(
+      name,
+      cool_off_time: T.undefined,
+      threshold: T.undefined,
+      recovery_threshold: T.undefined,
+      window_size: T.undefined,
+      tracked_errors: T.undefined,
+      skipped_errors: T.undefined,
+      data_store: T.undefined,
+      error_notifier: T.undefined,
+      notifiers: T.undefined,
+      traffic_control: T.undefined,
+      traffic_recovery: T.undefined
+    )
+      Wiring::LightFactory.new(settings: Wiring::Settings.empty).build_with(
+        name: "__stoplight__#{name}",
+        cool_off_time:,
+        threshold:,
+        recovery_threshold:,
+        window_size:,
+        tracked_errors:,
+        skipped_errors:,
+        data_store:,
+        error_notifier:,
+        notifiers:,
+        traffic_control:,
+        traffic_recovery:
+      )
     end
 
     # Create a Light with the user default configuration.
     #
-    # @param name [String]
-    # @param settings [Hash]
     # @return [Stoplight::Light]
     # @api private
-    def light(name, **settings)
-      __stoplight__default_light_factory.build_with(name:, **settings)
+    def light(
+      name,
+      cool_off_time: T.undefined,
+      threshold: T.undefined,
+      recovery_threshold: T.undefined,
+      window_size: T.undefined,
+      tracked_errors: T.undefined,
+      skipped_errors: T.undefined,
+      data_store: T.undefined,
+      error_notifier: T.undefined,
+      notifiers: T.undefined,
+      traffic_control: T.undefined,
+      traffic_recovery: T.undefined
+    )
+      __stoplight__default_light_factory.build_with(
+        name:,
+        cool_off_time:,
+        threshold:,
+        recovery_threshold:,
+        window_size:,
+        tracked_errors:,
+        skipped_errors:,
+        data_store:,
+        error_notifier:,
+        notifiers:,
+        traffic_control:,
+        traffic_recovery:
+      )
     end
 
     # Creates a new named system with the given configuration.
@@ -110,29 +157,47 @@ module Stoplight # rubocop:disable Style/Documentation
     #   Analytics = Stoplight.__stoplight__system(:analytics, data_store: analytics_redis)
     #
     # @api private
-    def __stoplight__system(name, **settings)
+    def __stoplight__system(
+      name,
+      cool_off_time: T.undefined,
+      threshold: T.undefined,
+      recovery_threshold: T.undefined,
+      window_size: T.undefined,
+      tracked_errors: T.undefined,
+      skipped_errors: T.undefined,
+      data_store: T.undefined,
+      error_notifier: T.undefined,
+      notifiers: T.undefined,
+      traffic_control: T.undefined,
+      traffic_recovery: T.undefined
+    )
       ensure_configured
 
-      @systems.compute(name.to_s) do |existing_system|
+      settings = default_configuration.to_settings.extend_with(
+        cool_off_time: cool_off_time,
+        threshold: threshold,
+        recovery_threshold: recovery_threshold,
+        window_size: window_size,
+        tracked_errors: tracked_errors,
+        skipped_errors: skipped_errors,
+        traffic_control: traffic_control,
+        traffic_recovery: traffic_recovery,
+        data_store: data_store,
+        error_notifier: error_notifier,
+        notifiers: notifiers
+      )
+
+      systems.compute(name.to_s) do |existing_system|
         if existing_system
           raise ArgumentError, "system `#{name}` is already in use"
         else
-          Stoplight::Wiring::System.new(name.to_s, **{
-            cool_off_time: @default_configuration.cool_off_time,
-            threshold: @default_configuration.threshold,
-            recovery_threshold: @default_configuration.recovery_threshold,
-            window_size: @default_configuration.window_size,
-            tracked_errors: @default_configuration.tracked_errors,
-            skipped_errors: @default_configuration.skipped_errors,
-            data_store: @default_configuration.data_store,
-            error_notifier: @default_configuration.error_notifier,
-            notifiers: @default_configuration.notifiers,
-            traffic_control: @default_configuration.traffic_control,
-            traffic_recovery: @default_configuration.traffic_recovery
-          }.compact.merge(settings))
+          Stoplight::Wiring::System.new(name.to_s, settings:)
         end
       end
     end
+
+    private attr_reader :systems
+    private def default_configuration = T.must(@default_configuration)
 
     # Resets Stoplight to an unconfigured state.
     #
@@ -170,12 +235,12 @@ module Stoplight # rubocop:disable Style/Documentation
     # @api private
     def __stoplight__default_light_factory
       ensure_configured
-      @default_light_factory
+      T.must(@default_light_factory)
     end
 
     def __stoplight__default_configuration
       ensure_configured
-      @default_configuration
+      T.must(@default_configuration)
     end
 
     # @api private
@@ -243,8 +308,21 @@ end
 #   # When 66.6% error rate reached withing a sliding 5 minute window, the circuit breaker will trip.
 #   light = Stoplight("Payment API", traffic_control: :error_rate, threshold: 0.666, window_size: 300)
 #
-def Stoplight(name, **settings) # rubocop:disable Naming/MethodName
-  Stoplight::Common::Deprecations.deprecate(<<~MSG) if settings.include?(:error_notifier)
+def Stoplight(
+  name,
+  cool_off_time: Stoplight::T.undefined,
+  threshold: Stoplight::T.undefined,
+  recovery_threshold: Stoplight::T.undefined,
+  window_size: Stoplight::T.undefined,
+  tracked_errors: Stoplight::T.undefined,
+  skipped_errors: Stoplight::T.undefined,
+  data_store: Stoplight::T.undefined,
+  error_notifier: Stoplight::T.undefined,
+  notifiers: Stoplight::T.undefined,
+  traffic_control: Stoplight::T.undefined,
+  traffic_recovery: Stoplight::T.undefined
+) # rubocop:disable Naming/MethodName
+  Stoplight::Common::Deprecations.deprecate(<<~MSG) if error_notifier != Stoplight::T.undefined
     Passing "error_notifier" to Stoplight('#{name}') is deprecated and will be removed in v6.0.0.
 
     IMPORTANT: The `error_notifier` is NOT called for exceptions in your protected code.
@@ -258,5 +336,18 @@ def Stoplight(name, **settings) # rubocop:disable Naming/MethodName
 
     See: https://github.com/bolshakov/stoplight#error-notifiers
   MSG
-  Stoplight.light(name, **settings)
+  Stoplight.light(
+    name,
+    cool_off_time:,
+    threshold:,
+    recovery_threshold:,
+    window_size:,
+    tracked_errors:,
+    skipped_errors:,
+    data_store:,
+    error_notifier:,
+    notifiers:,
+    traffic_control:,
+    traffic_recovery:
+  )
 end
