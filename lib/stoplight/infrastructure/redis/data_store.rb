@@ -203,7 +203,7 @@ module Stoplight
 
           Domain::StateSnapshot.new(
             breached_at: (clock.at(breached_at) if breached_at),
-            locked_state: locked_state || Domain::State::UNLOCKED,
+            locked_state: locked_state || State::UNLOCKED,
             recovery_scheduled_after: (clock.at(recovery_scheduled_after) if recovery_scheduled_after),
             recovery_started_at: (clock.at(recovery_started_at) if recovery_started_at),
             time: clock.current_time
@@ -315,11 +315,11 @@ module Stoplight
         # @return [Boolean] true if this is the first instance to detect this transition
         def transition_to_color(config, color)
           case color
-          when Domain::Color::GREEN
+          when Color::GREEN
             transition_to_green(config)
-          when Domain::Color::YELLOW
+          when Color::YELLOW
             transition_to_yellow(config)
-          when Domain::Color::RED
+          when Color::RED
             transition_to_red(config)
           else
             raise ArgumentError, "Invalid color: #{color}"

@@ -1,0 +1,29 @@
+# frozen_string_literal: true
+
+module Stoplight
+  interface _Configuration
+    def cool_off_time: -> duration
+    def threshold: -> (percentage | Integer)
+    def recovery_threshold: -> Integer
+    def window_size: -> duration?
+    def tracked_errors: -> Array[_ExceptionMatcher]
+    def skipped_errors: -> Array[_ExceptionMatcher]
+    def traffic_control: -> traffic_control
+    def traffic_recovery: -> traffic_recovery
+    def error_notifier: -> error_notifier
+    def data_store: -> data_store
+    def notifiers: -> Array[state_transition_notifier]
+
+    def cool_off_time=: (duration) -> void
+    def threshold=: (percentage | Integer) -> void
+    def recovery_threshold=: (Integer) -> void
+    def window_size=: (duration?) -> void
+    def tracked_errors=: (Array[_ExceptionMatcher]) -> void
+    def skipped_errors=: (Array[_ExceptionMatcher]) -> void
+    def traffic_control=: (traffic_control) -> void
+    def traffic_recovery=: (traffic_recovery) -> void
+    def error_notifier=: (error_notifier) -> void
+    def data_store=: (data_store) -> void
+    def notifiers=:(Array[state_transition_notifier]) -> void
+  end
+end

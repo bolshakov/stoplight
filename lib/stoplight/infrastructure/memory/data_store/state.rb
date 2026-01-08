@@ -17,7 +17,7 @@ module Stoplight
           attr_accessor :breached_at
 
           def initialize
-            @locked_state = Domain::State::UNLOCKED
+            @locked_state = Stoplight::State::UNLOCKED
           end
         end
       end

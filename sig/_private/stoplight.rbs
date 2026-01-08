@@ -1,0 +1,48 @@
+module Stoplight
+  T: singleton(Types)
+  CONFIG_MUTEX: Mutex
+
+  self.@configured:  bool?
+  self.@default_configuration: Wiring::DefaultConfiguration?
+  self.@systems: Concurrent::Map[String, Domain::System]
+  self.@default_light_factory: Wiring::LightFactory?
+
+  def self.warn_if_reconfiguring: (bool) { () -> void } -> void
+  def self.configured?: -> bool
+  def self.__stoplight__reset!: -> void
+
+  def self.system_light: (
+      String name,
+      ?cool_off_time: optional[duration],
+      ?threshold: optional[percentage | Integer],
+      ?recovery_threshold: optional[Integer],
+      ?window_size: optional[duration?],
+      ?tracked_errors: optional[Array[_ExceptionMatcher]],
+      ?skipped_errors: optional[Array[_ExceptionMatcher]],
+      ?data_store: optional[data_store],
+      ?error_notifier: optional[error_notifier],
+      ?notifiers: optional[Array[state_transition_notifier]],
+      ?traffic_control: optional[traffic_control],
+      ?traffic_recovery: optional[traffic_recovery],
+    ) -> Domain::Light
+
+  def self.systems: -> Concurrent::Map[String, Domain::System]
+  def self.default_configuration: -> Wiring::DefaultConfiguration
+  def self.ensure_configured: -> void
+  def self.__stoplight__system: (
+      _ToS name,
+      ?cool_off_time: optional[duration],
+      ?threshold: optional[percentage | Integer],
+      ?recovery_threshold: optional[Integer],
+      ?window_size: optional[duration?],
+      ?tracked_errors: optional[Array[_ExceptionMatcher]],
+      ?skipped_errors: optional[Array[_ExceptionMatcher]],
+      ?data_store: optional[data_store],
+      ?error_notifier: optional[error_notifier],
+      ?notifiers: optional[Array[state_transition_notifier]],
+      ?traffic_control: optional[traffic_control],
+      ?traffic_recovery: optional[traffic_recovery],
+    ) -> Domain::System
+  def self.__stoplight__default_configuration: -> Wiring::DefaultConfiguration
+  def self.__stoplight__default_light_factory: -> Wiring::LightFactory
+end

@@ -14,7 +14,7 @@ RSpec.describe Stoplight::Domain::Config do
       traffic_recovery: instance_double(Stoplight::Domain::TrafficRecovery::Base),
       error_notifier: ->(e) {},
       notifiers: [],
-      data_store: instance_double(Stoplight::Domain::DataStoreConfig),
+      data_store: double("config"),
       **settings
     )
   end

@@ -87,7 +87,7 @@ RSpec.describe RuboCop::Cop::Stoplight::ArchitectureBoundaries, :config do
           module Domain
             class Light
               def foo
-                Domain::Color.new
+                Color.new
                 Stoplight::Domain::State.new
               end
             end
@@ -107,7 +107,7 @@ RSpec.describe RuboCop::Cop::Stoplight::ArchitectureBoundaries, :config do
             class Redis
               def foo
                 Domain::Light.new
-                Stoplight::Domain::Color.new
+                Stoplight::Color.new
               end
             end
           end

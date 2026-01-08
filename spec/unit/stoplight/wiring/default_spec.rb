@@ -31,22 +31,11 @@ RSpec.describe Stoplight::Wiring::Default do
     it "is a proc" do
       expect(described_class::FORMATTER).to be_a(Proc)
     end
-
-    it "has the same arity as #notify" do
-      notify = Stoplight::Domain::StateTransitionNotifier.new.method(:notify)
-      expect(described_class::FORMATTER.arity).to eql(notify.arity)
-    end
   end
 
   describe "::NOTIFIERS" do
     it "is an array" do
       expect(described_class::NOTIFIERS).to be_an(Array)
-    end
-
-    it "contains notifiers" do
-      described_class::NOTIFIERS.each do |notifier|
-        expect(notifier).to be_a(Stoplight::Domain::StateTransitionNotifier)
-      end
     end
 
     it "is frozen" do

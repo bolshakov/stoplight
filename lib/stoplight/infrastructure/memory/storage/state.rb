@@ -15,7 +15,7 @@ module Stoplight
         #   state = State.new(clock: SystemClock.new, cool_off_time: 60)
         #
         #   # Multiple threads may call this concurrently
-        #   if state.transition_to_color(Domain::Color::RED)
+        #   if state.transition_to_color(Color::RED)
         #     # Only one thread reaches here - send notification
         #     notifier.notify(circuit_name, :opened)
         #   end
@@ -98,11 +98,11 @@ module Stoplight
           # @return [Boolean] true if this is the first instance to detect this transition
           def transition_to_color(color)
             case color
-            when Domain::Color::GREEN
+            when Color::GREEN
               transition_to_green
-            when Domain::Color::YELLOW
+            when Color::YELLOW
               transition_to_yellow
-            when Domain::Color::RED
+            when Color::RED
               transition_to_red
             else
               raise ArgumentError, "Invalid color: #{color}"

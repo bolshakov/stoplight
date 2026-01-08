@@ -1,0 +1,17 @@
+module Stoplight
+  module Infrastructure
+    module Notifier
+      class FailSafe
+        include _StateTransitionNotifier
+
+        attr_reader notifier: state_transition_notifier
+        attr_reader error_notifier: error_notifier
+        @circuit_breaker: Domain::Light?
+
+        def initialize: (notifier: state_transition_notifier, error_notifier: error_notifier) -> void
+
+        private def circuit_breaker: -> Domain::Light
+      end
+    end
+  end
+end

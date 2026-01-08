@@ -1,0 +1,18 @@
+module Stoplight
+  module Infrastructure
+    module Notifier
+      module Generic[T]
+        DEFAULT_FORMATTER: notification_formatter
+        @object: T
+
+        attr_reader formatter: notification_formatter
+
+        def initialize: (T object, ?notification_formatter? formatter) -> void
+
+        def notify: (Domain::Config light, color, color, StandardError?) -> String
+
+        private def put: (String) -> void
+      end
+    end
+  end
+end

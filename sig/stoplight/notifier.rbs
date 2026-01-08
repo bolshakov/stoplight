@@ -1,0 +1,11 @@
+module Stoplight
+  module Notifier
+    class Base
+      include _StateTransitionNotifier
+    end
+
+    module Generic = Infrastructure::Notifier::Generic
+    class IO = Infrastructure::Notifier::IO
+    class Logger = Infrastructure::Notifier::Logger
+  end
+end

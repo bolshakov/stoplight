@@ -43,8 +43,8 @@ module Stoplight
               successes = @successes.sum_in_window(window_start)
 
               Domain::MetricsSnapshot.new(
-                errors: errors,
-                successes: successes,
+                errors:,
+                successes:,
                 consecutive_errors: [@consecutive_errors, errors].min,
                 consecutive_successes: [@consecutive_successes, successes].min,
                 last_error: @last_error,

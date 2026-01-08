@@ -15,7 +15,7 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
 
   let(:notifiers) { [notifier] }
   let(:config) { instance_double(Stoplight::Domain::Config) }
-  let(:notifier) { instance_double(Stoplight::Domain::StateTransitionNotifier) }
+  let(:notifier) { instance_double(NullNotifier) }
   let(:recovery_lock_store) { instance_double(Stoplight::Domain::Storage::RecoveryLock) }
   let(:state_store) { instance_double(Stoplight::Domain::Storage::State) }
   let(:metrics_store) { instance_double(Stoplight::Domain::Storage::Metrics) }
@@ -138,8 +138,8 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
 
       it "notifies if able to transition to YELLO" do
         expect(metrics_store).to receive(:clear)
-        expect(state_store).to receive(:transition_to_color).with(Stoplight::Domain::Color::YELLOW)
-        expect(notifier).to receive(:notify).with(config, Stoplight::Domain::Color::RED, Stoplight::Domain::Color::YELLOW, nil)
+        expect(state_store).to receive(:transition_to_color).with(Stoplight::Color::YELLOW)
+        expect(notifier).to receive(:notify).with(config, Stoplight::Color::RED, Stoplight::Color::YELLOW, nil)
 
         enter_recovery
       end

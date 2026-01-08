@@ -53,7 +53,7 @@ module Stoplight
       # @return [void]
       def unlock(name)
         config = build_config(name)
-        data_store.set_state(config, Domain::State::UNLOCKED)
+        data_store.set_state(config, State::UNLOCKED)
       end
 
       # @param name [String] removes light metadata by its name

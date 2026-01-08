@@ -7,7 +7,7 @@ RSpec.describe "Notifications" do
     let(:notifier) { notifier_class.new }
 
     let(:notifier_class) do
-      Class.new(Stoplight::Domain::StateTransitionNotifier) do
+      Class.new do
         def initialize
           @notifications = Hash.new { |hash, key| hash[key] = [] }
         end

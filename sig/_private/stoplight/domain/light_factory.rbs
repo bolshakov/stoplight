@@ -1,0 +1,37 @@
+module Stoplight
+  module Domain
+    class LightFactory
+      def with: (
+          ?name: optional[String],
+          ?cool_off_time: optional[duration],
+          ?threshold: optional[percentage | Integer],
+          ?recovery_threshold: optional[Integer],
+          ?window_size: optional[duration?],
+          ?tracked_errors: optional[Array[_ExceptionMatcher]],
+          ?skipped_errors: optional[Array[_ExceptionMatcher]],
+          ?error_notifier: optional[error_notifier],
+          ?notifiers: optional[Array[state_transition_notifier]],
+          ?data_store: optional[data_store],
+          ?traffic_control: optional[traffic_control],
+          ?traffic_recovery: optional[traffic_recovery],
+      ) -> LightFactory
+
+      def build: -> Light
+
+      def build_with: (
+          name: optional[String],
+          cool_off_time: optional[duration],
+          threshold: optional[percentage | Integer],
+          recovery_threshold: optional[Integer],
+          window_size: optional[duration?],
+          tracked_errors: optional[Array[_ExceptionMatcher]],
+          skipped_errors: optional[Array[_ExceptionMatcher]],
+          error_notifier: optional[error_notifier],
+          notifiers: optional[Array[state_transition_notifier]],
+          data_store: optional[data_store],
+          traffic_control: optional[traffic_control],
+          traffic_recovery: optional[traffic_recovery],
+      ) -> Light
+    end
+  end
+end

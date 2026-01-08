@@ -1,0 +1,21 @@
+module Stoplight
+  module Wiring
+    class DefaultConfiguration
+      include _Configuration
+
+      @cool_off_time: option[duration]
+      @threshold: option[percentage | Integer]
+      @recovery_threshold: option[Integer]
+      @window_size: option[duration?]
+      @tracked_errors: option[Array[_ExceptionMatcher]]
+      @skipped_errors: option[Array[_ExceptionMatcher]]
+      @traffic_control: option[traffic_control]
+      @traffic_recovery: option[traffic_recovery]
+      @error_notifier: option[error_notifier]
+      @data_store: option[data_store]
+      @notifiers: option[Array[state_transition_notifier]]
+
+      def to_settings: -> Settings
+    end
+  end
+end

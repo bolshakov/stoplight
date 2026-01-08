@@ -10,7 +10,7 @@ module Stoplight
         in :consecutive_successes
           Domain::TrafficRecovery::ConsecutiveSuccesses.new
         else
-          raise Domain::Error::ConfigurationError, <<~ERROR
+          raise Error::ConfigurationError, <<~ERROR
             unsupported traffic_recovery strategy provided (`#{value}`). Supported options:
               * :consecutive_successes
           ERROR
