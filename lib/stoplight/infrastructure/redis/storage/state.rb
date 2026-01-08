@@ -27,7 +27,7 @@ module Stoplight
         #   )
         #
         #   # Multiple processes may call this concurrently
-        #   if state.transition_to_color(Domain::Color::RED)
+        #   if state.transition_to_color(Color::RED)
         #     # Only one process reaches here - send notification
         #     notifier.notify("payments", :opened)
         #   end
@@ -95,7 +95,7 @@ module Stoplight
 
             Domain::StateSnapshot.new(
               breached_at: breached_at_raw && clock.at(breached_at_raw.to_f),
-              locked_state: locked_state || Domain::State::UNLOCKED,
+              locked_state: locked_state || Stoplight::State::UNLOCKED,
               recovery_scheduled_after: recovery_scheduled_after_raw && clock.at(recovery_scheduled_after_raw.to_f),
               recovery_started_at: recovery_started_at_raw && clock.at(recovery_started_at_raw.to_f),
               time: clock.current_time
@@ -111,11 +111,11 @@ module Stoplight
 
           def transition_to_color(color)
             case color
-            when Domain::Color::GREEN
+            when Color::GREEN
               transition_to_green
-            when Domain::Color::YELLOW
+            when Color::YELLOW
               transition_to_yellow
-            when Domain::Color::RED
+            when Color::RED
               transition_to_red
             else
               raise ArgumentError, "Invalid color: #{color}"

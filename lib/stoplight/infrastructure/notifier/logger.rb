@@ -4,7 +4,7 @@ module Stoplight
   module Infrastructure
     module Notifier
       # @see Base
-      class Logger < Domain::StateTransitionNotifier
+      class Logger
         include Generic
 
         # @return [::Logger]

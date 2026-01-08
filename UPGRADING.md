@@ -1,3 +1,8 @@
+## Stoplight 6.0 (Unreleased)
+
+Breaking Changes
+- `Stoplight::DataStore::Base` removed without replacement
+
 ## Stoplight 5.0 
 
 Stoplight 5.0 introduces several breaking changes, so you'll need to set aside some time to update your code. The good 

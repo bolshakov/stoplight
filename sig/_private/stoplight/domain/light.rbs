@@ -1,0 +1,25 @@
+module Stoplight
+  module Domain
+    class Light
+      include _Light
+      attr_reader config: Config
+      attr_reader green_run_strategy: Strategies::GreenRunStrategy
+      attr_reader yellow_run_strategy: Strategies::YellowRunStrategy
+      attr_reader red_run_strategy: Strategies::RedRunStrategy
+      attr_reader state_store: Storage::State
+      attr_reader factory: LightFactory
+
+      def initialize: (
+        Config config,
+        green_run_strategy: Strategies::GreenRunStrategy,
+        yellow_run_strategy: Strategies::YellowRunStrategy,
+        red_run_strategy: Strategies::RedRunStrategy,
+        factory: LightFactory,
+        state_store: Storage::State
+      ) -> void
+
+      private def state_strategy_factory: (color) -> Strategies::RunStrategy
+      private def state_snapshot: -> StateSnapshot
+    end
+  end
+end

@@ -1,9 +1,0 @@
-# frozen_string_literal: true
-
-module Stoplight
-  module Domain
-    class StateTransitionNotifier
-      def notify: (Config config, color from_color, color to_color, StandardError? error) -> String
-    end
-  end
-end

@@ -7,7 +7,7 @@ RSpec.describe Stoplight::Wiring::NotifierFactory do
   context "when notifier is FailSafe already" do
     let(:notifier) do
       Stoplight::Infrastructure::Notifier::FailSafe.new(
-        notifier: instance_double(Stoplight::Domain::StateTransitionNotifier),
+        notifier: instance_double(NullNotifier),
         error_notifier: error_notifier
       )
     end
@@ -18,7 +18,7 @@ RSpec.describe Stoplight::Wiring::NotifierFactory do
   end
 
   context "when notifier is not FailSafe" do
-    let(:notifier) { instance_double(Stoplight::Domain::StateTransitionNotifier) }
+    let(:notifier) { instance_double(NullNotifier) }
 
     it "returns a new FailSafe instance" do
       expect(fail_safe).to be_a(Stoplight::Infrastructure::Notifier::FailSafe)

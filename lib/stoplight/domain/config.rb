@@ -43,8 +43,8 @@ module Stoplight
       # @param error [#==] The error to check, e.g. an Exception, Class or Proc
       # @return [Boolean]
       def track_error?(error)
-        skip = skipped_errors.any? { |klass| klass === error }
-        track = tracked_errors.any? { |klass| klass === error }
+        skip = skipped_errors.any? { |matcher| matcher === error }
+        track = tracked_errors.any? { |matcher| matcher === error }
 
         !skip && track
       end

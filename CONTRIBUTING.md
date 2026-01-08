@@ -59,7 +59,7 @@ Use test doubles for testing with abstract dependencies:
 ```ruby
 RSpec.describe Stoplight::Domain::Light do
   let(:data_store) { instance_double(Stoplight::Domain::DataStore) }
-  let(:notifier) { instance_double(Stoplight::Domain::StateTransitionNotifier) }
+  let(:notifier) { instance_double(NullNotifier) }
   
   # Test in isolation
   it "transitions to red after threshold" do
@@ -77,7 +77,7 @@ RSpec.describe Stoplight::Infrastructure::Redis::DataStore do
   let(:redis) { Redis.new(url: connection_string) } # connects to the real database
   
   it "transitions to red" do
-    data_store.transition_to_color(Stoplight::Domain::Color::RED)
+    data_store.transition_to_color(Stoplight::Color::RED)
     # ... test logic
   end
 end

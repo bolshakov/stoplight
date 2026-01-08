@@ -1,0 +1,10 @@
+module Stoplight
+  module Wiring
+    class NotifierFactory
+      def self.create: (
+        notifier: _StateTransitionNotifier,
+        error_notifier: error_notifier,
+      ) -> _StateTransitionNotifier
+    end
+  end
+end

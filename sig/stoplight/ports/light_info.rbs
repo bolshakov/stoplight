@@ -1,0 +1,5 @@
+module Stoplight
+  interface _LightInfo
+    def name: -> String
+  end
+end

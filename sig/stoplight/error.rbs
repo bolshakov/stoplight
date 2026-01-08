@@ -1,0 +1,20 @@
+module Stoplight
+  module Error
+    class Base < StandardError
+    end
+
+    class ConfigurationError < Base
+    end
+
+    class IncorrectColor < Base
+    end
+
+    class RedLight < Base
+      attr_reader light_name: String
+      attr_reader cool_off_time: Numeric
+      attr_reader retry_after: Time?
+
+      def initialize: (String light_name, cool_off_time: Numeric, retry_after: Time?) -> void
+    end
+  end
+end

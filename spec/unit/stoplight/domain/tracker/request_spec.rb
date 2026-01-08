@@ -7,7 +7,7 @@ RSpec.describe Stoplight::Domain::Tracker::Request do
   let(:state_store) { instance_double(Stoplight::Domain::Storage::State) }
   let(:traffic_control) { instance_double(Stoplight::Domain::TrafficControl::Base) }
   let(:notifiers) { [notifier] }
-  let(:notifier) { instance_double(Stoplight::Domain::StateTransitionNotifier) }
+  let(:notifier) { instance_double(NullNotifier) }
   let(:config) { instance_double(Stoplight::Domain::Config) }
 
   specify "#record_success" do
@@ -32,8 +32,8 @@ RSpec.describe Stoplight::Domain::Tracker::Request do
 
       context "when successfully transitions to RED" do
         it "sends notifications about transition" do
-          allow(state_store).to receive(:transition_to_color).with(Stoplight::Domain::Color::RED).and_return(true)
-          expect(notifier).to receive(:notify).with(config, Stoplight::Domain::Color::GREEN, Stoplight::Domain::Color::RED, exception)
+          allow(state_store).to receive(:transition_to_color).with(Stoplight::Color::RED).and_return(true)
+          expect(notifier).to receive(:notify).with(config, Stoplight::Color::GREEN, Stoplight::Color::RED, exception)
 
           request_tracker.record_failure(exception)
         end
@@ -41,7 +41,7 @@ RSpec.describe Stoplight::Domain::Tracker::Request do
 
       context "when failed to transition to RED" do
         it "does not send notification about transition" do
-          allow(state_store).to receive(:transition_to_color).with(Stoplight::Domain::Color::RED).and_return(false)
+          allow(state_store).to receive(:transition_to_color).with(Stoplight::Color::RED).and_return(false)
           expect(notifier).not_to receive(:notify)
 
           request_tracker.record_failure(exception)

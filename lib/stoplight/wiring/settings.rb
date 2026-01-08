@@ -101,18 +101,18 @@ module Stoplight
         data_store: T.undefined
       )
         Settings.new(
-          name: name.is_a?(Types::Undefined) ? @name : Common.some(name),
-          cool_off_time: cool_off_time.is_a?(Types::Undefined) ? @cool_off_time : Common.some(cool_off_time),
-          threshold: threshold.is_a?(Types::Undefined) ? @threshold : Common.some(threshold),
-          recovery_threshold: recovery_threshold.is_a?(Types::Undefined) ? @recovery_threshold : Common.some(recovery_threshold),
-          window_size: window_size.is_a?(Types::Undefined) ? @window_size : Common.some(window_size),
-          skipped_errors: skipped_errors.is_a?(Types::Undefined) ? @skipped_errors : Common.some(skipped_errors),
-          tracked_errors: tracked_errors.is_a?(Types::Undefined) ? @tracked_errors : Common.some(tracked_errors),
-          traffic_control: traffic_control.is_a?(Types::Undefined) ? @traffic_control : Common.some(traffic_control),
-          traffic_recovery: traffic_recovery.is_a?(Types::Undefined) ? @traffic_recovery : Common.some(traffic_recovery),
-          error_notifier: error_notifier.is_a?(Types::Undefined) ? @error_notifier : Common.some(error_notifier),
-          notifiers: notifiers.is_a?(Types::Undefined) ? @notifiers : Common.some(notifiers),
-          data_store: data_store.is_a?(Types::Undefined) ? @data_store : Common.some(data_store)
+          name: name.is_a?(Undefined) ? @name : Common.some(name),
+          cool_off_time: cool_off_time.is_a?(Undefined) ? @cool_off_time : Common.some(cool_off_time),
+          threshold: threshold.is_a?(Undefined) ? @threshold : Common.some(threshold),
+          recovery_threshold: recovery_threshold.is_a?(Undefined) ? @recovery_threshold : Common.some(recovery_threshold),
+          window_size: window_size.is_a?(Undefined) ? @window_size : Common.some(window_size),
+          skipped_errors: skipped_errors.is_a?(Undefined) ? @skipped_errors : Common.some(skipped_errors),
+          tracked_errors: tracked_errors.is_a?(Undefined) ? @tracked_errors : Common.some(tracked_errors),
+          traffic_control: traffic_control.is_a?(Undefined) ? @traffic_control : Common.some(traffic_control),
+          traffic_recovery: traffic_recovery.is_a?(Undefined) ? @traffic_recovery : Common.some(traffic_recovery),
+          error_notifier: error_notifier.is_a?(Undefined) ? @error_notifier : Common.some(error_notifier),
+          notifiers: notifiers.is_a?(Undefined) ? @notifiers : Common.some(notifiers),
+          data_store: data_store.is_a?(Undefined) ? @data_store : Common.some(data_store)
         )
       end
 

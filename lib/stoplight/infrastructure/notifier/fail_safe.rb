@@ -8,7 +8,7 @@ module Stoplight
       # handle failures.
       #
       # @api private
-      class FailSafe < Domain::StateTransitionNotifier
+      class FailSafe
         # @!attribute [r] notifier
         #   @return [Stoplight::Domain::StateTransitionNotifier] The underlying notifier being wrapped.
         # @dynamic notifier

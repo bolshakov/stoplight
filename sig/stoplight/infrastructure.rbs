@@ -1,6 +1,0 @@
-module Stoplight
-  module Infrastructure
-    type error_notifier = ^(StandardError) -> void
-    type notification_formatter = ^(Domain::Config light, Domain::color, Domain::color, StandardError?) -> String
-  end
-end

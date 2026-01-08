@@ -4,7 +4,7 @@ RSpec.describe Stoplight::Infrastructure::Notifier::FailSafe do
   describe "#notify" do
     subject(:fail_safe_notifier) { described_class.new(notifier:, error_notifier:) }
 
-    let(:notifier) { instance_double(Stoplight::Domain::StateTransitionNotifier) }
+    let(:notifier) { instance_double(NullNotifier) }
     let(:config) { instance_double(Stoplight::Domain::Config) }
     let(:error_notifier) { instance_double(Proc) }
     let(:from_color) { "green" }

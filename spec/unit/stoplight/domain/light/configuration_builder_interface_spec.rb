@@ -58,7 +58,7 @@ RSpec.describe Stoplight::Domain::Light::ConfigurationBuilderInterface do
   end
 
   describe "#with_notifiers" do
-    let(:notifiers) { [instance_double(Stoplight::Domain::StateTransitionNotifier)] }
+    let(:notifiers) { [instance_double(NullNotifier)] }
 
     include_examples "configurable attribute", :notifiers
   end

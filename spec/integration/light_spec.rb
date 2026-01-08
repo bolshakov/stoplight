@@ -269,7 +269,7 @@ RSpec.describe "Light" do
     specify "locking yellow" do
       expect do
         light.lock(Stoplight::Color::YELLOW)
-      end.to raise_error(Stoplight::Domain::Error::IncorrectColor)
+      end.to raise_error(Stoplight::Error::IncorrectColor)
     end
   end
 

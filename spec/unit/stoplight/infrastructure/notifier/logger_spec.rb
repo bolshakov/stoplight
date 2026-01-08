@@ -7,14 +7,6 @@ require "stoplight/rspec"
 RSpec.describe Stoplight::Infrastructure::Notifier::Logger do
   it_behaves_like "a generic notifier"
 
-  it "is a class" do
-    expect(described_class).to be_a(Class)
-  end
-
-  it "is a subclass of Base" do
-    expect(described_class).to be < Stoplight::Domain::StateTransitionNotifier
-  end
-
   describe "#formatter" do
     it "is initially the default" do
       expect(described_class.new(nil, nil).formatter)

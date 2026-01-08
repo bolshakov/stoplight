@@ -1,0 +1,5 @@
+module Stoplight
+  module Wiring
+    type option[T] = Common::option[T]
+  end
+end

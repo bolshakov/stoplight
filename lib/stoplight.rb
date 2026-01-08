@@ -17,8 +17,6 @@ loader.setup
 # steep:ignore:end
 
 module Stoplight # rubocop:disable Style/Documentation
-  include Wiring::PublicApi
-
   T = Types
 
   CONFIG_MUTEX = Mutex.new
@@ -264,7 +262,7 @@ module Stoplight # rubocop:disable Style/Documentation
   end
 end
 
-# Creates a new Stoplight circuit breaker with the given name and settings.
+# Creates a new Stoplight circuit brNeaker with the given name and settings.
 #
 # @param name [String] The name of the circuit breaker.
 # @param settings [Hash] Optional settings to configure the circuit breaker.
