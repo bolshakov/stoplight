@@ -11,27 +11,13 @@ module Stoplight
         # handle failures by falling back to default values when necessary.
         #
         # @api private
-        class RecoveryLock < Domain::Storage::RecoveryLock
-          # @!attribute primary_store
-          #  @return [Stoplight::Domain::Storage::RecoveryLock] The underlying primary store being used
+        class RecoveryLock
+          # The underlying primary store being used
           attr_reader :primary_store
-
-          # @!attribute error_notifier
-          #   @return [Proc]
           attr_reader :error_notifier
-
-          # @!attribute failover_store
-          #   @return [Stoplight::Domain::Storage::RecoveryLock] The fallback store used when the primary fails.
+          # The fallback store used when the primary fails.
           attr_reader :failover_store
 
-          # @!attribute circuit_breaker
-          #   @return [Stoplight::Light] The circuit breaker used to handle store failures.
-          private attr_reader :circuit_breaker
-
-          # @param primary_store [Stoplight::Domain::Storage::RecoveryLock]
-          # @param error_notifier [Proc]
-          # @param failover_store [Stoplight::Domain::Storage::RecoveryLock]
-          # @param circuit_breaker [Stoplight::Domain::Light]
           def initialize(primary_store:, error_notifier:, failover_store:, circuit_breaker:)
             @primary_store = primary_store
             @error_notifier = error_notifier
@@ -53,7 +39,6 @@ module Stoplight
           # Redis tokens release via primary (with error notification on failure).
           # Memory tokens release via failover directly.
           #
-          # @param recovery_lock_token [Stoplight::Domain::RecoveryLockToken]
           def release_lock(recovery_lock_token)
             case recovery_lock_token.origin
             in :primary
@@ -69,7 +54,12 @@ module Stoplight
             end
           end
 
-          private def wrap_token(origin, token)
+          private
+
+          # The circuit breaker used to handle store failures.
+          attr_reader :circuit_breaker
+
+          def wrap_token(origin, token)
             RecoveryLockToken.new(origin:, underlying_token: token) if token
           end
         end

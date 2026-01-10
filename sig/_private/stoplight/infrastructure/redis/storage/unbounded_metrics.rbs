@@ -6,11 +6,11 @@ module Stoplight
           attr_reader redis: redis
           attr_reader scripting: Scripting
           attr_reader metrics_key: String
-          attr_reader clock: Domain::Clock
+          attr_reader clock: Domain::_Clock
 
           def initialize: (
             redis: redis,
-            clock: Domain::Clock,
+            clock: Domain::_Clock,
             scripting: Scripting,
             key_space: KeySpace,
           ) -> void

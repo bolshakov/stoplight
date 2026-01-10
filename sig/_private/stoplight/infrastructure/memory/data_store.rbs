@@ -1,7 +1,8 @@
 module Stoplight
   module Infrastructure
     module Memory
-      class DataStore < Domain::DataStore
+      class DataStore
+        include Domain::_DataStore
         include MonitorMixin
 
         KEY_SEPARATOR: String
@@ -13,11 +14,11 @@ module Stoplight
         @states: Hash[String, State]
 
         private attr_reader recovery_lock_store: RecoveryLockStore
-        private attr_reader clock: Domain::Clock
+        private attr_reader clock: Domain::_Clock
 
         def initialize: (
           recovery_lock_store: RecoveryLockStore,
-          clock: Domain::Clock
+          clock: Domain::_Clock
         ) -> void
 
         private def transition_to_green: (Domain::Config config) -> bool

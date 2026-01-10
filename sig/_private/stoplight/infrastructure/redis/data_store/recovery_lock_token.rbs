@@ -2,7 +2,9 @@ module Stoplight
   module Infrastructure
     module Redis
       class DataStore
-        class RecoveryLockToken < Domain::RecoveryLockToken
+        class RecoveryLockToken
+          include Domain::_RecoveryLockToken
+
           attr_reader light_name: String
 
           attr_reader token: String

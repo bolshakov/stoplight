@@ -1,0 +1,18 @@
+module Stoplight
+  module Domain
+    # Wall-clock interface for time-dependent operations.
+    #
+    # Provides a centralized definition of how Stoplight obtains and
+    # interprets time. All time-dependent components should use this
+    # interface rather than calling Time methods directly, ensuring
+    # consistent time handling across the library.
+    #
+    interface _Clock
+      # Returns the current time.
+      def current_time: () -> Time
+
+      # Converts a Unix timestamp to a Time object.
+      def at: (timestamp) -> Time
+    end
+  end
+end

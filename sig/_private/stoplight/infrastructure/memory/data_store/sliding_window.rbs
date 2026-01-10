@@ -5,9 +5,9 @@ module Stoplight
         class SlidingWindow
           private attr_reader buckets: Hash[Integer, Integer]
           private attr_accessor running_sum: Integer
-          private attr_reader clock: Domain::Clock
+          private attr_reader clock: Domain::_Clock
 
-          def initialize: (clock: Domain::Clock) -> void
+          def initialize: (clock: Domain::_Clock) -> void
 
           def increment: -> void
 

@@ -21,8 +21,8 @@ module Stoplight
         private def window_size: -> duration?
         private def skipped_errors: -> Array[_ExceptionMatcher]
         private def tracked_errors: -> Array[_ExceptionMatcher]
-        private def traffic_control: -> Domain::TrafficControl::Base
-        private def traffic_recovery: -> Domain::TrafficRecovery::Base
+        private def traffic_control: -> Domain::_TrafficControl
+        private def traffic_recovery: -> Domain::_TrafficRecovery
         private def error_notifier: -> error_notifier
         private def notifiers: -> Array[state_transition_notifier]
         private def data_store: -> data_store

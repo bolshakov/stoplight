@@ -39,11 +39,8 @@ module Stoplight
       #     light.run { raise 'Simulated failure' } rescue nil
       #     light.run { raise 'Simulated failure' } rescue nil
       #
-      module Generic # rubocop:disable Style/Documentation
-        # @!attribute [r] formatter
-        #   @return [Proc] The formatter used to generate notification messages.
-        #   @see Stoplight::Default::FORMATTER
-        # @dynamic formatter
+      module Generic
+        # The formatter used to generate notification messages.
         attr_reader :formatter
 
         DEFAULT_FORMATTER = lambda do |light, from_color, to_color, error|
@@ -53,8 +50,8 @@ module Stoplight
         end
         public_constant :DEFAULT_FORMATTER
 
-        # @param object [Object] The object used by the notifier (e.g., a logger or external service).
-        # @param formatter [Proc, nil] A custom formatter for generating notification messages.
+        # @param object The object used by the notifier (e.g., a logger or external service).
+        # @param formatter A custom formatter for generating notification messages.
         #   If no formatter is provided, the default formatter is used.
         def initialize(object, formatter = nil)
           @object = object
@@ -62,12 +59,6 @@ module Stoplight
         end
 
         # Sends a notification when a Stoplight changes state.
-        #
-        # @param light [Light] The Stoplight instance triggering the notification.
-        # @param from_color [String] The previous state color of the Stoplight.
-        # @param to_color [String] The new state color of the Stoplight.
-        # @param error [Exception, nil] The error (if any) that caused the state change.
-        # @return [String] The formatted notification message.
         def notify(light, from_color, to_color, error)
           message = formatter.call(light, from_color, to_color, error)
           put(message)
@@ -78,8 +69,6 @@ module Stoplight
 
         # Processes the notification message.
         #
-        # @param message [String] The notification message to be processed.
-        # @raise [NotImplementedError] If the method is not implemented in a subclass.
         # :nocov:
         def put(message)
           raise NotImplementedError

@@ -13,7 +13,6 @@ RSpec.describe Stoplight::Infrastructure::Memory::DataStore do
   let(:cool_off_time) { 60 }
   let(:window_size) { 60 }
 
-  it_behaves_like "Stoplight::Domain::DataStore"
   it_behaves_like "Stoplight::Domain::DataStore#get_metrics"
   it_behaves_like "Stoplight::Domain::DataStore#get_recovery_metrics" do
     def get_metrics = data_store.get_recovery_metrics(config)

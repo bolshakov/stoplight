@@ -11,12 +11,12 @@ RSpec.describe Stoplight::Domain::Light do
       state_store:
     )
   end
-  let(:factory) { instance_double(Stoplight::Domain::LightFactory) }
+  let(:factory) { instance_double(NullLightFactory) }
   let(:config) { instance_double(Stoplight::Domain::Config) }
   let(:green_run_strategy) { instance_double(Stoplight::Domain::Strategies::GreenRunStrategy) }
   let(:yellow_run_strategy) { instance_double(Stoplight::Domain::Strategies::YellowRunStrategy) }
   let(:red_run_strategy) { instance_double(Stoplight::Domain::Strategies::RedRunStrategy) }
-  let(:state_store) { instance_double(Stoplight::Domain::Storage::State) }
+  let(:state_store) { instance_double(NullStateStore) }
 
   describe "#==" do
     context "light with the different factory" do
@@ -30,7 +30,7 @@ RSpec.describe Stoplight::Domain::Light do
           state_store:
         )
       end
-      let(:factory2) { instance_double(Stoplight::Domain::LightFactory) }
+      let(:factory2) { instance_double(NullLightFactory) }
 
       it { expect(light).not_to eq(light_2) }
     end

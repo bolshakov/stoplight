@@ -10,7 +10,7 @@ RSpec.describe Stoplight::Infrastructure::FailSafe::Storage::RecoveryLock do
   let(:failover_store) { Stoplight::Infrastructure::Memory::DataStore.new(recovery_lock_store:, clock:) }
   let(:clock) { Stoplight::Infrastructure::SystemClock.new }
   let(:recovery_lock_store) { Stoplight::Infrastructure::Memory::DataStore::RecoveryLockStore.new }
-  let(:primary_store) { instance_double(Stoplight::Domain::Storage::RecoveryLock) }
+  let(:primary_store) { instance_double(NullRecoveryLockStore) }
   let(:config) { Stoplight::Domain::Config.empty.with(name:, window_size: 4, cool_off_time: 60, threshold: 3) }
   let(:error_notifier) { instance_double(Proc) }
   let(:name) { SecureRandom.uuid }
@@ -33,7 +33,7 @@ RSpec.describe Stoplight::Infrastructure::FailSafe::Storage::RecoveryLock do
     subject(:acquired_lock_token) { fail_safe.acquire_lock }
 
     context "when primary store does not fail" do
-      let(:recovery_token) { instance_double(Stoplight::Domain::RecoveryLockToken) }
+      let(:recovery_token) { instance_double(NullRecoveryLockToken) }
 
       it "returns the token" do
         expect(error_notifier).not_to receive(:call)
@@ -47,7 +47,7 @@ RSpec.describe Stoplight::Infrastructure::FailSafe::Storage::RecoveryLock do
     end
 
     context "when primary store fails" do
-      let(:failover_recovery_token) { instance_double(Stoplight::Domain::RecoveryLockToken) }
+      let(:failover_recovery_token) { instance_double(NullRecoveryLockToken) }
 
       it "returns failover token" do
         expect(error_notifier).to receive(:call).with(error)

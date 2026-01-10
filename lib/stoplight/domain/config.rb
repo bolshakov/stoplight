@@ -20,27 +20,9 @@ module Stoplight
       :data_store
     )
     class Config
-      # # @!attribute [r] name
-      #   @return [String]
-      #
-      # @!attribute [r] cool_off_time - cool-off time in seconds
-      #   @return [Numeric]
-      #
-      # @!attribute [r] threshold
-      #   @return [Numeric]
-      #
-      # @!attribute [r] window_size
-      #   @return [Numeric]
-      #
-      # @!attribute [r] tracked_errors
-      #   @return [Array<StandardError>]
-      #
-      # @!attribute [r] skipped_errors
-      #  @return [Array<Exception>]
-
       # Checks if the given error should be tracked
       #
-      # @param error [#==] The error to check, e.g. an Exception, Class or Proc
+      # @param error The error to check, e.g. an Exception, Class or Proc
       # @return [Boolean]
       def track_error?(error)
         skip = skipped_errors.any? { |matcher| matcher === error }

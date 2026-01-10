@@ -7,7 +7,6 @@ module Stoplight
       class Logger
         include Generic
 
-        # @return [::Logger]
         def logger
           @object
         end

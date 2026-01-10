@@ -3,9 +3,9 @@
 RSpec.describe Stoplight::Domain::Tracker::RecoveryProbe do
   subject(:recorder) { described_class.new(state_store:, traffic_recovery:, notifiers:, config:, metrics_store:) }
 
-  let(:metrics_store) { instance_double(Stoplight::Domain::Storage::Metrics) }
-  let(:state_store) { instance_double(Stoplight::Domain::Storage::State) }
-  let(:traffic_recovery) { instance_double(Stoplight::Domain::TrafficRecovery::Base) }
+  let(:metrics_store) { instance_double(NullMetricsStore) }
+  let(:state_store) { instance_double(NullStateStore) }
+  let(:traffic_recovery) { instance_double(NullTrafficRecovery) }
   let(:notifiers) { [notifier] }
   let(:notifier) { instance_double(NullNotifier) }
   let(:config) { instance_double(Stoplight::Domain::Config) }

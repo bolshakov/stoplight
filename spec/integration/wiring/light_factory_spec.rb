@@ -80,7 +80,7 @@ RSpec.describe Stoplight::Wiring::LightFactory do
       subject(:traffic_control_out) do
         light
           .__send__(:green_run_strategy)
-          .__send__(:request_tracker)
+          .instance_variable_get(:@request_tracker)
           .__send__(:traffic_control)
       end
 
@@ -141,8 +141,7 @@ RSpec.describe Stoplight::Wiring::LightFactory do
       it "raises a configuration errors" do
         expect { light }.to raise_error(
           Stoplight::Error::ConfigurationError,
-          "Stoplight::Domain::TrafficControl::ErrorRate incompatible with config: " \
-            "`threshold` should be between 0 and 1"
+          include("incompatible with config: `threshold` should be between 0 and 1")
         )
       end
     end
@@ -154,8 +153,7 @@ RSpec.describe Stoplight::Wiring::LightFactory do
       it "raises a configuration errors" do
         expect { light }.to raise_error(
           Stoplight::Error::ConfigurationError,
-          "Stoplight::Domain::TrafficRecovery::ConsecutiveSuccesses incompatible with config: " \
-            "`recovery_threshold` should be bigger than 0"
+          include("incompatible with config: `recovery_threshold` should be bigger than 0")
         )
       end
     end

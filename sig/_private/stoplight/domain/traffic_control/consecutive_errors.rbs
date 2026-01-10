@@ -1,7 +1,8 @@
 module Stoplight
   module Domain
     module TrafficControl
-      class ConsecutiveErrors < Base
+      class ConsecutiveErrors
+        include _TrafficControl
       end
     end
   end

@@ -3,37 +3,7 @@
 module Stoplight
   module Domain
     module Tracker
-      class RecoveryProbe < Base
-        # @!attribute [r] traffic_recovery
-        #   @return [Stoplight::Domain::TrafficRecovery::Base]
-        # @dynamic traffic_recovery
-        protected attr_reader :traffic_recovery
-
-        # @!attribute [r] traffic_control
-        #   @return [Stoplight::Domain::TrafficControl::Base]
-        # @dynamic notifiers
-        protected attr_reader :notifiers
-
-        # @!attribute [r] config
-        #   @return [Stoplight::Domain::Config] The configuration for the light.
-        # @dynamic config
-        protected attr_reader :config
-
-        # @!attribute [r] metrics_store
-        #   @return [Stoplight::Domain::Storage::Metrics]
-        # @dynamic metrics_store
-        protected attr_reader :metrics_store
-
-        # @!attribute [r] state_store
-        #   @return [Stoplight::Domain::Storage::State]
-        # @dynamic state_store
-        protected attr_reader :state_store
-
-        # @param traffic_recovery [Stoplight::Domain::TrafficRecovery::Base]
-        # @param notifiers [<Stoplight::Domain::StateTransitionNotifier>]
-        # @param config [Stoplight::Domain::Config]
-        # @param metrics_store [Stoplight::Domain::Storage::Metrics]
-        # @param state_store [Stoplight::Domain::Storage::State]
+      class RecoveryProbe
         def initialize(traffic_recovery:, notifiers:, config:, metrics_store:, state_store:)
           @traffic_recovery = traffic_recovery
           @notifiers = notifiers
@@ -55,7 +25,15 @@ module Stoplight
           recover
         end
 
-        private def recover
+        private
+
+        attr_reader :traffic_recovery
+        attr_reader :notifiers
+        attr_reader :config
+        attr_reader :metrics_store
+        attr_reader :state_store
+
+        def recover
           recovery_metrics = metrics_store.metrics_snapshot
           recovery_result = traffic_recovery.determine_color(config, recovery_metrics)
 

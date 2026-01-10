@@ -10,8 +10,6 @@ module Stoplight
           attr_accessor recovery_scheduled_after: Time?
           attr_accessor recovery_started_at: Time?
           attr_accessor breached_at: Time?
-
-          def initialize: -> void
         end
       end
     end

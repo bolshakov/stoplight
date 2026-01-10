@@ -9,27 +9,12 @@ module Stoplight
         # handle failures by falling back to default values when necessary.
         #
         # @api private
-        class State < Domain::Storage::State
-          # @!attribute primary_store
-          #  @return [Stoplight::Domain::Storage::RecoveryLock] The underlying primary store being used
+        class State
           attr_reader :primary_store
-
-          # @!attribute error_notifier
-          #   @return [Proc]
           attr_reader :error_notifier
-
-          # @!attribute failover_store
-          #   @return [Stoplight::Domain::Storage::RecoveryLock] The fallback store used when the primary fails.
           attr_reader :failover_store
+          attr_reader :circuit_breaker
 
-          # @!attribute circuit_breaker
-          #   @return [Stoplight::Light] The circuit breaker used to handle store failures.
-          private attr_reader :circuit_breaker
-
-          # @param primary_store [Stoplight::Domain::Storage::State]
-          # @param error_notifier [Proc]
-          # @param failover_store [Stoplight::Domain::Storage::State]
-          # @param circuit_breaker [Stoplight::Domain::Light]
           def initialize(primary_store:, error_notifier:, failover_store:, circuit_breaker:)
             @primary_store = primary_store
             @error_notifier = error_notifier
@@ -37,8 +22,6 @@ module Stoplight
             @circuit_breaker = circuit_breaker
           end
 
-          # @param state [String]
-          # @return [String]
           def set_state(state)
             circuit_breaker.run(fallback { failover_store.set_state(state) }) do
               primary_store.set_state(state)

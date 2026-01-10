@@ -14,17 +14,11 @@ module Stoplight
     # @see Stoplight()
     # @api private
     #
-    class LightFactory < Domain::LightFactory
-      # @!attribute [r] settings
-      #   @return [Hash]
-      protected attr_reader :settings
-
+    class LightFactory
       def initialize(settings:)
         @settings = settings
       end
 
-      # @return [Stoplight::Wiring::LightFactory]
-      # @see Stoplight()
       def with(
         name: T.undefined,
         cool_off_time: T.undefined,
@@ -88,15 +82,51 @@ module Stoplight
 
       alias_method :eql?, :==
 
+      def build_with(
+        name: T.undefined,
+        cool_off_time: T.undefined,
+        threshold: T.undefined,
+        recovery_threshold: T.undefined,
+        window_size: T.undefined,
+        tracked_errors: T.undefined,
+        skipped_errors: T.undefined,
+        data_store: T.undefined,
+        error_notifier: T.undefined,
+        notifiers: T.undefined,
+        traffic_control: T.undefined,
+        traffic_recovery: T.undefined
+      )
+        with(
+          name:,
+          cool_off_time:,
+          threshold:,
+          recovery_threshold:,
+          window_size:,
+          tracked_errors:,
+          skipped_errors:,
+          data_store:,
+          error_notifier:,
+          notifiers:,
+          traffic_control:,
+          traffic_recovery:
+        ).build
+      end
+
       def hash
         [self.class, settings].hash
       end
 
-      private def light_builder(config:)
+      protected
+
+      attr_reader :settings
+
+      private
+
+      def light_builder(config:)
         LightBuilder.new(config:, factory: light_factory)
       end
 
-      private def light_factory = self
+      def light_factory = self
     end
   end
 end

@@ -8,7 +8,7 @@ RSpec.describe Stoplight::Wiring::Redis::Backend, :redis do
       described_class.new(redis:, scripting:, key_space:, clock:, config:, error_notifier:, failover_light:)
     end
 
-    let(:clock) { instance_double(Stoplight::Domain::Clock) }
+    let(:clock) { instance_double(NullClock) }
     let(:scripting) { instance_double(Stoplight::Infrastructure::Redis::Storage::Scripting) }
     let(:key_space) do
       Stoplight::Infrastructure::Redis::Storage::KeySpace.new(

@@ -4,12 +4,12 @@ module Stoplight
   class Admin
     class LightsRepository
       # @!attribute data_store
-      #   @return [Stoplight::Domain::DataStore]
+      #   @return [Stoplight::Domain::_DataStore]
       # @dynamic data_store
       attr_reader :data_store
       private :data_store
 
-      #  @param data_store [Stoplight::Domain::DataStore]
+      #  @param data_store [Stoplight::Domain::_DataStore]
       def initialize(data_store:)
         @data_store = data_store
       end

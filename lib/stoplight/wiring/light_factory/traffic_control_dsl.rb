@@ -5,7 +5,7 @@ module Stoplight
     class LightFactory
       TrafficControlDsl = ->(value) {
         case value
-        in Domain::TrafficControl::Base
+        in _ if value.respond_to?(:stop_traffic?) # TODO: can be removed in 6.0
           value
         in :consecutive_errors
           Domain::TrafficControl::ConsecutiveErrors.new

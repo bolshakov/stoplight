@@ -1,11 +1,13 @@
 module Stoplight
   module Domain
     module Strategies
-      class YellowRunStrategy < RunStrategy
+      class YellowRunStrategy
+        include _RunStrategy
+
         attr_reader config: Config
-        attr_reader state_store: Storage::State
-        attr_reader metrics_store: Storage::Metrics
-        attr_reader recovery_lock_store: Storage::RecoveryLock
+        attr_reader state_store: Domain::_StateStore
+        attr_reader metrics_store: _MetricsStore
+        attr_reader recovery_lock_store: _RecoveryLockStore
         attr_reader notifiers: Array[state_transition_notifier]
         attr_reader request_tracker: Tracker::RecoveryProbe
         attr_reader red_run_strategy: RedRunStrategy
@@ -15,9 +17,9 @@ module Stoplight
           notifiers: Array[state_transition_notifier],
           request_tracker: Tracker::RecoveryProbe,
           red_run_strategy: RedRunStrategy,
-          state_store: Storage::State,
-          metrics_store: Storage::Metrics,
-          recovery_lock_store: Storage::RecoveryLock
+          state_store: Domain::_StateStore,
+          metrics_store: _MetricsStore,
+          recovery_lock_store: _RecoveryLockStore
         ) -> void
 
         def with_recovery_lock: [T] (

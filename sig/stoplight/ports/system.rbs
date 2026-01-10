@@ -1,0 +1,21 @@
+# frozen_string_literal: true
+
+module Stoplight
+  # A System is a composition root that groups related circuit breakers
+  # with shared configuration.
+  interface _System
+    def name: -> String
+
+    def light: (
+      String name,
+      ?cool_off_time: optional[duration],
+      ?threshold: optional[percentage | Integer],
+      ?recovery_threshold: optional[Integer],
+      ?window_size: optional[duration?],
+      ?skipped_errors: optional[Array[_ExceptionMatcher]],
+      ?tracked_errors: optional[Array[_ExceptionMatcher]],
+      ?traffic_control: optional[traffic_control],
+      ?traffic_recovery: optional[traffic_recovery]
+    ) -> _Light
+  end
+end

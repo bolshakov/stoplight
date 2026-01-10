@@ -34,14 +34,6 @@ module Stoplight
       MEMORY_REGISTRY = Concurrent::Map.new
       private_constant :MEMORY_REGISTRY
 
-      private attr_reader :data_store_config
-      private attr_reader :error_notifier
-      private attr_reader :config
-      private attr_reader :factory
-      private attr_reader :clock
-      private attr_reader :traffic_control
-      private attr_reader :traffic_recovery
-
       def initialize(config:, factory:)
         @clock = Infrastructure::SystemClock.new
         @config = config
@@ -64,16 +56,26 @@ module Stoplight
         )
       end
 
-      private def state_store = Stoplight::Infrastructure::Storage::CompatibilityState.new(config:, data_store:)
+      private
+
+      attr_reader :data_store_config
+      attr_reader :error_notifier
+      attr_reader :config
+      attr_reader :factory
+      attr_reader :clock
+      attr_reader :traffic_control
+      attr_reader :traffic_recovery
+
+      def state_store = Stoplight::Infrastructure::Storage::CompatibilityState.new(config:, data_store:)
 
       # @return [<Stoplight::Notifier::Base>]
-      private def notifiers
+      def notifiers
         Array(@notifiers).map do |notifier|
           Infrastructure::Notifier::FailSafe.new(notifier:, error_notifier:)
         end
       end
 
-      private def redis_recovery_lock_store
+      def redis_recovery_lock_store
         Infrastructure::Redis::DataStore::RecoveryLockStore.new(
           redis:,
           lock_timeout: config.cool_off_time_in_milliseconds,
@@ -81,33 +83,33 @@ module Stoplight
         )
       end
 
-      private def scripting = Infrastructure::Redis::DataStore::Scripting.new(redis:)
+      def scripting = Infrastructure::Redis::DataStore::Scripting.new(redis:)
 
-      private def memory_recovery_lock_store
+      def memory_recovery_lock_store
         Infrastructure::Memory::DataStore::RecoveryLockStore.new
       end
 
-      private def failover_data_store
+      def failover_data_store
         create_data_store(FAILOVER_DATA_STORE_CONFIG)
       end
 
-      private def data_store
+      def data_store
         create_data_store(data_store_config)
       end
 
-      private def metrics_store
+      def metrics_store
         Stoplight::Infrastructure::Storage::CompatibilityMetrics.new(config:, data_store:)
       end
 
-      private def recovery_lock_store
+      def recovery_lock_store
         Stoplight::Infrastructure::Storage::CompatibilityRecoveryLock.new(config:, data_store:)
       end
 
-      private def request_tracker
+      def request_tracker
         Domain::Tracker::Request.new(traffic_control:, notifiers:, config:, metrics_store:, state_store:)
       end
 
-      private def recovery_probe_tracker
+      def recovery_probe_tracker
         Domain::Tracker::RecoveryProbe.new(
           traffic_recovery:,
           notifiers:,
@@ -117,15 +119,15 @@ module Stoplight
         )
       end
 
-      private def recovery_metrics_store
+      def recovery_metrics_store
         Stoplight::Infrastructure::Storage::CompatibilityRecoveryMetrics.new(config:, data_store:)
       end
 
-      private def green_run_strategy
+      def green_run_strategy
         Domain::Strategies::GreenRunStrategy.new(config:, request_tracker:)
       end
 
-      private def yellow_run_strategy
+      def yellow_run_strategy
         Domain::Strategies::YellowRunStrategy.new(
           config:,
           notifiers:,
@@ -137,11 +139,11 @@ module Stoplight
         )
       end
 
-      private def red_run_strategy
+      def red_run_strategy
         Domain::Strategies::RedRunStrategy.new(config:)
       end
 
-      private def create_data_store(data_store_config)
+      def create_data_store(data_store_config)
         case data_store_config
         when Stoplight::DataStore::Memory
           memory_registry.compute_if_absent(data_store_config.object_id) do
@@ -168,7 +170,7 @@ module Stoplight
         end
       end
 
-      private def redis
+      def redis
         case data_store_config
         when DataStore::Redis
           data_store_config.redis
@@ -177,7 +179,7 @@ module Stoplight
         end
       end
 
-      private def memory_registry = MEMORY_REGISTRY
+      def memory_registry = MEMORY_REGISTRY
     end
   end
 end

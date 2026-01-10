@@ -7,8 +7,8 @@ RSpec.describe Stoplight::Infrastructure::FailSafe::Storage::Metrics do
       circuit_breaker: test_circuit_breaker_class.new
     )
   end
-  let(:failover_store) { instance_double(Stoplight::Domain::Storage::Metrics) }
-  let(:primary_store) { instance_double(Stoplight::Domain::Storage::Metrics) }
+  let(:failover_store) { instance_double(NullMetricsStore) }
+  let(:primary_store) { instance_double(NullMetricsStore) }
   let(:error_notifier) { instance_double(Proc) }
 
   let(:test_circuit_breaker_class) do

@@ -16,15 +16,7 @@ module Stoplight
         #
         # @note All public methods are synchronized via mutex to ensure thread safety.
         #
-        class WindowMetrics < Domain::Storage::Metrics
-          # @!attribute mutex
-          #   @return [Mutex]
-          private attr_reader :mutex
-
-          # @!attribute clock
-          #   @return [Stoplight::Domain::Clock]
-          private attr_reader :clock
-
+        class WindowMetrics
           def initialize(window_size:, clock:)
             @clock = clock
             @mutex = Mutex.new
@@ -34,8 +26,6 @@ module Stoplight
           end
 
           # Get metrics for the current light
-          #
-          # @return [Stoplight::Domain::Metrics]
           def metrics_snapshot
             mutex.synchronize do
               window_start = (clock.current_time - @window_size)
@@ -54,8 +44,6 @@ module Stoplight
           end
 
           # Records successful circuit breaker execution
-          #
-          # @return [void]
           def record_success
             mutex.synchronize do
               current_time = clock.current_time
@@ -71,9 +59,6 @@ module Stoplight
           end
 
           # Records failed circuit breaker execution
-          #
-          # @param exception [StandardError]
-          # @return [void]
           def record_failure(exception)
             mutex.synchronize do
               @errors.increment
@@ -96,7 +81,12 @@ module Stoplight
             end
           end
 
-          private def initialize_metrics
+          private
+
+          attr_reader :mutex
+          attr_reader :clock
+
+          def initialize_metrics
             @consecutive_errors = 0
             @consecutive_successes = 0
             @last_error = nil

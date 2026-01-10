@@ -7,8 +7,8 @@ RSpec.describe Stoplight::Infrastructure::FailSafe::Storage::State do
       circuit_breaker: test_circuit_breaker_class.new
     )
   end
-  let(:failover_store) { instance_double(Stoplight::Domain::Storage::State) }
-  let(:primary_store) { instance_double(Stoplight::Domain::Storage::State) }
+  let(:failover_store) { instance_double(NullStateStore) }
+  let(:primary_store) { instance_double(NullStateStore) }
   let(:error_notifier) { instance_double(Proc) }
 
   let(:test_circuit_breaker_class) do

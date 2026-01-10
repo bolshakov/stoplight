@@ -1,11 +1,13 @@
 module Stoplight
   module Infrastructure
     module Storage
-      class CompatibilityState < Domain::Storage::State
-        private attr_reader data_store: Domain::DataStore
+      class CompatibilityState
+        include Domain::_StateStore
+
+        private attr_reader data_store: Domain::_DataStore
         private attr_reader config: Domain::Config
 
-        def initialize: (data_store: Domain::DataStore, config: Domain::Config) -> void
+        def initialize: (data_store: Domain::_DataStore, config: Domain::Config) -> void
       end
     end
   end

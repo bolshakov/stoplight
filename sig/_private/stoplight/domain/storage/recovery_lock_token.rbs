@@ -1,10 +1,10 @@
 module Stoplight
   module Domain
     module Storage
-      class RecoveryLockToken < Domain::RecoveryLockToken
-        attr_reader token: String
+      class RecoveryLockToken
+        include _RecoveryLockToken
 
-        def initialize: -> void
+        attr_reader token: String
       end
     end
   end

@@ -24,23 +24,6 @@ module Stoplight
             def default_scripts_root = SCRIPTS_ROOT
           end
 
-          # @!attribute scripts_root
-          #   @return [String]
-          # @dynamic scripts_root
-          protected attr_reader :scripts_root
-
-          # @!attribute shas
-          #   @return [Hash{Symbol, String}]
-          # @dynamic shas
-          private attr_reader :shas
-
-          # @!attribute redis
-          #   @return [RedisClient | ConnectionPool]
-          # @dynamic redis
-          protected attr_reader :redis
-
-          # @param redis [RedisClient | ConnectionPool]
-          # @param scripts_root [String]
           def initialize(redis:, scripts_root: self.class.default_scripts_root)
             @scripts_root = scripts_root
             @redis = redis
@@ -60,12 +43,21 @@ module Stoplight
             end
           end
 
-          private def reload_script(script_name)
+          protected
+
+          attr_reader :scripts_root
+          attr_reader :redis
+
+          private
+
+          attr_reader :shas
+
+          def reload_script(script_name)
             shas.delete(script_name)
             script_sha(script_name)
           end
 
-          private def script_sha(script_name)
+          def script_sha(script_name)
             if shas.key?(script_name)
               shas[script_name]
             else

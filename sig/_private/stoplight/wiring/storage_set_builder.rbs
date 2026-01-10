@@ -9,7 +9,7 @@ module Stoplight
       def initialize: (backend: DataStoreBackend, windowed: bool) -> void
 
       def build: -> StorageSet
-      def metrics_store: -> Domain::Storage::Metrics
+      def metrics_store: -> Domain::_MetricsStore
     end
   end
 end

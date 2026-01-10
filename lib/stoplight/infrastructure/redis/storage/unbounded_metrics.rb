@@ -54,22 +54,6 @@ module Stoplight
         #   desirable for ephemeral or decommissioned lights.
         #
         class UnboundedMetrics < Metrics
-          # @!attribute redis
-          #   @return [::Redis | ConnectionPool<::Redis>]
-          private attr_reader :redis
-
-          # @!attribute scripting
-          #   @return [Stoplight::Infrastructure::Redis::DataStore::Scripting]
-          private attr_reader :scripting
-
-          # @!attribute metrics_key
-          #   @return [String]
-          private attr_reader :metrics_key
-
-          # @!attribute clock
-          #   @return [Stoplight::Domain::Clock]
-          private attr_reader :clock
-
           def initialize(redis:, scripting:, key_space:, clock:)
             @clock = clock
             @scripting = scripting
@@ -79,7 +63,6 @@ module Stoplight
 
           # Get metrics for the current light
           #
-          # @return [Stoplight::Domain::Metrics]
           def metrics_snapshot
             last_success_at, last_error_json, consecutive_errors, consecutive_successes = redis.with do |client|
               client.hmget(
@@ -99,7 +82,6 @@ module Stoplight
 
           # Records successful circuit breaker execution
           #
-          # @return [void]
           def record_success
             timestamp = clock.current_time.to_f
 
@@ -112,8 +94,6 @@ module Stoplight
 
           # Records failed circuit breaker execution
           #
-          # @param exception [StandardError]
-          # @return [void]
           def record_failure(exception)
             timestamp = clock.current_time.to_f
 
@@ -129,6 +109,13 @@ module Stoplight
               client.hdel(metrics_key, "last_success_at", "last_error_json", "consecutive_errors", "consecutive_successes")
             end
           end
+
+          private
+
+          attr_reader :redis
+          attr_reader :scripting
+          attr_reader :metrics_key
+          attr_reader :clock
         end
       end
     end

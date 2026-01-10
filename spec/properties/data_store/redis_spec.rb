@@ -67,7 +67,7 @@ RSpec.describe "Stoplight::Infrastructure::Redis::DataStore#buckets_for_window",
 
   it "returns correct number of buckets for various window sizes" do
     property_of {
-      window_size = range(1, Stoplight::Domain::DataStore::METRICS_RETENTION_TIME)
+      window_size = range(1, 60 * 60 * 24)
       window_end = Time.now.to_i
       [window_size, window_end]
     }.check do |window_size, window_end|

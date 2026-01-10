@@ -1,0 +1,45 @@
+module Stoplight
+  module Domain
+    type decision = :green | :yellow | :red
+
+    # Strategies for determining how to recover traffic flow through the Stoplight.
+    # These strategies evaluate recovery metrics to decide which color the Stoplight should
+    # transition to during the recovery process.
+    #
+    # @example Creating a custom traffic recovery strategy
+    #   class GradualRecovery
+    #     def initialize(min_success_rate: 0.8, min_samples: 100)
+    #       @min_success_rate = min_success_rate
+    #       @min_samples = min_samples
+    #     end
+    #
+    #     def determine_color(config, metrics)
+    #       total_probes = metrics.recovery_probe_successes + metrics.recovery_probe_errors
+    #
+    #       if total_probes < @min_samples
+    #         return Color::YELLOW # Keep recovering, not enough samples
+    #       end
+    #
+    #       success_rate = metrics.recovery_probe_successes.fdiv(total_probes)
+    #       if success_rate >= @min_success_rate
+    #         Color::GREEN # Recovery successful
+    #       elsif success_rate <= 0.2
+    #         Color::RED # Recovery failed, too many errors
+    #       else
+    #         Color::YELLOW # Continue recovery
+    #       end
+    #     end
+    #   end
+    #
+    interface _TrafficRecovery
+      # Checks if the strategy is compatible with the given Stoplight configuration.
+      def check_compatibility: (Config config) -> CompatibilityResult
+
+      # Determines the appropriate recovery state based on the Stoplight's
+      # current metrics and recovery progress.
+      def determine_color: (Config, Domain::MetricsSnapshot) -> decision
+
+      def ==: (untyped) -> bool
+    end
+  end
+end

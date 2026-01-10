@@ -37,31 +37,6 @@ module Stoplight
         # - metrics_snapshot: Aggregates across buckets atomically
         #
         class WindowMetrics < Metrics
-          # @!attribute redis
-          #   @return [::Redis | ConnectionPool<::Redis>]
-          private attr_reader :redis
-
-          # @!attribute scripting
-          #   @return [Stoplight::Infrastructure::Redis::Storage::Scripting]
-          private attr_reader :scripting
-
-          # @!attribute metrics_key
-          #   @return [String]
-          private attr_reader :metrics_key
-
-          # @!attribute clock
-          #   @return [Stoplight::Domain::Clock]
-          private attr_reader :clock
-
-          # @!attribute key_space
-          #   @return [Stoplight::Infrastructure::Redis::Storage::KeySpace]
-          private attr_reader :key_space
-
-          # @param redis [Redis, ConnectionPool<Redis>] Redis client or connection pool
-          # @param scripting [Stoplight::Infrastructure::Redis::Storage::Scripting] Lua script executor
-          # @param config [Stoplight::Domain::Config]
-          # @param clock [Stoplight::Domain::Clock]
-          # @param key_space [Stoplight::Infrastructure::Redis::Storage::KeySpace]
           def initialize(redis:, scripting:, config:, clock:, key_space:)
             @clock = clock
             @scripting = scripting
@@ -153,14 +128,11 @@ module Stoplight
             key_space.key(:window_metrics, metric, (time.to_i / bucket_size) * bucket_size)
           end
 
-          private def bucket_size = 3600 # 1 hour
-          private def bucket_ttl = @window_size + bucket_size
-
           # Retrieves the list of Redis bucket keys required to cover a specific time window.
           #
-          # @param metric [Symbol] The metric type (e.g., "errors").
-          # @param window_end [Time, Numeric] The end time of the window (can be a Time object or a numeric timestamp).
-          # @return [Array<String>] A list of Redis keys for the buckets that cover the time window.
+          # @param metric The metric type (e.g., "errors").
+          # @param window_end  The end time of the window (can be a Time object or a numeric timestamp).
+          # @return A list of Redis keys for the buckets that cover the time window.
           # @api private
           def buckets_for_window(metric:, window_end:)
             window_end_ts = window_end.to_i
@@ -177,13 +149,24 @@ module Stoplight
             end
           end
 
-          private def successes_key(time:) = bucket_key(metric: :success, time:)
+          private
 
-          private def errors_key(time:) = bucket_key(metric: :failure, time:)
+          attr_reader :redis
+          attr_reader :scripting
+          attr_reader :metrics_key
+          attr_reader :clock
+          attr_reader :key_space
 
-          private def failure_bucket_keys(window_end) = buckets_for_window(metric: :failure, window_end:)
+          def bucket_size = 3600 # 1 hour
+          def bucket_ttl = @window_size + bucket_size
 
-          private def success_bucket_keys(window_end) = buckets_for_window(metric: :success, window_end:)
+          def successes_key(time:) = bucket_key(metric: :success, time:)
+
+          def errors_key(time:) = bucket_key(metric: :failure, time:)
+
+          def failure_bucket_keys(window_end) = buckets_for_window(metric: :failure, window_end:)
+
+          def success_bucket_keys(window_end) = buckets_for_window(metric: :success, window_end:)
         end
       end
     end

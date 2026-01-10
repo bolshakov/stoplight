@@ -6,8 +6,8 @@ module Stoplight
   module Infrastructure
     module Memory
       # steep:ignore:start
-      # @see +Domain::DataStore+
-      class DataStore < Domain::DataStore
+      # @see +Domain::_DataStore+
+      class DataStore
         include MonitorMixin
 
         KEY_SEPARATOR = ":"
@@ -19,12 +19,12 @@ module Stoplight
         private attr_reader :recovery_lock_store
 
         # @!attribute clock
-        #   @return [Stoplight::Domain::Clock]
+        #   @return [Stoplight::Domain::_Clock]
         # @dynamic clock
         private attr_reader :clock
 
         # @param recovery_lock_store [Stoplight::Infrastructure::Memory::DataStore::RecoveryLockStore]
-        # @param clock [Stoplight::Domain::Clock]
+        # @param clock [Stoplight::Domain::_Clock]
         def initialize(recovery_lock_store:, clock:)
           @clock = clock
           @recovery_lock_store = recovery_lock_store

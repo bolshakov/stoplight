@@ -38,36 +38,7 @@ module Stoplight
         # @see Stoplight::Memory::State for the in-memory equivalent
         # @see Stoplight::Domain::StateSnapshot for the structure of state snapshots
         #
-        class State < Domain::Storage::State
-          # @!attribute redis
-          #   @return [::Redis | ConnectionPool<::Redis>]
-          private attr_reader :redis
-
-          # @!attribute scripting
-          #   @return [Stoplight::Infrastructure::Redis::DataStore::Scripting]
-          private attr_reader :scripting
-
-          # @!attribute key_space
-          #   @return [Stoplight::Infrastructure::Redis::Storage::KeySpace]
-          private attr_reader :key_space
-
-          # @!attribute clock
-          #   @return [Stoplight::Domain::Clock]
-          private attr_reader :clock
-
-          # @!attribute cool_off_time
-          #   @return [Integer]
-          private attr_reader :cool_off_time
-
-          # @!attribute state_key
-          #   @return [String]
-          private attr_reader :state_key
-
-          # @param clock [Stoplight::Domain::Clock]
-          # @param redis [::Redis, ConnectionPool<::Redis>]
-          # @param scripting [Stoplight::Infrastructure::Redis::DataStore::Scripting]
-          # @param key_space [Stoplight::Infrastructure::Redis::DataStore::KeySpace]
-          # @param cool_off_time [Integer]
+        class State
           def initialize(clock:, redis:, scripting:, key_space:, cool_off_time:)
             @redis = redis
             @scripting = scripting
@@ -78,8 +49,6 @@ module Stoplight
             @state_key = key_space.key(:state)
           end
 
-          # @param state [String]
-          # @return [String]
           def set_state(state)
             redis.with do |client|
               client.hset(state_key, "locked_state", state)
@@ -87,7 +56,6 @@ module Stoplight
             state
           end
 
-          # @return [Stoplight::Domain::StateSnapshot]
           def state_snapshot
             breached_at_raw, locked_state, recovery_scheduled_after_raw, recovery_started_at_raw = redis.with do |client|
               client.hmget(state_key, :breached_at, :locked_state, :recovery_scheduled_after, :recovery_started_at)
@@ -102,7 +70,6 @@ module Stoplight
             )
           end
 
-          # @return [void]
           def clear
             redis.with do |client|
               client.del(state_key)
@@ -122,10 +89,18 @@ module Stoplight
             end
           end
 
+          private
+
+          attr_reader :redis
+          attr_reader :scripting
+          attr_reader :key_space
+          attr_reader :clock
+          attr_reader :cool_off_time
+          attr_reader :state_key
+
           # Transitions to GREEN state and ensures only one notification
           #
-          # @return [Boolean] true if this is the first instance to detect this transition
-          private def transition_to_green
+          def transition_to_green
             became_green = scripting.call(
               :"state/transition_to_green",
               args: [clock.current_time.to_f],
@@ -136,8 +111,7 @@ module Stoplight
 
           # Transitions to YELLOW (recovery) state and ensures only one notification
           #
-          # @return [Boolean] true if this is the first instance to detect this transition
-          private def transition_to_yellow
+          def transition_to_yellow
             became_yellow = scripting.call(
               :"state/transition_to_yellow",
               args: [clock.current_time.to_f],
@@ -148,8 +122,7 @@ module Stoplight
 
           # Transitions to RED state and ensures only one notification
           #
-          # @return [Boolean] true if this is the first instance to detect this transition
-          private def transition_to_red
+          def transition_to_red
             current_ts = clock.current_time.to_f
             recovery_scheduled_after_ts = current_ts + cool_off_time
 

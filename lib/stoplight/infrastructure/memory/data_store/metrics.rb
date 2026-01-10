@@ -5,13 +5,9 @@ module Stoplight
     module Memory
       class DataStore
         class Metrics
-          # @dynamic consecutive_errors
           attr_accessor :consecutive_errors
-          # @dynamic consecutive_successes
           attr_accessor :consecutive_successes
-          # @dynamic last_error
           attr_accessor :last_error
-          # @dynamic last_success_at
           attr_accessor :last_success_at
 
           def initialize(consecutive_errors: 0, consecutive_successes: 0, last_error: nil, last_success_at: nil)

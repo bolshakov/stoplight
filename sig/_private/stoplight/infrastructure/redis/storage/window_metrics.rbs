@@ -7,7 +7,7 @@ module Stoplight
           attr_reader redis: redis
           attr_reader scripting: Scripting
           attr_reader metrics_key: String
-          attr_reader clock: Domain::Clock
+          attr_reader clock: Domain::_Clock
           attr_reader key_space: KeySpace
           @window_size: Integer
 
@@ -15,7 +15,7 @@ module Stoplight
             redis: redis,
             scripting: Scripting,
             config: Domain::Config,
-            clock: Domain::Clock,
+            clock: Domain::_Clock,
             key_space: KeySpace
           ) -> void
 
