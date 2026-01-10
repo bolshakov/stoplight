@@ -24,19 +24,19 @@ RSpec.describe Stoplight::Infrastructure::Redis::Storage::KeySpace do
     context "with a pattern" do
       let(:pieces) { ["*"] }
 
-      it { is_expected.to eq("stoplight:v6:system:light:*") }
+      it { is_expected.to eq("stoplight:v6:system:{light}:*") }
     end
 
     context "with one piece" do
       let(:pieces) { ["metadata"] }
 
-      it { is_expected.to eq("stoplight:v6:system:light:metadata") }
+      it { is_expected.to eq("stoplight:v6:system:{light}:metadata") }
     end
 
     context "with multiple pieces" do
       let(:pieces) { ["this", "that"] }
 
-      it { is_expected.to eq("stoplight:v6:system:light:this:that") }
+      it { is_expected.to eq("stoplight:v6:system:{light}:this:that") }
     end
   end
 end
