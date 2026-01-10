@@ -4,7 +4,9 @@ module Stoplight
   module Infrastructure
     module Memory
       class DataStore
-        class RecoveryLockToken < Domain::RecoveryLockToken
+        class RecoveryLockToken
+          include Domain::_RecoveryLockToken
+
           attr_reader light_name: String
 
           def initialize: (light_name: String) -> void

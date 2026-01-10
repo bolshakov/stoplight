@@ -6,10 +6,7 @@ module Stoplight
   module Infrastructure
     module Redis
       module Storage
-        class Metrics < Domain::Storage::Metrics
-          # @param exception [StandardError]
-          # @param timestamp [Float]
-          # @api private
+        class Metrics
           def serialize_exception(exception, timestamp:)
             JSON.generate(
               {
@@ -22,9 +19,6 @@ module Stoplight
             )
           end
 
-          # @param failure_json [String, nil]
-          # @return [Stoplight::Domain::Failure, nil]
-          # @api private
           def deserialize_failure(failure_json)
             return if failure_json.nil?
 

@@ -1,7 +1,9 @@
 module Stoplight
   module Domain
     module Strategies
-      class RedRunStrategy < RunStrategy
+      class RedRunStrategy
+        include _RunStrategy
+
         attr_reader config: Config
 
         def initialize: (config: Config) -> void

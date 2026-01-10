@@ -6,16 +6,12 @@ module Stoplight
     # used as the basis for all circuit breakers.
     #
     class DefaultFactoryBuilder
-      # @!attribute [r] configuration
-      #  @return [Stoplight::Wiring::DefaultConfiguration]
       attr_reader :configuration
 
       def initialize
         @configuration = DefaultConfiguration.new
       end
 
-      # @return [Stoplight::Wiring::LightFactory]
-      # @api private the method is used internally by Stoplight
       def build
         LightFactory.new(settings: configuration.to_settings)
       end

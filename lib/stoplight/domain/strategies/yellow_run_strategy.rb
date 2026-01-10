@@ -10,47 +10,7 @@ module Stoplight
       # raising them or invoking a fallback if provided.
       #
       # @api private
-      class YellowRunStrategy < RunStrategy
-        # @!attribute [r] config
-        #   @return [Stoplight::Domain::Config] The configuration for the light.
-        # @dynamic config
-        protected attr_reader :config
-
-        # @!attribute [r] stare_store
-        #   @return [Stoplight::Domain::Storage::State]
-        # @dynamic state_store
-        protected attr_reader :state_store
-
-        # @!attribute [r] metrics_store
-        #   @return [Stoplight::Domain::Storage::Metrics]
-        # @dynamic metrics_store
-        protected attr_reader :metrics_store
-
-        # @!attribute [r] recovery_lock_store
-        #   @return [Stoplight::Domain::Storage::RecoveryLock]
-        # @dynamic recovery_lock_store
-        protected attr_reader :recovery_lock_store
-
-        # @!attribute [r] notifiers
-        #   @return [Stoplight::Domain::StateTransitionNotifier]
-        # @dynamic notifiers
-        protected attr_reader :notifiers
-
-        # @!attribute [r] request_tracker
-        #   @return [Stoplight::Domain::RecoveryProbeRequestRecorder]
-        # @dynamic request_tracker
-        protected attr_reader :request_tracker
-
-        # @!attribute [r] red_run_strategy
-        #   @return [Stoplight::Domain::Strategies::RedRunStrategy]
-        # @dynamic red_run_strategy
-        protected attr_reader :red_run_strategy
-
-        # @param config [Stoplight::Domain::Config]
-        # @param notifiers [Array<Stoplight::Domain::StateTransitionNotifier>]
-        # @param request_tracker [Stoplight::Domain::Tracker::RecoveryProbe]
-        # @param red_run_strategy [Stoplight::Domain::Strategies::RedRunStrategy]
-        # @param recovery_lock_store [Stoplight::Domain::Storage::RecoveryLock]
+      class YellowRunStrategy
         def initialize(config:, notifiers:, request_tracker:, red_run_strategy:, state_store:, metrics_store:, recovery_lock_store:)
           @config = config
           @notifiers = notifiers
@@ -63,11 +23,11 @@ module Stoplight
 
         # Executes the provided code block when the light is in the yellow state.
         #
-        # @param fallback [Proc, nil] A fallback proc to execute in case of an error.
-        # @param state_snapshot [Stoplight::Domain::StateSnapshot]
+        # @param fallback A fallback proc to execute in case of an error.
+        # @param state_snapshot
         # @yield The code block to execute.
-        # @return [Object] The result of the code block if successful.
-        # @raise [Exception] Re-raises the error if it is not tracked or no fallback is provided.
+        # @return The result of the code block if successful.
+        # @raise Re-raises the error if it is not tracked or no fallback is provided.
         def execute(fallback, state_snapshot:, &code)
           # Everything withing this block executed exclusively:
           #   - enter recovery
@@ -96,7 +56,17 @@ module Stoplight
           end
         end
 
-        private def with_recovery_lock(fallback:, state_snapshot:, code:)
+        private
+
+        attr_reader :config
+        attr_reader :notifiers
+        attr_reader :request_tracker
+        attr_reader :red_run_strategy
+        attr_reader :state_store
+        attr_reader :metrics_store
+        attr_reader :recovery_lock_store
+
+        def with_recovery_lock(fallback:, state_snapshot:, code:)
           recovery_lock_token = recovery_lock_store.acquire_lock
           if recovery_lock_token.nil?
             return red_run_strategy.execute(fallback, state_snapshot:, &code)
@@ -109,17 +79,15 @@ module Stoplight
           end
         end
 
-        private def record_recovery_probe_success
+        def record_recovery_probe_success
           request_tracker.record_success
         end
 
-        private def record_recovery_probe_failure(error)
+        def record_recovery_probe_failure(error)
           request_tracker.record_failure(error)
         end
 
-        # @param state_snapshot [Stoplight::Domain::StateSnapshot]
-        # @return [void]
-        private def enter_recovery(state_snapshot)
+        def enter_recovery(state_snapshot)
           return if state_snapshot.recovery_started?
 
           state_store.transition_to_color(Color::YELLOW)

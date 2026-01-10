@@ -19,15 +19,7 @@ module Stoplight
         # @note The +#errors+ and +#successes+ fields in the returned +Stoplight::Domain::Metrics+
         #   are always +nil+ since totals aren't tracked.
         #
-        class UnboundedMetrics < Domain::Storage::Metrics
-          private attr_accessor :consecutive_errors
-          private attr_accessor :consecutive_successes
-          private attr_accessor :last_error
-          private attr_accessor :last_success_at
-
-          private attr_reader :mutex
-          private attr_reader :clock
-
+        class UnboundedMetrics
           def initialize(clock:)
             initialize_metrics
             @clock = clock
@@ -35,8 +27,6 @@ module Stoplight
           end
 
           # Get metrics for the current light
-          #
-          # @return [Stoplight::Domain::Metrics]
           def metrics_snapshot
             mutex.synchronize do
               Domain::MetricsSnapshot.new(
@@ -51,8 +41,6 @@ module Stoplight
           end
 
           # Records successful circuit breaker execution
-          #
-          # @return [void]
           def record_success
             current_time = clock.current_time
 
@@ -67,9 +55,6 @@ module Stoplight
           end
 
           # Records failed circuit breaker execution
-          #
-          # @param exception [StandardError]
-          # @return [void]
           def record_failure(exception)
             current_time = clock.current_time
             failure = Domain::Failure.from_error(exception, time: current_time)
@@ -91,14 +76,24 @@ module Stoplight
             end
           end
 
-          private def initialize_metrics
+          private
+
+          attr_accessor :consecutive_errors
+          attr_accessor :consecutive_successes
+          attr_accessor :last_error
+          attr_accessor :last_success_at
+
+          attr_reader :mutex
+          attr_reader :clock
+
+          def initialize_metrics
             @consecutive_errors = 0
             @consecutive_successes = 0
             @last_error = nil
             @last_success_at = nil
           end
 
-          private def last_error_at
+          def last_error_at
             last_error&.occurred_at
           end
         end

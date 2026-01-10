@@ -342,7 +342,7 @@ RSpec.describe RuboCop::Cop::Stoplight::ArchitectureBoundaries, :config do
       expect_no_offenses(<<~RUBY, filename)
         RSpec.describe Stoplight::Domain::Light do
           it "uses domain interface" do
-            store = instance_double(Stoplight::Domain::DataStore)
+            store = instance_double(Stoplight::Domain::_DataStore)
           end
         end
       RUBY

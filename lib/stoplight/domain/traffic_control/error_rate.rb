@@ -16,33 +16,23 @@ module Stoplight
       #   traffic_control = Stoplight::Domain::TrafficControl::ErrorRate.new(min_requests: 100)
       #
       # @api private
-      class ErrorRate < Base
-        # @!attribute min_requests
-        #   @return [Integer]
-        # @dynamic min_requests
-        attr_reader :min_requests
-
-        # @param min_requests [Integer] Minimum number of requests before traffic control is applied.
+      class ErrorRate
+        # @param min_requests Minimum number of requests before traffic control is applied.
         #   until this number of requests is reached, the error rate will not be considered.
         def initialize(min_requests: 10)
           @min_requests = min_requests
         end
 
-        # @param config [Stoplight::Domain::Config]
-        # @return [Stoplight::Domain::CompatibilityResult]
         def check_compatibility(config)
           if config.window_size.nil?
-            incompatible("`window_size` should be set")
+            CompatibilityResult.incompatible("`window_size` should be set")
           elsif config.threshold < 0 || config.threshold > 1
-            incompatible("`threshold` should be between 0 and 1")
+            CompatibilityResult.incompatible("`threshold` should be between 0 and 1")
           else
-            compatible
+            CompatibilityResult.compatible
           end
         end
 
-        # @param config [Stoplight::Domain::Config]
-        # @param metrics [Stoplight::Domain::MetricsSnapshot]
-        # @return [Boolean]
         def stop_traffic?(config, metrics)
           error_rate = metrics.error_rate
           requests = metrics.requests
@@ -51,6 +41,14 @@ module Stoplight
 
           requests >= min_requests && error_rate >= config.threshold
         end
+
+        def ==(other)
+          other.is_a?(self.class) && min_requests == other.min_requests
+        end
+
+        protected
+
+        attr_reader :min_requests
       end
     end
   end

@@ -4,8 +4,8 @@ RSpec.describe Stoplight::Infrastructure::Storage::CompatibilityRecoveryLock do
   subject(:store) { described_class.new(data_store:, config:) }
 
   let(:config) { instance_double(Stoplight::Domain::Config) }
-  let(:data_store) { instance_double(Stoplight::Domain::DataStore) }
-  let(:lock_token) { instance_double(Stoplight::Domain::RecoveryLockToken) }
+  let(:data_store) { instance_double(NullDataStore) }
+  let(:lock_token) { instance_double(NullRecoveryLockToken) }
 
   describe "#acquire_lock" do
     subject { store.acquire_lock }

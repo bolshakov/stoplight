@@ -58,7 +58,7 @@ Use test doubles for testing with abstract dependencies:
 
 ```ruby
 RSpec.describe Stoplight::Domain::Light do
-  let(:data_store) { instance_double(Stoplight::Domain::DataStore) }
+  let(:data_store) { instance_double(Stoplight::Domain::_DataStore) }
   let(:notifier) { instance_double(NullNotifier) }
   
   # Test in isolation

@@ -2,7 +2,9 @@ module Stoplight
   module Infrastructure
     module Memory
       module Storage
-        class RecoveryLock < Domain::Storage::RecoveryLock
+        class RecoveryLock
+          include Domain::_RecoveryLockStore
+
           private attr_reader lock: Mutex
 
           def initialize: -> void

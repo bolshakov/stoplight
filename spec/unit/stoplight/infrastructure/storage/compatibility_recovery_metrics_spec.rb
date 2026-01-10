@@ -4,7 +4,7 @@ RSpec.describe Stoplight::Infrastructure::Storage::CompatibilityRecoveryMetrics 
   subject(:store) { described_class.new(data_store:, config:) }
 
   let(:config) { instance_double(Stoplight::Domain::Config) }
-  let(:data_store) { instance_double(Stoplight::Domain::DataStore) }
+  let(:data_store) { instance_double(NullDataStore) }
 
   describe "#metrics_snapshot" do
     subject { store.metrics_snapshot }

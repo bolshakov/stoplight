@@ -1,13 +1,16 @@
 module Stoplight
   module Infrastructure
     module Redis
-      class DataStore < Domain::DataStore
+      class DataStore
+        include Domain::_DataStore
+
         BUCKET_SIZE: Integer
         KEY_SEPARATOR: String
         KEY_PREFIX: String
         METRICS_TTL: Integer
         METADATA_TTL: Integer
         SKEW_TOLERANCE: Integer
+        METRICS_RETENTION_TIME: Integer
 
         def self.key: (*_ToS) -> String
 
@@ -30,14 +33,14 @@ module Stoplight
         private attr_reader scripting: Scripting
         private attr_reader redis: redis
         private attr_reader warn_on_clock_skew: bool
-        private attr_reader clock: Domain::Clock
+        private attr_reader clock: Domain::_Clock
 
         def initialize: (
           redis: redis,
           recovery_lock_store: RecoveryLockStore,
           scripting: Scripting,
           warn_on_clock_skew: bool,
-          clock: Domain::Clock
+          clock: Domain::_Clock
         ) -> void
 
         private def transition_to_green: (Domain::Config config) -> bool

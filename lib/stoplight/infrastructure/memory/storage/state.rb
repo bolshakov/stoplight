@@ -27,43 +27,8 @@ module Stoplight
         #   snapshot.recovery_scheduled_after  # => 2025-01-15 10:31:00 UTC
         #
         # @see Stoplight::Domain::StateSnapshot for the structure of state snapshots
-        # @see Stoplight::Domain::Storage::State for the interface contract
         #
-        class State < Domain::Storage::State
-          # @!attribute locked_state
-          #   @return [String]
-          private attr_accessor :locked_state
-
-          # @!attribute recovered_at
-          #   @return [Time, nil]
-          private attr_accessor :recovered_at
-
-          # @!attribute recovery_scheduled_after
-          #   @return [Time, nil]
-          private attr_accessor :recovery_scheduled_after
-
-          # @!attribute recovery_started_at
-          #   @return [Time, nil]
-          private attr_accessor :recovery_started_at
-
-          # @!attribute breached_at
-          #   @return [Time, nil]
-          private attr_accessor :breached_at
-
-          # @!attribute mutex
-          #   @return [Thread::Mutex]
-          private attr_reader :mutex
-
-          # @!attribute clock
-          #   @return [Stoplight::Domain::Clock]
-          private attr_reader :clock
-
-          # @!attribute cool_off_time
-          #   @return [Integer]
-          private attr_reader :cool_off_time
-
-          # @param clock [Stoplight::Domain::Clock]
-          # @param cool_off_time [Integer]
+        class State
           def initialize(clock:, cool_off_time:)
             @locked_state = Stoplight::State::UNLOCKED
             @mutex = Thread::Mutex.new
@@ -71,15 +36,12 @@ module Stoplight
             @cool_off_time = cool_off_time
           end
 
-          # @param state [String]
-          # @return [String]
           def set_state(state)
             mutex.synchronize do
               self.locked_state = state
             end
           end
 
-          # @return [Stoplight::Domain::StateSnapshot]
           def state_snapshot
             mutex.synchronize do
               Domain::StateSnapshot.new(
@@ -94,8 +56,8 @@ module Stoplight
 
           # Combined method that performs the state transition based on color
           #
-          # @param color [String] The color to transition to ("GREEN", "YELLOW", or "RED")
-          # @return [Boolean] true if this is the first instance to detect this transition
+          # @param color The color to transition to ("GREEN", "YELLOW", or "RED")
+          # @return true if this is the first instance to detect this transition
           def transition_to_color(color)
             case color
             when Color::GREEN
@@ -109,7 +71,6 @@ module Stoplight
             end
           end
 
-          # @return [void]
           def clear
             mutex.synchronize do
               self.locked_state = Stoplight::State::UNLOCKED
@@ -120,10 +81,21 @@ module Stoplight
             end
           end
 
+          private
+
+          attr_accessor :locked_state
+          attr_accessor :recovered_at
+          attr_accessor :recovery_scheduled_after
+          attr_accessor :recovery_started_at
+          attr_accessor :breached_at
+          attr_reader :mutex
+          attr_reader :clock
+          attr_reader :cool_off_time
+
           # Transitions to GREEN state and ensures only one notification
           #
-          # @return [Boolean] true if this is the first instance to detect this transition
-          private def transition_to_green
+          # @return true if this is the first instance to detect this transition
+          def transition_to_green
             mutex.synchronize do
               if recovered_at
                 false
@@ -139,8 +111,8 @@ module Stoplight
 
           # Transitions to YELLOW (recovery) state and ensures only one notification
           #
-          # @return [Boolean] true if this is the first instance to detect this transition
-          private def transition_to_yellow
+          # @return true if this is the first instance to detect this transition
+          def transition_to_yellow
             mutex.synchronize do
               if recovery_started_at.nil?
                 self.recovery_started_at = clock.current_time
@@ -159,8 +131,8 @@ module Stoplight
 
           # Transitions to RED state and ensures only one notification
           #
-          # @return [Boolean] true if this is the first instance to detect this transition
-          private def transition_to_red
+          # @return true if this is the first instance to detect this transition
+          def transition_to_red
             mutex.synchronize do
               current_time = clock.current_time
 

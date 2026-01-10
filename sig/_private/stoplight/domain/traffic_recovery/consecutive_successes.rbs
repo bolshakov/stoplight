@@ -1,7 +1,8 @@
 module Stoplight
   module Domain
     module TrafficRecovery
-      class ConsecutiveSuccesses < Base
+      class ConsecutiveSuccesses
+        include _TrafficRecovery
       end
     end
   end

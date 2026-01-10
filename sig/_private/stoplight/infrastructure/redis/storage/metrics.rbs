@@ -2,7 +2,9 @@ module Stoplight
   module Infrastructure
     module Redis
       module Storage
-        class Metrics < Domain::Storage::Metrics
+        class Metrics
+          include Domain::_MetricsStore
+
           def serialize_exception: (StandardError, timestamp: Float) -> String
 
           def deserialize_failure: (String?) -> Domain::Failure?

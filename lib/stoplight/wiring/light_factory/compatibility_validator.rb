@@ -33,7 +33,7 @@ module Stoplight
           traffic_control.check_compatibility(config).then do |compatibility_result|
             if compatibility_result.incompatible?
               raise Error::ConfigurationError,
-                "#{traffic_control.class.name} incompatible with config: #{compatibility_result.error_messages}",
+                "#{traffic_control} incompatible with config: #{compatibility_result.error_messages}",
                 caller(8)
             end
           end
@@ -44,7 +44,7 @@ module Stoplight
           traffic_recovery.check_compatibility(config).then do |compatibility_result|
             if compatibility_result.incompatible?
               raise Error::ConfigurationError,
-                "#{traffic_recovery.class.name} incompatible with config: #{compatibility_result.error_messages}",
+                "#{traffic_recovery} incompatible with config: #{compatibility_result.error_messages}",
                 caller(8)
             end
           end

@@ -7,36 +7,36 @@ module Stoplight
       attr_reader data_store_config: data_store
       attr_reader error_notifier: error_notifier
       attr_reader config: Domain::Config
-      attr_reader factory: Domain::LightFactory
-      attr_reader clock: Domain::Clock
+      attr_reader factory: Domain::_LightFactory
+      attr_reader clock: Domain::_Clock
 
-      attr_reader traffic_recovery: Domain::TrafficRecovery::Base
-      attr_reader traffic_control: Domain::TrafficControl::Base
+      attr_reader traffic_recovery: Domain::_TrafficRecovery
+      attr_reader traffic_control: Domain::_TrafficControl
       @notifiers: Array[state_transition_notifier]
 
-      def initialize: (config: Domain::Config, factory: Domain::LightFactory) -> void
+      def initialize: (config: Domain::Config, factory: Domain::_LightFactory) -> void
 
       def build: -> Domain::Light
 
-      def state_store: -> Domain::Storage::State
+      def state_store: -> Domain::_StateStore
       def notifiers: -> Array[state_transition_notifier]
       def redis_recovery_lock_store: -> Infrastructure::Redis::DataStore::RecoveryLockStore
       def scripting: -> Infrastructure::Redis::DataStore::Scripting
 
       def memory_recovery_lock_store: -> Infrastructure::Memory::DataStore::RecoveryLockStore
-      def failover_data_store: -> Domain::DataStore
-      def data_store: -> Domain::DataStore
+      def failover_data_store: -> Domain::_DataStore
+      def data_store: -> Domain::_DataStore
 
-      def metrics_store: -> Domain::Storage::Metrics
-      def recovery_lock_store: -> Domain::Storage::RecoveryLock
+      def metrics_store: -> Domain::_MetricsStore
+      def recovery_lock_store: -> Domain::_RecoveryLockStore
       def request_tracker: -> Domain::Tracker::Request
       def recovery_probe_tracker: -> Domain::Tracker::RecoveryProbe
-      def recovery_metrics_store: -> Domain::Storage::Metrics
+      def recovery_metrics_store: -> Domain::_MetricsStore
 
       def green_run_strategy: -> Domain::Strategies::GreenRunStrategy
       def yellow_run_strategy: -> Domain::Strategies::YellowRunStrategy
       def red_run_strategy: -> Domain::Strategies::RedRunStrategy
-      def create_data_store: (data_store) -> Domain::DataStore
+      def create_data_store: (data_store) -> Domain::_DataStore
       def memory_registry: -> Concurrent::Map[Integer, Infrastructure::Memory::DataStore]
       def redis: -> redis
     end

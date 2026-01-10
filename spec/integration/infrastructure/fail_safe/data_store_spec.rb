@@ -13,7 +13,7 @@ RSpec.describe Stoplight::Infrastructure::FailSafe::DataStore do
   let(:circuit_breaker) { Stoplight.system_light(SecureRandom.uuid) }
 
   describe "faulty data store" do
-    let(:data_store) { instance_double(Stoplight::Domain::DataStore) }
+    let(:data_store) { instance_double(NullDataStore) }
 
     it "when primary store fails" do
       # Prepare: move internal circuit breaker into the red state

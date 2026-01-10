@@ -24,33 +24,25 @@ module Stoplight
 
         class KeySpace
           # @!attribute system_id
-          #   @return [String] 12-char hex identifier for the system
-          #   @dynamic system_id
+          #   12-char hex identifier for the system
           #
           # @!attribute light_id
-          #   @return [String] 12-char hex identifier for the light
-          #   @dynamic light_id
+          #   12-char hex identifier for the light
 
           class << self
-            # @param system_name [String, Symbol]
-            # @param light_name [String, Symbol]
-            # @return [Stoplight::Infrastructure::Redis::Storage::KeySpace]
             def build(system_name:, light_name:) = new(
               system_id: hash_name(system_name),
               light_id: hash_name(light_name)
             )
 
             # Generates a truncated SHA256 hash for use in Redis keys.
-            #
-            # @param name [String, Symbol]
-            # @return [String] 12-char hex string
             def hash_name(name) = Digest::SHA256.hexdigest(name.to_s)[0, 12] #: String
           end
 
           # Builds a Redis key within this namespace.
           #
-          # @param pieces [Array<String, Symbol>] Key segments to append
-          # @return [String] Full Redis key
+          # @param pieces  Key segments to append
+          # @return  Full Redis key
           def key(*pieces) = [:stoplight, :v6, system_id, light_id, *pieces].join(":")
         end
       end

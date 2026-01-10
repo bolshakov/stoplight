@@ -4,7 +4,7 @@ module Stoplight
   module Infrastructure
     module FailSafe
       module Storage
-        class RecoveryLockToken < Domain::RecoveryLockToken
+        class RecoveryLockToken
           attr_reader :underlying_token
           attr_reader :origin
 

@@ -16,9 +16,9 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
   let(:notifiers) { [notifier] }
   let(:config) { instance_double(Stoplight::Domain::Config) }
   let(:notifier) { instance_double(NullNotifier) }
-  let(:recovery_lock_store) { instance_double(Stoplight::Domain::Storage::RecoveryLock) }
-  let(:state_store) { instance_double(Stoplight::Domain::Storage::State) }
-  let(:metrics_store) { instance_double(Stoplight::Domain::Storage::Metrics) }
+  let(:recovery_lock_store) { instance_double(NullRecoveryLockStore) }
+  let(:state_store) { instance_double(NullStateStore) }
+  let(:metrics_store) { instance_double(NullMetricsStore) }
   let(:request_tracker) { instance_double(Stoplight::Domain::Tracker::RecoveryProbe) }
   let(:red_run_strategy) { instance_double(Stoplight::Domain::Strategies::RedRunStrategy) }
 
@@ -28,7 +28,7 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
     end
 
     context "when recovery lock acquired" do
-      let(:recovery_lock_token) { instance_double(Stoplight::Domain::RecoveryLockToken) }
+      let(:recovery_lock_token) { instance_double(NullRecoveryLockToken) }
 
       before do
         allow(recovery_lock_store).to receive(:acquire_lock).and_return(recovery_lock_token)

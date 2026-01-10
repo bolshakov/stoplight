@@ -3,7 +3,7 @@
 RSpec.describe Stoplight::Infrastructure::Memory::DataStore::RecoveryLockStore do
   let(:store) { described_class.new }
 
-  let(:data_store) { instance_double(Stoplight::Domain::DataStore) }
+  let(:data_store) { instance_double(NullDataStore) }
   let(:light_name) { SecureRandom.uuid }
 
   it "acquires lock and return recovery lock" do

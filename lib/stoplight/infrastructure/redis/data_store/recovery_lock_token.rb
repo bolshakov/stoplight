@@ -6,19 +6,8 @@ module Stoplight
   module Infrastructure
     module Redis
       class DataStore
-        class RecoveryLockToken < Domain::RecoveryLockToken
-          private def key(*parts)
-            Stoplight::Infrastructure::Redis::DataStore.key(*parts)
-          end
-
-          # @!attribute light_name
-          #   @return [String]
-          # @dynamic light_name
+        class RecoveryLockToken
           attr_reader :light_name
-
-          # @!attribute token
-          #   @return [String]
-          # @dynamic token
           attr_reader :token
 
           # @param light_name [String]
@@ -28,6 +17,10 @@ module Stoplight
           end
 
           def lock_key = key(:locks, :recovery, light_name)
+
+          private def key(*parts)
+            Stoplight::Infrastructure::Redis::DataStore.key(*parts)
+          end
         end
       end
     end

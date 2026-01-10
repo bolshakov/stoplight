@@ -3,7 +3,7 @@
 module Stoplight
   module Domain
     module Storage
-      class RecoveryLockToken < Domain::RecoveryLockToken
+      class RecoveryLockToken
         attr_reader :token
 
         def initialize

@@ -14,8 +14,6 @@ module Stoplight
       #
       # @api private
       class ConfigurationPipeline
-        private attr_reader :settings
-
         def self.process(settings:)
           new(settings:).process
         end
@@ -49,45 +47,49 @@ module Stoplight
           )
         end
 
-        private def name = settings.name.get_or_else { raise ArgumentError, "name is required" }
+        private
 
-        private def cool_off_time = settings.cool_off_time.get_or_else { Default::COOL_OFF_TIME }
+        attr_reader :settings
 
-        private def threshold = settings.threshold.get_or_else { Default::THRESHOLD }
+        def name = settings.name.get_or_else { raise ArgumentError, "name is required" }
 
-        private def recovery_threshold = settings.recovery_threshold.get_or_else { Default::RECOVERY_THRESHOLD }
+        def cool_off_time = settings.cool_off_time.get_or_else { Default::COOL_OFF_TIME }
 
-        private def window_size = settings.window_size.get_or_else { Default::WINDOW_SIZE }
+        def threshold = settings.threshold.get_or_else { Default::THRESHOLD }
 
-        private def skipped_errors
+        def recovery_threshold = settings.recovery_threshold.get_or_else { Default::RECOVERY_THRESHOLD }
+
+        def window_size = settings.window_size.get_or_else { Default::WINDOW_SIZE }
+
+        def skipped_errors
           settings.skipped_errors
             .map { Array(_1) }
             .get_or_else { Default::SKIPPED_ERRORS }
         end
 
-        private def tracked_errors
+        def tracked_errors
           settings.tracked_errors
             .map { Array(_1) }
             .get_or_else { Default::TRACKED_ERRORS }
         end
 
-        private def traffic_control
+        def traffic_control
           settings.traffic_control
             .map { TrafficControlDsl.call(_1) }
             .get_or_else { Default::TRAFFIC_CONTROL }
         end
 
-        private def traffic_recovery
+        def traffic_recovery
           settings.traffic_recovery
             .map { TrafficRecoveryDsl.call(_1) }
             .get_or_else { Default::TRAFFIC_RECOVERY }
         end
 
-        private def error_notifier = settings.error_notifier.get_or_else { Default::ERROR_NOTIFIER }
+        def error_notifier = settings.error_notifier.get_or_else { Default::ERROR_NOTIFIER }
 
-        private def notifiers = settings.notifiers.get_or_else { Default::NOTIFIERS }
+        def notifiers = settings.notifiers.get_or_else { Default::NOTIFIERS }
 
-        private def data_store = settings.data_store.get_or_else { Default::DATA_STORE }
+        def data_store = settings.data_store.get_or_else { Default::DATA_STORE }
       end
     end
   end

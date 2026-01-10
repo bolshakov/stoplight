@@ -2,7 +2,7 @@ module Stoplight
   module Wiring
     module Memory
       class Backend < DataStoreBackend
-        @clock: Domain::Clock
+        @clock: Domain::_Clock
         @config: Domain::Config
         @state_store: Infrastructure::Memory::Storage::State
         @recovery_lock_store: Infrastructure::Memory::Storage::RecoveryLock
@@ -11,7 +11,7 @@ module Stoplight
         @unbounded_metrics_store: Infrastructure::Memory::Storage::UnboundedMetrics
 
         def initialize: (
-            clock: Domain::Clock,
+            clock: Domain::_Clock,
             config: Domain::Config
           ) -> void
 

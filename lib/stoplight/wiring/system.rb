@@ -44,12 +44,9 @@ module Stoplight
     #   the same name returns the cached instance.
     #
     # @api private
-    class System < Domain::System
+    class System
       attr_reader :name
-      private attr_reader :lights
-      private attr_reader :settings
 
-      # @api private
       def initialize(name, settings:)
         @name = name
         @settings = settings
@@ -58,30 +55,13 @@ module Stoplight
         validate_configuration!
       end
 
-      private def validate_configuration!
-        LightFactory.new(system: self, settings:).validate_configuration!
-      end
-
       # Creates or retrieves a light.
       #
       # If a light with this name already exists, returns the cached instance.
       # If settings differ from the existing light, raises +Stoplight::Error::ConfigurationError+.
       #
-      # @param name [String, Symbol] unique light name within this system
-      # @param settings [Hash] light-specific configuration (overrides system defaults)
-      # @option settings [Integer] :threshold failure threshold
-      # @option settings [Integer] :recovery_threshold success threshold
-      # @option settings [Numeric] :window_size time window in seconds
-      # @option settings [Numeric] :cool_off_time cooldown period
-      # @option settings [Symbol, Hash] :traffic_control failure detection strategy
-      # @option settings [Symbol] :traffic_recovery recovery strategy
-      # @option settings [Array<Class>] :tracked_errors errors to track
-      # @option settings [Array<Class>] :skipped_errors errors to skip
-      #
-      # @return [Stoplight::Domain::Light]
       #
       # @raise [Stoplight::Error::ConfigurationError] if light exists with different settings
-      # @raise [ArgumentError] if settings includes disallowed keys (e.g., :data_store)
       #
       # @example Create a light
       #   light = system.light("stripe", threshold: 5, window_size: 60)
@@ -137,6 +117,15 @@ module Stoplight
           end
         end
         light
+      end
+
+      private
+
+      attr_reader :lights
+      attr_reader :settings
+
+      def validate_configuration!
+        LightFactory.new(system: self, settings:).validate_configuration!
       end
     end
   end

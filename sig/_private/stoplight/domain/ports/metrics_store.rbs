@@ -1,0 +1,29 @@
+module Stoplight
+  module Domain
+    # Encapsulates metrics storage for circuit breaker execution tracking.
+    #
+    # This abstraction isolates metrics collection and retrieval from the
+    # broader data store concerns, enabling:
+    # - Purpose-built implementations optimized for time-series data
+    # - Independent scaling and optimization of metrics vs. state storage
+    # - Clearer separation between "what happened" (metrics) and "what to do" (state)
+    #
+    # Lifecycle: A Metrics instance is scoped to a single circuit breaker
+    # configuration. Each circuit gets its own metrics store instance,
+    # allowing different circuits to use different storage strategies.
+    #
+    interface _MetricsStore
+      # Retrieves a snapshot of current metrics for decision-making.
+      def metrics_snapshot: () -> Domain::MetricsSnapshot
+
+      # Records a successful circuit breaker execution
+      def record_success: () -> void
+
+      # Records a failed circuit breaker execution
+      def record_failure: (StandardError error) -> void
+
+      # Clears all metrics for this circuit
+      def clear: () -> void
+    end
+  end
+end

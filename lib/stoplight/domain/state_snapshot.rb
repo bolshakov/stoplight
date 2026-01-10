@@ -13,22 +13,15 @@ module Stoplight
     class StateSnapshot
       # @!attribute breached_at
       #   The time when the light became red (breached threshold)
-      #   @return [Time, nil]
-      #
-      # @!attribute locked_state
-      #   @return [State::UNLOCKED | State::LOCKED_GREEN | State::LOCKED_RED]
       #
       # @!attribute recovery_scheduled_after
       #   When Light transitions to RED, it schedules recovery after the Cool Off Time.
-      #   @return [Time, nil]
       #
       # @!attribute recovery_started_at
       #   When in YELLOW state, this time indicates the time of transitioning to YELLOW
-      #   @return [Time, nil]
       #
       # @!attribute time
       #   The time when the snapshot was taken
-      #   @return [Time]
 
       # @return [String] one of +Color::GREEN+, +Color::RED+, or +Color::YELLOW+
       def color
@@ -50,7 +43,6 @@ module Stoplight
       #
       # This method indicates whether the recovery has already started explicitly
       #
-      # @return [Boolean]
       def recovery_started?
         if recovery_started_at.nil?
           false

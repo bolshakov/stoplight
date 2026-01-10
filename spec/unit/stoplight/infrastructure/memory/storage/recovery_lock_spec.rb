@@ -4,13 +4,13 @@ RSpec.describe Stoplight::Infrastructure::Memory::Storage::RecoveryLock do
   let(:store) { described_class.new }
 
   it "does not acquire if lock is already acquired" do
-    expect(store.acquire_lock).to be_kind_of(Stoplight::Domain::RecoveryLockToken)
+    expect(store.acquire_lock).not_to be(nil)
     expect(store.acquire_lock).to eq(nil)
   end
 
   it "acquires released lock" do
     token = store.acquire_lock
-    expect(token).to be_kind_of(Stoplight::Domain::RecoveryLockToken)
+    expect(token).not_to be(nil)
 
     store.release_lock(token)
 
@@ -37,6 +37,6 @@ RSpec.describe Stoplight::Infrastructure::Memory::Storage::RecoveryLock do
     release_latch.count_down # Proceed to release
     thread.join # what the release to finish
 
-    expect(store.acquire_lock).to be_kind_of(Stoplight::Domain::RecoveryLockToken), "should be able to lock if thread dies"
+    expect(store.acquire_lock).not_to be(nil)
   end
 end

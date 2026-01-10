@@ -17,25 +17,9 @@ module Stoplight
     class MetricsSnapshot
       # @!attribute successes
       #   A number of successes withing requested window. Zero for non-windowed metrics
-      #   @return [Integer]
       #
       # @!attribute errors
       #   A number of errors withing requested window. Zero for non-windowed metrics
-      #   @return [Integer]
-      #
-      # @!attribute consecutive_errors
-      #   A number of consecutive errors
-      #   @return [Integer]
-      #
-      # @!attribute consecutive_successes
-      #   A number of consecutive successes
-      #   @return [Integer]
-      #
-      # @!attribute last_error
-      #   @return [Stoplight::Domain::Failure, nil]
-      #
-      # @!attribute last_success_at
-      #   @return [Time, nil]
 
       # Calculates the error rate based on the number of successes and errors.
       #

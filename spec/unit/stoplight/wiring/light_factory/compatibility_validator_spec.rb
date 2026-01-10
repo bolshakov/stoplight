@@ -27,7 +27,7 @@ RSpec.describe Stoplight::Wiring::LightFactory::CompatibilityValidator do
     it "raises a configuration errors" do
       expect { validate }.to raise_error(
         Stoplight::Error::ConfigurationError,
-        "Stoplight::Domain::TrafficControl::ErrorRate incompatible with config: `threshold` should be between 0 and 1"
+        include("incompatible with config: `threshold` should be between 0 and 1")
       )
     end
   end
@@ -39,7 +39,7 @@ RSpec.describe Stoplight::Wiring::LightFactory::CompatibilityValidator do
     it "raises a configuration errors" do
       expect { validate }.to raise_error(
         Stoplight::Error::ConfigurationError,
-        "Stoplight::Domain::TrafficRecovery::ConsecutiveSuccesses incompatible with config: `recovery_threshold` should be bigger than 0"
+        include("incompatible with config: `recovery_threshold` should be bigger than 0")
       )
     end
   end

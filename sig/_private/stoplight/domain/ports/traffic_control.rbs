@@ -1,0 +1,38 @@
+module Stoplight
+  module Domain
+    # Strategies for determining when a Stoplight should change color to red.
+    #
+    # These strategies evaluate the current state and metrics of a Stoplight to decide
+    # if traffic should be stopped (i.e., if the light should turn RED).
+    #
+    # @example Creating a custom strategy
+    #   class ErrorRateStrategy
+    #     def check_compatibility(config)
+    #       if config.window_size.nil?
+    #         incompatible("`window_size` should be set")
+    #       else
+    #         compatible
+    #       end
+    #     end
+    #
+    #     def stop_traffic?(config, metrics)
+    #       total = metrics.successes + metrics.failures
+    #       return false if total < 10 # Minimum sample size
+    #
+    #       error_rate = metrics.failures.fdiv(total)
+    #       error_rate >= 0.5 # Stop traffic when error rate reaches 50%
+    #     end
+    #   end
+    #
+    interface _TrafficControl
+      # Checks if the strategy is compatible with the given Stoplight configuration.
+      def check_compatibility: (Config) -> CompatibilityResult
+
+      # Determines whether traffic should be stopped based on the Stoplight's
+      # current state and metrics.
+      # @return +true+ if traffic should be stopped otherwise false
+      def stop_traffic?: (Config, Domain::MetricsSnapshot) -> bool
+      def ==: (untyped) -> bool
+    end
+  end
+end

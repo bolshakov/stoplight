@@ -8,7 +8,6 @@ module Stoplight
         # to test whether the protected service has recovered. These test requests have
         # different semantics than normal requests and their metrics are tracked separately.
         #
-        # @see Stoplight::Domain::Storage::Metrics
         class RecoveryMetrics < UnboundedMetrics
           def initialize(redis:, scripting:, key_space:, clock:)
             super

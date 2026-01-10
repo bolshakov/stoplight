@@ -17,22 +17,6 @@ module Stoplight
         # @note Not thread-safe; synchronization must be handled externally
         # @api private
         class SlidingWindow
-          # @!attribute buckets
-          #   @return [Hash<Integer, Integer>] A hash mapping time buckets to their counts
-          # @dynamic buckets
-          private attr_reader :buckets
-
-          # @!attribute running_sum
-          #   @return [Integer] The running sum of all increments in the current window
-          # @dynamic running_sum
-          private attr_accessor :running_sum
-
-          # @!attribute clock
-          #   @return [Stoplight::Domain::Clock]
-          # @dynamic clock
-          private attr_reader :clock
-
-          # @param clock [Stoplight::Domain::Clock]
           def initialize(clock:)
             @buckets = Hash.new { |buckets, bucket| buckets[bucket] = 0 }
             @running_sum = 0
@@ -45,14 +29,24 @@ module Stoplight
             self.running_sum += 1
           end
 
-          # @param window_start [Time]
-          # @return [Integer]
           def sum_in_window(window_start)
             slide_window!(window_start)
             self.running_sum
           end
 
-          private def slide_window!(window_start)
+          def inspect
+            "#<#{self.class.name} #{buckets}>"
+          end
+
+          private
+
+          # A hash mapping time buckets to their counts
+          attr_reader :buckets
+          # The running sum of all increments in the current window
+          attr_accessor :running_sum
+          attr_reader :clock
+
+          def slide_window!(window_start)
             window_start_ts = window_start.to_i
 
             loop do
@@ -66,16 +60,12 @@ module Stoplight
             end
           end
 
-          private def current_bucket
+          def current_bucket
             bucket_for_time(clock.current_time)
           end
 
-          private def bucket_for_time(time)
+          def bucket_for_time(time)
             time.to_i
-          end
-
-          def inspect
-            "#<#{self.class.name} #{buckets}>"
           end
         end
       end

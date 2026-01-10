@@ -4,7 +4,8 @@ module Stoplight
   module Wiring
     class System
       class LightFactory < Wiring::LightFactory
-        class InternalLightFactory < Domain::LightFactory
+        class InternalLightFactory
+          include Domain::_LightFactory
         end
 
         attr_reader system: System

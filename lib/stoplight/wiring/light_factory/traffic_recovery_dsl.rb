@@ -5,7 +5,7 @@ module Stoplight
     class LightFactory
       TrafficRecoveryDsl = ->(value) {
         case value
-        in Domain::TrafficRecovery::Base
+        in _ if value.respond_to?(:determine_color) # TODO: remove in 6.0
           value
         in :consecutive_successes
           Domain::TrafficRecovery::ConsecutiveSuccesses.new

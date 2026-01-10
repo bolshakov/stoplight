@@ -1,8 +1,6 @@
 module Stoplight
   module Domain
     module TrafficRecovery
-      type decision = :green | :yellow | :red
-
       GREEN: :green
       YELLOW: :yellow
       RED: :red

@@ -3,9 +3,9 @@
 RSpec.describe Stoplight::Domain::Tracker::Request do
   subject(:request_tracker) { described_class.new(state_store:, traffic_control:, notifiers:, config:, metrics_store:) }
 
-  let(:metrics_store) { instance_double(Stoplight::Domain::Storage::Metrics) }
-  let(:state_store) { instance_double(Stoplight::Domain::Storage::State) }
-  let(:traffic_control) { instance_double(Stoplight::Domain::TrafficControl::Base) }
+  let(:metrics_store) { instance_double(NullMetricsStore) }
+  let(:state_store) { instance_double(NullStateStore) }
+  let(:traffic_control) { instance_double(NullTrafficControl) }
   let(:notifiers) { [notifier] }
   let(:notifier) { instance_double(NullNotifier) }
   let(:config) { instance_double(Stoplight::Domain::Config) }

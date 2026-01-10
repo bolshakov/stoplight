@@ -19,8 +19,8 @@ module Stoplight
       TRACKED_ERRORS: Array[_ExceptionMatcher]
       SKIPPED_ERRORS: Array[_ExceptionMatcher]
 
-      TRAFFIC_CONTROL: Domain::TrafficControl::Base
-      TRAFFIC_RECOVERY: Domain::TrafficRecovery::Base
+      TRAFFIC_CONTROL: Domain::_TrafficControl
+      TRAFFIC_RECOVERY: Domain::_TrafficRecovery
     end
   end
 end

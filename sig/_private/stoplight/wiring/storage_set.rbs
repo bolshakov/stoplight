@@ -15,23 +15,23 @@ module Stoplight
     # @see StorageSetBuilder
     # @api private
     class StorageSet < Data
-      attr_reader metrics_store: Domain::Storage::Metrics
-      attr_reader recovery_metrics_store: Domain::Storage::Metrics
-      attr_reader state_store: Domain::Storage::State
-      attr_reader recovery_lock_store: Domain::Storage::RecoveryLock
+      attr_reader metrics_store: Domain::_MetricsStore
+      attr_reader recovery_metrics_store: Domain::_MetricsStore
+      attr_reader state_store: Domain::_StateStore
+      attr_reader recovery_lock_store: Domain::_RecoveryLockStore
 
       def self.new: (
-        metrics_store: Domain::Storage::Metrics,
-        recovery_metrics_store: Domain::Storage::Metrics,
-        state_store: Domain::Storage::State,
-        recovery_lock_store: Domain::Storage::RecoveryLock
+        metrics_store: Domain::_MetricsStore,
+        recovery_metrics_store: Domain::_MetricsStore,
+        state_store: Domain::_StateStore,
+        recovery_lock_store: Domain::_RecoveryLockStore
       ) -> instance
 
       def initialize: (
-          metrics_store: Domain::Storage::Metrics,
-          recovery_metrics_store: Domain::Storage::Metrics,
-          state_store: Domain::Storage::State,
-          recovery_lock_store: Domain::Storage::RecoveryLock
+          metrics_store: Domain::_MetricsStore,
+          recovery_metrics_store: Domain::_MetricsStore,
+          state_store: Domain::_StateStore,
+          recovery_lock_store: Domain::_RecoveryLockStore
         ) -> void
     end
   end

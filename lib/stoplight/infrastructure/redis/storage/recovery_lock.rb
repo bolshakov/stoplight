@@ -21,27 +21,7 @@ module Stoplight
         # - Crashed holder: raises an error and let caller decide. Lock auto-expires after lock_timeout
         # - Release failure: Lock auto-expires after lock_timeout
         #
-        class RecoveryLock < Domain::Storage::RecoveryLock
-          # @!attribute config
-          #   @return [Stoplight::Domain::Config]
-          private attr_reader :config
-
-          # @!attribute redis
-          #   @return [::Redis | ConnectionPool<::Redis>]
-          private attr_reader :redis
-
-          # @!attribute scripting
-          #   @return [Stoplight::Infrastructure::Redis::DataStore::Scripting]
-          private attr_reader :scripting
-
-          # @!attribute key_space
-          #   @return [Stoplight::Infrastructure::Redis::Storage::KeySpace]
-          private attr_reader :key_space
-
-          # @param config [Stoplight::Domain::Config]
-          # @param redis [::Redis, ConnectionPool<::Redis>]
-          # @param scripting [Stoplight::Infrastructure::Redis::DataStore::Scripting]
-          # @param key_space [Stoplight::Infrastructure::Redis::DataStore::KeySpace]
+        class RecoveryLock
           def initialize(config:, redis:, scripting:, key_space:)
             @config = config
             @redis = redis
@@ -68,9 +48,15 @@ module Stoplight
             )
           end
 
-          private def lock_key = key_space.key(:locks, :recovery)
+          private
 
-          private def lock_timeout = config.cool_off_time_in_milliseconds
+          attr_reader :config
+          attr_reader :redis
+          attr_reader :scripting
+          attr_reader :key_space
+
+          def lock_key = key_space.key(:locks, :recovery)
+          def lock_timeout = config.cool_off_time_in_milliseconds
         end
       end
     end

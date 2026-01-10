@@ -8,7 +8,7 @@ module Stoplight
         @config: Domain::Config
         @error_notifier: error_notifier
         @failover_light: Domain::Light
-        @clock: Domain::Clock
+        @clock: Domain::_Clock
 
         @memory_fallback: Memory::Backend
         @state_store: Infrastructure::FailSafe::Storage::State
@@ -24,7 +24,7 @@ module Stoplight
           config: Domain::Config,
           error_notifier: error_notifier,
           failover_light: Domain::Light,
-          clock: Domain::Clock,
+          clock: Domain::_Clock,
           ) -> void
 
         def state_stare: -> Infrastructure::FailSafe::Storage::State

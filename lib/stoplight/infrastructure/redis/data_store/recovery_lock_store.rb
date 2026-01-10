@@ -25,32 +25,12 @@ module Stoplight
         # - Release failure: Lock auto-expires after lock_timeout
         #
         class RecoveryLockStore
-          # @!attribute redis
-          #   @return [RedisClient]
-          # @dynamic redis
-          protected attr_reader :redis
-
-          # @!attribute lock_timeout
-          #   @return [Integer]
-          # @dynamic lock_timeout
-          protected attr_reader :lock_timeout
-
-          # @!attribute scripting
-          #   @return [Stoplight::Infrastructure::Redis::DataStore::Scripting]
-          # @dynamic scripting
-          protected attr_reader :scripting
-
-          # @param redis [RedisClient | ConnectionPool]
-          # @param lock_timeout [Integer] recovery_lock timeout in milliseconds
-          # @param scripting [Stoplight::Infrastructure::Redis::DataStore::Scripting]
           def initialize(redis:, lock_timeout:, scripting:)
             @redis = redis
             @lock_timeout = lock_timeout
             @scripting = scripting
           end
 
-          # @param light_name [String]
-          # @return [Stoplight::Infrastructure::Redis::DataStore::RecoveryLockToken, nil]
           def acquire_lock(light_name)
             recovery_lock = RecoveryLockToken.new(light_name:)
 
@@ -61,14 +41,18 @@ module Stoplight
             recovery_lock if acquired
           end
 
-          # @param recovery_lock [Stoplight::Infrastructure::Redis::DataStore::RecoveryLockToken]
-          # @return [void]
           def release_lock(recovery_lock)
             scripting.call(
               :release_lock,
               keys: [recovery_lock.lock_key], args: [recovery_lock.token]
             )
           end
+
+          protected
+
+          attr_reader :redis
+          attr_reader :lock_timeout
+          attr_reader :scripting
         end
       end
     end

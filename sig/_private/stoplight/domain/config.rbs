@@ -8,8 +8,8 @@ module Stoplight
       attr_reader name: String
       attr_reader cool_off_time: duration
       attr_reader recovery_threshold: Integer
-      attr_reader traffic_control: TrafficControl::Base
-      attr_reader traffic_recovery: TrafficRecovery::Base
+      attr_reader traffic_control: _TrafficControl
+      attr_reader traffic_recovery: _TrafficRecovery
       attr_reader error_notifier: error_notifier
       attr_reader notifiers: Array[state_transition_notifier]
       attr_reader data_store: data_store
@@ -22,8 +22,8 @@ module Stoplight
           window_size: duration?,
           tracked_errors: Array[_ExceptionMatcher],
           skipped_errors: Array[_ExceptionMatcher],
-          traffic_control: TrafficControl::Base,
-          traffic_recovery: TrafficRecovery::Base,
+          traffic_control: _TrafficControl,
+          traffic_recovery: _TrafficRecovery,
           error_notifier: error_notifier,
           notifiers: Array[state_transition_notifier],
           data_store: data_store
@@ -37,14 +37,14 @@ module Stoplight
           window_size: duration?,
           tracked_errors: Array[_ExceptionMatcher],
           skipped_errors: Array[_ExceptionMatcher],
-          traffic_control: TrafficControl::Base,
-          traffic_recovery: TrafficRecovery::Base,
+          traffic_control: _TrafficControl,
+          traffic_recovery: _TrafficRecovery,
           error_notifier: error_notifier,
           notifiers: Array[state_transition_notifier],
           data_store: data_store
         ) -> void
 
-      def track_error?: ((Class)  error) -> bool
+      def track_error?: (_ExceptionMatcher) -> bool
 
       def cool_off_time_in_milliseconds: () -> Integer
 
@@ -56,8 +56,8 @@ module Stoplight
           ?window_size: duration?,
           ?tracked_errors: Array[_ExceptionMatcher],
           ?skipped_errors: Array[_ExceptionMatcher],
-          ?traffic_control: TrafficControl::Base,
-          ?traffic_recovery: TrafficRecovery::Base,
+          ?traffic_control: _TrafficControl,
+          ?traffic_recovery: _TrafficRecovery,
           ?error_notifier: error_notifier,
           ?notifiers: Array[state_transition_notifier],
           ?data_store: data_store

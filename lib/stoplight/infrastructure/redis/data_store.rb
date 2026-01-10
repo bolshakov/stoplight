@@ -18,7 +18,7 @@ module Stoplight
       #
       # @see Base
       # steep:ignore:start
-      class DataStore < Domain::DataStore
+      class DataStore
         extend Forwardable
 
         class << self
@@ -31,6 +31,8 @@ module Stoplight
             [KEY_PREFIX, *pieces].join(KEY_SEPARATOR)
           end
 
+          METRICS_RETENTION_TIME = 60 * 60 * 24 # 1 day
+
           # Retrieves the list of Redis bucket keys required to cover a specific time window.
           #
           # @param light_name [String] The name of the light (used as part of the Redis key).
@@ -41,7 +43,7 @@ module Stoplight
           # @api private
           def buckets_for_window(light_name, metric:, window_end:, window_size:)
             window_end_ts = window_end.to_i
-            window_start_ts = window_end_ts - [window_size, Domain::DataStore::METRICS_RETENTION_TIME].compact.min.to_i
+            window_start_ts = window_end_ts - [window_size, METRICS_RETENTION_TIME].compact.min.to_i
 
             # Find bucket timestamps that contain any part of the window
             start_bucket = (window_start_ts / bucket_size) * bucket_size
@@ -96,7 +98,7 @@ module Stoplight
         protected attr_reader :warn_on_clock_skew
 
         # @!attribute clock
-        #   @return [Stoplight::Domain::Clock]
+        #   @return [Stoplight::Domain::_Clock]
         # @dynamic clock
         private attr_reader :clock
 
@@ -104,7 +106,7 @@ module Stoplight
         # @param recovery_lock_store [Stoplight::Infrastructure::Redis::DataStore::RecoveryLockStore]
         # @param warn_on_clock_skew [Boolean] (true) Whether to warn about clock skew between Redis and
         # @param scripting [Stoplight::Infrastructure::Redis::DataStore::Scripting]
-        # @param clock [Stoplight::Domain::Clock]
+        # @param clock [Stoplight::Domain::_Clock]
         #   the application server
         def initialize(redis:, recovery_lock_store:, scripting:, clock:, warn_on_clock_skew: true)
           @clock = clock

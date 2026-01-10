@@ -1,23 +1,24 @@
 module Stoplight
   module Infrastructure
     module FailSafe
-      class DataStore < Domain::DataStore
-        attr_reader data_store: Domain::DataStore
-        attr_reader failover_data_store: Domain::DataStore
+      class DataStore
+        include Domain::_DataStore
+        attr_reader data_store: Domain::_DataStore
+        attr_reader failover_data_store: Domain::_DataStore
         attr_reader error_notifier: error_notifier
         private attr_reader circuit_breaker: Domain::Light
 
         def initialize: (
-          data_store: Domain::DataStore,
+          data_store: Domain::_DataStore,
           error_notifier: error_notifier,
-          failover_data_store: Domain::DataStore,
+          failover_data_store: Domain::_DataStore,
           circuit_breaker: Domain::Light
         ) -> void
 
         private def with_fallback: [T] (
-          String method_name,
-          *Object,
-          **Object,
+          String | Symbol method_name,
+          *untyped,
+          **untyped,
         ) { () -> T } -> T
       end
     end

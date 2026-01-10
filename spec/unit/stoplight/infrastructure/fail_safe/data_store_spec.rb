@@ -10,7 +10,7 @@ RSpec.describe Stoplight::Infrastructure::FailSafe::DataStore do
   let(:failover_data_store) { Stoplight::Infrastructure::Memory::DataStore.new(recovery_lock_store:, clock:) }
   let(:recovery_lock_store) { Stoplight::Infrastructure::Memory::DataStore::RecoveryLockStore.new }
   let(:clock) { Stoplight::Infrastructure::SystemClock.new }
-  let(:data_store) { instance_double(Stoplight::Domain::DataStore) }
+  let(:data_store) { instance_double(NullDataStore) }
   let(:config) { instance_double(Stoplight::Domain::Config, name:, window_size: 4, cool_off_time: 60, threshold: 3) }
   let(:error_notifier) { instance_double(Proc) }
   let(:name) { SecureRandom.uuid }
@@ -28,8 +28,6 @@ RSpec.describe Stoplight::Infrastructure::FailSafe::DataStore do
       end
     end
   end
-
-  it_behaves_like "Stoplight::Domain::DataStore"
 
   describe "#clear_metrics" do
     subject(:clear_metrics) { fail_safe.clear_metrics(config) }

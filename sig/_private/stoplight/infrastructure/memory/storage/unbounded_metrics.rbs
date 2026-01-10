@@ -2,16 +2,18 @@ module Stoplight
   module Infrastructure
     module Memory
       module Storage
-        class UnboundedMetrics < Domain::Storage::Metrics
+        class UnboundedMetrics
+          include Domain::_MetricsStore
+
           attr_accessor consecutive_errors: Integer
           attr_accessor consecutive_successes: Integer
           attr_accessor last_error: Domain::Failure?
           attr_accessor last_success_at: Time?
 
           attr_reader mutex: Mutex
-          attr_reader clock: Domain::Clock
+          attr_reader clock: Domain::_Clock
 
-          def initialize: (clock: Domain::Clock) -> void
+          def initialize: (clock: Domain::_Clock) -> void
 
           def last_error_at: -> Time?
 

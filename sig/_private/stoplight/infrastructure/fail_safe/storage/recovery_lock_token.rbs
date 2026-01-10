@@ -2,12 +2,14 @@ module Stoplight
   module Infrastructure
     module FailSafe
       module Storage
-        class RecoveryLockToken < Domain::RecoveryLockToken
-          attr_reader underlying_token: Domain::RecoveryLockToken
+        class RecoveryLockToken
+          include Domain::_RecoveryLockToken
+
+          attr_reader underlying_token: Domain::_RecoveryLockToken
           attr_reader origin: :primary | :failover
 
           def initialize: (
-            underlying_token: Domain::RecoveryLockToken,
+            underlying_token: Domain::_RecoveryLockToken,
             origin: (:primary | :failover)
           ) -> void
         end

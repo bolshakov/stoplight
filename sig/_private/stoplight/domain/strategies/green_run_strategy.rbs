@@ -1,7 +1,9 @@
 module Stoplight
   module Domain
     module Strategies
-      class GreenRunStrategy < RunStrategy
+      class GreenRunStrategy
+        include _RunStrategy
+
         attr_reader request_tracker: Tracker::Request
         attr_reader config: Config
 

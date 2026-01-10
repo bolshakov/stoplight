@@ -7,7 +7,6 @@ module Stoplight
       class IO
         include Generic
 
-        # @return [::IO]
         def io
           @object
         end
