@@ -43,7 +43,7 @@ module Stoplight
           #
           # @param pieces  Key segments to append
           # @return  Full Redis key
-          def key(*pieces) = [:stoplight, :v6, system_id, light_id, *pieces].join(":")
+          def key(*pieces) = [:stoplight, :v6, system_id, "{#{light_id}}", *pieces].join(":")
         end
       end
     end
