@@ -37,7 +37,7 @@ module Stoplight
       def initialize(config:, factory:)
         @clock = Infrastructure::SystemClock.new
         @config = config
-        @name = config.name
+        @name = T.must(config.name)
         @cool_off_time = config.cool_off_time
 
         @data_store_config = config.data_store

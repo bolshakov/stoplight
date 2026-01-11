@@ -22,14 +22,14 @@ module Stoplight
         end
 
         # Sends a notification using the wrapped notifier with fail-safe mechanisms.
-        def notify(config, from_color, to_color, error = nil)
+        def notify(info, from_color, to_color, error = nil)
           fallback = proc do |exception|
             error_notifier.call(exception) if exception
             nil
           end #: ^(StandardError?) -> void
 
           circuit_breaker.run(fallback) do
-            notifier.notify(config, from_color, to_color, error)
+            notifier.notify(info, from_color, to_color, error)
           end #: void
         end
 

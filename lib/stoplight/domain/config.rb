@@ -20,6 +20,8 @@ module Stoplight
       :data_store
     )
     class Config
+      def name! = T.must(name)
+
       def cool_off_time_in_milliseconds
         (cool_off_time * 1_000).to_i
       end

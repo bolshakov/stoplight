@@ -8,7 +8,8 @@ RSpec.describe Stoplight::Domain::Tracker::RecoveryProbe do
   let(:traffic_recovery) { instance_double(NullTrafficRecovery) }
   let(:notifiers) { [notifier] }
   let(:notifier) { instance_double(NullNotifier) }
-  let(:config) { instance_double(Stoplight::Domain::Config) }
+  let(:config) { instance_double(Stoplight::Domain::Config, name!: name) }
+  let(:name) { SecureRandom.uuid }
 
   shared_examples "when recover to" do |recover_to:, transition_from:, transition_to:|
     context "when recover to #{recover_to}" do
@@ -21,7 +22,7 @@ RSpec.describe Stoplight::Domain::Tracker::RecoveryProbe do
 
       it "sends notifications" do
         expect(metrics_store).to receive(:clear)
-        expect(notifier).to receive(:notify).with(config, transition_from, transition_to, nil)
+        expect(notifier).to receive(:notify).with(have_attributes(name:), transition_from, transition_to, nil)
 
         record_probe
       end

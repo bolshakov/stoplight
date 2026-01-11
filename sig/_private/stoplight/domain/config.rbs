@@ -5,7 +5,7 @@ module Stoplight
       attr_reader window_size: duration?
       attr_reader tracked_errors: Array[_ExceptionMatcher]
       attr_reader skipped_errors: Array[_ExceptionMatcher]
-      attr_reader name: String
+      attr_reader name: String?
       attr_reader cool_off_time: duration
       attr_reader recovery_threshold: Integer
       attr_reader traffic_control: _TrafficControl
@@ -15,7 +15,7 @@ module Stoplight
       attr_reader data_store: data_store
 
       def self.new: (
-          name: String,
+          name: String?,
           cool_off_time: duration,
           threshold: percentage | Integer,
           recovery_threshold: Integer,
@@ -30,7 +30,7 @@ module Stoplight
         ) -> instance
 
       def initialize: (
-          name: String,
+          name: String?,
           cool_off_time: duration,
           threshold: percentage | Integer,
           recovery_threshold: Integer,
@@ -45,6 +45,8 @@ module Stoplight
         ) -> void
 
       def cool_off_time_in_milliseconds: () -> Integer
+
+      def name!: -> String
 
       def with: (
           ?name: String,

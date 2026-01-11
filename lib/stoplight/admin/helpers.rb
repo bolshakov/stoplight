@@ -21,6 +21,7 @@ module Stoplight
         else
           Stoplight::Wiring::LightBuilder.new(
             config: Wiring::Light::DefaultConfig.with(
+              name: "noname",
               data_store: settings.data_store
             ),
             factory: nil
