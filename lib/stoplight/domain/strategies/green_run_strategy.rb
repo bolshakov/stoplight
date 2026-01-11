@@ -10,8 +10,8 @@ module Stoplight
       #
       # @api private
       class GreenRunStrategy
-        def initialize(config:, request_tracker:)
-          @config = config
+        def initialize(error_tracking_policy:, request_tracker:)
+          @error_tracking_policy = error_tracking_policy
           @request_tracker = request_tracker
         end
 
@@ -28,7 +28,7 @@ module Stoplight
           record_success
           result
         rescue => error
-          if @config.track_error?(error)
+          if @error_tracking_policy.track?(error)
             record_error(error)
 
             if fallback

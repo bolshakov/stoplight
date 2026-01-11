@@ -14,6 +14,10 @@ module Stoplight
         @value = value
       end
 
+      def value!
+        @value
+      end
+
       def get_or_else
         @value
       end

@@ -85,11 +85,18 @@ RSpec.describe "Stoplight" do
 
     it "allows configuration with a block" do
       Stoplight.configure(trust_me_im_an_engineer: true) do |config|
-        config.window_size = 94
+        config.window_size = 30
       end
 
-      light = Stoplight(SecureRandom.uuid)
-      expect(light.config.window_size).to eq(94)
+      light = Stoplight(SecureRandom.uuid, window_size: 30, threshold: 2, traffic_control: :consecutive_errors)
+
+      light.run(->(_) {}) { raise }
+      expect(light.color).to eq(Stoplight::Color::GREEN)
+
+      Timecop.travel(Time.now + 31) do
+        light.run(->(_) {}) { raise }
+        expect(light.color).to eq(Stoplight::Color::GREEN)
+      end
     end
 
     it "validates default configuration and does not apply invalid one" do

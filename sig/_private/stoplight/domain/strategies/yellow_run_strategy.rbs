@@ -4,7 +4,6 @@ module Stoplight
       class YellowRunStrategy
         include _RunStrategy
 
-        attr_reader config: Config
         attr_reader state_store: Domain::_StateStore
         attr_reader metrics_store: _MetricsStore
         attr_reader recovery_lock_store: _RecoveryLockStore
@@ -12,8 +11,12 @@ module Stoplight
         attr_reader request_tracker: Tracker::RecoveryProbe
         attr_reader red_run_strategy: RedRunStrategy
 
+        @name: String
+        @error_tracking_policy: ErrorTrackingPolicy
+
         def initialize: (
-          config: Config,
+          name: String,
+          error_tracking_policy: ErrorTrackingPolicy,
           notifiers: Array[state_transition_notifier],
           request_tracker: Tracker::RecoveryProbe,
           red_run_strategy: RedRunStrategy,
@@ -29,8 +32,8 @@ module Stoplight
           ) { () -> T } -> T
 
         def record_recovery_probe_success: () -> void
-        def record_recovery_probe_failure: (StandardError error) -> void
-        def enter_recovery: (StateSnapshot state_snapshot) -> void
+        def record_recovery_probe_failure: (StandardError) -> void
+        def enter_recovery: (StateSnapshot) -> void
       end
     end
   end

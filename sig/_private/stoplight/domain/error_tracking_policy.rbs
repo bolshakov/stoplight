@@ -1,0 +1,14 @@
+module Stoplight
+  module Domain
+    class ErrorTrackingPolicy
+      @tracked: Array[_ExceptionMatcher]
+      @skipped: Array[_ExceptionMatcher]
+
+      def initialize: (tracked: Array[_ExceptionMatcher], skipped: Array[_ExceptionMatcher]) -> void
+      def track?: (StandardError) -> bool
+
+      def skipped?: (StandardError) -> bool
+      def tracked?: (StandardError) -> bool
+    end
+  end
+end

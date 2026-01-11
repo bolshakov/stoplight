@@ -8,9 +8,7 @@ module Stoplight
       include Common::Deprecations
       include ConfigurationBuilderInterface # steep:ignore
 
-      attr_reader :config
-
-      def name = config.name
+      attr_reader :name
 
       attr_reader :green_run_strategy
       attr_reader :yellow_run_strategy
@@ -18,8 +16,8 @@ module Stoplight
       attr_reader :factory
       attr_reader :state_store
 
-      def initialize(config, green_run_strategy:, yellow_run_strategy:, red_run_strategy:, factory:, state_store:)
-        @config = config
+      def initialize(name, green_run_strategy:, yellow_run_strategy:, red_run_strategy:, factory:, state_store:)
+        @name = name
         @green_run_strategy = green_run_strategy
         @yellow_run_strategy = yellow_run_strategy
         @red_run_strategy = red_run_strategy

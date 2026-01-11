@@ -5,9 +5,9 @@ module Stoplight
         include _RunStrategy
 
         attr_reader request_tracker: Tracker::Request
-        attr_reader config: Config
+        @error_tracking_policy: ErrorTrackingPolicy
 
-        def initialize: (config: Config, request_tracker: Tracker::Request) -> void
+        def initialize: (error_tracking_policy: ErrorTrackingPolicy, request_tracker: Tracker::Request) -> void
 
         def record_error: (StandardError) -> void
         def record_success: -> void
