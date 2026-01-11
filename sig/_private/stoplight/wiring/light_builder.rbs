@@ -6,13 +6,17 @@ module Stoplight
 
       attr_reader data_store_config: data_store
       attr_reader error_notifier: error_notifier
-      attr_reader config: Domain::Config
       attr_reader factory: Domain::_LightFactory
       attr_reader clock: Domain::_Clock
 
       attr_reader traffic_recovery: Domain::_TrafficRecovery
       attr_reader traffic_control: Domain::_TrafficControl
+      attr_reader config: Domain::Config
+
       @notifiers: Array[state_transition_notifier]
+      @name: String
+      @cool_off_time: duration
+      @error_tracking_policy: Domain::ErrorTrackingPolicy
 
       def initialize: (config: Domain::Config, factory: Domain::_LightFactory) -> void
 

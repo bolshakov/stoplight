@@ -44,8 +44,6 @@ module Stoplight
           data_store: data_store
         ) -> void
 
-      def track_error?: (_ExceptionMatcher) -> bool
-
       def cool_off_time_in_milliseconds: () -> Integer
 
       def with: (

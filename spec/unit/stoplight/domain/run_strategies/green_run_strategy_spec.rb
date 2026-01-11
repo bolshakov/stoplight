@@ -3,12 +3,12 @@
 RSpec.describe Stoplight::Domain::Strategies::GreenRunStrategy do
   subject(:strategy) do
     described_class.new(
-      config:,
+      error_tracking_policy:,
       request_tracker:
     )
   end
 
-  let(:config) { instance_double(Stoplight::Domain::Config) }
+  let(:error_tracking_policy) { instance_double(Stoplight::Domain::ErrorTrackingPolicy) }
   let(:request_tracker) { instance_double(Stoplight::Domain::Tracker::Request) }
 
   context "when code executes successfully" do
@@ -31,7 +31,7 @@ RSpec.describe Stoplight::Domain::Strategies::GreenRunStrategy do
     let(:metadata) { instance_double(Stoplight::Domain::Metadata) }
 
     before do
-      allow(config).to receive(:track_error?).and_return(track_error)
+      allow(error_tracking_policy).to receive(:track?).with(error).and_return(track_error)
     end
 
     context "when error is tracked" do

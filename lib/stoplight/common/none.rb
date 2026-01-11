@@ -7,6 +7,10 @@ module Stoplight
     #
     # @see Some
     class None
+      def value!
+        raise RuntimeError, "None does not hold a value", caller(1)
+      end
+
       def get_or_else
         yield
       end

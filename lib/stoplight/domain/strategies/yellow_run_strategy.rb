@@ -11,14 +11,24 @@ module Stoplight
       #
       # @api private
       class YellowRunStrategy
-        def initialize(config:, notifiers:, request_tracker:, red_run_strategy:, state_store:, metrics_store:, recovery_lock_store:)
-          @config = config
+        def initialize(
+          name:,
+          error_tracking_policy:,
+          notifiers:,
+          request_tracker:,
+          red_run_strategy:,
+          state_store:,
+          metrics_store:,
+          recovery_lock_store:
+        )
           @notifiers = notifiers
           @request_tracker = request_tracker
           @red_run_strategy = red_run_strategy
           @state_store = state_store
           @metrics_store = metrics_store
           @recovery_lock_store = recovery_lock_store
+          @name = name
+          @error_tracking_policy = error_tracking_policy
         end
 
         # Executes the provided code block when the light is in the yellow state.
@@ -41,7 +51,7 @@ module Stoplight
             record_recovery_probe_success
             result
           rescue => error
-            if config.track_error?(error)
+            if @error_tracking_policy.track?(error)
               record_recovery_probe_failure(error)
 
               if fallback
@@ -58,7 +68,6 @@ module Stoplight
 
         private
 
-        attr_reader :config
         attr_reader :notifiers
         attr_reader :request_tracker
         attr_reader :red_run_strategy
@@ -92,8 +101,9 @@ module Stoplight
 
           state_store.transition_to_color(Color::YELLOW)
           metrics_store.clear
+          light_info = LightInfo.new(name: @name)
           notifiers.each do |notifier|
-            notifier.notify(config, Color::RED, Color::YELLOW, nil)
+            notifier.notify(light_info, Color::RED, Color::YELLOW, nil)
           end
         end
       end

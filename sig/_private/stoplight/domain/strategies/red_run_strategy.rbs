@@ -4,9 +4,10 @@ module Stoplight
       class RedRunStrategy
         include _RunStrategy
 
-        attr_reader config: Config
+        @name: String
+        @cool_off_time: duration
 
-        def initialize: (config: Config) -> void
+        def initialize: (name: String, cool_off_time: duration) -> void
 
         private def record_error: (StandardError) -> void
         private def record_success: -> void

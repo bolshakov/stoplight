@@ -10,8 +10,9 @@ module Stoplight
       #
       # @api private
       class RedRunStrategy
-        def initialize(config:)
-          @config = config
+        def initialize(name:, cool_off_time:)
+          @name = name
+          @cool_off_time = cool_off_time
         end
 
         # Executes the fallback proc when the light is in the red state.
@@ -25,16 +26,12 @@ module Stoplight
             fallback.call(nil)
           else
             raise Error::RedLight.new(
-              config.name,
-              cool_off_time: config.cool_off_time,
+              @name,
+              cool_off_time: @cool_off_time,
               retry_after: state_snapshot.recovery_scheduled_after
             )
           end
         end
-
-        private
-
-        attr_reader :config
       end
     end
   end

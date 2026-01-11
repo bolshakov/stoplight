@@ -37,17 +37,25 @@ module Stoplight
       def initialize(config:, factory:)
         @clock = Infrastructure::SystemClock.new
         @config = config
+        @name = config.name
+        @cool_off_time = config.cool_off_time
+
         @data_store_config = config.data_store
         @error_notifier = config.error_notifier
         @factory = factory
         @notifiers = config.notifiers
         @traffic_recovery = config.traffic_recovery
         @traffic_control = config.traffic_control
+
+        @error_tracking_policy = Domain::ErrorTrackingPolicy.new(
+          tracked: config.tracked_errors,
+          skipped: config.skipped_errors
+        )
       end
 
       def build
         Stoplight::Domain::Light.new(
-          config,
+          @name,
           state_store:,
           green_run_strategy:,
           yellow_run_strategy:,
@@ -60,11 +68,11 @@ module Stoplight
 
       attr_reader :data_store_config
       attr_reader :error_notifier
-      attr_reader :config
       attr_reader :factory
       attr_reader :clock
       attr_reader :traffic_control
       attr_reader :traffic_recovery
+      attr_reader :config
 
       def state_store = Stoplight::Infrastructure::Storage::CompatibilityState.new(config:, data_store:)
 
@@ -124,12 +132,16 @@ module Stoplight
       end
 
       def green_run_strategy
-        Domain::Strategies::GreenRunStrategy.new(config:, request_tracker:)
+        Domain::Strategies::GreenRunStrategy.new(
+          error_tracking_policy: @error_tracking_policy,
+          request_tracker:
+        )
       end
 
       def yellow_run_strategy
         Domain::Strategies::YellowRunStrategy.new(
-          config:,
+          name: @name,
+          error_tracking_policy: @error_tracking_policy,
           notifiers:,
           request_tracker: recovery_probe_tracker,
           red_run_strategy:,
@@ -140,7 +152,7 @@ module Stoplight
       end
 
       def red_run_strategy
-        Domain::Strategies::RedRunStrategy.new(config:)
+        Domain::Strategies::RedRunStrategy.new(name: @name, cool_off_time: @cool_off_time)
       end
 
       def create_data_store(data_store_config)

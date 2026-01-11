@@ -7,6 +7,7 @@ module Stoplight
 
       def initialize: (T value) -> void
 
+      def value!: -> T
       def get_or_else: [U] { () -> untyped } -> T
       def map: [U] { (T) -> U } -> Some[U]
       def ==: (untyped) -> bool
@@ -14,6 +15,7 @@ module Stoplight
     end
 
     class None
+      def value!: -> bot
       def get_or_else: [U] { () -> U } -> U
       def map: [U] { (untyped) -> U } -> None
       def ==: (untyped) -> bool
@@ -22,8 +24,5 @@ module Stoplight
 
     def self.some: [T] (T value) -> Some[T]
     def self.none: -> None
-    # def self.option: [T] (T? value) -> option[T]
-    # def self.provided: (undefined) -> None
-    #                  | [T] (T value) -> Some[T]
   end
 end
