@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Stoplight::Wiring::LightFactory::CompatibilityValidator do
+RSpec.describe Stoplight::Wiring::ConfigCompatibilityValidator do
   subject(:validate) { described_class.call(config:) }
 
   let(:config) do

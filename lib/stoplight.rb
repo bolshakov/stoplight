@@ -56,13 +56,11 @@ module Stoplight # rubocop:disable Style/Documentation
     #
     def configure(trust_me_im_an_engineer: false)
       warn_if_reconfiguring(trust_me_im_an_engineer) do
-        factory_builder = Wiring::DefaultFactoryBuilder.new
-        yield factory_builder.configuration if block_given?
+        configuration = Wiring::DefaultConfiguration.new
+        yield configuration if block_given?
 
-        default_light_factory = factory_builder.build
-        default_light_factory.validate_configuration!
-        @default_configuration = factory_builder.configuration
-        @default_light_factory = default_light_factory
+        @default_config = configuration.to_config!
+        @default_light_factory = Wiring::LightFactory.new(config: configuration.to_config!)
       end
     end
 
@@ -81,7 +79,7 @@ module Stoplight # rubocop:disable Style/Documentation
       traffic_control: T.undefined,
       traffic_recovery: T.undefined
     )
-      Wiring::LightFactory.new(settings: Wiring::Settings.empty).build_with(
+      Wiring::LightFactory.new(config: Wiring::DefaultConfig).build_with(
         name: "__stoplight__#{name}",
         cool_off_time:,
         threshold:,
@@ -171,31 +169,32 @@ module Stoplight # rubocop:disable Style/Documentation
     )
       ensure_configured
 
-      settings = default_configuration.to_settings.extend_with(
-        cool_off_time: cool_off_time,
-        threshold: threshold,
-        recovery_threshold: recovery_threshold,
-        window_size: window_size,
-        tracked_errors: tracked_errors,
-        skipped_errors: skipped_errors,
-        traffic_control: traffic_control,
-        traffic_recovery: traffic_recovery,
-        data_store: data_store,
-        error_notifier: error_notifier,
-        notifiers: notifiers
-      )
-
       systems.compute(name.to_s) do |existing_system|
         if existing_system
           raise ArgumentError, "system `#{name}` is already in use"
         else
-          Stoplight::Wiring::System.new(name.to_s, settings:)
+          Wiring::System.new(
+            name.to_s,
+            config: Wiring::ConfigurationDsl.new(
+              cool_off_time:,
+              threshold:,
+              recovery_threshold:,
+              window_size:,
+              tracked_errors:,
+              skipped_errors:,
+              traffic_control:,
+              traffic_recovery:,
+              data_store:,
+              error_notifier:,
+              notifiers:
+            ).configure!(default_config)
+          )
         end
       end
     end
 
     private attr_reader :systems
-    private def default_configuration = T.must(@default_configuration)
+    private def default_config = T.must(@default_config)
 
     # Resets Stoplight to an unconfigured state.
     #
@@ -222,7 +221,7 @@ module Stoplight # rubocop:disable Style/Documentation
     # @api private
     def __stoplight__reset!
       @systems = Concurrent::Map.new
-      @default_configuration = nil
+      @default_config = nil
       @default_light_factory = nil
       @configured = nil
     end
@@ -238,7 +237,7 @@ module Stoplight # rubocop:disable Style/Documentation
 
     def __stoplight__default_configuration
       ensure_configured
-      T.must(@default_configuration)
+      T.must(@default_config)
     end
 
     # @api private

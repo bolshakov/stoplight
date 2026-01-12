@@ -3,19 +3,27 @@ module Stoplight
     class DefaultConfiguration
       include _Configuration
 
-      @cool_off_time: option[duration]
-      @threshold: option[percentage | Integer]
-      @recovery_threshold: option[Integer]
-      @window_size: option[duration?]
-      @tracked_errors: option[Array[_ExceptionMatcher]]
-      @skipped_errors: option[Array[_ExceptionMatcher]]
-      @traffic_control: option[traffic_control]
-      @traffic_recovery: option[traffic_recovery]
-      @error_notifier: option[error_notifier]
-      @data_store: option[data_store]
-      @notifiers: option[Array[state_transition_notifier]]
+      @config: Domain::Config
+      @cool_off_time: optional[duration]
+      @threshold: optional[percentage | Integer]
+      @recovery_threshold: optional[Integer]
+      @window_size: optional[duration?]
+      @tracked_errors: optional[Array[_ExceptionMatcher] | _ExceptionMatcher]
+      @skipped_errors: optional[Array[_ExceptionMatcher] | _ExceptionMatcher]
+      @traffic_control: optional[traffic_control]
+      @traffic_recovery: optional[traffic_recovery]
+      @error_notifier: optional[error_notifier]
+      @data_store: optional[data_store]
+      @notifiers: optional[Array[state_transition_notifier]]
 
-      def to_settings: -> Settings
+      def to_config!: -> Domain::Config
+
+      private
+
+      def tracked_errors: -> optional[Array[_ExceptionMatcher]]
+      def skipped_errors: -> optional[Array[_ExceptionMatcher]]
+      def traffic_control: -> optional[Domain::_TrafficControl]
+      def traffic_recovery: -> optional[Domain::_TrafficRecovery]
     end
   end
 end

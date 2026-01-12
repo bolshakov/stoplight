@@ -49,19 +49,19 @@ module Stoplight
       def name!: -> String
 
       def with: (
-          ?name: String,
-          ?cool_off_time: duration,
-          ?threshold: percentage | Integer,
-          ?recovery_threshold: Integer,
-          ?window_size: duration?,
-          ?tracked_errors: Array[_ExceptionMatcher],
-          ?skipped_errors: Array[_ExceptionMatcher],
-          ?traffic_control: _TrafficControl,
-          ?traffic_recovery: _TrafficRecovery,
-          ?error_notifier: error_notifier,
-          ?notifiers: Array[state_transition_notifier],
-          ?data_store: data_store
-      ) -> Config
+          ?name: optional[String],
+          ?cool_off_time: optional[duration],
+          ?threshold: optional[percentage | Integer],
+          ?recovery_threshold: optional[Integer],
+          ?window_size: optional[duration?],
+          ?tracked_errors: optional[Array[_ExceptionMatcher]],
+          ?skipped_errors: optional[Array[_ExceptionMatcher]],
+          ?traffic_control: optional[_TrafficControl],
+          ?traffic_recovery: optional[_TrafficRecovery],
+          ?error_notifier: optional[error_notifier],
+          ?notifiers: optional[Array[state_transition_notifier]],
+          ?data_store: optional[data_store],
+      ) -> Config | () -> Config
     end
   end
 end

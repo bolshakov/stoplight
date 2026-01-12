@@ -33,13 +33,15 @@ module Stoplight
     #
     interface _TrafficRecovery
       # Checks if the strategy is compatible with the given Stoplight configuration.
-      def check_compatibility: (Config config) -> CompatibilityResult
+      def check_compatibility: (Config) -> CompatibilityResult
 
       # Determines the appropriate recovery state based on the Stoplight's
       # current metrics and recovery progress.
       def determine_color: (Config, Domain::MetricsSnapshot) -> decision
 
+      # Object methods
       def ==: (untyped) -> bool
+      def is_a?: (untyped) -> bool
     end
   end
 end

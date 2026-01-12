@@ -3,7 +3,7 @@ module Stoplight
   CONFIG_MUTEX: Mutex
 
   self.@configured:  bool?
-  self.@default_configuration: Wiring::DefaultConfiguration?
+  self.@default_config: Domain::Config?
   self.@systems: Concurrent::Map[String, _System]
   self.@default_light_factory: Wiring::LightFactory?
 
@@ -27,7 +27,7 @@ module Stoplight
     ) -> Domain::Light
 
   def self.systems: -> Concurrent::Map[String, _System]
-  def self.default_configuration: -> Wiring::DefaultConfiguration
+  def self.default_config: -> Domain::Config
   def self.ensure_configured: -> void
   def self.__stoplight__system: (
       _ToS name,
@@ -43,6 +43,6 @@ module Stoplight
       ?traffic_control: optional[traffic_control],
       ?traffic_recovery: optional[traffic_recovery],
     ) -> _System
-  def self.__stoplight__default_configuration: -> Wiring::DefaultConfiguration
+  def self.__stoplight__default_configuration: -> Domain::Config
   def self.__stoplight__default_light_factory: -> Wiring::LightFactory
 end

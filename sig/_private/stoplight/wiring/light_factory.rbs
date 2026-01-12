@@ -2,11 +2,9 @@ module Stoplight
   module Wiring
     class LightFactory
       include Domain::_LightFactory
-      attr_reader settings: Settings
+      attr_reader config: Domain::Config
 
-      def initialize: (settings: Settings) -> void
-
-      def validate_configuration!: -> void
+      def initialize: (config: Domain::Config) -> void
 
       def eql: (untyped other) -> bool
       def hash: -> Integer

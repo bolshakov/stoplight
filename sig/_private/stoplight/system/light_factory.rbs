@@ -9,9 +9,8 @@ module Stoplight
         end
 
         attr_reader system: System
-        attr_reader settings: Settings
 
-        def initialize: (system: System, settings: Settings) -> void
+        def initialize: (system: System, config: Domain::Config) -> void
       end
     end
   end

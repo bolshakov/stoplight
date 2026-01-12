@@ -20,7 +20,7 @@ module Stoplight
             "Please configure a different data store in your Stoplight configuration."
         else
           Stoplight::Wiring::LightBuilder.new(
-            config: Wiring::Light::DefaultConfig.with(
+            config: Wiring::DefaultConfig.with(
               name: "noname",
               data_store: settings.data_store
             ),
