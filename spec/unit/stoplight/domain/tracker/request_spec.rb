@@ -8,7 +8,8 @@ RSpec.describe Stoplight::Domain::Tracker::Request do
   let(:traffic_control) { instance_double(NullTrafficControl) }
   let(:notifiers) { [notifier] }
   let(:notifier) { instance_double(NullNotifier) }
-  let(:config) { instance_double(Stoplight::Domain::Config) }
+  let(:config) { instance_double(Stoplight::Domain::Config, name!: name) }
+  let(:name) { SecureRandom.uuid }
 
   specify "#record_success" do
     expect(metrics_store).to receive(:record_success)
@@ -33,7 +34,7 @@ RSpec.describe Stoplight::Domain::Tracker::Request do
       context "when successfully transitions to RED" do
         it "sends notifications about transition" do
           allow(state_store).to receive(:transition_to_color).with(Stoplight::Color::RED).and_return(true)
-          expect(notifier).to receive(:notify).with(config, Stoplight::Color::GREEN, Stoplight::Color::RED, exception)
+          expect(notifier).to receive(:notify).with(have_attributes(name:), Stoplight::Color::GREEN, Stoplight::Color::RED, exception)
 
           request_tracker.record_failure(exception)
         end

@@ -46,78 +46,37 @@ module Stoplight
     #
     class DefaultConfiguration
       def initialize
-        @cool_off_time = Common.none
-        @threshold = Common.none
-        @recovery_threshold = Common.none
-        @window_size = Common.none
-        @tracked_errors = Common.none
-        @skipped_errors = Common.none
-        @traffic_control = Common.none
-        @traffic_recovery = Common.none
-        @error_notifier = Common.none
-        @data_store = Common.none
-        @notifiers = Common.none
+        @config = DefaultConfig.with
+        @cool_off_time = T.undefined
+        @threshold = T.undefined
+        @recovery_threshold = T.undefined
+        @window_size = T.undefined
+        @tracked_errors = T.undefined
+        @skipped_errors = T.undefined
+        @traffic_control = T.undefined
+        @traffic_recovery = T.undefined
+        @error_notifier = T.undefined
+        @data_store = T.undefined
+        @notifiers = T.undefined
       end
 
-      def cool_off_time = @cool_off_time.get_or_else { Default::COOL_OFF_TIME }
-      def threshold = @threshold.get_or_else { Default::THRESHOLD }
-      def recovery_threshold = @recovery_threshold.get_or_else { Default::RECOVERY_THRESHOLD }
-      def window_size = @window_size.get_or_else { Default::WINDOW_SIZE }
-      def tracked_errors = @tracked_errors.get_or_else { Default::TRACKED_ERRORS }
-      def skipped_errors = @skipped_errors.get_or_else { Default::SKIPPED_ERRORS }
-      def traffic_control = @traffic_control.get_or_else { Default::TRAFFIC_CONTROL }
-      def traffic_recovery = @traffic_recovery.get_or_else { Default::TRAFFIC_RECOVERY }
-      def error_notifier = @error_notifier.get_or_else { Default::ERROR_NOTIFIER }
-      def data_store = @data_store.get_or_else { Default::DATA_STORE }
-      def notifiers = @notifiers.get_or_else { Default::NOTIFIERS }
+      def notifiers = @config.notifiers
 
-      def cool_off_time=(value)
-        @cool_off_time = Common.some(value)
-      end
+      attr_writer :cool_off_time
+      attr_writer :threshold
+      attr_writer :recovery_threshold
+      attr_writer :window_size
+      attr_writer :tracked_errors
+      attr_writer :skipped_errors
+      attr_writer :traffic_control
+      attr_writer :traffic_recovery
+      attr_writer :error_notifier
+      attr_writer :data_store
+      attr_writer :notifiers
 
-      def threshold=(value)
-        @threshold = Common.some(value)
-      end
-
-      def recovery_threshold=(value)
-        @recovery_threshold = Common.some(value)
-      end
-
-      def window_size=(value)
-        @window_size = Common.some(value)
-      end
-
-      def tracked_errors=(value)
-        @tracked_errors = Common.some(value)
-      end
-
-      def skipped_errors=(value)
-        @skipped_errors = Common.some(value)
-      end
-
-      def traffic_control=(value)
-        @traffic_control = Common.some(value)
-      end
-
-      def traffic_recovery=(value)
-        @traffic_recovery = Common.some(value)
-      end
-
-      def error_notifier=(value)
-        @error_notifier = Common.some(value)
-      end
-
-      def data_store=(value)
-        @data_store = Common.some(value)
-      end
-
-      def notifiers=(value)
-        @notifiers = Common.some(value)
-      end
-
-      def to_settings
-        Settings.new(
-          name: Common.none,
+      # Builds and validates configuration
+      def to_config!
+        ConfigurationDsl.new(
           cool_off_time: @cool_off_time,
           threshold: @threshold,
           recovery_threshold: @recovery_threshold,
@@ -127,9 +86,9 @@ module Stoplight
           traffic_control: @traffic_control,
           traffic_recovery: @traffic_recovery,
           error_notifier: @error_notifier,
-          notifiers: @notifiers,
-          data_store: @data_store
-        )
+          data_store: @data_store,
+          notifiers: @notifiers
+        ).configure!(@config)
       end
     end
   end

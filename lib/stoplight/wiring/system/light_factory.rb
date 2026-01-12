@@ -7,11 +7,10 @@ module Stoplight
         # @dynamic system
         attr_reader :system
 
-        def initialize(system:, settings:)
+        def initialize(system:, config:)
           @system = system
-          @settings = settings
 
-          super(settings:)
+          super(config:)
         end
 
         def with(
@@ -30,20 +29,19 @@ module Stoplight
         )
           self.class.new(
             system:,
-            settings: settings.extend_with(
-              name:,
+            config: ConfigurationDsl.new(
               cool_off_time:,
               threshold:,
               recovery_threshold:,
               window_size:,
               tracked_errors:,
               skipped_errors:,
-              data_store:,
-              error_notifier:,
-              notifiers:,
               traffic_control:,
-              traffic_recovery:
-            )
+              traffic_recovery:,
+              error_notifier:,
+              data_store:,
+              notifiers:
+            ).configure!(config)
           )
         end
 
@@ -51,7 +49,7 @@ module Stoplight
           def initialize
           end
 
-          def with(**settings) # steep:ignore
+          def with(**untyped) # steep:ignore
             raise NotImplementedError, "You're not allowed to extend system lights"
           end
         end

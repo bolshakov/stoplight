@@ -32,7 +32,10 @@ module Stoplight
       # current state and metrics.
       # @return +true+ if traffic should be stopped otherwise false
       def stop_traffic?: (Config, Domain::MetricsSnapshot) -> bool
+
+      # Object methods
       def ==: (untyped) -> bool
+      def is_a?: (untyped) -> bool
     end
   end
 end

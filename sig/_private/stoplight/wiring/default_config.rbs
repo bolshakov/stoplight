@@ -2,8 +2,6 @@
 
 module Stoplight
   module Wiring
-    module Light
-      SystemConfig: Domain::Config
-    end
+    DefaultConfig: Domain::Config
   end
 end

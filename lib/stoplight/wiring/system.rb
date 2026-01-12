@@ -47,12 +47,10 @@ module Stoplight
     class System
       attr_reader :name
 
-      def initialize(name, settings:)
+      def initialize(name, config:)
         @name = name
-        @settings = settings
+        @system_config = config
         @lights = Concurrent::Map.new
-
-        validate_configuration!
       end
 
       # Creates or retrieves a light.
@@ -87,7 +85,7 @@ module Stoplight
         traffic_control: T.undefined,
         traffic_recovery: T.undefined
       )
-        light_settings = settings.extend_with(
+        light_config = ConfigurationDsl.new(
           name:,
           cool_off_time:,
           threshold:,
@@ -97,23 +95,24 @@ module Stoplight
           skipped_errors:,
           traffic_control:,
           traffic_recovery:
-        )
+        ).configure!(system_config)
+
         light, _ = lights.compute(name) do |existing|
           if existing
-            existing_light, existing_settings = existing
-            if light_settings.empty? || light_settings == existing_settings
-              [existing_light, existing_settings]
+            existing_light, existing_config = existing
+            if light_config == existing_config
+              [existing_light, existing_config]
             else
               raise Stoplight::Error::ConfigurationError, <<~MSG
                 Light name `#{name}` reused with different settings:
-                  existing settings: #{existing_settings}
-                  new settings:      #{light_settings}
+                  existing settings: #{existing_config}
+                  new settings:      #{light_config}
 
                 You cannot use the same light name with different settings.
               MSG
             end
           else
-            [LightFactory.new(system: self, settings: light_settings).build, light_settings]
+            [LightFactory.new(system: self, config: light_config).build, light_config]
           end
         end
         light
@@ -122,11 +121,7 @@ module Stoplight
       private
 
       attr_reader :lights
-      attr_reader :settings
-
-      def validate_configuration!
-        LightFactory.new(system: self, settings:).validate_configuration!
-      end
+      attr_reader :system_config
     end
   end
 end

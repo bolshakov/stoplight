@@ -6,12 +6,10 @@ module Stoplight
       @name: String
 
       attr_reader light_factory: Domain::_LightFactory
-      attr_reader lights: Concurrent::Map[String, [_Light, Settings]]
-      attr_reader settings: Settings
+      attr_reader lights: Concurrent::Map[String, [_Light, Domain::Config]]
+      attr_reader system_config: Domain::Config
 
-      def initialize: (String name, settings: Settings) -> void
-
-      def validate_configuration!: -> void
+      def initialize: (String name, config: Domain::Config) -> void
     end
   end
 end

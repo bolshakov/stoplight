@@ -1,9 +1,0 @@
-module Stoplight
-  module Wiring
-    class DefaultFactoryBuilder
-      attr_reader configuration: DefaultConfiguration
-
-      def build: -> LightFactory
-    end
-  end
-end

@@ -1,9 +1,0 @@
-# frozen_string_literal: true
-
-module Stoplight
-  module Wiring
-    module Light
-      DefaultConfig: Domain::Config
-    end
-  end
-end

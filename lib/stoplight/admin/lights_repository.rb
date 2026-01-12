@@ -80,7 +80,7 @@ module Stoplight
       end
 
       private def build_config(name)
-        Wiring::Light::DefaultConfig.with(name:)
+        Wiring::DefaultConfig.with(name:)
       end
     end
   end

@@ -15,8 +15,8 @@ module Stoplight
     # @api private
     #
     class LightFactory
-      def initialize(settings:)
-        @settings = settings
+      def initialize(config:)
+        @config = config
       end
 
       def with(
@@ -34,7 +34,7 @@ module Stoplight
         traffic_recovery: T.undefined
       )
         self.class.new(
-          settings: settings.extend_with(
+          config: ConfigurationDsl.new(
             name:,
             cool_off_time:,
             threshold:,
@@ -42,12 +42,12 @@ module Stoplight
             window_size:,
             tracked_errors:,
             skipped_errors:,
-            data_store:,
-            error_notifier:,
-            notifiers:,
             traffic_control:,
-            traffic_recovery:
-          )
+            traffic_recovery:,
+            error_notifier:,
+            data_store:,
+            notifiers:
+          ).configure!(config)
         )
       end
 
@@ -68,16 +68,11 @@ module Stoplight
       #   light.run { api_call }
 
       def build
-        config = ConfigurationPipeline.process(settings:)
         light_builder(config:).build
       end
 
-      def validate_configuration!
-        ConfigurationPipeline.process(settings: settings.extend_with(name: "validate"))
-      end
-
       def ==(other)
-        other.is_a?(self.class) && other.settings == settings
+        other.is_a?(self.class) && other.config == config
       end
 
       alias_method :eql?, :==
@@ -113,12 +108,12 @@ module Stoplight
       end
 
       def hash
-        [self.class, settings].hash
+        [self.class, config].hash
       end
 
       protected
 
-      attr_reader :settings
+      attr_reader :config
 
       private
 

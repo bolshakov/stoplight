@@ -40,8 +40,9 @@ module Stoplight
             # Returns true only if not yet in red therefore preventing
             # duplicate notifications
             if state_store.transition_to_color(Color::RED)
+              info = LightInfo.new(name: config.name!)
               notifiers.each do |notifier|
-                notifier.notify(config, Color::GREEN, Color::RED, exception)
+                notifier.notify(info, Color::GREEN, Color::RED, exception)
               end
             end
           end
