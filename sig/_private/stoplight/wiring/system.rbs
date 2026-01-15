@@ -9,7 +9,7 @@ module Stoplight
       attr_reader lights: Concurrent::Map[String, [_Light, Domain::Config]]
       attr_reader system_config: Domain::Config
 
-      def initialize: (String name, config: Domain::Config) -> void
+      def initialize: (config: Domain::Config) -> void
     end
   end
 end

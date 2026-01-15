@@ -8,7 +8,7 @@ RSpec.describe Stoplight::Domain::Tracker::Request do
   let(:traffic_control) { instance_double(NullTrafficControl) }
   let(:notifiers) { [notifier] }
   let(:notifier) { instance_double(NullNotifier) }
-  let(:config) { instance_double(Stoplight::Domain::Config, name!: name) }
+  let(:config) { instance_double(Stoplight::Domain::Config, name: name) }
   let(:name) { SecureRandom.uuid }
 
   specify "#record_success" do

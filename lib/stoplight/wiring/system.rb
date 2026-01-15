@@ -46,9 +46,12 @@ module Stoplight
     # @api private
     class System
       attr_reader :name
+      # @!attribute system_config
+      #   @api private
+      attr_reader :system_config
 
-      def initialize(name, config:)
-        @name = name
+      def initialize(config:)
+        @name = config.name
         @system_config = config
         @lights = Concurrent::Map.new
       end
@@ -121,7 +124,6 @@ module Stoplight
       private
 
       attr_reader :lights
-      attr_reader :system_config
     end
   end
 end

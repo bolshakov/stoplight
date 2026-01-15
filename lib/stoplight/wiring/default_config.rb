@@ -4,7 +4,7 @@ module Stoplight
   module Wiring
     # Provides default settings for the Stoplight library.
     DefaultConfig = Domain::Config.new(
-      name: nil,
+      name: "DEFAULT_CONFIG",
       cool_off_time: Default::COOL_OFF_TIME,
       threshold: Default::THRESHOLD,
       recovery_threshold: Default::RECOVERY_THRESHOLD,

@@ -59,8 +59,9 @@ module Stoplight # rubocop:disable Style/Documentation
         configuration = Wiring::DefaultConfiguration.new
         yield configuration if block_given?
 
-        @default_config = configuration.to_config!
-        @default_light_factory = Wiring::LightFactory.new(config: configuration.to_config!)
+        default_config = configuration.to_config!
+        @default_config = default_config
+        @default_light_factory = Wiring::LightFactory.new(config: default_config)
       end
     end
 
@@ -174,8 +175,8 @@ module Stoplight # rubocop:disable Style/Documentation
           raise ArgumentError, "system `#{name}` is already in use"
         else
           Wiring::System.new(
-            name.to_s,
             config: Wiring::ConfigurationDsl.new(
+              name: name.to_s,
               cool_off_time:,
               threshold:,
               recovery_threshold:,

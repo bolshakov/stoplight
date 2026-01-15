@@ -48,7 +48,7 @@ module Stoplight
 
           state_store.transition_to_color(to_color)
           metrics_store.clear
-          info = LightInfo.new(name: config.name!)
+          info = LightInfo.new(name: config.name)
           notifiers.each do |notifier|
             notifier.notify(info, from_color, to_color, nil)
           end

@@ -8,7 +8,7 @@ RSpec.describe Stoplight::Domain::Tracker::RecoveryProbe do
   let(:traffic_recovery) { instance_double(NullTrafficRecovery) }
   let(:notifiers) { [notifier] }
   let(:notifier) { instance_double(NullNotifier) }
-  let(:config) { instance_double(Stoplight::Domain::Config, name!: name) }
+  let(:config) { instance_double(Stoplight::Domain::Config, name: name) }
   let(:name) { SecureRandom.uuid }
 
   shared_examples "when recover to" do |recover_to:, transition_from:, transition_to:|
