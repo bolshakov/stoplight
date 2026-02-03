@@ -75,7 +75,8 @@ module Stoplight
           name: name,
           color: state_snapshot.color,
           state: state_snapshot.locked_state,
-          failures: [metrics.last_error].compact
+          failures: [metrics.last_error].compact,
+          failure_count: metrics.consecutive_errors
         )
       end
 

@@ -117,7 +117,7 @@
   <!-- Stats Row -->
   <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-3">
     <div>
-      <span class="font-medium">Failures:</span> <%= light.failures.count  %>
+      <span class="font-medium">Failures:</span> <%= light.failure_count %>
     </div>
 
     <% light.last_check_in_words.then do |last_check| %>

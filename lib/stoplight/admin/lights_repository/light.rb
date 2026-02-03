@@ -37,16 +37,23 @@ module Stoplight
         # @dynamic failures
         attr_reader :failures
 
+        # @!attribute failure_count
+        #   @return [Integer]
+        # @dynamic failure_count
+        attr_reader :failure_count
+
         # @param name [String]
         # @param color [String]
         # @param state [String]
         # @param failures [<Stoplight::Failure>]
-        def initialize(name:, color:, state:, failures:)
+        # @param failure_count [Integer, nil]
+        def initialize(name:, color:, state:, failures:, failure_count: nil)
           @id = SecureRandom.uuid
           @name = name
           @color = color
           @state = state
           @failures = failures
+          @failure_count = failure_count
         end
 
         def latest_failure
