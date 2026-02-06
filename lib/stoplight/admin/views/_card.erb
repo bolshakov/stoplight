@@ -107,8 +107,11 @@
         <p><%= light.description_comment %></p>
       </div>
       <% if light.latest_failure %>
-        <div class="whitespace-nowrap">
-          <%= Time.at(light.latest_failure.time).strftime("%T") %>
+        <div class="whitespace-nowrap text-center">
+          <%= light.latest_failure.time.strftime("%F %T") %>
+          <span class="text-gray-400 dark:text-gray-500 uppercase tracking-wide">
+            UTC
+          </span>
         </div>
       <% end %>
     </div>
@@ -120,10 +123,10 @@
       <span class="font-medium">Failures:</span> <%= light.failure_count %>
     </div>
 
-    <% light.last_check_in_words.then do |last_check| %>
+    <% light.last_check.then do |last_check| %>
       <% if last_check %>
         <div>
-          <span class="font-medium">Last Check:</span> <%= light.last_check_in_words %>
+          <span class="font-medium">Last Check:</span><%= time_ago_in_words(last_check) %>
         </div>
       <% end %>
     <% end %>
