@@ -22,7 +22,7 @@ Gem::Specification.new do |gem|
     gem.email = hash.values
   end
 
-  gem.files = Dir.glob("lib/**/*") + %w[CHANGELOG.md LICENSE.md README.md]
+  gem.files = Dir.glob("lib/**/*") + Dir.glob("sig/**/*.rbs") + %w[UPGRADING.md CHANGELOG.md LICENSE.md README.md]
 
   gem.required_ruby_version = ">= 3.2"
   gem.add_runtime_dependency "zeitwerk"
