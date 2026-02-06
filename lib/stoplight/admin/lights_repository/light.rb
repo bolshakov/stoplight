@@ -126,13 +126,19 @@ module Stoplight
         def description_message
           case color
           when RED
-            if locked? && failures.empty?
+            if latest_failure
+              "#{latest_failure.error_class}: #{latest_failure.error_message}"
+            elsif locked?
               "Circuit manually locked open"
             else
-              "#{latest_failure.error_class}: #{latest_failure.error_message}"
+              "Not available"
             end
           when Stoplight::Color::YELLOW
-            "#{latest_failure.error_class}: #{latest_failure.error_message}"
+            if latest_failure
+              "#{latest_failure.error_class}: #{latest_failure.error_message}"
+            else
+              "Not available"
+            end
           when GREEN
             if locked?
               "Circuit manually locked closed"

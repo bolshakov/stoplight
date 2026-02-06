@@ -50,6 +50,15 @@ RSpec.describe Stoplight::Admin::LightsRepository::Light do
         it { expect(description_message).to eq("StandardError: bang!") }
         it { expect(description_comment).to eq("Will attempt recovery after cooling period") }
       end
+
+      context "when unlocked without an error" do
+        let(:state) { Stoplight::State::UNLOCKED }
+        let(:failures) { [] }
+
+        it { expect(description_title).to eq("Last Error") }
+        it { expect(description_message).to eq("Not available") }
+        it { expect(description_comment).to eq("Will attempt recovery after cooling period") }
+      end
     end
 
     context "when the light is yellow" do
@@ -58,6 +67,14 @@ RSpec.describe Stoplight::Admin::LightsRepository::Light do
       it { expect(description_title).to eq("Testing Recovery") }
       it { expect(description_message).to eq("StandardError: bang!") }
       it { expect(description_comment).to eq("Allowing limited test traffic (0 of 1 requests)") }
+
+      context "without an error" do
+        let(:failures) { [] }
+
+        it { expect(description_title).to eq("Testing Recovery") }
+        it { expect(description_message).to eq("Not available") }
+        it { expect(description_comment).to eq("Allowing limited test traffic (0 of 1 requests)") }
+      end
     end
 
     context "when the light is green" do
