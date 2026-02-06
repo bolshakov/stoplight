@@ -8,9 +8,9 @@ module Stoplight
     # bucket calculation, window boundaries, and state transition timestamps.
     #
     class SystemClock
-      def current_time = Time.now
+      def current_time = Time.now.utc
 
-      def at(timestamp) = Time.at(timestamp)
+      def at(timestamp) = Time.at(timestamp).utc
     end
   end
 end

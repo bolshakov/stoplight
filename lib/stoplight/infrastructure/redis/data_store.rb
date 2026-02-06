@@ -75,7 +75,7 @@ module Stoplight
         end
 
         KEY_SEPARATOR = ":"
-        KEY_PREFIX = %w[stoplight v5].join(KEY_SEPARATOR)
+        KEY_PREFIX = %w[stoplight v6].join(KEY_SEPARATOR)
 
         # @!attribute recovery_lock_store
         #   @return [Stoplight::Infrastructure::Redis::DataStore::RecoveryLockStore]
