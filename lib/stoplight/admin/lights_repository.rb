@@ -5,7 +5,6 @@ module Stoplight
     class LightsRepository
       # @!attribute data_store
       #   @return [Stoplight::Domain::_DataStore]
-      # @dynamic data_store
       attr_reader :data_store
       private :data_store
 

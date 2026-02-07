@@ -14,18 +14,15 @@ module Stoplight
     class RedLight < Base
       # @!attribute light_name
       #   @return [String] The light's name
-      # @dynamic light_name
       attr_reader :light_name
 
       # @!attribute cool_off_time
       #   @return [Numeric] Cool-off period in seconds
-      # @dynamic cool_off_time
       attr_reader :cool_off_time
 
       # @!attribute retry_after
       #   @return [Time | nil] Absolute Time after which a recovery attempt can occur
       #     could be nil if the light is locked red
-      # @dynamic retry_after
       attr_reader :retry_after
 
       # Initializes a new RedLight error.

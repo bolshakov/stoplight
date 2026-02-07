@@ -7,7 +7,6 @@ module Stoplight
       class Action
         # @!attribute lights_repository
         #   @return [Stoplight::Admin::LightsRepository]
-        # @dynamic lights_repository
         attr_reader :lights_repository
         private :lights_repository
 
