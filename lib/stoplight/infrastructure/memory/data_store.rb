@@ -15,12 +15,10 @@ module Stoplight
         # @!attribute recovery_lock_store
         #   @return [Stoplight::Infrastructure::Memory::DataStore::RecoveryLockStore]
         #   @api private
-        # @dynamic recovery_lock_store
         private attr_reader :recovery_lock_store
 
         # @!attribute clock
         #   @return [Stoplight::Domain::_Clock]
-        # @dynamic clock
         private attr_reader :clock
 
         # @param recovery_lock_store [Stoplight::Infrastructure::Memory::DataStore::RecoveryLockStore]

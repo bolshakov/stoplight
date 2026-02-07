@@ -5,7 +5,6 @@ module Stoplight
     class Dependencies
       # @!attribute data_store
       #   @return [Stoplight::DataStore::Base]
-      # @dynamic data_store
       attr_reader :data_store
       private :data_store
 

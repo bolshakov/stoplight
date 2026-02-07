@@ -6,7 +6,6 @@ module Stoplight
       class Stats < Action
         # @!attribute lights_stats
         #   @return [Class<Stoplight::Admin::LightsStats>]
-        # @dynamic lights_stats
         attr_reader :lights_stats
         private :lights_stats
 
