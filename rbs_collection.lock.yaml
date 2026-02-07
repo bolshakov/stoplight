@@ -42,7 +42,7 @@ gems:
   source:
     type: stdlib
 - name: bigdecimal
-  version: '3.1'
+  version: '4.0'
   source:
     type: git
     name: ruby/gem_rbs_collection
@@ -94,7 +94,7 @@ gems:
   source:
     type: stdlib
 - name: ffi
-  version: 1.17.2
+  version: 1.17.3
   source:
     type: rubygems
 - name: fileutils
@@ -182,7 +182,7 @@ gems:
   source:
     type: stdlib
 - name: prism
-  version: 1.8.0
+  version: 1.9.0
   source:
     type: rubygems
 - name: rack
