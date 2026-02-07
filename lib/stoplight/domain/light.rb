@@ -138,7 +138,7 @@ module Stoplight
       # steep:ignore:start
       def with(**settings)
         deprecate(<<~MSG)
-          Light#with is deprecated and will be removed in v6.0.0.
+          Light#with is deprecated and will be removed in v7.0.0.
 
           Circuit breakers should be configured once at creation, not cloned with
           modifications.

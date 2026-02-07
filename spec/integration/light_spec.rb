@@ -180,7 +180,7 @@ RSpec.describe "Light" do
 
       it "produces deprecation warning" do
         expect { prototype }.to output(
-          include("Passing \"error_notifier\" to Stoplight('prototype') is deprecated and will be removed in v6.0.0.")
+          include("Passing \"error_notifier\" to Stoplight('prototype') is deprecated and will be removed in v7.0.0.")
         ).to_stderr
       end
 

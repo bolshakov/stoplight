@@ -119,7 +119,7 @@ RSpec.describe Stoplight::Domain::Light do
       allow(factory).to receive(:build_with)
 
       expect { light.with(**settings) }.to output(
-        include("[DEPRECATION] Light#with is deprecated and will be removed in v6.0.0.")
+        include("[DEPRECATION] Light#with is deprecated and will be removed in v7.0.0.")
       ).to_stderr
     end
   end

@@ -321,7 +321,7 @@ def Stoplight(
   traffic_recovery: Stoplight::T.undefined
 ) # rubocop:disable Naming/MethodName
   Stoplight::Common::Deprecations.deprecate(<<~MSG) if error_notifier != Stoplight::T.undefined
-    Passing "error_notifier" to Stoplight('#{name}') is deprecated and will be removed in v6.0.0.
+    Passing "error_notifier" to Stoplight('#{name}') is deprecated and will be removed in v7.0.0.
 
     IMPORTANT: The `error_notifier` is NOT called for exceptions in your protected code.
     It only reports internal Stoplight failures (e.g., Redis connection errors).

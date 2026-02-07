@@ -19,7 +19,7 @@ module Stoplight
         # @deprecated
         def with_data_store(data_store)
           deprecate(<<~MSG)
-            Light#with_data_store is deprecated and will be removed in v6.0.0.
+            Light#with_data_store is deprecated and will be removed in v7.0.0.
 
             Circuit breakers should be configured once at creation, not cloned with
             modifications.
@@ -46,7 +46,7 @@ module Stoplight
         # @deprecated
         def with_cool_off_time(cool_off_time)
           deprecate(<<~MSG)
-            Light#with_cool_off_time is deprecated and will be removed in v6.0.0.
+            Light#with_cool_off_time is deprecated and will be removed in v7.0.0.
 
             Circuit breakers should be configured once at creation, not cloned with
             modifications.
@@ -73,7 +73,7 @@ module Stoplight
         # @deprecated
         def with_threshold(threshold)
           deprecate(<<~MSG)
-            Light#with_threshold is deprecated and will be removed in v6.0.0.
+            Light#with_threshold is deprecated and will be removed in v7.0.0.
 
             Circuit breakers should be configured once at creation, not cloned with
             modifications.
@@ -103,7 +103,7 @@ module Stoplight
         # @deprecated
         def with_window_size(window_size)
           deprecate(<<~MSG)
-            Light#with_window_size is deprecated and will be removed in v6.0.0.
+            Light#with_window_size is deprecated and will be removed in v7.0.0.
 
             Circuit breakers should be configured once at creation, not cloned with
             modifications.
@@ -131,7 +131,7 @@ module Stoplight
         # @deprecated
         def with_notifiers(notifiers)
           deprecate(<<~MSG)
-            Light#with_notifiers is deprecated and will be removed in v6.0.0.
+            Light#with_notifiers is deprecated and will be removed in v7.0.0.
 
             Circuit breakers should be configured once at creation, not cloned with
             modifications.
@@ -152,7 +152,7 @@ module Stoplight
         # @deprecated
         def with_error_notifier(&error_notifier)
           deprecate(<<~MSG)
-            Light#with_error_notifier is deprecated and will be removed in v6.0.0.
+            Light#with_error_notifier is deprecated and will be removed in v7.0.0.
 
             Circuit breakers should be configured once at creation, not cloned with
             modifications.
@@ -183,7 +183,7 @@ module Stoplight
         # @deprecated
         def with_tracked_errors(*tracked_errors)
           deprecate(<<~MSG)
-            Light#with_tracked_errors is deprecated and will be removed in v6.0.0.
+            Light#with_tracked_errors is deprecated and will be removed in v7.0.0.
 
             Circuit breakers should be configured once at creation, not cloned with
             modifications.
@@ -215,7 +215,7 @@ module Stoplight
         # @deprecated
         def with_skipped_errors(*skipped_errors)
           deprecate(<<~MSG)
-            Light#with_skipped_errors is deprecated and will be removed in v6.0.0.
+            Light#with_skipped_errors is deprecated and will be removed in v7.0.0.
 
             Circuit breakers should be configured once at creation, not cloned with
             modifications.
