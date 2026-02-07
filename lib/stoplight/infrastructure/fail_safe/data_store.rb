@@ -33,15 +33,15 @@ module Stoplight
           end
         end
 
-        def get_metrics(config, *args, **kwargs)
-          with_fallback(:get_metrics, config, *args, **kwargs) do
-            data_store.get_metrics(config, *args, **kwargs)
+        def get_metrics(config)
+          with_fallback(:get_metrics, config) do
+            data_store.get_metrics(config)
           end
         end
 
-        def get_recovery_metrics(config, *args, **kwargs)
-          with_fallback(:get_recovery_metrics, config, *args, **kwargs) do
-            data_store.get_recovery_metrics(config, *args, **kwargs)
+        def get_recovery_metrics(config)
+          with_fallback(:get_recovery_metrics, config) do
+            data_store.get_recovery_metrics(config)
           end
         end
 
@@ -63,45 +63,45 @@ module Stoplight
           end
         end
 
-        def record_failure(config, *args, **kwargs)
-          with_fallback(:record_failure, config, *args, **kwargs) do
-            data_store.record_failure(config, *args, **kwargs)
+        def record_failure(config, exception)
+          with_fallback(:record_failure, config, exception) do
+            data_store.record_failure(config, exception)
           end
         end
 
-        def record_success(config, *args, **kwargs)
-          with_fallback(:record_success, config, *args, **kwargs) do
-            data_store.record_success(config, *args, **kwargs)
+        def record_success(config)
+          with_fallback(:record_success, config) do
+            data_store.record_success(config)
           end
         end
 
-        def record_recovery_probe_success(config, *args, **kwargs)
-          with_fallback(:record_recovery_probe_success, config, *args, **kwargs) do
-            data_store.record_recovery_probe_success(config, *args, **kwargs)
+        def record_recovery_probe_success(config)
+          with_fallback(:record_recovery_probe_success, config) do
+            data_store.record_recovery_probe_success(config)
           end
         end
 
-        def record_recovery_probe_failure(config, *args, **kwargs)
-          with_fallback(:record_recovery_probe_failure, config, *args, **kwargs) do
-            data_store.record_recovery_probe_failure(config, *args, **kwargs)
+        def record_recovery_probe_failure(config, exception)
+          with_fallback(:record_recovery_probe_failure, config, exception) do
+            data_store.record_recovery_probe_failure(config, exception)
           end
         end
 
-        def set_state(config, *args, **kwargs)
-          with_fallback(:set_state, config, *args, **kwargs) do
-            data_store.set_state(config, *args, **kwargs)
+        def set_state(config, state)
+          with_fallback(:set_state, config, state) do
+            data_store.set_state(config, state)
           end
         end
 
-        def transition_to_color(config, *args, **kwargs)
-          with_fallback(:transition_to_color, config, *args, **kwargs) do
-            data_store.transition_to_color(config, *args, **kwargs)
+        def transition_to_color(config, color)
+          with_fallback(:transition_to_color, config, color) do
+            data_store.transition_to_color(config, color)
           end
         end
 
-        def delete_light(config, *args, **kwargs)
-          with_fallback(:delete_light, config, *args, **kwargs) do
-            data_store.delete_light(config, *args, **kwargs)
+        def delete_light(config)
+          with_fallback(:delete_light, config) do
+            data_store.delete_light(config)
           end
         end
 
