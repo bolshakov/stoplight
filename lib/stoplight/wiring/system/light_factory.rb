@@ -4,7 +4,6 @@ module Stoplight
   module Wiring
     class System
       class LightFactory < Wiring::LightFactory
-        # @dynamic system
         attr_reader :system
 
         def initialize(system:, config:)

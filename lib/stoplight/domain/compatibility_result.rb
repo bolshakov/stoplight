@@ -39,7 +39,6 @@ module Stoplight
 
       # Retrieves the list of error messages.
       # @return  The list of error messages.
-      # @dynamic errors
       attr_reader :errors
 
       # Retrieves a concatenated error message string.
