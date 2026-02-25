@@ -648,7 +648,7 @@ Fowler’s [CircuitBreaker][] article.
 [the change log]: CHANGELOG.md
 [stoplight-sentry]: https://github.com/bolshakov/stoplight-sentry
 [stoplight-honeybadger]: https://github.com/qoqa/stoplight-honeybadger
-[notifier interface documentation]: https://github.com/bolshakov/stoplight/blob/main/lib/stoplight/notifier/generic.rb
+[notifier interface documentation]: https://github.com/bolshakov/stoplight/blob/main/lib/stoplight/domain/state_transition_notifier.rb
 [camdez]: https://github.com/camdez
 [tfausak]: https://github.com/tfausak
 [bolshakov]: https://github.com/bolshakov
