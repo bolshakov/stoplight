@@ -3,7 +3,7 @@ module Stoplight
     # Configuration for Redis-backed Stoplight storage.
     #
     # @note This is a configuration object, not the storage implementation itself.
-    class Redis
+    class Redis < Base
       attr_reader redis: redis
       attr_reader warn_on_clock_skew: bool
 
@@ -13,7 +13,7 @@ module Stoplight
     # Configuration for Memory-backed Stoplight storage.
     #
     # @note This is a configuration object, not the storage implementation itself.
-    class Memory
+    class Memory < Base
     end
   end
 end

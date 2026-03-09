@@ -1,7 +1,6 @@
 ## Stoplight 6.0 (Unreleased)
 
 Breaking Changes
-- `Stoplight::DataStore::Base` removed without replacement
 - Notifiers call `#notify# with an instance `Stoplight::_LightInfo` interface rather then Config
 
 ## Stoplight 5.0 
