@@ -1,6 +1,10 @@
 module Stoplight
   module DataStore
-    class Redis
+    # @api private not for public use
+    class Base
+    end
+
+    class Redis < Base
       # @!attribute redis
       #   @return [::Redis, ConnectionPool<::Redis>]
       attr_reader :redis
@@ -18,7 +22,7 @@ module Stoplight
       end
     end
 
-    class Memory
+    class Memory < Base
     end
   end
 end

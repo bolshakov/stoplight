@@ -12,6 +12,7 @@ module Stoplight
         attr_reader red_run_strategy: RedRunStrategy
 
         @name: String
+        @config: Domain::Config
         @error_tracking_policy: ErrorTrackingPolicy
 
         def initialize: (
@@ -22,7 +23,8 @@ module Stoplight
           red_run_strategy: RedRunStrategy,
           state_store: Domain::_StateStore,
           metrics_store: _MetricsStore,
-          recovery_lock_store: _RecoveryLockStore
+          recovery_lock_store: _RecoveryLockStore,
+          config: Domain::Config,
         ) -> void
 
         def with_recovery_lock: [T] (
