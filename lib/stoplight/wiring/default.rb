@@ -19,7 +19,7 @@ module Stoplight
       WINDOW_SIZE = nil
 
       TRACKED_ERRORS = [StandardError].freeze
-      SKIPPED_ERRORS = [].freeze
+      SKIPPED_ERRORS = [].freeze # steep:ignore
 
       TRAFFIC_CONTROL = Domain::TrafficControl::ConsecutiveErrors.new
       TRAFFIC_RECOVERY = Domain::TrafficRecovery::ConsecutiveSuccesses.new

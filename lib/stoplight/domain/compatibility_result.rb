@@ -9,28 +9,28 @@ module Stoplight
       class << self
         # Creates a new +CompatibilityResult+ instance representing a compatible strategy.
         #
-        # @return [CompatibilityResult] An instance with no errors.
+        # @return An instance with no errors.
         def compatible
           new(errors: [])
         end
 
         # Creates a new +CompatibilityResult+ instance representing an incompatible strategy.
         #
-        # @param errors [Array<String>] List of error messages indicating incompatibility.
-        # @return [CompatibilityResult] An instance with the provided errors.
+        # @param errors List of error messages indicating incompatibility.
+        # @return An instance with the provided errors.
         def incompatible(*errors)
           new(errors:)
         end
       end
 
       # Initializes a new `CompatibilityResult` instance.
-      # @param errors [Array<String>] List of error messages if the strategy is not compatible.
+      # @param errors List of error messages if the strategy is not compatible.
       def initialize(errors: [])
         @errors = errors.freeze
       end
 
       # Checks if the strategy is compatible.
-      # @return [Boolean] `true` if there are no errors, `false` otherwise.
+      # @return `true` if there are no errors, `false` otherwise.
       def compatible?
         @errors.empty?
       end
@@ -38,11 +38,11 @@ module Stoplight
       def incompatible? = !compatible?
 
       # Retrieves the list of error messages.
-      # @return [Array<String>] The list of error messages.
+      # @return  The list of error messages.
       attr_reader :errors
 
       # Retrieves a concatenated error message string.
-      # @return [String, nil] A string containing all error messages joined by "; ",
+      # @return A string containing all error messages joined by "; ",
       #   or `nil` if the strategy is compatible.
       def error_messages
         unless compatible?

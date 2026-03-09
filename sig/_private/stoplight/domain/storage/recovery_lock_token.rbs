@@ -1,0 +1,11 @@
+module Stoplight
+  module Domain
+    module Storage
+      class RecoveryLockToken
+        include _RecoveryLockToken
+
+        attr_reader token: String
+      end
+    end
+  end
+end

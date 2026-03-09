@@ -4,7 +4,15 @@
 # instance with various options.
 module ConfigureLightWorld
   def configure_light(name, table = nil)
-    Stoplight(name, notifiers:, data_store:, **collect_settings(table))
+    factory_method = ENV.fetch("STOPLIGHT_LIGHT_CREATION", "Stoplight()")
+    case factory_method
+    when "Stoplight()"
+      Stoplight(name, notifiers:, data_store:, **collect_settings(table))
+    when "System#light"
+      system.light(name, **collect_settings(table))
+    else
+      raise ArgumentError, "unexpected light creation method: `#{factory_method}`"
+    end
   end
 
   def collect_settings(table)

@@ -3,19 +3,19 @@
 module Stoplight
   module Wiring
     class LightFactory
-      TrafficRecoveryDsl = proc do |value|
+      TrafficRecoveryDsl = ->(value) {
         case value
-        in Domain::TrafficRecovery::Base
+        in _ if value.respond_to?(:determine_color) # TODO: remove in 6.0
           value
         in :consecutive_successes
           Domain::TrafficRecovery::ConsecutiveSuccesses.new
         else
-          raise Domain::Error::ConfigurationError, <<~ERROR
+          raise Error::ConfigurationError, <<~ERROR
             unsupported traffic_recovery strategy provided (`#{value}`). Supported options:
               * :consecutive_successes
           ERROR
         end
-      end
+      }
     end
   end
 end

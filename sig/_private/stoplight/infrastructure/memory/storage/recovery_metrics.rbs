@@ -1,0 +1,10 @@
+module Stoplight
+  module Infrastructure
+    module Memory
+      module Storage
+        class RecoveryMetrics < UnboundedMetrics
+        end
+      end
+    end
+  end
+end

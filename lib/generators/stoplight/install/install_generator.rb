@@ -11,7 +11,12 @@ end
 module Stoplight
   module Generators
     class InstallGenerator < ::Rails::Generators::Base # :nodoc:
-      source_root File.expand_path("templates", __dir__)
+      case (root = __dir__)
+      when String
+        source_root File.expand_path("templates", root)
+      else
+        raise "cannot find templates root"
+      end
 
       class_option :with_admin_panel, type: :boolean, optional: true,
         desc: "Define whether to set up admin panel"

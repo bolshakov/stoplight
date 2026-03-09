@@ -4,10 +4,9 @@ module Stoplight
   module Infrastructure
     module Notifier
       # @see Base
-      class IO < Domain::StateTransitionNotifier
+      class IO
         include Generic
 
-        # @return [::IO]
         def io
           @object
         end

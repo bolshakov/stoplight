@@ -1,0 +1,13 @@
+module Stoplight
+  module Infrastructure
+    module Redis
+      module Storage
+        class Scripting < Infrastructure::Redis::DataStore::Scripting
+          SCRIPTS_ROOT: String
+
+          def default_scripts_root: -> String
+        end
+      end
+    end
+  end
+end

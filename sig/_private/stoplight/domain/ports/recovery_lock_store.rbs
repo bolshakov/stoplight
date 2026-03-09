@@ -1,0 +1,52 @@
+# frozen_string_literal: true
+
+module Stoplight
+  module Domain
+    # Encapsulates recovery lock management for coordinating recovery probes.
+    #
+    # When a circuit enters YELLOW state (half-open), it begins sending
+    # "recovery probes" - test requests to check if the protected service
+    # has recovered. In distributed deployments with multiple instances,
+    # recovery locks ensure only ONE instance sends probes at a time.
+    #
+    # Without coordination, all instances would simultaneously:
+    # 1. Detect the circuit is YELLOW
+    # 2. Send recovery probes to the struggling service
+    # 3. Potentially overwhelm it with "test" traffic
+    #
+    # Lock Lifecycle:
+    #
+    #   Instance A: acquire_lock -> probe -> release_lock
+    #   Instance B: acquire_lock -> nil (already held) -> skip probe
+    #   Instance C: acquire_lock -> nil (already held) -> skip probe
+    #
+    # Lock Semantics:
+    # - Returns +nil+ if lock is already held. Never blocks waiting for lock availability
+    # - Locks must automatically expire when persisted storage is used
+    # - Failed releases are acceptable (timeout provides safety)
+    #
+    # @see Stoplight::Domain::Strategies::YellowRunStrategy
+    interface _RecoveryLockStore
+      # Attempts to acquire recovery lock for exclusive probe execution.
+      #
+      # This method tries to acquire a lock that serializes recovery probe
+      # execution across multiple instances. If the lock is already held by
+      # another instance, returns +nil+ immediately without blocking.
+      #
+      # @return
+      #   - +RecoveryLockToken+: Lock acquired, caller should send probe
+      #   - +nil+: Lock unavailable, another instance is probing
+      #
+      def acquire_lock: -> Storage::RecoveryLockToken?
+
+      # Releases a previously acquired lock.
+      #
+      # This method releases the lock token returned by +#acquire_lock+,
+      # allowing other instances to acquire it. Release should be called
+      # in an ensure block to guarantee cleanup even if probe fails.
+      #
+      # @param lock The token returned by +#acquire_lock+
+      def release_lock: (Storage::RecoveryLockToken) -> void
+    end
+  end
+end

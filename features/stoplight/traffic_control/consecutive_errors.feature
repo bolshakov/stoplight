@@ -4,7 +4,8 @@ Feature: Consecutive Errors Traffic Control Strategy
   So that my application can respond appropriately to service failures
 
   Background:
-    Given a light "basic-service" exists
+    Given a light "basic-service" configured with:
+      | Recovery Threshold | 2 |
 
   Scenario: Light transitions to red after threshold failures
     Given the service starts failing with "connection-timeout"
@@ -20,8 +21,6 @@ Feature: Consecutive Errors Traffic Control Strategy
     Then the light color is green
 
   Scenario: Light transitions to yellow after cool-off period
-    Given a light "basic-service" configured with:
-      | Recovery Threshold | 2 |
     And the service starts failing with "connection-timeout"
     And the light enters red state
     When 61 seconds have elapsed
@@ -34,7 +33,7 @@ Feature: Consecutive Errors Traffic Control Strategy
     Given the service starts failing with "connection-timeout"
     And the light enters yellow state
     And the service recovers and starts functioning normally
-    When 1 request is made
+    When 2 request is made
     Then the light color is green
     And notification about transition from yellow to green is sent
 

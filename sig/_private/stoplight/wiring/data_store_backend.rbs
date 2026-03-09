@@ -1,0 +1,11 @@
+module Stoplight
+  module Wiring
+    class DataStoreBackend
+      def windowed_metrics_store: -> Domain::_MetricsStore
+      def unbounded_metrics_store: -> Domain::_MetricsStore
+      def recovery_metrics_store: -> Domain::_MetricsStore
+      def state_store: -> Domain::_StateStore
+      def recovery_lock_store: -> Domain::_RecoveryLockStore
+    end
+  end
+end

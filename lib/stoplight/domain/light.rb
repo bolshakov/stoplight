@@ -1,49 +1,23 @@
 # frozen_string_literal: true
 
-require "forwardable"
-
 module Stoplight
   module Domain
     #
     # @api private use +Stoplight()+ method instead
     class Light
-      extend Forwardable
       include Common::Deprecations
-      include ConfigurationBuilderInterface
+      include ConfigurationBuilderInterface # steep:ignore
 
-      # @!attribute [r] config
-      #   @return [Stoplight::Domain::Config]
-      #   @api private
-      attr_reader :config
+      attr_reader :name
 
-      # @!attribute [r] name
-      #   The name of the light.
-      #   @return [String]
-      def_delegator :config, :name
+      attr_reader :green_run_strategy
+      attr_reader :yellow_run_strategy
+      attr_reader :red_run_strategy
+      attr_reader :factory
+      attr_reader :state_store
 
-      # @!attribute [r] green_run_strategy
-      #   @return [Stoplight::Domain::Strategies::GreenRunStrategy]
-      protected attr_reader :green_run_strategy
-
-      # @!attribute [r] yellow_run_strategy
-      #   @return [Stoplight::Domain::Strategies::YellowRunStrategy]
-      protected attr_reader :yellow_run_strategy
-
-      # @!attribute [r] red_run_strategy
-      #   @return [Stoplight::Domain::Strategies::RedRunStrategy]
-      protected attr_reader :red_run_strategy
-
-      # @!attribute [r] factory
-      #   @return [Stoplight::Domain::LightFactory]
-      protected attr_reader :factory
-
-      # @!attribute state_store
-      #   @param [Stoplight::Domain::Storage::State]
-      protected attr_reader :state_store
-
-      # @param config [Stoplight::Domain::Config]
-      def initialize(config, green_run_strategy:, yellow_run_strategy:, red_run_strategy:, factory:, state_store:)
-        @config = config
+      def initialize(name, green_run_strategy:, yellow_run_strategy:, red_run_strategy:, factory:, state_store:)
+        @name = name
         @green_run_strategy = green_run_strategy
         @yellow_run_strategy = yellow_run_strategy
         @red_run_strategy = red_run_strategy
@@ -56,7 +30,6 @@ module Stoplight
       #  * +Stoplight::State::LOCKED_RED+ -- light is locked red and blocks all traffic
       #  * +Stoplight::State::UNLOCKED+ -- light is not locked and follow the configured rules
       #
-      # @return [String]
       def state = state_snapshot.locked_state
 
       # Returns current color:
@@ -68,7 +41,6 @@ module Stoplight
       #   light = Stoplight('example')
       #   light.color #=> Color::GREEN
       #
-      # @return [String] returns current light color
       def color = state_snapshot.color
 
       # Runs the given block of code with this circuit breaker
@@ -81,9 +53,7 @@ module Stoplight
       #   light = Stoplight('example')
       #   light.run(->(error) { 0 }) { 1 / 0 } #=> 0
       #
-      # @param fallback [Proc, nil] (nil) fallback code to run if the circuit breaker is open
-      # @raise [Stoplight::Error::RedLight]
-      # @return [any]
+      # @param fallback fallback code to run if the circuit breaker is open
       # @raise [Stoplight::Error::RedLight]
       def run(fallback = nil, &code)
         raise ArgumentError, "nothing to run. Please, pass a block into `Light#run`" unless block_given?
@@ -100,8 +70,8 @@ module Stoplight
       #   light = Stoplight('example-locked')
       #   light.lock(Stoplight::Color::RED)
       #
-      # @param color [String] should be either +Color::RED+ or +Color::GREEN+
-      # @return [Stoplight::Light] returns locked light (circuit breaker)
+      # @param color should be either +Color::RED+ or +Color::GREEN+
+      # @return locked light
       def lock(color)
         state = case color
         when Color::RED then State::LOCKED_RED
@@ -121,7 +91,7 @@ module Stoplight
       #   light.lock(Stoplight::Color::RED)
       #   light.unlock
       #
-      # @return [Stoplight::Light] returns unlocked light (circuit breaker)
+      # @return returns unlocked light (circuit breaker)
       def unlock
         state_store.set_state(State::UNLOCKED)
 
@@ -129,9 +99,6 @@ module Stoplight
       end
 
       # Two lights considered equal if they have the same configuration.
-      #
-      # @param other [any]
-      # @return [Boolean]
       def ==(other)
         other.is_a?(self.class) && factory == other.factory
       end
@@ -168,6 +135,7 @@ module Stoplight
       #   payment_light.run(->(error) { nil }) { call_payment_api }
       # @deprecated
       # @see +Stoplight()+
+      # steep:ignore:start
       def with(**settings)
         deprecate(<<~MSG)
           Light#with is deprecated and will be removed in v6.0.0.
@@ -188,6 +156,7 @@ module Stoplight
       private def with_without_warning(**settings)
         factory.build_with(**settings)
       end
+      # steep:ignore:end
 
       private
 

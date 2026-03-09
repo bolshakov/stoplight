@@ -1,0 +1,14 @@
+module Stoplight
+  module Domain
+    # Represents an abstract strategy for running a light's operations.
+    # Every new strategy should implement this interface
+    #
+    interface _RunStrategy
+      # @param fallback A fallback proc to execute in case of an error.
+      def execute: [T] (
+        (^(StandardError?) -> T)? fallback,
+        state_snapshot: StateSnapshot
+      ) { () -> T } -> T
+    end
+  end
+end

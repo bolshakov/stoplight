@@ -43,6 +43,26 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
         expect(last_response.body).not_to include("Ensure that your Stoplight data store is properly configured and that your Stoplight blocks have been run.")
       end
     end
+
+    context "when light has multiple consecutive failures" do
+      let(:light) { Stoplight("failing") }
+
+      before do
+        3.times do
+          light.run { raise "whoops" }
+        rescue
+          nil
+        end
+      end
+
+      it "displays the correct failure count" do
+        get "/"
+
+        expect(last_response).to be_ok
+
+        expect(last_response.body).to include(">Failures:</span> 3")
+      end
+    end
   end
 
   describe "GET /stats" do

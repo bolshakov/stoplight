@@ -1,0 +1,22 @@
+module Stoplight
+  module Generators
+    class InstallGenerator < ::Rails::Generators::Base
+      ROUTES_PATH: String
+      STOPLIGHT_CONFIG_TEMPLATE: String
+      INITIALIZERS_PATH: String
+      AFTER_INSTALL_NOTIFICATION: String
+      STOPLIGHT_ADMIN_ROUTE: String
+      STOPLIGHT_AUTH: String
+
+      def options: -> Hash[Symbol, untyped]
+      def generate_redis_gem: -> void
+      def generate_sinatra_deps: -> void
+      def generate_initializer: -> void
+      def generate_admin_panel: -> void
+      def redis_configuration_notification: -> void
+
+      def copy_file: (String, String) -> void
+      def inject_into_file: (String path, String what, ?after: String) -> void
+    end
+  end
+end

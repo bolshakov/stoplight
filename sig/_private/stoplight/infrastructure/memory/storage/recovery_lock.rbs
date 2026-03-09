@@ -1,0 +1,15 @@
+module Stoplight
+  module Infrastructure
+    module Memory
+      module Storage
+        class RecoveryLock
+          include Domain::_RecoveryLockStore
+
+          private attr_reader lock: Mutex
+
+          def initialize: -> void
+        end
+      end
+    end
+  end
+end

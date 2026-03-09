@@ -1,0 +1,12 @@
+module Stoplight
+  interface _Light
+    def name: -> String
+
+    def state: -> state
+    def color: -> color
+    def run: [T] (?(^(StandardError?) -> T)?) { () -> T } -> T
+    def lock: (color) -> _Light
+    def unlock: -> _Light
+    def ==: (untyped) -> bool
+  end
+end

@@ -13,39 +13,42 @@ module Stoplight
     # @see Stoplight::Domain::LightFactory
     # @see Stoplight()
     # @api private
-
-    class LightFactory < Domain::LightFactory
-      DEPENDENCY_KEYS = %i[data_store traffic_recovery traffic_control notifiers error_notifier].freeze
-      private_constant :DEPENDENCY_KEYS
-
-      CONFIG_KEYS = Domain::Config.members.freeze
-      private_constant :CONFIG_KEYS
-
-      # @!attribute [r] settings
-      #   @return [Hash]
-      protected attr_reader :settings
-
-      def initialize(settings = {})
-        @settings = settings
-
-        validate_settings!
+    #
+    class LightFactory
+      def initialize(config:)
+        @config = config
       end
 
-      private def validate_settings!
-        recognized = CONFIG_KEYS + DEPENDENCY_KEYS
-        unknown = settings.keys - recognized
-
-        return if unknown.empty?
-
-        raise ArgumentError, "Unknown settings: #{unknown.join(", ")}", caller(2)
-      end
-
-      # @param settings [Hash] Settings to override in the new factory
-      #   @see Stoplight()
-      # @return [Stoplight::Wiring::LightFactory]
-      # @see Stoplight()
-      def with(**settings)
-        self.class.new(self.settings.merge(settings))
+      def with(
+        name: T.undefined,
+        cool_off_time: T.undefined,
+        threshold: T.undefined,
+        recovery_threshold: T.undefined,
+        window_size: T.undefined,
+        tracked_errors: T.undefined,
+        skipped_errors: T.undefined,
+        data_store: T.undefined,
+        error_notifier: T.undefined,
+        notifiers: T.undefined,
+        traffic_control: T.undefined,
+        traffic_recovery: T.undefined
+      )
+        self.class.new(
+          config: ConfigurationDsl.new(
+            name:,
+            cool_off_time:,
+            threshold:,
+            recovery_threshold:,
+            window_size:,
+            tracked_errors:,
+            skipped_errors:,
+            traffic_control:,
+            traffic_recovery:,
+            error_notifier:,
+            data_store:,
+            notifiers:
+          ).configure!(config)
+        )
       end
 
       # Builds a fully-configured Light instance.
@@ -65,37 +68,60 @@ module Stoplight
       #   light.run { api_call }
 
       def build
-        config_settings = settings.slice(*CONFIG_KEYS)
-        dependency_settings = settings.slice(*DEPENDENCY_KEYS)
-
-        config, dependencies = ConfigurationPipeline.process(
-          config_settings,
-          dependency_settings
-        )
-        LightBuilder.new(factory: self, config:, **dependencies).build
-      end
-
-      # @return [Stoplight::Error::ConfigurationError]
-      def validate_configuration!
-        config_settings = settings.slice(*CONFIG_KEYS)
-        dependency_settings = settings.slice(*DEPENDENCY_KEYS)
-
-        ConfigurationPipeline.process(
-          config_settings,
-          dependency_settings
-        )
-        nil
+        light_builder(config:).build
       end
 
       def ==(other)
-        other.is_a?(self.class) && other.settings == settings
+        other.is_a?(self.class) && other.config == config
       end
 
       alias_method :eql?, :==
 
-      def hash
-        [self.class, settings].hash
+      def build_with(
+        name: T.undefined,
+        cool_off_time: T.undefined,
+        threshold: T.undefined,
+        recovery_threshold: T.undefined,
+        window_size: T.undefined,
+        tracked_errors: T.undefined,
+        skipped_errors: T.undefined,
+        data_store: T.undefined,
+        error_notifier: T.undefined,
+        notifiers: T.undefined,
+        traffic_control: T.undefined,
+        traffic_recovery: T.undefined
+      )
+        with(
+          name:,
+          cool_off_time:,
+          threshold:,
+          recovery_threshold:,
+          window_size:,
+          tracked_errors:,
+          skipped_errors:,
+          data_store:,
+          error_notifier:,
+          notifiers:,
+          traffic_control:,
+          traffic_recovery:
+        ).build
       end
+
+      def hash
+        [self.class, config].hash
+      end
+
+      protected
+
+      attr_reader :config
+
+      private
+
+      def light_builder(config:)
+        LightBuilder.new(config:, factory: light_factory)
+      end
+
+      def light_factory = self
     end
   end
 end

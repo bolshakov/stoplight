@@ -7,6 +7,18 @@ require "simplecov"
 require "stoplight"
 require "timecop"
 require "rack/test"
+
+require_relative "support/adapters/null_clock"
+require_relative "support/adapters/null_data_store"
+require_relative "support/adapters/null_light_factory"
+require_relative "support/adapters/null_metrics_store"
+require_relative "support/adapters/null_notifier"
+require_relative "support/adapters/null_recovery_lock_store"
+require_relative "support/adapters/null_recovery_lock_token"
+require_relative "support/adapters/null_state_store"
+require_relative "support/adapters/null_traffic_control"
+require_relative "support/adapters/null_traffic_recovery"
+
 require_relative "support/data_store"
 require_relative "support/light/color"
 require_relative "support/light/run"
@@ -24,6 +36,8 @@ RSpec.configure do |rspec|
   rspec.include Rack::Test::Methods
   rspec.include ExceptionHelpers
   rspec.include RouteHelpers, type: :request
+
+  rspec.before { Stoplight.__stoplight__reset! }
 
   rspec.filter_run_when_matching :focus
   rspec.color = true

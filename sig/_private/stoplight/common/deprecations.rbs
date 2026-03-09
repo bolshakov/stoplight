@@ -1,0 +1,9 @@
+# frozen_string_literal: true
+
+module Stoplight
+  module Common
+    module Deprecations
+      def deprecate: (String) -> void
+    end
+  end
+end

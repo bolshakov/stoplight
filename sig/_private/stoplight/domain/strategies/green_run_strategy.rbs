@@ -1,0 +1,17 @@
+module Stoplight
+  module Domain
+    module Strategies
+      class GreenRunStrategy
+        include _RunStrategy
+
+        attr_reader request_tracker: Tracker::Request
+        @error_tracking_policy: ErrorTrackingPolicy
+
+        def initialize: (error_tracking_policy: ErrorTrackingPolicy, request_tracker: Tracker::Request) -> void
+
+        def record_error: (StandardError) -> void
+        def record_success: -> void
+      end
+    end
+  end
+end

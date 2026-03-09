@@ -1,0 +1,66 @@
+module Stoplight
+  type optional[T] = Undefined | T
+
+  type timestamp = Float | Integer
+  type redis = ::Redis | ConnectionPool[::Redis]
+
+  # Light Colors
+  type green = "green"
+  type yellow = "yellow"
+  type red = "red"
+  type color = green | yellow | red
+
+  # Light States
+  type unlocked = "unlocked"
+  type locked_green = "locked_green"
+  type locked_red = "locked_red"
+  type state = unlocked | locked_green | locked_red
+
+  # Duration in seconds (1, 23, 0.4, etc.)
+  type duration = Float | Integer
+  # Percentage as decimal (0.0 to 1.0)
+  type percentage = Float
+
+  type error_notifier = ^(StandardError) -> void
+  type traffic_control = :consecutive_errors | :error_rate | {error_rate: {min_requests: Integer}}
+  type traffic_recovery = :consecutive_successes
+  type data_store = DataStore::Redis | DataStore::Memory
+  type state_transition_notifier = _StateTransitionNotifier
+  type notification_formatter = ^(Domain::Config light, color, color, StandardError?) -> String
+
+  def self.configure: (?trust_me_im_an_engineer: bool) ?{ (_Configuration) -> void } -> void
+
+  def self.light: (
+      String name,
+      ?cool_off_time: optional[duration],
+      ?threshold: optional[percentage | Integer],
+      ?recovery_threshold: optional[Integer],
+      ?window_size: optional[duration?],
+      ?tracked_errors: optional[Array[_ExceptionMatcher] | _ExceptionMatcher],
+      ?skipped_errors: optional[Array[_ExceptionMatcher] | _ExceptionMatcher],
+      ?data_store: optional[data_store],
+      ?error_notifier: optional[error_notifier],
+      ?notifiers: optional[Array[state_transition_notifier]],
+      ?traffic_control: optional[traffic_control],
+      ?traffic_recovery: optional[traffic_recovery],
+    ) -> _Light
+end
+
+module Kernel
+  # For a method usable both as Kernel.Stoplight() and just Stoplight()
+  def self?.Stoplight: (
+      String name,
+      ?cool_off_time: Stoplight::optional[Stoplight::duration],
+      ?threshold: Stoplight::optional[Stoplight::percentage | Integer],
+      ?recovery_threshold: Stoplight::optional[Integer],
+      ?window_size: Stoplight::optional[Stoplight::duration?],
+      ?tracked_errors: Stoplight::optional[Array[Stoplight::_ExceptionMatcher] | Stoplight::_ExceptionMatcher],
+      ?skipped_errors: Stoplight::optional[Array[Stoplight::_ExceptionMatcher] | Stoplight::_ExceptionMatcher],
+      ?data_store: Stoplight::optional[Stoplight::data_store],
+      ?error_notifier: Stoplight::optional[Stoplight::error_notifier],
+      ?notifiers: Stoplight::optional[Array[Stoplight::state_transition_notifier]],
+      ?traffic_control: Stoplight::optional[Stoplight::traffic_control],
+      ?traffic_recovery: Stoplight::optional[Stoplight::traffic_recovery],
+  ) -> Stoplight::_Light
+end
+

@@ -1,0 +1,19 @@
+module Stoplight
+  module Domain
+    class LightInfo < Data
+      include _LightInfo
+
+      def self.new: (
+          name: String,
+        ) -> instance
+
+      def initialize: (
+          name: String,
+        ) -> void
+
+      def with: (
+          ?name: String,
+      ) -> LightInfo
+    end
+  end
+end

@@ -1,0 +1,29 @@
+module Stoplight
+  module Infrastructure
+    module FailSafe
+      module Storage
+        class RecoveryLock
+          attr_reader primary_store: Domain::_RecoveryLockStore
+          attr_reader error_notifier: error_notifier
+          attr_reader failover_store: Domain::_RecoveryLockStore
+          attr_reader circuit_breaker: Domain::Light
+
+          def initialize: (
+            primary_store: Domain::_RecoveryLockStore,
+            error_notifier: error_notifier,
+            failover_store: Domain::_RecoveryLockStore,
+            circuit_breaker: Domain::Light
+          ) -> void
+
+          def acquire_lock: -> RecoveryLockToken?
+          def release_lock: (RecoveryLockToken) -> void
+
+          def wrap_token: (
+            (:primary | :failover) origin,
+            Domain::_RecoveryLockToken? token,
+          ) -> FailSafe::Storage::RecoveryLockToken?
+        end
+      end
+    end
+  end
+end

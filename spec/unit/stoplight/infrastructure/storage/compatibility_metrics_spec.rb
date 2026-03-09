@@ -4,12 +4,12 @@ RSpec.describe Stoplight::Infrastructure::Storage::CompatibilityMetrics do
   subject(:store) { described_class.new(data_store:, config:) }
 
   let(:config) { instance_double(Stoplight::Domain::Config) }
-  let(:data_store) { instance_double(Stoplight::Domain::DataStore) }
+  let(:data_store) { instance_double(NullDataStore) }
 
   describe "#metrics_snapshot" do
     subject { store.metrics_snapshot }
 
-    let(:metrics) { instance_double(Stoplight::Domain::Metrics) }
+    let(:metrics) { instance_double(Stoplight::Domain::MetricsSnapshot) }
 
     it "delegates to data store" do
       expect(data_store).to receive(:get_metrics).with(config).and_return(metrics)

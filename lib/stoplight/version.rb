@@ -1,5 +1,5 @@
 # frozen_string_literal: true
 
 module Stoplight
-  VERSION = Gem::Version.new("5.7.0")
+  VERSION = Gem::Version.new("5.8.0")
 end

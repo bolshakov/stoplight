@@ -1,0 +1,26 @@
+module Stoplight
+  module Wiring
+    module Memory
+      class Backend < DataStoreBackend
+        @clock: Domain::_Clock
+        @config: Domain::Config
+        @state_store: Infrastructure::Memory::Storage::State
+        @recovery_lock_store: Infrastructure::Memory::Storage::RecoveryLock
+        @recovery_metrics_store: Infrastructure::Memory::Storage::RecoveryMetrics
+        @windowed_metrics_store: Infrastructure::Memory::Storage::WindowMetrics
+        @unbounded_metrics_store: Infrastructure::Memory::Storage::UnboundedMetrics
+
+        def initialize: (
+            clock: Domain::_Clock,
+            config: Domain::Config
+          ) -> void
+
+        def state_stare: -> Infrastructure::Memory::Storage::State
+        def recovery_lock_store: -> Infrastructure::Memory::Storage::RecoveryLock
+        def recovery_metrics_store: -> Infrastructure::Memory::Storage::RecoveryMetrics
+        def windowed_metrics_store: -> Infrastructure::Memory::Storage::WindowMetrics
+        def unbounded_metrics_store: -> Infrastructure::Memory::Storage::UnboundedMetrics
+      end
+    end
+  end
+end

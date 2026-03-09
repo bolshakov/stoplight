@@ -8,40 +8,29 @@ module Stoplight
       # handle failures.
       #
       # @api private
-      class FailSafe < Domain::StateTransitionNotifier
-        # @!attribute [r] notifier
-        #   @return [Stoplight::Domain::StateTransitionNotifier] The underlying notifier being wrapped.
+      class FailSafe
+        # The underlying notifier being wrapped.
         attr_reader :notifier
-
-        # @!attribute [r] error_notifier
-        #   @return [Stoplight::Domain::StateTransitionNotifier] The underlying notifier being wrapped.
+        # The underlying notifier being wrapped.
         attr_reader :error_notifier
 
-        # Initializes a new instance of the +FailSafe+ class.
-        #
-        # @param notifier [Stoplight::Domain::StateTransitionNotifier] The notifier to wrap.
-        # @param error_notifier [Proc] called when wrapped data store fails
+        # @param notifier The notifier to wrap.
+        # @param error_notifier called when wrapped data store fails
         def initialize(notifier:, error_notifier:)
           @notifier = notifier
           @error_notifier = error_notifier
         end
 
         # Sends a notification using the wrapped notifier with fail-safe mechanisms.
-        #
-        # @param config [Stoplight::Domain::Config] The light configuration.
-        # @param from_color [String] The initial color of the light.
-        # @param to_color [String] The target color of the light.
-        # @param error [Exception, nil] An optional error to include in the notification.
-        # @return [void]
-        def notify(config, from_color, to_color, error = nil)
+        def notify(info, from_color, to_color, error = nil)
           fallback = proc do |exception|
             error_notifier.call(exception) if exception
             nil
-          end
+          end #: ^(StandardError?) -> void
 
           circuit_breaker.run(fallback) do
-            notifier.notify(config, from_color, to_color, error)
-          end
+            notifier.notify(info, from_color, to_color, error)
+          end #: void
         end
 
         # @return [Boolean]
@@ -49,7 +38,6 @@ module Stoplight
           other.is_a?(self.class) && notifier == other.notifier
         end
 
-        # @return [Stoplight::Light] The circuit breaker used to handle failures.
         private def circuit_breaker
           @circuit_breaker ||= Stoplight.system_light(
             "stoplight:notifier:fail_safe:#{notifier.class.name}",

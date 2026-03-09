@@ -76,55 +76,73 @@ graph TD
 
 Here is a real world example:
 
-1. Domain defines interfaces (abstract contracts):
+1. Domain defines interfaces using **RBS type signatures**:
 ```ruby
-# lib/stoplight/domain/data_store.rb
+# sig/_private/stoplight/domain/ports/data_store.rbs
+module Stoplight
+  module Domain
+    interface _DataStore
+      def get_metrics: (Config) -> MetricsSnapshot
+      def get_state_snapshot: (Config) -> StateSnapshot
+      def record_failure: (Config, StandardError exception) -> void
+      # ... other methods
+    end
+  end
+end
+```
+
+Note: There is **no Ruby base class** in `lib/stoplight/domain/`. Interfaces are pure type definitions.
+
+2. Infrastructure implements interfaces via **duck typing**:
+```ruby
+# lib/stoplight/infrastructure/memory/data_store.rb
+module Stoplight::Infrastructure::Memory
+  # No inheritance - satisfies interface through duck typing
+  class DataStore
+    # @param config [Stoplight::Domain::Config]
+    # @return [Stoplight::Domain::MetricsSnapshot]
+    def get_metrics(config)
+      # Concrete implementation
+    end
+
+    # @param config [Stoplight::Domain::Config]
+    # @return [Stoplight::Domain::StateSnapshot]
+    def get_state_snapshot(config)
+      # Concrete implementation
+    end
+  end
+end
+```
+
+3. Domain code depends only on **type-checked interfaces**:
+```ruby
+# lib/stoplight/domain/light.rb
 module Stoplight::Domain
- class DataStore  # This is the interface
-   def get_metrics(config)
-     raise NotImplementedError
-   end
- end
+  class Light
+    # @param data_store [Stoplight::Domain::_DataStore]
+    def initialize(data_store:)  # Expects interface (duck-typed)
+      @data_store = data_store
+    end
+
+    def run
+      state = @data_store.get_state_snapshot(config)  # Calls interface
+    end
+  end
 end
 ```
-
-2. Infrastructure implements interfaces:
-```ruby
-# lib/stoplight/infrastructure/data_store/memory.rb
-module Stoplight::Infrastructure::DataStore
- class Memory < Stoplight::Domain::DataStore
-   def get_metrics(config)
-     # Concrete implementation
-   end
- end
-end
-```
-
-3. Domain code depends only on domain interfaces:
-   ```ruby
-   # lib/stoplight/domain/light.rb
-   module Stoplight::Domain
-     class Light
-       # @param data_store [Stoplight::Domain::DataStore]
-       def initialize(data_store:)  # Expects domain interface
-         @data_store = data_store
-       end
-       
-       def run
-         state = @data_store.get_state_snapshot(config)  # Calls interface
-       end
-     end
-   end
-   ```
 
 4. Wiring layer injects implementations:
 ```ruby
 # lib/stoplight/wiring/light_factory.rb
-concrete_store = Infrastructure::DataStore::Memory.new
+concrete_store = Infrastructure::Memory::DataStore.new
 light = Domain::Light.new(data_store: concrete_store)
 ```
 
-**Result:** Domain is pure and testable, infrastructure is swappable.
+**Result:**
+- Domain is pure and testable
+- Infrastructure is swappable
+- Type safety enforced via **RBS + Steep** (static type checker)
+- Embraces Ruby's duck typing philosophy
 
 ### Request Flow Example
 
@@ -239,8 +257,8 @@ spec/
 **Contains:**
 - Core circuit breaker logic (`Light`)
 - Configuration value objects (`Config`)
-- State management (`StateSnapshot`, `Metrics`)
-- Abstract interfaces (`DataStore`, `StateTransitionNotifier`)
+- State management (`StateSnapshot`, `MetricsSnapshot`)
+- **RBS interface definitions** (in `sig/_private/stoplight/domain/ports/`)
 - Traffic Control strategies
 - Traffic Recovery strategies
 
@@ -248,26 +266,27 @@ spec/
 - NO external gem dependencies (except standard library)
 - NO I/O operations
 - Only depends on other domain objects
-- Interfaces define contracts for infrastructure
+- **NO Ruby abstract base classes** - interfaces are pure RBS type definitions
+- Interfaces define contracts for infrastructure via duck typing
 
-Example:
+Example (RBS interface definition):
 
 ```ruby
+# sig/_private/stoplight/domain/ports/data_store.rbs
 module Stoplight
   module Domain
-    # Abstract interface - domain defines the contract
-    class DataStore
-      def get_metrics(config)
-        raise NotImplementedError
-      end
-
-      def record_failure(config, failure)
-        raise NotImplementedError
-      end
+    # Interface definition (type signature only)
+    interface _DataStore
+      def get_metrics: (Config) -> MetricsSnapshot
+      def record_failure: (Config, StandardError exception) -> void
+      def record_success: (Config) -> void
+      # ... other methods
     end
   end
 end
 ```
+
+Note: This is an **RBS type definition**, not executable Ruby code. There is no corresponding `.rb` file in `lib/stoplight/domain/`.
 
 #### Infrastructure Layer (`lib/stoplight/infrastructure/`)
 
@@ -279,21 +298,33 @@ end
 - Any code that does I/O or depends on external gems
 
 **Rules:**
-- Implements domain interfaces
+- Implements domain interfaces **via duck typing** (no inheritance)
 - Can depend on external gems
 - Can perform I/O operations
 - Should not contain business logic
 - Must be swappable without affecting domain
+- Type-checked by Steep to ensure interface compliance
 
 Example:
 
 ```ruby
 module Stoplight
   module Infrastructure
-    module DataStore
+    module Memory
       # Concrete implementation using in-memory storage
-      class Memory < Domain::DataStore
+      # Satisfies Domain::_DataStore interface via duck typing
+      class DataStore
+        # @param config [Stoplight::Domain::Config]
+        # @return [Stoplight::Domain::MetricsSnapshot]
         def get_metrics(config)
+          # Implementation details...
+          Domain::MetricsSnapshot.new(...)
+        end
+
+        # @param config [Stoplight::Domain::Config]
+        # @param exception [StandardError]
+        # @return [void]
+        def record_failure(config, exception)
           # Implementation details...
         end
       end
@@ -301,6 +332,8 @@ module Stoplight
   end
 end
 ```
+
+Note: **No inheritance from domain**. Steep validates that this class satisfies the `_DataStore` interface.
 
 #### Wiring Layer (`lib/stoplight/wiring/`)
 
@@ -353,20 +386,20 @@ We enforce architecture boundaries using a custom RuboCop cop. This prevents:
 
 ```mermaid
 classDiagram
-    class DataStore {
-        <<interface>>
+    class DataStore_RBS {
+        <<RBS interface>>
         +get_metrics(config)
         +get_state_snapshot(config)
         +get_recovery_metrics(config)
         +record_failure(config, failure)
         +record_success(config)
     }
-    
-    class StateTransitionNotifier {
-        <<interface>>
+
+    class StateTransitionNotifier_RBS {
+        <<RBS interface>>
         +notify(config, from_color, to_color)
     }
-    
+
     class Memory {
         +get_metrics(config)
         +get_state_snapshot(config)
@@ -374,7 +407,7 @@ classDiagram
         +record_failure(config, failure)
         +record_success(config)
     }
-    
+
     class Redis {
         +get_metrics(config)
         +get_state_snapshot(config)
@@ -382,35 +415,35 @@ classDiagram
         +record_failure(config, failure)
         +record_success(config)
     }
-    
+
     class IO {
         +notify(config, from_color, to_color)
     }
-    
+
     class Logger {
         +notify(config, from_color, to_color)
     }
-    
+
     class Light {
         -data_store
         -notifiers
         +run()
     }
-    
-    DataStore <|.. Memory : implements
-    DataStore <|.. Redis : implements
-    StateTransitionNotifier <|.. IO : implements
-    StateTransitionNotifier <|.. Logger : implements
-    
-    Light --> DataStore : depends on interface
-    Light --> StateTransitionNotifier : depends on interface
-    
+
+    DataStore_RBS .. Memory : duck types (Steep validates)
+    DataStore_RBS .. Redis : duck types (Steep validates)
+    StateTransitionNotifier_RBS .. IO : duck types (Steep validates)
+    StateTransitionNotifier_RBS .. Logger : duck types (Steep validates)
+
+    Light --> DataStore_RBS : depends on RBS interface
+    Light --> StateTransitionNotifier_RBS : depends on RBS interface
+
     namespace Domain {
-        class DataStore
-        class StateTransitionNotifier
+        class DataStore_RBS
+        class StateTransitionNotifier_RBS
         class Light
     }
-    
+
     namespace Infrastructure {
         class Memory
         class Redis
@@ -419,66 +452,80 @@ classDiagram
     }
 ```
 
-Domain defines interfaces, Infrastructure implements them.
+**Key Differences from Traditional Architecture:**
+- Interfaces exist only as **RBS type definitions** (`.rbs` files)
+- No Ruby inheritance between domain and infrastructure
+- Infrastructure classes satisfy interfaces via **duck typing**
+- **Steep** (static type checker) validates interface compliance at development time
+- Zero runtime coupling between layers
 
 ### Common Violations
 
 Understanding what breaks clean architecture:
 
-- ❌ Violation 1: Domain directly referencing infrastructure
+#### ❌ Violation 1: Domain directly referencing infrastructure
+
+**WRONG:**
 ```ruby
-# In lib/stoplight/domain/light.rb - WRONG!
+# In lib/stoplight/domain/light.rb - BAD!
 module Stoplight::Domain
   class Light
     def notify_error
-      # BAD: Domain knows about concrete infrastructure, does not allow runtime swapping
+      # BAD: Domain knows about concrete infrastructure
+      # This creates coupling and prevents swapping implementations
       Stoplight::Infrastructure::Notifier::IO.new.notify(...)
     end
   end
 end
 ```
 
-- ✅ Correct: Domain depends on domain interface
+**CORRECT:**
 ```ruby
-# In lib/stoplight/domain/light.rb - CORRECT
+# In lib/stoplight/domain/light.rb - GOOD!
 module Stoplight::Domain
   class Light
+    # @param notifiers [Array<Stoplight::Domain::_StateTransitionNotifier>]
     def initialize(notifiers:)
-      @notifiers = notifiers  # Array of domain interfaces
+      @notifiers = notifiers  # Array of duck-typed objects
     end
-    
+
     def notify_error
-      # GOOD: Calls through abstraction
+      # GOOD: Calls through interface (duck-typed)
       @notifiers.each { |notifier| notifier.notify(...) }
     end
   end
 end
 
-# Interface defined in domain
-# lib/stoplight/domain/state_transition_notifier.rb
+# Interface defined in RBS (NOT in Ruby)
+# sig/_private/stoplight/domain/ports/state_transition_notifier.rbs
 module Stoplight::Domain
-  class StateTransitionNotifier
-    def notify(config, from_color, to_color)
-      raise NotImplementedError
-    end
+  interface _StateTransitionNotifier
+    def notify: (Config, color from_color, color to_color) -> void
   end
 end
 
-# Implementation in infrastructure
+# Implementation in infrastructure (duck typing, no inheritance)
 # lib/stoplight/infrastructure/notifier/io.rb
 module Stoplight::Infrastructure::Notifier
-  class IO < Domain::StateTransitionNotifier
+  class IO
+    # @param config [Stoplight::Domain::Config]
+    # @param from_color [Stoplight::Color::color]
+    # @param to_color [Stoplight::Color::color]
+    # @return [void]
     def notify(config, from_color, to_color)
       # Concrete implementation
+      # Steep validates this matches the interface
     end
   end
 end
 ```
 
-- ❌ Violation 2: Domain requiring external gems
+#### ❌ Violation 2: Domain requiring external gems
+
+**WRONG:**
 ```ruby
-# In lib/stoplight/domain/light.rb - WRONG!
-require 'redis'  # External gem dependency
+# In lib/stoplight/domain/light.rb - BAD!
+require 'redis'  # External gem dependency in domain!
 
 module Stoplight::Domain
   class Light
@@ -489,28 +536,39 @@ module Stoplight::Domain
 end
 ```
 
-- ✅ Correct: Infrastructure handles external dependencies
+**CORRECT:**
 ```ruby
-# Domain defines what it needs
+# Domain defines what it needs (via RBS interface)
 # lib/stoplight/domain/light.rb
 module Stoplight::Domain
   class Light
+    # @param data_store [Stoplight::Domain::_DataStore]
     def initialize(data_store:)
-      @data_store = data_store  # Domain interface
+      @data_store = data_store  # Duck-typed interface
     end
-    
+
     def store_state
       @data_store.record_success(config)  # Interface call
     end
   end
 end
 
-# Infrastructure provides implementation
-# lib/stoplight/infrastructure/data_store/redis.rb
-require 'redis'  # External gem - OK in infrastructure
+# Interface in RBS
+# sig/_private/stoplight/domain/ports/data_store.rbs
+module Stoplight::Domain
+  interface _DataStore
+    def record_success: (Config) -> void
+  end
+end
 
-module Stoplight::Infrastructure::DataStore
-  class Redis < Domain::DataStore
+# Infrastructure provides implementation
+# lib/stoplight/infrastructure/redis/data_store.rb
+require 'redis'  # External gem - OK in infrastructure!
+
+module Stoplight::Infrastructure::Redis
+  class DataStore
+    # @param config [Stoplight::Domain::Config]
+    # @return [void]
     def record_success(config)
       @redis.set(...)  # I/O operations in infrastructure
     end
@@ -518,5 +576,36 @@ module Stoplight::Infrastructure::DataStore
 end
 ```
 
-**Remember:** If you see domain code importing external gems or referencing infrastructure namespaces, that's a boundary
-violation!
+#### ❌ Violation 3: Creating abstract base classes in domain
+
+**WRONG (old pattern, no longer used):**
+```ruby
+# lib/stoplight/domain/data_store.rb - DON'T DO THIS!
+module Stoplight::Domain
+  class DataStore
+    def get_metrics(config)
+      raise NotImplementedError  # Runtime error, creates coupling
+    end
+  end
+end
+```
+
+**CORRECT (current pattern):**
+```ruby
+# sig/_private/stoplight/domain/ports/data_store.rbs
+module Stoplight::Domain
+  interface _DataStore  # Type definition, not runtime code
+    def get_metrics: (Config) -> MetricsSnapshot
+  end
+end
+
+# No .rb file needed! Steep validates at development time.
+```
+
+**Key Reminders:**
+- ✅ Domain interfaces live in `.rbs` files, not `.rb` files
+- ✅ Infrastructure uses duck typing (no inheritance)
+- ✅ Steep provides compile-time type checking
+- ❌ Domain never imports external gems
+- ❌ Domain never references infrastructure namespaces
+- ❌ No `raise NotImplementedError` patterns

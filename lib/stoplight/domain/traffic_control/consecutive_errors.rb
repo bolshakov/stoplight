@@ -26,26 +26,23 @@ module Stoplight
       #
       # Will switch to red only if 5 consecutive failures occur regardless of the time window
       # @api private
-      class ConsecutiveErrors < Base
-        # @param config [Stoplight::Domain::Config]
-        # @return [Stoplight::Domain::CompatibilityResult]
+      class ConsecutiveErrors
         def check_compatibility(config)
           if config.threshold <= 0
-            incompatible("`threshold` should be bigger than 0")
+            CompatibilityResult.incompatible("`threshold` should be bigger than 0")
           elsif !config.threshold.is_a?(Integer)
-            incompatible("`threshold` should be an integer")
+            CompatibilityResult.incompatible("`threshold` should be an integer")
           else
-            compatible
+            CompatibilityResult.compatible
           end
         end
 
-        # Determines if traffic should be stopped based on failure counts.
-        #
-        # @param config [Stoplight::Domain::Config]
-        # @param metrics [Stoplight::Domain::Metrics]
-        # @return [Boolean] true if failures have reached the threshold, false otherwise
         def stop_traffic?(config, metrics)
           metrics.consecutive_errors >= config.threshold
+        end
+
+        def ==(other)
+          other.is_a?(self.class)
         end
       end
     end

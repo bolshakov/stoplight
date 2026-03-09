@@ -1,0 +1,26 @@
+module Stoplight
+  module Domain
+    module Tracker
+      class Request < Base
+        attr_reader config: Config
+        attr_reader traffic_control: _TrafficControl
+        attr_reader notifiers: Array[state_transition_notifier]
+        attr_reader metrics_store: _MetricsStore
+        attr_reader state_store: _StateStore
+
+        def initialize: (
+          config: Config,
+          traffic_control: _TrafficControl,
+          notifiers: Array[state_transition_notifier],
+          metrics_store: _MetricsStore,
+          state_store: _StateStore,
+        ) -> void
+
+        def record_failure: (StandardError exception) -> void
+        def record_success: -> void
+
+        private def transition_to_red: (StandardError exception, metrics: MetricsSnapshot) -> void
+      end
+    end
+  end
+end

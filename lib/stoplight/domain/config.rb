@@ -4,24 +4,6 @@ module Stoplight
   module Domain
     # A +Stoplight::Light+ configuration object.
     #
-    # # @!attribute [r] name
-    #   @return [String]
-    #
-    # @!attribute [r] cool_off_time - cool-off time in seconds
-    #   @return [Numeric]
-    #
-    # @!attribute [r] threshold
-    #   @return [Numeric]
-    #
-    # @!attribute [r] window_size
-    #   @return [Numeric]
-    #
-    # @!attribute [r] tracked_errors
-    #   @return [Array<StandardError>]
-    #
-    # @!attribute [r] skipped_errors
-    #  @return [Array<Exception>]
-    #
     # @api private
     Config = Data.define(
       :name,
@@ -30,29 +12,46 @@ module Stoplight
       :recovery_threshold,
       :window_size,
       :tracked_errors,
-      :skipped_errors
-    ) do
-      class << self
-        # Creates a new NULL configuration object.
-        # @return [Stoplight::Domain::Config]
-        def empty
-          new(**members.map { |key| [key, nil] }.to_h)
-        end
-      end
-
-      # Checks if the given error should be tracked
-      #
-      # @param error [#==] The error to check, e.g. an Exception, Class or Proc
-      # @return [Boolean]
-      def track_error?(error)
-        skip = skipped_errors.any? { |klass| klass === error }
-        track = tracked_errors.any? { |klass| klass === error }
-
-        !skip && track
-      end
-
+      :skipped_errors,
+      :traffic_control,
+      :traffic_recovery,
+      :error_notifier,
+      :notifiers,
+      :data_store
+    )
+    class Config
       def cool_off_time_in_milliseconds
-        cool_off_time * 1_000
+        (cool_off_time * 1_000).to_i
+      end
+
+      def with(
+        name: T.undefined,
+        cool_off_time: T.undefined,
+        threshold: T.undefined,
+        recovery_threshold: T.undefined,
+        window_size: T.undefined,
+        skipped_errors: T.undefined,
+        tracked_errors: T.undefined,
+        traffic_control: T.undefined,
+        traffic_recovery: T.undefined,
+        error_notifier: T.undefined,
+        notifiers: T.undefined,
+        data_store: T.undefined
+      )
+        super(
+          name: name.is_a?(Undefined) ? self.name : name,
+          cool_off_time: cool_off_time.is_a?(Undefined) ? self.cool_off_time : cool_off_time,
+          threshold: threshold.is_a?(Undefined) ? self.threshold : threshold,
+          recovery_threshold: recovery_threshold.is_a?(Undefined) ? self.recovery_threshold : recovery_threshold,
+          window_size: window_size.is_a?(Undefined) ? self.window_size : window_size,
+          skipped_errors: skipped_errors.is_a?(Undefined) ? self.skipped_errors : skipped_errors,
+          tracked_errors: tracked_errors.is_a?(Undefined) ? self.tracked_errors : tracked_errors,
+          traffic_control: traffic_control.is_a?(Undefined) ? self.traffic_control : traffic_control,
+          traffic_recovery: traffic_recovery.is_a?(Undefined) ? self.traffic_recovery : traffic_recovery,
+          error_notifier: error_notifier.is_a?(Undefined) ? self.error_notifier : error_notifier,
+          notifiers: notifiers.is_a?(Undefined) ? self.notifiers : notifiers,
+          data_store: data_store.is_a?(Undefined) ? self.data_store : data_store,
+        )
       end
     end
   end

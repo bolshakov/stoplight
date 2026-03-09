@@ -10,6 +10,7 @@ tmp/
 profile_results
 /docker/Gemfile.lock
 *.log
+.gem_rbs_collection/
 
 # OS or Editor folders
 .DS_Store

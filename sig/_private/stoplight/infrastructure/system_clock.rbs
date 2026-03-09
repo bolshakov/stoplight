@@ -1,0 +1,7 @@
+module Stoplight
+  module Infrastructure
+    class SystemClock
+      include Domain::_Clock
+    end
+  end
+end

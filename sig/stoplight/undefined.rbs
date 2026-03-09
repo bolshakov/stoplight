@@ -1,0 +1,9 @@
+module Stoplight
+  class Undefined
+    include Singleton
+
+    def self.instance: -> instance
+    def inspect: -> String
+    def to_s: -> String
+  end
+end

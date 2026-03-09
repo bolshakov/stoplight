@@ -58,8 +58,8 @@ Use test doubles for testing with abstract dependencies:
 
 ```ruby
 RSpec.describe Stoplight::Domain::Light do
-  let(:data_store) { instance_double(Stoplight::Domain::DataStore) }
-  let(:notifier) { instance_double(Stoplight::Domain::StateTransitionNotifier) }
+  let(:data_store) { instance_double(Stoplight::Domain::_DataStore) }
+  let(:notifier) { instance_double(NullNotifier) }
   
   # Test in isolation
   it "transitions to red after threshold" do
@@ -72,12 +72,12 @@ end
 Use real dependencies when testing infrastructure
 
 ```ruby
-RSpec.describe Stoplight::Infrastructure::DataStore::Redis do
+RSpec.describe Stoplight::Infrastructure::Redis::DataStore do
   let(:data_store) { described_class.new(redis) }
   let(:redis) { Redis.new(url: connection_string) } # connects to the real database
   
   it "transitions to red" do
-    data_store.transition_to_color(Stoplight::Domain::Color::RED)
+    data_store.transition_to_color(Stoplight::Color::RED)
     # ... test logic
   end
 end
@@ -91,7 +91,7 @@ it's tricky to use gherkin language for testing, you can opt out to using integr
 ```ruby
 RSpec.describe "Concurrency testing" do
   # Use real implementations
-  let(:data_store) { Stoplight::Infrastructure::DataStore::Redis.new }
+  let(:data_store) { Stoplight::Infrastructure::Redis::DataStore.new }
   
   it "persists state across instances" do
     # Test actual integration

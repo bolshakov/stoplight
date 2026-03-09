@@ -1,0 +1,34 @@
+module Stoplight
+  module Infrastructure
+    module Redis
+      class DataStore
+        class Scripting
+          SCRIPTS_ROOT: String
+
+          def self.default_scripts_root: -> String
+
+          attr_reader scripts_root: String
+
+          attr_reader shas: Hash[interned, String]
+
+          attr_reader redis: redis
+
+          def initialize: (
+            redis: redis,
+            ?scripts_root: String,
+          ) -> void
+
+          def call: (
+            interned script_name,
+            ?keys: Array[_ToS],
+            ?args: Array[_ToS]
+          ) -> untyped
+
+          private def reload_script: (interned script_name) -> String
+
+          private def script_sha: (interned script_name) -> String
+        end
+      end
+    end
+  end
+end

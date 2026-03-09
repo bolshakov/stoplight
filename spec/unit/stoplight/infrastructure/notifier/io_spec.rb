@@ -10,10 +10,6 @@ RSpec.describe Stoplight::Infrastructure::Notifier::IO do
     expect(described_class).to be_a(Class)
   end
 
-  it "is a subclass of Base" do
-    expect(described_class).to be < Stoplight::Domain::StateTransitionNotifier
-  end
-
   describe "#io" do
     it "reads the IO" do
       io = StringIO.new

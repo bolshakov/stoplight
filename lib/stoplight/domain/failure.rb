@@ -16,7 +16,7 @@ module Stoplight
 
       # @param error [Exception]
       # @return (see #initialize)
-      def self.from_error(error, time: Time.now)
+      def self.from_error(error, time:)
         new(error.class.name, error.message, time)
       end
 

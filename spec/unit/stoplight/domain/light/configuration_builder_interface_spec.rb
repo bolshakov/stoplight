@@ -12,7 +12,7 @@ RSpec.describe Stoplight::Domain::Light::ConfigurationBuilderInterface do
       factory:
     )
   end
-  let(:factory) { instance_double(Stoplight::Domain::LightFactory) }
+  let(:factory) { instance_double(NullLightFactory) }
 
   shared_examples "configurable attribute" do |attribute|
     subject(:light_with_attribute) do
@@ -34,7 +34,7 @@ RSpec.describe Stoplight::Domain::Light::ConfigurationBuilderInterface do
   end
 
   describe "#with_data_store" do
-    let(:data_store) { instance_double(Stoplight::Domain::DataStore) }
+    let(:data_store) { instance_double(NullDataStore) }
 
     include_examples "configurable attribute", :data_store
   end
@@ -58,7 +58,7 @@ RSpec.describe Stoplight::Domain::Light::ConfigurationBuilderInterface do
   end
 
   describe "#with_notifiers" do
-    let(:notifiers) { [instance_double(Stoplight::Domain::StateTransitionNotifier)] }
+    let(:notifiers) { [instance_double(NullNotifier)] }
 
     include_examples "configurable attribute", :notifiers
   end

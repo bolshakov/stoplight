@@ -12,24 +12,21 @@ module Stoplight
       # This adapter will be removed in a future versions once all
       # data stores have native recovery lock implementations.
       #
-      # @see Stoplight::Domain::Storage::RecoveryLock
-      class CompatibilityRecoveryLock < Domain::Storage::RecoveryLock
-        private attr_reader :data_store
-        private attr_reader :config
-
-        # @param data_store [Stoplight::Domain::DataStore]
-        # @param config [Stoplight::Domain::Config]
+      # @see Stoplight::Domain::_RecoveryLockStore
+      class CompatibilityRecoveryLock
         def initialize(data_store:, config:)
           @data_store = data_store
           @config = config
         end
 
-        # @return [Stoplight::Domain::RecoveryLockToken, nil]
-        def acquire_lock = data_store.acquire_recovery_lock(config)
+        def acquire_lock = data_store.acquire_recovery_lock(config) #: Domain::Storage::RecoveryLockToken?
 
-        # @param lock [Stoplight::Domain::LockToken]
-        # @return [void]
         def release_lock(lock) = data_store.release_recovery_lock(lock)
+
+        private
+
+        attr_reader :data_store
+        attr_reader :config
       end
     end
   end

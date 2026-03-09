@@ -9,6 +9,20 @@ permissions:  # added using https://github.com/step-security/secure-repo
   contents: read
 
 jobs:
+  steep:
+    name: Type Check 🔍
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@19a43a6a2428d455dbd1b85344698725179c9d8c # v1.289.0
+        with:
+          ruby-version: 4.0
+          bundler-cache: true
+      - run: |
+          bundle exec steep check --format=github
+
   rubocop:
     name: Standard 👮
     runs-on: ubuntu-latest
@@ -17,22 +31,24 @@ jobs:
       contents: read
     steps:
       - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@df199fb7be9f65074067a9eb93f12bb4c5547cf2 # v2.13.3
+        uses: step-security/harden-runner@58077d3c7e43986b6b15fba718e8ea69e387dfcc # v2.15.1
         with:
           egress-policy: audit
 
       - name: Checkout code
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Standard Ruby
         uses: standardrb/standard-ruby-action@eecb3f730879f5b8830705348c2961e5aa26de78 # v1.5.0
         with:
+          ruby-version: '4.0'
           autofix: false
 
   features:
-    name: Features (${{ matrix.data-store }} Data Store and ${{ matrix.data-store-image }} Data Store image) 🥒
+    name: Features (${{ matrix.data-store }} Data Store and ${{ matrix.data-store-image }} Data Store image using ${{matrix.light-creation}}) 🥒
     runs-on: ubuntu-latest
     strategy:
       matrix:
+        light-creation: [ 'Stoplight()', 'System#light' ]
         data-store: [ 'Redis' ]
         data-store-image:
           - 'redis:7.4'
@@ -41,6 +57,10 @@ jobs:
           # Memory does not depend on the Data Store so we only want to run its suite once
           - data-store: 'Memory'
             data-store-image: 'redis:7.4'
+            light-creation: 'Stoplight()'
+          - data-store: 'Memory'
+            data-store-image: 'redis:7.4'
+            light-creation: 'System#light'
     services:
       data-store:
         image: ${{ matrix.data-store-image }}
@@ -53,17 +73,17 @@ jobs:
           - 6379:6379
     steps:
       - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@df199fb7be9f65074067a9eb93f12bb4c5547cf2 # v2.13.3
+        uses: step-security/harden-runner@58077d3c7e43986b6b15fba718e8ea69e387dfcc # v2.15.1
         with:
           egress-policy: audit
 
       - name: Checkout code
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@8aeb6ff8030dd539317f8e1769a044873b56ea71 # v1.268.0
+        uses: ruby/setup-ruby@19a43a6a2428d455dbd1b85344698725179c9d8c # v1.289.0
         with:
-          ruby-version: 3.3.4
+          ruby-version: 4.0
           bundler-cache: true
 
       - name: Run Features
@@ -71,6 +91,7 @@ jobs:
         env:
           STOPLIGHT_REDIS_URL: 'redis://127.0.0.1:6379/0'
           STOPLIGHT_DATA_STORE: ${{ matrix.data-store }}
+          STOPLIGHT_LIGHT_CREATION: ${{ matrix.light-creation }}
           CUCUMBER_PUBLISH_ENABLED: true
 
   spec:
@@ -88,7 +109,7 @@ jobs:
           - 'redis:8.0'
           - 'valkey/valkey:7.2-alpine'
           - 'valkey/valkey:8.1-alpine'
-        ruby: [ '3.2', '3.3', '3.4' ]
+        ruby: [ '3.2', '3.3', '3.4', '4.0' ]
     services:
       data-store:
         image: ${{ matrix.data-store-image }}
@@ -101,15 +122,15 @@ jobs:
           - 6379:6379
     steps:
       - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@df199fb7be9f65074067a9eb93f12bb4c5547cf2 # v2.13.3
+        uses: step-security/harden-runner@58077d3c7e43986b6b15fba718e8ea69e387dfcc # v2.15.1
         with:
           egress-policy: audit
 
       - name: Checkout code
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@8aeb6ff8030dd539317f8e1769a044873b56ea71 # v1.268.0
+        uses: ruby/setup-ruby@19a43a6a2428d455dbd1b85344698725179c9d8c # v1.289.0
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
@@ -131,7 +152,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@df199fb7be9f65074067a9eb93f12bb4c5547cf2 # v2.13.3
+        uses: step-security/harden-runner@58077d3c7e43986b6b15fba718e8ea69e387dfcc # v2.15.1
         with:
           egress-policy: audit
 

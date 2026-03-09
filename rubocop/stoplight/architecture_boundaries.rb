@@ -95,7 +95,6 @@ module RuboCop
           # Check for Stoplight.light() or Stoplight.configure()
           if node.receiver.const_type?
             receiver_name = extract_constant_path(node.receiver)
-
             if receiver_name == "Stoplight" &&
                 [:light, :system_light, :configure].include?(node.method_name)
               add_offense(
@@ -143,7 +142,7 @@ module RuboCop
 
           # Special case: Check for Stoplight::DataStore, Stoplight::Notifier, etc.
           # These are aliases in the root namespace that shouldn't be used from Domain
-          if @current_layer == :domain && const_path.match?(/^Stoplight::(DataStore|Notifier|Light|Color|State|Error|Failure)/)
+          if @current_layer == :domain && const_path.match?(/^Stoplight::(DataStore|Notifier)/)
             # Check if this is actually referencing the root alias vs Domain namespace
             if !inside_stoplight_domain_namespace?
               add_offense(

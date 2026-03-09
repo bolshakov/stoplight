@@ -1,0 +1,9 @@
+module Stoplight
+  module Domain
+    module TrafficRecovery
+      GREEN: :green
+      YELLOW: :yellow
+      RED: :red
+    end
+  end
+end

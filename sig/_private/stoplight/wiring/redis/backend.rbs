@@ -1,0 +1,38 @@
+module Stoplight
+  module Wiring
+    module Redis
+      class Backend < DataStoreBackend
+        @redis: redis
+        @scripting: Infrastructure::Redis::Storage::Scripting
+        @key_space: Infrastructure::Redis::Storage::KeySpace
+        @config: Domain::Config
+        @error_notifier: error_notifier
+        @failover_light: Domain::Light
+        @clock: Domain::_Clock
+
+        @memory_fallback: Memory::Backend
+        @state_store: Infrastructure::FailSafe::Storage::State
+        @recovery_lock_store: Infrastructure::FailSafe::Storage::RecoveryLock
+        @recovery_metrics_store: Infrastructure::FailSafe::Storage::Metrics
+        @windowed_metrics_store: Infrastructure::FailSafe::Storage::Metrics
+        @unbounded_metrics_store: Infrastructure::FailSafe::Storage::Metrics
+
+        def initialize: (
+          redis: redis,
+          scripting: Infrastructure::Redis::Storage::Scripting,
+          key_space: Infrastructure::Redis::Storage::KeySpace,
+          config: Domain::Config,
+          error_notifier: error_notifier,
+          failover_light: Domain::Light,
+          clock: Domain::_Clock,
+          ) -> void
+
+        def state_stare: -> Infrastructure::FailSafe::Storage::State
+        def recovery_lock_store: -> Infrastructure::FailSafe::Storage::RecoveryLock
+        def recovery_metrics_store: -> Infrastructure::FailSafe::Storage::Metrics
+        def windowed_metrics_store: -> Infrastructure::FailSafe::Storage::Metrics
+        def unbounded_metrics_store: -> Infrastructure::FailSafe::Storage::Metrics
+      end
+    end
+  end
+end

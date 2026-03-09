@@ -9,28 +9,25 @@ module Stoplight
       # or invokes a fallback if provided.
       #
       # @api private
-      class RedRunStrategy < RunStrategy
-        # @!attribute [r] config
-        #   @return [Stoplight::Domain::Config] The configuration for the light.
-        protected attr_reader :config
-
-        def initialize(config:)
-          @config = config
+      class RedRunStrategy
+        def initialize(name:, cool_off_time:)
+          @name = name
+          @cool_off_time = cool_off_time
         end
 
         # Executes the fallback proc when the light is in the red state.
         #
-        # @param fallback [Proc, nil] A fallback proc to execute instead of the code block.
-        # @param state_snapshot [Stoplight::Domain::StateSnapshot]
-        # @return [Object, nil] The result of the fallback proc if provided.
+        # @param fallback A fallback proc to execute instead of the code block.
+        # @param state_snapshot
+        # @return The result of the fallback proc if provided.
         # @raise [Stoplight::Error::RedLight] Raises an error if no fallback is provided.
         def execute(fallback, state_snapshot:)
           if fallback
             fallback.call(nil)
           else
             raise Error::RedLight.new(
-              config.name,
-              cool_off_time: config.cool_off_time,
+              @name,
+              cool_off_time: @cool_off_time,
               retry_after: state_snapshot.recovery_scheduled_after
             )
           end

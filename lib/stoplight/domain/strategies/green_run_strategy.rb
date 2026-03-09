@@ -9,34 +9,26 @@ module Stoplight
       # by either raising them or invoking a fallback if provided.
       #
       # @api private
-      class GreenRunStrategy < RunStrategy
-        # @!attribute [r] request_tracker
-        #   @return [Stoplight::Domain::Tracker::Request]
-        protected attr_reader :request_tracker
-
-        # @!attribute [r] config
-        #   @return [Stoplight::Domain::Config] The configuration for the light.
-        protected attr_reader :config
-
-        # @param config [Stoplight::Domain::Config]
-        # @param request_tracker [Stoplight::Domain::Tracker::Request
-        def initialize(config:, request_tracker:)
-          @config = config
+      class GreenRunStrategy
+        def initialize(error_tracking_policy:, request_tracker:)
+          @error_tracking_policy = error_tracking_policy
           @request_tracker = request_tracker
         end
 
         # Executes the provided code block when the light is in the green state.
         #
-        # @param fallback [Proc, nil] A fallback proc to execute in case of an error.
-        # @param state_snapshot [Stoplight::Domain::StateSnapshot]
+        # @param fallback A fallback proc to execute in case of an error.
+        # @param state_snapshot
         # @yield The code block to execute.
-        # @return [Object] The result of the code block if successful.
-        # @raise [Exception] Re-raises the error if it is not tracked or no fallback is provided.
+        # @return The result of the code block if successful.
+        # @raise re-raises the error if it is not tracked or no fallback is provided.
         def execute(fallback, state_snapshot:, &code)
           # TODO: Consider implementing sampling rate to limit the memory footprint
-          code.call.tap { record_success }
+          result = code.call
+          record_success
+          result
         rescue => error
-          if config.track_error?(error)
+          if @error_tracking_policy.track?(error)
             record_error(error)
 
             if fallback
@@ -51,17 +43,17 @@ module Stoplight
           end
         end
 
-        private def record_error(error)
+        private
+
+        attr_reader :config
+        attr_reader :request_tracker
+
+        def record_error(error)
           request_tracker.record_failure(error)
         end
 
-        private def record_success
+        def record_success
           request_tracker.record_success
-        end
-
-        # @return [Boolean]
-        def ==(other)
-          super && config == other.config && request_tracker == other.request_tracker
         end
       end
     end

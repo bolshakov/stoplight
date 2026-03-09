@@ -1,0 +1,6 @@
+module Stoplight
+  module Domain
+    interface _RecoveryLockToken
+    end
+  end
+end

@@ -32,16 +32,22 @@ module Stoplight
         #   @return [<Stoplight::Failure>]
         attr_reader :failures
 
+        # @!attribute failure_count
+        #   @return [Integer]
+        attr_reader :failure_count
+
         # @param name [String]
         # @param color [String]
         # @param state [String]
         # @param failures [<Stoplight::Failure>]
-        def initialize(name:, color:, state:, failures:)
+        # @param failure_count [Integer, nil]
+        def initialize(name:, color:, state:, failures:, failure_count: nil)
           @id = SecureRandom.uuid
           @name = name
           @color = color
           @state = state
           @failures = failures
+          @failure_count = failure_count
         end
 
         def latest_failure
@@ -73,20 +79,24 @@ module Stoplight
           [-COLORS.index(color), name]
         end
 
+        def last_check = latest_failure&.time # TODO: take into account positive checks as well
+
         # @return [String, nil]
         def last_check_in_words
           last_error_time = latest_failure&.time
           return unless last_error_time
 
-          time_difference = Time.now - last_error_time
+          time_difference = Time.now.utc - last_error_time
           if time_difference < 1
             "just now"
           elsif time_difference < 60
             "#{time_difference.to_i}s ago"
           elsif time_difference < 3600
             "#{(time_difference / 60).to_i}m ago"
-          else
+          elsif time_difference < 86400
             "#{(time_difference / 3600).to_i}h ago"
+          else
+            "#{(time_difference / 86400).to_i}d ago"
           end
         end
 
@@ -114,13 +124,19 @@ module Stoplight
         def description_message
           case color
           when RED
-            if locked? && failures.empty?
+            if latest_failure
+              "#{latest_failure.error_class}: #{latest_failure.error_message}"
+            elsif locked?
               "Circuit manually locked open"
             else
-              "#{latest_failure.error_class}: #{latest_failure.error_message}"
+              "Not available"
             end
           when Stoplight::Color::YELLOW
-            "#{latest_failure.error_class}: #{latest_failure.error_message}"
+            if latest_failure
+              "#{latest_failure.error_class}: #{latest_failure.error_message}"
+            else
+              "Not available"
+            end
           when GREEN
             if locked?
               "Circuit manually locked closed"

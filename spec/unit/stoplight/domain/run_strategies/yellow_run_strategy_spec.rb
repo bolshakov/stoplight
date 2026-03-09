@@ -3,24 +3,28 @@
 RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
   subject(:strategy) do
     described_class.new(
-      config:,
+      name:,
+      error_tracking_policy:,
       notifiers: notifiers,
       request_tracker:,
       red_run_strategy:,
       state_store:,
       metrics_store:,
-      recovery_lock_store:
+      recovery_lock_store:,
+      config:
     )
   end
 
+  let(:name) { SecureRandom.uuid }
+  let(:error_tracking_policy) { instance_double(Stoplight::Domain::ErrorTrackingPolicy) }
   let(:notifiers) { [notifier] }
-  let(:config) { instance_double(Stoplight::Domain::Config) }
-  let(:notifier) { instance_double(Stoplight::Domain::StateTransitionNotifier) }
-  let(:recovery_lock_store) { instance_double(Stoplight::Domain::Storage::RecoveryLock) }
-  let(:state_store) { instance_double(Stoplight::Domain::Storage::State) }
-  let(:metrics_store) { instance_double(Stoplight::Domain::Storage::Metrics) }
+  let(:notifier) { instance_double(NullNotifier) }
+  let(:recovery_lock_store) { instance_double(NullRecoveryLockStore) }
+  let(:state_store) { instance_double(NullStateStore) }
+  let(:metrics_store) { instance_double(NullMetricsStore) }
   let(:request_tracker) { instance_double(Stoplight::Domain::Tracker::RecoveryProbe) }
   let(:red_run_strategy) { instance_double(Stoplight::Domain::Strategies::RedRunStrategy) }
+  let(:config) { instance_double(Stoplight::Domain::Config, name:) }
 
   describe "#exceute" do
     before do
@@ -28,7 +32,7 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
     end
 
     context "when recovery lock acquired" do
-      let(:recovery_lock_token) { instance_double(Stoplight::Domain::RecoveryLockToken) }
+      let(:recovery_lock_token) { instance_double(NullRecoveryLockToken) }
 
       before do
         allow(recovery_lock_store).to receive(:acquire_lock).and_return(recovery_lock_token)
@@ -54,7 +58,7 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
         let(:code) { -> { raise error } }
 
         before do
-          allow(config).to receive(:track_error?).and_return(track_error)
+          allow(error_tracking_policy).to receive(:track?).with(error).and_return(track_error)
         end
 
         context "when error is tracked" do
@@ -138,8 +142,8 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
 
       it "notifies if able to transition to YELLO" do
         expect(metrics_store).to receive(:clear)
-        expect(state_store).to receive(:transition_to_color).with(Stoplight::Domain::Color::YELLOW)
-        expect(notifier).to receive(:notify).with(config, Stoplight::Domain::Color::RED, Stoplight::Domain::Color::YELLOW, nil)
+        expect(state_store).to receive(:transition_to_color).with(Stoplight::Color::YELLOW)
+        expect(notifier).to receive(:notify).with(have_attributes(name:), Stoplight::Color::RED, Stoplight::Color::YELLOW, nil)
 
         enter_recovery
       end

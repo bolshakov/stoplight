@@ -4,7 +4,7 @@ RSpec.describe Stoplight::Domain::TrafficRecovery::ConsecutiveSuccesses do
   describe "#check_compatibility" do
     subject(:strategy) { described_class.new.check_compatibility(config) }
 
-    let(:config) { Stoplight::Domain::Config.empty.with(recovery_threshold:) }
+    let(:config) { instance_double(Stoplight::Domain::Config, recovery_threshold:) }
     let(:recovery_threshold) { 42 }
 
     context "when recovery threshold is less then 1" do
@@ -31,11 +31,11 @@ RSpec.describe Stoplight::Domain::TrafficRecovery::ConsecutiveSuccesses do
   describe "#determine_color" do
     subject { described_class.new.determine_color(config, metrics) }
 
-    let(:config) { Stoplight::Domain::Config.empty.with(recovery_threshold:) }
+    let(:config) { instance_double(Stoplight::Domain::Config, recovery_threshold:) }
     let(:recovery_threshold) { 2 }
 
-    let(:metrics) { instance_double(Stoplight::Domain::Metrics, consecutive_successes:, consecutive_errors:) }
-    let(:color) { Stoplight::Domain::Color::YELLOW }
+    let(:metrics) { instance_double(Stoplight::Domain::MetricsSnapshot, consecutive_successes:, consecutive_errors:) }
+    let(:color) { Stoplight::Color::YELLOW }
 
     context "when has errors" do
       let(:consecutive_errors) { 1 }

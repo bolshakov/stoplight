@@ -4,11 +4,11 @@ module Stoplight
   class Admin
     class LightsRepository
       # @!attribute data_store
-      #   @return [Stoplight::Domain::DataStore]
+      #   @return [Stoplight::Domain::_DataStore]
       attr_reader :data_store
       private :data_store
 
-      #  @param data_store [Stoplight::Domain::DataStore]
+      #  @param data_store [Stoplight::Domain::_DataStore]
       def initialize(data_store:)
         @data_store = data_store
       end
@@ -52,7 +52,7 @@ module Stoplight
       # @return [void]
       def unlock(name)
         config = build_config(name)
-        data_store.set_state(config, Domain::State::UNLOCKED)
+        data_store.set_state(config, State::UNLOCKED)
       end
 
       # @param name [String] removes light metadata by its name
@@ -74,12 +74,13 @@ module Stoplight
           name: name,
           color: state_snapshot.color,
           state: state_snapshot.locked_state,
-          failures: [metrics.last_error].compact
+          failures: [metrics.last_error].compact,
+          failure_count: metrics.consecutive_errors
         )
       end
 
       private def build_config(name)
-        Wiring::Light::DefaultConfig.with(name:)
+        Wiring::DefaultConfig.with(name:)
       end
     end
   end

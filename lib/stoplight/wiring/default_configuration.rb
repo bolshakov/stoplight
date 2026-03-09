@@ -2,76 +2,93 @@
 
 module Stoplight
   module Wiring
-    # User-facing configuration interface
+    # User-facing configuration interface for setting global Stoplight defaults.
+    #
+    # This class serves as the configuration DSL yielded to users when calling
+    # +Stoplight.configure+. It provides a clean interface for setting default
+    # values while internally tracking whether each setting was explicitly
+    # configured or should fall back to library defaults.
+    #
+    # @example Configuring Stoplight defaults
+    #   Stoplight.configure do |config|
+    #     config.data_store = Redis.new
+    #     config.threshold = 5
+    #     # window_size not set - will use library default
+    #   end
+    #
+    # == Option-Based Configuration Tracking
+    #
+    # Internally, each setting is wrapped in an Option type (+Some+ or +None+).
+    # This design allows the class to distinguish between three states:
+    #
+    # 1. Not configured: Stored as +None+, getter returns library default
+    # 2. Explicitly configured: Stored as +Some(value)+, getter returns that value
+    # 3. Explicitly set to nil: Stored as +Some(nil)+, getter returns +nil+
+    #
+    # This distinction is critical when building {Settings} and {Dependencies}
+    # objects, which need to know whether a value was user-specified (and should
+    # be enforced) or inherited (and can be overridden per-circuit).
+    #
+    # == Dual Interface
+    #
+    # The class exposes two interfaces for each setting:
+    #
+    # - *Setters* (+attr_writer+): Accept raw values, wrap them in +Some+
+    # - *Getters* (custom methods): Unwrap the Option, returning the value
+    #   or falling back to library defaults from {Default}
+    #
+    # The {#settings} and {#dependencies} methods preserve the raw Option
+    # values, allowing downstream code to detect explicit configuration.
+    #
+    # @see Settings Value object for circuit behavior configuration
+    # @see Dependencies Value object for infrastructure dependencies
+    # @see Default Library default constants
+    #
     class DefaultConfiguration
-      # @!attribute [w] cool_off_time
-      #   @return [Integer, nil] The default cool-off time in seconds.
-      attr_writer :cool_off_time
-
-      # @!attribute [w] threshold
-      #   @return [Integer, Float, nil] The default failure threshold to trip the circuit breaker.
-      attr_writer :threshold
-
-      # @!attribute [w] recovery_threshold
-      #  @return [Integer, nil] The default recovery threshold for the circuit breaker.
-      attr_writer :recovery_threshold
-
-      # @!attribute [w] window_size
-      #   @return [Integer, nil] The default size of the rolling window for failure tracking.
-      attr_writer :window_size
-
-      # @!attribute [w] tracked_errors
-      #   @return [Array<Class>, nil] The default list of errors to track.
-      attr_writer :tracked_errors
-
-      # @!attribute [w] skipped_errors
-      #   @return [Array<Class>, nil] The default list of errors to skip.
-      attr_writer :skipped_errors
-
-      # @!attribute [w] error_notifier
-      #   @return [Proc, nil] The default error notifier (callable object).
-      attr_writer :error_notifier
-
-      # @!attribute [rw] notifiers
-      #   @return [Array<Stoplight::Domain::StateTransitionNotifier>] The default list of notifiers.
-      attr_accessor :notifiers
-
-      # @!attribute [rw] data_store
-      #   @return [Stoplight::Wiring::DataStore::Base] The default data store instance.
-      attr_accessor :data_store
-
-      # @!attribute [w] traffic_control
-      #   @return [Stoplight::Domain::TrafficControl::Base] The traffic control strategy.
-      attr_writer :traffic_control
-
-      # @!attribute [w] traffic_recovery
-      #   @return [Stoplight::Domain::TrafficRecovery::Base] The traffic recovery strategy.
-      attr_writer :traffic_recovery
-
       def initialize
-        # This allows users appending notifiers to the default list,
-        # while still allowing them to override the default list.
-        @notifiers = Default::NOTIFIERS
+        @config = DefaultConfig.with
+        @cool_off_time = T.undefined
+        @threshold = T.undefined
+        @recovery_threshold = T.undefined
+        @window_size = T.undefined
+        @tracked_errors = T.undefined
+        @skipped_errors = T.undefined
+        @traffic_control = T.undefined
+        @traffic_recovery = T.undefined
+        @error_notifier = T.undefined
+        @data_store = T.undefined
+        @notifiers = T.undefined
       end
 
-      # Converts the user-defined configuration to a hash.
-      #
-      # @return [Hash] A hash representation of the configuration, excluding nil values.
-      # @api private
-      def to_h
-        {
+      def notifiers = @config.notifiers
+
+      attr_writer :cool_off_time
+      attr_writer :threshold
+      attr_writer :recovery_threshold
+      attr_writer :window_size
+      attr_writer :tracked_errors
+      attr_writer :skipped_errors
+      attr_writer :traffic_control
+      attr_writer :traffic_recovery
+      attr_writer :error_notifier
+      attr_writer :data_store
+      attr_writer :notifiers
+
+      # Builds and validates configuration
+      def to_config!
+        ConfigurationDsl.new(
           cool_off_time: @cool_off_time,
           threshold: @threshold,
           recovery_threshold: @recovery_threshold,
           window_size: @window_size,
           tracked_errors: @tracked_errors,
           skipped_errors: @skipped_errors,
-          data_store: @data_store,
-          error_notifier: @error_notifier,
-          notifiers: @notifiers,
           traffic_control: @traffic_control,
-          traffic_recovery: @traffic_recovery
-        }.compact
+          traffic_recovery: @traffic_recovery,
+          error_notifier: @error_notifier,
+          data_store: @data_store,
+          notifiers: @notifiers
+        ).configure!(@config)
       end
     end
   end

@@ -6,6 +6,7 @@ module Stoplight
   module Domain
     class Light
       # Implements light configuration behavior
+      # steep:ignore:start
       module ConfigurationBuilderInterface
         # Configures data store to be used with this circuit breaker
         #
@@ -229,6 +230,7 @@ module Stoplight
           with_without_warning(skipped_errors:)
         end
       end
+      # steep:ignore:end
     end
   end
 end

@@ -33,24 +33,18 @@ module Stoplight
       # conservative approach prioritizes stability over recovery speed.
       #
       # @api private
-      class ConsecutiveSuccesses < Base
-        # @param config [Stoplight::Domain::Config]
-        # @return [Stoplight::Domain::CompatibilityResult]
+      class ConsecutiveSuccesses
         def check_compatibility(config)
           if config.recovery_threshold <= 0
-            incompatible("`recovery_threshold` should be bigger than 0")
+            CompatibilityResult.incompatible("`recovery_threshold` should be bigger than 0")
           elsif !config.recovery_threshold.is_a?(Integer)
-            incompatible("`recovery_threshold` should be an integer")
+            CompatibilityResult.incompatible("`recovery_threshold` should be an integer")
           else
-            compatible
+            CompatibilityResult.compatible
           end
         end
 
         # Determines if traffic should be resumed based on successes counts.
-        #
-        # @param config [Stoplight::Domain::Config]
-        # @param recovery_metrics [Stoplight::Domain::Metrics]
-        # @return [TrafficRecovery::Decision]
         def determine_color(config, recovery_metrics)
           if recovery_metrics.consecutive_errors > 0
             TrafficRecovery::RED
@@ -60,6 +54,8 @@ module Stoplight
             TrafficRecovery::YELLOW
           end
         end
+
+        def ==(other) = other.is_a?(self.class)
       end
     end
   end

@@ -1,0 +1,80 @@
+module Stoplight
+  module Domain
+    # Abstract factory protocol for building +Stoplight::Light+ instances.
+    #
+    # This defines the interface that any Light factory must implement,
+    # regardless of the underlying implementation details.
+    #
+    # This uses the Abstract Factory pattern to decouple the domain (Light)
+    # from the application layer (concrete factory implementation). Light
+    # doesn't know HOW it's built, only that it needs something that can
+    # build variants of itself.
+    #
+    # By defining this interface in the domain layer:
+    # - Light can request reconfiguration without knowing about containers
+    # - Different factory implementations can be swapped (code, database-configured, etc.)
+    # - Dependency direction is preserved (Application → Domain, not Domain → Application)
+    #
+    interface _LightFactory
+      # Creates a new factory with modified settings.
+      #
+      # This method must return a NEW factory instance - it should not
+      # modify the current factory. The new factory should inherit all
+      # configuration from the current factory, with the provided
+      # settings overriding specific values.
+      def with: (
+          ?name: optional[String],
+          ?cool_off_time: optional[duration],
+          ?threshold: optional[percentage | Integer],
+          ?recovery_threshold: optional[Integer],
+          ?window_size: optional[duration?],
+          ?tracked_errors: optional[Array[_ExceptionMatcher] | _ExceptionMatcher],
+          ?skipped_errors: optional[Array[_ExceptionMatcher] | _ExceptionMatcher],
+          ?error_notifier: optional[error_notifier],
+          ?notifiers: optional[Array[state_transition_notifier]],
+          ?data_store: optional[data_store],
+          ?traffic_control: optional[traffic_control],
+          ?traffic_recovery: optional[traffic_recovery],
+      ) -> _LightFactory
+
+      # Builds a Light instance with the current configuration.
+      #
+      # This method must construct a fully-wired Light with all required
+      # dependencies (strategies, data store, notifiers, etc.). The Light
+      # should be ready to use immediately after construction.
+      #
+      # @raise [Stoplight::Error::ConfigurationError] If configuration is invalid
+      def build: -> Light
+
+      # Convenience method to configure and build in one operation.
+      #
+      # This combines +#with+ and +#build+ into a single call, which is
+      # useful when you want to create a customized Light without keeping
+      # a reference to the intermediate factory.
+      #
+      # @example Usage
+      #   # Instead of:
+      #   new_factory = factory.with(threshold: 10)
+      #   light = new_factory.build
+      #
+      #   # You can do:
+      #   light = factory.build_with(threshold: 10)
+      def build_with: (
+          ?name: optional[String],
+          ?cool_off_time: optional[duration],
+          ?threshold: optional[percentage | Integer],
+          ?recovery_threshold: optional[Integer],
+          ?window_size: optional[duration?],
+          ?tracked_errors: optional[Array[_ExceptionMatcher] | _ExceptionMatcher],
+          ?skipped_errors: optional[Array[_ExceptionMatcher] | _ExceptionMatcher],
+          ?error_notifier: optional[error_notifier],
+          ?notifiers: optional[Array[state_transition_notifier]],
+          ?data_store: optional[data_store],
+          ?traffic_control: optional[traffic_control],
+          ?traffic_recovery: optional[traffic_recovery],
+      ) -> Light
+
+      def ==: (untyped) -> bool
+    end
+  end
+end

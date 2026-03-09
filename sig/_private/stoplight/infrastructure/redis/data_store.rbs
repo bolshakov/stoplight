@@ -1,0 +1,67 @@
+module Stoplight
+  module Infrastructure
+    module Redis
+      class DataStore
+        include Domain::_DataStore
+
+        BUCKET_SIZE: Integer
+        KEY_SEPARATOR: String
+        KEY_PREFIX: String
+        METRICS_TTL: Integer
+        METADATA_TTL: Integer
+        SKEW_TOLERANCE: Integer
+        METRICS_RETENTION_TIME: Integer
+
+        def self.key: (*_ToS) -> String
+
+        def self.buckets_for_window: (
+          String light_name,
+          metric: String,
+          window_end: Time | Numeric,
+          window_size: Integer
+        ) -> Array[String]
+
+        def self.bucket_key: (
+          String light_name,
+          metric: String,
+          time: Time | Numeric,
+        ) -> String
+
+        def self.bucket_size: -> Integer
+
+        private attr_reader recovery_lock_store: RecoveryLockStore
+        private attr_reader scripting: Scripting
+        private attr_reader redis: redis
+        private attr_reader warn_on_clock_skew: bool
+        private attr_reader clock: Domain::_Clock
+
+        def initialize: (
+          redis: redis,
+          recovery_lock_store: RecoveryLockStore,
+          scripting: Scripting,
+          warn_on_clock_skew: bool,
+          clock: Domain::_Clock
+        ) -> void
+
+        private def transition_to_green: (Domain::Config config) -> bool
+        private def transition_to_yellow: (Domain::Config config) -> bool
+        private def transition_to_red: (Domain::Config config) -> bool
+        private def deserialize_failure: (String? failure_json) -> Domain::Failure?
+        private def serialize_failure: (Domain::Failure failure) -> String
+        private def key: (*String) -> String
+        private def failure_bucket_keys: (Domain::Config config, window_end: Time | Integer) -> Array[String]
+        private def success_bucket_keys: (Domain::Config config, window_end: Time | Integer) -> Array[String]
+        private def recovery_probe_failure_bucket_keys: (Domain::Config config, window_end: Time | Integer) -> Array[String]
+        private def recovery_probe_success_bucket_keys: (Domain::Config config, window_end: Time | Integer) -> Array[String]
+        private def successes_key: (Domain::Config config, time: Time) -> String
+        private def errors_key: (Domain::Config config, time: Time) -> String
+        private def recovery_metrics_key: (Domain::Config config) -> String
+        private def metadata_key: (Domain::Config config) -> String
+        private def metrics_ttl: -> Integer
+        private def metadata_ttl: -> Integer
+        private def detect_clock_skew: -> void
+        private def should_sample?: (Float) -> bool
+      end
+    end
+  end
+end

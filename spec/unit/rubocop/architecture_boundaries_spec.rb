@@ -87,7 +87,7 @@ RSpec.describe RuboCop::Cop::Stoplight::ArchitectureBoundaries, :config do
           module Domain
             class Light
               def foo
-                Domain::Color.new
+                Color.new
                 Stoplight::Domain::State.new
               end
             end
@@ -107,7 +107,7 @@ RSpec.describe RuboCop::Cop::Stoplight::ArchitectureBoundaries, :config do
             class Redis
               def foo
                 Domain::Light.new
-                Stoplight::Domain::Color.new
+                Stoplight::Color.new
               end
             end
           end
@@ -154,7 +154,7 @@ RSpec.describe RuboCop::Cop::Stoplight::ArchitectureBoundaries, :config do
             class Container
               def foo
                 Domain::Light.new
-                Infrastructure::DataStore::Redis.new
+                Infrastructure::Redis::DataStore.new
               end
             end
           end
@@ -188,7 +188,7 @@ RSpec.describe RuboCop::Cop::Stoplight::ArchitectureBoundaries, :config do
             class LightsRepository
               def foo
                 Domain::Light.new
-                Infrastructure::DataStore::Redis.new
+                Infrastructure::Redis::DataStore.new
                 Wiring::Container.resolve(:foo)
               end
             end
@@ -218,7 +218,7 @@ RSpec.describe RuboCop::Cop::Stoplight::ArchitectureBoundaries, :config do
           module Domain
             class Light
               def foo
-                Infrastructure::DataStore::Redis::Connection.new
+                Infrastructure::Redis::DataStore::Connection.new
                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Stoplight/ArchitectureBoundaries: domain cannot depend on infrastructure
               end
             end
@@ -320,7 +320,7 @@ RSpec.describe RuboCop::Cop::Stoplight::ArchitectureBoundaries, :config do
       expect_offense(<<~RUBY, filename)
         RSpec.describe Stoplight::Domain::Light do
           it "uses infrastructure" do
-            store = instance_double(Infrastructure::DataStore::Redis)
+            store = instance_double(Infrastructure::Redis::DataStore)
                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Stoplight/ArchitectureBoundaries: domain cannot depend on infrastructure (use domain interface in test doubles instead)
           end
         end
@@ -342,7 +342,7 @@ RSpec.describe RuboCop::Cop::Stoplight::ArchitectureBoundaries, :config do
       expect_no_offenses(<<~RUBY, filename)
         RSpec.describe Stoplight::Domain::Light do
           it "uses domain interface" do
-            store = instance_double(Stoplight::Domain::DataStore)
+            store = instance_double(Stoplight::Domain::_DataStore)
           end
         end
       RUBY
@@ -350,7 +350,7 @@ RSpec.describe RuboCop::Cop::Stoplight::ArchitectureBoundaries, :config do
 
     it "allows Infrastructure in describe block" do
       expect_no_offenses(<<~RUBY, filename)
-        RSpec.describe Infrastructure::DataStore::Redis do
+        RSpec.describe Infrastructure::Redis::DataStore do
           # This is fine - we're describing what we're testing
         end
       RUBY

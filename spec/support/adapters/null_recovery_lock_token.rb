@@ -1,0 +1,2 @@
+class NullRecoveryLockToken
+end

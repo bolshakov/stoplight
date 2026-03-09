@@ -19,13 +19,10 @@ module Stoplight
       #   )
       #   metrics.record_success
       #
-      # @see Stoplight::Domain::Storage::Metrics
-      class CompatibilityMetrics < Domain::Storage::Metrics
-        private attr_reader :data_store
-        private attr_reader :config
+      class CompatibilityMetrics
+        attr_reader :data_store
+        attr_reader :config
 
-        # @param data_store [Stoplight::Domain::DataStore]
-        # @param config [Stoplight::Domain::Config]
         def initialize(data_store:, config:)
           @data_store = data_store
           @config = config
@@ -33,14 +30,10 @@ module Stoplight
 
         def metrics_snapshot = data_store.get_metrics(config)
 
-        # @return [void]
         def record_success = data_store.record_success(config)
 
-        # @param error [StandardError]
-        # @return [void]
         def record_failure(error) = data_store.record_failure(config, error)
 
-        # @return [void]
         def clear = data_store.clear_metrics(config)
       end
     end
