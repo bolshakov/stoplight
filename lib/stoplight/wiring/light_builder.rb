@@ -147,7 +147,8 @@ module Stoplight
           red_run_strategy:,
           state_store:,
           metrics_store:,
-          recovery_lock_store:
+          recovery_lock_store:,
+          config: @config
         )
       end
 

@@ -19,7 +19,8 @@ module Stoplight
           red_run_strategy:,
           state_store:,
           metrics_store:,
-          recovery_lock_store:
+          recovery_lock_store:,
+          config: # FIXME: needed for backward compatibility, remove when notifier accepts light config
         )
           @notifiers = notifiers
           @request_tracker = request_tracker
@@ -29,6 +30,7 @@ module Stoplight
           @recovery_lock_store = recovery_lock_store
           @name = name
           @error_tracking_policy = error_tracking_policy
+          @config = config
         end
 
         # Executes the provided code block when the light is in the yellow state.
@@ -101,9 +103,10 @@ module Stoplight
 
           state_store.transition_to_color(Color::YELLOW)
           metrics_store.clear
-          light_info = LightInfo.new(name: @name)
+          # FIXME: use light config instead of @_config
+          # light_info = LightInfo.new(name: @name)
           notifiers.each do |notifier|
-            notifier.notify(light_info, Color::RED, Color::YELLOW, nil)
+            notifier.notify(@config, Color::RED, Color::YELLOW, nil)
           end
         end
       end

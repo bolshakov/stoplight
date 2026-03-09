@@ -10,7 +10,8 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
       red_run_strategy:,
       state_store:,
       metrics_store:,
-      recovery_lock_store:
+      recovery_lock_store:,
+      config:
     )
   end
 
@@ -23,6 +24,7 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
   let(:metrics_store) { instance_double(NullMetricsStore) }
   let(:request_tracker) { instance_double(Stoplight::Domain::Tracker::RecoveryProbe) }
   let(:red_run_strategy) { instance_double(Stoplight::Domain::Strategies::RedRunStrategy) }
+  let(:config) { instance_double(Stoplight::Domain::Config, name:) }
 
   describe "#exceute" do
     before do
