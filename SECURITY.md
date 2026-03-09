@@ -6,8 +6,8 @@ You can expect to receive security fixes for the latest minor version only.
 
 | Version | Supported          |
 |---------| ------------------ |
-| 5.3.x   | :white_check_mark: |
-| < 5.3   | :x:                |
+| 5.8.x   | :white_check_mark: |
+| < 5.8   | :x:                |
 
 ## Reporting a Vulnerability
 
