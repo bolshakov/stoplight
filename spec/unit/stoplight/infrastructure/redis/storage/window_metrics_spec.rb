@@ -31,7 +31,7 @@ RSpec.describe Stoplight::Infrastructure::Redis::Storage::WindowMetrics, :redis 
 
       it "returns a single bucket key" do
         is_expected.to contain_exactly(
-          "stoplight:v6:#{key_space.system_id}:{#{key_space.light_id}}:window_metrics:failures:1696154400"
+          "stoplight:v5:#{key_space.system_id}:{#{key_space.light_id}}:window_metrics:failures:1696154400"
         )
       end
     end
@@ -42,10 +42,10 @@ RSpec.describe Stoplight::Infrastructure::Redis::Storage::WindowMetrics, :redis 
 
       it "returns all bucket keys within the window" do
         is_expected.to contain_exactly(
-          "stoplight:v6:#{key_space.system_id}:{#{key_space.light_id}}:window_metrics:failures:1696140000",
-          "stoplight:v6:#{key_space.system_id}:{#{key_space.light_id}}:window_metrics:failures:1696143600",
-          "stoplight:v6:#{key_space.system_id}:{#{key_space.light_id}}:window_metrics:failures:1696147200",
-          "stoplight:v6:#{key_space.system_id}:{#{key_space.light_id}}:window_metrics:failures:1696150800"
+          "stoplight:v5:#{key_space.system_id}:{#{key_space.light_id}}:window_metrics:failures:1696140000",
+          "stoplight:v5:#{key_space.system_id}:{#{key_space.light_id}}:window_metrics:failures:1696143600",
+          "stoplight:v5:#{key_space.system_id}:{#{key_space.light_id}}:window_metrics:failures:1696147200",
+          "stoplight:v5:#{key_space.system_id}:{#{key_space.light_id}}:window_metrics:failures:1696150800"
         )
       end
     end
@@ -56,7 +56,7 @@ RSpec.describe Stoplight::Infrastructure::Redis::Storage::WindowMetrics, :redis 
 
       it "returns the single bucket key" do
         is_expected.to contain_exactly(
-          "stoplight:v6:#{key_space.system_id}:{#{key_space.light_id}}:window_metrics:failures:1696150800"
+          "stoplight:v5:#{key_space.system_id}:{#{key_space.light_id}}:window_metrics:failures:1696150800"
         )
       end
     end
