@@ -299,7 +299,7 @@ GEM
     unicode-emoji (4.2.0)
     uri (1.1.1)
     useragent (0.16.11)
-    yard (0.9.38)
+    yard (0.9.43)
     zeitwerk (2.7.5)
 
 PLATFORMS
