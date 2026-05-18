@@ -14,6 +14,10 @@ module Stoplight
         Dependencies.new(data_store:)
       end
 
+      def asset_path(name)
+        url("/#{name}?v=#{ASSET_DIGESTS.fetch(name)}")
+      end
+
       def time_ago_in_words(time)
         time_difference = Time.now.utc - time
         if time_difference < 1
