@@ -30,6 +30,7 @@ module Stoplight
     set :data_store, proc { Stoplight.__stoplight__default_configuration.data_store }
     set :views, File.join(__dir__, "admin", "views")
     set :nonce, proc { |request| }
+    set :public_folder, File.join(__dir__, "admin", "assets")
 
     get "/" do
       lights, stats = dependencies.stats_action.call

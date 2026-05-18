@@ -6,13 +6,13 @@
 
     <title>Stoplight Admin</title>
 
-    <script nonce="<%= nonce %>" type="module" src="https://cdn.jsdelivr.net/npm/@hotwired/turbo@latest/dist/turbo.es2017-esm.min.js"></script>
+    <script nonce="<%= nonce %>" type="module" src=<%= url('turbo.es2017-esm.min.js') %>></script>
     <script nonce="<%= nonce %>" type="module">
         document.addEventListener("turbo:load", () => {
             window.initFlowbite()
         })
     </script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.css" />
+    <link rel="stylesheet" href="<%= url('/flowbite.min.css') %>" />
   </head>
   <body class="bg-gray-50 dark:bg-gray-900">
     <div class="antialiased bg-gray-50 dark:bg-gray-900 flex flex-col" style="min-height: 100vh;">
@@ -63,6 +63,6 @@
       </footer>
     </div>
 
-    <script nonce="<%= nonce %>" src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
+    <script nonce="<%= nonce %>" src=<%= url('/flowbite.min.js') %>></script>
   </body>
 </html>
