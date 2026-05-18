@@ -31,6 +31,7 @@ module Stoplight
     set :views, File.join(__dir__, "admin", "views")
     set :nonce, proc { |request| }
     set :public_folder, File.join(__dir__, "admin", "assets")
+    set :static_cache_control, [:public, max_age: 86400]
 
     get "/" do
       lights, stats = dependencies.stats_action.call
