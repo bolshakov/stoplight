@@ -2,7 +2,7 @@ module Stoplight
   module Wiring
     class LightConfigurationDsl
       def initialize: (
-        ?name: optional[String],
+        name: String,
         ?cool_off_time: optional[duration],
         ?threshold: optional[percentage | Integer],
         ?recovery_threshold: optional[Integer],
@@ -15,9 +15,11 @@ module Stoplight
 
       def configure!: (Domain::Config default_config) -> Domain::Config
 
+      def digest: -> Integer
+
       private
 
-      attr_reader name: optional[String]
+      attr_reader name: String
       attr_reader cool_off_time: optional[duration]
       attr_reader threshold: optional[percentage | Integer]
       attr_reader recovery_threshold: optional[Integer]

@@ -4,7 +4,7 @@ module Stoplight
   module Wiring
     class LightConfigurationDsl
       def initialize(
-        name: T.undefined,
+        name:,
         cool_off_time: T.undefined,
         threshold: T.undefined,
         recovery_threshold: T.undefined,
@@ -39,6 +39,20 @@ module Stoplight
             traffic_recovery:
           )
         )
+      end
+
+      def digest
+        [
+          name,
+          cool_off_time,
+          threshold,
+          recovery_threshold,
+          window_size,
+          tracked_errors,
+          skipped_errors,
+          traffic_control,
+          traffic_recovery
+        ].hash
       end
 
       private

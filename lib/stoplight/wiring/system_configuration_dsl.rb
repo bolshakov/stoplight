@@ -4,7 +4,7 @@ module Stoplight
   module Wiring
     class SystemConfigurationDsl
       def initialize(
-        name: T.undefined,
+        name:,
         cool_off_time: T.undefined,
         threshold: T.undefined,
         recovery_threshold: T.undefined,
