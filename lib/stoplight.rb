@@ -175,7 +175,7 @@ module Stoplight # rubocop:disable Style/Documentation
           raise ArgumentError, "system `#{name}` is already in use"
         else
           Wiring::System.new(
-            config: Wiring::ConfigurationDsl.new(
+            config: Wiring::SystemConfigurationDsl.new(
               name: name.to_s,
               cool_off_time:,
               threshold:,

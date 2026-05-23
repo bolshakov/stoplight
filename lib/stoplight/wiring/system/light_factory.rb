@@ -28,7 +28,7 @@ module Stoplight
         )
           self.class.new(
             system:,
-            config: ConfigurationDsl.new(
+            config: LegacyConfigurationDsl.new(
               cool_off_time:,
               threshold:,
               recovery_threshold:,
