@@ -83,7 +83,7 @@ module Stoplight
         traffic_control: T.undefined,
         traffic_recovery: T.undefined
       )
-        light_config = ConfigurationDsl.new(
+        light_config = LightConfigurationDsl.new(
           name:,
           cool_off_time:,
           threshold:,

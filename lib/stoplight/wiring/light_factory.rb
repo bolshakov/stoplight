@@ -34,7 +34,7 @@ module Stoplight
         traffic_recovery: T.undefined
       )
         self.class.new(
-          config: ConfigurationDsl.new(
+          config: LegacyConfigurationDsl.new(
             name:,
             cool_off_time:,
             threshold:,

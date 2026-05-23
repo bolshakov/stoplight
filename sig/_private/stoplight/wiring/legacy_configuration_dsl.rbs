@@ -1,6 +1,6 @@
 module Stoplight
   module Wiring
-    class ConfigurationDsl
+    class LegacyConfigurationDsl
       def initialize: (
         ?name: optional[String],
         ?cool_off_time: optional[duration],
