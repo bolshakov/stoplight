@@ -22,10 +22,10 @@ module Stoplight
         @threshold = threshold
         @recovery_threshold = recovery_threshold
         @window_size = window_size
-        @tracked_errors = tracked_errors
-        @skipped_errors = skipped_errors
-        @traffic_control = traffic_control
-        @traffic_recovery = traffic_recovery
+        @tracked_errors = tracked_errors.is_a?(Undefined) ? tracked_errors : Array(tracked_errors)
+        @skipped_errors = skipped_errors.is_a?(Undefined) ? skipped_errors : Array(skipped_errors)
+        @traffic_control = traffic_control.is_a?(Undefined) ? traffic_control : LightFactory::TrafficControlDsl.call(traffic_control)
+        @traffic_recovery = traffic_recovery.is_a?(Undefined) ? traffic_recovery : LightFactory::TrafficRecoveryDsl.call(traffic_recovery)
         @error_notifier = error_notifier
         @data_store = data_store
         @notifiers = notifiers
@@ -60,42 +60,10 @@ module Stoplight
       attr_reader :error_notifier
       attr_reader :data_store
       attr_reader :notifiers
-
-      def tracked_errors
-        value = @tracked_errors
-        if value.is_a?(Undefined)
-          value
-        else
-          Array(value)
-        end
-      end
-
-      def skipped_errors
-        value = @skipped_errors
-        if value.is_a?(Undefined)
-          value
-        else
-          Array(value)
-        end
-      end
-
-      def traffic_control
-        value = @traffic_control
-        if value.is_a?(Undefined)
-          value
-        else
-          LightFactory::TrafficControlDsl.call(value)
-        end
-      end
-
-      def traffic_recovery
-        value = @traffic_recovery
-        if value.is_a?(Undefined)
-          value
-        else
-          LightFactory::TrafficRecoveryDsl.call(value)
-        end
-      end
+      attr_reader :tracked_errors
+      attr_reader :skipped_errors
+      attr_reader :traffic_control
+      attr_reader :traffic_recovery
     end
   end
 end

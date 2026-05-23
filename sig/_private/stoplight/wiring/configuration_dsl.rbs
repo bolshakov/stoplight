@@ -1,11 +1,6 @@
 module Stoplight
   module Wiring
     class ConfigurationDsl
-      @tracked_errors: optional[Array[_ExceptionMatcher] | _ExceptionMatcher]
-      @skipped_errors: optional[Array[_ExceptionMatcher] | _ExceptionMatcher]
-      @traffic_control: optional[traffic_control]
-      @traffic_recovery: optional[traffic_recovery]
-
       def initialize: (
         ?name: optional[String],
         ?cool_off_time: optional[duration],
@@ -33,11 +28,10 @@ module Stoplight
       attr_reader data_store: optional[data_store]
       attr_reader error_notifier: optional[error_notifier]
       attr_reader notifiers: optional[Array[state_transition_notifier]]
-
-      def tracked_errors: -> optional[Array[_ExceptionMatcher]]
-      def skipped_errors: -> optional[Array[_ExceptionMatcher]]
-      def traffic_control: -> optional[Domain::_TrafficControl]
-      def traffic_recovery: -> optional[Domain::_TrafficRecovery]
+      attr_reader tracked_errors: optional[Array[_ExceptionMatcher]]
+      attr_reader skipped_errors: optional[Array[_ExceptionMatcher]]
+      attr_reader traffic_control: optional[Domain::_TrafficControl]
+      attr_reader traffic_recovery: optional[Domain::_TrafficRecovery]
     end
   end
 end
