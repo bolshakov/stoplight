@@ -61,15 +61,10 @@ module Stoplight
       # If a light with this name already exists, returns the cached instance.
       # If settings differ from the existing light, raises +Stoplight::Error::ConfigurationError+.
       #
-      #
       # @raise [Stoplight::Error::ConfigurationError] if light exists with different settings
       #
       # @example Create a light
       #   light = system.light("stripe", threshold: 5, window_size: 60)
-      #
-      # @example Retrieve existing light - both return cached light
-      #   light = system.light("stripe", threshold: 5, window_size: 60)
-      #   light = system.light("stripe")
       #
       # @example Configuration conflict
       #   system.light("api", threshold: 5)
