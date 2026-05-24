@@ -1,5 +1,7 @@
 module Stoplight
   module Types
+    UNDEFINED: Undefined
+
     def self.undefined: -> Undefined
     def self.must: [T < Object] (T? value) -> T
   end

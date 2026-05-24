@@ -106,10 +106,14 @@ RSpec.describe Stoplight::Wiring::System do
     end
 
     describe "inheriting system configuration" do
-      it "inherits threshold from system" do
-        expect(system.light("foo")).to equal(
+      before do
+        system.light("foo")
+      end
+
+      it "raises error as user-provided settings does not match exactly" do
+        expect do
           system.light("foo", threshold: system_config.threshold)
-        )
+        end.to raise_error(Stoplight::Error::ConfigurationError)
       end
     end
 
@@ -120,8 +124,9 @@ RSpec.describe Stoplight::Wiring::System do
         expect do
           system.light("bar", cool_off_time: 30, threshold: 44)
         end.to raise_error(
-          include(/reused with different settings/)
-            .and(include("existing settings")).and(include("new settings"))
+          include(/Light `bar` already registered with different configuration/)
+            .and(include(/system_spec\.rb:121/))
+            .and(include(/system_spec\.rb:125/))
         )
       end
     end

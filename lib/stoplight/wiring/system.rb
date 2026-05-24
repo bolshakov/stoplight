@@ -83,7 +83,7 @@ module Stoplight
         traffic_control: T.undefined,
         traffic_recovery: T.undefined
       )
-        light_config = LightConfigurationDsl.new(
+        light_dsl = LightConfigurationDsl.new(
           name:,
           cool_off_time:,
           threshold:,
@@ -93,26 +93,37 @@ module Stoplight
           skipped_errors:,
           traffic_control:,
           traffic_recovery:
-        ).configure!(system_config)
-
-        light, _ = lights.compute(name) do |existing|
+        )
+        config_digest = light_dsl.digest
+        light, _, _ = lights.compute(name) do |existing|
           if existing
-            existing_light, existing_config = existing
-            if light_config == existing_config
-              [existing_light, existing_config]
-            else
-              raise Stoplight::Error::ConfigurationError, <<~MSG
-                Light name `#{name}` reused with different settings:
-                  existing settings: #{existing_config}
-                  new settings:      #{light_config}
+            _, existing_digest, existing_source_line = existing
 
-                You cannot use the same light name with different settings.
+            if config_digest != existing_digest
+              raise Stoplight::Error::ConfigurationError, <<~MSG
+                Light `#{name}` already registered with different configuration.
+
+                Original registration: #{existing_source_line}
+                Current attempt: #{caller(6, 1)&.first}
+
+                Lights must have consistent configuration across all call sites.
               MSG
             end
+
+            existing
           else
-            [LightFactory.new(system: self, config: light_config).build, light_config]
+            source_line = caller(6, 1)&.first
+            [
+              LightFactory.new(
+                system: self,
+                config: light_dsl.configure!(system_config)
+              ).build,
+              config_digest,
+              source_line
+            ]
           end
         end
+
         light
       end
 
