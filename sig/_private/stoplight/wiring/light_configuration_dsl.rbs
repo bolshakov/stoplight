@@ -15,7 +15,7 @@ module Stoplight
 
       def configure!: (Domain::Config default_config) -> Domain::Config
 
-      def digest: -> Integer
+      attr_reader digest: Integer
 
       private
 

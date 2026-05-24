@@ -4,7 +4,8 @@ require "singleton"
 
 module Stoplight
   module Types
-    def self.undefined = Undefined.instance
+    UNDEFINED = Undefined.instance
+    def self.undefined = UNDEFINED
 
     # Asserts a value is non-nil, returning it with a narrowed type.
     #
