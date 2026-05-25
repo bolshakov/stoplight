@@ -11,6 +11,19 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
   end
 
   describe "GET /" do
+    it "renders favicon, svg icon, and apple-touch-icon links with cache-busting digests" do
+      get "/"
+
+      expect(last_response).to be_ok
+
+      host = last_request.env["HTTP_HOST"]
+      digests = Stoplight::Admin::ASSET_DIGESTS
+
+      expect(last_response.body).to include(%(<link rel="icon" href="http://#{host}/favicon.ico?v=#{digests.fetch("favicon.ico")}" sizes="32x32">))
+      expect(last_response.body).to include(%(<link rel="icon" href="http://#{host}/icon.svg?v=#{digests.fetch("icon.svg")}" type="image/svg+xml">))
+      expect(last_response.body).to include(%(<link rel="apple-touch-icon" href="http://#{host}/apple-touch-icon.png?v=#{digests.fetch("apple-touch-icon.png")}">))
+    end
+
     context "with no lights" do
       it "renders home page correctly" do
         get "/"
