@@ -2,6 +2,7 @@
 
 require "cgi/escape"
 require "cgi/util" if RUBY_VERSION < "3.5"
+require "digest"
 
 begin
   require "sinatra/base"
@@ -24,12 +25,22 @@ module Stoplight
     ].freeze
     private_constant :COLORS
 
+    ASSETS_PATH = File.join(__dir__, "admin", "assets")
+    ASSET_DIGESTS = Dir.children(ASSETS_PATH).each_with_object({}) do |name, h|
+      h[name] = Digest::SHA256.file(File.join(ASSETS_PATH, name)).hexdigest[0, 8]
+    end.freeze
+
+    ONE_YEAR_IN_SECONDS = 60 * 60 * 24 * 365
+    private_constant :ONE_YEAR_IN_SECONDS
+
     helpers Helpers
 
     set :protection, except: %i[json_csrf]
     set :data_store, proc { Stoplight.__stoplight__default_configuration.data_store }
     set :views, File.join(__dir__, "admin", "views")
     set :nonce, proc { |request| }
+    set :public_folder, ASSETS_PATH
+    set :static_cache_control, [:public, max_age: ONE_YEAR_IN_SECONDS, immutable: true]
 
     get "/" do
       lights, stats = dependencies.stats_action.call
