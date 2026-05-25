@@ -639,9 +639,9 @@ Fowler’s [CircuitBreaker][] article.
 [Stoplight]: https://github.com/bolshakov/stoplight
 [Version badge]: https://img.shields.io/gem/v/stoplight.svg?label=version
 [version]: https://rubygems.org/gems/stoplight
-[Build badge]: https://github.com/bolshakov/stoplight/workflows/Specs/badge.svg
-[build]: https://github.com/bolshakov/stoplight/actions?query=branch%3Amaster
-[Coverage badge]: https://img.shields.io/coveralls/bolshakov/stoplight/master.svg?label=coverage
+[Build badge]: https://github.com/bolshakov/stoplight/actions/workflows/ci.yml/badge.svg?branch=main
+[build]: https://github.com/bolshakov/stoplight/actions?query=branch%3Amain
+[Coverage badge]: https://img.shields.io/coveralls/bolshakov/stoplight/main.svg?label=coverage
 [coverage]: https://coveralls.io/r/bolshakov/stoplight
 [stoplight-admin]: https://github.com/bolshakov/stoplight-admin
 [Semantic Versioning]: http://semver.org/spec/v2.0.0.html
