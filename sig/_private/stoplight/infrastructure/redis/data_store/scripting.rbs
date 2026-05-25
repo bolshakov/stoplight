@@ -9,7 +9,7 @@ module Stoplight
 
           attr_reader scripts_root: String
 
-          attr_reader shas: Hash[interned, String]
+          attr_reader shas: Hash[String, String]
 
           attr_reader redis: redis
 
@@ -19,14 +19,14 @@ module Stoplight
           ) -> void
 
           def call: (
-            interned script_name,
+            String script_name,
             ?keys: Array[_ToS],
             ?args: Array[_ToS]
           ) -> untyped
 
-          private def reload_script: (interned script_name) -> String
+          private def reload_script: (String script_name) -> String
 
-          private def script_sha: (interned script_name) -> String
+          private def script_sha: (String script_name) -> String
         end
       end
     end

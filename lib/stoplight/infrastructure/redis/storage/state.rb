@@ -102,7 +102,7 @@ module Stoplight
           #
           def transition_to_green
             became_green = scripting.call(
-              :"state/transition_to_green",
+              "state/transition_to_green",
               args: [clock.current_time.to_f],
               keys: [state_key]
             )
@@ -113,7 +113,7 @@ module Stoplight
           #
           def transition_to_yellow
             became_yellow = scripting.call(
-              :"state/transition_to_yellow",
+              "state/transition_to_yellow",
               args: [clock.current_time.to_f],
               keys: [state_key]
             )
@@ -127,7 +127,7 @@ module Stoplight
             recovery_scheduled_after_ts = current_ts + cool_off_time
 
             became_red = scripting.call(
-              :"state/transition_to_red",
+              "state/transition_to_red",
               args: [current_ts, recovery_scheduled_after_ts],
               keys: [state_key]
             )

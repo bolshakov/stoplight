@@ -57,7 +57,7 @@ module Stoplight
             success_keys = success_bucket_keys(window_end_ts)
 
             successes, errors, last_success_at, last_error_json, consecutive_errors, consecutive_successes = scripting.call(
-              :"window_metrics/metrics_snapshot",
+              "window_metrics/metrics_snapshot",
               args: [
                 failure_keys.count,
                 window_start_ts,
@@ -86,7 +86,7 @@ module Stoplight
             timestamp = clock.current_time.to_f
 
             scripting.call(
-              :"window_metrics/record_success",
+              "window_metrics/record_success",
               args: [timestamp, SecureRandom.hex(12), bucket_ttl, metrics_ttl],
               keys: [
                 metrics_key,
@@ -103,7 +103,7 @@ module Stoplight
             timestamp = clock.current_time.to_f
 
             scripting.call(
-              :"window_metrics/record_failure",
+              "window_metrics/record_failure",
               args: [timestamp, SecureRandom.hex(12), serialize_exception(exception, timestamp:), bucket_ttl, metrics_ttl],
               keys: [metrics_key, errors_key(time: timestamp)]
             )
