@@ -142,7 +142,7 @@ module Stoplight
           end
 
           successes, errors, last_success_at, last_error_json, consecutive_errors, consecutive_successes = scripting.call(
-            :get_metrics,
+            "get_metrics",
             args: [
               failure_keys.count,
               window_start_ts,
@@ -241,7 +241,7 @@ module Stoplight
           failure = Domain::Failure.from_error(exception, time: current_time)
 
           scripting.call(
-            :record_failure,
+            "record_failure",
             args: [current_ts, SecureRandom.hex(12), serialize_failure(failure), metrics_ttl, metadata_ttl],
             keys: [
               metadata_key(config),
@@ -254,7 +254,7 @@ module Stoplight
           current_ts = clock.current_time.to_f
 
           scripting.call(
-            :record_success,
+            "record_success",
             args: [current_ts, request_id, metrics_ttl, metadata_ttl],
             keys: [
               metadata_key(config),
@@ -274,7 +274,7 @@ module Stoplight
           failure = Domain::Failure.from_error(exception, time: current_time)
 
           scripting.call(
-            :record_recovery_probe_failure,
+            "record_recovery_probe_failure",
             args: [current_ts, serialize_failure(failure)],
             keys: [recovery_metrics_key(config)]
           )
@@ -288,7 +288,7 @@ module Stoplight
           current_ts = clock.current_time.to_f
 
           scripting.call(
-            :record_recovery_probe_success,
+            "record_recovery_probe_success",
             args: [current_ts],
             keys: [recovery_metrics_key(config)]
           )
@@ -344,7 +344,7 @@ module Stoplight
           meta_key = metadata_key(config)
 
           became_green = scripting.call(
-            :transition_to_green,
+            "transition_to_green",
             args: [current_ts],
             keys: [meta_key]
           )
@@ -360,7 +360,7 @@ module Stoplight
           meta_key = metadata_key(config)
 
           became_yellow = scripting.call(
-            :transition_to_yellow,
+            "transition_to_yellow",
             args: [current_ts],
             keys: [meta_key]
           )
@@ -377,7 +377,7 @@ module Stoplight
           recovery_scheduled_after_ts = current_ts + config.cool_off_time
 
           became_red = scripting.call(
-            :transition_to_red,
+            "transition_to_red",
             args: [current_ts, recovery_scheduled_after_ts],
             keys: [meta_key]
           )

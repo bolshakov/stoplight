@@ -1,0 +1,4 @@
+module SecureRandom
+  def self.uuid: () -> String
+  def self.hex: (Integer) -> String
+end

@@ -86,7 +86,7 @@ module Stoplight
             timestamp = clock.current_time.to_f
 
             scripting.call(
-              :"unbounded_metrics/record_success",
+              "unbounded_metrics/record_success",
               args: [timestamp, metrics_ttl],
               keys: [metrics_key]
             )
@@ -98,7 +98,7 @@ module Stoplight
             timestamp = clock.current_time.to_f
 
             scripting.call(
-              :"unbounded_metrics/record_failure",
+              "unbounded_metrics/record_failure",
               args: [timestamp, serialize_exception(exception, timestamp:), metrics_ttl],
               keys: [metrics_key]
             )
