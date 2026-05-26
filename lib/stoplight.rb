@@ -61,7 +61,7 @@ module Stoplight # rubocop:disable Style/Documentation
 
         default_config = configuration.to_config!
         @default_config = default_config
-        @default_light_factory = Wiring::LightFactory.new(config: default_config)
+        @default_light_factory = Wiring::LightBuilder.new(config: default_config)
       end
     end
 
@@ -80,7 +80,7 @@ module Stoplight # rubocop:disable Style/Documentation
       traffic_control: T.undefined,
       traffic_recovery: T.undefined
     )
-      Wiring::LightFactory.new(config: Wiring::DefaultConfig).build_with(
+      Wiring::LightFactory.new(config: Wiring::DefaultConfig).with(
         name: "__stoplight__#{name}",
         cool_off_time:,
         threshold:,
@@ -93,7 +93,7 @@ module Stoplight # rubocop:disable Style/Documentation
         notifiers:,
         traffic_control:,
         traffic_recovery:
-      )
+      ).build
     end
 
     # Create a Light with the user default configuration.
@@ -114,7 +114,7 @@ module Stoplight # rubocop:disable Style/Documentation
       traffic_control: T.undefined,
       traffic_recovery: T.undefined
     )
-      __stoplight__default_light_factory.build_with(
+      __stoplight__default_light_factory.with(
         name:,
         cool_off_time:,
         threshold:,
@@ -127,7 +127,7 @@ module Stoplight # rubocop:disable Style/Documentation
         notifiers:,
         traffic_control:,
         traffic_recovery:
-      )
+      ).build
     end
 
     # Creates a new named system with the given configuration.
