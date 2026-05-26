@@ -3,7 +3,7 @@
 module Stoplight
   module Wiring
     class System
-      class LightBuilder < Wiring::LightBuilder
+      class LightFactory < Wiring::LightFactory
         def initialize(system:, config:)
           @system = system
 

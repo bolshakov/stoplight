@@ -27,7 +27,7 @@ module Stoplight
     # not by value equality.
     #
     # @api private
-    class LightBuilder
+    class LightFactory
       FAILOVER_DATA_STORE_CONFIG = Stoplight::DataStore::Memory.new
       private_constant :FAILOVER_DATA_STORE_CONFIG
 

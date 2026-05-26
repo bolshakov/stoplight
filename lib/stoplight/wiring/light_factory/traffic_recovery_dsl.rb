@@ -2,7 +2,7 @@
 
 module Stoplight
   module Wiring
-    class LightBuilder
+    class LightFactory
       TrafficRecoveryDsl = ->(value) {
         case value
         in _ if value.respond_to?(:determine_color) # TODO: remove in 6.0
