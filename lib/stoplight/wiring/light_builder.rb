@@ -35,8 +35,9 @@ module Stoplight
       private_constant :MEMORY_REGISTRY
 
       def initialize(config:)
-        @clock = Infrastructure::SystemClock.new
         @config = config
+
+        @clock = Infrastructure::SystemClock.new
         @name = T.must(config.name)
         @cool_off_time = config.cool_off_time
 
@@ -98,7 +99,6 @@ module Stoplight
 
       attr_reader :data_store_config
       attr_reader :error_notifier
-      attr_reader :factory
       attr_reader :clock
       attr_reader :traffic_control
       attr_reader :traffic_recovery

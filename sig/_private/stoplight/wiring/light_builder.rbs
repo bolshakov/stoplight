@@ -6,7 +6,6 @@ module Stoplight
 
       attr_reader data_store_config: data_store
       attr_reader error_notifier: error_notifier
-      attr_reader factory: Domain::_LightFactory
       attr_reader clock: Domain::_Clock
 
       attr_reader traffic_recovery: Domain::_TrafficRecovery

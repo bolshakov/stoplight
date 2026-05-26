@@ -80,7 +80,7 @@ module Stoplight # rubocop:disable Style/Documentation
       traffic_control: T.undefined,
       traffic_recovery: T.undefined
     )
-      Wiring::LightFactory.new(config: Wiring::DefaultConfig).with(
+      Wiring::LightBuilder.new(config: Wiring::DefaultConfig).with(
         name: "__stoplight__#{name}",
         cool_off_time:,
         threshold:,
@@ -229,7 +229,6 @@ module Stoplight # rubocop:disable Style/Documentation
 
     # Retrieves the current default dependencies.
     #
-    # @return [Stoplight::Domain::LightFactory]
     # @api private
     def __stoplight__default_light_factory
       ensure_configured
