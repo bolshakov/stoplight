@@ -4,10 +4,10 @@ module Stoplight
   module Wiring
     class System
       class LightBuilder < Wiring::LightBuilder
-        def initialize(system:, config:, factory:)
+        def initialize(system:, config:)
           @system = system
 
-          super(config:, factory:)
+          super(config:)
         end
 
         def key_space = @key_space ||= Infrastructure::Redis::Storage::KeySpace.build(

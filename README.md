@@ -239,23 +239,6 @@ light = Stoplight("Payment Service",
 )
 ```
 
-### Modifying Stoplights
-
-You can create specialized versions of existing stoplights:
-
-```ruby
-# Base configuration for API calls
-base_api = Stoplight("Service API")
-
-# Create specialized version for the users endpoint
-users_api = base_api.with(
-  tracked_errors: [TimeoutError]          # Only track timeouts
-)
-```
-
-The `#with` method creates a new stoplight instance without modifying the original, making it ideal for creating
-specialized stoplights from a common configuration.
-
 ## Error Handling
 
 By default, Stoplight tracks all `StandardError` exceptions.

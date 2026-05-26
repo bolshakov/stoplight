@@ -42,8 +42,7 @@ module Stoplight
             config: Wiring::DefaultConfig.with(
               name: "noname",
               data_store: settings.data_store
-            ),
-            factory: nil
+            )
           ).__send__(:data_store)
         end
       end

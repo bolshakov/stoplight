@@ -8,7 +8,7 @@ module Stoplight
         @storage_set: StorageSet
         @key_space: Infrastructure::Redis::Storage::KeySpace
 
-        def initialize: (config: Domain::Config, factory: Domain::_LightFactory, system: System) -> void
+        def initialize: (config: Domain::Config, system: System) -> void
 
         def key_space: -> Infrastructure::Redis::Storage::KeySpace
 
