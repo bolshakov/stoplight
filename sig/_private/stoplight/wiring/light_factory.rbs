@@ -10,7 +10,6 @@ module Stoplight
       def hash: -> Integer
 
       def light_builder: (config: Domain::Config) -> LightBuilder
-      def light_factory: -> Domain::_LightFactory
     end
   end
 end

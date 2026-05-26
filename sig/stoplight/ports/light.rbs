@@ -7,6 +7,5 @@ module Stoplight
     def run: [T] (?(^(StandardError?) -> T)?) { () -> T } -> T
     def lock: (color) -> _Light
     def unlock: -> _Light
-    def ==: (untyped) -> bool
   end
 end

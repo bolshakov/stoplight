@@ -118,10 +118,8 @@ module Stoplight
       private
 
       def light_builder(config:)
-        LightBuilder.new(config:, factory: light_factory)
+        LightBuilder.new(config:)
       end
-
-      def light_factory = self
     end
   end
 end

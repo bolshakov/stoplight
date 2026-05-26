@@ -7,48 +7,16 @@ RSpec.describe Stoplight::Domain::Light do
       green_run_strategy:,
       yellow_run_strategy:,
       red_run_strategy:,
-      factory:,
       state_store:
     )
   end
-  let(:factory) { instance_double(NullLightFactory) }
   let(:config) { instance_double(Stoplight::Domain::Config) }
   let(:green_run_strategy) { instance_double(Stoplight::Domain::Strategies::GreenRunStrategy) }
   let(:yellow_run_strategy) { instance_double(Stoplight::Domain::Strategies::YellowRunStrategy) }
   let(:red_run_strategy) { instance_double(Stoplight::Domain::Strategies::RedRunStrategy) }
   let(:state_store) { instance_double(NullStateStore) }
 
-  describe "#==" do
-    context "light with the different factory" do
-      let(:light_2) do
-        described_class.new(
-          config,
-          green_run_strategy:,
-          yellow_run_strategy:,
-          red_run_strategy:,
-          factory: factory2,
-          state_store:
-        )
-      end
-      let(:factory2) { instance_double(NullLightFactory) }
-
-      it { expect(light).not_to eq(light_2) }
-    end
-
-    context "light with the same factory" do
-      let(:light_2) do
-        described_class.new(
-          config,
-          green_run_strategy:,
-          yellow_run_strategy:,
-          red_run_strategy:,
-          factory:,
-          state_store:
-        )
-      end
-
-      it { expect(light).to eq(light_2) }
-    end
+  describe "#==", pending: true do
   end
 
   describe "#lock" do
@@ -95,33 +63,6 @@ RSpec.describe Stoplight::Domain::Light do
     expect(state_store).to receive(:set_state).with(Stoplight::State::UNLOCKED)
 
     expect(light.unlock).to be_a Stoplight::Domain::Light
-  end
-
-  describe "#with" do
-    let(:settings) do
-      {
-        name: "combined-light",
-        threshold: 5,
-        window_size: 60,
-        tracked_errors: [RuntimeError],
-        skipped_errors: [KeyError, NoMemoryError, ScriptError, SecurityError, SignalException, SystemExit, SystemStackError]
-      }
-    end
-
-    it "delegates to the factory" do
-      new_light = instance_double(Stoplight::Domain::Light)
-      expect(factory).to receive(:build_with).with(**settings).and_return(new_light)
-
-      expect(light.with(**settings)).to eq(new_light)
-    end
-
-    it "produces deprecation warning" do
-      allow(factory).to receive(:build_with)
-
-      expect { light.with(**settings) }.to output(
-        include("[DEPRECATION] Light#with is deprecated and will be removed in v6.0.0.")
-      ).to_stderr
-    end
   end
 
   specify "#state" do

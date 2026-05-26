@@ -10,7 +10,6 @@ require "rack/test"
 
 require_relative "support/adapters/null_clock"
 require_relative "support/adapters/null_data_store"
-require_relative "support/adapters/null_light_factory"
 require_relative "support/adapters/null_metrics_store"
 require_relative "support/adapters/null_notifier"
 require_relative "support/adapters/null_recovery_lock_store"

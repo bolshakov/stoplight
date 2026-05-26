@@ -34,7 +34,7 @@ module Stoplight
       MEMORY_REGISTRY = Concurrent::Map.new
       private_constant :MEMORY_REGISTRY
 
-      def initialize(config:, factory:)
+      def initialize(config:)
         @clock = Infrastructure::SystemClock.new
         @config = config
         @name = T.must(config.name)
@@ -42,7 +42,6 @@ module Stoplight
 
         @data_store_config = config.data_store
         @error_notifier = config.error_notifier
-        @factory = factory
         @notifiers = config.notifiers
         @traffic_recovery = config.traffic_recovery
         @traffic_control = config.traffic_control
@@ -59,8 +58,7 @@ module Stoplight
           state_store:,
           green_run_strategy:,
           yellow_run_strategy:,
-          red_run_strategy:,
-          factory:
+          red_run_strategy:
         )
       end
 

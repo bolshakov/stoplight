@@ -18,7 +18,7 @@ module Stoplight
       @cool_off_time: duration
       @error_tracking_policy: Domain::ErrorTrackingPolicy
 
-      def initialize: (config: Domain::Config, factory: Domain::_LightFactory) -> void
+      def initialize: (config: Domain::Config) -> void
 
       def build: -> Domain::Light
 
