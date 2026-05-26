@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Stoplight::Wiring::LightFactory::TrafficControlDsl do
+RSpec.describe Stoplight::Wiring::LightBuilder::TrafficControlDsl do
   subject(:traffic_control_out) { described_class.call(traffic_control) }
 
   context "when an instance of TrafficControl::Base" do

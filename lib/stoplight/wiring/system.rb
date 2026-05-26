@@ -114,7 +114,7 @@ module Stoplight
           else
             source_line = caller(6, 1)&.first
             [
-              LightFactory.new(
+              LightBuilder.new(
                 system: self,
                 config: light_dsl.configure!(system_config)
               ).build,
