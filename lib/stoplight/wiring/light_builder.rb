@@ -35,9 +35,8 @@ module Stoplight
       private_constant :MEMORY_REGISTRY
 
       def initialize(config:)
-        @config = config
-
         @clock = Infrastructure::SystemClock.new
+        @config = config
         @name = T.must(config.name)
         @cool_off_time = config.cool_off_time
 
@@ -94,7 +93,6 @@ module Stoplight
           ).configure!(config)
         )
       end
-
 
       private
 
