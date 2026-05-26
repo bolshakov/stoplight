@@ -24,8 +24,8 @@ module Stoplight
         @window_size = window_size
         @tracked_errors = tracked_errors.is_a?(Undefined) ? tracked_errors : Array(tracked_errors)
         @skipped_errors = skipped_errors.is_a?(Undefined) ? skipped_errors : Array(skipped_errors)
-        @traffic_control = traffic_control.is_a?(Undefined) ? traffic_control : LightBuilder::TrafficControlDsl.call(traffic_control)
-        @traffic_recovery = traffic_recovery.is_a?(Undefined) ? traffic_recovery : LightBuilder::TrafficRecoveryDsl.call(traffic_recovery)
+        @traffic_control = traffic_control.is_a?(Undefined) ? traffic_control : LightFactory::TrafficControlDsl.call(traffic_control)
+        @traffic_recovery = traffic_recovery.is_a?(Undefined) ? traffic_recovery : LightFactory::TrafficRecoveryDsl.call(traffic_recovery)
         @error_notifier = error_notifier
         @data_store = data_store
         @notifiers = notifiers

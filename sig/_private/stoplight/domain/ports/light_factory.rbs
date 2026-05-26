@@ -45,36 +45,6 @@ module Stoplight
       #
       # @raise [Stoplight::Error::ConfigurationError] If configuration is invalid
       def build: -> Light
-
-      # Convenience method to configure and build in one operation.
-      #
-      # This combines +#with+ and +#build+ into a single call, which is
-      # useful when you want to create a customized Light without keeping
-      # a reference to the intermediate factory.
-      #
-      # @example Usage
-      #   # Instead of:
-      #   new_factory = factory.with(threshold: 10)
-      #   light = new_factory.build
-      #
-      #   # You can do:
-      #   light = factory.build_with(threshold: 10)
-      def build_with: ( # to check
-          ?name: optional[String],
-          ?cool_off_time: optional[duration],
-          ?threshold: optional[percentage | Integer],
-          ?recovery_threshold: optional[Integer],
-          ?window_size: optional[duration?],
-          ?tracked_errors: optional[Array[_ExceptionMatcher] | _ExceptionMatcher],
-          ?skipped_errors: optional[Array[_ExceptionMatcher] | _ExceptionMatcher],
-          ?error_notifier: optional[error_notifier],
-          ?notifiers: optional[Array[state_transition_notifier]],
-          ?data_store: optional[data_store],
-          ?traffic_control: optional[traffic_control],
-          ?traffic_recovery: optional[traffic_recovery],
-      ) -> Light
-
-      def ==: (untyped) -> bool
     end
   end
 end

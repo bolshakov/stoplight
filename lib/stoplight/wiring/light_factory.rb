@@ -6,12 +6,12 @@ module Stoplight
   module Wiring
     # Constructs a fully-wired Light instance from validated configuration.
     #
-    # LightBuilder is the final assembly step in the Light creation pipeline.
+    # LightFactory is the final assembly step in the Light creation pipeline.
     # It receives validated config and dependencies from ConfigurationPipeline
     # and wires together all infrastructure components (data stores, trackers,
     # strategies) needed for a functioning circuit breaker.
     #
-    # LightBuilder maintains a global registry (MEMORY_REGISTRY) that ensures
+    # LightFactory maintains a global registry (MEMORY_REGISTRY) that ensures
     # the same Memory data store config object always produces the same
     # data store instance:
     #
@@ -27,7 +27,7 @@ module Stoplight
     # not by value equality.
     #
     # @api private
-    class LightBuilder
+    class LightFactory
       FAILOVER_DATA_STORE_CONFIG = Stoplight::DataStore::Memory.new
       private_constant :FAILOVER_DATA_STORE_CONFIG
 

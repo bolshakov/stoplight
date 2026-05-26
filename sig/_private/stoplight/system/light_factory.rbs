@@ -1,7 +1,7 @@
 module Stoplight
   module Wiring
     class System
-      class LightBuilder < Wiring::LightBuilder
+      class LightFactory < Wiring::LightFactory
         attr_reader system: System
 
         @failover_system: _System

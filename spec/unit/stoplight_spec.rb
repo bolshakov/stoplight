@@ -53,7 +53,7 @@ RSpec.describe "Stoplight" do
     let(:notifiers) { [Stoplight::Infrastructure::Notifier::IO.new($stdout)] }
 
     it "instantiates with the correct settings", pending: true do
-      expect(light).to eq(Stoplight.__stoplight__default_light_factory.build_with(name:, **settings))
+      expect(light).to eq(Stoplight.__stoplight__default_light_factory.with(name:, **settings).build)
     end
 
     context "when unknown option is given" do
