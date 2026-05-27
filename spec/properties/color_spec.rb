@@ -8,7 +8,7 @@ RSpec.describe "Stoplight::Light#color" do
       property_of {
         array(10) { choose(Stoplight::Color::GREEN, Stoplight::Color::RED, Stoplight::Color::YELLOW) }
       }.check do |color_sequence|
-        light = Stoplight(SecureRandom.uuid, data_store:)
+        light = Stoplight(SecureRandom.uuid)
 
         color_sequence.each do |color|
           light.__send__(:state_store).transition_to_color(color)
@@ -52,7 +52,7 @@ RSpec.describe "Stoplight::Light#color" do
       property_of {
         array(20) { [choose(true, false), range(1, 10)] }
       }.check do |executions_sequence|
-        light = Stoplight(SecureRandom.uuid, data_store:, cool_off_time: 5, recovery_threshold: 2)
+        light = Stoplight(SecureRandom.uuid, cool_off_time: 5, recovery_threshold: 2)
         transitions = []
 
         executions_sequence.each do |(should_fail, time_gap)|
@@ -68,6 +68,12 @@ RSpec.describe "Stoplight::Light#color" do
           expect(state_machine[from]).to include(to), "Invalid transition from #{from} to #{to}"
         end
       end
+    end
+  end
+
+  before do
+    Stoplight.configure(trust_me_im_an_engineer: true) do |config|
+      config.data_store = data_store
     end
   end
 

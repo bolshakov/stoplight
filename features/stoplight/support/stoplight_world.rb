@@ -66,19 +66,21 @@ module StoplightWorld
     @last_exception = nil
     @last_result = nil
     @last_fallback_received_argument = :nothing
-    @data_store = case ENV.fetch("STOPLIGHT_DATA_STORE", "Memory")
-    when "Memory"
-      Stoplight::DataStore::Memory.new
-    when "Redis"
-      redis = Redis.new(url: ENV.fetch("STOPLIGHT_REDIS_URL", "redis://127.0.0.1:6379/0"))
+    Stoplight.configure(trust_me_im_an_engineer: true) do |config|
+      config.data_store = case ENV.fetch("STOPLIGHT_DATA_STORE", "Memory")
+      when "Memory"
+        Stoplight::DataStore::Memory.new
+      when "Redis"
+        redis = Redis.new(url: ENV.fetch("STOPLIGHT_REDIS_URL", "redis://127.0.0.1:6379/0"))
 
-      DatabaseCleaner[:redis].db = redis
-      DatabaseCleaner.clean_with(:deletion)
-      Stoplight::DataStore::Redis.new(redis)
-    else
-      raise ArgumentError, "unexpected data store"
+        DatabaseCleaner[:redis].db = redis
+        DatabaseCleaner.clean_with(:deletion)
+        Stoplight::DataStore::Redis.new(redis)
+      else
+        raise ArgumentError, "unexpected data store"
+      end
+      config.notifiers = [TestNotifier.new(notifications)]
     end
-    @notifiers = [TestNotifier.new(notifications)]
   end
 
   def system = @system ||= Stoplight.__stoplight__system(SecureRandom.uuid, notifiers:, data_store:)

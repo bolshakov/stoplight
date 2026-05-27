@@ -25,7 +25,13 @@ RSpec.describe Stoplight::Admin::LightsRepository, :redis do
   end
   let(:data_store_config) { Stoplight::DataStore::Redis.new(redis) }
   let(:name) { "lights-repository" }
-  let(:light) { Stoplight(name, data_store: data_store_config) }
+  let(:light) { Stoplight(name) }
+
+  before do
+    Stoplight.configure(trust_me_im_an_engineer: true) do |config|
+      config.data_store = data_store_config
+    end
+  end
 
   describe "#all" do
     subject(:lights) { repository.all }
@@ -63,8 +69,8 @@ RSpec.describe Stoplight::Admin::LightsRepository, :redis do
 
   describe "#with_color" do
     before do
-      Stoplight("red-light", data_store: data_store_config).lock("red")
-      Stoplight("green-light", data_store: data_store_config).lock("green")
+      Stoplight("red-light").lock("red")
+      Stoplight("green-light").lock("green")
     end
 
     it "returns light with requested color" do

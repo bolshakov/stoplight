@@ -261,28 +261,21 @@ module Stoplight # rubocop:disable Style/Documentation
   end
 end
 
-# Creates a new Stoplight circuit brNeaker with the given name and settings.
+# Creates a new Stoplight circuit breaker with the given name and settings.
 #
 # @param name [String] The name of the circuit breaker.
-# @param settings [Hash] Optional settings to configure the circuit breaker.
-#   @option settings [Numeric] :cool_off_time The time to wait before resetting the circuit breaker.
-#   @option settings [Stoplight::DataStore::Base] :data_store The data store to use for storing state.
-#   @option settings [Array<Stoplight::Notifier::Base>] :notifiers A list of notifiers to use.
-#   @option settings [Numeric] :threshold The failure threshold to trip the circuit breaker.
-#   @option settings [Numeric] :window_size The size of the rolling window for failure tracking.
-#   @option settings [Array<StandardError>] :tracked_errors A list of errors to track.
-#   @option settings [Array<Exception>] :skipped_errors A list of errors to skip.
-#   @option settings [Symbol, {Symbol, Hash{Symbol, any}}] :traffic_control The
-#     traffic control strategy to use.
+# @param cool_off_time The time to wait before resetting the circuit breaker.
+# @param threshold The failure threshold to trip the circuit breaker.
+# @param window_size The size of the rolling window for failure tracking.
+# @param tracked_errors A list of errors to track.
+# @param skipped_errors A list of errors to skip.
+# @param traffic_control The traffic control strategy to use.
 #
 # @return [Stoplight::Light] A new circuit breaker instance.
 # @raise [ArgumentError] If an unknown option is provided in the settings.
 #
 # @example configure circuit breaker behavior
 #   light = Stoplight("Payment API", window_size: 300, threshold: 5, cool_off_time: 60)
-#
-# @example configure data store
-#   light = Stoplight("Payment API", data_store: Stoplight::DataStore::Redis.new(redis_client))
 #
 # In the example below, the +TimeoutError+ and +NetworkError+ exceptions
 # will be counted towards the threshold for moving the circuit breaker into the red state.
@@ -313,26 +306,9 @@ def Stoplight(
   window_size: Stoplight::T.undefined,
   tracked_errors: Stoplight::T.undefined,
   skipped_errors: Stoplight::T.undefined,
-  data_store: Stoplight::T.undefined,
-  error_notifier: Stoplight::T.undefined,
-  notifiers: Stoplight::T.undefined,
   traffic_control: Stoplight::T.undefined,
   traffic_recovery: Stoplight::T.undefined
 ) # rubocop:disable Naming/MethodName
-  Stoplight::Common::Deprecations.deprecate(<<~MSG) if error_notifier != Stoplight::T.undefined
-    Passing "error_notifier" to Stoplight('#{name}') is deprecated and will be removed in v6.0.0.
-
-    IMPORTANT: The `error_notifier` is NOT called for exceptions in your protected code.
-    It only reports internal Stoplight failures (e.g., Redis connection errors).
-
-    To fix: Move `error_notifier` to global configuration:
-
-      Stoplight.configure do |config|
-        config.error_notifier = ->(error) { Logger.warn(error) }
-      end
-
-    See: https://github.com/bolshakov/stoplight#error-notifiers
-  MSG
   Stoplight.light(
     name,
     cool_off_time:,
@@ -341,9 +317,6 @@ def Stoplight(
     window_size:,
     tracked_errors:,
     skipped_errors:,
-    data_store:,
-    error_notifier:,
-    notifiers:,
     traffic_control:,
     traffic_recovery:
   )
