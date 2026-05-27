@@ -39,9 +39,7 @@ RSpec.describe "Notifications" do
       }.check do |executions_sequence|
         light = Stoplight(
           SecureRandom.uuid,
-          data_store:,
           cool_off_time: 3,
-          notifiers: [notifier],
           recovery_threshold: 2
         )
 
@@ -67,6 +65,13 @@ RSpec.describe "Notifications" do
           notifications_before_run = notifications.count
         end
       end
+    end
+  end
+
+  before do
+    Stoplight.configure(trust_me_im_an_engineer: true) do |config|
+      config.data_store = data_store
+      config.notifiers = [notifier]
     end
   end
 
