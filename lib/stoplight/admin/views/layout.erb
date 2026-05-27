@@ -6,6 +6,10 @@
 
     <title>Stoplight Admin</title>
 
+    <link rel="icon" href="<%= asset_path('favicon.ico') %>" sizes="32x32">
+    <link rel="icon" href="<%= asset_path('icon.svg') %>" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="<%= asset_path('apple-touch-icon.png') %>">
+
     <script nonce="<%= nonce %>" type="module" src="<%= asset_path('turbo.es2017-esm.min.js') %>"></script>
     <script nonce="<%= nonce %>" type="module">
         document.addEventListener("turbo:load", () => {
