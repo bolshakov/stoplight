@@ -74,13 +74,10 @@ module Stoplight # rubocop:disable Style/Documentation
       window_size: T.undefined,
       tracked_errors: T.undefined,
       skipped_errors: T.undefined,
-      data_store: T.undefined,
-      error_notifier: T.undefined,
-      notifiers: T.undefined,
       traffic_control: T.undefined,
       traffic_recovery: T.undefined
     )
-      Wiring::LightFactory.new(config: Wiring::DefaultConfig).with(
+      Wiring::LightFactory.new(config: Wiring::FailSafeConfig).with(
         name: "__stoplight__#{name}",
         cool_off_time:,
         threshold:,
@@ -88,9 +85,6 @@ module Stoplight # rubocop:disable Style/Documentation
         window_size:,
         tracked_errors:,
         skipped_errors:,
-        data_store:,
-        error_notifier:,
-        notifiers:,
         traffic_control:,
         traffic_recovery:
       ).build
