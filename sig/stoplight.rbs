@@ -38,9 +38,6 @@ module Stoplight
       ?window_size: optional[duration?],
       ?tracked_errors: optional[Array[_ExceptionMatcher] | _ExceptionMatcher],
       ?skipped_errors: optional[Array[_ExceptionMatcher] | _ExceptionMatcher],
-      ?data_store: optional[data_store],
-      ?error_notifier: optional[error_notifier],
-      ?notifiers: optional[Array[state_transition_notifier]],
       ?traffic_control: optional[traffic_control],
       ?traffic_recovery: optional[traffic_recovery],
     ) -> _Light
