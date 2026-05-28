@@ -123,10 +123,6 @@ module Stoplight # rubocop:disable Style/Documentation
     # Systems are composition roots that own infrastructure (data store, notifiers)
     # and enforce configuration consistency for all lights created within them.
     #
-    # @param name [String] Unique identifier for the system
-    # @param settings [Hash] Configuration options that override global defaults.
-    #   @see Stoplight() documentation
-    #
     # @return [Stoplight::Wiring::System] A new system instance.
     #
     # @raise [ArgumentError] If a system with the given name already exists.
