@@ -76,7 +76,8 @@ module Stoplight
 
       # Builds and validates configuration
       def to_config!
-        LegacyConfigurationDsl.new(
+        SystemConfigurationDsl.new(
+          name: "default",
           cool_off_time: @cool_off_time,
           threshold: @threshold,
           recovery_threshold: @recovery_threshold,

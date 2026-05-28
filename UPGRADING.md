@@ -1,6 +1,10 @@
 ## Stoplight 6.0 
 - Removed Light#with() method 
-- Removed Ligh's `#with_data_store`, `#with_cool_off_time`, `#with_threshold`, `#with_window_size`, `#with_notifiers`, `#with_error_notifier`, `#with_tracked_errors`, `#with_skipped_errors`
+- Removed Light's `#with_data_store`, `#with_cool_off_time`, `#with_threshold`, `#with_window_size`, `#with_notifiers`, 
+  `#with_error_notifier`, `#with_tracked_errors`, `#with_skipped_errors`
+- Remove `data_store`, `notifiers`, and `error_notifier` parameters from `Stoplight()` and `Stoplight.light()` methods. 
+  From now on this could be configured only on the Stoplight/System level
+
 ## Stoplight 5.0 
 
 Stoplight 5.0 introduces several breaking changes, so you'll need to set aside some time to update your code. The good 

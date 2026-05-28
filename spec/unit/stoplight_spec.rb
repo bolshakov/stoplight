@@ -30,8 +30,7 @@ RSpec.describe "Stoplight" do
   context "with settings" do
     subject(:light) { Stoplight(name, **settings) }
 
-    let(:settings) { {**config_settings, **dependencies_settings} }
-    let(:config_settings) do
+    let(:settings) do
       {
         cool_off_time: 1,
         threshold: 4,
@@ -41,16 +40,6 @@ RSpec.describe "Stoplight" do
         recovery_threshold: 3
       }
     end
-    let(:dependencies_settings) do
-      {
-        data_store: data_store,
-        error_notifier: error_notifier,
-        notifiers: notifiers
-      }
-    end
-    let(:data_store) { Stoplight::DataStore::Memory.new }
-    let(:error_notifier) { ->(error) { warn error } }
-    let(:notifiers) { [Stoplight::Infrastructure::Notifier::IO.new($stdout)] }
 
     it "instantiates with the correct settings", pending: true do
       expect(light).to eq(Stoplight.__stoplight__default_light_factory.build_with(name:, **settings))
