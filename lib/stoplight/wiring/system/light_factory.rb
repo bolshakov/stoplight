@@ -44,20 +44,9 @@ module Stoplight
           )
         end
 
-        class InternalLightFactory < Wiring::LightFactory
-          def initialize
-          end
-
-          def with(**untyped) # steep:ignore
-            raise NotImplementedError, "You're not allowed to extend system lights"
-          end
-        end
-
         private def light_builder(config:)
-          System::LightBuilder.new(system:, factory: light_factory, config:)
+          System::LightBuilder.new(system:, config:)
         end
-
-        private def light_factory = InternalLightFactory.new
       end
     end
   end

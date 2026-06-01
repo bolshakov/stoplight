@@ -59,7 +59,7 @@ module Stoplight
       #
       #   # You can do:
       #   light = factory.build_with(threshold: 10)
-      def build_with: (
+      def build_with: ( # to check
           ?name: optional[String],
           ?cool_off_time: optional[duration],
           ?threshold: optional[percentage | Integer],

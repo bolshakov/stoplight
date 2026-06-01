@@ -6,7 +6,6 @@ module Stoplight
       attr_reader yellow_run_strategy: Strategies::YellowRunStrategy
       attr_reader red_run_strategy: Strategies::RedRunStrategy
       attr_reader state_store: Domain::_StateStore
-      attr_reader factory: _LightFactory
       @name: String
 
       def initialize: (
@@ -14,7 +13,6 @@ module Stoplight
         green_run_strategy: Strategies::GreenRunStrategy,
         yellow_run_strategy: Strategies::YellowRunStrategy,
         red_run_strategy: Strategies::RedRunStrategy,
-        factory: _LightFactory,
         state_store: Domain::_StateStore
       ) -> void
 

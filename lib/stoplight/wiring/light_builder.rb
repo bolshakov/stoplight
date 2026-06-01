@@ -34,15 +34,15 @@ module Stoplight
       MEMORY_REGISTRY = Concurrent::Map.new
       private_constant :MEMORY_REGISTRY
 
-      def initialize(config:, factory:)
-        @clock = Infrastructure::SystemClock.new
+      def initialize(config:)
         @config = config
+
+        @clock = Infrastructure::SystemClock.new
         @name = T.must(config.name)
         @cool_off_time = config.cool_off_time
 
         @data_store_config = config.data_store
         @error_notifier = config.error_notifier
-        @factory = factory
         @notifiers = config.notifiers
         @traffic_recovery = config.traffic_recovery
         @traffic_control = config.traffic_control
@@ -59,10 +59,42 @@ module Stoplight
           state_store:,
           green_run_strategy:,
           yellow_run_strategy:,
-          red_run_strategy:,
-          factory:
+          red_run_strategy:
         )
       end
+
+      def with(
+        name: T.undefined,
+        cool_off_time: T.undefined,
+        threshold: T.undefined,
+        recovery_threshold: T.undefined,
+        window_size: T.undefined,
+        tracked_errors: T.undefined,
+        skipped_errors: T.undefined,
+        data_store: T.undefined,
+        error_notifier: T.undefined,
+        notifiers: T.undefined,
+        traffic_control: T.undefined,
+        traffic_recovery: T.undefined
+      )
+        self.class.new(
+          config: LegacyConfigurationDsl.new(
+            name:,
+            cool_off_time:,
+            threshold:,
+            recovery_threshold:,
+            window_size:,
+            tracked_errors:,
+            skipped_errors:,
+            traffic_control:,
+            traffic_recovery:,
+            error_notifier:,
+            data_store:,
+            notifiers:
+          ).configure!(config)
+        )
+      end
+
 
       private
 
