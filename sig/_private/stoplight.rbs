@@ -5,7 +5,7 @@ module Stoplight
   self.@configured:  bool?
   self.@default_config: Domain::Config?
   self.@systems: Concurrent::Map[String, _System]
-  self.@default_light_factory: Wiring::LightBuilder?
+  self.@default_light_factory: Wiring::LightFactory?
 
   def self.warn_if_reconfiguring: (bool) { () -> void } -> void
   def self.configured?: -> bool
@@ -44,5 +44,5 @@ module Stoplight
       ?traffic_recovery: optional[traffic_recovery],
     ) -> _System
   def self.__stoplight__default_configuration: -> Domain::Config
-  def self.__stoplight__default_light_factory: -> Wiring::LightBuilder
+  def self.__stoplight__default_light_factory: -> Wiring::LightFactory
 end

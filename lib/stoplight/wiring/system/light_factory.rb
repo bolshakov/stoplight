@@ -4,48 +4,42 @@ module Stoplight
   module Wiring
     class System
       class LightFactory < Wiring::LightFactory
-        attr_reader :system
-
         def initialize(system:, config:)
           @system = system
 
           super(config:)
         end
 
-        def with(
-          name: T.undefined,
-          cool_off_time: T.undefined,
-          threshold: T.undefined,
-          recovery_threshold: T.undefined,
-          window_size: T.undefined,
-          tracked_errors: T.undefined,
-          skipped_errors: T.undefined,
-          data_store: T.undefined,
-          error_notifier: T.undefined,
-          notifiers: T.undefined,
-          traffic_control: T.undefined,
-          traffic_recovery: T.undefined
+        def key_space = @key_space ||= Infrastructure::Redis::Storage::KeySpace.build(
+          system_name: system.name,
+          light_name: config.name
         )
-          self.class.new(
-            system:,
-            config: LegacyConfigurationDsl.new(
-              cool_off_time:,
-              threshold:,
-              recovery_threshold:,
-              window_size:,
-              tracked_errors:,
-              skipped_errors:,
-              traffic_control:,
-              traffic_recovery:,
-              error_notifier:,
-              data_store:,
-              notifiers:
-            ).configure!(config)
-          )
+
+        def storage_set
+          @storage_set ||= StorageSetBuilder.new(backend: build_backend, windowed: !config.window_size.nil?).build
         end
 
-        private def light_builder(config:)
-          System::LightBuilder.new(system:, config:)
+        private
+
+        attr_reader :system
+
+        def state_store = storage_set.state_store
+        def recovery_lock_store = storage_set.recovery_lock_store
+        def recovery_metrics_store = storage_set.recovery_metrics_store
+        def metrics_store = storage_set.metrics_store
+        def storage_scripting = Infrastructure::Redis::Storage::Scripting.new(redis:)
+        def failover_system = @failover_system ||= Stoplight.__stoplight__system("failover-#{system.name}")
+
+        def build_backend
+          case data_store_config
+          in DataStore::Memory
+            Memory::Backend.new(clock:, config:)
+          in DataStore::Redis
+            Redis::Backend.new(
+              redis:, scripting: storage_scripting, key_space:, clock:, config:, error_notifier:,
+              failover_light: failover_system.light("redis")
+            )
+          end
         end
       end
     end

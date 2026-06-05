@@ -61,7 +61,7 @@ module Stoplight # rubocop:disable Style/Documentation
 
         default_config = configuration.to_config!
         @default_config = default_config
-        @default_light_factory = Wiring::LightBuilder.new(config: default_config)
+        @default_light_factory = Wiring::LightFactory.new(config: default_config)
       end
     end
 
@@ -229,7 +229,6 @@ module Stoplight # rubocop:disable Style/Documentation
 
     # Retrieves the current default dependencies.
     #
-    # @return [Stoplight::Domain::LightFactory]
     # @api private
     def __stoplight__default_light_factory
       ensure_configured
