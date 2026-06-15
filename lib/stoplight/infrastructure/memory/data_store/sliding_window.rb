@@ -31,7 +31,7 @@ module Stoplight
 
           def sum_in_window(window_start)
             slide_window!(window_start)
-            self.running_sum
+            running_sum
           end
 
           def inspect
