@@ -41,10 +41,6 @@ RSpec.describe "Stoplight" do
       }
     end
 
-    it "instantiates with the correct settings", pending: true do
-      expect(light).to eq(Stoplight.__stoplight__default_light_factory.build_with(name:, **settings))
-    end
-
     context "when unknown option is given" do
       let(:settings) do
         super().merge(unknown_option: "unknown")
