@@ -2,6 +2,7 @@
 
 module Stoplight
   module Wiring
+    # Empty notifiers prevent notification loops; inherited Memory data store prevents infinite recursion if Redis is down.
     FailSafeConfig = DefaultConfig.with(notifiers: [])
   end
 end
