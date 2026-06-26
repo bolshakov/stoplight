@@ -104,7 +104,7 @@ module Stoplight
 
       # @return [<Stoplight::Notifier::Base>]
       def notifiers
-        Array(@notifiers).map do |notifier|
+        @wrapped_notifiers ||= Array(@notifiers).map do |notifier|
           Infrastructure::Notifier::FailSafe.new(notifier:, error_notifier:)
         end
       end
@@ -124,11 +124,11 @@ module Stoplight
       end
 
       def failover_data_store
-        create_data_store(FAILOVER_DATA_STORE_CONFIG)
+        @failover_data_store ||= create_data_store(FAILOVER_DATA_STORE_CONFIG)
       end
 
       def data_store
-        create_data_store(data_store_config)
+        @data_store ||= create_data_store(data_store_config)
       end
 
       def metrics_store
