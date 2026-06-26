@@ -8,14 +8,6 @@ require_relative "notifications"
 
 # The StoplightWorld module provides a shared context for testing Stoplight functionality.
 module StoplightWorld
-  # @!attribute data_store
-  #   @return [Stoplight::DataStore::Base]
-  attr_reader :data_store
-
-  # @!attribute notifiers
-  #   @return [<Stoplight::Notifier::Base>]
-  attr_reader :notifiers
-
   # Provides access to the notifications system used for testing.
   #
   # @return [Notifications] The notifications instance.
@@ -66,24 +58,22 @@ module StoplightWorld
     @last_exception = nil
     @last_result = nil
     @last_fallback_received_argument = :nothing
-    @data_store = case ENV.fetch("STOPLIGHT_DATA_STORE", "Memory")
-    when "Memory"
-      Stoplight::DataStore::Memory.new
-    when "Redis"
-      redis = Redis.new(url: ENV.fetch("STOPLIGHT_REDIS_URL", "redis://127.0.0.1:6379/0"))
-
-      DatabaseCleaner[:redis].db = redis
-      DatabaseCleaner.clean_with(:deletion)
-      Stoplight::DataStore::Redis.new(redis)
-    else
-      raise ArgumentError, "unexpected data store"
-    end
-    @notifiers = [TestNotifier.new(notifications)]
     Stoplight.configure(trust_me_im_an_engineer: true) do |config|
-      config.data_store = @data_store
-      config.notifiers = @notifiers
+      config.data_store = case ENV.fetch("STOPLIGHT_DATA_STORE", "Memory")
+      when "Memory"
+        Stoplight::DataStore::Memory.new
+      when "Redis"
+        redis = Redis.new(url: ENV.fetch("STOPLIGHT_REDIS_URL", "redis://127.0.0.1:6379/0"))
+
+        DatabaseCleaner[:redis].db = redis
+        DatabaseCleaner.clean_with(:deletion)
+        Stoplight::DataStore::Redis.new(redis)
+      else
+        raise ArgumentError, "unexpected data store"
+      end
+      config.notifiers = [TestNotifier.new(notifications)]
     end
   end
 
-  def system = @system ||= Stoplight.__stoplight__system(SecureRandom.uuid, notifiers:, data_store:)
+  def system = @system ||= Stoplight.__stoplight__system(SecureRandom.uuid)
 end
