@@ -28,7 +28,10 @@ module Stoplight
         def recovery_metrics_store = storage_set.recovery_metrics_store
         def metrics_store = storage_set.metrics_store
         def storage_scripting = Infrastructure::Redis::Storage::Scripting.new(redis:)
-        def failover_system = @failover_system ||= Stoplight.__stoplight__system("failover-#{system.name}")
+        def failover_system = @failover_system ||= Stoplight.__stoplight__system(
+          "failover-#{system.name}",
+          data_store: Stoplight::DataStore::Memory.new
+        )
 
         def build_backend
           case data_store_config
