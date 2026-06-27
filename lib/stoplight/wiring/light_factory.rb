@@ -16,11 +16,13 @@ module Stoplight
     # data store instance:
     #
     #   data_store = Stoplight::DataStore::Memory.new
-    #   light1 = Stoplight("foo", data_store: data_store)
-    #   light2 = Stoplight("bar", data_store: data_store)
+    #   system1 = Stoplight.system("API", data_store: data_store)
+    #   light1 = system.light("foo")
+    #   light2 = Stoplight("bar")
     #   # light1 and light2 share the same underlying memory store
     #
-    #   light3 = Stoplight("baz", data_store: Stoplight::DataStore::Memory.new)
+    #   system2 = Stoplight.system("Payments", data_store: Stoplight::DataStore::Memory.new)
+    #   light3 = system2.light("baz")
     #   # light3 has its own independent store
     #
     # This singleton behavior is keyed by config object identity (object_id),
@@ -51,6 +53,10 @@ module Stoplight
           tracked: config.tracked_errors,
           skipped: config.skipped_errors
         )
+
+        @wrapped_notifiers = nil
+        @failover_data_store = nil
+        @data_store = nil
       end
 
       def build
@@ -64,21 +70,18 @@ module Stoplight
       end
 
       def with(
-        name: T.undefined,
+        name:,
         cool_off_time: T.undefined,
         threshold: T.undefined,
         recovery_threshold: T.undefined,
         window_size: T.undefined,
         tracked_errors: T.undefined,
         skipped_errors: T.undefined,
-        data_store: T.undefined,
-        error_notifier: T.undefined,
-        notifiers: T.undefined,
         traffic_control: T.undefined,
         traffic_recovery: T.undefined
       )
         self.class.new(
-          config: LegacyConfigurationDsl.new(
+          config: LightConfigurationDsl.new(
             name:,
             cool_off_time:,
             threshold:,
@@ -87,10 +90,7 @@ module Stoplight
             tracked_errors:,
             skipped_errors:,
             traffic_control:,
-            traffic_recovery:,
-            error_notifier:,
-            data_store:,
-            notifiers:
+            traffic_recovery:
           ).configure!(config)
         )
       end
@@ -108,7 +108,7 @@ module Stoplight
 
       # @return [<Stoplight::Notifier::Base>]
       def notifiers
-        Array(@notifiers).map do |notifier|
+        @wrapped_notifiers ||= Array(@notifiers).map do |notifier|
           Infrastructure::Notifier::FailSafe.new(notifier:, error_notifier:)
         end
       end
@@ -128,11 +128,11 @@ module Stoplight
       end
 
       def failover_data_store
-        create_data_store(FAILOVER_DATA_STORE_CONFIG)
+        @failover_data_store ||= create_data_store(FAILOVER_DATA_STORE_CONFIG)
       end
 
       def data_store
-        create_data_store(data_store_config)
+        @data_store ||= create_data_store(data_store_config)
       end
 
       def metrics_store

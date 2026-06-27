@@ -38,9 +38,6 @@ module Stoplight
       ?window_size: optional[duration?],
       ?tracked_errors: optional[Array[_ExceptionMatcher] | _ExceptionMatcher],
       ?skipped_errors: optional[Array[_ExceptionMatcher] | _ExceptionMatcher],
-      ?data_store: optional[data_store],
-      ?error_notifier: optional[error_notifier],
-      ?notifiers: optional[Array[state_transition_notifier]],
       ?traffic_control: optional[traffic_control],
       ?traffic_recovery: optional[traffic_recovery],
     ) -> _Light
@@ -56,9 +53,6 @@ module Kernel
       ?window_size: Stoplight::optional[Stoplight::duration?],
       ?tracked_errors: Stoplight::optional[Array[Stoplight::_ExceptionMatcher] | Stoplight::_ExceptionMatcher],
       ?skipped_errors: Stoplight::optional[Array[Stoplight::_ExceptionMatcher] | Stoplight::_ExceptionMatcher],
-      ?data_store: Stoplight::optional[Stoplight::data_store],
-      ?error_notifier: Stoplight::optional[Stoplight::error_notifier],
-      ?notifiers: Stoplight::optional[Array[Stoplight::state_transition_notifier]],
       ?traffic_control: Stoplight::optional[Stoplight::traffic_control],
       ?traffic_recovery: Stoplight::optional[Stoplight::traffic_recovery],
   ) -> Stoplight::_Light

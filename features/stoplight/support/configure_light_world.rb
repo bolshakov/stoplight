@@ -7,7 +7,7 @@ module ConfigureLightWorld
     factory_method = ENV.fetch("STOPLIGHT_LIGHT_CREATION", "Stoplight()")
     case factory_method
     when "Stoplight()"
-      Stoplight(name, notifiers:, data_store:, **collect_settings(table))
+      Stoplight(name, **collect_settings(table))
     when "System#light"
       system.light(name, **collect_settings(table))
     else

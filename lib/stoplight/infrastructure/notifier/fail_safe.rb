@@ -39,10 +39,7 @@ module Stoplight
         end
 
         private def circuit_breaker
-          @circuit_breaker ||= Stoplight.system_light(
-            "stoplight:notifier:fail_safe:#{notifier.class.name}",
-            notifiers: []
-          )
+          @circuit_breaker ||= Stoplight.system_light("stoplight:notifier:fail_safe:#{notifier.class.name}")
         end
       end
     end

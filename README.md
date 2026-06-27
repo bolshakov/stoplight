@@ -226,14 +226,11 @@ light = Stoplight("Payment Service")
 You can also provide settings during creation:
 
 ```ruby
-data_store = Stoplight::DataStore::Redis.new(Redis.new)
-
 light = Stoplight("Payment Service",
   window_size: 300,                       # Only count errors in the last five minutes
   threshold: 5,                           # 5 errors before turning red
   cool_off_time: 60,                      # Wait 60 seconds before attempting recovery
   recovery_threshold: 1,                  # 1 successful attempt to turn green again
-  data_store: data_store,                 # Use Redis for persistence
   tracked_errors: [TimeoutError],         # Only count TimeoutError
   skipped_errors: [ValidationError]       # Ignore ValidationError
 )

@@ -16,9 +16,6 @@ RSpec.describe Stoplight::Domain::Light do
   let(:red_run_strategy) { instance_double(Stoplight::Domain::Strategies::RedRunStrategy) }
   let(:state_store) { instance_double(NullStateStore) }
 
-  describe "#==", pending: true do
-  end
-
   describe "#lock" do
     let(:color) { Stoplight::Color::GREEN }
 
