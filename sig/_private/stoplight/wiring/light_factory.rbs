@@ -31,6 +31,9 @@ module Stoplight
       @name: String
       @cool_off_time: duration
       @error_tracking_policy: Domain::ErrorTrackingPolicy
+      @wrapped_notifiers: Array[state_transition_notifier]?
+      @failover_data_store: Domain::_DataStore?
+      @data_store: Domain::_DataStore?
 
       def initialize: (config: Domain::Config) -> void
 
