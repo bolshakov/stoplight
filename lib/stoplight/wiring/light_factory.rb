@@ -53,6 +53,10 @@ module Stoplight
           tracked: config.tracked_errors,
           skipped: config.skipped_errors
         )
+
+        @wrapped_notifiers = nil
+        @failover_data_store = nil
+        @data_store = nil
       end
 
       def build
