@@ -1,0 +1,20 @@
+# frozen_string_literal: true
+
+class UpdateStoplightFunctions < ActiveRecord::Migration[<%= migration_version %>]
+  def up
+    # Re-installs all pgSQL functions used by the Stoplight PostgreSQL adapter.
+    # CREATE OR REPLACE is idempotent — safe to run multiple times.
+    # Embedded at generation time so this migration is self-contained.
+    safety_assured do
+      execute <<~SQL
+        <%= stoplight_functions_sql.gsub("\n", "\n        ").rstrip %>
+      SQL
+    end
+  end
+
+  def down
+    raise ActiveRecord::IrreversibleMigration,
+      "CREATE OR REPLACE FUNCTION has no clean inverse. " \
+      "To remove the functions, drop them manually or roll back to a prior install migration."
+  end
+end

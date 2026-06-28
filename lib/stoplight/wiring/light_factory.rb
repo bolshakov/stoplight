@@ -121,6 +121,13 @@ module Stoplight
         )
       end
 
+      def postgres_recovery_lock_store(connection)
+        Infrastructure::Postgres::DataStore::RecoveryLockStore.new(
+          connection:,
+          lock_timeout_ms: config.cool_off_time_in_milliseconds
+        )
+      end
+
       def scripting = Infrastructure::Redis::DataStore::Scripting.new(redis:)
 
       def memory_recovery_lock_store
@@ -207,6 +214,18 @@ module Stoplight
             error_notifier:,
             failover_data_store:,
             circuit_breaker: Stoplight.system_light("data_store:fail_safe:redis")
+          )
+        when Stoplight::DataStore::Postgres
+          Infrastructure::FailSafe::DataStore.new(
+            data_store: Stoplight::Infrastructure::Postgres::DataStore.new(
+              connection: data_store_config.connection,
+              recovery_lock_store: postgres_recovery_lock_store(data_store_config.connection),
+              clock:,
+              warn_on_clock_skew: data_store_config.warn_on_clock_skew
+            ),
+            error_notifier:,
+            failover_data_store:,
+            circuit_breaker: Stoplight.system_light("data_store:fail_safe:postgres")
           )
         else
           raise NoMatchingPatternError, data_store_config

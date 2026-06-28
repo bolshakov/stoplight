@@ -40,6 +40,7 @@ module Stoplight
       def state_store: -> Domain::_StateStore
       def notifiers: -> Array[state_transition_notifier]
       def redis_recovery_lock_store: -> Infrastructure::Redis::DataStore::RecoveryLockStore
+      def postgres_recovery_lock_store: (untyped connection) -> Infrastructure::Postgres::DataStore::RecoveryLockStore
       def scripting: -> Infrastructure::Redis::DataStore::Scripting
 
       def memory_recovery_lock_store: -> Infrastructure::Memory::DataStore::RecoveryLockStore

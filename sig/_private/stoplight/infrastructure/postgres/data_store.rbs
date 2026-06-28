@@ -1,0 +1,19 @@
+module Stoplight
+  module Infrastructure
+    module Postgres
+      class DataStore
+        include Domain::_DataStore
+
+        TABLE_PREFIX: String
+        RETENTION_MARGIN: Integer
+
+        def initialize: (
+          connection: untyped,
+          recovery_lock_store: RecoveryLockStore,
+          clock: Domain::_Clock,
+          ?warn_on_clock_skew: bool
+        ) -> void
+      end
+    end
+  end
+end

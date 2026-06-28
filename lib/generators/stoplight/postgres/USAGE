@@ -1,0 +1,36 @@
+Description:
+  Generates a database migration that creates the five tables required by the
+  Stoplight PostgreSQL data store and installs the nine pgSQL functions used
+  by the adapter for atomic circuit-breaker operations:
+
+    stoplight_events          — rolling event log with composite PK
+    stoplight_metadata        — per-light error/success counters
+    stoplight_recovery_metrics — metrics tracked during half-open recovery
+    stoplight_states          — circuit breaker state and timestamps
+    stoplight_locks           — distributed advisory locks
+
+  The pgSQL function definitions are embedded directly into the generated
+  migration at generation time, keeping migrations self-contained and
+  reproducible (no runtime SQL file reads required).
+
+Examples:
+  rails generate stoplight:postgres:install
+
+    Creates db/migrate/<timestamp>_create_stoplight_tables.rb
+    The migration creates all five tables AND installs the nine pgSQL functions.
+
+  rails generate stoplight:postgres:install --update
+
+    Creates db/migrate/<timestamp>_update_stoplight_functions.rb
+    The migration only re-installs the pgSQL functions (CREATE OR REPLACE is
+    idempotent). Use this after upgrading the stoplight gem to pick up any
+    function changes without recreating the tables.
+
+  rails db:migrate
+
+    Applies whichever migration(s) are pending.
+
+Note:
+  The Stoplight PostgreSQL data store NEVER issues DDL at runtime.
+  This generator is the supported way to create or update the schema in
+  Rails apps.

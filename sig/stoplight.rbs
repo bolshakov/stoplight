@@ -24,7 +24,7 @@ module Stoplight
   type error_notifier = ^(StandardError) -> void
   type traffic_control = :consecutive_errors | :error_rate | {error_rate: {min_requests: Integer}}
   type traffic_recovery = :consecutive_successes
-  type data_store = DataStore::Redis | DataStore::Memory
+  type data_store = DataStore::Redis | DataStore::Memory | DataStore::Postgres
   type state_transition_notifier = _StateTransitionNotifier
   type notification_formatter = ^(Domain::Config light, color, color, StandardError?) -> String
 

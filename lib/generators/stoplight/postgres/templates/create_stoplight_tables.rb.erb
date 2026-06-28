@@ -1,0 +1,40 @@
+# frozen_string_literal: true
+
+class CreateStoplightTables < ActiveRecord::Migration[<%= migration_version %>]
+  def up
+    # Tables and pgSQL functions are embedded from the gem's canonical DDL at
+    # generation time, so the migration is self-contained and the column types
+    # (text / timestamptz) always match what the functions expect.
+    safety_assured do
+      execute <<~SQL
+        <%= stoplight_schema_sql.gsub("\n", "\n        ").rstrip %>
+      SQL
+
+      execute <<~SQL
+        <%= stoplight_functions_sql.gsub("\n", "\n        ").rstrip %>
+      SQL
+    end
+  end
+
+  def down
+    safety_assured do
+      execute <<~SQL
+        DROP FUNCTION IF EXISTS stoplight_get_metrics CASCADE;
+        DROP FUNCTION IF EXISTS stoplight_record_failure CASCADE;
+        DROP FUNCTION IF EXISTS stoplight_record_recovery_probe_failure CASCADE;
+        DROP FUNCTION IF EXISTS stoplight_record_recovery_probe_success CASCADE;
+        DROP FUNCTION IF EXISTS stoplight_record_success CASCADE;
+        DROP FUNCTION IF EXISTS stoplight_release_lock CASCADE;
+        DROP FUNCTION IF EXISTS stoplight_transition_to_green CASCADE;
+        DROP FUNCTION IF EXISTS stoplight_transition_to_red CASCADE;
+        DROP FUNCTION IF EXISTS stoplight_transition_to_yellow CASCADE;
+      SQL
+
+      drop_table :stoplight_locks
+      drop_table :stoplight_states
+      drop_table :stoplight_recovery_metrics
+      drop_table :stoplight_metadata
+      drop_table :stoplight_events
+    end
+  end
+end

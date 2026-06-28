@@ -372,10 +372,11 @@ single successful recovery probe will resume traffic flow.
 
 ### Data Store
 
-Stoplight officially supports three data stores:
+Stoplight officially supports three data stores, plus one experimental adapter:
 - In-memory data store
 - Redis
 - Valkey
+- PostgreSQL (experimental)
 
 By default, Stoplight uses an in-memory data store:
 
@@ -416,6 +417,66 @@ Stoplight.configure do |config|
   # ...
 end
 ```
+
+#### PostgreSQL (experimental)
+
+> **Experimental**: This adapter is new and may change in future releases. Production use is possible but not yet covered by the maintenance policy.
+
+Stoplight can use [PostgreSQL][] as a persistent data store. This adapter requires no additional runtime dependencies beyond the `pg` gem and uses the application Ruby clock, so there is no clock-skew concern between Stoplight and the database.
+
+```ruby
+require "pg"
+
+Stoplight.configure do |config|
+  config.data_store = Stoplight::DataStore::Postgres.new(PG.connect(ENV["DATABASE_URL"]))
+end
+```
+
+For multi-threaded applications (e.g. Puma or Sidekiq), pass a `ConnectionPool<PG::Connection>` instead of a bare connection — this is strongly recommended for production:
+
+```ruby
+require "pg"
+require "connection_pool"
+
+pool = ConnectionPool.new(size: 5, timeout: 3) { PG.connect(ENV["DATABASE_URL"]) }
+
+Stoplight.configure do |config|
+  config.data_store = Stoplight::DataStore::Postgres.new(pool)
+end
+```
+
+The schema must be created before use. In a Rails application, run the provided generator:
+
+```sh
+bin/rails generate stoplight:postgres:install
+bin/rails db:migrate
+```
+
+For non-Rails applications, the DDL is available as the `Stoplight::Infrastructure::Postgres::DataStore::Schema::SQL` constant — execute it against your database once during setup.
+
+> **Warning — Rails schema format requirement:** The adapter installs pgSQL functions (via the migration above). Rails' default `schema_format = :ruby` (`db/schema.rb`) cannot represent database functions — only tables. If you keep the default format, `db:schema:load`, `db:prepare`, and any fresh-database setup that loads from `schema.rb` (common in CI and test environments) will create the `stoplight_*` tables but **not** the functions. The adapter will then raise `PG::UndefinedFunction` at runtime.
+>
+> To capture the functions, set the following in `config/application.rb`:
+>
+> ```ruby
+> config.active_record.schema_format = :sql
+> ```
+>
+> With `:sql` format, Rails dumps to `db/structure.sql` instead, which preserves pgSQL functions and makes `db:schema:load` / `db:prepare` fully reproduce the schema.
+>
+> **Prefer to keep the `:ruby` schema format?** Add the [`fx`](https://github.com/teoljungberg/fx) gem to your app (the function equivalent of `scenic` for views). With `fx` loaded, Rails' schema dumper emits the Stoplight functions into `db/schema.rb` as `create_function` statements, so `db:schema:load` / `db:prepare` reproduce them without switching to `:sql`. This requires no changes to Stoplight — `fx` discovers the functions by introspection. (This is the same options matrix `logidze` offers: `schema_format = :sql`, or `fx` + the default `:ruby`.)
+>
+> If you keep `:ruby` format **without** `fx`, the functions are only installed when you run `bin/rails db:migrate` — they are **not** replayed by `db:schema:load`.
+>
+> **Seeing `PG::UndefinedFunction: function stoplight_*` does not exist?** Your database was loaded from `schema.rb` without the functions. Switch to `schema_format = :sql`, add the `fx` gem, or run `bin/rails db:migrate` to install them.
+
+As with the Redis adapter, if the PostgreSQL connection fails Stoplight automatically falls back to the in-memory data store and invokes the configured `error_notifier`.
+
+**Known limitations (experimental):**
+
+- **Thread safety / connections.** A bare `PG::Connection` is *not* thread-safe; in a multi-threaded server (e.g. Puma) pass a `ConnectionPool<PG::Connection>` so each thread checks out its own connection. A single shared bare connection will raise `another command is already in progress` under concurrency (which then trips the in-memory failover).
+- **Failover suspends distributed guarantees.** While PostgreSQL is unavailable, the breaker falls back to a per-process in-memory store (same trade-off as the Redis adapter). During that window circuit state is not shared across processes, the single-recovery-prober guarantee does not hold, and a `stoplight_locks` row held when the outage began is released only by its TTL.
+- **Sub-second window boundaries.** This adapter counts events with microsecond precision (`occurred_at >= window_start`), whereas the in-memory/Redis adapters bucket by whole seconds. At the exact window edge the same event stream can yield slightly different counts across backends, so a circuit configured with a threshold right at the boundary may decide differently on PostgreSQL.
 
 #### DragonflyDB Support
 
@@ -636,6 +697,7 @@ Fowler’s [CircuitBreaker][] article.
 [complete list of contributors]: https://github.com/bolshakov/stoplight/graphs/contributors
 [CircuitBreaker]: http://martinfowler.com/bliki/CircuitBreaker.html
 [Redis]: https://redis.io/
+[PostgreSQL]: https://www.postgresql.org/
 [Git Flow wiki page]: https://github.com/bolshakov/stoplight/wiki/Git-Flow
 [Valkey]: https://valkey.io/
 [Ruby Maintenance Branches]: https://www.ruby-lang.org/en/downloads/branches/

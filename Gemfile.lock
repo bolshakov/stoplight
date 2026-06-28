@@ -128,6 +128,7 @@ GEM
     parser (3.3.11.1)
       ast (~> 2.4.1)
       racc
+    pg (1.6.3)
     pp (0.6.3)
       prettyprint
     prettyprint (0.2.0)
@@ -312,6 +313,7 @@ DEPENDENCIES
   cucumber
   database_cleaner-redis (~> 2.0)
   debug
+  pg
   puma
   rack-test
   rake (~> 13.4)

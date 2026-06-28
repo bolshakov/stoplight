@@ -118,7 +118,7 @@ module Stoplight
         #
         def release_recovery_lock(recovery_lock_token)
           case recovery_lock_token
-          in Redis::DataStore::RecoveryLockToken
+          in Redis::DataStore::RecoveryLockToken | Postgres::DataStore::RecoveryLockToken
             fallback = proc do |error|
               error_notifier.call(error) if error
             end

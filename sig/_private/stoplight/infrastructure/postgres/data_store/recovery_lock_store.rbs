@@ -1,0 +1,18 @@
+module Stoplight
+  module Infrastructure
+    module Postgres
+      class DataStore
+        class RecoveryLockStore
+          def initialize: (
+            connection: untyped,
+            lock_timeout_ms: Integer
+          ) -> void
+
+          def acquire_lock: (String light_name) -> RecoveryLockToken?
+
+          def release_lock: (RecoveryLockToken recovery_lock) -> void
+        end
+      end
+    end
+  end
+end

@@ -10,6 +10,16 @@ module Stoplight
       def initialize: (redis, ?warn_on_clock_skew: bool) -> void
     end
 
+    # Configuration for PostgreSQL-backed Stoplight storage.
+    #
+    # @note This is a configuration object, not the storage implementation itself.
+    class Postgres < Base
+      attr_reader connection: untyped
+      attr_reader warn_on_clock_skew: bool
+
+      def initialize: (untyped connection, ?warn_on_clock_skew: bool) -> void
+    end
+
     # Configuration for Memory-backed Stoplight storage.
     #
     # @note This is a configuration object, not the storage implementation itself.

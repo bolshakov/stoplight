@@ -23,6 +23,7 @@ require_relative "support/light/color"
 require_relative "support/light/run"
 require_relative "support/light/state"
 require_relative "support/database_cleaner"
+require_relative "support/database_cleaner_postgres"
 require_relative "support/exception_helpers"
 require_relative "support/route_helpers"
 

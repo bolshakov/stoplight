@@ -14,6 +14,7 @@ end
 
 group :development do
   gem "ammeter"
+  gem "pg"
   gem "benchmark-ips", "~> 2.15"
   gem "concurrent-ruby-ext"
   gem "connection_pool"

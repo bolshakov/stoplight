@@ -1,3 +1,7 @@
+## Unreleased
+- Added an experimental PostgreSQL data store adapter (`Stoplight::DataStore::Postgres`). Create the schema with `bin/rails generate stoplight:postgres:install` then `bin/rails db:migrate` (Rails apps). For non-Rails apps, execute the DDL from `Stoplight::Infrastructure::Postgres::DataStore::Schema::SQL`. See the README "PostgreSQL (experimental)" section.
+- **Rails users:** The PostgreSQL adapter relies on pgSQL functions that Rails' default Ruby schema dumper (`schema_format = :ruby`, `db/schema.rb`) cannot capture. Set `config.active_record.schema_format = :sql` in `config/application.rb` so that `db/structure.sql` is used instead — this ensures `db:schema:load`, `db:prepare`, and CI database setup all install the functions. Alternatively, keep the default `:ruby` format and add the [`fx`](https://github.com/teoljungberg/fx) gem — its schema dumper emits the functions into `db/schema.rb` as `create_function` statements (same options matrix as `logidze`). If you keep `:ruby` *without* `fx`, the functions are only present after running `bin/rails db:migrate`; loading from `schema.rb` alone will cause `PG::UndefinedFunction` errors at runtime.
+
 ## Stoplight 6.0 
 - Removed Light#with() method 
 - Removed Light's `#with_data_store`, `#with_cool_off_time`, `#with_threshold`, `#with_window_size`, `#with_notifiers`, 

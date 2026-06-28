@@ -1,0 +1,16 @@
+module Stoplight
+  module Infrastructure
+    module Postgres
+      class DataStore
+        class RecoveryLockToken
+          include Domain::_RecoveryLockToken
+
+          attr_reader light_name: String
+          attr_reader token: String
+
+          def initialize: (light_name: String, token: String) -> void
+        end
+      end
+    end
+  end
+end
