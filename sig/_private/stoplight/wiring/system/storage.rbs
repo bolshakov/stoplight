@@ -4,6 +4,7 @@ module Stoplight
       class Storage
         @system_name: String
         @failover_system: _System
+        @factories: Hash[Domain::Config, LightFactory]
 
         def initialize: (system_name: String, failover_system: _System) -> void
 
@@ -15,6 +16,7 @@ module Stoplight
 
         def state_store: (Domain::Config) -> Domain::_StateStore
         def metrics_store: (Domain::Config) -> Domain::_MetricsStore
+        def light_factory: (Domain::Config) -> LightFactory
       end
     end
   end

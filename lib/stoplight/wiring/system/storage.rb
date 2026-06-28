@@ -7,6 +7,7 @@ module Stoplight
         def initialize(system_name:, failover_system:)
           @system_name = system_name
           @failover_system = failover_system
+          @factories = {}
         end
 
         def state_snapshot(config)
@@ -23,11 +24,15 @@ module Stoplight
         end
 
         private def state_store(config)
-          LightFactory.new(system_name: @system_name, config:, failover_system: @failover_system).state_store
+          light_factory(config).state_store
         end
 
         private def metrics_store(config)
-          LightFactory.new(system_name: @system_name, config:, failover_system: @failover_system).metrics_store
+          light_factory(config).metrics_store
+        end
+
+        private def light_factory(config)
+          @factories[config] ||= LightFactory.new(system_name: @system_name, config:, failover_system: @failover_system)
         end
       end
     end

@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "concurrent/map"
-
 module Stoplight
   module Infrastructure
     module Memory

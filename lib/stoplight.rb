@@ -26,7 +26,6 @@ module Stoplight # rubocop:disable Style/Documentation
     # Configures the Stoplight library.
     #
     # This method allows you to set up the library's configuration using a block.
-    # It raises an error if called more than once.
     # @param trust_me_im_an_engineer [Boolean]
     # @yield [config] Provides a configuration object to the block.
     # @yieldparam config [Stoplight::Wiring::DefaultConfiguration] The configuration object.
