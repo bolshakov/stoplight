@@ -116,6 +116,7 @@ module Stoplight
             [
               LightFactory.new(
                 system: self,
+                failover_system: failover_system,
                 config: light_dsl.configure!(system_config)
               ).build,
               config_digest,
@@ -130,6 +131,12 @@ module Stoplight
       private
 
       attr_reader :lights
+
+      def failover_system
+        @failover_system ||= Wiring::System.new(
+          config: Wiring::FailSafeConfig.with(name: "__stoplight__:failover:#{@name}")
+        )
+      end
     end
   end
 end

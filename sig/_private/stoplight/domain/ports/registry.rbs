@@ -1,0 +1,11 @@
+module Stoplight
+  module Domain
+    # Holds the information about existing lights.
+    # Each system has its own registry so you can query lights belonging to it.
+    interface _Registry
+      def names: -> Array[String]
+      def register: (String name, config: Domain::Config) -> void
+      def unregister: (String name) -> void
+    end
+  end
+end

@@ -4,8 +4,9 @@ module Stoplight
   module Wiring
     class System
       class LightFactory < Wiring::LightFactory
-        def initialize(system:, config:)
+        def initialize(system:, failover_system:, config:)
           @system = system
+          @failover_system = failover_system
 
           super(config:)
         end
@@ -22,17 +23,13 @@ module Stoplight
         private
 
         attr_reader :system
+        attr_reader :failover_system
 
         def state_store = storage_set.state_store
         def recovery_lock_store = storage_set.recovery_lock_store
         def recovery_metrics_store = storage_set.recovery_metrics_store
         def metrics_store = storage_set.metrics_store
         def storage_scripting = Infrastructure::Redis::Storage::Scripting.new(redis:)
-
-        def failover_system = @failover_system ||= Stoplight.__stoplight__system(
-          "failover-#{system.name}",
-          data_store: Stoplight::DataStore::Memory.new
-        )
 
         def build_backend
           case data_store_config

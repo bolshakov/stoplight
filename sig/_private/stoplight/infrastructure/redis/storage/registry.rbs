@@ -1,0 +1,18 @@
+module Stoplight
+  module Infrastructure
+    module Redis
+      module Storage
+        class Registry
+          include Domain::_Registry
+
+          REDIS_KEY: String
+          @redis: redis
+          @key_space: SystemKeySpace
+          @clock: Domain::_Clock
+
+          def initialize: (redis: redis, key_space: SystemKeySpace, clock: Domain::_Clock) -> void
+        end
+      end
+    end
+  end
+end

@@ -105,6 +105,20 @@ RSpec.describe Stoplight::Wiring::System do
       end
     end
 
+    describe "with a Redis-backed system", :redis do
+      let(:system_config) do
+        Stoplight::Wiring::DefaultConfig.with(
+          name: "redis-test-system",
+          data_store: Stoplight::DataStore::Redis.new(redis)
+        )
+      end
+
+      it "allows creating multiple lights without raising" do
+        system.light("stripe")
+        expect { system.light("paypal") }.not_to raise_error
+      end
+    end
+
     describe "inheriting system configuration" do
       before do
         system.light("foo")
@@ -125,8 +139,8 @@ RSpec.describe Stoplight::Wiring::System do
           system.light("bar", cool_off_time: 30, threshold: 44)
         end.to raise_error(
           include(/Light `bar` already registered with different configuration/)
-            .and(include(/system_spec\.rb:121/))
-            .and(include(/system_spec\.rb:125/))
+            .and(include(/system_spec\.rb:135/))
+            .and(include(/system_spec\.rb:139/))
         )
       end
     end
