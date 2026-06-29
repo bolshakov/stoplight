@@ -19,14 +19,6 @@ RSpec.describe "Stoplight" do
     end
   end
 
-  describe ".system_light" do
-    subject(:light) { Stoplight.system_light(name) }
-
-    it "prefix name with __stoplight__" do
-      expect(light.name).to eq("__stoplight__#{name}")
-    end
-  end
-
   context "with settings" do
     subject(:light) { Stoplight(name, **settings) }
 

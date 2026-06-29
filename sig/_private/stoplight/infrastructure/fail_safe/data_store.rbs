@@ -6,13 +6,13 @@ module Stoplight
         attr_reader data_store: Domain::_DataStore
         attr_reader failover_data_store: Domain::_DataStore
         attr_reader error_notifier: error_notifier
-        private attr_reader circuit_breaker: Domain::Light
+        private attr_reader circuit_breaker: _Light
 
         def initialize: (
           data_store: Domain::_DataStore,
           error_notifier: error_notifier,
           failover_data_store: Domain::_DataStore,
-          circuit_breaker: Domain::Light
+          circuit_breaker: _Light
         ) -> void
 
         private def with_fallback: [T] (

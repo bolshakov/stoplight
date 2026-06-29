@@ -3,21 +3,17 @@
 module Stoplight
   class Admin
     class LightsRepository
-      # @!attribute data_store
-      #   @return [Stoplight::Domain::_DataStore]
-      attr_reader :data_store
-      private :data_store
-
-      #  @param data_store [Stoplight::Domain::_DataStore]
-      def initialize(data_store:)
-        @data_store = data_store
+      def initialize(registry:, storage:, system:)
+        @storage = storage
+        @registry = registry
+        @system = system
       end
 
       # @return [<Stoplight::Admin::LightsRepository::Light>]
       def all
-        data_store
+        @registry
           .names
-          .map { |name| load_light(name) }
+          .map { |name| load_light_view(name) }
           .sort_by(&:default_sort_key)
       end
 
@@ -37,38 +33,36 @@ module Stoplight
       #   color
       # @return [void]
       def lock(name, color = nil)
-        config = build_config(name)
-        color ||= data_store.get_state_snapshot(config).color
+        light = load_light(name)
+        color ||= light.color
 
-        case color
-        when Stoplight::Color::GREEN
-          data_store.set_state(config, Stoplight::State::LOCKED_GREEN)
-        else
-          data_store.set_state(config, Stoplight::State::LOCKED_RED)
-        end
+        light.lock(color)
       end
 
       # @param name [String] unlocks light by its name
       # @return [void]
       def unlock(name)
-        config = build_config(name)
-        data_store.set_state(config, State::UNLOCKED)
+        load_light(name).unlock
       end
 
       # @param name [String] removes light metadata by its name
       # @return [void]
       def remove(name)
-        config = build_config(name)
-
-        data_store.delete_light(config)
+        config = @system.system_config.with(name:)
+        @storage.delete(config)
+        @registry.unregister(name)
       end
 
       private def load_light(name)
+        @system.light(name)
+      end
+
+      private def load_light_view(name)
         config = build_config(name)
 
         # failures, state
-        state_snapshot = data_store.get_state_snapshot(config)
-        metrics = data_store.get_metrics(config)
+        state_snapshot = @storage.state_snapshot(config)
+        metrics = @storage.metrics_snapshot(config)
 
         Light.new(
           name: name,
@@ -80,7 +74,7 @@ module Stoplight
       end
 
       private def build_config(name)
-        Wiring::DefaultConfig.with(name:)
+        @system.system_config.with(name:)
       end
     end
   end

@@ -1,0 +1,21 @@
+module Stoplight
+  module Wiring
+    class System
+      class Storage
+        @system_name: String
+        @failover_system: _System
+
+        def initialize: (system_name: String, failover_system: _System) -> void
+
+        def state_snapshot: (Domain::Config) -> Domain::StateSnapshot
+        def metrics_snapshot: (Domain::Config) -> Domain::MetricsSnapshot
+        def delete: (Domain::Config) -> void
+
+        private
+
+        def state_store: (Domain::Config) -> Domain::_StateStore
+        def metrics_store: (Domain::Config) -> Domain::_MetricsStore
+      end
+    end
+  end
+end

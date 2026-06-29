@@ -84,7 +84,9 @@ module Stoplight
       # should be ready to use immediately after construction.
       #
       # @raise [Stoplight::Error::ConfigurationError] If configuration is invalid
-      def build: -> Domain::Light
+      def build: -> _Light
+
+      def create_circuit_breaker: (String) -> _Light
     end
   end
 end

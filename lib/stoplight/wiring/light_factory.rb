@@ -109,7 +109,11 @@ module Stoplight
       # @return [<Stoplight::Notifier::Base>]
       def notifiers
         @wrapped_notifiers ||= Array(@notifiers).map do |notifier|
-          Infrastructure::Notifier::FailSafe.new(notifier:, error_notifier:)
+          Infrastructure::Notifier::FailSafe.new(
+            notifier:,
+            error_notifier:,
+            circuit_breaker: create_circuit_breaker("notifier:#{notifier.class.name}")
+          )
         end
       end
 
@@ -206,7 +210,7 @@ module Stoplight
             ),
             error_notifier:,
             failover_data_store:,
-            circuit_breaker: Stoplight.system_light("data_store:fail_safe:redis")
+            circuit_breaker: create_circuit_breaker("data_store:fail_safe:redis")
           )
         else
           raise NoMatchingPatternError, data_store_config

@@ -3,19 +3,18 @@
 module Stoplight
   class Admin
     class Dependencies
-      # @!attribute data_store
-      #   @return [Stoplight::DataStore::Base]
-      attr_reader :data_store
-      private :data_store
-
-      # @param data_store [Stoplight::Domain::_DataStore]
-      def initialize(data_store:)
-        @data_store = data_store
+      # @param system [Stoplight::Wiring::System]
+      def initialize(system:)
+        @system = system
       end
 
       # @return [Stoplight::Admin::LightsRepository]
       def lights_repository
-        Stoplight::Admin::LightsRepository.new(data_store: data_store)
+        Stoplight::Admin::LightsRepository.new(
+          registry: @system.__stoplight__registry,
+          storage: @system.__stoplight__storage,
+          system: @system
+        )
       end
 
       # @return [Stoplight::Admin::Actions::Stats]

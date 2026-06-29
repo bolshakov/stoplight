@@ -1,31 +1,14 @@
 # frozen_string_literal: true
 
 RSpec.describe Stoplight::Admin::LightsRepository, :redis do
-  subject(:repository) { described_class.new(data_store:) }
+  subject(:repository) { described_class.new(registry:, storage:, system:) }
 
-  let(:data_store) do
-    Stoplight::Infrastructure::Redis::DataStore.new(
-      clock:,
-      redis:,
-      warn_on_clock_skew: false,
-      recovery_lock_store: redis_recovery_lock_store,
-      scripting:
-    )
-  end
-  let(:redis_recovery_lock_store) do
-    Stoplight::Infrastructure::Redis::DataStore::RecoveryLockStore.new(
-      redis:,
-      lock_timeout: 1,
-      scripting:
-    )
-  end
-  let(:clock) { Stoplight::Infrastructure::SystemClock.new }
-  let(:scripting) do
-    Stoplight::Infrastructure::Redis::DataStore::Scripting.new(redis:)
-  end
+  let(:system) { Stoplight.__stoplight__system(SecureRandom.uuid) }
+  let(:storage) { system.__stoplight__storage }
+  let(:registry) { instance_double(Stoplight::Infrastructure::Redis::Storage::Registry) }
   let(:data_store_config) { Stoplight::DataStore::Redis.new(redis) }
   let(:name) { "lights-repository" }
-  let(:light) { Stoplight(name) }
+  let(:light) { system.light(name) }
 
   before do
     Stoplight.configure(trust_me_im_an_engineer: true) do |config|
@@ -37,6 +20,8 @@ RSpec.describe Stoplight::Admin::LightsRepository, :redis do
     subject(:lights) { repository.all }
 
     context "when there are no lights" do
+      before { allow(registry).to receive(:names).and_return([]) }
+
       it "returns empty array" do
         is_expected.to be_empty
       end
@@ -44,6 +29,7 @@ RSpec.describe Stoplight::Admin::LightsRepository, :redis do
 
     context "when there are lights" do
       before do
+        allow(registry).to receive(:names).and_return([name])
         light.run { raise "whoops" }
       rescue
         nil
@@ -69,8 +55,9 @@ RSpec.describe Stoplight::Admin::LightsRepository, :redis do
 
   describe "#with_color" do
     before do
-      Stoplight("red-light").lock("red")
-      Stoplight("green-light").lock("green")
+      allow(registry).to receive(:names).and_return(["red-light", "green-light"])
+      system.light("red-light").lock("red")
+      system.light("green-light").lock("green")
     end
 
     it "returns light with requested color" do
@@ -133,19 +120,23 @@ RSpec.describe Stoplight::Admin::LightsRepository, :redis do
     subject(:remove) { repository.remove(light.name) }
 
     before do
-      # Ensure metadata exists
-
+      allow(registry).to receive(:names).and_return([name])
       light.run { raise "whoops" }
     rescue
       nil
     end
 
-    it "removes the light metadata so it no longer appears in repository" do
-      expect(repository.all.map(&:name)).to include(light.name)
+    it "clears state and metrics so the light appears as fresh after removal" do
+      expect(repository.all).to contain_exactly(
+        have_attributes(name:, failures: contain_exactly(have_attributes(error_class: "RuntimeError")))
+      )
+      expect(registry).to receive(:unregister).with(light.name)
 
       remove
 
-      expect(repository.all.map(&:name)).not_to include(light.name)
+      expect(repository.all).to contain_exactly(
+        have_attributes(name:, failures: be_empty, failure_count: 0)
+      )
     end
   end
 end

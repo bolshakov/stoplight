@@ -20,7 +20,8 @@ module Stoplight
     # @return [T] the non-nil value
     #
     def self.must(value)
-      if value.nil?
+      case value
+      when nil
         raise TypeError, "must not have nil value"
       else
         value

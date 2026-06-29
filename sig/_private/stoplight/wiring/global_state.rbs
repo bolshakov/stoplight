@@ -1,0 +1,18 @@
+module Stoplight
+  module Wiring
+    class GlobalState
+      @default_config: Domain::Config
+      @default_system: _System
+      @systems: Concurrent::Map[String, _System]
+
+      attr_reader default_config: Domain::Config
+      attr_reader default_system: _System
+
+      def initialize: (default_config: Domain::Config) -> void
+      def create_system: (config: Domain::Config) -> _System
+
+      def create_registry: (Domain::Config) -> Domain::_Registry
+      def redis: (Domain::Config) -> redis
+    end
+  end
+end

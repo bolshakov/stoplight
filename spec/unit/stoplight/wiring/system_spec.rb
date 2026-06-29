@@ -1,7 +1,16 @@
 # frozen_string_literal: true
 
 RSpec.describe Stoplight::Wiring::System do
-  subject!(:system) { described_class.new(config: system_config) }
+  subject!(:system) { described_class.new(config: system_config, failover_system:, registry:) }
+
+  let(:failover_system) do
+    described_class.new(
+      config: Stoplight::Wiring::FailSafeConfig.with(name: SecureRandom.uuid),
+      failover_system: nil,
+      registry: instance_double(Stoplight::Infrastructure::Memory::Storage::Registry, register: nil)
+    )
+  end
+  let(:registry) { instance_double(Stoplight::Infrastructure::Memory::Storage::Registry, register: nil) }
 
   describe "#light" do
     let(:system_config) { Stoplight::Wiring::DefaultConfig }
@@ -139,9 +148,29 @@ RSpec.describe Stoplight::Wiring::System do
           system.light("bar", cool_off_time: 30, threshold: 44)
         end.to raise_error(
           include(/Light `bar` already registered with different configuration/)
-            .and(include(/system_spec\.rb:135/))
-            .and(include(/system_spec\.rb:139/))
+            .and(include(/system_spec\.rb:144/))
+            .and(include(/system_spec\.rb:148/))
         )
+      end
+    end
+
+    describe "registry" do
+      let(:registry) { instance_double(Stoplight::Infrastructure::Memory::Storage::Registry, register: nil) }
+      let(:system_config) { Stoplight::Wiring::DefaultConfig }
+
+      subject!(:system) { described_class.new(config: system_config, failover_system:, registry:) }
+
+      it "registers the light name when a new light is created" do
+        system.light("stripe")
+
+        expect(registry).to have_received(:register).with("stripe", config: anything)
+      end
+
+      it "does not register again on repeated calls with the same name" do
+        system.light("stripe")
+        system.light("stripe")
+
+        expect(registry).to have_received(:register).once
       end
     end
   end

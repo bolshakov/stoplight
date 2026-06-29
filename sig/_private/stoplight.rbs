@@ -2,10 +2,7 @@ module Stoplight
   T: singleton(Types)
   CONFIG_MUTEX: Mutex
 
-  self.@configured:  bool?
-  self.@default_config: Domain::Config?
-  self.@systems: Concurrent::Map[String, _System]
-  self.@default_light_factory: Wiring::LightFactory?
+  self.@state: Wiring::GlobalState?
 
   def self.warn_if_reconfiguring: (bool) { () -> void } -> void
   def self.configured?: -> bool
@@ -21,10 +18,8 @@ module Stoplight
       ?skipped_errors: optional[Array[_ExceptionMatcher]],
       ?traffic_control: optional[traffic_control],
       ?traffic_recovery: optional[traffic_recovery],
-    ) -> Domain::Light
+    ) -> _Light
 
-  def self.systems: -> Concurrent::Map[String, _System]
-  def self.default_config: -> Domain::Config
   def self.ensure_configured: -> void
   def self.__stoplight__system: (
       _ToS name,
@@ -41,5 +36,6 @@ module Stoplight
       ?traffic_recovery: optional[traffic_recovery],
     ) -> _System
   def self.__stoplight__default_configuration: -> Domain::Config
-  def self.__stoplight__default_light_factory: -> Wiring::LightFactory
+  def self.__stoplight__default_system: -> _System
+  def self.state: -> Wiring::GlobalState
 end
