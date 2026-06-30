@@ -19,6 +19,14 @@
             "command": "#wh-check-lint\ni=$(cat); [ \"$(printf '%s' \"$i\" | jq -r '.stop_hook_active // false')\" = true ] && exit 0\ncd \"$CLAUDE_PROJECT_DIR\" || exit 2\nbundle exec standardrb >&2 || exit 2"
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "#steep\ni=$(cat); [ \"$(printf '%s' \"$i\" | jq -r '.stop_hook_active // false')\" = true ] && exit 0\ncd \"$CLAUDE_PROJECT_DIR\" || exit 2\nbundle exec steep check >&2 || exit 2"
+          }
+        ]
       }
     ]
   }
