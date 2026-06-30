@@ -1,0 +1,1 @@
+../../docs/redis_and_storage.md
