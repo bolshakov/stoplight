@@ -1,0 +1,6 @@
+{
+  "name": "stoplight-skills",
+  "version": "1.0.0",
+  "description": "TDD skill for Stoplight contributors",
+  "skills": "../.claude/skills/"
+}
