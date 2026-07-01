@@ -42,24 +42,6 @@ fails lint:
 
 Full detail: `docs/architecture.md`.
 
-## TDD protocol - non-negotiable
-
-Implement every `lib/` change test-first, **one test at a time**: write one failing
-test → simplest code to make it pass → refactor with the test green → repeat.
-
-Two hard stops. If either happens, **delete the work and restart test-first**:
-
-- Implementation code was written before its test.
-- More than one failing test was written at once. Write the next test only after the
-  previous one is green.
-
-Adding a dependency (e.g. injecting a clock or a store) **purely to make code testable
-is fine**.
-
-Definition of done: `domain/` and `infrastructure/` stay at **100% line coverage**, and
-every public interface is covered by a **feature test** (`features/`, run against both
-Memory and Redis). Detail in `docs/testing.md`.
-
 ## Conventions
 
 - `# frozen_string_literal: true` at the top of every Ruby file.

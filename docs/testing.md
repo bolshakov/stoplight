@@ -6,10 +6,6 @@ paths:
 
 # Testing conventions
 
-The **TDD protocol** (one failing test at a time. Delete-and-restart if implementation
-preceded its test or if multiple failing tests were written at once) lives in
-`AGENTS.md` and governs all implementation. This file covers the testing specifics.
-
 ## Coverage
 
 - `domain/` and `infrastructure/` must stay at **100% line coverage**. These are the
@@ -101,29 +97,3 @@ A new spec mirrors the path of the code it covers and stays inside its layer's
 directory so the boundary cop applies. New behavior generally wants a unit spec plus,
 where it crosses a real store, an integration or property spec.
 
-## TDD: agent failure modes to name, not discover in review
-
-- **Teaching to the test.** Satisfying the letter of the assertion - hardcoding the
-  expected value, special-casing the one input - instead of implementing the behavior.
-  If you notice yourself hardcoding expected output, stop.
-- **Correlated test and code.** When the same context produces both, a misunderstanding
-  yields a wrong test and a wrong implementation that agree, and green is a lie. Write
-  the test from the desired behavior, not from the implementation you intend. Property
-  tests (`spec/properties/`) catch this class of error where example-based tests miss.
-- **Not feeling the pain.** If a test needs heavy setup, private-method access, or
-  constant stubbing, stop and say so - that is the design pushing back. Injected ports
-  (`spec/support/adapters/`) are the fix; if the test is still awkward after using them,
-  the design is wrong.
-
-## TDD: rationalizations to reject
-
-- *"I'll test after."* A test written after the code tends to assert what the code
-  does, not what it should - and one you never watched fail proves nothing.
-- *"Too simple to break."* Simple code breaks too, and the test costs seconds.
-- *"I already tested it by hand."* Ad-hoc checking is not a kept, repeatable test;
-  the next change has nothing to catch its regression.
-- *"Restarting test-first wastes the code I have."* Sunk cost. Untested code is a
-  liability; re-deriving it under a test is fast.
-
-The exception is narrow: no behavior to test (config, generated code), or explicitly
-told otherwise. Name which exception applies - don't reach for one of the above.
