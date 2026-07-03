@@ -48,6 +48,9 @@ Full detail: `docs/architecture.md`.
 - Let zeitwerk autoload - no manual `require` inside `lib/`. File path = constant path.
 - Internal-but-public plumbing uses the `__stoplight__` prefix.
 - Public surface is only: `Stoplight()`, `Stoplight.light`, `Stoplight.configure`.
+- Public API methods require a doc comment with at least one usage example -
+  see `lib/stoplight.rb` for the pattern. Document behavior, not types - types
+  belong in RBS (`docs/types_and_rbs.md`).
 - Domain collaborator ports are RBS interfaces with **no runtime constant** - test
   doubles use the `Null*` classes in `spec/support/adapters/`, e.g.
   `instance_double(NullStateStore)`. See `docs/testing.md`.
