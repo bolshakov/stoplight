@@ -16,9 +16,6 @@ module Stoplight
     # - Dependency direction is preserved (Application → Domain, not Domain → Application)
     #
     class LightFactory
-      FAILOVER_DATA_STORE_CONFIG: Stoplight::DataStore::Memory
-      MEMORY_REGISTRY: Concurrent::Map[Integer, Infrastructure::Memory::DataStore]
-
       attr_reader data_store_config: data_store
       attr_reader error_notifier: error_notifier
       attr_reader clock: Domain::_Clock
@@ -32,19 +29,11 @@ module Stoplight
       @cool_off_time: duration
       @error_tracking_policy: Domain::ErrorTrackingPolicy
       @wrapped_notifiers: Array[state_transition_notifier]?
-      @failover_data_store: Domain::_DataStore?
-      @data_store: Domain::_DataStore?
 
       def initialize: (config: Domain::Config) -> void
 
       def state_store: -> Domain::_StateStore
       def notifiers: -> Array[state_transition_notifier]
-      def redis_recovery_lock_store: -> Infrastructure::Redis::DataStore::RecoveryLockStore
-      def scripting: -> Infrastructure::Redis::DataStore::Scripting
-
-      def memory_recovery_lock_store: -> Infrastructure::Memory::DataStore::RecoveryLockStore
-      def failover_data_store: -> Domain::_DataStore
-      def data_store: -> Domain::_DataStore
 
       def metrics_store: -> Domain::_MetricsStore
       def recovery_lock_store: -> Domain::_RecoveryLockStore
@@ -55,8 +44,6 @@ module Stoplight
       def green_run_strategy: -> Domain::Strategies::GreenRunStrategy
       def yellow_run_strategy: -> Domain::Strategies::YellowRunStrategy
       def red_run_strategy: -> Domain::Strategies::RedRunStrategy
-      def create_data_store: (data_store) -> Domain::_DataStore
-      def memory_registry: -> Concurrent::Map[Integer, Infrastructure::Memory::DataStore]
       def redis: -> redis
 
       # Builds a Light instance with the current configuration.

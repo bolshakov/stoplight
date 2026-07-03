@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Stoplight::Infrastructure::Memory::DataStore::SlidingWindow do
+RSpec.describe Stoplight::Infrastructure::Memory::Storage::WindowMetrics::SlidingWindow do
   let(:counter) { described_class.new(clock:) }
   let(:clock) { Stoplight::Infrastructure::SystemClock.new }
 

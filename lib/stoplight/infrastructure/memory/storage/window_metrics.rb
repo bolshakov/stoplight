@@ -91,8 +91,8 @@ module Stoplight
             @consecutive_successes = 0
             @last_error = nil
             @last_success_at = nil
-            @successes = Infrastructure::Memory::DataStore::SlidingWindow.new(clock:)
-            @errors = Infrastructure::Memory::DataStore::SlidingWindow.new(clock:)
+            @successes = SlidingWindow.new(clock:)
+            @errors = SlidingWindow.new(clock:)
           end
         end
       end

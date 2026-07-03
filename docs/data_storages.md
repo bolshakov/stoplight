@@ -12,21 +12,12 @@ These are infrastructure implementations of domain storage ports. They may depen
 the domain, never on wiring or admin. Currently supported backends: **Memory** and
 **Redis**.
 
-## Two storage models - migration in progress
+## Storage model
 
-The single monolithic `DataStore` port (one object with ~15 methods) is being
-**replaced by a decomposed `StorageSet`**: focused stores for state, metrics
-(windowed vs unbounded), recovery-lock, and recovery-metrics, assembled by
-`Wiring::StorageSetBuilder`. `StorageSetBuilder` is the single place the
-windowed/unbounded metrics decision is made.
-
-The new `Storage` classes already exist under `infrastructure/{backend}/storage/`, but
-the default wiring still flows through the legacy `DataStore` - **the decomposed model 
-is not the live default yet**.
-
-Direction of travel: new code targets the focused stores; do **not** add capability to
-the monolithic `DataStore`. The `compatibility_*` adapters bridge the two during the
-transition.
+Storage is a decomposed `StorageSet`: focused stores for state, metrics (windowed vs
+unbounded), recovery-lock, and recovery-metrics, assembled by `Wiring::StorageSetBuilder`.
+`StorageSetBuilder` is the single place the windowed/unbounded metrics decision is made.
+The `Storage` classes live under `infrastructure/{backend}/storage/`.
 
 ## Atomicity
 
@@ -53,7 +44,6 @@ spec that pins the invariant).
 
 ## Backward compatibility
 
-The `compatibility_*` adapters bridge the legacy monolithic `DataStore` and the new
-decomposed `StorageSet`. Don't change key layouts or remove a compatibility adapter 
-without a deliberate deprecation - existing users have live backend state in the old
-format.
+Don't change a backend's key layout without a deliberate deprecation - existing users
+have live backend state in the current format and such change considered breaking and 
+requires major version update.
