@@ -62,7 +62,7 @@ those.
 
 `NullDataStore` mirrors the **legacy monolithic** port; the focused
 `NullStateStore` / `NullMetricsStore` / `NullRecoveryLockStore` adapters mirror the
-**new decomposed StorageSet** ports (see `redis-and-storage.md`). Prefer the decomposed
+**new decomposed StorageSet** ports (see `data_storages.md`). Prefer the decomposed
 adapters in new domain specs.
 
 ## Testing notifiers

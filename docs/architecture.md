@@ -57,7 +57,7 @@ end
   `DataStore`, which is being phased out. Implement the focused store(s) under
   `infrastructure/{backend}/storage/` and assemble them via `Wiring::StorageSetBuilder`.
   Mirror the existing memory/redis pairing and keep Redis writes atomic (see
-  `redis-and-storage.md`).
+  `data_storages.md`).
 - New notifier -> implement the notifier interface under `infrastructure/notifier/`,
   register it in `wiring/notifier_factory.rb`. Consider implementing as gem rather 
   adding here.
