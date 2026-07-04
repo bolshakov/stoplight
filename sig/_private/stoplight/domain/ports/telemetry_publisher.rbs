@@ -1,0 +1,14 @@
+module Stoplight
+  module Domain
+    # Producer-facing side of the telemetry bus, injected into Telemetry::Emitter. End users never
+    # see it: they get the consumer side (_Telemetry) from +_System#telemetry+.
+    interface _TelemetryPublisher
+      # True when any subscriber (firehose, exact class, or via the StateTransitioned marker) would
+      # receive this event class. The Emitter guards on it before building anything.
+      def subscribed?: (Telemetry::event_class) -> bool
+
+      # Delivers to every interested subscriber, synchronously, in subscription order.
+      def publish: (Telemetry::Envelope[Telemetry::event]) -> void
+    end
+  end
+end

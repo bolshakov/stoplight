@@ -1,0 +1,36 @@
+module Stoplight
+  module Domain
+    class Telemetry
+      # state_transitioned variant: traffic control tripped the light.
+      class TrafficBreached < Data
+        include StateTransitioned
+
+        attr_reader from_color: green
+        attr_reader to_color: red
+        # Open set - the traffic-control policy self-identifies ("consecutive_errors", "error_rate", custom).
+        attr_reader policy: String
+        # Today's policies are consulted only when recording a failure, so a triggering exception is
+        # always present - but a future policy may breach without one (e.g. slow-call rate).
+        attr_reader failure: Failure?
+        # Request metrics at the decision point.
+        attr_reader metrics: Metrics
+
+        def self.new: (
+            from_color: green,
+            to_color: red,
+            policy: String,
+            failure: Failure?,
+            metrics: Metrics
+          ) -> instance
+
+        def initialize: (
+            from_color: green,
+            to_color: red,
+            policy: String,
+            failure: Failure?,
+            metrics: Metrics
+          ) -> void
+      end
+    end
+  end
+end

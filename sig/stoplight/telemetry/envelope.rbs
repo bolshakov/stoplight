@@ -1,0 +1,30 @@
+module Stoplight
+  module Domain
+    class Telemetry
+      # Wraps every published event. Carries only what the emission site knows.
+      #
+      # Identity, sequencing, and transport-level enrichment (ids, host, app version, deploy), etc. belong to the
+      # exporter, which can attach them at delivery time.
+      class Envelope[out P < event] < Data
+        attr_reader system_name: String
+        attr_reader light_name: String
+        attr_reader occurred_at: Time
+        attr_reader payload: P
+
+        def self.new: [Q < event] (
+            system_name: String,
+            light_name: String,
+            occurred_at: Time,
+            payload: Q
+          ) -> Envelope[Q]
+
+        def initialize: (
+            system_name: String,
+            light_name: String,
+            occurred_at: Time,
+            payload: P
+          ) -> void
+      end
+    end
+  end
+end

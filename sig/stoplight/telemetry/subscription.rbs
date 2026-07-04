@@ -1,0 +1,9 @@
+module Stoplight
+  module Domain
+    class Telemetry
+      # Opaque, single-use token returned by +Telemetry#subscribe+ and accepted by +Telemetry#unsubscribe+. No public behavior.
+      class Subscription
+      end
+    end
+  end
+end
