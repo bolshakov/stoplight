@@ -10,6 +10,6 @@ jobs:
     name: Review Price Tag
     runs-on: ubuntu-latest
     steps:
-      - uses: bolshakov/proquo@v1
+      - uses: bolshakov/proquo@v1.1.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
