@@ -1,0 +1,15 @@
+name: 🏷️ ProQuo
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+permissions:
+  contents: read
+  pull-requests: write
+jobs:
+  price:
+    name: Review Price Tag
+    runs-on: ubuntu-latest
+    steps:
+      - uses: bolshakov/proquo@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
