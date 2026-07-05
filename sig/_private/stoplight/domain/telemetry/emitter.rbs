@@ -5,6 +5,11 @@ module Stoplight
       # wiring, responsible for building envelopes. Injected into strategies, trackers, and Light the same
       # way notifiers are today.
       class Emitter
+        @bus: _TelemetryPublisher
+        @clock: _Clock
+        @system_name: String
+        @light_name: String
+
         def initialize: (
             bus: _TelemetryPublisher,
             clock: _Clock,
