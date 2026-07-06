@@ -1,0 +1,12 @@
+exclude:
+  - spec/dummy/**/*
+
+weights:
+  - pattern: '**/*.yml'
+    weight: 0.3
+  - pattern: '**/*.yaml'
+    weight: 0.3
+  - pattern: '**/*.md'
+    weight: 0.5
+  - pattern: 'sig/**/*.md'
+    weight: 0.5
