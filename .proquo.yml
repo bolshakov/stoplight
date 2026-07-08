@@ -8,5 +8,5 @@ weights:
     weight: 0.3
   - pattern: '**/*.md'
     weight: 0.5
-  - pattern: 'sig/**/*.md'
+  - pattern: 'sig/**/*.rbs'
     weight: 0.5
