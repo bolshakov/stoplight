@@ -2,13 +2,13 @@ module Stoplight
   module Wiring
     class System
       class LightFactory < Wiring::LightFactory
-        attr_reader system: System
+        attr_reader system_name: String
 
-        @failover_system: _System
+        @failover_system: _System?
         @storage_set: StorageSet
         @key_space: Infrastructure::Redis::Storage::KeySpace
 
-        def initialize: (config: Domain::Config, system: System) -> void
+        def initialize: (config: Domain::Config, system_name: String, failover_system: _System?) -> void
 
         def key_space: -> Infrastructure::Redis::Storage::KeySpace
 

@@ -50,10 +50,18 @@ module Stoplight
       #   @api private
       attr_reader :system_config
 
-      def initialize(config:)
+      # @param failover_system is a system used to create lights that protects components
+      #   of this system. For example if your system uses Redis data store, or notifiers that
+      #   communicate with external systems, they could go off. Failover system hosts
+      #   all the circuit breakers that are needed to protect these dependencies from failing.
+      #   Failover system itself never uses external dependencies and thereforec does not need
+      #   external failover.
+      def initialize(config:, failover_system:, registry:)
         @name = config.name
         @system_config = config
         @lights = Concurrent::Map.new
+        @failover_system = failover_system
+        @registry = registry
       end
 
       # Creates or retrieves a light.
@@ -113,18 +121,24 @@ module Stoplight
             existing
           else
             source_line = caller(6, 1)&.first
-            [
-              LightFactory.new(
-                system: self,
-                config: light_dsl.configure!(system_config)
-              ).build,
-              config_digest,
-              source_line
-            ]
+            config = light_dsl.configure!(system_config)
+            light = LightFactory.new(system_name: @name, config:, failover_system: @failover_system).build
+            @registry.register(name, config:)
+            [light, config_digest, source_line]
           end
         end
 
         light
+      end
+
+      # @api private
+      def __stoplight__storage
+        Storage.new(system_name: @name, failover_system: T.must(@failover_system)) # works only with redis ds
+      end
+
+      # @api private
+      def __stoplight__registry
+        @registry
       end
 
       private

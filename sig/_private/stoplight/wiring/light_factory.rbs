@@ -59,24 +59,6 @@ module Stoplight
       def memory_registry: -> Concurrent::Map[Integer, Infrastructure::Memory::DataStore]
       def redis: -> redis
 
-      # Creates a new factory with modified settings.
-      #
-      # This method must return a NEW factory instance - it should not
-      # modify the current factory. The new factory should inherit all
-      # configuration from the current factory, with the provided
-      # settings overriding specific values.
-      def with: (
-          name: String,
-          ?cool_off_time: optional[duration],
-          ?threshold: optional[percentage | Integer],
-          ?recovery_threshold: optional[Integer],
-          ?window_size: optional[duration?],
-          ?tracked_errors: optional[Array[_ExceptionMatcher] | _ExceptionMatcher],
-          ?skipped_errors: optional[Array[_ExceptionMatcher] | _ExceptionMatcher],
-          ?traffic_control: optional[traffic_control],
-          ?traffic_recovery: optional[traffic_recovery],
-        ) -> LightFactory
-
       # Builds a Light instance with the current configuration.
       #
       # This method must construct a fully-wired Light with all required
@@ -84,7 +66,9 @@ module Stoplight
       # should be ready to use immediately after construction.
       #
       # @raise [Stoplight::Error::ConfigurationError] If configuration is invalid
-      def build: -> Domain::Light
+      def build: -> _Light
+
+      def create_circuit_breaker: (String) -> _Light
     end
   end
 end

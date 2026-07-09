@@ -19,14 +19,6 @@ RSpec.describe "Stoplight" do
     end
   end
 
-  describe ".system_light" do
-    subject(:light) { Stoplight.system_light(name) }
-
-    it "prefix name with __stoplight__" do
-      expect(light.name).to eq("__stoplight__#{name}")
-    end
-  end
-
   context "with settings" do
     subject(:light) { Stoplight(name, **settings) }
 
@@ -105,6 +97,46 @@ RSpec.describe "Stoplight" do
         Stoplight.__stoplight__system(name)
 
         expect { system }.to raise_error(ArgumentError)
+      end
+    end
+
+    context "notifier circuit breaker isolation" do
+      before do
+        stub_const("BrokenNotifier", Class.new do
+          def notify(info, from_color, to_color, error = nil)
+            raise "notifier always fails"
+          end
+        end)
+
+        stub_const("SpyNotifier", Class.new do
+          attr_reader :notifications
+
+          def initialize
+            @notifications = []
+          end
+
+          def notify(info, from_color, to_color, error = nil)
+            @notifications << [from_color, to_color]
+          end
+        end)
+      end
+
+      let(:spy_notifier) { SpyNotifier.new }
+
+      it "a flaky notifier does not suppress notifications from an independent notifier" do
+        # Three BrokenNotifiers of the same class are enough to exhaust the failover
+        # system's default threshold of 3 in a single notifiers.each pass. If all
+        # notifiers share one circuit breaker (the bug), the breaker trips before
+        # SpyNotifier runs and SpyNotifier never sees the green→red transition.
+        system = Stoplight.__stoplight__system(
+          SecureRandom.uuid,
+          threshold: 1,
+          notifiers: [BrokenNotifier.new, BrokenNotifier.new, BrokenNotifier.new, spy_notifier]
+        )
+
+        system.light("payments").run(->(_) {}) { raise "dependency failure" }
+
+        expect(spy_notifier.notifications).not_to be_empty
       end
     end
   end

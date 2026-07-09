@@ -69,32 +69,6 @@ module Stoplight
         )
       end
 
-      def with(
-        name:,
-        cool_off_time: T.undefined,
-        threshold: T.undefined,
-        recovery_threshold: T.undefined,
-        window_size: T.undefined,
-        tracked_errors: T.undefined,
-        skipped_errors: T.undefined,
-        traffic_control: T.undefined,
-        traffic_recovery: T.undefined
-      )
-        self.class.new(
-          config: LightConfigurationDsl.new(
-            name:,
-            cool_off_time:,
-            threshold:,
-            recovery_threshold:,
-            window_size:,
-            tracked_errors:,
-            skipped_errors:,
-            traffic_control:,
-            traffic_recovery:
-          ).configure!(config)
-        )
-      end
-
       private
 
       attr_reader :data_store_config
@@ -104,12 +78,14 @@ module Stoplight
       attr_reader :traffic_recovery
       attr_reader :config
 
-      def state_store = Stoplight::Infrastructure::Storage::CompatibilityState.new(config:, data_store:)
-
       # @return [<Stoplight::Notifier::Base>]
       def notifiers
         @wrapped_notifiers ||= Array(@notifiers).map do |notifier|
-          Infrastructure::Notifier::FailSafe.new(notifier:, error_notifier:)
+          Infrastructure::Notifier::FailSafe.new(
+            notifier:,
+            error_notifier:,
+            circuit_breaker: create_circuit_breaker("notifier:#{notifier.class.name}")
+          )
         end
       end
 
@@ -135,14 +111,6 @@ module Stoplight
         @data_store ||= create_data_store(data_store_config)
       end
 
-      def metrics_store
-        Stoplight::Infrastructure::Storage::CompatibilityMetrics.new(config:, data_store:)
-      end
-
-      def recovery_lock_store
-        Stoplight::Infrastructure::Storage::CompatibilityRecoveryLock.new(config:, data_store:)
-      end
-
       def request_tracker
         Domain::Tracker::Request.new(traffic_control:, notifiers:, config:, metrics_store:, state_store:)
       end
@@ -155,10 +123,6 @@ module Stoplight
           metrics_store: recovery_metrics_store,
           state_store:
         )
-      end
-
-      def recovery_metrics_store
-        Stoplight::Infrastructure::Storage::CompatibilityRecoveryMetrics.new(config:, data_store:)
       end
 
       def green_run_strategy
@@ -206,7 +170,7 @@ module Stoplight
             ),
             error_notifier:,
             failover_data_store:,
-            circuit_breaker: Stoplight.system_light("data_store:fail_safe:redis")
+            circuit_breaker: create_circuit_breaker("data_store:fail_safe:redis")
           )
         else
           raise NoMatchingPatternError, data_store_config

@@ -10,7 +10,7 @@ RSpec.describe Stoplight::Infrastructure::FailSafe::DataStore do
   let(:config) { instance_double(Stoplight::Domain::Config, name:, window_size: 4, cool_off_time: 60, threshold: 3) }
   let(:name) { SecureRandom.uuid }
   let(:error_notifier) { instance_double(Proc) }
-  let(:circuit_breaker) { Stoplight.system_light(SecureRandom.uuid) }
+  let(:circuit_breaker) { Stoplight(SecureRandom.uuid) }
 
   describe "faulty data store" do
     let(:data_store) { instance_double(NullDataStore) }

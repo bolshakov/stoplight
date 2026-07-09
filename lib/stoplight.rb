@@ -21,13 +21,11 @@ module Stoplight # rubocop:disable Style/Documentation
 
   CONFIG_MUTEX = Mutex.new
   private_constant :CONFIG_MUTEX
-  @systems = Concurrent::Map.new
 
   class << self
     # Configures the Stoplight library.
     #
     # This method allows you to set up the library's configuration using a block.
-    # It raises an error if called more than once.
     # @param trust_me_im_an_engineer [Boolean]
     # @yield [config] Provides a configuration object to the block.
     # @yieldparam config [Stoplight::Wiring::DefaultConfiguration] The configuration object.
@@ -59,35 +57,8 @@ module Stoplight # rubocop:disable Style/Documentation
         configuration = Wiring::DefaultConfiguration.new
         yield configuration if block_given?
 
-        default_config = configuration.to_config!
-        @default_config = default_config
-        @default_light_factory = Wiring::LightFactory.new(config: default_config)
+        @state = Wiring::GlobalState.new(default_config: configuration.to_config!)
       end
-    end
-
-    # @api private
-    def system_light(
-      name,
-      cool_off_time: T.undefined,
-      threshold: T.undefined,
-      recovery_threshold: T.undefined,
-      window_size: T.undefined,
-      tracked_errors: T.undefined,
-      skipped_errors: T.undefined,
-      traffic_control: T.undefined,
-      traffic_recovery: T.undefined
-    )
-      Wiring::LightFactory.new(config: Wiring::FailSafeConfig).with(
-        name: "__stoplight__#{name}",
-        cool_off_time:,
-        threshold:,
-        recovery_threshold:,
-        window_size:,
-        tracked_errors:,
-        skipped_errors:,
-        traffic_control:,
-        traffic_recovery:
-      ).build
     end
 
     # Create a Light with the user default configuration.
@@ -105,8 +76,8 @@ module Stoplight # rubocop:disable Style/Documentation
       traffic_control: T.undefined,
       traffic_recovery: T.undefined
     )
-      __stoplight__default_light_factory.with(
-        name:,
+      state.default_system.light(
+        name,
         cool_off_time:,
         threshold:,
         recovery_threshold:,
@@ -115,7 +86,7 @@ module Stoplight # rubocop:disable Style/Documentation
         skipped_errors:,
         traffic_control:,
         traffic_recovery:
-      ).build
+      )
     end
 
     # Creates a new named system with the given configuration.
@@ -152,34 +123,23 @@ module Stoplight # rubocop:disable Style/Documentation
       traffic_control: T.undefined,
       traffic_recovery: T.undefined
     )
-      ensure_configured
-
-      systems.compute(name.to_s) do |existing_system|
-        if existing_system
-          raise ArgumentError, "system `#{name}` is already in use"
-        else
-          Wiring::System.new(
-            config: Wiring::SystemConfigurationDsl.new(
-              name: name.to_s,
-              cool_off_time:,
-              threshold:,
-              recovery_threshold:,
-              window_size:,
-              tracked_errors:,
-              skipped_errors:,
-              traffic_control:,
-              traffic_recovery:,
-              data_store:,
-              error_notifier:,
-              notifiers:
-            ).configure!(default_config)
-          )
-        end
-      end
+      state.create_system(
+        config: Wiring::SystemConfigurationDsl.new(
+          name: name.to_s,
+          cool_off_time:,
+          threshold:,
+          recovery_threshold:,
+          window_size:,
+          tracked_errors:,
+          skipped_errors:,
+          traffic_control:,
+          traffic_recovery:,
+          data_store:,
+          error_notifier:,
+          notifiers:
+        ).configure!(state.default_config)
+      )
     end
-
-    private attr_reader :systems
-    private def default_config = T.must(@default_config)
 
     # Resets Stoplight to an unconfigured state.
     #
@@ -205,24 +165,11 @@ module Stoplight # rubocop:disable Style/Documentation
     #
     # @api private
     def __stoplight__reset!
-      @systems = Concurrent::Map.new
-      @default_config = nil
-      @default_light_factory = nil
-      @configured = nil
+      @state = nil
     end
 
-    # Retrieves the current default dependencies.
-    #
-    # @api private
-    def __stoplight__default_light_factory
-      ensure_configured
-      T.must(@default_light_factory)
-    end
-
-    def __stoplight__default_configuration
-      ensure_configured
-      T.must(@default_config)
-    end
+    def __stoplight__default_configuration = state.default_config
+    def __stoplight__default_system = state.default_system
 
     # @api private
     private def ensure_configured
@@ -236,11 +183,15 @@ module Stoplight # rubocop:disable Style/Documentation
         warn "Stoplight reconfigured. Existing circuit breakers will not see new configuration"
       end
       yield
-      @configured = true
     end
 
     private def configured?
-      @configured == true
+      @state != nil
+    end
+
+    private def state
+      ensure_configured
+      T.must(@state)
     end
   end
 end

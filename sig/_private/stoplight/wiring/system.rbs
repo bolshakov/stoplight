@@ -4,11 +4,16 @@ module Stoplight
       include _System
 
       @name: String
+      @failover_system: _System?
+      @registry: Domain::_Registry
 
       attr_reader lights: Concurrent::Map[String, [_Light, Integer, String?]]
       attr_reader system_config: Domain::Config
 
-      def initialize: (config: Domain::Config) -> void
+      def initialize: (config: Domain::Config, failover_system: _System?, registry: Domain::_Registry) -> void
+
+      def __stoplight__storage: -> Storage
+      def __stoplight__registry: -> Domain::_Registry
     end
   end
 end

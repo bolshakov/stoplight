@@ -11,7 +11,11 @@ module Stoplight
 
       # @return [Stoplight::Admin::Dependencies]
       def dependencies
-        Dependencies.new(data_store:)
+        if settings.data_store.is_a?(Stoplight::DataStore::Memory)
+          raise "Stoplight Admin requires a persistent data store, but the current data store is Memory. " \
+            "Please configure a different data store in your Stoplight configuration."
+        end
+        Dependencies.new(system: Stoplight.__stoplight__default_system)
       end
 
       def asset_path(name)
@@ -30,20 +34,6 @@ module Stoplight
           "#{(time_difference / 3600).to_i}h ago"
         else
           "#{(time_difference / 86400).to_i}d ago"
-        end
-      end
-
-      private def data_store
-        if settings.data_store.is_a?(Stoplight::DataStore::Memory)
-          raise "Stoplight Admin requires a persistent data store, but the current data store is Memory. " \
-            "Please configure a different data store in your Stoplight configuration."
-        else
-          Stoplight::Wiring::LightFactory.new(
-            config: Wiring::DefaultConfig.with(
-              name: "noname",
-              data_store: settings.data_store
-            )
-          ).__send__(:data_store)
         end
       end
     end

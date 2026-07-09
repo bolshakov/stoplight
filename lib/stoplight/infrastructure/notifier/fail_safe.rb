@@ -13,12 +13,14 @@ module Stoplight
         attr_reader :notifier
         # The underlying notifier being wrapped.
         attr_reader :error_notifier
+        attr_reader :circuit_breaker
 
         # @param notifier The notifier to wrap.
         # @param error_notifier called when wrapped data store fails
-        def initialize(notifier:, error_notifier:)
+        def initialize(notifier:, error_notifier:, circuit_breaker:)
           @notifier = notifier
           @error_notifier = error_notifier
+          @circuit_breaker = circuit_breaker
         end
 
         # Sends a notification using the wrapped notifier with fail-safe mechanisms.
@@ -36,10 +38,6 @@ module Stoplight
         # @return [Boolean]
         def ==(other)
           other.is_a?(self.class) && notifier == other.notifier
-        end
-
-        private def circuit_breaker
-          @circuit_breaker ||= Stoplight.system_light("stoplight:notifier:fail_safe:#{notifier.class.name}")
         end
       end
     end

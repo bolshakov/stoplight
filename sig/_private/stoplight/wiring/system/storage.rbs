@@ -1,0 +1,23 @@
+module Stoplight
+  module Wiring
+    class System
+      class Storage
+        @system_name: String
+        @failover_system: _System
+        @factories: Hash[Domain::Config, LightFactory]
+
+        def initialize: (system_name: String, failover_system: _System) -> void
+
+        def state_snapshot: (Domain::Config) -> Domain::StateSnapshot
+        def metrics_snapshot: (Domain::Config) -> Domain::MetricsSnapshot
+        def delete: (Domain::Config) -> void
+
+        private
+
+        def state_store: (Domain::Config) -> Domain::_StateStore
+        def metrics_store: (Domain::Config) -> Domain::_MetricsStore
+        def light_factory: (Domain::Config) -> LightFactory
+      end
+    end
+  end
+end
