@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Stoplight::Infrastructure::Redis::DataStore::Scripting, :redis do
+RSpec.describe Stoplight::Infrastructure::Redis::Storage::Scripting, :redis do
   subject(:script_manager) { described_class.new(redis:, scripts_root:) }
 
   let(:script_file) { Tempfile.create(["script", ".lua"]) }
@@ -43,5 +43,17 @@ RSpec.describe Stoplight::Infrastructure::Redis::DataStore::Scripting, :redis do
     updated_value = SecureRandom.uuid
     script_manager.call(script_name, args: [updated_value], keys: [key])
     expect(redis.get(key)).to eq(updated_value)
+  end
+
+  context "when the script itself raises an error unrelated to a missing script" do
+    let(:script) { <<~LUA }
+      return redis.call("THIS-IS-NOT-A-REAL-COMMAND")
+    LUA
+
+    it "propagates the error instead of retrying" do
+      expect do
+        script_manager.call(script_name, args: [value], keys: [key])
+      end.to raise_error(::Redis::CommandError) { |error| expect(error.message).not_to include("NOSCRIPT") }
+    end
   end
 end

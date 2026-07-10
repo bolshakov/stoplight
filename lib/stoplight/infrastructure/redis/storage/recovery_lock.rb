@@ -39,8 +39,6 @@ module Stoplight
             recovery_lock if acquired
           end
 
-          # @param recovery_lock [Stoplight::Infrastructure::Redis::DataStore::RecoveryLockToken]
-          # @return [void]
           def release_lock(recovery_lock)
             scripting.call(
               "recovery_lock/release_lock",

@@ -21,7 +21,7 @@ nothing about the outside world. The `Stoplight/ArchitectureBoundaries` cop
 ## Dependency inversion (how domain stays pure)
 
 The domain depends on **interfaces it defines as RBS type signatures**, not on Ruby
-classes. Example interface: `Stoplight::Domain::_DataStore` in
+classes. Example interface: `Stoplight::Domain::_StateStore` in
 `sig/_private/stoplight/domain/ports/`. There is intentionally **no Ruby base class**
 in `lib/stoplight/domain/` for these ports.
 
@@ -29,11 +29,11 @@ Infrastructure satisfies a port by **duck typing** - it implements the methods, 
 not inherit anything:
 
 ```ruby
-module Stoplight::Infrastructure::Memory
-  class DataStore            # no inheritance; conforms to Domain::_DataStore
-    def get_metrics(config) = ...
-    def get_state_snapshot(config) = ...
-    def record_failure(config, exception) = ...
+module Stoplight::Infrastructure::Memory::Storage
+  class State            # no inheritance; conforms to Domain::_StateStore
+    def state_snapshot = ...
+    def set_state(state) = ...
+    def transition_to_color(color) = ...
   end
 end
 ```
@@ -53,8 +53,7 @@ end
 ## Adding a capability (where code goes)
 
 - New storage work -> target the **decomposed StorageSet** (focused state, metrics,
-  recovery-lock, and recovery-metrics stores), **not** the legacy monolithic
-  `DataStore`, which is being phased out. Implement the focused store(s) under
+  recovery-lock, and recovery-metrics stores). Implement the focused store(s) under
   `infrastructure/{backend}/storage/` and assemble them via `Wiring::StorageSetBuilder`.
   Mirror the existing memory/redis pairing and keep Redis writes atomic (see
   `data_storages.md`).
@@ -90,27 +89,27 @@ require 'redis'
 Redis.new.set(...)  # I/O in domain
 
 # GOOD - call through the injected port
-@data_store.record_success(config)
+@metrics_store.record_success
 # Infrastructure owns Redis; domain never sees it
-# Interface: sig/_private/stoplight/domain/ports/
+# Interface: sig/_private/stoplight/domain/ports/metrics_store.rbs
 ```
 
 ### Abstract base class instead of RBS interface
 
 ```ruby
 # BAD (old pattern, fully removed)
-# lib/stoplight/domain/data_store.rb
+# lib/stoplight/domain/metrics_store.rb
 module Stoplight::Domain
-  class DataStore
-    def get_metrics(config) = raise NotImplementedError  # runtime coupling
+  class MetricsStore
+    def metrics_snapshot = raise NotImplementedError  # runtime coupling
   end
 end
 
 # GOOD (current pattern)
-# sig/_private/stoplight/domain/ports/data_store.rbs
+# sig/_private/stoplight/domain/ports/metrics_store.rbs
 module Stoplight::Domain
-  interface _DataStore
-    def get_metrics: (Config) -> MetricsSnapshot
+  interface _MetricsStore
+    def metrics_snapshot: () -> MetricsSnapshot
   end
 end
 # No .rb file. Steep validates at development time; zero runtime coupling.

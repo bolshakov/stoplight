@@ -62,9 +62,8 @@ Full detail: `docs/architecture.md`.
   strategies, `traffic_control` (`consecutive_errors`, `error_rate` -> trip to red),
   `traffic_recovery` (`consecutive_successes`), recovery probes + recovery locks.
 - `infrastructure/` - memory + redis stores, notifiers, `fail_safe` wrappers. Redis
-  writes go through co-located Lua scripts for atomicity. The monolithic `DataStore` is
-  being replaced by a decomposed `Storage`/`StorageSet` model (exists, not yet the
-  default) - target the new stores for new work.
+  writes go through co-located Lua scripts for atomicity. Storage is a decomposed
+  `Storage`/`StorageSet` model - target the focused stores for new work.
 - `wiring/` - dependency injection / composition root, config DSLs, defaults.
 - `admin/` - optional Sinatra dashboard (excluded from Steep type checking).
 - `sig/` - RBS; `sig/_private/` holds internal interfaces. `bench/` - benchmarks.

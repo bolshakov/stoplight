@@ -4,12 +4,52 @@ module Stoplight
   module Infrastructure
     module Redis
       module Storage
-        class Scripting < Infrastructure::Redis::DataStore::Scripting
+        class Scripting
           SCRIPTS_ROOT = __dir__ => String
           private_constant :SCRIPTS_ROOT
 
           class << self
             def default_scripts_root = SCRIPTS_ROOT
+          end
+
+          def initialize(redis:, scripts_root: self.class.default_scripts_root)
+            @scripts_root = scripts_root
+            @redis = redis
+            @shas = {}
+          end
+
+          def call(script_name, keys: [], args: [])
+            redis.then do |client|
+              client.evalsha(script_sha(script_name), keys: keys.map(&:to_s), argv: args.map(&:to_s))
+            end
+          rescue ::Redis::CommandError => error
+            if error.message.include?("NOSCRIPT")
+              reload_script(script_name)
+              retry
+            else
+              raise
+            end
+          end
+
+          private
+
+          attr_reader :scripts_root
+          attr_reader :redis
+          attr_reader :shas
+
+          def reload_script(script_name)
+            shas.delete(script_name)
+            script_sha(script_name)
+          end
+
+          def script_sha(script_name)
+            if shas.key?(script_name)
+              shas[script_name]
+            else
+              script = File.read(File.join(scripts_root, "#{script_name}.lua"))
+
+              shas[script_name] = redis.then { |client| client.script(:load, script) }
+            end
           end
         end
       end

@@ -13,8 +13,8 @@ Stoplight ships type signatures and checks them with Steep under strict mode.
   break `bundle exec steep check`.
 - **Public/shipped** signatures live in `sig/stoplight/…`. **Internal** interfaces and
   ports live in `sig/_private/…` (e.g. `sig/_private/stoplight/domain/ports/`). The
-  domain's collaborator interfaces (like `_DataStore`) are defined here - these are the
-  contracts infrastructure must satisfy by duck typing.
+  domain's collaborator interfaces (like `_StateStore`, `_MetricsStore`) are defined here -
+  these are the contracts infrastructure must satisfy by duck typing.
 - Keep duck-typed implementations conformant to their port. If you add a method to a
   domain port, update every infrastructure implementation **and** its signature.
 - Steep is configured strict (`Steep::Diagnostic::Ruby.strict`). `lib/stoplight/admin`

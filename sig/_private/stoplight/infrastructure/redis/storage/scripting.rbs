@@ -2,10 +2,31 @@ module Stoplight
   module Infrastructure
     module Redis
       module Storage
-        class Scripting < Infrastructure::Redis::DataStore::Scripting
+        class Scripting
           SCRIPTS_ROOT: String
 
-          def default_scripts_root: -> String
+          def self.default_scripts_root: -> String
+
+          attr_reader scripts_root: String
+
+          attr_reader shas: Hash[String, String]
+
+          attr_reader redis: redis
+
+          def initialize: (
+              redis: redis,
+              ?scripts_root: String,
+            ) -> void
+
+          def call: (
+              String script_name,
+              ?keys: Array[_ToS],
+              ?args: Array[_ToS]
+            ) -> untyped
+
+          private def reload_script: (String script_name) -> String
+
+          private def script_sha: (String script_name) -> String
         end
       end
     end

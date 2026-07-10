@@ -32,8 +32,7 @@ ships with a matching `.feature`, and features must pass against **both**
 - `spec/unit/` - fast, isolated, dependency injected. Mirrors `lib/` directory-for-directory and
   is bound by the architecture-boundary cop (see `architecture.md`).
 - `spec/integration/` - end-to-end, exercises observable behavior.
-- `spec/properties/` - property-based tests using `rantly` (color, DSL, notifications,
-  data store invariants).
+- `spec/properties/` - property-based tests using `rantly` (color, DSL, notifications).
 - `features/stoplight/*.feature` - Cucumber, user-facing behavior. Must pass against
   **both** stores: `STOPLIGHT_DATA_STORE=Memory` and `STOPLIGHT_DATA_STORE=Redis`.
 
@@ -49,8 +48,7 @@ those.
   `instance_double(NullStateStore)`, `instance_double(NullMetricsStore)`,
   `instance_double(NullRecoveryLockStore)`, `instance_double(NullRecoveryLockToken)`,
   `instance_double(NullNotifier)`, `instance_double(NullTrafficControl)`,
-  `instance_double(NullTrafficRecovery)`, `instance_double(NullClock)`,
-  `instance_double(NullDataStore)`, etc..
+  `instance_double(NullTrafficRecovery)`, `instance_double(NullClock)`, etc..
 - **Real domain classes / value objects** -> double them directly, they exist at
   runtime: `instance_double(Stoplight::Domain::Config)`,
   `instance_double(Stoplight::Domain::StateSnapshot)`,
@@ -60,10 +58,8 @@ those.
 - In **infrastructure** specs, use the **real** dependency (a real `Redis.new(...)`)
   so you exercise actual storage behavior, including Lua scripts.
 
-`NullDataStore` mirrors the **legacy monolithic** port; the focused
-`NullStateStore` / `NullMetricsStore` / `NullRecoveryLockStore` adapters mirror the
-**new decomposed StorageSet** ports (see `data_storages.md`). Prefer the decomposed
-adapters in new domain specs.
+The focused `NullStateStore` / `NullMetricsStore` / `NullRecoveryLockStore` adapters
+mirror the decomposed `StorageSet` ports (see `data_storages.md`).
 
 ## Testing notifiers
 
