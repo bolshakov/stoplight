@@ -1,0 +1,31 @@
+module Stoplight
+  module Domain
+    class Telemetry
+      # state_transitioned variant: recovery policy resumed traffic.
+      class RecoverySucceeded < Data
+        include StateTransitioned
+
+        attr_reader from_color: yellow
+        attr_reader to_color: green
+        # Open set - the traffic-recovery policy self-identifies ("consecutive_successes", custom).
+        attr_reader policy: String
+        # Recovery metrics at the decision point.
+        attr_reader metrics: Metrics
+
+        def self.new: (
+            from_color: yellow,
+            to_color: green,
+            policy: String,
+            metrics: Metrics
+          ) -> instance
+
+        def initialize: (
+            from_color: yellow,
+            to_color: green,
+            policy: String,
+            metrics: Metrics
+          ) -> void
+      end
+    end
+  end
+end

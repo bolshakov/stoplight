@@ -1,0 +1,23 @@
+module Stoplight
+  module Domain
+    class Telemetry
+      # Carries the live exception.
+      class Failure < Data
+        attr_reader exception: StandardError
+        # false when the exception matched skipped_errors: the light counted the run a success, but the caller still
+        # saw the exception.
+        attr_reader tracked: bool
+
+        def self.new: (
+            exception: StandardError,
+            tracked: bool
+          ) -> instance
+
+        def initialize: (
+            exception: StandardError,
+            tracked: bool
+          ) -> void
+      end
+    end
+  end
+end

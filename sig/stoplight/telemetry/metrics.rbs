@@ -1,0 +1,27 @@
+module Stoplight
+  module Domain
+    class Telemetry
+      # The serializable subset of MetricsSnapshot. successes/errors are nil for non-windowed metrics.
+      class Metrics < Data
+        attr_reader successes: Integer?
+        attr_reader errors: Integer?
+        attr_reader consecutive_errors: Integer
+        attr_reader consecutive_successes: Integer
+
+        def self.new: (
+            successes: Integer?,
+            errors: Integer?,
+            consecutive_errors: Integer,
+            consecutive_successes: Integer
+          ) -> instance
+
+        def initialize: (
+            successes: Integer?,
+            errors: Integer?,
+            consecutive_errors: Integer,
+            consecutive_successes: Integer
+          ) -> void
+      end
+    end
+  end
+end

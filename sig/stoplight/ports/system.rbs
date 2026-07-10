@@ -17,5 +17,7 @@ module Stoplight
       ?traffic_control: optional[traffic_control],
       ?traffic_recovery: optional[traffic_recovery]
     ) -> _Light
+
+    def telemetry: -> _Telemetry
   end
 end

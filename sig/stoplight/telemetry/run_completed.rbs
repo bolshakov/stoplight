@@ -1,0 +1,36 @@
+module Stoplight
+  module Domain
+    class Telemetry
+      # Emitted for every Light#run.
+      class RunCompleted < Data
+        attr_reader outcome: run_outcome
+        attr_reader color: color
+        # nil only when blocked (no user code ran).
+        attr_reader duration_ms: Float?
+        # Present on failures and on successes caused by untracked (skipped) errors (see Failure#tracked).
+        attr_reader failure: Failure?
+        attr_reader fallback_used: bool
+        # Set only when blocked, nil under locked-red (no recovery scheduled).
+        attr_reader retry_after: Time?
+
+        def self.new: (
+            outcome: run_outcome,
+            color: color,
+            duration_ms: Float?,
+            failure: Failure?,
+            fallback_used: bool,
+            retry_after: Time?
+          ) -> instance
+
+        def initialize: (
+            outcome: run_outcome,
+            color: color,
+            duration_ms: Float?,
+            failure: Failure?,
+            fallback_used: bool,
+            retry_after: Time?
+          ) -> void
+      end
+    end
+  end
+end

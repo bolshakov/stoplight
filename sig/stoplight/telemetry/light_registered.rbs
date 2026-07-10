@@ -1,0 +1,23 @@
+module Stoplight
+  module Domain
+    class Telemetry
+      # Emitted once per (process instance, system, light): the cache-miss branch of System#light.
+      #
+      # Consumers deduplicate by (system_name, light_name) + settings content.
+      #
+      # Emitted by wiring through the light's own emitter, after the light is fully constructed and before it is
+      # returned to the caller - so on the bus it precedes every other event of that light.
+      class LightRegistered < Data
+        attr_reader settings: Settings
+
+        def self.new: (
+            settings: Settings
+          ) -> instance
+
+        def initialize: (
+            settings: Settings
+          ) -> void
+      end
+    end
+  end
+end

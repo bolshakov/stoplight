@@ -1,0 +1,22 @@
+module Stoplight
+  # Public face of the telemetry bus. The bus and its events live in the domain layer
+  # (Domain::Telemetry); this namespace re-exports them so callers never reference the
+  # Domain:: boundary - mirroring Stoplight::Notifier and Stoplight::DataStore.
+  module Telemetry
+    class RunCompleted = Domain::Telemetry::RunCompleted
+    class TrafficBreached = Domain::Telemetry::TrafficBreached
+    class RecoveryStarted = Domain::Telemetry::RecoveryStarted
+    class RecoverySucceeded = Domain::Telemetry::RecoverySucceeded
+    class RecoveryFailed = Domain::Telemetry::RecoveryFailed
+    class LockChanged = Domain::Telemetry::LockChanged
+    class RecoveryProbeCompleted = Domain::Telemetry::RecoveryProbeCompleted
+    class LightRegistered = Domain::Telemetry::LightRegistered
+
+    module StateTransitioned = Domain::Telemetry::StateTransitioned
+
+    type event = Domain::Telemetry::event
+    type state_transitioned = Domain::Telemetry::state_transitioned
+    type envelope[T < Domain::Telemetry::event] = Domain::Telemetry::Envelope[T]
+    type subscription = Domain::Telemetry::Subscription
+  end
+end

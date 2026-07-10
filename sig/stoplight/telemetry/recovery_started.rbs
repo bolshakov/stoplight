@@ -1,0 +1,26 @@
+module Stoplight
+  module Domain
+    class Telemetry
+      # state_transitioned variant: cool-off elapsed and the first probe explicitly entered recovery.
+      class RecoveryStarted < Data
+        include StateTransitioned
+
+        attr_reader from_color: red
+        attr_reader to_color: yellow
+        attr_reader breached_at: Time
+
+        def self.new: (
+            from_color: red,
+            to_color: yellow,
+            breached_at: Time
+          ) -> instance
+
+        def initialize: (
+            from_color: red,
+            to_color: yellow,
+            breached_at: Time
+          ) -> void
+      end
+    end
+  end
+end

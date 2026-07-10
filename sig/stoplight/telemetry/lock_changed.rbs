@@ -1,0 +1,35 @@
+module Stoplight
+  module Domain
+    class Telemetry
+      # state_transitioned variant: manual lock override changed.
+      #
+      # Emitted even when the effective color is unchanged (from_color == to_color), so the lock timeline is complete.
+      class LockChanged < Data
+        include StateTransitioned
+
+        attr_reader from_color: color
+        attr_reader to_color: color
+        attr_reader from_state: state
+        attr_reader to_state: state
+        # Open set: "api", "admin", custom.
+        attr_reader source: String
+
+        def self.new: (
+            from_color: color,
+            to_color: color,
+            from_state: state,
+            to_state: state,
+            source: String
+          ) -> instance
+
+        def initialize: (
+            from_color: color,
+            to_color: color,
+            from_state: state,
+            to_state: state,
+            source: String
+          ) -> void
+      end
+    end
+  end
+end

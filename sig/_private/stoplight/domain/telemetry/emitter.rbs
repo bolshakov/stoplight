@@ -1,0 +1,39 @@
+module Stoplight
+  module Domain
+    class Telemetry
+      # The producer side of the bus. One per light, bound to its coordinates at construction time in
+      # wiring, responsible for building envelopes. Injected into strategies, trackers, and Light the same
+      # way notifiers are today.
+      class Emitter
+        def initialize: (
+            bus: _TelemetryPublisher,
+            clock: _Clock,
+            system_name: String,
+            light_name: String
+          ) -> void
+
+        # Lazily yields the event's payload only when the bus has subscribers for this event class, then stamps
+        # +occurred_at+ from the clock and publishes.
+        #
+        # Emitting an unwatched event class allocates nothing - no payload, no envelope.
+        #
+        # The leading class argument is what lets the per-class guard run before the payload exists. Each overload
+        # pins the block's return type to it, so a mismatch is a Steep error at the emission site.
+        #
+        # @example
+        #   emitter.emit(Telemetry::RecoveryStarted) do
+        #     RecoveryStarted.new(from_color: "red", to_color: "yellow", breached_at: Time.now)
+        #   end
+        #
+        def emit: (singleton(RunCompleted)) { () -> RunCompleted } -> void
+                | (singleton(TrafficBreached)) { () -> TrafficBreached } -> void
+                | (singleton(RecoveryStarted)) { () -> RecoveryStarted } -> void
+                | (singleton(RecoverySucceeded)) { () -> RecoverySucceeded } -> void
+                | (singleton(RecoveryFailed)) { () -> RecoveryFailed } -> void
+                | (singleton(LockChanged)) { () -> LockChanged } -> void
+                | (singleton(RecoveryProbeCompleted)) { () -> RecoveryProbeCompleted } -> void
+                | (singleton(LightRegistered)) { () -> LightRegistered } -> void
+      end
+    end
+  end
+end
