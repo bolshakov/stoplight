@@ -7,7 +7,7 @@ module Stoplight
     #
     # @api private
     class LightFactory
-      def initialize(system_name:, config:, failover_system:)
+      def initialize(system_name:, config:, failover_system:, telemetry:)
         @system_name = system_name
         @failover_system = failover_system
         @config = config
@@ -27,6 +27,12 @@ module Stoplight
           skipped: config.skipped_errors
         )
 
+        @emitter = Domain::Telemetry::Emitter.new(
+          bus: telemetry,
+          system_name: system_name,
+          light_name: config.name,
+          clock: @clock
+        )
         @wrapped_notifiers = nil
       end
 

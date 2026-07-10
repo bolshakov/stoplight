@@ -6,6 +6,7 @@ module Stoplight
       @name: String
       @failover_system: _System?
       @registry: Domain::_Registry
+      @telemetry: Domain::_TelemetryPublisher
 
       attr_reader lights: Concurrent::Map[String, [_Light, Integer, String?]]
       attr_reader system_config: Domain::Config
