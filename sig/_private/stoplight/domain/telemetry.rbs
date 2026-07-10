@@ -22,6 +22,12 @@ module Stoplight
       # The producer side (publish/subscribed?), what wiring injects into Emitter.
       include _TelemetryPublisher
 
+      @error_notifier: ^(StandardError) -> void
+      @mutex: Mutex
+      @max_subscriptions: Integer
+      @subscriptions: Array[[Subscription, subscription_filter, subscription_handler]]
+      @dispatch: Hash[Class, Array[subscription_handler]]
+
       # Default cap on live subscriptions.
       MAX_SUBSCRIPTIONS: Integer
 
@@ -29,6 +35,11 @@ module Stoplight
       # @param max_subscriptions caps the number of live subscriptions - #subscribe raises
       #   Stoplight::Error::TooManySubscriptions once reached.
       def initialize: (error_notifier: error_notifier, ?max_subscriptions: Integer) -> void
+
+      type subscription_handler = ^(Envelope[event]) -> void
+      type subscription_filter =  nil | singleton(RunCompleted) | singleton(TrafficBreached) | singleton(RecoveryStarted)
+        | singleton(RecoverySucceeded) | singleton(RecoveryFailed) | singleton(LockChanged)
+        | singleton(RecoveryProbeCompleted) | singleton(LightRegistered) | singleton(StateTransitioned)
 
       # Run outcomes reflect the light's accounting, not the caller's experience: an untracked (skipped) error
       # emits +:success+ with +failure.tracked = false+.
@@ -38,12 +49,7 @@ module Stoplight
       # Closed union over the state machine's edges. New traffic/recovery policies never add variants. They
       # self-identify via the open +policy+ string inside the matching variant. Every variant includes
       # the +StateTransitioned+ marker module - the union's runtime name.
-      type state_transitioned =
-        TrafficBreached |
-        RecoveryStarted |
-        RecoverySucceeded |
-        RecoveryFailed |
-        LockChanged
+      type state_transitioned = TrafficBreached | RecoveryStarted | RecoverySucceeded | RecoveryFailed | LockChanged
 
       type event = RunCompleted | state_transitioned | RecoveryProbeCompleted | LightRegistered
 
@@ -60,6 +66,8 @@ module Stoplight
       # Value-level mirror of the +event+ union. A new event type is added here and to the union
       # together (a spec pins them in sync).
       EVENT_CLASSES: Array[event_class]
+
+      private def rebuild: -> void
     end
   end
 end
