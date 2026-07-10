@@ -11,6 +11,9 @@ module Stoplight
     class IncorrectColor < Base
     end
 
+    class TooManySubscriptions < Base
+    end
+
     class RedLight < Base
       # @!attribute light_name
       #   @return [String] The light's name

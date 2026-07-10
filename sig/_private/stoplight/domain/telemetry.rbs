@@ -22,6 +22,9 @@ module Stoplight
       # The producer side (publish/subscribed?), what wiring injects into Emitter.
       include _TelemetryPublisher
 
+      # Default cap on live subscriptions.
+      MAX_SUBSCRIPTIONS: Integer
+
       # @param error_notifier receives any StandardError a subscriber's handler raises.
       # @param max_subscriptions caps the number of live subscriptions - #subscribe raises
       #   Stoplight::Error::TooManySubscriptions once reached.
