@@ -30,11 +30,17 @@ module Stoplight
       @cool_off_time: duration
       @error_tracking_policy: Domain::ErrorTrackingPolicy
       @wrapped_notifiers: Array[state_transition_notifier]?
+      @emitter: Domain::Telemetry::Emitter
       @failover_system: _System?
       @storage_set: StorageSet
       @key_space: Infrastructure::Redis::Storage::KeySpace
 
-      def initialize: (config: Domain::Config, system_name: String, failover_system: _System?) -> void
+      def initialize: (
+          config: Domain::Config,
+          system_name: String,
+          failover_system: _System?,
+          telemetry: Domain::_TelemetryPublisher
+        ) -> void
 
       def storage_set: -> StorageSet
       def key_space: -> Infrastructure::Redis::Storage::KeySpace

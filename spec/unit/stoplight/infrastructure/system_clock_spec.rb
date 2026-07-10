@@ -15,6 +15,18 @@ RSpec.describe Stoplight::Infrastructure::SystemClock do
     end
   end
 
+  describe "#monotonic_time" do
+    subject(:monotonic_time) { clock.monotonic_time }
+
+    around do |example|
+      Timecop.freeze { example.run }
+    end
+
+    it "returns monotonic time" do
+      expect(monotonic_time).to be_within(0.1).of(Process.clock_gettime(Process::CLOCK_MONOTONIC))
+    end
+  end
+
   describe "#at" do
     subject(:at) { clock.at(timestamp) }
 

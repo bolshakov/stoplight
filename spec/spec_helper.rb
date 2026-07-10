@@ -16,6 +16,7 @@ require_relative "support/adapters/null_recovery_lock_token"
 require_relative "support/adapters/null_state_store"
 require_relative "support/adapters/null_traffic_control"
 require_relative "support/adapters/null_traffic_recovery"
+require_relative "support/adapters/test_telemetry_emitter"
 
 require_relative "support/data_store"
 require_relative "support/light/color"
@@ -24,6 +25,7 @@ require_relative "support/light/state"
 require_relative "support/database_cleaner"
 require_relative "support/exception_helpers"
 require_relative "support/route_helpers"
+require_relative "support/matchers/emit"
 
 Timecop.safe_mode = true
 

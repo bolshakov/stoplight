@@ -62,6 +62,7 @@ module Stoplight
         @lights = Concurrent::Map.new
         @failover_system = failover_system
         @registry = registry
+        @telemetry = Domain::Telemetry.new(error_notifier: config.error_notifier)
       end
 
       # Creates or retrieves a light.
@@ -122,7 +123,12 @@ module Stoplight
           else
             source_line = caller(6, 1)&.first
             config = light_dsl.configure!(system_config)
-            light = LightFactory.new(system_name: @name, config:, failover_system: @failover_system).build
+            light = LightFactory.new(
+              system_name: @name,
+              config:,
+              failover_system: @failover_system,
+              telemetry: @telemetry
+            ).build
             @registry.register(name, config:)
             [light, config_digest, source_line]
           end
@@ -133,7 +139,11 @@ module Stoplight
 
       # @api private
       def __stoplight__storage
-        Storage.new(system_name: @name, failover_system: T.must(@failover_system)) # works only with redis ds
+        Storage.new(
+          system_name: @name,
+          failover_system: T.must(@failover_system), # works only with redis ds
+          telemetry: @telemetry
+        )
       end
 
       # @api private
