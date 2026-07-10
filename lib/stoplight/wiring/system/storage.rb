@@ -3,6 +3,7 @@
 module Stoplight
   module Wiring
     class System
+      # Only for admin panel use.
       class Storage
         def initialize(system_name:, failover_system:)
           @system_name = system_name
