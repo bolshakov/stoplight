@@ -2,7 +2,7 @@
 
 module Stoplight
   module Wiring
-    class LightFactory
+    class LightConfigurationDsl
       TrafficControlDsl = ->(value) {
         case value
         in _ if value.respond_to?(:stop_traffic?) # TODO: can be removed in 6.0

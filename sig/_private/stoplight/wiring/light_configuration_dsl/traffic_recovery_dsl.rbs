@@ -1,6 +1,6 @@
 module Stoplight
   module Wiring
-    class LightFactory
+    class LightConfigurationDsl
       TrafficRecoveryDsl: ^(traffic_recovery | Domain::_TrafficRecovery) -> Domain::_TrafficRecovery
     end
   end
