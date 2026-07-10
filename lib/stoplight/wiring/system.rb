@@ -104,34 +104,29 @@ module Stoplight
           traffic_recovery:
         )
         config_digest = light_dsl.digest
-        light, _, _ = lights.compute(name) do |existing|
-          if existing
-            _, existing_digest, existing_source_line = existing
 
-            if config_digest != existing_digest
-              raise Stoplight::Error::ConfigurationError, <<~MSG
-                Light `#{name}` already registered with different configuration.
+        light, existing_digest, existing_source_line = lights.compute_if_absent(name) do
+          source_line = caller(6, 1)&.first # Very expensive call
+          config = light_dsl.configure!(system_config)
+          built = LightFactory.new(
+            system_name: @name, config:,
+            failover_system: @failover_system,
+            telemetry: @telemetry
+          ).build
+          @registry.register(name, config:)
+          [built, config_digest, source_line]
+        end
 
-                Original registration: #{existing_source_line}
-                Current attempt: #{caller(6, 1)&.first}
+        if config_digest != existing_digest
+          source_line = caller(1, 1)&.first # Very expensive call
 
-                Lights must have consistent configuration across all call sites.
-              MSG
-            end
+          raise Stoplight::Error::ConfigurationError, <<~MSG
+            Light `#{name}` already registered with different configuration.
+            Original registration: #{existing_source_line}
+            Current attempt: #{source_line}
 
-            existing
-          else
-            source_line = caller(6, 1)&.first
-            config = light_dsl.configure!(system_config)
-            light = LightFactory.new(
-              system_name: @name,
-              config:,
-              failover_system: @failover_system,
-              telemetry: @telemetry
-            ).build
-            @registry.register(name, config:)
-            [light, config_digest, source_line]
-          end
+            Lights must have consistent configuration across all call sites.
+          MSG
         end
 
         light
