@@ -10,7 +10,7 @@ module Stoplight
     class SystemClock
       def current_time = Time.now.utc
 
-      def monotonic_time = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+      def monotonic_time = Process.clock_gettime(Process::CLOCK_MONOTONIC, :float_millisecond)
 
       def at(timestamp) = Time.at(timestamp).utc
     end

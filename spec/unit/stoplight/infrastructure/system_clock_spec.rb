@@ -22,8 +22,8 @@ RSpec.describe Stoplight::Infrastructure::SystemClock do
       Timecop.freeze { example.run }
     end
 
-    it "returns monotonic time" do
-      expect(monotonic_time).to be_within(0.1).of(Process.clock_gettime(Process::CLOCK_MONOTONIC))
+    it "returns monotonic time in milliseconds" do
+      expect(monotonic_time).to be_within(10).of(Process.clock_gettime(Process::CLOCK_MONOTONIC, :float_millisecond))
     end
   end
 
