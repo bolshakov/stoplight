@@ -58,9 +58,10 @@ module Stoplight
           def record_failure(exception)
             current_time = clock.current_time
             failure = Domain::Failure.from_error(exception, time: current_time)
-            last_error_at = self.last_error_at
 
             mutex.synchronize do
+              last_error_at = self.last_error_at
+
               if last_error_at.nil? || failure.occurred_at > last_error_at
                 self.last_error = failure
               end
