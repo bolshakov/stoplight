@@ -4,7 +4,6 @@ require "concurrent/map"
 
 module Stoplight
   module Wiring
-    # 🚧UNDER CONSTRUCTION 🚧
     # System provides namespace isolation and shared configuration for related circuits.
     #
     # Systems enforce configuration consistency within their scope - creating the same
@@ -13,37 +12,35 @@ module Stoplight
     # This prevents subtle bugs where circuits silently interfere with each other.
     #
     # @example Basic usage
-    #   billing = Stoplight.system(:billing,
+    #   billing = Stoplight.__stoplight__system(:billing,
     #     data_store: billing_redis,
     #     threshold: 5,
     #     window_size: 300
     #   )
     #
-    #   billing.light("stripe")
-    #   billing.light("paypal")
+    #   billing.register("stripe")
+    #   billing.register("paypal")
+    #
+    #   billing.light("stripe").run { ... }
+    #   billing.light("paypal").run { ... }
     #
     # @example Multi-tenancy
-    #   tenant_a = Stoplight.system(:tenant_a, data_store: tenant_a_redis)
-    #   tenant_b = Stoplight.system(:tenant_b, data_store: tenant_b_redis)
+    #   tenant_a = Stoplight.__stoplight__system(:tenant_a, data_store: tenant_a_redis)
+    #   tenant_b = Stoplight.__stoplight__system(:tenant_b, data_store: tenant_b_redis)
     #
     #   # Same circuit name, completely isolated
-    #   tenant_a.light("api")
-    #   tenant_b.light("api")
+    #   tenant_a.register("api")
+    #   tenant_b.register("api")
     #
     # @example Configuration inheritance
-    #   system = Stoplight.system(:payments, threshold: 3, cool_off_time: 600)
+    #   system = Stoplight.__stoplight__system(:payments, threshold: 3, cool_off_time: 600)
     #
-    #   system.light("stripe")                # Inherits threshold: 3
-    #   system.light("paypal", threshold: 5)  # Overrides threshold
+    #   system.register("stripe")                # Inherits threshold: 3
+    #   system.register("paypal", threshold: 5)  # Overrides threshold
     #
-    # @note System configuration objects (data_store, notifiers) should be defined
-    #   as constants and reused, not created inline. This ensures configuration
-    #   matching works correctly across multiple system references.
-    #
-    # @note Light instances are cached within the system. Calling {#light} with
-    #   the same name returns the cached instance.
-    #
-    # @api private
+    # @note Light instances are cached within the system once {#register}ed. {#light}
+    #   returns that cached instance and raises +Stoplight::Error::UnregisteredLightError+
+    #   if the name was never registered.
     class System
       attr_reader :name
       # @!attribute system_config
@@ -65,23 +62,24 @@ module Stoplight
         @telemetry = Domain::Telemetry.new(error_notifier: config.error_notifier)
       end
 
-      # Creates or retrieves a light.
+      # Registers and returns a light.
       #
-      # If a light with this name already exists, returns the cached instance.
+      # If a light with this name already exists, returns it.
       # If settings differ from the existing light, raises +Stoplight::Error::ConfigurationError+.
       #
       # @raise [Stoplight::Error::ConfigurationError] if light exists with different settings
       #
-      # @example Create a light
-      #   light = system.light("stripe", threshold: 5, window_size: 60)
+      # @example Register a light
+      #   system.register("stripe", threshold: 5, window_size: 60)
+      #   system.light("stripe") #=> returns named light
       #
       # @example Configuration conflict
-      #   system.light("api", threshold: 5)
-      #   system.light("api", threshold: 10)  # Raises ConfigurationError
+      #   system.register("api", threshold: 5)
+      #   system.register("api", threshold: 10)  # Raises ConfigurationError
       #
       # @note Thread-safe: multiple threads can safely call this method concurrently
       #
-      def light(
+      def register(
         name,
         cool_off_time: T.undefined,
         threshold: T.undefined,
@@ -105,7 +103,7 @@ module Stoplight
         )
         config_digest = light_dsl.digest
 
-        light, existing_digest, existing_source_line = lights.compute_if_absent(name) do
+        light, existing_digest, existing_source_line = @lights.compute_if_absent(name) do
           source_line = caller(6, 1)&.first # Very expensive call
           config = light_dsl.configure!(system_config)
           built = LightFactory.new(
@@ -132,6 +130,14 @@ module Stoplight
         light
       end
 
+      # @raise [Stoplight::Error::UnregisteredLightError] if no light was registered under +name+
+      def light(name)
+        @lights[name]&.first || raise(Stoplight::Error::UnregisteredLightError, <<~MSG)
+          Light `#{name}` was never registered on system `#{@name}`.
+          Call `.register(#{name.inspect}, ...)` at boot before using it.
+        MSG
+      end
+
       # @api private
       def __stoplight__storage
         Storage.new(
@@ -145,10 +151,6 @@ module Stoplight
       def __stoplight__registry
         @registry
       end
-
-      private
-
-      attr_reader :lights
     end
   end
 end

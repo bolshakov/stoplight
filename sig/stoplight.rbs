@@ -30,7 +30,7 @@ module Stoplight
 
   def self.configure: (?trust_me_im_an_engineer: bool) ?{ (_Configuration) -> void } -> void
 
-  def self.light: (
+  def self.register: (
       String name,
       ?cool_off_time: optional[duration],
       ?threshold: optional[percentage | Integer],
@@ -41,6 +41,8 @@ module Stoplight
       ?traffic_control: optional[traffic_control],
       ?traffic_recovery: optional[traffic_recovery],
     ) -> _Light
+
+  def self.light: (String name) -> _Light
 end
 
 module Kernel

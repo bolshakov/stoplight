@@ -5,6 +5,9 @@ module Stoplight
     class Base < StandardError
     end
 
+    class UnregisteredLightError < Base
+    end
+
     class ConfigurationError < Base
     end
 

@@ -41,8 +41,8 @@ end
 ## Hard rules for domain code
 
 - No `require`/reference to Redis, IO, Sinatra, or any infrastructure constant.
-- Never call the composition root: `Stoplight.light`, `Stoplight.configure`, 
-  or `Stoplight(...)`.
+- Never call the composition root: `Stoplight.light`, `Stoplight.register`,
+  `Stoplight.configure`, or `Stoplight(...)`.
 - Never reference the root aliases `Stoplight::DataStore` / `Stoplight::Notifier`.
   Reference `Stoplight::Domain::…` directly instead.
 - These same prohibitions apply to `spec/unit/stoplight/domain/**` - build collaborator

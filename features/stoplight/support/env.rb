@@ -12,7 +12,7 @@ Before do
 end
 
 Before("@global_configuration") do
-  pending("Skipping global configuration tests for systems") if ENV["STOPLIGHT_LIGHT_CREATION"] == "System#light"
+  pending("Skipping global configuration tests for systems") if ENV["STOPLIGHT_LIGHT_CREATION"] == "System#register"
 end
 
 Around do |_scenario, block|

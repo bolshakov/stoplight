@@ -8,7 +8,7 @@ RSpec.describe Stoplight::Admin::LightsRepository, :redis do
   let(:registry) { instance_double(Stoplight::Infrastructure::Redis::Storage::Registry) }
   let(:data_store_config) { Stoplight::DataStore::Redis.new(redis) }
   let(:name) { "lights-repository" }
-  let(:light) { system.light(name) }
+  let(:light) { system.register(name) }
 
   before do
     Stoplight.configure(trust_me_im_an_engineer: true) do |config|
@@ -56,8 +56,8 @@ RSpec.describe Stoplight::Admin::LightsRepository, :redis do
   describe "#with_color" do
     before do
       allow(registry).to receive(:names).and_return(["red-light", "green-light"])
-      system.light("red-light").lock("red")
-      system.light("green-light").lock("green")
+      system.register("red-light").lock("red")
+      system.register("green-light").lock("green")
     end
 
     it "returns light with requested color" do
@@ -84,6 +84,20 @@ RSpec.describe Stoplight::Admin::LightsRepository, :redis do
         expect { lock }
           .to change { light.state }
           .to("locked_green")
+      end
+    end
+
+    context "when the light was never registered on this system" do
+      subject(:lock) { repository.lock("never-registered") }
+
+      before { allow(registry).to receive(:names).and_return(["never-registered"]) }
+
+      it "locks the light anyway" do
+        lock
+
+        expect(repository.all).to contain_exactly(
+          have_attributes(name: "never-registered", state: "locked_green")
+        )
       end
     end
 

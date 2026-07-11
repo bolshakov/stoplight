@@ -7,9 +7,9 @@ Stoplight(SecureRandom.uuid, threshold: 10)
 system = Stoplight.__stoplight__system("default")
 
 Benchmark.ips do |b|
-  b.report("before") { system.light("bar", threshold: 4) }
+  b.report("before") { system.register("bar", threshold: 4) }
   b.hold!("cache")
-  b.report("after") { system.light("bar", threshold: 4) }
+  b.report("after") { system.register("bar", threshold: 4) }
 
   b.compare!
 end

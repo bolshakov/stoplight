@@ -50,7 +50,7 @@ module Stoplight
             ),
             error_notifier: config.error_notifier,
             failover_registry: Infrastructure::Memory::Storage::Registry.new,
-            circuit_breaker: failover_system.light("registry")
+            circuit_breaker: failover_system.register("registry")
           )
         when DataStore::Memory
           Infrastructure::Memory::Storage::Registry.new

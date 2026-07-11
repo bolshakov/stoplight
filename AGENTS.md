@@ -36,8 +36,9 @@ fails lint:
   signatures only** (`sig/_private/stoplight/domain/ports/`), never Ruby base classes.
 - **Infrastructure implements** those interfaces by **duck typing** (no inheritance).
 - Domain must never reference the composition root (`Stoplight.light` /
-  `.configure` / `Stoplight()`) or the root aliases `Stoplight::DataStore` /
-  `Stoplight::Notifier`. Use `Domain::Light` and domain interfaces directly.
+  `Stoplight.register` / `.configure` / `.light` / `Stoplight()`) or the root aliases
+  `Stoplight::DataStore` / `Stoplight::Notifier`. Use `Domain::Light` and
+  domain interfaces directly.
 - The same boundary rule applies to specs under `spec/unit/<layer>/`.
 
 Full detail: `docs/architecture.md`.
@@ -47,7 +48,8 @@ Full detail: `docs/architecture.md`.
 - `# frozen_string_literal: true` at the top of every Ruby file.
 - Let zeitwerk autoload - no manual `require` inside `lib/`. File path = constant path.
 - Internal-but-public plumbing uses the `__stoplight__` prefix.
-- Public surface is only: `Stoplight()`, `Stoplight.light`, `Stoplight.configure`.
+- Public surface is only: `Stoplight()`, `Stoplight.register`, `Stoplight.light`,
+  `Stoplight.configure`, `Light#run`
 - Public API methods require a doc comment with at least one usage example -
   see `lib/stoplight.rb` for the pattern. Document behavior, not types - types
   belong in RBS (`docs/types_and_rbs.md`).

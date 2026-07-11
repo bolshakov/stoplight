@@ -48,7 +48,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        light-creation: [ 'Stoplight()', 'System#light' ]
+        light-creation: [ 'Stoplight()', 'System#register' ]
         data-store: [ 'Redis' ]
         data-store-image:
           - 'redis:7.4'
@@ -60,7 +60,7 @@ jobs:
             light-creation: 'Stoplight()'
           - data-store: 'Memory'
             data-store-image: 'redis:7.4'
-            light-creation: 'System#light'
+            light-creation: 'System#register'
     services:
       data-store:
         image: ${{ matrix.data-store-image }}

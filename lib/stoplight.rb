@@ -61,11 +61,15 @@ module Stoplight # rubocop:disable Style/Documentation
       end
     end
 
-    # Create a Light with the user default configuration.
+    # Registers a Light with the given configuration.
     #
-    # @return [Stoplight::Light]
-    # @api private
-    def light(
+    # If a light with this name is already registered, returns it. If the given settings
+    # differ from the existing registration, raises +Stoplight::Error::ConfigurationError+.
+    # #
+    # @example
+    #   Stoplight.register("stripe", threshold: 5, cool_off_time: 60)
+    #
+    def register(
       name,
       cool_off_time: T.undefined,
       threshold: T.undefined,
@@ -76,7 +80,7 @@ module Stoplight # rubocop:disable Style/Documentation
       traffic_control: T.undefined,
       traffic_recovery: T.undefined
     )
-      state.default_system.light(
+      state.default_system.register(
         name,
         cool_off_time:,
         threshold:,
@@ -88,6 +92,16 @@ module Stoplight # rubocop:disable Style/Documentation
         traffic_recovery:
       )
     end
+
+    # Returns a Light previously registered.
+    #
+    # @raise [Stoplight::Error::UnregisteredLightError] if no light was registered under +name+
+    #
+    # @example
+    #   Stoplight.register("stripe", threshold: 5)
+    #   Stoplight.light("stripe")
+    #
+    def light(name) = state.default_system.light(name)
 
     # Creates a new named system with the given configuration.
     #
@@ -103,6 +117,7 @@ module Stoplight # rubocop:disable Style/Documentation
     #
     # @example Creating a system for payment services
     #   Payments = Stoplight.__stoplight__system(:payments, threshold: 3, cool_off_time: 30)
+    #   Payments.register("stripe")
     #   Payments.light("stripe").run { process_payment }
     #
     # @example Isolated system with dedicated data store
@@ -246,7 +261,7 @@ def Stoplight(
   traffic_control: Stoplight::T.undefined,
   traffic_recovery: Stoplight::T.undefined
 ) # rubocop:disable Naming/MethodName
-  Stoplight.light(
+  Stoplight.register(
     name,
     cool_off_time:,
     threshold:,
