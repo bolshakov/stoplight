@@ -27,8 +27,8 @@ module Stoplight
 
           # Get metrics for the current light
           def metrics_snapshot
-            mutex.synchronize do
-              window_start = (clock.current_time - @window_size)
+            @mutex.synchronize do
+              window_start = (@clock.current_time - @window_size)
               errors = @errors.sum_in_window(window_start)
               successes = @successes.sum_in_window(window_start)
 
@@ -45,9 +45,10 @@ module Stoplight
 
           # Records successful circuit breaker execution
           def record_success
-            mutex.synchronize do
-              current_time = clock.current_time
+            @mutex.synchronize do
               @successes.increment
+
+              current_time = @clock.current_time
 
               if @last_success_at.nil? || current_time > T.must(@last_success_at)
                 @last_success_at = current_time
@@ -60,10 +61,10 @@ module Stoplight
 
           # Records failed circuit breaker execution
           def record_failure(exception)
-            mutex.synchronize do
+            @mutex.synchronize do
               @errors.increment
 
-              failure = Domain::Failure.from_error(exception, time: clock.current_time)
+              failure = Domain::Failure.from_error(exception, time: @clock.current_time)
               last_error_at = @last_error&.occurred_at
 
               if last_error_at.nil? || failure.occurred_at > last_error_at
@@ -76,23 +77,20 @@ module Stoplight
           end
 
           def clear
-            mutex.synchronize do
+            @mutex.synchronize do
               initialize_metrics
             end
           end
 
           private
 
-          attr_reader :mutex
-          attr_reader :clock
-
           def initialize_metrics
             @consecutive_errors = 0
             @consecutive_successes = 0
             @last_error = nil
             @last_success_at = nil
-            @successes = SlidingWindow.new(clock:)
-            @errors = SlidingWindow.new(clock:)
+            @successes = SlidingWindow.new(clock: @clock)
+            @errors = SlidingWindow.new(clock: @clock)
           end
         end
       end
