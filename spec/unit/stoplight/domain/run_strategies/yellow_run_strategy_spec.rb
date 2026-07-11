@@ -7,7 +7,6 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
       error_tracking_policy:,
       notifiers: notifiers,
       request_tracker:,
-      red_run_strategy:,
       state_store:,
       metrics_store:,
       recovery_lock_store:,
@@ -23,8 +22,8 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
   let(:state_store) { instance_double(NullStateStore) }
   let(:metrics_store) { instance_double(NullMetricsStore) }
   let(:request_tracker) { instance_double(Stoplight::Domain::Tracker::RecoveryProbe) }
-  let(:red_run_strategy) { instance_double(Stoplight::Domain::Strategies::RedRunStrategy) }
-  let(:config) { instance_double(Stoplight::Domain::Config, name:) }
+  let(:cool_off_time) { 60 }
+  let(:config) { instance_double(Stoplight::Domain::Config, name:, cool_off_time:) }
 
   describe "#exceute" do
     before do
@@ -108,18 +107,41 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
     end
 
     context "when recovery lock is not acquired" do
-      let(:value) { instance_double(Object) }
-      let(:fallback) { instance_double(Proc) }
-      let(:state_snapshot) { instance_double(Stoplight::Domain::StateSnapshot) }
+      let(:state_snapshot) { instance_double(Stoplight::Domain::StateSnapshot, recovery_scheduled_after: Time.now) }
 
-      it "delegates to red_run_strategy" do
-        expect(recovery_lock_store).to receive(:acquire_lock).and_return(nil)
-        expect(red_run_strategy).to receive(:execute).with(fallback, state_snapshot:).and_return(value)
+      before do
+        allow(recovery_lock_store).to receive(:acquire_lock).and_return(nil)
+      end
 
-        expect do |code|
-          result = strategy.execute(fallback, state_snapshot:, &code)
-          expect(result).to eq(value)
-        end.not_to yield_control
+      context "when fallback is provided" do
+        let(:fallback) do
+          ->(error) {
+            @error = error
+            "Fallback"
+          }
+        end
+
+        it "returns the fallback result without yielding" do
+          expect do |code|
+            result = strategy.execute(fallback, state_snapshot:, &code)
+            expect(result).to eq("Fallback")
+          end.not_to yield_control
+
+          expect(@error).to eq(nil)
+        end
+      end
+
+      context "when fallback is not provided" do
+        let(:fallback) { nil }
+
+        it "raises RedLight without yielding" do
+          expect do |code|
+            expect { strategy.execute(fallback, state_snapshot:, &code) }.to raise_error(Stoplight::Error::RedLight, name) { |error|
+              expect(error.cool_off_time).to eq(cool_off_time)
+              expect(error.retry_after).to eq(state_snapshot.recovery_scheduled_after)
+            }
+          end.not_to yield_control
+        end
       end
     end
   end
