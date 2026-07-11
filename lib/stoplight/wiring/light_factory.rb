@@ -111,7 +111,7 @@ module Stoplight
           error_tracking_policy: @error_tracking_policy,
           notifiers:,
           request_tracker: recovery_probe_tracker,
-          red_run_strategy:,
+          cool_off_time: @cool_off_time,
           state_store:,
           metrics_store:,
           recovery_lock_store:,

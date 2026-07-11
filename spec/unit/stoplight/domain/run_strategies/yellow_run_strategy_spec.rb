@@ -7,7 +7,7 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
       error_tracking_policy:,
       notifiers: notifiers,
       request_tracker:,
-      red_run_strategy:,
+      cool_off_time:,
       state_store:,
       metrics_store:,
       recovery_lock_store:,
@@ -23,7 +23,6 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
   let(:state_store) { instance_double(NullStateStore) }
   let(:metrics_store) { instance_double(NullMetricsStore) }
   let(:request_tracker) { instance_double(Stoplight::Domain::Tracker::RecoveryProbe) }
-  let(:red_run_strategy) { Stoplight::Domain::Strategies::RedRunStrategy.new(name:, cool_off_time:) }
   let(:cool_off_time) { 60 }
   let(:config) { instance_double(Stoplight::Domain::Config, name:) }
 

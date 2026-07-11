@@ -16,7 +16,7 @@ module Stoplight
           error_tracking_policy:,
           notifiers:,
           request_tracker:,
-          red_run_strategy:,
+          cool_off_time:,
           state_store:,
           metrics_store:,
           recovery_lock_store:,
@@ -24,7 +24,7 @@ module Stoplight
         )
           @notifiers = notifiers
           @request_tracker = request_tracker
-          @red_run_strategy = red_run_strategy
+          @cool_off_time = cool_off_time
           @state_store = state_store
           @metrics_store = metrics_store
           @recovery_lock_store = recovery_lock_store
@@ -46,7 +46,7 @@ module Stoplight
           #   - execute user's code
           #   - record outcome
           #   - transition to green or red if needed
-          with_recovery_lock(fallback:, state_snapshot:, code:) do
+          with_recovery_lock(fallback:, state_snapshot:) do
             enter_recovery(state_snapshot)
 
             result = code.call
@@ -72,15 +72,20 @@ module Stoplight
 
         attr_reader :notifiers
         attr_reader :request_tracker
-        attr_reader :red_run_strategy
         attr_reader :state_store
         attr_reader :metrics_store
         attr_reader :recovery_lock_store
 
-        def with_recovery_lock(fallback:, state_snapshot:, code:)
+        def with_recovery_lock(fallback:, state_snapshot:)
           recovery_lock_token = recovery_lock_store.acquire_lock
           if recovery_lock_token.nil?
-            return red_run_strategy.execute(fallback, state_snapshot:, &code)
+            return fallback.call(nil) if fallback
+
+            raise Error::RedLight.new(
+              @name,
+              cool_off_time: @cool_off_time,
+              retry_after: state_snapshot.recovery_scheduled_after
+            )
           end
 
           begin
