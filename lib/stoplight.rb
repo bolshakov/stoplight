@@ -173,6 +173,8 @@ module Stoplight # rubocop:disable Style/Documentation
 
     # @api private
     private def ensure_configured
+      return if configured?
+
       CONFIG_MUTEX.synchronize do
         configure unless configured?
       end
