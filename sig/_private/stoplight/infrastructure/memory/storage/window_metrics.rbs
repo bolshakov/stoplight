@@ -5,9 +5,8 @@ module Stoplight
         class WindowMetrics
           include Domain::_MetricsStore
 
-          attr_reader mutex: Mutex
-          attr_reader clock: Domain::_Clock
-
+          @mutex: Mutex
+          @clock: Domain::_Clock
           @window_size: duration
           @consecutive_errors: Integer
           @consecutive_successes: Integer

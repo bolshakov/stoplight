@@ -19,50 +19,46 @@ module Stoplight
           # @api private
           class SlidingWindow
             def initialize(clock:)
+              # A hash mapping time buckets to their counts
               @buckets = Hash.new { |buckets, bucket| buckets[bucket] = 0 }
+              # The running sum of all increments in the current window
               @running_sum = 0
               @clock = clock
             end
 
             # Increment the count at a given timestamp
             def increment
-              buckets[current_bucket] += 1
-              self.running_sum += 1
+              @buckets[current_bucket] += 1
+              @running_sum += 1
             end
 
             def sum_in_window(window_start)
               slide_window!(window_start)
-              running_sum
+              @running_sum
             end
 
             def inspect
-              "#<#{self.class.name} #{buckets}>"
+              "#<#{self.class.name} #{@buckets}>"
             end
 
             private
-
-            # A hash mapping time buckets to their counts
-            attr_reader :buckets
-            # The running sum of all increments in the current window
-            attr_accessor :running_sum
-            attr_reader :clock
 
             def slide_window!(window_start)
               window_start_ts = window_start.to_i
 
               loop do
-                timestamp, sum = buckets.first
+                timestamp, sum = @buckets.first
                 if timestamp.nil? || timestamp >= window_start_ts
                   break
                 else
-                  self.running_sum -= sum.to_i
-                  buckets.shift
+                  @running_sum -= sum.to_i
+                  @buckets.shift
                 end
               end
             end
 
             def current_bucket
-              bucket_for_time(clock.current_time)
+              bucket_for_time(@clock.current_time)
             end
 
             def bucket_for_time(time)
