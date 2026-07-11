@@ -7,7 +7,6 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
       error_tracking_policy:,
       notifiers: notifiers,
       request_tracker:,
-      cool_off_time:,
       state_store:,
       metrics_store:,
       recovery_lock_store:,
@@ -24,7 +23,7 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
   let(:metrics_store) { instance_double(NullMetricsStore) }
   let(:request_tracker) { instance_double(Stoplight::Domain::Tracker::RecoveryProbe) }
   let(:cool_off_time) { 60 }
-  let(:config) { instance_double(Stoplight::Domain::Config, name:) }
+  let(:config) { instance_double(Stoplight::Domain::Config, name:, cool_off_time:) }
 
   describe "#exceute" do
     before do

@@ -16,7 +16,6 @@ module Stoplight
           error_tracking_policy:,
           notifiers:,
           request_tracker:,
-          cool_off_time:,
           state_store:,
           metrics_store:,
           recovery_lock_store:,
@@ -24,7 +23,6 @@ module Stoplight
         )
           @notifiers = notifiers
           @request_tracker = request_tracker
-          @cool_off_time = cool_off_time
           @state_store = state_store
           @metrics_store = metrics_store
           @recovery_lock_store = recovery_lock_store
@@ -83,7 +81,7 @@ module Stoplight
 
             raise Error::RedLight.new(
               @name,
-              cool_off_time: @cool_off_time,
+              cool_off_time: @config.cool_off_time,
               retry_after: state_snapshot.recovery_scheduled_after
             )
           end

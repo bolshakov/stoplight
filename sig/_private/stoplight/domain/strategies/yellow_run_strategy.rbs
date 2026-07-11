@@ -13,14 +13,12 @@ module Stoplight
         @name: String
         @config: Domain::Config
         @error_tracking_policy: ErrorTrackingPolicy
-        @cool_off_time: duration
 
         def initialize: (
           name: String,
           error_tracking_policy: ErrorTrackingPolicy,
           notifiers: Array[state_transition_notifier],
           request_tracker: Tracker::RecoveryProbe,
-          cool_off_time: duration,
           state_store: Domain::_StateStore,
           metrics_store: _MetricsStore,
           recovery_lock_store: _RecoveryLockStore,
