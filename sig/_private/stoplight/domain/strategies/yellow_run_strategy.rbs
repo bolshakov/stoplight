@@ -13,25 +13,41 @@ module Stoplight
         @name: String
         @config: Domain::Config
         @error_tracking_policy: ErrorTrackingPolicy
+        @clock: _Clock
+        @run_recorder: Telemetry::RunRecorder
 
         def initialize: (
           name: String,
           error_tracking_policy: ErrorTrackingPolicy,
           notifiers: Array[state_transition_notifier],
           request_tracker: Tracker::RecoveryProbe,
-          state_store: Domain::_StateStore,
+          state_store: _StateStore,
           metrics_store: _MetricsStore,
           recovery_lock_store: _RecoveryLockStore,
-          config: Domain::Config,
+          config: Config,
+          clock: _Clock,
+          run_recorder: Telemetry::RunRecorder
         ) -> void
 
         def with_recovery_lock: [T] (
             fallback: (^(StandardError?) -> T)?,
             state_snapshot: StateSnapshot,
-          ) { () -> T } -> T
+          ) { (Float?) -> T } -> T
 
-        def record_recovery_probe_success: () -> void
-        def record_recovery_probe_failure: (StandardError) -> void
+        def capture_started_at: () -> Float?
+        def duration_since: (Float?) -> Float?
+
+        def record_recovery_probe_success: (
+            duration_ms: Float?,
+            ?error: StandardError?
+          ) -> void
+
+        def record_recovery_probe_failure: (
+            StandardError,
+            duration_ms: Float?,
+            fallback_used: bool,
+          ) -> void
+
         def enter_recovery: (StateSnapshot) -> void
       end
     end

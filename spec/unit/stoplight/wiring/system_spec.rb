@@ -13,7 +13,7 @@ RSpec.describe Stoplight::Wiring::System do
   let(:registry) { instance_double(Stoplight::Infrastructure::Memory::Storage::Registry, register: nil) }
 
   describe "#light" do
-    let(:system_config) { Stoplight::Wiring::DefaultConfig }
+    let(:system_config) { Stoplight::Wiring::DefaultConfig.with(name: SecureRandom.uuid) }
 
     describe "caching behavior with same name and no settings" do
       let(:light) { system.light(name) }
@@ -156,7 +156,7 @@ RSpec.describe Stoplight::Wiring::System do
 
     describe "registry" do
       let(:registry) { instance_double(Stoplight::Infrastructure::Memory::Storage::Registry, register: nil) }
-      let(:system_config) { Stoplight::Wiring::DefaultConfig }
+      let(:system_config) { Stoplight::Wiring::DefaultConfig.with(name: SecureRandom.uuid) }
 
       subject!(:system) { described_class.new(config: system_config, failover_system:, registry:) }
 

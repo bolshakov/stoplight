@@ -102,7 +102,9 @@ module Stoplight
       def green_run_strategy
         Domain::Strategies::GreenRunStrategy.new(
           error_tracking_policy: @error_tracking_policy,
-          request_tracker:
+          request_tracker:,
+          clock:,
+          run_recorder: run_recorder(Color::GREEN)
         )
       end
 
@@ -115,12 +117,22 @@ module Stoplight
           state_store:,
           metrics_store:,
           recovery_lock_store:,
-          config: @config
+          config: @config,
+          clock:,
+          run_recorder: run_recorder(Color::YELLOW)
         )
       end
 
       def red_run_strategy
-        Domain::Strategies::RedRunStrategy.new(name: @name, cool_off_time: @cool_off_time)
+        Domain::Strategies::RedRunStrategy.new(
+          name: @name,
+          cool_off_time: @cool_off_time,
+          run_recorder: run_recorder(Color::RED)
+        )
+      end
+
+      def run_recorder(color)
+        Domain::Telemetry::RunRecorder.new(emitter: @emitter, color:)
       end
 
       def redis
