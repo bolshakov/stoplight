@@ -9,13 +9,18 @@ module Stoplight
         @clock: _Clock
         @system_name: String
         @light_name: String
+        @error_notifier: error_notifier
 
         def initialize: (
             bus: _TelemetryPublisher,
             clock: _Clock,
             system_name: String,
-            light_name: String
+            light_name: String,
+            error_notifier: error_notifier
           ) -> void
+
+        # True when any subscriber would receive this event class.
+        def subscribed?: (Telemetry::event_class) -> bool
 
         # Lazily yields the event's payload only when the bus has subscribers for this event class, then stamps
         # +occurred_at+ from the clock and publishes.
@@ -38,6 +43,8 @@ module Stoplight
                 | (singleton(LockChanged)) { () -> LockChanged } -> void
                 | (singleton(RecoveryProbeCompleted)) { () -> RecoveryProbeCompleted } -> void
                 | (singleton(LightRegistered)) { () -> LightRegistered } -> void
+
+        private def notify_error: (StandardError) -> void
       end
     end
   end
