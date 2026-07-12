@@ -17,7 +17,7 @@ RSpec.describe Stoplight::Domain::Tracker::RecoveryProbe do
 
       before do
         allow(traffic_recovery).to receive(:determine_color).with(config, metrics_after_probe).and_return(recover_to)
-        allow(state_store).to receive(:transition_to_color).with(transition_to)
+        allow(state_store).to receive(:transition_to_color).with(transition_to).and_return(true)
       end
 
       it "sends notifications" do
@@ -25,6 +25,19 @@ RSpec.describe Stoplight::Domain::Tracker::RecoveryProbe do
         expect(notifier).to receive(:notify).with(have_attributes(name:), transition_from, transition_to, nil)
 
         record_probe
+      end
+
+      context "when failed to transition to #{transition_to}" do
+        before do
+          allow(state_store).to receive(:transition_to_color).with(transition_to).and_return(false)
+        end
+
+        it "does not clear metrics or send notifications" do
+          expect(metrics_store).not_to receive(:clear)
+          expect(notifier).not_to receive(:notify)
+
+          record_probe
+        end
       end
     end
   end
