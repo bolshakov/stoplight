@@ -38,13 +38,17 @@ module Stoplight
       end
 
       def build
-        Stoplight::Domain::Light.new(
+        light = Stoplight::Domain::Light.new(
           @name,
           state_store:,
           green_run_strategy:,
           yellow_run_strategy:,
           red_run_strategy:
         )
+        @emitter.emit(Domain::Telemetry::LightRegistered) do
+          Domain::Telemetry::LightRegistered.new(settings: telemetry_settings)
+        end
+        light
       end
 
       def state_store = storage_set.state_store
@@ -133,6 +137,36 @@ module Stoplight
 
       def run_recorder(color)
         Domain::Telemetry::RunRecorder.new(emitter: @emitter, color:)
+      end
+
+      def telemetry_settings
+        Domain::Telemetry::Settings.new(
+          cool_off_time: config.cool_off_time,
+          threshold: config.threshold,
+          recovery_threshold: config.recovery_threshold,
+          window_size: config.window_size,
+          tracked_errors: matcher_names(config.tracked_errors),
+          skipped_errors: matcher_names(config.skipped_errors),
+          traffic_control: policy_name(config.traffic_control),
+          traffic_control_params: policy_params(config.traffic_control),
+          traffic_recovery: policy_name(config.traffic_recovery),
+          traffic_recovery_params: policy_params(config.traffic_recovery)
+        )
+      end
+
+      def matcher_names(matchers) = matchers.map { |matcher| matcher.to_s }
+
+      def policy_name(policy)
+        T.must(policy.class.name).split("::").last.gsub(/([a-z\d])([A-Z])/, "\\1_\\2").downcase
+      end
+
+      def policy_params(policy)
+        case policy
+        when Domain::TrafficControl::ErrorRate
+          {"min_requests" => policy.instance_variable_get(:@min_requests)}
+        else
+          {}
+        end
       end
 
       def redis

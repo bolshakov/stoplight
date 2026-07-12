@@ -173,5 +173,54 @@ RSpec.describe Stoplight::Wiring::System do
         expect(registry).to have_received(:register).once
       end
     end
+
+    describe "telemetry" do
+      let(:events) { [] }
+
+      before do
+        telemetry = system.instance_variable_get(:@telemetry)
+        telemetry.subscribe(Stoplight::Telemetry::LightRegistered) { |event| events << event }
+      end
+
+      it "emits one LightRegistered event with the normalized settings" do
+        system.light(
+          "stripe",
+          cool_off_time: 30,
+          threshold: 0.25,
+          recovery_threshold: 4,
+          window_size: 60,
+          tracked_errors: RuntimeError,
+          skipped_errors: ArgumentError,
+          traffic_control: {error_rate: {min_requests: 17}}
+        )
+        system.light(
+          "stripe",
+          cool_off_time: 30,
+          threshold: 0.25,
+          recovery_threshold: 4,
+          window_size: 60,
+          tracked_errors: RuntimeError,
+          skipped_errors: ArgumentError,
+          traffic_control: {error_rate: {min_requests: 17}}
+        )
+
+        expect(events.size).to eq(1)
+        expect(events.first).to have_attributes(system_name: system.name, light_name: "stripe")
+        expect(events.first.payload.settings).to eq(
+          Stoplight::Domain::Telemetry::Settings.new(
+            cool_off_time: 30,
+            threshold: 0.25,
+            recovery_threshold: 4,
+            window_size: 60,
+            tracked_errors: ["RuntimeError"],
+            skipped_errors: ["ArgumentError"],
+            traffic_control: "error_rate",
+            traffic_control_params: {"min_requests" => 17},
+            traffic_recovery: "consecutive_successes",
+            traffic_recovery_params: {}
+          )
+        )
+      end
+    end
   end
 end

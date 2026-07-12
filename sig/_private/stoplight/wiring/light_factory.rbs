@@ -57,6 +57,10 @@ module Stoplight
       def yellow_run_strategy: -> Domain::Strategies::YellowRunStrategy
       def red_run_strategy: -> Domain::Strategies::RedRunStrategy
       def run_recorder: (color) -> Domain::Telemetry::RunRecorder
+      def telemetry_settings: -> Domain::Telemetry::Settings
+      def matcher_names: (Array[_ExceptionMatcher]) -> Array[String]
+      def policy_name: (untyped) -> String
+      def policy_params: (untyped) -> Hash[String, untyped]
       def redis: -> redis
       def storage_scripting: -> Infrastructure::Redis::Storage::Scripting
       def failover_system: -> _System

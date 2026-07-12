@@ -4,5 +4,6 @@ module Stoplight
 
     # Object methods
     def is_a?: (untyped) -> bool
+    def to_s: () -> String
   end
 end
