@@ -10,9 +10,10 @@ module Stoplight
       #
       # @api private
       class RedRunStrategy
-        def initialize(name:, cool_off_time:)
+        def initialize(name:, cool_off_time:, run_recorder:)
           @name = name
           @cool_off_time = cool_off_time
+          @run_recorder = run_recorder
         end
 
         # Executes the fallback proc when the light is in the red state.
@@ -22,6 +23,11 @@ module Stoplight
         # @return The result of the fallback proc if provided.
         # @raise [Stoplight::Error::RedLight] Raises an error if no fallback is provided.
         def execute(fallback, state_snapshot:)
+          @run_recorder.record_blocked(
+            fallback_used: !fallback.nil?,
+            retry_after: state_snapshot.recovery_scheduled_after
+          )
+
           if fallback
             fallback.call(nil)
           else

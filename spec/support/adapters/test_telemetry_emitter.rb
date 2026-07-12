@@ -7,6 +7,8 @@ class TestTelemetryEmitter
     @emitted = []
   end
 
+  def subscribed?(event_class) = true
+
   def emit(event_class)
     event = yield
     expect(event).to be_kind_of(event_class)

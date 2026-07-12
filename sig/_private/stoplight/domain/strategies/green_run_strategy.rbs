@@ -6,11 +6,17 @@ module Stoplight
 
         attr_reader request_tracker: Tracker::Request
         @error_tracking_policy: ErrorTrackingPolicy
+        @run_recorder: Telemetry::RunRecorder
+        @clock: _Clock
 
-        def initialize: (error_tracking_policy: ErrorTrackingPolicy, request_tracker: Tracker::Request) -> void
+        def initialize: (error_tracking_policy: ErrorTrackingPolicy, request_tracker: Tracker::Request,
+            run_recorder: Telemetry::RunRecorder, clock: _Clock) -> void
 
-        def record_error: (StandardError) -> void
-        def record_success: -> void
+        def capture_started_at: () -> Float?
+        def duration_since: (Float?) -> Float?
+
+        def record_error: (StandardError, duration_ms: Float?, fallback_used: bool) -> void
+        def record_success: (duration_ms: Float?, ?error: StandardError?)-> void
       end
     end
   end

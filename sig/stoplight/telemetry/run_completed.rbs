@@ -5,7 +5,9 @@ module Stoplight
       class RunCompleted < Data
         attr_reader outcome: run_outcome
         attr_reader color: color
-        # nil only when blocked (no user code ran).
+        # nil when blocked (no user code ran)
+        # @note For performance reasons, durations might not be measured if nobody was subscribed at the start
+        # of the run - e.g. due to a race condition between active light and new subscription.
         attr_reader duration_ms: Float?
         # Present on failures and on successes caused by untracked (skipped) errors (see Failure#tracked).
         attr_reader failure: Failure?

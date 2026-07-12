@@ -19,7 +19,9 @@ module Stoplight
           state_store:,
           metrics_store:,
           recovery_lock_store:,
-          config: # FIXME: needed for backward compatibility, remove when notifier accepts light config
+          config:, # FIXME: needed for backward compatibility, remove when notifier accepts light config
+          clock:,
+          run_recorder:
         )
           @notifiers = notifiers
           @request_tracker = request_tracker
@@ -29,6 +31,8 @@ module Stoplight
           @name = name
           @error_tracking_policy = error_tracking_policy
           @config = config
+          @clock = clock
+          @run_recorder = run_recorder
         end
 
         # Executes the provided code block when the light is in the yellow state.
@@ -44,15 +48,15 @@ module Stoplight
           #   - execute user's code
           #   - record outcome
           #   - transition to green or red if needed
-          with_recovery_lock(fallback:, state_snapshot:) do
+          with_recovery_lock(fallback:, state_snapshot:) do |started_at|
             enter_recovery(state_snapshot)
 
             result = code.call
-            record_recovery_probe_success
+            record_recovery_probe_success(duration_ms: duration_since(started_at))
             result
           rescue => error
             if @error_tracking_policy.track?(error)
-              record_recovery_probe_failure(error)
+              record_recovery_probe_failure(error, duration_ms: duration_since(started_at), fallback_used: !fallback.nil?)
 
               if fallback
                 fallback.call(error)
@@ -60,7 +64,7 @@ module Stoplight
                 raise
               end
             else
-              record_recovery_probe_success
+              record_recovery_probe_success(duration_ms: duration_since(started_at), error:)
               raise
             end
           end
@@ -77,6 +81,11 @@ module Stoplight
         def with_recovery_lock(fallback:, state_snapshot:)
           recovery_lock_token = recovery_lock_store.acquire_lock
           if recovery_lock_token.nil?
+            @run_recorder.record_blocked(
+              fallback_used: !fallback.nil?,
+              retry_after: state_snapshot.recovery_scheduled_after
+            )
+
             return fallback.call(nil) if fallback
 
             raise Error::RedLight.new(
@@ -87,17 +96,27 @@ module Stoplight
           end
 
           begin
-            yield
+            yield capture_started_at
           ensure
             recovery_lock_store.release_lock(recovery_lock_token)
           end
         end
 
-        def record_recovery_probe_success
+        def capture_started_at
+          @clock.monotonic_time if @run_recorder.subscribed?
+        end
+
+        def duration_since(started_at)
+          @clock.monotonic_time - started_at if started_at
+        end
+
+        def record_recovery_probe_success(duration_ms:, error: nil)
+          @run_recorder.record_success(duration_ms:, error:)
           request_tracker.record_success
         end
 
-        def record_recovery_probe_failure(error)
+        def record_recovery_probe_failure(error, duration_ms:, fallback_used:)
+          @run_recorder.record_failure(error, duration_ms:, fallback_used:)
           request_tracker.record_failure(error)
         end
 
@@ -106,7 +125,7 @@ module Stoplight
 
           state_store.transition_to_color(Color::YELLOW)
           metrics_store.clear
-          # FIXME: use light config instead of @_config
+          # FIXME: use light config instead of @config
           # light_info = LightInfo.new(name: @name)
           notifiers.each do |notifier|
             notifier.notify(@config, Color::RED, Color::YELLOW, nil)

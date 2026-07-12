@@ -6,11 +6,13 @@ module Stoplight
 
         @name: String
         @cool_off_time: duration
+        @run_recorder: Telemetry::RunRecorder
 
-        def initialize: (name: String, cool_off_time: duration) -> void
-
-        private def record_error: (StandardError) -> void
-        private def record_success: -> void
+        def initialize: (
+            name: String,
+            cool_off_time: duration,
+            run_recorder: Telemetry::RunRecorder,
+          ) -> void
       end
     end
   end
