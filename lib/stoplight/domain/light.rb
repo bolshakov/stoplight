@@ -11,12 +11,13 @@ module Stoplight
       attr_reader :red_run_strategy
       attr_reader :state_store
 
-      def initialize(name, green_run_strategy:, yellow_run_strategy:, red_run_strategy:, state_store:)
+      def initialize(name, green_run_strategy:, yellow_run_strategy:, red_run_strategy:, state_store:, emitter:)
         @name = name
         @green_run_strategy = green_run_strategy
         @yellow_run_strategy = yellow_run_strategy
         @red_run_strategy = red_run_strategy
         @state_store = state_store
+        @emitter = emitter
       end
 
       # Returns the current state of the light:
@@ -73,7 +74,7 @@ module Stoplight
         else raise Error::IncorrectColor
         end
 
-        state_store.set_state(state)
+        change_lock(state)
 
         self
       end
@@ -87,7 +88,7 @@ module Stoplight
       #
       # @return returns unlocked light (circuit breaker)
       def unlock
-        state_store.set_state(State::UNLOCKED)
+        change_lock(State::UNLOCKED)
 
         self
       end
@@ -106,6 +107,20 @@ module Stoplight
       end
 
       def state_snapshot = state_store.state_snapshot
+
+      def change_lock(state)
+        before = state_snapshot
+        state_store.set_state(state)
+        after = state_snapshot
+        @emitter.emit(Telemetry::LockChanged) do
+          Telemetry::LockChanged.new(
+            from_color: before.color,
+            to_color: after.color,
+            from_state: before.locked_state,
+            to_state: after.locked_state
+          )
+        end
+      end
     end
   end
 end

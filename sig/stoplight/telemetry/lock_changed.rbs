@@ -11,23 +11,19 @@ module Stoplight
         attr_reader to_color: color
         attr_reader from_state: state
         attr_reader to_state: state
-        # Open set: "api", "admin", custom.
-        attr_reader source: String
 
         def self.new: (
             from_color: color,
             to_color: color,
             from_state: state,
-            to_state: state,
-            source: String
+            to_state: state
           ) -> instance
 
         def initialize: (
             from_color: color,
             to_color: color,
             from_state: state,
-            to_state: state,
-            source: String
+            to_state: state
           ) -> void
       end
     end

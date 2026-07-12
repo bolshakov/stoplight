@@ -7,7 +7,8 @@ RSpec.describe Stoplight::Domain::Light do
       green_run_strategy:,
       yellow_run_strategy:,
       red_run_strategy:,
-      state_store:
+      state_store:,
+      emitter:
     )
   end
   let(:config) { instance_double(Stoplight::Domain::Config) }
@@ -15,6 +16,17 @@ RSpec.describe Stoplight::Domain::Light do
   let(:yellow_run_strategy) { instance_double(Stoplight::Domain::Strategies::YellowRunStrategy) }
   let(:red_run_strategy) { instance_double(Stoplight::Domain::Strategies::RedRunStrategy) }
   let(:state_store) { instance_double(NullStateStore) }
+  let(:emitter) { TestTelemetryEmitter.new }
+
+  before do
+    allow(state_store).to receive(:state_snapshot).and_return(
+      instance_double(
+        Stoplight::Domain::StateSnapshot,
+        color: Stoplight::Color::GREEN,
+        locked_state: Stoplight::State::UNLOCKED
+      )
+    )
+  end
 
   describe "#lock" do
     let(:color) { Stoplight::Color::GREEN }
@@ -39,6 +51,28 @@ RSpec.describe Stoplight::Domain::Light do
           expect(light.lock(color)).to be_a Stoplight::Domain::Light
         end
       end
+
+      it "emits LockChanged even when the effective color stays the same" do
+        before = instance_double(
+          Stoplight::Domain::StateSnapshot,
+          color: Stoplight::Color::RED,
+          locked_state: Stoplight::State::LOCKED_RED
+        )
+        after = instance_double(
+          Stoplight::Domain::StateSnapshot,
+          color: Stoplight::Color::RED,
+          locked_state: Stoplight::State::LOCKED_RED
+        )
+        allow(state_store).to receive(:state_snapshot).and_return(before, after)
+        allow(state_store).to receive(:set_state)
+
+        expect { light.lock(Stoplight::Color::RED) }.to emit(Stoplight::Telemetry::LockChanged).with(
+          from_color: Stoplight::Color::RED,
+          to_color: Stoplight::Color::RED,
+          from_state: Stoplight::State::LOCKED_RED,
+          to_state: Stoplight::State::LOCKED_RED
+        )
+      end
     end
 
     context "with incorrect color" do
@@ -60,6 +94,28 @@ RSpec.describe Stoplight::Domain::Light do
     expect(state_store).to receive(:set_state).with(Stoplight::State::UNLOCKED)
 
     expect(light.unlock).to be_a Stoplight::Domain::Light
+  end
+
+  specify "#unlock emits LockChanged" do
+    before = instance_double(
+      Stoplight::Domain::StateSnapshot,
+      color: Stoplight::Color::RED,
+      locked_state: Stoplight::State::LOCKED_RED
+    )
+    after = instance_double(
+      Stoplight::Domain::StateSnapshot,
+      color: Stoplight::Color::GREEN,
+      locked_state: Stoplight::State::UNLOCKED
+    )
+    allow(state_store).to receive(:state_snapshot).and_return(before, after)
+    allow(state_store).to receive(:set_state)
+
+    expect { light.unlock }.to emit(Stoplight::Telemetry::LockChanged).with(
+      from_color: Stoplight::Color::RED,
+      to_color: Stoplight::Color::GREEN,
+      from_state: Stoplight::State::LOCKED_RED,
+      to_state: Stoplight::State::UNLOCKED
+    )
   end
 
   specify "#state" do

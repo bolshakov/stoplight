@@ -8,8 +8,7 @@ module Stoplight
         :from_color,
         :to_color,
         :from_state,
-        :to_state,
-        :source
+        :to_state
       )
 
       class LockChanged

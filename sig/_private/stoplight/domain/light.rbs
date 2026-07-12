@@ -7,17 +7,20 @@ module Stoplight
       attr_reader red_run_strategy: Strategies::RedRunStrategy
       attr_reader state_store: Domain::_StateStore
       @name: String
+      @emitter: Telemetry::Emitter
 
       def initialize: (
         String name,
         green_run_strategy: Strategies::GreenRunStrategy,
         yellow_run_strategy: Strategies::YellowRunStrategy,
         red_run_strategy: Strategies::RedRunStrategy,
-        state_store: Domain::_StateStore
+        state_store: Domain::_StateStore,
+        emitter: Telemetry::Emitter
       ) -> void
 
       private def state_strategy_factory: (color) -> _RunStrategy
       private def state_snapshot: -> StateSnapshot
+      private def change_lock: (state) -> void
     end
   end
 end
