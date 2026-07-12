@@ -31,7 +31,8 @@ module Stoplight
           bus: telemetry,
           system_name: system_name,
           light_name: config.name,
-          clock: @clock
+          clock: @clock,
+          error_notifier: @error_notifier
         )
         @wrapped_notifiers = nil
       end

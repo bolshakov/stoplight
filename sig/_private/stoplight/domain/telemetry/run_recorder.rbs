@@ -1,0 +1,27 @@
+module Stoplight
+  module Domain
+    class Telemetry
+      # Builds and emits RunCompleted events for one light color.
+      class RunRecorder
+        @emitter: Telemetry::Emitter
+        @color: color
+
+        def initialize: (emitter: Telemetry::Emitter, color: color) -> void
+
+        def subscribed?: () -> bool
+
+        def record_success: (duration_ms: Float?, ?error: StandardError?) -> void
+        def record_failure: (StandardError, duration_ms: Float?, fallback_used: bool) -> void
+        def record_blocked: (fallback_used: bool, retry_after: Time?) -> void
+
+        private def emit: (
+            outcome: run_outcome,
+            duration_ms: Float?,
+            failure: Failure?,
+            fallback_used: bool,
+            retry_after: Time?
+          ) -> void
+      end
+    end
+  end
+end
