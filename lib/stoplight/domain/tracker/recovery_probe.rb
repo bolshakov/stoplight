@@ -4,19 +4,20 @@ module Stoplight
   module Domain
     module Tracker
       class RecoveryProbe
-        def initialize(traffic_recovery:, notifiers:, config:, metrics_store:, state_store:)
+        def initialize(traffic_recovery:, notifiers:, config:, metrics_store:, state_store:, emitter:)
           @traffic_recovery = traffic_recovery
           @notifiers = notifiers
           @config = config
           @metrics_store = metrics_store
           @state_store = state_store
+          @emitter = emitter
         end
 
         # @param exception [Exception]
         def record_failure(exception)
           metrics_store.record_failure(exception)
 
-          recover
+          recover(exception)
         end
 
         def record_success
@@ -32,8 +33,9 @@ module Stoplight
         attr_reader :config
         attr_reader :metrics_store
         attr_reader :state_store
+        attr_reader :emitter
 
-        def recover
+        def recover(exception = nil)
           recovery_metrics = metrics_store.metrics_snapshot
           recovery_result = traffic_recovery.determine_color(config, recovery_metrics)
 
@@ -46,12 +48,37 @@ module Stoplight
             raise "recovery strategy returned unexpected color: #{recovery_result}"
           end
 
-          state_store.transition_to_color(to_color)
+          transitioned = state_store.transition_to_color(to_color)
           metrics_store.clear
           info = LightInfo.new(name: config.name)
           notifiers.each do |notifier|
             notifier.notify(info, from_color, to_color, nil)
           end
+
+          return unless transitioned && to_color == Color::RED
+
+          emitter.emit(Telemetry::RecoveryFailed) do
+            Telemetry::RecoveryFailed.new(
+              from_color: Color::YELLOW,
+              to_color: Color::RED,
+              policy: policy_name,
+              failure: exception && Telemetry::Failure.new(exception:, tracked: true),
+              metrics: telemetry_metrics(recovery_metrics)
+            )
+          end
+        end
+
+        def policy_name
+          traffic_recovery.class.to_s.split("::").last.gsub(/([a-z\d])([A-Z])/, "\\1_\\2").downcase
+        end
+
+        def telemetry_metrics(metrics)
+          Telemetry::Metrics.new(
+            successes: metrics.successes,
+            errors: metrics.errors,
+            consecutive_errors: metrics.consecutive_errors,
+            consecutive_successes: metrics.consecutive_successes
+          )
         end
       end
     end

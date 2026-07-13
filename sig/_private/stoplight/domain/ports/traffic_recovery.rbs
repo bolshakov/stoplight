@@ -42,6 +42,7 @@ module Stoplight
       # Object methods
       def ==: (untyped) -> bool
       def is_a?: (untyped) -> bool
+      def class: -> Class
     end
   end
 end

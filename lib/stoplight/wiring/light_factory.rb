@@ -95,7 +95,8 @@ module Stoplight
           notifiers:,
           config:,
           metrics_store: recovery_metrics_store,
-          state_store:
+          state_store:,
+          emitter: @emitter
         )
       end
 
