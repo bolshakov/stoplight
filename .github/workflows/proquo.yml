@@ -1,10 +1,11 @@
 name: 🏷️ ProQuo
 on:
-  pull_request:
+  pull_request_target:
     types: [opened, synchronize, reopened]
 permissions:
   contents: read
   pull-requests: write
+  issues: write
 jobs:
   price:
     name: Review Price Tag
