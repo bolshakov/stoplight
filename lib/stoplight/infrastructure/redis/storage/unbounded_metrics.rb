@@ -71,13 +71,7 @@ module Stoplight
               )
             end
 
-            Domain::MetricsSnapshot.new(
-              successes: nil, errors: nil,
-              consecutive_errors: consecutive_errors.to_i,
-              consecutive_successes: consecutive_successes.to_i,
-              last_error: deserialize_failure(last_error_json),
-              last_success_at: (clock.at(last_success_at.to_f) if last_success_at)
-            )
+            build_metrics_snapshot(consecutive_errors:, consecutive_successes:, last_error_json:, last_success_at:)
           end
 
           # Records successful circuit breaker execution
@@ -85,13 +79,11 @@ module Stoplight
           def record_success
             timestamp = clock.current_time.to_f
 
-            last_success_at, last_error_json, consecutive_errors, consecutive_successes = scripting.call(
+            scripting.call(
               "unbounded_metrics/record_success",
               args: [timestamp, metrics_ttl],
               keys: [metrics_key]
             )
-
-            build_metrics_snapshot(consecutive_errors:, consecutive_successes:, last_error_json:, last_success_at:)
           end
 
           # Records failed circuit breaker execution

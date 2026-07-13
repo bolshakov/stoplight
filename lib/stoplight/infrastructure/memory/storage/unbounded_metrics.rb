@@ -42,8 +42,6 @@ module Stoplight
 
               @consecutive_errors = 0
               @consecutive_successes += 1
-
-              build_metrics_snapshot
             end
           end
 

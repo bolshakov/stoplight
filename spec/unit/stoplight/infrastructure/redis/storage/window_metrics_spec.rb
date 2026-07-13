@@ -20,14 +20,6 @@ RSpec.describe Stoplight::Infrastructure::Redis::Storage::WindowMetrics, :redis 
     def record_success = metrics.record_success
   end
 
-  describe "#record_success" do
-    it "fetches the resulting snapshot in a single round trip" do
-      expect(scripting).to receive(:call).once.and_call_original
-
-      metrics.record_success
-    end
-  end
-
   describe "#record_failure" do
     it "fetches the resulting snapshot in a single round trip" do
       expect(scripting).to receive(:call).once.and_call_original

@@ -17,4 +17,30 @@ RSpec.describe Stoplight::Infrastructure::Redis::Storage::UnboundedMetrics, :red
     def record_failure(error) = unbounded_metrics.record_failure(error)
     def record_success = unbounded_metrics.record_success
   end
+
+  describe "#record_failure" do
+    it "sets a TTL on the metrics key when it is the first ever failure" do
+      unbounded_metrics.record_failure(StandardError.new)
+
+      ttl = redis.with { |client| client.ttl(key_space.key(:metrics)) }
+      expect(ttl).to be_positive
+    end
+
+    it "keeps the TTL on the metrics key for a subsequent out-of-order failure" do
+      unbounded_metrics.record_failure(StandardError.new)
+
+      Timecop.freeze(Time.now - 30) do
+        unbounded_metrics.record_failure(StandardError.new)
+      end
+
+      ttl = redis.with { |client| client.ttl(key_space.key(:metrics)) }
+      expect(ttl).to be_positive
+    end
+
+    it "fetches the resulting snapshot in a single round trip" do
+      expect(scripting).to receive(:call).once.and_call_original
+
+      unbounded_metrics.record_failure(StandardError.new)
+    end
+  end
 end

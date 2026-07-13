@@ -29,8 +29,7 @@ module Stoplight
         # - Memory efficiency: Natural expiration without manual cleanup
         # - Precision: Sub-bucket accuracy via ZSET scores
         #
-        # All operations run as Lua scripts, so a mutation and the snapshot it returns commit atomically
-        # in one round-trip.
+        # All operations run as Lua scripts for atomicity.
         #
         class WindowMetrics < Metrics
           METRICS_FIELDS = %w[last_success_at last_error_json consecutive_errors consecutive_successes].freeze
@@ -71,25 +70,15 @@ module Stoplight
 
           def record_success
             timestamp = clock.current_time.to_f
-            window_start_ts, success_keys, failure_keys = snapshot_window(timestamp)
 
-            successes, errors, last_success_at, last_error_json, consecutive_errors, consecutive_successes = scripting.call(
+            scripting.call(
               "window_metrics/record_success",
-              args: [
-                timestamp, SecureRandom.hex(12), bucket_ttl, metrics_ttl,
-                failure_keys.count, window_start_ts, timestamp,
-                *METRICS_FIELDS
-              ],
+              args: [timestamp, SecureRandom.hex(12), bucket_ttl, metrics_ttl],
               keys: [
                 metrics_key,
-                successes_key(time: timestamp),
-                *success_keys,
-                *failure_keys
+                successes_key(time: timestamp)
               ]
             )
-
-            build_metrics_snapshot(successes:, errors:, consecutive_errors:, consecutive_successes:, last_error_json:,
-              last_success_at:)
           end
 
           def record_failure(exception)
@@ -100,8 +89,7 @@ module Stoplight
               "window_metrics/record_failure",
               args: [
                 timestamp, SecureRandom.hex(12), serialize_exception(exception, timestamp:), bucket_ttl, metrics_ttl,
-                failure_keys.count, window_start_ts, timestamp,
-                *METRICS_FIELDS
+                failure_keys.count, window_start_ts, timestamp
               ],
               keys: [
                 metrics_key,

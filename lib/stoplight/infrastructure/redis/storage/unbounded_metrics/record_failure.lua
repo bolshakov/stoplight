@@ -9,8 +9,6 @@ local meta = redis.call('HMGET', metrics_key, 'last_error_at', 'consecutive_erro
 local prev_failure_ts = tonumber(meta[1])
 local prev_consecutive_errors = tonumber(meta[2])
 
-redis.call('EXPIRE', metrics_key, metrics_ttl)
-
 local consecutive_errors = (prev_consecutive_errors or 0) + 1
 local consecutive_successes = 0
 
@@ -22,6 +20,7 @@ if not prev_failure_ts or failure_ts > prev_failure_ts then
     'consecutive_errors', consecutive_errors,
     'consecutive_successes', consecutive_successes
   )
+  redis.call('EXPIRE', metrics_key, metrics_ttl)
 
   local last_success_at = redis.call("HGET", metrics_key, "last_success_at")
   return {last_success_at, failure_json, consecutive_errors, consecutive_successes}
@@ -31,6 +30,7 @@ else
     'consecutive_errors', consecutive_errors,
     'consecutive_successes', consecutive_successes
   )
+  redis.call('EXPIRE', metrics_key, metrics_ttl)
 
   local meta = redis.call("HMGET", metrics_key, "last_success_at", "last_error_json")
   return {meta[1], meta[2], consecutive_errors, consecutive_successes}

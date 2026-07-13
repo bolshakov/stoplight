@@ -22,8 +22,7 @@ RSpec.describe Stoplight::Domain::Tracker::Request do
     let(:metrics) { instance_double(Stoplight::Domain::MetricsSnapshot) }
 
     before do
-      allow(metrics_store).to receive(:record_failure).with(exception)
-      allow(metrics_store).to receive(:metrics_snapshot).and_return(metrics)
+      allow(metrics_store).to receive(:record_failure).with(exception).and_return(metrics)
     end
 
     context "when traffic control decides to stop the traffic" do

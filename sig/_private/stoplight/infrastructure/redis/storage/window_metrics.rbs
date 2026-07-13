@@ -36,8 +36,8 @@ module Stoplight
             errors: Integer,
             consecutive_errors: String,
             consecutive_successes: String,
-            last_error_json: String,
-            last_success_at: String,
+            last_error_json: String?,
+            last_success_at: String?,
             ) -> Domain::MetricsSnapshot
         end
       end

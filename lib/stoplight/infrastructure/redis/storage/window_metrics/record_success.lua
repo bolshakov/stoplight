@@ -17,36 +17,19 @@ local meta = redis.call('HMGET', metrics_key, 'last_success_at', 'consecutive_su
 local prev_success_ts = tonumber(meta[1])
 local prev_consecutive_successes = tonumber(meta[2])
 
-local consecutive_errors = 0
-local consecutive_successes = (prev_consecutive_successes or 0) + 1
-
-redis.call('EXPIRE', metrics_key, metadata_ttl) -- Not supported in Redis 6.2:, 'GT')
-
 if not prev_success_ts or request_ts > prev_success_ts then
   redis.call(
     'HSET', metrics_key,
     'last_success_at', request_ts,
-    'consecutive_errors', consecutive_errors,
-    'consecutive_successes', consecutive_successes
+    'consecutive_errors', 0,
+    'consecutive_successes', (prev_consecutive_successes or 0) + 1
   )
 else
   redis.call(
     'HSET', metrics_key,
-    'consecutive_errors', consecutive_errors,
-    'consecutive_successes', consecutive_successes
+    'consecutive_errors', 0,
+    'consecutive_successes', (prev_consecutive_successes or 0) + 1
   )
 end
 
--- @include window_metrics/_metrics_snapshot
-
-local number_of_metric_buckets = tonumber(ARGV[5])
-local window_start_ts = tonumber(ARGV[6])
-local window_end_ts = tonumber(ARGV[7])
-local metrics_fields = {}
-for idx = 8, #ARGV do
-  table.insert(metrics_fields, ARGV[idx])
-end
-
-local success_keys, failure_keys = slice_window_keys(KEYS, 2, number_of_metric_buckets)
-
-return build_metrics_snapshot(metrics_key, success_keys, failure_keys, window_start_ts, window_end_ts, metrics_fields)
+redis.call('EXPIRE', metrics_key, metadata_ttl) -- Not supported in Redis 6.2:, 'GT')
