@@ -19,8 +19,8 @@ module Stoplight
       # Records a successful circuit breaker execution
       def record_success: () -> void
 
-      # Records a failed circuit breaker execution
-      def record_failure: (StandardError error) -> void
+      # Records a failed circuit breaker execution and returns the resulting snapshot
+      def record_failure: (StandardError error) -> Domain::MetricsSnapshot
 
       # Clears all metrics for this circuit
       def clear: () -> void

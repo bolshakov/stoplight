@@ -3,6 +3,8 @@ module Stoplight
     module Redis
       module Storage
         class WindowMetrics < Metrics
+          METRICS_FIELDS: Array[String]
+
           attr_reader config: Domain::Config
           attr_reader redis: redis
           attr_reader scripting: Scripting
@@ -27,6 +29,16 @@ module Stoplight
           def errors_key: (time: _ToI) -> String
           def failure_bucket_keys: (_ToI window_end) -> Array[String]
           def success_bucket_keys: (_ToI window_end) -> Array[String]
+          def snapshot_window: (Float window_end_ts) -> [Float, Array[String], Array[String]]
+
+          def build_metrics_snapshot: (
+            successes: Integer,
+            errors: Integer,
+            consecutive_errors: String,
+            consecutive_successes: String,
+            last_error_json: String?,
+            last_success_at: String?,
+            ) -> Domain::MetricsSnapshot
         end
       end
     end

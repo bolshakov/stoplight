@@ -71,13 +71,7 @@ module Stoplight
               )
             end
 
-            Domain::MetricsSnapshot.new(
-              successes: nil, errors: nil,
-              consecutive_errors: consecutive_errors.to_i,
-              consecutive_successes: consecutive_successes.to_i,
-              last_error: deserialize_failure(last_error_json),
-              last_success_at: (clock.at(last_success_at.to_f) if last_success_at)
-            )
+            build_metrics_snapshot(consecutive_errors:, consecutive_successes:, last_error_json:, last_success_at:)
           end
 
           # Records successful circuit breaker execution
@@ -97,11 +91,13 @@ module Stoplight
           def record_failure(exception)
             timestamp = clock.current_time.to_f
 
-            scripting.call(
+            last_success_at, last_error_json, consecutive_errors, consecutive_successes = scripting.call(
               "unbounded_metrics/record_failure",
               args: [timestamp, serialize_exception(exception, timestamp:), metrics_ttl],
               keys: [metrics_key]
             )
+
+            build_metrics_snapshot(consecutive_errors:, consecutive_successes:, last_error_json:, last_success_at:)
           end
 
           def clear
@@ -116,6 +112,16 @@ module Stoplight
           attr_reader :scripting
           attr_reader :metrics_key
           attr_reader :clock
+
+          def build_metrics_snapshot(consecutive_errors:, consecutive_successes:, last_error_json:, last_success_at:)
+            Domain::MetricsSnapshot.new(
+              successes: nil, errors: nil,
+              consecutive_errors: consecutive_errors.to_i,
+              consecutive_successes: consecutive_successes.to_i,
+              last_error: deserialize_failure(last_error_json),
+              last_success_at: (clock.at(last_success_at.to_f) if last_success_at)
+            )
+          end
         end
       end
     end

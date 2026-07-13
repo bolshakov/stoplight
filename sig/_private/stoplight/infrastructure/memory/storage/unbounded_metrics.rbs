@@ -17,6 +17,7 @@ module Stoplight
           def last_error_at: -> Time?
 
           private def initialize_metrics: -> void
+          private def build_metrics_snapshot: -> Domain::MetricsSnapshot
         end
       end
     end

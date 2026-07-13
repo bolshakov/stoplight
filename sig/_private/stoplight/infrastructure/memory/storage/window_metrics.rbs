@@ -18,6 +18,7 @@ module Stoplight
           def initialize: (window_size: duration, clock: Domain::_Clock) -> void
 
           def initialize_metrics: -> void
+          def build_metrics_snapshot: () -> Domain::MetricsSnapshot
         end
       end
     end

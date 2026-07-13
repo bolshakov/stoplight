@@ -27,20 +27,7 @@ module Stoplight
 
           # Get metrics for the current light
           def metrics_snapshot
-            @mutex.synchronize do
-              window_start = (@clock.current_time - @window_size)
-              errors = @errors.sum_in_window(window_start)
-              successes = @successes.sum_in_window(window_start)
-
-              Domain::MetricsSnapshot.new(
-                errors:,
-                successes:,
-                consecutive_errors: [@consecutive_errors, errors].min,
-                consecutive_successes: [@consecutive_successes, successes].min,
-                last_error: @last_error,
-                last_success_at: @last_success_at
-              )
-            end
+            @mutex.synchronize { build_metrics_snapshot }
           end
 
           # Records successful circuit breaker execution
@@ -73,6 +60,8 @@ module Stoplight
 
               @consecutive_errors += 1
               @consecutive_successes = 0
+
+              build_metrics_snapshot
             end
           end
 
@@ -91,6 +80,21 @@ module Stoplight
             @last_success_at = nil
             @successes = SlidingWindow.new(clock: @clock)
             @errors = SlidingWindow.new(clock: @clock)
+          end
+
+          def build_metrics_snapshot
+            window_start = (@clock.current_time - @window_size)
+            errors = @errors.sum_in_window(window_start)
+            successes = @successes.sum_in_window(window_start)
+
+            Domain::MetricsSnapshot.new(
+              errors:,
+              successes:,
+              consecutive_errors: [@consecutive_errors, errors].min,
+              consecutive_successes: [@consecutive_successes, successes].min,
+              last_error: @last_error,
+              last_success_at: @last_success_at
+            )
           end
         end
       end

@@ -19,8 +19,7 @@ module Stoplight
         end
 
         def record_failure(exception)
-          metrics_store.record_failure(exception)
-          metrics = metrics_store.metrics_snapshot
+          metrics = metrics_store.record_failure(exception)
 
           transition_to_red(exception, metrics:)
         end
