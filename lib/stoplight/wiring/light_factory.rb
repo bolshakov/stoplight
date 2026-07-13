@@ -86,7 +86,7 @@ module Stoplight
       end
 
       def request_tracker
-        Domain::Tracker::Request.new(traffic_control:, notifiers:, config:, metrics_store:, state_store:)
+        Domain::Tracker::Request.new(traffic_control:, notifiers:, config:, metrics_store:, state_store:, emitter: @emitter)
       end
 
       def recovery_probe_tracker
