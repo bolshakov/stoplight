@@ -28,16 +28,7 @@ module Stoplight
 
           # Get metrics for the current light
           def metrics_snapshot
-            @mutex.synchronize do
-              Domain::MetricsSnapshot.new(
-                errors: nil,
-                successes: nil,
-                consecutive_errors: @consecutive_errors,
-                consecutive_successes: @consecutive_successes,
-                last_error: @last_error,
-                last_success_at: @last_success_at
-              )
-            end
+            @mutex.synchronize { build_metrics_snapshot }
           end
 
           # Records successful circuit breaker execution
@@ -51,6 +42,8 @@ module Stoplight
 
               @consecutive_errors = 0
               @consecutive_successes += 1
+
+              build_metrics_snapshot
             end
           end
 
@@ -68,6 +61,8 @@ module Stoplight
 
               @consecutive_errors += 1
               @consecutive_successes = 0
+
+              build_metrics_snapshot
             end
           end
 
@@ -88,6 +83,17 @@ module Stoplight
 
           def last_error_at
             @last_error&.occurred_at
+          end
+
+          def build_metrics_snapshot
+            Domain::MetricsSnapshot.new(
+              errors: nil,
+              successes: nil,
+              consecutive_errors: @consecutive_errors,
+              consecutive_successes: @consecutive_successes,
+              last_error: @last_error,
+              last_success_at: @last_success_at
+            )
           end
         end
       end

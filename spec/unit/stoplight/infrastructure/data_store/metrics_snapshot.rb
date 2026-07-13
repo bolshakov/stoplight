@@ -63,6 +63,18 @@ RSpec.shared_examples "a metrics snapshot" do
     end
   end
 
+  describe "#record_success" do
+    it "returns the resulting metrics snapshot" do
+      expect(record_success).to eq(metrics_snapshot)
+    end
+  end
+
+  describe "#record_failure" do
+    it "returns the resulting metrics snapshot" do
+      expect(record_failure(error)).to eq(metrics_snapshot)
+    end
+  end
+
   describe "#consecutive_successes" do
     it "resets when a failure is recorded after success" do
       expect { record_success }.to change { metrics_snapshot.consecutive_successes }.by(1)

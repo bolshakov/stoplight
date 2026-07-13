@@ -14,6 +14,13 @@ module Stoplight
             scripting: Scripting,
             key_space: KeySpace,
           ) -> void
+
+          private def build_metrics_snapshot: (
+            consecutive_errors: String,
+            consecutive_successes: String,
+            last_error_json: String,
+            last_success_at: String
+          ) -> Domain::MetricsSnapshot
         end
       end
     end

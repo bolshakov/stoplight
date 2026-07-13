@@ -29,14 +29,13 @@ module Stoplight
         # - Memory efficiency: Natural expiration without manual cleanup
         # - Precision: Sub-bucket accuracy via ZSET scores
         #
-        # == Atomicity
-        #
-        # All operations use Lua scripts to ensure atomicity:
-        # - record_success: Increments counter and updates metadata in one round-trip
-        # - record_failure: Same, plus stores serialized error details
-        # - metrics_snapshot: Aggregates across buckets atomically
+        # All operations run as Lua scripts, so a mutation and the snapshot it returns commit atomically
+        # in one round-trip.
         #
         class WindowMetrics < Metrics
+          METRICS_FIELDS = %w[last_success_at last_error_json consecutive_errors consecutive_successes].freeze
+          private_constant :METRICS_FIELDS
+
           def initialize(redis:, scripting:, config:, clock:, key_space:)
             @clock = clock
             @scripting = scripting
@@ -47,14 +46,9 @@ module Stoplight
             @window_size = T.must(config.window_size).to_i
           end
 
-          # Get metrics for the current light
-          #
-          # @return [Stoplight::Domain::Metrics]
           def metrics_snapshot
             window_end_ts = clock.current_time.to_f
-            window_start_ts = window_end_ts - @window_size
-            failure_keys = failure_bucket_keys(window_end_ts)
-            success_keys = success_bucket_keys(window_end_ts)
+            window_start_ts, success_keys, failure_keys = snapshot_window(window_end_ts)
 
             successes, errors, last_success_at, last_error_json, consecutive_errors, consecutive_successes = scripting.call(
               "window_metrics/metrics_snapshot",
@@ -62,7 +56,7 @@ module Stoplight
                 failure_keys.count,
                 window_start_ts,
                 window_end_ts,
-                "last_success_at", "last_error_json", "consecutive_errors", "consecutive_successes"
+                *METRICS_FIELDS
               ],
               keys: [
                 metrics_key,
@@ -70,43 +64,55 @@ module Stoplight
                 *failure_keys
               ]
             )
-            Domain::MetricsSnapshot.new(
-              successes:, errors:,
-              consecutive_errors: [consecutive_errors.to_i, errors].min,
-              consecutive_successes: [consecutive_successes.to_i, successes].min,
-              last_error: deserialize_failure(last_error_json),
-              last_success_at: (clock.at(last_success_at.to_f) if last_success_at)
-            )
+
+            build_metrics_snapshot(successes:, errors:, consecutive_errors:, consecutive_successes:, last_error_json:,
+              last_success_at:)
           end
 
-          # Records successful circuit breaker execution
-          #
-          # @return [void]
           def record_success
             timestamp = clock.current_time.to_f
+            window_start_ts, success_keys, failure_keys = snapshot_window(timestamp)
 
-            scripting.call(
+            successes, errors, last_success_at, last_error_json, consecutive_errors, consecutive_successes = scripting.call(
               "window_metrics/record_success",
-              args: [timestamp, SecureRandom.hex(12), bucket_ttl, metrics_ttl],
+              args: [
+                timestamp, SecureRandom.hex(12), bucket_ttl, metrics_ttl,
+                failure_keys.count, window_start_ts, timestamp,
+                *METRICS_FIELDS
+              ],
               keys: [
                 metrics_key,
-                successes_key(time: timestamp)
+                successes_key(time: timestamp),
+                *success_keys,
+                *failure_keys
               ]
             )
+
+            build_metrics_snapshot(successes:, errors:, consecutive_errors:, consecutive_successes:, last_error_json:,
+              last_success_at:)
           end
 
-          # Records failed circuit breaker execution
-          #
-          # @param exception [StandardError]
-          # @return [void]
           def record_failure(exception)
             timestamp = clock.current_time.to_f
+            window_start_ts, success_keys, failure_keys = snapshot_window(timestamp)
 
-            scripting.call(
+            successes, errors, last_success_at, last_error_json, consecutive_errors, consecutive_successes = scripting.call(
               "window_metrics/record_failure",
-              args: [timestamp, SecureRandom.hex(12), serialize_exception(exception, timestamp:), bucket_ttl, metrics_ttl],
-              keys: [metrics_key, errors_key(time: timestamp)]
+              args: [
+                timestamp, SecureRandom.hex(12), serialize_exception(exception, timestamp:), bucket_ttl, metrics_ttl,
+                failure_keys.count, window_start_ts, timestamp,
+                *METRICS_FIELDS
+              ],
+              keys: [
+                metrics_key,
+                errors_key(time: timestamp),
+                *success_keys,
+                *failure_keys
+              ]
             )
+
+            build_metrics_snapshot(successes:, errors:, consecutive_errors:, consecutive_successes:, last_error_json:,
+              last_success_at:)
           end
 
           def clear
@@ -167,6 +173,21 @@ module Stoplight
           def failure_bucket_keys(window_end) = buckets_for_window(metric: :failure, window_end:)
 
           def success_bucket_keys(window_end) = buckets_for_window(metric: :success, window_end:)
+
+          def snapshot_window(window_end_ts)
+            [window_end_ts - @window_size, success_bucket_keys(window_end_ts), failure_bucket_keys(window_end_ts)]
+          end
+
+          def build_metrics_snapshot(successes:, errors:, consecutive_errors:, consecutive_successes:, last_error_json:,
+            last_success_at:)
+            Domain::MetricsSnapshot.new(
+              successes:, errors:,
+              consecutive_errors: [consecutive_errors.to_i, errors].min,
+              consecutive_successes: [consecutive_successes.to_i, successes].min,
+              last_error: deserialize_failure(last_error_json),
+              last_success_at: (@clock.at(last_success_at.to_f) if last_success_at)
+            )
+          end
         end
       end
     end

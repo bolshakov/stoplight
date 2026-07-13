@@ -34,3 +34,17 @@ else
   )
 end
 redis.call('EXPIRE', metrics_key, metadata_ttl) -- Not supported in Redis 6.2:, 'GT')
+
+-- @include window_metrics/_metrics_snapshot
+
+local number_of_metric_buckets = tonumber(ARGV[6])
+local window_start_ts = tonumber(ARGV[7])
+local window_end_ts = tonumber(ARGV[8])
+local metrics_fields = {}
+for idx = 9, #ARGV do
+  table.insert(metrics_fields, ARGV[idx])
+end
+
+local success_keys, failure_keys = slice_window_keys(KEYS, 2, number_of_metric_buckets)
+
+return build_metrics_snapshot(metrics_key, success_keys, failure_keys, window_start_ts, window_end_ts, metrics_fields)
