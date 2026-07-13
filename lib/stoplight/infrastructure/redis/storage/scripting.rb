@@ -8,6 +8,9 @@ module Stoplight
           SCRIPTS_ROOT = __dir__ => String
           private_constant :SCRIPTS_ROOT
 
+          INCLUDE_DIRECTIVE = /^--\s*@include\s+([\w\-\/]+)$/
+          private_constant :INCLUDE_DIRECTIVE
+
           class << self
             def default_scripts_root = SCRIPTS_ROOT
           end
@@ -46,10 +49,14 @@ module Stoplight
             if shas.key?(script_name)
               shas[script_name]
             else
-              script = File.read(File.join(scripts_root, "#{script_name}.lua"))
-
-              shas[script_name] = redis.then { |client| client.script(:load, script) }
+              shas[script_name] = redis.then { |client| client.script(:load, resolve_source(script_name)) }
             end
+          end
+
+          # Redis's Lua sandbox has no `require`, so an included script is spliced in as source text.
+          def resolve_source(script_name)
+            source = File.read(File.join(scripts_root, "#{script_name}.lua"))
+            source.gsub(INCLUDE_DIRECTIVE) { resolve_source(T.must(Regexp.last_match(1))) }
           end
         end
       end
