@@ -22,7 +22,7 @@ module Stoplight
         # @param state_snapshot
         # @return The result of the fallback proc if provided.
         # @raise [Stoplight::Error::RedLight] Raises an error if no fallback is provided.
-        def execute(fallback, state_snapshot:)
+        def execute(fallback, state_snapshot:, error_tracking_policy:)
           @run_recorder.record_blocked(
             fallback_used: !fallback.nil?,
             retry_after: state_snapshot.recovery_scheduled_after

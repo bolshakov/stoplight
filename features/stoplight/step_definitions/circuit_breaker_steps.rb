@@ -58,6 +58,18 @@ And(/^(\d+) request(?:s)? (?:is|are) made(?: with "([^"]+)" message)?(?: (?:with
   end
 end
 
+And(/^(\d+) request(?:s)? (?:is|are) made with:$/) do |count, table|
+  settings = collect_settings(table).slice(:tracked_errors, :skipped_errors)
+
+  count.to_i.times do |x|
+    capture_result do
+      current_light.run(**settings) do
+        echo_service.call("hello #{x}")
+      end
+    end
+  end
+end
+
 When(/^I lock the light to ([^"]*)$/) do |color|
   current_light.lock(color)
 end

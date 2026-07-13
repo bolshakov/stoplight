@@ -12,13 +12,11 @@ module Stoplight
 
         @name: String
         @config: Domain::Config
-        @error_tracking_policy: ErrorTrackingPolicy
         @clock: _Clock
         @run_recorder: Telemetry::RunRecorder
 
         def initialize: (
           name: String,
-          error_tracking_policy: ErrorTrackingPolicy,
           notifiers: Array[state_transition_notifier],
           request_tracker: Tracker::RecoveryProbe,
           state_store: _StateStore,

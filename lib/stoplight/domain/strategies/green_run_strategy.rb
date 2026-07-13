@@ -10,8 +10,7 @@ module Stoplight
       #
       # @api private
       class GreenRunStrategy
-        def initialize(error_tracking_policy:, request_tracker:, run_recorder:, clock:)
-          @error_tracking_policy = error_tracking_policy
+        def initialize(request_tracker:, run_recorder:, clock:)
           @request_tracker = request_tracker
           @run_recorder = run_recorder
           @clock = clock
@@ -24,7 +23,7 @@ module Stoplight
         # @yield The code block to execute.
         # @return The result of the code block if successful.
         # @raise re-raises the error if it is not tracked or no fallback is provided.
-        def execute(fallback, state_snapshot:, &code)
+        def execute(fallback, state_snapshot:, error_tracking_policy:, &code)
           started_at = capture_started_at
 
           begin
@@ -33,7 +32,7 @@ module Stoplight
 
             result
           rescue => error
-            if @error_tracking_policy.track?(error)
+            if error_tracking_policy.track?(error)
               record_error(error, duration_ms: duration_since(started_at), fallback_used: !fallback.nil?)
 
               if fallback

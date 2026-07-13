@@ -44,7 +44,8 @@ module Stoplight
           green_run_strategy:,
           yellow_run_strategy:,
           red_run_strategy:,
-          lock_control:
+          lock_control:,
+          error_tracking_policy: @error_tracking_policy
         )
       end
 
@@ -103,7 +104,6 @@ module Stoplight
 
       def green_run_strategy
         Domain::Strategies::GreenRunStrategy.new(
-          error_tracking_policy: @error_tracking_policy,
           request_tracker:,
           clock:,
           run_recorder: run_recorder(Color::GREEN)
@@ -113,7 +113,6 @@ module Stoplight
       def yellow_run_strategy
         Domain::Strategies::YellowRunStrategy.new(
           name: @name,
-          error_tracking_policy: @error_tracking_policy,
           notifiers:,
           request_tracker: recovery_probe_tracker,
           state_store:,

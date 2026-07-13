@@ -257,6 +257,16 @@ light = Stoplight("Example API", tracked_errors: [NetworkError, Timeout::Error])
 
 When both methods are used, `skipped_errors` takes precedence over `tracked_errors`.
 
+Either list can be replaced for a single call without changing the light's configuration:
+
+```ruby
+light.run(tracked_errors: [Timeout::Error]) { fetch_data }
+light.run(skipped_errors: [ValidationError]) { process_data }
+```
+
+Any list omitted from `run` keeps its configured value. The provided list is replaced only for that call, and
+`skipped_errors` still takes precedence over `tracked_errors`.
+
 ## Advanced Configuration
 
 ### Traffic Control Strategies

@@ -3,7 +3,6 @@
 RSpec.describe Stoplight::Domain::Strategies::GreenRunStrategy do
   subject(:strategy) do
     described_class.new(
-      error_tracking_policy:,
       request_tracker:,
       run_recorder:,
       clock:
@@ -17,7 +16,7 @@ RSpec.describe Stoplight::Domain::Strategies::GreenRunStrategy do
   let(:clock) { instance_double(NullClock, monotonic_time: 1.4) }
 
   context "when code executes successfully" do
-    subject(:result) { strategy.execute(nil, state_snapshot: nil, &code) }
+    subject(:result) { strategy.execute(nil, state_snapshot: nil, error_tracking_policy:, &code) }
 
     let(:code) { -> { "Success" } }
 
@@ -43,7 +42,7 @@ RSpec.describe Stoplight::Domain::Strategies::GreenRunStrategy do
   end
 
   context "when nobody is subscribed to telemetry" do
-    subject(:result) { strategy.execute(nil, state_snapshot: nil, &code) }
+    subject(:result) { strategy.execute(nil, state_snapshot: nil, error_tracking_policy:, &code) }
 
     let(:code) { -> { "Success" } }
     let(:run_recorder) { instance_double(Stoplight::Domain::Telemetry::RunRecorder, subscribed?: false, record_success: nil) }
@@ -57,7 +56,7 @@ RSpec.describe Stoplight::Domain::Strategies::GreenRunStrategy do
   end
 
   context "when code fails" do
-    subject(:result) { strategy.execute(fallback, state_snapshot: nil, &code) }
+    subject(:result) { strategy.execute(fallback, state_snapshot: nil, error_tracking_policy:, &code) }
 
     let(:error) { StandardError.new("Test error") }
     let(:code) { -> { raise error } }

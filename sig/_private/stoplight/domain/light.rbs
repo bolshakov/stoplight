@@ -8,6 +8,7 @@ module Stoplight
       attr_reader state_store: _StateStore
       @name: String
       @lock_control: LockControl
+      @error_tracking_policy: ErrorTrackingPolicy
 
       def initialize: (
         String name,
@@ -15,7 +16,8 @@ module Stoplight
         yellow_run_strategy: Strategies::YellowRunStrategy,
         red_run_strategy: Strategies::RedRunStrategy,
         state_store: _StateStore,
-        lock_control: LockControl
+        lock_control: LockControl,
+        error_tracking_policy: ErrorTrackingPolicy
       ) -> void
 
       private def state_strategy_factory: (color) -> _RunStrategy

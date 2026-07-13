@@ -4,7 +4,11 @@ module Stoplight
 
     def state: -> state
     def color: -> color
-    def run: [T] (?(^(StandardError?) -> T)?) { () -> T } -> T
+    def run: [T] (
+      ?(^(StandardError?) -> T)?,
+      ?tracked_errors: optional[Array[_ExceptionMatcher] | _ExceptionMatcher],
+      ?skipped_errors: optional[Array[_ExceptionMatcher] | _ExceptionMatcher]
+    ) { () -> T } -> T
     def lock: (color) -> _Light
     def unlock: -> _Light
   end

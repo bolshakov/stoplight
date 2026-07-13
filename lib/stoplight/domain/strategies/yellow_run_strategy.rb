@@ -13,7 +13,6 @@ module Stoplight
       class YellowRunStrategy
         def initialize(
           name:,
-          error_tracking_policy:,
           notifiers:,
           request_tracker:,
           state_store:,
@@ -29,7 +28,6 @@ module Stoplight
           @metrics_store = metrics_store
           @recovery_lock_store = recovery_lock_store
           @name = name
-          @error_tracking_policy = error_tracking_policy
           @config = config
           @clock = clock
           @run_recorder = run_recorder
@@ -42,7 +40,7 @@ module Stoplight
         # @yield The code block to execute.
         # @return The result of the code block if successful.
         # @raise Re-raises the error if it is not tracked or no fallback is provided.
-        def execute(fallback, state_snapshot:, &code)
+        def execute(fallback, state_snapshot:, error_tracking_policy:, &code)
           # Everything withing this block executed exclusively:
           #   - enter recovery
           #   - execute user's code
@@ -55,7 +53,7 @@ module Stoplight
             record_recovery_probe_success(duration_ms: duration_since(started_at))
             result
           rescue => error
-            if @error_tracking_policy.track?(error)
+            if error_tracking_policy.track?(error)
               record_recovery_probe_failure(error, duration_ms: duration_since(started_at), fallback_used: !fallback.nil?)
 
               if fallback

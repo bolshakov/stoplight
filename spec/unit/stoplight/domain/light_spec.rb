@@ -8,7 +8,8 @@ RSpec.describe Stoplight::Domain::Light do
       yellow_run_strategy:,
       red_run_strategy:,
       state_store:,
-      lock_control:
+      lock_control:,
+      error_tracking_policy:
     )
   end
   let(:config) { instance_double(Stoplight::Domain::Config) }
@@ -17,6 +18,9 @@ RSpec.describe Stoplight::Domain::Light do
   let(:red_run_strategy) { instance_double(Stoplight::Domain::Strategies::RedRunStrategy) }
   let(:state_store) { instance_double(NullStateStore) }
   let(:lock_control) { instance_double(Stoplight::Domain::LockControl) }
+  let(:error_tracking_policy) do
+    Stoplight::Domain::ErrorTrackingPolicy.new(tracked: [StandardError], skipped: [Timeout::Error])
+  end
 
   describe "#lock" do
     let(:color) { Stoplight::Color::GREEN }
@@ -50,6 +54,7 @@ RSpec.describe Stoplight::Domain::Light do
 
   describe "#run" do
     let(:state_snapshot) { instance_double(Stoplight::Domain::StateSnapshot, color:) }
+    let(:color) { Stoplight::Color::GREEN }
     let(:fallback) { ->(_error) { "fallback" } }
     let(:code) { -> { "result" } }
 
@@ -62,7 +67,7 @@ RSpec.describe Stoplight::Domain::Light do
         let(:color) { current_color }
 
         it "executes green run strategy" do
-          expect(strategy).to receive(:execute).with(fallback, state_snapshot:) { |_, _, &block|
+          expect(strategy).to receive(:execute).with(fallback, state_snapshot:, error_tracking_policy:) { |_, _, &block|
             expect(block).to eq(code)
             "result"
           }
@@ -82,6 +87,20 @@ RSpec.describe Stoplight::Domain::Light do
 
     it_behaves_like "delegates to the run strategy", Stoplight::Color::RED do
       let(:strategy) { red_run_strategy }
+    end
+
+    it "uses per-call overrides with registered values as partial fallbacks" do
+      expect(green_run_strategy).to receive(:execute).with(
+        fallback,
+        state_snapshot:,
+        error_tracking_policy: satisfy { |policy|
+          policy.track?(KeyError.new) &&
+            !policy.track?(ArgumentError.new) &&
+            !policy.track?(Timeout::Error.new)
+        }
+      ) { "result" }
+
+      expect(light.run(fallback, tracked_errors: [KeyError], &code)).to eq("result")
     end
   end
 end

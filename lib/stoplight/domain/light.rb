@@ -11,13 +11,22 @@ module Stoplight
       attr_reader :red_run_strategy
       attr_reader :state_store
 
-      def initialize(name, green_run_strategy:, yellow_run_strategy:, red_run_strategy:, state_store:, lock_control:)
+      def initialize(
+        name,
+        green_run_strategy:,
+        yellow_run_strategy:,
+        red_run_strategy:,
+        state_store:,
+        lock_control:,
+        error_tracking_policy:
+      )
         @name = name
         @green_run_strategy = green_run_strategy
         @yellow_run_strategy = yellow_run_strategy
         @red_run_strategy = red_run_strategy
         @state_store = state_store
         @lock_control = lock_control
+        @error_tracking_policy = error_tracking_policy
       end
 
       # Returns the current state of the light:
@@ -48,14 +57,20 @@ module Stoplight
       #   light = Stoplight('example')
       #   light.run(->(error) { 0 }) { 1 / 0 } #=> 0
       #
+      # @example Overriding tracked errors for one run
+      #   light.run(tracked_errors: [Timeout::Error]) { fetch_data }
+      #
       # @param fallback fallback code to run if the circuit breaker is open
+      # @param tracked_errors errors to track for this run; replaces the configured list
+      # @param skipped_errors errors to skip for this run; replaces the configured list
       # @raise [Stoplight::Error::RedLight]
-      def run(fallback = nil, &code)
+      def run(fallback = nil, tracked_errors: T.undefined, skipped_errors: T.undefined, &code)
         raise ArgumentError, "nothing to run. Please, pass a block into `Light#run`" unless block_given?
 
         state_snapshot.then do |state_snapshot|
           strategy = state_strategy_factory(state_snapshot.color)
-          strategy.execute(fallback, state_snapshot:, &code)
+          error_tracking_policy = @error_tracking_policy.with(tracked: tracked_errors, skipped: skipped_errors)
+          strategy.execute(fallback, state_snapshot:, error_tracking_policy:, &code)
         end
       end
 

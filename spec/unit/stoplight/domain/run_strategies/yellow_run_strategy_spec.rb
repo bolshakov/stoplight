@@ -4,7 +4,6 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
   subject(:strategy) do
     described_class.new(
       name:,
-      error_tracking_policy:,
       notifiers: notifiers,
       request_tracker:,
       state_store:,
@@ -43,7 +42,7 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
       end
 
       context "when code executes successfully" do
-        subject(:result) { strategy.execute(nil, state_snapshot: nil, &code) }
+        subject(:result) { strategy.execute(nil, state_snapshot: nil, error_tracking_policy:, &code) }
 
         let(:code) { -> { "Success" } }
 
@@ -71,7 +70,7 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
       end
 
       context "when nobody is subscribed to telemetry" do
-        subject(:result) { strategy.execute(nil, state_snapshot: nil, &code) }
+        subject(:result) { strategy.execute(nil, state_snapshot: nil, error_tracking_policy:, &code) }
 
         let(:code) { -> { "Success" } }
         let(:run_recorder) { instance_double(Stoplight::Domain::Telemetry::RunRecorder, subscribed?: false, record_success: nil) }
@@ -86,7 +85,7 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
       end
 
       context "when code fails" do
-        subject(:result) { strategy.execute(fallback, state_snapshot: nil, &code) }
+        subject(:result) { strategy.execute(fallback, state_snapshot: nil, error_tracking_policy:, &code) }
 
         let(:error) { StandardError.new("Test error") }
         let(:code) { -> { raise error } }
@@ -200,7 +199,7 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
 
         it "returns the fallback result without yielding" do
           expect do |code|
-            result = strategy.execute(fallback, state_snapshot:, &code)
+            result = strategy.execute(fallback, state_snapshot:, error_tracking_policy:, &code)
             expect(result).to eq("Fallback")
           end.not_to yield_control
 
@@ -210,12 +209,12 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
         it "does not measure duration for a blocked run" do
           expect(clock).not_to receive(:monotonic_time)
 
-          strategy.execute(fallback, state_snapshot:) {}
+          strategy.execute(fallback, state_snapshot:, error_tracking_policy:) {}
         end
 
         it "produces RunCompleted event" do
           expect {
-            strategy.execute(fallback, state_snapshot:) {}
+            strategy.execute(fallback, state_snapshot:, error_tracking_policy:) {}
           }.to emit(Stoplight::Domain::Telemetry::RunCompleted).with(
             outcome: :blocked,
             color: "yellow",
@@ -232,7 +231,7 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
 
         it "raises RedLight without yielding" do
           expect do |code|
-            expect { strategy.execute(fallback, state_snapshot:, &code) }.to raise_error(Stoplight::Error::RedLight, name) { |error|
+            expect { strategy.execute(fallback, state_snapshot:, error_tracking_policy:, &code) }.to raise_error(Stoplight::Error::RedLight, name) { |error|
               expect(error.cool_off_time).to eq(cool_off_time)
               expect(error.retry_after).to eq(state_snapshot.recovery_scheduled_after)
             }
@@ -243,7 +242,7 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
           expect(clock).not_to receive(:monotonic_time)
 
           begin
-            strategy.execute(fallback, state_snapshot:) {}
+            strategy.execute(fallback, state_snapshot:, error_tracking_policy:) {}
           rescue Stoplight::Error::RedLight
             nil
           end
@@ -252,7 +251,7 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
         it "produces RunCompleted event" do
           expect do
             expect do
-              strategy.execute(fallback, state_snapshot:) {}
+              strategy.execute(fallback, state_snapshot:, error_tracking_policy:) {}
             end.to raise_error(Stoplight::Error::RedLight, name)
           end.to emit(Stoplight::Domain::Telemetry::RunCompleted).with(
             outcome: :blocked,

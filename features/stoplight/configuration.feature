@@ -86,6 +86,33 @@ Feature: Stoplight Custom Configuration
     And 1 request is made
     Then the light color is green
 
+  Scenario: Per-call tracked errors replace the registered list and preserve registered skipped errors
+    Given a light configured with:
+      | Tracked Errors | KeyError       |
+      | Skipped Errors | Timeout::Error |
+      | Threshold      | 1              |
+    When the service starts failing with:
+      | Type | Timeout::Error |
+    And 1 request is made with:
+      | Tracked Errors | StandardError |
+    Then the light color is green
+    When the service starts failing with:
+      | Type | KeyError |
+    And 1 request is made with:
+      | Tracked Errors | Timeout::Error |
+    Then the light color is green
+
+  Scenario: Per-call skipped errors replace the registered list and preserve registered tracked errors
+    Given a light configured with:
+      | Tracked Errors | StandardError  |
+      | Skipped Errors | Timeout::Error |
+      | Threshold      | 1              |
+    When the service starts failing with:
+      | Type | Timeout::Error |
+    And 1 request is made with:
+      | Skipped Errors | KeyError |
+    Then the light color is red
+
   Scenario: System-level exceptions don't trigger circuit breaker
     Given a light configured with:
       | Threshold   | 1             |
