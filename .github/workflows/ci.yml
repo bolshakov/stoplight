@@ -96,7 +96,6 @@ jobs:
 
   spec:
     permissions:
-      checks: write  # for coverallsapp/github-action to create new checks
       contents: read  # for actions/checkout to fetch code
     name: Specs on Ruby ${{ matrix.ruby }} with Data Store as ${{ matrix.data-store-image }} 💚
     runs-on: ubuntu-latest
@@ -139,25 +138,3 @@ jobs:
         run: bundle exec rake spec
         env:
           STOPLIGHT_REDIS_URL: 'redis://127.0.0.1:6379/0'
-      - name: Coveralls
-        uses: coverallsapp/github-action@5cbfd81b66ca5d10c19b062c04de0199c215fb6e # v2.3.7
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          flag-name: ruby-${{ matrix.ruby }}
-          parallel: true
-  finish:
-    permissions:
-      checks: write  # for coverallsapp/github-action to create new checks
-    needs: spec
-    runs-on: ubuntu-latest
-    steps:
-      - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
-        with:
-          egress-policy: audit
-
-      - name: Coveralls Finished
-        uses: coverallsapp/github-action@5cbfd81b66ca5d10c19b062c04de0199c215fb6e # master
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          parallel-finished: true
