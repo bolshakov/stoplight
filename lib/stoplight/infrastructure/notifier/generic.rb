@@ -69,11 +69,11 @@ module Stoplight
 
         # Processes the notification message.
         #
-        # :nocov:
+        # simplecov:disable
         def put(message)
           raise NotImplementedError
         end
-        # :nocov:
+        # simplecov:enable
       end
     end
   end
