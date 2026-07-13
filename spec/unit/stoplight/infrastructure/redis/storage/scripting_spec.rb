@@ -45,6 +45,136 @@ RSpec.describe Stoplight::Infrastructure::Redis::Storage::Scripting, :redis do
     expect(redis.get(key)).to eq(updated_value)
   end
 
+  context "when the script includes another script" do
+    let(:script) { <<~LUA }
+      -- @include multiply
+      local factor = tonumber(ARGV[1])
+      local key = KEYS[1]
+
+      return redis.call("SET", key, multiply(factor, 2))
+    LUA
+
+    before do
+      File.write(File.join(scripts_root, "multiply.lua"), <<~LUA)
+        local function multiply(a, b)
+          return a * b
+        end
+      LUA
+    end
+
+    after do
+      File.delete(File.join(scripts_root, "multiply.lua"))
+    end
+
+    it "splices the included script's source into the calling script" do
+      script_manager.call(script_name, args: [21], keys: [key])
+
+      expect(redis.get(key)).to eq("42")
+    end
+  end
+
+  context "when an included script itself includes another script" do
+    let(:script) { <<~LUA }
+      -- @include multiply
+      local factor = tonumber(ARGV[1])
+      local key = KEYS[1]
+
+      return redis.call("SET", key, multiply_by_four(factor))
+    LUA
+
+    before do
+      File.write(File.join(scripts_root, "multiply.lua"), <<~LUA)
+        -- @include multiply/double
+        local function multiply_by_four(a)
+          return double(double(a))
+        end
+      LUA
+      File.write(File.join(scripts_root, "multiply", "double.lua"), <<~LUA)
+        local function double(a)
+          return a * 2
+        end
+      LUA
+    end
+
+    around do |example|
+      Dir.mkdir(File.join(scripts_root, "multiply"))
+      example.run
+    ensure
+      FileUtils.rm_rf(File.join(scripts_root, "multiply"))
+    end
+
+    after do
+      File.delete(File.join(scripts_root, "multiply.lua"))
+    end
+
+    it "resolves transitively included scripts" do
+      script_manager.call(script_name, args: [21], keys: [key])
+
+      expect(redis.get(key)).to eq("84")
+    end
+  end
+
+  context "when the script includes more than one other script" do
+    let(:script) { <<~LUA }
+      -- @include double
+      -- @include triple
+      local factor = tonumber(ARGV[1])
+      local key = KEYS[1]
+
+      return redis.call("SET", key, triple(double(factor)))
+    LUA
+
+    before do
+      File.write(File.join(scripts_root, "double.lua"), <<~LUA)
+        local function double(a)
+          return a * 2
+        end
+      LUA
+      File.write(File.join(scripts_root, "triple.lua"), <<~LUA)
+        local function triple(a)
+          return a * 3
+        end
+      LUA
+    end
+
+    after do
+      File.delete(File.join(scripts_root, "double.lua"))
+      File.delete(File.join(scripts_root, "triple.lua"))
+    end
+
+    it "splices in every included script" do
+      script_manager.call(script_name, args: [7], keys: [key])
+
+      expect(redis.get(key)).to eq("42")
+    end
+  end
+
+  context "when the script includes a script that does not exist" do
+    let(:script) { <<~LUA }
+      -- @include does-not-exist
+      return "unreachable"
+    LUA
+
+    it "raises rather than silently skipping the include" do
+      expect do
+        script_manager.call(script_name, args: [value], keys: [key])
+      end.to raise_error(Errno::ENOENT)
+    end
+  end
+
+  context "when the include target attempts to traverse outside scripts_root" do
+    let(:script) { <<~LUA }
+      -- @include ../../../../../../etc/passwd
+      return "safe"
+    LUA
+
+    it "treats the directive as inert instead of reading outside scripts_root" do
+      result = script_manager.call(script_name, args: [value], keys: [key])
+
+      expect(result).to eq("safe")
+    end
+  end
+
   context "when the script itself raises an error unrelated to a missing script" do
     let(:script) { <<~LUA }
       return redis.call("THIS-IS-NOT-A-REAL-COMMAND")

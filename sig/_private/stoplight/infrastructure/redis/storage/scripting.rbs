@@ -5,6 +5,8 @@ module Stoplight
         class Scripting
           SCRIPTS_ROOT: String
 
+          INCLUDE_DIRECTIVE: Regexp
+
           def self.default_scripts_root: -> String
 
           attr_reader scripts_root: String
@@ -27,6 +29,8 @@ module Stoplight
           private def reload_script: (String script_name) -> String
 
           private def script_sha: (String script_name) -> String
+
+          private def resolve_source: (String script_name) -> String
         end
       end
     end
