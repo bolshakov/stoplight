@@ -8,7 +8,7 @@ module Stoplight
       #
       # @example Custom Notifier Implementation and Usage
       #     # Custom notifier that writes notifications to a file
-      #     class FileNotifier < Stoplight::Domain::StateTransitionNotifier
+      #     class FileNotifier
       #       include Stoplight::Notifier::Generic
       #
       #       def initialize(file_path)
