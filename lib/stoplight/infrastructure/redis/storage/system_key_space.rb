@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "digest"
+
 module Stoplight
   module Infrastructure
     module Redis
