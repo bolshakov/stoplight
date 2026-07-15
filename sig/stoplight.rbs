@@ -26,7 +26,7 @@ module Stoplight
   type traffic_recovery = :consecutive_successes
   type data_store = DataStore::Redis | DataStore::Memory
   type state_transition_notifier = _StateTransitionNotifier
-  type notification_formatter = ^(Domain::Config light, color, color, StandardError?) -> String
+  type notification_formatter = ^(_LightInfo light, color, color, StandardError?) -> String
 
   def self.configure: (?trust_me_im_an_engineer: bool) ?{ (_Configuration) -> void } -> void
 
