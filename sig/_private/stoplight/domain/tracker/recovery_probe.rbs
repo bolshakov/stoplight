@@ -1,7 +1,7 @@
 module Stoplight
   module Domain
     module Tracker
-      class RecoveryProbe < Base
+      class RecoveryProbe
         attr_reader traffic_recovery: _TrafficRecovery
         attr_reader notifiers: Array[state_transition_notifier]
         attr_reader config: Config
