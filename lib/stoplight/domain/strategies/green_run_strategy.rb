@@ -51,7 +51,6 @@ module Stoplight
 
         private
 
-        attr_reader :config
         attr_reader :request_tracker
 
         def capture_started_at
