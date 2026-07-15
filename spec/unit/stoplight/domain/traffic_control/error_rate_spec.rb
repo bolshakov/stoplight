@@ -59,6 +59,26 @@ RSpec.describe Stoplight::Domain::TrafficControl::ErrorRate do
 
       it { is_expected.to be_compatible }
     end
+
+    context "when threshold is nil" do
+      let(:threshold) { nil }
+
+      it { is_expected.to be_incompatible }
+
+      it "returns an error message" do
+        expect(availability.error_messages).to eq("`threshold` should be a number")
+      end
+    end
+
+    context "when threshold is not numeric" do
+      let(:threshold) { "0.7" }
+
+      it { is_expected.to be_incompatible }
+
+      it "returns an error message" do
+        expect(availability.error_messages).to eq("`threshold` should be a number")
+      end
+    end
   end
 
   describe "#stop_traffic?" do

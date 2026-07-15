@@ -26,6 +26,8 @@ module Stoplight
         def check_compatibility(config)
           if config.window_size.nil?
             CompatibilityResult.incompatible("`window_size` should be set")
+          elsif !config.threshold.is_a?(Numeric)
+            CompatibilityResult.incompatible("`threshold` should be a number")
           elsif config.threshold < 0 || config.threshold > 1
             CompatibilityResult.incompatible("`threshold` should be between 0 and 1")
           else
