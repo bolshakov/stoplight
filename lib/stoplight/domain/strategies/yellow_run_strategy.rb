@@ -125,10 +125,9 @@ module Stoplight
 
           state_store.transition_to_color(Color::YELLOW)
           metrics_store.clear
-          # FIXME: use light config instead of @config
-          # light_info = LightInfo.new(name: @name)
+          light_info = LightInfo.new(name: @name)
           notifiers.each do |notifier|
-            notifier.notify(@config, Color::RED, Color::YELLOW, nil)
+            notifier.notify(light_info, Color::RED, Color::YELLOW, nil)
           end
         end
       end
