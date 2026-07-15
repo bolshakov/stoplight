@@ -43,7 +43,8 @@ module Stoplight
           state_store:,
           green_run_strategy:,
           yellow_run_strategy:,
-          red_run_strategy:
+          red_run_strategy:,
+          lock_control: Domain::LockControl.new(state_store:, emitter: @emitter)
         )
       end
 

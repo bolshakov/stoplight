@@ -11,12 +11,13 @@ module Stoplight
       attr_reader :red_run_strategy
       attr_reader :state_store
 
-      def initialize(name, green_run_strategy:, yellow_run_strategy:, red_run_strategy:, state_store:)
+      def initialize(name, green_run_strategy:, yellow_run_strategy:, red_run_strategy:, state_store:, lock_control:)
         @name = name
         @green_run_strategy = green_run_strategy
         @yellow_run_strategy = yellow_run_strategy
         @red_run_strategy = red_run_strategy
         @state_store = state_store
+        @lock_control = lock_control
       end
 
       # Returns the current state of the light:
@@ -67,13 +68,7 @@ module Stoplight
       # @param color should be either +Color::RED+ or +Color::GREEN+
       # @return locked light
       def lock(color)
-        state = case color
-        when Color::RED then State::LOCKED_RED
-        when Color::GREEN then State::LOCKED_GREEN
-        else raise Error::IncorrectColor
-        end
-
-        state_store.set_state(state)
+        @lock_control.lock(color)
 
         self
       end
@@ -87,7 +82,7 @@ module Stoplight
       #
       # @return returns unlocked light (circuit breaker)
       def unlock
-        state_store.set_state(State::UNLOCKED)
+        @lock_control.unlock
 
         self
       end

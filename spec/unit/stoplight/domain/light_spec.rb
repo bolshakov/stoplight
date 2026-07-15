@@ -7,7 +7,8 @@ RSpec.describe Stoplight::Domain::Light do
       green_run_strategy:,
       yellow_run_strategy:,
       red_run_strategy:,
-      state_store:
+      state_store:,
+      lock_control:
     )
   end
   let(:config) { instance_double(Stoplight::Domain::Config) }
@@ -15,49 +16,20 @@ RSpec.describe Stoplight::Domain::Light do
   let(:yellow_run_strategy) { instance_double(Stoplight::Domain::Strategies::YellowRunStrategy) }
   let(:red_run_strategy) { instance_double(Stoplight::Domain::Strategies::RedRunStrategy) }
   let(:state_store) { instance_double(NullStateStore) }
+  let(:lock_control) { instance_double(Stoplight::Domain::LockControl) }
 
   describe "#lock" do
     let(:color) { Stoplight::Color::GREEN }
 
-    context "with correct color" do
-      context "with green color" do
-        let(:color) { Stoplight::Color::GREEN }
+    it "delegates to lock_control" do
+      expect(lock_control).to receive(:lock).with(color)
 
-        it "locks green color" do
-          expect(state_store).to receive(:set_state).with(Stoplight::State::LOCKED_GREEN)
-
-          expect(light.lock(color)).to be_a Stoplight::Domain::Light
-        end
-      end
-
-      context "with red color" do
-        let(:color) { Stoplight::Color::RED }
-
-        it "locks red color" do
-          expect(state_store).to receive(:set_state).with(Stoplight::State::LOCKED_RED)
-
-          expect(light.lock(color)).to be_a Stoplight::Domain::Light
-        end
-      end
-    end
-
-    context "with incorrect color" do
-      let(:color) { "incorrect-color" }
-
-      it "raises Error::IncorrectColor error" do
-        expect { light.lock(color) }.to raise_error(Stoplight::Error::IncorrectColor)
-      end
-
-      it "does not lock color" do
-        expect(state_store).to_not receive(:set_state)
-
-        suppress(Stoplight::Error::IncorrectColor) { light.lock(color) }
-      end
+      expect(light.lock(color)).to be_a Stoplight::Domain::Light
     end
   end
 
   specify "#unlock" do
-    expect(state_store).to receive(:set_state).with(Stoplight::State::UNLOCKED)
+    expect(lock_control).to receive(:unlock)
 
     expect(light.unlock).to be_a Stoplight::Domain::Light
   end

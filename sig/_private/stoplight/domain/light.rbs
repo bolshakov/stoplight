@@ -5,15 +5,17 @@ module Stoplight
       attr_reader green_run_strategy: Strategies::GreenRunStrategy
       attr_reader yellow_run_strategy: Strategies::YellowRunStrategy
       attr_reader red_run_strategy: Strategies::RedRunStrategy
-      attr_reader state_store: Domain::_StateStore
+      attr_reader state_store: _StateStore
       @name: String
+      @lock_control: LockControl
 
       def initialize: (
         String name,
         green_run_strategy: Strategies::GreenRunStrategy,
         yellow_run_strategy: Strategies::YellowRunStrategy,
         red_run_strategy: Strategies::RedRunStrategy,
-        state_store: Domain::_StateStore
+        state_store: _StateStore,
+        lock_control: LockControl
       ) -> void
 
       private def state_strategy_factory: (color) -> _RunStrategy
