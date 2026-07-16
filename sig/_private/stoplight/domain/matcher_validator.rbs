@@ -1,0 +1,11 @@
+module Stoplight
+  module Domain
+    class MatcherValidator
+      def self.call: (Module) -> String
+
+      private
+
+      def self.message: (Module) -> String
+    end
+  end
+end

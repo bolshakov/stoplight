@@ -7,8 +7,8 @@ module Stoplight
         ?threshold: optional[percentage | Integer],
         ?recovery_threshold: optional[Integer],
         ?window_size: optional[duration?],
-        ?tracked_errors: optional[Array[_ExceptionMatcher] | _ExceptionMatcher],
-        ?skipped_errors: optional[Array[_ExceptionMatcher] | _ExceptionMatcher],
+        ?tracked_errors: optional[Array[Module] | Module],
+        ?skipped_errors: optional[Array[Module] | Module],
         ?traffic_control: optional[traffic_control],
         ?traffic_recovery: optional[traffic_recovery],
       ) -> void
@@ -24,10 +24,13 @@ module Stoplight
       attr_reader threshold: optional[percentage | Integer]
       attr_reader recovery_threshold: optional[Integer]
       attr_reader window_size: optional[duration?]
-      attr_reader tracked_errors: optional[Array[_ExceptionMatcher]]
-      attr_reader skipped_errors: optional[Array[_ExceptionMatcher]]
+      attr_reader tracked_errors: optional[Array[Module]]
+      attr_reader skipped_errors: optional[Array[Module]]
       attr_reader traffic_control: optional[Domain::_TrafficControl]
       attr_reader traffic_recovery: optional[Domain::_TrafficRecovery]
+
+      def calculate_digest: -> Integer
+      def errors_for_digest: (optional[Array[Module]]) -> optional[Array[String]]
     end
   end
 end
