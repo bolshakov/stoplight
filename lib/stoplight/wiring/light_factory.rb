@@ -50,7 +50,7 @@ module Stoplight
 
       def state_store = storage_set.state_store
       def metrics_store = storage_set.metrics_store
-      def lock_control = @lock_control ||= Domain::LockControl.new(state_store:, emitter: @emitter)
+      def lock_control = Domain::LockControl.new(state_store:, emitter: @emitter)
 
       private
 

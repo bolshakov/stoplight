@@ -34,7 +34,6 @@ module Stoplight
       @failover_system: _System?
       @storage_set: StorageSet
       @key_space: Infrastructure::Redis::Storage::KeySpace
-      @lock_control: Domain::LockControl
 
       def initialize: (
           config: Domain::Config,
