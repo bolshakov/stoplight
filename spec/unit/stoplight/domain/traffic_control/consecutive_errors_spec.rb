@@ -39,6 +39,26 @@ RSpec.describe Stoplight::Domain::TrafficControl::ConsecutiveErrors do
         expect(strategy.error_messages).to eq("`threshold` should be an integer")
       end
     end
+
+    context "when threshold is nil" do
+      let(:threshold) { nil }
+
+      it { is_expected.to be_incompatible }
+
+      it "returns an error message" do
+        expect(strategy.error_messages).to eq("`threshold` should be an integer")
+      end
+    end
+
+    context "when threshold is a string" do
+      let(:threshold) { "3" }
+
+      it { is_expected.to be_incompatible }
+
+      it "returns an error message" do
+        expect(strategy.error_messages).to eq("`threshold` should be an integer")
+      end
+    end
   end
 
   describe "#stop_traffic?" do

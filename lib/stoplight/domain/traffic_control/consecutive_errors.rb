@@ -28,10 +28,10 @@ module Stoplight
       # @api private
       class ConsecutiveErrors
         def check_compatibility(config)
-          if config.threshold <= 0
-            CompatibilityResult.incompatible("`threshold` should be bigger than 0")
-          elsif !config.threshold.is_a?(Integer)
+          if !config.threshold.is_a?(Integer)
             CompatibilityResult.incompatible("`threshold` should be an integer")
+          elsif config.threshold <= 0
+            CompatibilityResult.incompatible("`threshold` should be bigger than 0")
           else
             CompatibilityResult.compatible
           end
