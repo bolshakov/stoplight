@@ -25,12 +25,24 @@ module Stoplight
           metrics_store(config).clear
         end
 
+        def lock(config, color)
+          lock_control(config).lock(color)
+        end
+
+        def unlock(config)
+          lock_control(config).unlock
+        end
+
         private def state_store(config)
           light_factory(config).state_store
         end
 
         private def metrics_store(config)
           light_factory(config).metrics_store
+        end
+
+        private def lock_control(config)
+          light_factory(config).lock_control
         end
 
         private def light_factory(config)

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Stoplight::Admin::LightsRepository, :redis do
-  subject(:repository) { described_class.new(registry:, storage:, system:) }
+  subject(:repository) { described_class.new(registry:, storage:, system_config: system.system_config) }
 
   let(:system) { Stoplight.__stoplight__system(SecureRandom.uuid) }
   let(:storage) { system.__stoplight__storage }
@@ -100,6 +100,19 @@ RSpec.describe Stoplight::Admin::LightsRepository, :redis do
           .to("locked_red")
       end
     end
+
+    context "when the light was already registered elsewhere with overrides" do
+      let(:overridden_name) { "overridden-light" }
+      let(:overridden_light) { system.light(overridden_name, threshold: 10) }
+
+      before { overridden_light }
+
+      it "locks the light without raising ConfigurationError" do
+        expect { repository.lock(overridden_name) }
+          .to change { overridden_light.state }
+          .to("locked_green")
+      end
+    end
   end
 
   describe "#unlock" do
@@ -113,6 +126,19 @@ RSpec.describe Stoplight::Admin::LightsRepository, :redis do
       expect { unlock }
         .to change { light.state }
         .to("unlocked")
+    end
+
+    context "when the light was already registered elsewhere with overrides" do
+      let(:overridden_name) { "overridden-light" }
+      let(:overridden_light) { system.light(overridden_name, threshold: 10) }
+
+      before { overridden_light.lock("red") }
+
+      it "unlocks the light without raising ConfigurationError" do
+        expect { repository.unlock(overridden_name) }
+          .to change { overridden_light.state }
+          .to("unlocked")
+      end
     end
   end
 

@@ -44,12 +44,13 @@ module Stoplight
           green_run_strategy:,
           yellow_run_strategy:,
           red_run_strategy:,
-          lock_control: Domain::LockControl.new(state_store:, emitter: @emitter)
+          lock_control:
         )
       end
 
       def state_store = storage_set.state_store
       def metrics_store = storage_set.metrics_store
+      def lock_control = @lock_control ||= Domain::LockControl.new(state_store:, emitter: @emitter)
 
       private
 

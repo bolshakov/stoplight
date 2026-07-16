@@ -3,10 +3,10 @@
 module Stoplight
   class Admin
     class LightsRepository
-      def initialize(registry:, storage:, system:)
+      def initialize(registry:, storage:, system_config:)
         @storage = storage
         @registry = registry
-        @system = system
+        @system_config = system_config
       end
 
       # @return [<Stoplight::Admin::LightsRepository::Light>]
@@ -33,28 +33,23 @@ module Stoplight
       #   color
       # @return [void]
       def lock(name, color = nil)
-        light = load_light(name)
-        color ||= light.color
-
-        light.lock(color)
+        config = build_config(name)
+        color ||= @storage.state_snapshot(config).color
+        @storage.lock(config, color)
       end
 
       # @param name [String] unlocks light by its name
       # @return [void]
       def unlock(name)
-        load_light(name).unlock
+        @storage.unlock(build_config(name))
       end
 
       # @param name [String] removes light metadata by its name
       # @return [void]
       def remove(name)
-        config = @system.system_config.with(name:)
+        config = build_config(name)
         @storage.delete(config)
         @registry.unregister(name)
-      end
-
-      private def load_light(name)
-        @system.light(name)
       end
 
       private def load_light_view(name)
@@ -74,7 +69,7 @@ module Stoplight
       end
 
       private def build_config(name)
-        @system.system_config.with(name:)
+        @system_config.with(name:)
       end
     end
   end
