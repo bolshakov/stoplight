@@ -35,10 +35,10 @@ module Stoplight
       # @api private
       class ConsecutiveSuccesses
         def check_compatibility(config)
-          if config.recovery_threshold <= 0
-            CompatibilityResult.incompatible("`recovery_threshold` should be bigger than 0")
-          elsif !config.recovery_threshold.is_a?(Integer)
+          if !config.recovery_threshold.is_a?(Integer)
             CompatibilityResult.incompatible("`recovery_threshold` should be an integer")
+          elsif config.recovery_threshold <= 0
+            CompatibilityResult.incompatible("`recovery_threshold` should be bigger than 0")
           else
             CompatibilityResult.compatible
           end
