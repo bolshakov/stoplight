@@ -28,6 +28,7 @@ module Stoplight
 
       def subscribe(filter = nil, &handler)
         raise ArgumentError, "nothing to subscribe. Please, pass a block into `Telemetry#subscribe`" unless handler
+        raise ArgumentError, "filter must be nil or a Module, got #{filter.inspect}" unless filter.nil? || filter.is_a?(Module)
 
         subscription = Subscription.new
         @mutex.synchronize do
