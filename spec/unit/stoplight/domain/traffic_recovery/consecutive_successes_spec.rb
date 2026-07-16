@@ -26,6 +26,26 @@ RSpec.describe Stoplight::Domain::TrafficRecovery::ConsecutiveSuccesses do
         expect(strategy.error_messages).to eq("`recovery_threshold` should be an integer")
       end
     end
+
+    context "when recovery threshold is nil" do
+      let(:recovery_threshold) { nil }
+
+      it { is_expected.to be_incompatible }
+
+      it "returns an error message" do
+        expect(strategy.error_messages).to eq("`recovery_threshold` should be an integer")
+      end
+    end
+
+    context "when recovery threshold is a string" do
+      let(:recovery_threshold) { "3" }
+
+      it { is_expected.to be_incompatible }
+
+      it "returns an error message" do
+        expect(strategy.error_messages).to eq("`recovery_threshold` should be an integer")
+      end
+    end
   end
 
   describe "#determine_color" do
