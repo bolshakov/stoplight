@@ -9,6 +9,15 @@ module Stoplight
         @skipped = skipped
       end
 
+      def with(tracked: T.undefined, skipped: T.undefined)
+        return self if tracked.is_a?(Undefined) && skipped.is_a?(Undefined)
+
+        self.class.new(
+          tracked: tracked.is_a?(Undefined) ? @tracked : Array(tracked),
+          skipped: skipped.is_a?(Undefined) ? @skipped : Array(skipped)
+        )
+      end
+
       def track?(error)
         !skipped?(error) && tracked?(error)
       end

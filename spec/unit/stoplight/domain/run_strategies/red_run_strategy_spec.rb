@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Stoplight::Domain::Strategies::RedRunStrategy, :freeze do
-  subject(:result) { strategy.execute(fallback, state_snapshot:) { 42 } }
+  subject(:result) { strategy.execute(fallback, state_snapshot:, error_tracking_policy:) { 42 } }
 
   let(:strategy) do
     described_class.new(
@@ -11,6 +11,7 @@ RSpec.describe Stoplight::Domain::Strategies::RedRunStrategy, :freeze do
     )
   end
   let(:state_snapshot) { instance_double(Stoplight::Domain::StateSnapshot, recovery_scheduled_after: Time.now) }
+  let(:error_tracking_policy) { instance_double(Stoplight::Domain::ErrorTrackingPolicy) }
   let(:name) { SecureRandom.uuid }
   let(:cool_off_time) { 60 }
   let(:emitter) { TestTelemetryEmitter.new }

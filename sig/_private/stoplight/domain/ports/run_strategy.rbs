@@ -7,7 +7,8 @@ module Stoplight
       # @param fallback A fallback proc to execute in case of an error.
       def execute: [T] (
         (^(StandardError?) -> T)? fallback,
-        state_snapshot: StateSnapshot
+        state_snapshot: StateSnapshot,
+        error_tracking_policy: ErrorTrackingPolicy
       ) { () -> T } -> T
     end
   end

@@ -5,6 +5,10 @@ module Stoplight
       @skipped: Array[_ExceptionMatcher]
 
       def initialize: (tracked: Array[_ExceptionMatcher], skipped: Array[_ExceptionMatcher]) -> void
+      def with: (
+        ?tracked: optional[Array[_ExceptionMatcher] | _ExceptionMatcher],
+        ?skipped: optional[Array[_ExceptionMatcher] | _ExceptionMatcher]
+      ) -> ErrorTrackingPolicy
       def track?: (StandardError) -> bool
 
       def skipped?: (StandardError) -> bool

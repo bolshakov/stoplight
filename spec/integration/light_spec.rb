@@ -67,6 +67,76 @@ RSpec.describe "Light" do
       end.not_to raise_error
     end
 
+    specify "with per-call tracked_errors" do
+      light = Stoplight(SecureRandom.uuid, tracked_errors: KeyError)
+
+      expect do
+        light.run(fallback, tracked_errors: [Timeout::Error]) { raise Timeout::Error }
+      end.not_to raise_error
+
+      expect do
+        light.run(fallback, tracked_errors: [Timeout::Error]) { raise KeyError }
+      end.to raise_error(KeyError)
+
+      expect do
+        light.run(fallback, tracked_errors: []) { raise Timeout::Error }
+      end.to raise_error(Timeout::Error)
+
+      expect do
+        light.run(fallback) { raise KeyError }
+      end.not_to raise_error
+    end
+
+    specify "with per-call skipped_errors" do
+      light = Stoplight(SecureRandom.uuid, tracked_errors: StandardError, skipped_errors: Timeout::Error)
+
+      expect do
+        light.run(fallback, skipped_errors: [KeyError]) { raise Timeout::Error }
+      end.not_to raise_error
+
+      expect do
+        light.run(fallback, skipped_errors: [KeyError]) { raise KeyError }
+      end.to raise_error(KeyError)
+
+      expect do
+        light.run(fallback) { raise Timeout::Error }
+      end.to raise_error(Timeout::Error)
+    end
+
+    specify "with per-call tracked_errors while yellow" do
+      light = Stoplight(
+        SecureRandom.uuid,
+        tracked_errors: Timeout::Error,
+        traffic_control: :consecutive_errors,
+        threshold: 1,
+        cool_off_time: 1
+      )
+      light.run(fallback) { raise Timeout::Error }
+
+      Timecop.travel(Time.now + 2) do
+        expect(light.color).to eq(Stoplight::Color::YELLOW)
+        expect do
+          light.run(fallback, tracked_errors: [KeyError]) { raise KeyError }
+        end.not_to raise_error
+        expect(light.color).to eq(Stoplight::Color::RED)
+      end
+    end
+
+    specify "with per-call error tracking while red" do
+      light = Stoplight(
+        SecureRandom.uuid,
+        traffic_control: :consecutive_errors,
+        threshold: 1
+      )
+      light.run(fallback) { raise StandardError }
+
+      code_executed = false
+      light.run(fallback, skipped_errors: [KeyError]) { code_executed = true }
+
+      expect(code_executed).to be false
+      expect(light.color).to eq(Stoplight::Color::RED)
+    end
+
     context "with traffic control" do
       specify "with error rate" do
         light = Stoplight(SecureRandom.uuid, traffic_control: :error_rate, threshold: 0.5, window_size: 60)

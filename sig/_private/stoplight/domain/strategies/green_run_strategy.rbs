@@ -5,11 +5,10 @@ module Stoplight
         include _RunStrategy
 
         attr_reader request_tracker: Tracker::Request
-        @error_tracking_policy: ErrorTrackingPolicy
         @run_recorder: Telemetry::RunRecorder
         @clock: _Clock
 
-        def initialize: (error_tracking_policy: ErrorTrackingPolicy, request_tracker: Tracker::Request,
+        def initialize: (request_tracker: Tracker::Request,
             run_recorder: Telemetry::RunRecorder, clock: _Clock) -> void
 
         def capture_started_at: () -> Float?
