@@ -4,6 +4,10 @@
   `#with_error_notifier`, `#with_tracked_errors`, `#with_skipped_errors`
 - Remove `data_store`, `notifiers`, and `error_notifier` parameters from `Stoplight()` and `Stoplight.light()` methods. 
   From now on this could be configured only on the Stoplight/System level
+- `tracked_errors` and `skipped_errors` passed to `Stoplight()` / `Stoplight.light()` must now be named `Class`/`Module` 
+  constants (e.g. `StandardError`, or a custom class/module overriding `===`). Procs, anonymous classes 
+  (`Class.new(StandardError)`), and instances no longer work here and raise `ArgumentError` - they have no stable name, 
+  which config-consistency checks and the admin registry depend on.
 
 ## Stoplight 5.0 
 
