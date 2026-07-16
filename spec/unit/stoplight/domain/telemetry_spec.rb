@@ -107,6 +107,36 @@ RSpec.describe Stoplight::Domain::Telemetry do
       end
     end
 
+    context "with an invalid filter" do
+      subject(:bus) { described_class.new(error_notifier:, max_subscriptions: 1) }
+
+      it "raises ArgumentError instead of comparing it against event classes" do
+        expect { bus.subscribe("not_a_class") {} }.to raise_error(ArgumentError, /filter/)
+      end
+
+      it "does not register the invalid subscription" do
+        expect { bus.subscribe("not_a_class") {} }.to raise_error(ArgumentError)
+        expect { bus.subscribe(described_class::RunCompleted) {} }.not_to raise_error
+      end
+
+      it "leaves the bus usable for subsequent subscribers" do
+        expect { bus.subscribe(42) {} }.to raise_error(ArgumentError)
+
+        expect do |handler|
+          bus.subscribe(described_class::RunCompleted, &handler)
+          bus.publish(envelope(run_completed))
+        end.to yield_control
+      end
+
+      it "does not break unsubscribe for subscriptions made before the bad call" do
+        subscription = bus.subscribe(described_class::RunCompleted) {}
+
+        expect { bus.subscribe(:invalid) {} }.to raise_error(ArgumentError)
+
+        expect { bus.unsubscribe(subscription) }.not_to raise_error
+      end
+    end
+
     context "when the subscription cap is reached" do
       subject(:bus) { described_class.new(error_notifier:, max_subscriptions: 1) }
 
