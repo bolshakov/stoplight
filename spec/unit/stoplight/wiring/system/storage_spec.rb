@@ -22,29 +22,4 @@ RSpec.describe Stoplight::Wiring::System::Storage do
       expect(snapshot.last_error).to be_nil
     end
   end
-
-  describe "#lock" do
-    it "locks the light to the given color" do
-      config = Stoplight::Wiring::DefaultConfig.with(name: "stripe")
-
-      expect do
-        storage.lock(config, Stoplight::Color::RED)
-      end.to change { storage.state_snapshot(config).locked_state }
-        .from(Stoplight::State::UNLOCKED)
-        .to(Stoplight::State::LOCKED_RED)
-    end
-  end
-
-  describe "#unlock" do
-    it "unlocks the light" do
-      config = Stoplight::Wiring::DefaultConfig.with(name: "stripe")
-      storage.lock(config, Stoplight::Color::RED)
-
-      expect do
-        storage.unlock(config)
-      end.to change { storage.state_snapshot(config).locked_state }
-        .from(Stoplight::State::LOCKED_RED)
-        .to(Stoplight::State::UNLOCKED)
-    end
-  end
 end

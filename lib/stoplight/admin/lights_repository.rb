@@ -47,7 +47,7 @@ module Stoplight
       # @param name [String] removes light metadata by its name
       # @return [void]
       def remove(name)
-        config = build_config(name)
+        config = @system_config.with(name:)
         @storage.delete(config)
         @registry.unregister(name)
       end
