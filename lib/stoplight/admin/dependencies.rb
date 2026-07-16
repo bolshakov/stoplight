@@ -13,7 +13,7 @@ module Stoplight
         Stoplight::Admin::LightsRepository.new(
           registry: @system.__stoplight__registry,
           storage: @system.__stoplight__storage,
-          system: @system
+          system_config: @system.system_config
         )
       end
 
