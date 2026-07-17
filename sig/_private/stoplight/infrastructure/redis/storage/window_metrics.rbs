@@ -22,6 +22,7 @@ module Stoplight
           ) -> void
 
           def bucket_key: (metric: Symbol, time: _ToI) -> String
+          def bucket_start_for: (_ToI time) -> Integer
           def bucket_size: -> Integer
           def bucket_ttl: -> Integer
           def buckets_for_window: (metric: Symbol, window_end: _ToI) -> Array[String]
