@@ -148,8 +148,8 @@ RSpec.describe Stoplight::Wiring::System do
           system.register("bar", cool_off_time: 30, threshold: 44)
         end.to raise_error(
           include(/Light `bar` already registered with different configuration/)
-            .and(include(/system_spec\.rb:143/))
-            .and(include(/system_spec\.rb:147/))
+            .and(include(/system_spec\.rb:144/))
+            .and(include(/system_spec\.rb:148/))
         )
       end
     end
