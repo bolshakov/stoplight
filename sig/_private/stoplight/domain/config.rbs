@@ -3,8 +3,8 @@ module Stoplight
     class Config < Data
       attr_reader threshold: percentage | Integer
       attr_reader window_size: duration?
-      attr_reader tracked_errors: Array[_ExceptionMatcher]
-      attr_reader skipped_errors: Array[_ExceptionMatcher]
+      attr_reader tracked_errors: Array[Module]
+      attr_reader skipped_errors: Array[Module]
       attr_reader name: String
       attr_reader cool_off_time: duration
       attr_reader recovery_threshold: Integer
@@ -20,8 +20,8 @@ module Stoplight
           threshold: percentage | Integer,
           recovery_threshold: Integer,
           window_size: duration?,
-          tracked_errors: Array[_ExceptionMatcher],
-          skipped_errors: Array[_ExceptionMatcher],
+          tracked_errors: Array[Module],
+          skipped_errors: Array[Module],
           traffic_control: _TrafficControl,
           traffic_recovery: _TrafficRecovery,
           error_notifier: error_notifier,
@@ -35,8 +35,8 @@ module Stoplight
           threshold: percentage | Integer,
           recovery_threshold: Integer,
           window_size: duration?,
-          tracked_errors: Array[_ExceptionMatcher],
-          skipped_errors: Array[_ExceptionMatcher],
+          tracked_errors: Array[Module],
+          skipped_errors: Array[Module],
           traffic_control: _TrafficControl,
           traffic_recovery: _TrafficRecovery,
           error_notifier: error_notifier,
@@ -52,8 +52,8 @@ module Stoplight
           ?threshold: optional[percentage | Integer],
           ?recovery_threshold: optional[Integer],
           ?window_size: optional[duration?],
-          ?tracked_errors: optional[Array[_ExceptionMatcher]],
-          ?skipped_errors: optional[Array[_ExceptionMatcher]],
+          ?tracked_errors: optional[Array[Module]],
+          ?skipped_errors: optional[Array[Module]],
           ?traffic_control: optional[_TrafficControl],
           ?traffic_recovery: optional[_TrafficRecovery],
           ?error_notifier: optional[error_notifier],

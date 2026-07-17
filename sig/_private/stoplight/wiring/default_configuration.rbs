@@ -8,8 +8,8 @@ module Stoplight
       @threshold: optional[percentage | Integer]
       @recovery_threshold: optional[Integer]
       @window_size: optional[duration?]
-      @tracked_errors: optional[Array[_ExceptionMatcher] | _ExceptionMatcher]
-      @skipped_errors: optional[Array[_ExceptionMatcher] | _ExceptionMatcher]
+      @tracked_errors: optional[Array[Module] | Module]
+      @skipped_errors: optional[Array[Module] | Module]
       @traffic_control: optional[traffic_control]
       @traffic_recovery: optional[traffic_recovery]
       @error_notifier: optional[error_notifier]
@@ -20,8 +20,8 @@ module Stoplight
 
       private
 
-      def tracked_errors: -> optional[Array[_ExceptionMatcher]]
-      def skipped_errors: -> optional[Array[_ExceptionMatcher]]
+      def tracked_errors: -> optional[Array[Module]]
+      def skipped_errors: -> optional[Array[Module]]
       def traffic_control: -> optional[Domain::_TrafficControl]
       def traffic_recovery: -> optional[Domain::_TrafficRecovery]
     end

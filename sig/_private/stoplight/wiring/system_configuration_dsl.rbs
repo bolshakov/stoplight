@@ -7,8 +7,8 @@ module Stoplight
         ?threshold: optional[percentage | Integer],
         ?recovery_threshold: optional[Integer],
         ?window_size: optional[duration?],
-        ?tracked_errors: optional[Array[_ExceptionMatcher] | _ExceptionMatcher],
-        ?skipped_errors: optional[Array[_ExceptionMatcher] | _ExceptionMatcher],
+        ?tracked_errors: optional[Array[Module] | Module],
+        ?skipped_errors: optional[Array[Module] | Module],
         ?data_store: optional[data_store],
         ?error_notifier: optional[error_notifier],
         ?notifiers: optional[Array[state_transition_notifier]],
@@ -28,8 +28,8 @@ module Stoplight
       attr_reader data_store: optional[data_store]
       attr_reader error_notifier: optional[error_notifier]
       attr_reader notifiers: optional[Array[state_transition_notifier]]
-      attr_reader tracked_errors: optional[Array[_ExceptionMatcher]]
-      attr_reader skipped_errors: optional[Array[_ExceptionMatcher]]
+      attr_reader tracked_errors: optional[Array[Module]]
+      attr_reader skipped_errors: optional[Array[Module]]
       attr_reader traffic_control: optional[Domain::_TrafficControl]
       attr_reader traffic_recovery: optional[Domain::_TrafficRecovery]
     end

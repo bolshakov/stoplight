@@ -7,9 +7,9 @@ module Stoplight
         case value
         in _ if value.respond_to?(:stop_traffic?) # TODO: can be removed in 6.0
           value
-        in :consecutive_errors
+        in Domain::TrafficControl::ConsecutiveErrors::NAME
           Domain::TrafficControl::ConsecutiveErrors.new
-        in :error_rate
+        in Domain::TrafficControl::ErrorRate::NAME
           Domain::TrafficControl::ErrorRate.new
         in {error_rate: error_rate_settings}
           Domain::TrafficControl::ErrorRate.new(**error_rate_settings)

@@ -3,6 +3,8 @@ module Stoplight
     module TrafficRecovery
       class ConsecutiveSuccesses
         include _TrafficRecovery
+
+        NAME: :consecutive_successes
       end
     end
   end

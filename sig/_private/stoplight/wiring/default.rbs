@@ -16,8 +16,8 @@ module Stoplight
 
       WINDOW_SIZE: duration?
 
-      TRACKED_ERRORS: Array[_ExceptionMatcher]
-      SKIPPED_ERRORS: Array[_ExceptionMatcher]
+      TRACKED_ERRORS: Array[Module]
+      SKIPPED_ERRORS: Array[Module]
 
       TRAFFIC_CONTROL: Domain::_TrafficControl
       TRAFFIC_RECOVERY: Domain::_TrafficRecovery

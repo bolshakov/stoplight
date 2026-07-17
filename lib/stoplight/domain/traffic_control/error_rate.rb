@@ -17,6 +17,8 @@ module Stoplight
       #
       # @api private
       class ErrorRate
+        NAME = :error_rate
+
         # @param min_requests Minimum number of requests before traffic control is applied.
         #   until this number of requests is reached, the error rate will not be considered.
         def initialize(min_requests: 10)

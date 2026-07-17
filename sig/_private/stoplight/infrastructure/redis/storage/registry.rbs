@@ -9,8 +9,14 @@ module Stoplight
           @redis: redis
           @key_space: SystemKeySpace
           @clock: Domain::_Clock
+          @config_serializer: singleton(ConfigSerializer)
 
-          def initialize: (redis: redis, key_space: SystemKeySpace, clock: Domain::_Clock) -> void
+          def initialize: (
+              redis: redis,
+              key_space: SystemKeySpace,
+              clock: Domain::_Clock,
+              config_serializer: singleton(ConfigSerializer),
+            ) -> void
         end
       end
     end

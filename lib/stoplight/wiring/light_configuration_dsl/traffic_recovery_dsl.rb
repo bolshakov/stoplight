@@ -7,7 +7,7 @@ module Stoplight
         case value
         in _ if value.respond_to?(:determine_color) # TODO: remove in 6.0
           value
-        in :consecutive_successes
+        in Domain::TrafficRecovery::ConsecutiveSuccesses::NAME
           Domain::TrafficRecovery::ConsecutiveSuccesses.new
         else
           raise Error::ConfigurationError, <<~ERROR

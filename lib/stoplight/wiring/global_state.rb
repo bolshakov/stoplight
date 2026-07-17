@@ -46,7 +46,8 @@ module Stoplight
             primary_registry: Infrastructure::Redis::Storage::Registry.new(
               redis: config.data_store.redis,
               key_space: Infrastructure::Redis::Storage::SystemKeySpace.build(system_name: config.name.to_s),
-              clock: Infrastructure::SystemClock.new
+              clock: Infrastructure::SystemClock.new,
+              config_serializer: Infrastructure::ConfigSerializer
             ),
             error_notifier: config.error_notifier,
             failover_registry: Infrastructure::Memory::Storage::Registry.new,
