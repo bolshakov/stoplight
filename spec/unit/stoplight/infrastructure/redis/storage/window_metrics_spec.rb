@@ -53,7 +53,8 @@ RSpec.describe Stoplight::Infrastructure::Redis::Storage::WindowMetrics, :redis 
           "stoplight:v5:#{key_space.system_id}:{#{key_space.light_id}}:window_metrics:failures:1696140000",
           "stoplight:v5:#{key_space.system_id}:{#{key_space.light_id}}:window_metrics:failures:1696143600",
           "stoplight:v5:#{key_space.system_id}:{#{key_space.light_id}}:window_metrics:failures:1696147200",
-          "stoplight:v5:#{key_space.system_id}:{#{key_space.light_id}}:window_metrics:failures:1696150800"
+          "stoplight:v5:#{key_space.system_id}:{#{key_space.light_id}}:window_metrics:failures:1696150800",
+          "stoplight:v5:#{key_space.system_id}:{#{key_space.light_id}}:window_metrics:failures:1696154400"
         )
       end
     end
@@ -62,9 +63,10 @@ RSpec.describe Stoplight::Infrastructure::Redis::Storage::WindowMetrics, :redis 
       let(:window_end) { Time.at(1696154400) }
       let(:window_size) { 3600 } # Exactly one bucket size
 
-      it "returns the single bucket key" do
+      it "returns both bucket keys" do
         is_expected.to contain_exactly(
-          "stoplight:v5:#{key_space.system_id}:{#{key_space.light_id}}:window_metrics:failures:1696150800"
+          "stoplight:v5:#{key_space.system_id}:{#{key_space.light_id}}:window_metrics:failures:1696150800",
+          "stoplight:v5:#{key_space.system_id}:{#{key_space.light_id}}:window_metrics:failures:1696154400"
         )
       end
     end

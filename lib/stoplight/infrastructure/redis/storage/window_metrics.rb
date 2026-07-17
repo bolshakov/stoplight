@@ -119,7 +119,7 @@ module Stoplight
           # @param time [Time, Numeric] The time for which to generate the key.
           # @return [String] The generated Redis key.
           def bucket_key(metric:, time:)
-            key_space.key(:window_metrics, metric, (time.to_i / bucket_size) * bucket_size)
+            key_space.key(:window_metrics, metric, bucket_start_for(time))
           end
 
           # Retrieves the list of Redis bucket keys required to cover a specific time window.
@@ -133,10 +133,10 @@ module Stoplight
             window_start_ts = window_end_ts - @window_size
 
             # Find bucket timestamps that contain any part of the window
-            start_bucket = (window_start_ts / bucket_size) * bucket_size
+            start_bucket = bucket_start_for(window_start_ts)
 
-            # End bucket is the last bucket that contains data within our window
-            end_bucket = ((window_end_ts - 1) / bucket_size) * bucket_size
+            # End bucket is the bucket that window_end itself falls into, so it's always included
+            end_bucket = bucket_start_for(window_end_ts)
 
             (start_bucket..end_bucket).step(bucket_size).map do |bucket_start|
               bucket_key(metric: metric, time: bucket_start)
@@ -150,6 +150,8 @@ module Stoplight
           attr_reader :metrics_key
           attr_reader :clock
           attr_reader :key_space
+
+          def bucket_start_for(time) = (time.to_i / bucket_size) * bucket_size
 
           def bucket_size = 3600 # 1 hour
           def bucket_ttl = @window_size + bucket_size
