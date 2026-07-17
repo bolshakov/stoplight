@@ -158,7 +158,7 @@ module Stoplight
       end
 
       def create_circuit_breaker(name)
-        failover_system.light(name)
+        failover_system.register(name)
       end
     end
   end

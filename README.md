@@ -269,6 +269,29 @@ Any list omitted from `run` keeps its configured value. The provided list is rep
 
 ## Advanced Configuration
 
+### Registering Lights
+
+Calling `Stoplight("name", ...)` at every call site works well for a handful of lights. As an app
+grows, repeating the same settings everywhere makes them easy to drift out of sync, and there's no
+single place listing what lights exist.
+
+Register a light once and look it up by name wherever you need it, instead of repeating the same
+settings at every call site.
+
+```ruby
+# config/initializers/stoplight.rb
+Stoplight.register("Payment Service", threshold: 5, cool_off_time: 60)
+```
+
+```ruby
+# anywhere else in your app
+Stoplight.light("Payment Service").run { payment_gateway.process(order) }
+```
+
+`Stoplight("name", ...)` still works as shown above -- registration is an addition, not a replacement.
+`Stoplight.light` is also approximately 10 times faster, since it's a plain lookup rather than re-validating 
+the configuration on every call.
+
 ### Traffic Control Strategies
 
 You've seen how Stoplight transitions from green to red when errors reach the threshold. But **how exactly does it 

@@ -8,8 +8,8 @@ module ConfigureLightWorld
     case factory_method
     when "Stoplight()"
       Stoplight(name, **collect_settings(table))
-    when "System#light"
-      system.light(name, **collect_settings(table))
+    when "System#register"
+      system.register(name, **collect_settings(table))
     else
       raise ArgumentError, "unexpected light creation method: `#{factory_method}`"
     end

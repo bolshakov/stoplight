@@ -2,11 +2,11 @@
 
 module Stoplight
   # A System is a composition root that groups related circuit breakers
-  # with shared configuration.
+  # with shared infrastructure configuration and defaults.
   interface _System
     def name: -> String
 
-    def light: (
+    def register: (
       String name,
       ?cool_off_time: optional[duration],
       ?threshold: optional[percentage | Integer],
@@ -17,6 +17,8 @@ module Stoplight
       ?traffic_control: optional[traffic_control],
       ?traffic_recovery: optional[traffic_recovery]
     ) -> _Light
+
+    def light: (String name) -> _Light
 
     def telemetry: -> _Telemetry
   end

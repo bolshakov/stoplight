@@ -15,7 +15,7 @@ PROF_TYPES = {
 }.freeze
 
 system = Stoplight.__stoplight__system("default 2")
-system.light("bar", threshold: 4)
+system.register("bar", threshold: 4)
 
 def profile_scenario(name, &block)
   result = RubyProf::Profile.profile do
@@ -31,7 +31,7 @@ end
 
 profile_scenario("success") do
   50.times do
-    system.light("bar", threshold: 4)
+    system.register("bar", threshold: 4)
   end
 end
 

@@ -81,6 +81,32 @@ RSpec.describe "Stoplight" do
     end
   end
 
+  describe ".register" do
+    it "returns the registered light" do
+      expect(Stoplight.register(name)).to be_kind_of(Stoplight::Domain::Light)
+    end
+
+    it "returns the same instance on repeated calls with matching settings" do
+      expect(Stoplight.register(name)).to equal(Stoplight.register(name))
+    end
+  end
+
+  describe ".light" do
+    context "when the name was registered" do
+      it "returns the registered light" do
+        registered = Stoplight.register(name)
+
+        expect(Stoplight.light(name)).to be(registered)
+      end
+    end
+
+    context "when the name was never registered" do
+      it "raises an error" do
+        expect { Stoplight.light(name) }.to raise_error(Stoplight::Error::UnregisteredLightError, /#{name}/)
+      end
+    end
+  end
+
   describe ".__stoplight__system" do
     context "name is not in use yet" do
       subject(:system) { Stoplight.__stoplight__system(SecureRandom.uuid) }
@@ -134,7 +160,7 @@ RSpec.describe "Stoplight" do
           notifiers: [BrokenNotifier.new, BrokenNotifier.new, BrokenNotifier.new, spy_notifier]
         )
 
-        system.light("payments").run(->(_) {}) { raise "dependency failure" }
+        system.register("payments").run(->(_) {}) { raise "dependency failure" }
 
         expect(spy_notifier.notifications).not_to be_empty
       end
