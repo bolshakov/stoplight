@@ -34,6 +34,8 @@ module Stoplight
       #
       # @api private
       class ConsecutiveSuccesses
+        NAME = :consecutive_successes
+
         def check_compatibility(config)
           if !config.recovery_threshold.is_a?(Integer)
             CompatibilityResult.incompatible("`recovery_threshold` should be an integer")

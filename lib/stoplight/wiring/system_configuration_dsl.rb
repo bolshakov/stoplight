@@ -22,8 +22,8 @@ module Stoplight
         @threshold = threshold
         @recovery_threshold = recovery_threshold
         @window_size = window_size
-        @tracked_errors = tracked_errors.is_a?(Undefined) ? tracked_errors : Array(tracked_errors)
-        @skipped_errors = skipped_errors.is_a?(Undefined) ? skipped_errors : Array(skipped_errors)
+        @tracked_errors = (tracked_errors.is_a?(Undefined) || tracked_errors.is_a?(Array)) ? tracked_errors : [tracked_errors]
+        @skipped_errors = (skipped_errors.is_a?(Undefined) || skipped_errors.is_a?(Array)) ? skipped_errors : [skipped_errors]
         @traffic_control = traffic_control.is_a?(Undefined) ? traffic_control : LightConfigurationDsl::TrafficControlDsl.call(traffic_control)
         @traffic_recovery = traffic_recovery.is_a?(Undefined) ? traffic_recovery : LightConfigurationDsl::TrafficRecoveryDsl.call(traffic_recovery)
         @error_notifier = error_notifier

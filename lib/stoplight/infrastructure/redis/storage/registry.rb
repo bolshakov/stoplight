@@ -8,10 +8,11 @@ module Stoplight
           REDIS_KEY = "lights"
           private_constant :REDIS_KEY
 
-          def initialize(redis:, key_space:, clock:)
+          def initialize(redis:, key_space:, clock:, config_serializer:)
             @redis = redis
             @key_space = key_space
             @clock = clock
+            @config_serializer = config_serializer
           end
 
           def names
@@ -29,7 +30,8 @@ module Stoplight
                   meta: {
                     version: 1,
                     registered_at: @clock.current_time.to_i
-                  }
+                  },
+                  config: @config_serializer.call(config)
                 }.to_json
               )
             end

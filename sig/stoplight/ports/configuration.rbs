@@ -8,8 +8,8 @@ module Stoplight
     def threshold=: (percentage | Integer) -> void
     def recovery_threshold=: (Integer) -> void
     def window_size=: (duration?) -> void
-    def tracked_errors=: (Array[_ExceptionMatcher] | _ExceptionMatcher) -> void
-    def skipped_errors=: (Array[_ExceptionMatcher] | _ExceptionMatcher) -> void
+    def tracked_errors=: (Array[Module] | Module) -> void
+    def skipped_errors=: (Array[Module] | Module) -> void
     def traffic_control=: (traffic_control) -> void
     def traffic_recovery=: (traffic_recovery) -> void
     def error_notifier=: (error_notifier) -> void
