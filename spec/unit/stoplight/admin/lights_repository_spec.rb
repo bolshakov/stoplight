@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 RSpec.describe Stoplight::Admin::LightsRepository, :redis do
-  subject(:repository) { described_class.new(registry:, storage:, system_config: system.system_config) }
+  subject(:repository) do
+    described_class.new(registry:, storage:, system_config: system.system_config)
+  end
 
   let(:system) { Stoplight.__stoplight__system(SecureRandom.uuid) }
   let(:storage) { system.__stoplight__storage }
@@ -30,6 +32,7 @@ RSpec.describe Stoplight::Admin::LightsRepository, :redis do
     context "when there are lights" do
       before do
         allow(registry).to receive(:names).and_return([name])
+        allow(registry).to receive(:config_for).and_return(nil)
         light.run { raise "whoops" }
       rescue
         nil
@@ -51,11 +54,35 @@ RSpec.describe Stoplight::Admin::LightsRepository, :redis do
         )
       end
     end
+
+    context "when the light was registered with an overridden window_size in another process" do
+      let(:registry) { system.__stoplight__registry }
+      let(:light) { system.register(name, window_size: 300) }
+
+      before do
+        light.run { raise "boom" }
+      rescue
+        nil
+      end
+
+      it "reads the failure from the light's real, windowed metrics" do
+        is_expected.to contain_exactly(
+          have_attributes(
+            name: name,
+            failure_count: 1,
+            failures: contain_exactly(
+              have_attributes(error_class: "RuntimeError", error_message: "boom")
+            )
+          )
+        )
+      end
+    end
   end
 
   describe "#with_color" do
     before do
       allow(registry).to receive(:names).and_return(["red-light", "green-light"])
+      allow(registry).to receive(:config_for).and_return(nil)
       system.register("red-light").lock("red")
       system.register("green-light").lock("green")
     end
@@ -78,6 +105,8 @@ RSpec.describe Stoplight::Admin::LightsRepository, :redis do
 
   describe "#lock" do
     subject(:lock) { repository.lock(light.name) }
+
+    before { allow(registry).to receive(:config_for).and_return(nil) }
 
     context "when the light is green" do
       it "locks the light" do
@@ -120,6 +149,7 @@ RSpec.describe Stoplight::Admin::LightsRepository, :redis do
     subject(:unlock) { repository.unlock(light.name) }
 
     before do
+      allow(registry).to receive(:config_for).and_return(nil)
       light.lock("red")
     end
 
@@ -135,6 +165,7 @@ RSpec.describe Stoplight::Admin::LightsRepository, :redis do
 
     before do
       allow(registry).to receive(:names).and_return([name])
+      allow(registry).to receive(:config_for).and_return(nil)
       light.run { raise "whoops" }
     rescue
       nil

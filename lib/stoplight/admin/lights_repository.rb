@@ -69,7 +69,11 @@ module Stoplight
       end
 
       private def build_config(name)
-        @system_config.with(name:)
+        config = @registry.config_for(name)
+        return @system_config.with(name:) if config.nil?
+
+        overrides = config.slice("cool_off_time", "window_size").compact.transform_keys(&:to_sym)
+        @system_config.with(name:, **overrides)
       end
     end
   end
