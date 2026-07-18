@@ -17,14 +17,14 @@ module Stoplight
 
           def names
             @redis.with do |conn|
-              conn.hkeys(@key_space.key(REDIS_KEY))
+              conn.hkeys(key)
             end
           end
 
           def register(name, config:)
             @redis.with do |conn|
               conn.hset(
-                @key_space.key(REDIS_KEY),
+                key,
                 name,
                 {
                   meta: {
@@ -39,8 +39,21 @@ module Stoplight
 
           def unregister(name)
             @redis.with do |conn|
-              conn.hdel(@key_space.key(REDIS_KEY), name)
+              conn.hdel(key, name)
             end
+          end
+
+          def config_for(name)
+            raw_light_info = @redis.with do |conn|
+              conn.hget(key, name)
+            end
+            return unless raw_light_info
+            light_info = JSON.parse(raw_light_info)
+            light_info["config"]
+          end
+
+          private def key
+            @key_space.key(REDIS_KEY)
           end
         end
       end

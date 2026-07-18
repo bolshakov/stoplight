@@ -17,6 +17,10 @@ module Stoplight
               clock: Domain::_Clock,
               config_serializer: singleton(ConfigSerializer),
             ) -> void
+
+          private
+
+          def key: () -> String
         end
       end
     end

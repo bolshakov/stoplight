@@ -9,6 +9,7 @@ module Stoplight
 
           def register(name, config:) = nil
           def unregister(name) = nil
+          def config_for(name) = nil
         end
       end
     end

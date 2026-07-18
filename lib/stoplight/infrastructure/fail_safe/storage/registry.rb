@@ -41,6 +41,16 @@ module Stoplight
               @primary_registry.unregister(name)
             end
           end
+
+          def config_for(name)
+            fallback = ->(error) {
+              @error_notifier.call(error) if error
+              @failover_registry.config_for(name)
+            }
+            @circuit_breaker.run(fallback) do
+              @primary_registry.config_for(name)
+            end
+          end
         end
       end
     end

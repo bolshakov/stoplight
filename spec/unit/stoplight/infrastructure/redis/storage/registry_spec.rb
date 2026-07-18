@@ -71,4 +71,20 @@ RSpec.describe Stoplight::Infrastructure::Redis::Storage::Registry, :redis do
       expect(parsed["config"]).to eq(Stoplight::Infrastructure::ConfigSerializer.call(config))
     end
   end
+
+  describe "#config_for" do
+    subject { registry.config_for("stripe") }
+
+    context "when the light is registered" do
+      before { registry.register("stripe", config:) }
+
+      it "returns the persisted config" do
+        is_expected.to eq(Stoplight::Infrastructure::ConfigSerializer.call(config))
+      end
+    end
+
+    context "when the light was never registered" do
+      it { is_expected.to be_nil }
+    end
+  end
 end
