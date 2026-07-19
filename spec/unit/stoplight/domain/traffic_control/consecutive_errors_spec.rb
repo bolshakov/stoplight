@@ -117,4 +117,17 @@ RSpec.describe Stoplight::Domain::TrafficControl::ConsecutiveErrors do
       end
     end
   end
+
+  describe "#eql?" do
+    it "returns true for equal instances" do
+      strategy_a = described_class.new
+      strategy_b = described_class.new
+
+      expect(strategy_a.eql?(strategy_b)).to be(true)
+    end
+
+    it "returns false for different classes" do
+      expect(described_class.new.eql?(Stoplight::Domain::TrafficControl::ErrorRate.new)).to be(false)
+    end
+  end
 end
