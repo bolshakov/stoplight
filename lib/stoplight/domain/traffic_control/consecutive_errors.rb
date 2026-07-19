@@ -46,6 +46,10 @@ module Stoplight
         def ==(other)
           other.is_a?(self.class)
         end
+
+        def eql?(other)
+          self == other
+        end
       end
     end
   end

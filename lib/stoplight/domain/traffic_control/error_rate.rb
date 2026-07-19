@@ -46,6 +46,10 @@ module Stoplight
           other.is_a?(self.class) && min_requests == other.min_requests
         end
 
+        def eql?(other)
+          self == other
+        end
+
         def hash = [self.class, @min_requests].hash
 
         protected

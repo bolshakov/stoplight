@@ -125,4 +125,27 @@ RSpec.describe Stoplight::Domain::TrafficControl::ErrorRate do
       end
     end
   end
+
+  describe "#eql?" do
+    it "returns true for same class and same min_requests" do
+      strategy_a = described_class.new
+      strategy_b = described_class.new
+
+      expect(strategy_a.eql?(strategy_b)).to be(true)
+    end
+
+    it "returns false when same class and different min_requests" do
+      strategy_a = described_class.new(min_requests: 10)
+      strategy_b = described_class.new(min_requests: 11)
+
+      expect(strategy_a.eql?(strategy_b)).to be(false)
+    end
+
+    it "returns false when different class and same min_requests" do
+      strategy_a = described_class.new(min_requests: 10)
+      strategy_b = Stoplight::Domain::TrafficControl::ConsecutiveErrors.new
+
+      expect(strategy_a.eql?(strategy_b)).to be(false)
+    end
+  end
 end
