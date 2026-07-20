@@ -137,6 +137,12 @@ RSpec.describe Stoplight::Domain::Telemetry do
       end
     end
 
+    context "with a filter that matches no event class" do
+      it "raises ArgumentError instead of registering a dead subscription" do
+        expect { bus.subscribe(Comparable) {} }.to raise_error(ArgumentError, /does not match/)
+      end
+    end
+
     context "when the subscription cap is reached" do
       subject(:bus) { described_class.new(error_notifier:, max_subscriptions: 1) }
 
