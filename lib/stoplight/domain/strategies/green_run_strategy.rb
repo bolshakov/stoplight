@@ -28,9 +28,6 @@ module Stoplight
 
           begin
             result = code.call
-            record_success(duration_ms: duration_since(started_at))
-
-            result
           rescue => error
             if error_tracking_policy.track?(error)
               record_error(error, duration_ms: duration_since(started_at), fallback_used: !fallback.nil?)
@@ -45,6 +42,9 @@ module Stoplight
               record_success(duration_ms: duration_since(started_at), error: error)
               raise
             end
+          else
+            record_success(duration_ms: duration_since(started_at))
+            result
           end
         end
 
