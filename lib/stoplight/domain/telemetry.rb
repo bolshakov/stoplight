@@ -29,6 +29,9 @@ module Stoplight
       def subscribe(filter = nil, &handler)
         raise ArgumentError, "nothing to subscribe. Please, pass a block into `Telemetry#subscribe`" unless handler
         raise ArgumentError, "filter must be nil or a Module, got #{filter.inspect}" unless filter.nil? || filter.is_a?(Module)
+        unless filter.nil? || EVENT_CLASSES.any? { |event_class| event_class <= filter }
+          raise ArgumentError, "filter #{filter.inspect} does not match any telemetry event class"
+        end
 
         subscription = Subscription.new
         @mutex.synchronize do
