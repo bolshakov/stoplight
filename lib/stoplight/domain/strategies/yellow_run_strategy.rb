@@ -49,21 +49,24 @@ module Stoplight
           with_recovery_lock(fallback:, state_snapshot:) do |started_at|
             enter_recovery(state_snapshot)
 
-            result = code.call
-            record_recovery_probe_success(duration_ms: duration_since(started_at))
-            result
-          rescue => error
-            if error_tracking_policy.track?(error)
-              record_recovery_probe_failure(error, duration_ms: duration_since(started_at), fallback_used: !fallback.nil?)
+            begin
+              result = code.call
+            rescue => error
+              if error_tracking_policy.track?(error)
+                record_recovery_probe_failure(error, duration_ms: duration_since(started_at), fallback_used: !fallback.nil?)
 
-              if fallback
-                fallback.call(error)
+                if fallback
+                  fallback.call(error)
+                else
+                  raise
+                end
               else
+                record_recovery_probe_success(duration_ms: duration_since(started_at), error:)
                 raise
               end
             else
-              record_recovery_probe_success(duration_ms: duration_since(started_at), error:)
-              raise
+              record_recovery_probe_success(duration_ms: duration_since(started_at))
+              result
             end
           end
         end

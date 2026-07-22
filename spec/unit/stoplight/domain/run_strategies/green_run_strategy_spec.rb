@@ -138,4 +138,27 @@ RSpec.describe Stoplight::Domain::Strategies::GreenRunStrategy do
       end
     end
   end
+
+  context "when success bookkeeping raises" do
+    subject(:result) { strategy.execute(fallback, state_snapshot: nil, error_tracking_policy:, &code) }
+
+    let(:code) { -> { "Success" } }
+    let(:bookkeeping_error) { StandardError.new("metrics store unavailable") }
+    let(:fallback_calls) { [] }
+    let(:fallback) { ->(error) { fallback_calls << error } }
+
+    before do
+      allow(request_tracker).to receive(:record_success).and_raise(bookkeeping_error)
+      allow(request_tracker).to receive(:record_failure)
+      allow(error_tracking_policy).to receive(:track?).and_return(true)
+    end
+
+    it "surfaces the bookkeeping error without misreporting it as a run failure" do
+      expect { result }.to raise_error(bookkeeping_error)
+
+      expect(error_tracking_policy).not_to have_received(:track?)
+      expect(request_tracker).not_to have_received(:record_failure)
+      expect(fallback_calls).to be_empty
+    end
+  end
 end

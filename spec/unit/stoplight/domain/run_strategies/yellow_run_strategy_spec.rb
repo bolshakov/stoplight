@@ -180,6 +180,56 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
           end
         end
       end
+
+      context "when success bookkeeping raises" do
+        subject(:result) { strategy.execute(fallback, state_snapshot: nil, error_tracking_policy:, &code) }
+
+        let(:code) { -> { "Success" } }
+        let(:bookkeeping_error) { StandardError.new("metrics store unavailable") }
+        let(:fallback_calls) { [] }
+        let(:fallback) { ->(error) { fallback_calls << error } }
+
+        before do
+          allow(request_tracker).to receive(:record_success).and_raise(bookkeeping_error)
+          allow(request_tracker).to receive(:record_failure)
+          allow(error_tracking_policy).to receive(:track?).and_return(true)
+        end
+
+        it "surfaces the bookkeeping error without misreporting it as a probe failure" do
+          expect(recovery_lock_store).to receive(:release_lock).with(recovery_lock_token)
+
+          expect { result }.to raise_error(bookkeeping_error)
+
+          expect(error_tracking_policy).not_to have_received(:track?)
+          expect(request_tracker).not_to have_received(:record_failure)
+          expect(fallback_calls).to be_empty
+        end
+      end
+
+      context "when entering recovery raises" do
+        subject(:result) { strategy.execute(fallback, state_snapshot: nil, error_tracking_policy:, &code) }
+
+        let(:code) { -> { "Success" } }
+        let(:recovery_error) { StandardError.new("state store unavailable") }
+        let(:fallback_calls) { [] }
+        let(:fallback) { ->(error) { fallback_calls << error } }
+
+        before do
+          allow(strategy).to receive(:enter_recovery).and_raise(recovery_error)
+          allow(request_tracker).to receive(:record_failure)
+          allow(error_tracking_policy).to receive(:track?).and_return(true)
+        end
+
+        it "surfaces the recovery error without misreporting it as a probe failure" do
+          expect(recovery_lock_store).to receive(:release_lock).with(recovery_lock_token)
+
+          expect { result }.to raise_error(recovery_error)
+
+          expect(error_tracking_policy).not_to have_received(:track?)
+          expect(request_tracker).not_to have_received(:record_failure)
+          expect(fallback_calls).to be_empty
+        end
+      end
     end
 
     context "when recovery lock is not acquired" do
