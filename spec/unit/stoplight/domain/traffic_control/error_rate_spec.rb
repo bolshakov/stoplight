@@ -79,6 +79,30 @@ RSpec.describe Stoplight::Domain::TrafficControl::ErrorRate do
         expect(availability.error_messages).to eq("`threshold` should be a number")
       end
     end
+
+    context "when min_requests is less then 1" do
+      let(:min_requests) { 0 }
+      it { is_expected.to be_incompatible }
+      it "returns an error message" do
+        expect(availability.error_messages).to eq("`min_requests` should be bigger than 0")
+      end
+    end
+
+    context "when min_requests is negative" do
+      let(:min_requests) { -5 }
+      it { is_expected.to be_incompatible }
+      it "returns an error message" do
+        expect(availability.error_messages).to eq("`min_requests` should be bigger than 0")
+      end
+    end
+
+    context "when min_requests is not an integer" do
+      let(:min_requests) { 10.5 }
+      it { is_expected.to be_incompatible }
+      it "returns an error message" do
+        expect(availability.error_messages).to eq("`min_requests` should be an integer")
+      end
+    end
   end
 
   describe "#stop_traffic?" do

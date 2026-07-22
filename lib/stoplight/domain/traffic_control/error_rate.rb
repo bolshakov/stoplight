@@ -32,6 +32,10 @@ module Stoplight
             CompatibilityResult.incompatible("`threshold` should be a number")
           elsif config.threshold < 0 || config.threshold > 1
             CompatibilityResult.incompatible("`threshold` should be between 0 and 1")
+          elsif !min_requests.is_a?(Integer)
+            CompatibilityResult.incompatible("`min_requests` should be an integer")
+          elsif min_requests <= 0
+            CompatibilityResult.incompatible("`min_requests` should be bigger than 0")
           else
             CompatibilityResult.compatible
           end
