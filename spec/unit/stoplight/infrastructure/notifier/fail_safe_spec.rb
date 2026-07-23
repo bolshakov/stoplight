@@ -32,5 +32,16 @@ RSpec.describe Stoplight::Infrastructure::Notifier::FailSafe do
         expect(error_notifier).to have_received(:call).with(error)
       end
     end
+
+    context "when notification fails and error_notifier raises" do
+      it "does not propagate the error_notifier exception" do
+        allow(notifier).to receive(:notify).and_raise(error)
+        allow(error_notifier).to receive(:call).and_raise(StandardError.new("error_notifier boom"))
+
+        expect {
+          fail_safe_notifier.notify(config, from_color, to_color, error)
+        }.not_to raise_error
+      end
+    end
   end
 end
