@@ -90,4 +90,25 @@ RSpec.describe Stoplight::Domain::Failure do
       end
     end
   end
+
+  describe "#eql? and #hash" do
+    let(:failure) { described_class.new(error_class, error_message, time) }
+    let(:other) { described_class.new(error_class, error_message, time) }
+
+    it "is eql when equal" do
+      expect(failure).to eql(other)
+    end
+
+    it "has the same hash when equal" do
+      expect(failure.hash).to eq(other.hash)
+    end
+
+    it "collides as hash keys when equal" do
+      expect({failure => 1, other => 2}.size).to eq(1)
+    end
+
+    it "dedupes in an array when equal" do
+      expect([failure, other].uniq.size).to eq(1)
+    end
+  end
 end
