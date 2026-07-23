@@ -11,6 +11,8 @@ module Stoplight
       def initialize: (String error_class, String error_message, Time time) -> void
 
       def ==: (untyped other) -> bool
+      def eql?: (untyped other) -> bool
+      def hash: () -> Integer
     end
   end
 end
