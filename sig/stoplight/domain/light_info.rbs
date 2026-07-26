@@ -1,7 +1,7 @@
 module Stoplight
   module Domain
     class LightInfo < Data
-      include _LightInfo
+      attr_reader name: String
 
       def self.new: (
           name: String,

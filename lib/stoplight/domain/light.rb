@@ -5,12 +5,18 @@ module Stoplight
     #
     # @api private use +Stoplight()+ method instead
     class Light
+      # @api public
       attr_reader :name
+      # @api private
       attr_reader :green_run_strategy
+      # @api private
       attr_reader :yellow_run_strategy
+      # @api private
       attr_reader :red_run_strategy
+      # @api private
       attr_reader :state_store
 
+      # @api private
       def initialize(
         name,
         green_run_strategy:,
@@ -34,6 +40,7 @@ module Stoplight
       #  * +Stoplight::State::LOCKED_RED+ -- light is locked red and blocks all traffic
       #  * +Stoplight::State::UNLOCKED+ -- light is not locked and follow the configured rules
       #
+      # @api public
       def state = state_snapshot.locked_state
 
       # Returns current color:
@@ -45,6 +52,7 @@ module Stoplight
       #   light = Stoplight('example')
       #   light.color #=> Color::GREEN
       #
+      # @api public
       def color = state_snapshot.color
 
       # Runs the given block of code with this circuit breaker
@@ -64,6 +72,8 @@ module Stoplight
       # @param tracked_errors errors to track for this run; replaces the configured list
       # @param skipped_errors errors to skip for this run; replaces the configured list
       # @raise [Stoplight::Error::RedLight]
+      #
+      # @api public
       def run(fallback = nil, tracked_errors: T.undefined, skipped_errors: T.undefined, &code)
         raise ArgumentError, "nothing to run. Please, pass a block into `Light#run`" unless block_given?
 
@@ -82,6 +92,8 @@ module Stoplight
       #
       # @param color should be either +Color::RED+ or +Color::GREEN+
       # @return locked light
+      #
+      # @api public
       def lock(color)
         @lock_control.lock(color)
 
@@ -96,6 +108,8 @@ module Stoplight
       #   light.unlock
       #
       # @return returns unlocked light (circuit breaker)
+      #
+      # @api public
       def unlock
         @lock_control.unlock
 

@@ -1,11 +1,12 @@
 module Stoplight
   module Domain
     class Light
-      include _Light
+      attr_reader name: String
       attr_reader green_run_strategy: Strategies::GreenRunStrategy
       attr_reader yellow_run_strategy: Strategies::YellowRunStrategy
       attr_reader red_run_strategy: Strategies::RedRunStrategy
       attr_reader state_store: _StateStore
+
       @name: String
       @lock_control: LockControl
       @error_tracking_policy: ErrorTrackingPolicy
@@ -20,8 +21,19 @@ module Stoplight
         error_tracking_policy: ErrorTrackingPolicy
       ) -> void
 
-      private def state_strategy_factory: (color) -> _RunStrategy
-      private def state_snapshot: -> StateSnapshot
+      def state: -> Domain::state
+      def color: -> Domain::color
+      def run: [T] (
+          ?(^(StandardError?) -> T)?,
+          ?tracked_errors: optional[Array[Domain::_ExceptionMatcher] | Domain::_ExceptionMatcher],
+          ?skipped_errors: optional[Array[Domain::_ExceptionMatcher] | Domain::_ExceptionMatcher]
+        ) { () -> T } -> T
+      def lock: (Domain::color) -> Light
+      def unlock: -> Light
+
+      private
+      def state_strategy_factory: (color) -> _RunStrategy
+      def state_snapshot: -> StateSnapshot
     end
   end
 end

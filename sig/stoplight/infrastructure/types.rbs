@@ -1,6 +1,6 @@
 module Stoplight
   module Infrastructure
     type redis = ::Redis | ConnectionPool[::Redis]
-    type notification_formatter = ^(_LightInfo light, Domain::color, Domain::color, StandardError?) -> String
+    type notification_formatter = ^(Domain::LightInfo light, Domain::color, Domain::color, StandardError?) -> String
   end
 end
