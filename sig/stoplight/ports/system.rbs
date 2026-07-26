@@ -14,8 +14,8 @@ module Stoplight
       ?window_size: optional[Domain::duration_seconds?],
       ?skipped_errors: optional[Array[Module] | Module],
       ?tracked_errors: optional[Array[Module] | Module],
-      ?traffic_control: optional[traffic_control],
-      ?traffic_recovery: optional[traffic_recovery]
+      ?traffic_control: optional[Wiring::traffic_control],
+      ?traffic_recovery: optional[Wiring::traffic_recovery]
     ) -> _Light
 
     def light: (String name) -> _Light

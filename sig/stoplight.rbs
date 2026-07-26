@@ -18,8 +18,8 @@ module Stoplight
       ?data_store: optional[Domain::_DataStore],
       ?error_notifier: optional[Domain::error_notifier],
       ?notifiers: optional[Array[Domain::_StateTransitionNotifier]],
-      ?traffic_control: optional[traffic_control],
-      ?traffic_recovery: optional[traffic_recovery],
+      ?traffic_control: optional[Wiring::traffic_control],
+      ?traffic_recovery: optional[Wiring::traffic_recovery],
     ) -> _System
   def self.__stoplight__default_configuration: -> Domain::Config
   def self.__stoplight__default_system: -> _System
@@ -27,10 +27,7 @@ module Stoplight
 
   type optional[T] = Undefined | T
 
-  type traffic_control = :consecutive_errors | :error_rate | {error_rate: {min_requests: Integer}}
-  type traffic_recovery = :consecutive_successes
-
-  def self.configure: (?trust_me_im_an_engineer: bool) ?{ (_Configuration) -> void } -> void
+  def self.configure: (?trust_me_im_an_engineer: bool) ?{ (Wiring::DefaultConfiguration) -> void } -> void
 
   def self.register: (
       String name,
@@ -40,8 +37,8 @@ module Stoplight
       ?window_size: optional[Domain::duration_seconds?],
       ?tracked_errors: optional[Array[Module] | Module],
       ?skipped_errors: optional[Array[Module] | Module],
-      ?traffic_control: optional[traffic_control],
-      ?traffic_recovery: optional[traffic_recovery],
+      ?traffic_control: optional[Wiring::traffic_control],
+      ?traffic_recovery: optional[Wiring::traffic_recovery],
     ) -> _Light
 
   def self.light: (String name) -> _Light
@@ -57,8 +54,8 @@ module Kernel
       ?window_size: Stoplight::optional[Stoplight::Domain::duration_seconds?],
       ?tracked_errors: Stoplight::optional[Array[Module] | Module],
       ?skipped_errors: Stoplight::optional[Array[Module] | Module],
-      ?traffic_control: Stoplight::optional[Stoplight::traffic_control],
-      ?traffic_recovery: Stoplight::optional[Stoplight::traffic_recovery],
+      ?traffic_control: Stoplight::optional[Stoplight::Wiring::traffic_control],
+      ?traffic_recovery: Stoplight::optional[Stoplight::Wiring::traffic_recovery],
   ) -> Stoplight::_Light
 end
 

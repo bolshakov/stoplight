@@ -1,0 +1,6 @@
+module Stoplight
+  module Wiring
+    type traffic_control = :consecutive_errors | :error_rate | {error_rate: {min_requests: Integer}}
+    type traffic_recovery = :consecutive_successes
+  end
+end
