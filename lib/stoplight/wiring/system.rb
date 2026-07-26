@@ -51,7 +51,7 @@ module Stoplight
       #   of this system. For example if your system uses Redis data store, or notifiers that
       #   communicate with external systems, they could go off. Failover system hosts
       #   all the circuit breakers that are needed to protect these dependencies from failing.
-      #   Failover system itself never uses external dependencies and thereforec does not need
+      #   Failover system itself never uses external dependencies and therefore does not need
       #   external failover.
       def initialize(config:, failover_system:, registry:)
         @name = config.name
