@@ -9,11 +9,5 @@ module Stoplight
 
       def initialize: (redis, ?warn_on_clock_skew: bool) -> void
     end
-
-    # Configuration for Memory-backed Stoplight storage.
-    #
-    # @note This is a configuration object, not the storage implementation itself.
-    class Memory < Base
-    end
   end
 end
