@@ -1,7 +1,7 @@
 module Stoplight
   module Color
-    GREEN: green
-    YELLOW: yellow
-    RED: red
+    GREEN: Domain::green
+    YELLOW: Domain::yellow
+    RED: Domain::red
   end
 end

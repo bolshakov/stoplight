@@ -2,13 +2,13 @@ module Stoplight
   module Infrastructure
     module Notifier
       class FailSafe
-        include _StateTransitionNotifier
+        include Domain::_StateTransitionNotifier
 
-        attr_reader notifier: state_transition_notifier
-        attr_reader error_notifier: error_notifier
+        attr_reader notifier: Domain::_StateTransitionNotifier
+        attr_reader error_notifier: Domain::error_notifier
         attr_reader circuit_breaker: _Light
 
-        def initialize: (notifier: state_transition_notifier, error_notifier: error_notifier, circuit_breaker: _Light) -> void
+        def initialize: (notifier: Domain::_StateTransitionNotifier, error_notifier: Domain::error_notifier, circuit_breaker: _Light) -> void
       end
     end
   end

@@ -7,7 +7,7 @@ module Stoplight
 
           @mutex: Mutex
           @clock: Domain::_Clock
-          @window_size: duration
+          @window_size: Domain::duration_seconds
           @consecutive_errors: Integer
           @consecutive_successes: Integer
           @last_error: Domain::Failure?
@@ -15,7 +15,7 @@ module Stoplight
           @successes: SlidingWindow
           @errors: SlidingWindow
 
-          def initialize: (window_size: duration, clock: Domain::_Clock) -> void
+          def initialize: (window_size: Domain::duration_seconds, clock: Domain::_Clock) -> void
 
           def initialize_metrics: -> void
           def build_metrics_snapshot: () -> Domain::MetricsSnapshot

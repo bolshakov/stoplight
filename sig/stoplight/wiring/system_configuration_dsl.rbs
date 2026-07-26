@@ -3,15 +3,15 @@ module Stoplight
     class SystemConfigurationDsl
       def initialize: (
         name: String,
-        ?cool_off_time: optional[duration],
-        ?threshold: optional[percentage | Integer],
+        ?cool_off_time: optional[Domain::duration_seconds],
+        ?threshold: optional[Domain::percentage | Integer],
         ?recovery_threshold: optional[Integer],
-        ?window_size: optional[duration?],
+        ?window_size: optional[Domain::duration_seconds?],
         ?tracked_errors: optional[Array[Module] | Module],
         ?skipped_errors: optional[Array[Module] | Module],
-        ?data_store: optional[data_store],
-        ?error_notifier: optional[error_notifier],
-        ?notifiers: optional[Array[state_transition_notifier]],
+        ?data_store: optional[Domain::_DataStore],
+        ?error_notifier: optional[Domain::error_notifier],
+        ?notifiers: optional[Array[Domain::_StateTransitionNotifier]],
         ?traffic_control: optional[traffic_control],
         ?traffic_recovery: optional[traffic_recovery],
       ) -> void
@@ -21,13 +21,13 @@ module Stoplight
       private
 
       attr_reader name: String
-      attr_reader cool_off_time: optional[duration]
-      attr_reader threshold: optional[percentage | Integer]
+      attr_reader cool_off_time: optional[Domain::duration_seconds]
+      attr_reader threshold: optional[Domain::percentage | Integer]
       attr_reader recovery_threshold: optional[Integer]
-      attr_reader window_size: optional[duration?]
-      attr_reader data_store: optional[data_store]
-      attr_reader error_notifier: optional[error_notifier]
-      attr_reader notifiers: optional[Array[state_transition_notifier]]
+      attr_reader window_size: optional[Domain::duration_seconds?]
+      attr_reader data_store: optional[Domain::_DataStore]
+      attr_reader error_notifier: optional[Domain::error_notifier]
+      attr_reader notifiers: optional[Array[Domain::_StateTransitionNotifier]]
       attr_reader tracked_errors: optional[Array[Module]]
       attr_reader skipped_errors: optional[Array[Module]]
       attr_reader traffic_control: optional[Domain::_TrafficControl]

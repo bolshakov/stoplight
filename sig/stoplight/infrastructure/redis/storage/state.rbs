@@ -9,7 +9,7 @@ module Stoplight
           attr_reader scripting: Scripting
           attr_reader key_space: KeySpace
           attr_reader clock: Domain::_Clock
-          attr_reader cool_off_time: timestamp
+          attr_reader cool_off_time: Domain::timestamp
           attr_reader state_key: String
 
           def initialize: (
@@ -17,7 +17,7 @@ module Stoplight
             redis: redis,
             scripting: Scripting,
             key_space: KeySpace,
-            cool_off_time: timestamp
+            cool_off_time: Domain::timestamp
           ) -> void
 
           def transition_to_green: -> bool
