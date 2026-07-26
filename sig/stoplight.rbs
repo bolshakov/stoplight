@@ -1,4 +1,30 @@
 module Stoplight
+  T: singleton(Types)
+  CONFIG_MUTEX: Mutex
+
+  self.@state: Wiring::GlobalState?
+  def self.warn_if_reconfiguring: (bool) { () -> void } -> void
+  def self.configured?: -> bool
+  def self.__stoplight__reset!: -> void
+  def self.ensure_configured: -> void
+  def self.__stoplight__system: (
+      _ToS name,
+      ?cool_off_time: optional[duration],
+      ?threshold: optional[percentage | Integer],
+      ?recovery_threshold: optional[Integer],
+      ?window_size: optional[duration?],
+      ?tracked_errors: optional[Array[Module]],
+      ?skipped_errors: optional[Array[Module]],
+      ?data_store: optional[data_store],
+      ?error_notifier: optional[error_notifier],
+      ?notifiers: optional[Array[state_transition_notifier]],
+      ?traffic_control: optional[traffic_control],
+      ?traffic_recovery: optional[traffic_recovery],
+    ) -> _System
+  def self.__stoplight__default_configuration: -> Domain::Config
+  def self.__stoplight__default_system: -> _System
+  def self.state: -> Wiring::GlobalState
+
   type optional[T] = Undefined | T
 
   type timestamp = Float | Integer

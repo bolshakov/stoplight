@@ -22,6 +22,8 @@ jobs:
           bundler-cache: true
       - run: |
           bundle exec steep check --format=github
+      - run: |
+          bundle exec rbs -I sig validate
 
   rubocop:
     name: Standard 👮
