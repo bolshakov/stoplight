@@ -27,11 +27,8 @@ module Stoplight
 
   type optional[T] = Undefined | T
 
-  type redis = ::Redis | ConnectionPool[::Redis]
-
   type traffic_control = :consecutive_errors | :error_rate | {error_rate: {min_requests: Integer}}
   type traffic_recovery = :consecutive_successes
-  type notification_formatter = ^(_LightInfo light, Domain::color, Domain::color, StandardError?) -> String
 
   def self.configure: (?trust_me_im_an_engineer: bool) ?{ (_Configuration) -> void } -> void
 

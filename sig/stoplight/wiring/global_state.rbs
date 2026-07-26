@@ -14,7 +14,6 @@ module Stoplight
       def create_system: (config: Domain::Config) -> _System
 
       def create_registry: (Domain::Config, _System) -> Domain::_Registry
-      def redis: (Domain::Config) -> redis
     end
   end
 end

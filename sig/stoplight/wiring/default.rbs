@@ -7,7 +7,7 @@ module Stoplight
 
       ERROR_NOTIFIER: Domain::error_notifier
 
-      FORMATTER: notification_formatter
+      FORMATTER: Infrastructure::notification_formatter
 
       NOTIFIERS: Array[Domain::_StateTransitionNotifier]
 

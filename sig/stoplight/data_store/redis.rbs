@@ -4,10 +4,10 @@ module Stoplight
     #
     # @note This is a configuration object, not the storage implementation itself.
     class Redis < Base
-      attr_reader redis: redis
+      attr_reader redis: Infrastructure::redis
       attr_reader warn_on_clock_skew: bool
 
-      def initialize: (redis, ?warn_on_clock_skew: bool) -> void
+      def initialize: (Infrastructure::redis, ?warn_on_clock_skew: bool) -> void
     end
   end
 end
