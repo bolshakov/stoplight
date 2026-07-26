@@ -16,7 +16,7 @@ RSpec.describe Stoplight::Domain::Telemetry::StateTransitioned do
   end
 
   it "is not included by any other event" do
-    other_events = Stoplight::Domain::Telemetry::EVENT_CLASSES - transition_events
+    other_events = Stoplight::Domain::Telemetry::Bus::EVENT_CLASSES - transition_events
 
     expect(other_events).to all(satisfy { |event_class| !(event_class < described_class) })
   end

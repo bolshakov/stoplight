@@ -1,6 +1,6 @@
 module Stoplight
   module Domain
-    class Telemetry
+    module Telemetry
       # Carries the live exception.
       class Failure < Data
         attr_reader exception: StandardError

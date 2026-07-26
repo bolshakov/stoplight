@@ -2,7 +2,7 @@
 
 module Stoplight
   module Domain
-    class Telemetry
+    module Telemetry
       # The serializable subset of a light's configuration.
       Settings = Data.define(
         :cool_off_time,

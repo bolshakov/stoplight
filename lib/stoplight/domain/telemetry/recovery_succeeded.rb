@@ -2,7 +2,7 @@
 
 module Stoplight
   module Domain
-    class Telemetry
+    module Telemetry
       # state_transitioned variant: recovery policy resumed traffic.
       RecoverySucceeded = Data.define(
         :from_color,

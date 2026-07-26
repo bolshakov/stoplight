@@ -1,6 +1,6 @@
 module Stoplight
   module Domain
-    class Telemetry
+    module Telemetry
       # Wraps every published event. Carries only what the emission site knows.
       #
       # Identity, sequencing, and transport-level enrichment (ids, host, app version, deploy), etc. belong to the

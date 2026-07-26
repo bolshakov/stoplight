@@ -1,6 +1,6 @@
 module Stoplight
   module Domain
-    class Telemetry
+    module Telemetry
       # Emitted for every recovery probe.
       class RecoveryProbeCompleted < Data
         attr_reader outcome: probe_outcome

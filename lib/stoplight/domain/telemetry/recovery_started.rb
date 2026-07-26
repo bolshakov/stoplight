@@ -2,7 +2,7 @@
 
 module Stoplight
   module Domain
-    class Telemetry
+    module Telemetry
       # state_transitioned variant: cool-off elapsed and the first probe explicitly entered recovery.
       RecoveryStarted = Data.define(
         :from_color,

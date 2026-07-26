@@ -2,7 +2,7 @@
 
 module Stoplight
   module Domain
-    class Telemetry
+    module Telemetry
       # state_transitioned variant: manual lock override changed.
       LockChanged = Data.define(
         :from_color,

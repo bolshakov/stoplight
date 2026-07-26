@@ -1,6 +1,6 @@
 module Stoplight
   module Domain
-    class Telemetry
+    module Telemetry
       # Runtime name for the +state_transitioned+ union: a marker module included by every transition variant.
       # Carries no behavior - it exists so subscription filters can dispatch on the union with
       # Module#=== (RBS unions have no runtime constant). The type alias keeps typing the payload, this module names it at runtime.

@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
-RSpec.describe Stoplight::Domain::Telemetry do
+RSpec.describe Stoplight::Domain::Telemetry::Bus do
   subject(:bus) { described_class.new(error_notifier:) }
 
   let(:error_notifier) { instance_spy(Proc) }
 
   def envelope(payload)
-    described_class::Envelope.new(
+    Stoplight::Domain::Telemetry::Envelope.new(
       system_name: "sys",
       light_name: "light",
       occurred_at: Time.at(0),
@@ -15,7 +15,7 @@ RSpec.describe Stoplight::Domain::Telemetry do
   end
 
   let(:run_completed) do
-    described_class::RunCompleted.new(
+    Stoplight::Domain::Telemetry::RunCompleted.new(
       outcome: :success,
       color: "green",
       duration_ms: 1.0,
@@ -26,7 +26,7 @@ RSpec.describe Stoplight::Domain::Telemetry do
   end
 
   let(:traffic_breached) do
-    described_class::TrafficBreached.new(
+    Stoplight::Domain::Telemetry::TrafficBreached.new(
       from_color: "green",
       to_color: "red",
       policy: "error_rate",
@@ -43,7 +43,7 @@ RSpec.describe Stoplight::Domain::Telemetry do
 
       it "delivers an event to a handler" do
         expect do |handler|
-          bus.subscribe(described_class::RunCompleted, &handler)
+          bus.subscribe(Stoplight::Domain::Telemetry::RunCompleted, &handler)
           bus.publish(published_event)
         end.to yield_with_args(published_event)
       end
@@ -54,7 +54,7 @@ RSpec.describe Stoplight::Domain::Telemetry do
 
       it "does not deliver an event to a handler" do
         expect do |handler|
-          bus.subscribe(described_class::TrafficBreached, &handler)
+          bus.subscribe(Stoplight::Domain::Telemetry::TrafficBreached, &handler)
           bus.publish(published_event)
         end.not_to yield_control
       end
@@ -78,8 +78,8 @@ RSpec.describe Stoplight::Domain::Telemetry do
       let(:received) { [] }
 
       it "delivers to multiple handlers in subscription order" do
-        bus.subscribe(described_class::RunCompleted) { received << :first }
-        bus.subscribe(described_class::RunCompleted) { received << :second }
+        bus.subscribe(Stoplight::Domain::Telemetry::RunCompleted) { received << :first }
+        bus.subscribe(Stoplight::Domain::Telemetry::RunCompleted) { received << :second }
 
         bus.publish(published_event)
 
@@ -93,7 +93,7 @@ RSpec.describe Stoplight::Domain::Telemetry do
 
       it "delivers only state-transition events to a handler" do
         expect do |handler|
-          bus.subscribe(described_class::StateTransitioned, &handler)
+          bus.subscribe(Stoplight::Domain::Telemetry::StateTransitioned, &handler)
 
           bus.publish(state_transition_event)
           bus.publish(not_state_transition_event)
@@ -103,7 +103,7 @@ RSpec.describe Stoplight::Domain::Telemetry do
 
     context "without a handler block" do
       it "raises ArgumentError" do
-        expect { bus.subscribe(described_class::RunCompleted) }.to raise_error(ArgumentError)
+        expect { bus.subscribe(Stoplight::Domain::Telemetry::RunCompleted) }.to raise_error(ArgumentError)
       end
     end
 
@@ -116,20 +116,20 @@ RSpec.describe Stoplight::Domain::Telemetry do
 
       it "does not register the invalid subscription" do
         expect { bus.subscribe("not_a_class") {} }.to raise_error(ArgumentError)
-        expect { bus.subscribe(described_class::RunCompleted) {} }.not_to raise_error
+        expect { bus.subscribe(Stoplight::Domain::Telemetry::RunCompleted) {} }.not_to raise_error
       end
 
       it "leaves the bus usable for subsequent subscribers" do
         expect { bus.subscribe(42) {} }.to raise_error(ArgumentError)
 
         expect do |handler|
-          bus.subscribe(described_class::RunCompleted, &handler)
+          bus.subscribe(Stoplight::Domain::Telemetry::RunCompleted, &handler)
           bus.publish(envelope(run_completed))
         end.to yield_control
       end
 
       it "does not break unsubscribe for subscriptions made before the bad call" do
-        subscription = bus.subscribe(described_class::RunCompleted) {}
+        subscription = bus.subscribe(Stoplight::Domain::Telemetry::RunCompleted) {}
 
         expect { bus.subscribe(:invalid) {} }.to raise_error(ArgumentError)
 
@@ -147,9 +147,9 @@ RSpec.describe Stoplight::Domain::Telemetry do
       subject(:bus) { described_class.new(error_notifier:, max_subscriptions: 1) }
 
       it "raises Stoplight::Error::TooManySubscriptions" do
-        bus.subscribe(described_class::RunCompleted) {}
+        bus.subscribe(Stoplight::Domain::Telemetry::RunCompleted) {}
 
-        expect { bus.subscribe(described_class::RunCompleted) {} }
+        expect { bus.subscribe(Stoplight::Domain::Telemetry::RunCompleted) {} }
           .to raise_error(Stoplight::Error::TooManySubscriptions)
       end
     end
@@ -158,8 +158,8 @@ RSpec.describe Stoplight::Domain::Telemetry do
       let(:received) { [] }
 
       it "takes effect only on the next publish, not the one in progress" do
-        bus.subscribe(described_class::RunCompleted) do
-          bus.subscribe(described_class::RunCompleted) { received << :late }
+        bus.subscribe(Stoplight::Domain::Telemetry::RunCompleted) do
+          bus.subscribe(Stoplight::Domain::Telemetry::RunCompleted) { received << :late }
         end
 
         bus.publish(envelope(run_completed))
@@ -176,7 +176,7 @@ RSpec.describe Stoplight::Domain::Telemetry do
     let(:event) { envelope(run_completed) }
 
     it "routes a raising handler's error to the error notifier" do
-      bus.subscribe(described_class::RunCompleted) { raise boom }
+      bus.subscribe(Stoplight::Domain::Telemetry::RunCompleted) { raise boom }
 
       bus.publish(event)
 
@@ -184,33 +184,33 @@ RSpec.describe Stoplight::Domain::Telemetry do
     end
 
     it "still delivers to the remaining handlers" do
-      bus.subscribe(described_class::RunCompleted) { raise boom }
+      bus.subscribe(Stoplight::Domain::Telemetry::RunCompleted) { raise boom }
 
       expect do |handler|
-        bus.subscribe(described_class::RunCompleted, &handler)
+        bus.subscribe(Stoplight::Domain::Telemetry::RunCompleted, &handler)
         bus.publish(event)
       end.to yield_with_args(event)
     end
 
     it "does not raise out of publish when the error notifier itself raises" do
       allow(error_notifier).to receive(:call).and_raise(StandardError.new("notifier boom"))
-      bus.subscribe(described_class::RunCompleted) { raise boom }
+      bus.subscribe(Stoplight::Domain::Telemetry::RunCompleted) { raise boom }
 
       expect { bus.publish(event) }.not_to raise_error
     end
 
     it "still delivers to the remaining handlers when the error notifier itself raises" do
       allow(error_notifier).to receive(:call).and_raise(StandardError.new("notifier boom"))
-      bus.subscribe(described_class::RunCompleted) { raise boom }
+      bus.subscribe(Stoplight::Domain::Telemetry::RunCompleted) { raise boom }
 
       expect do |handler|
-        bus.subscribe(described_class::RunCompleted, &handler)
+        bus.subscribe(Stoplight::Domain::Telemetry::RunCompleted, &handler)
         bus.publish(event)
       end.to yield_with_args(event)
     end
 
     it "does not raise out of publish" do
-      bus.subscribe(described_class::RunCompleted) { raise boom }
+      bus.subscribe(Stoplight::Domain::Telemetry::RunCompleted) { raise boom }
 
       expect { bus.publish(event) }.not_to raise_error
     end
@@ -221,7 +221,7 @@ RSpec.describe Stoplight::Domain::Telemetry do
 
     it "stops delivery to the removed handler" do
       expect do |handler|
-        subscription = bus.subscribe(described_class::RunCompleted, &handler)
+        subscription = bus.subscribe(Stoplight::Domain::Telemetry::RunCompleted, &handler)
         bus.unsubscribe(subscription)
         bus.publish(event)
       end.not_to yield_control
@@ -232,15 +232,15 @@ RSpec.describe Stoplight::Domain::Telemetry do
 
       bus.unsubscribe(subscription)
 
-      expect(described_class::EVENT_CLASSES).to all(satisfy { |klass| !bus.subscribed?(klass) })
+      expect(Stoplight::Domain::Telemetry::Bus::EVENT_CLASSES).to all(satisfy { |klass| !bus.subscribed?(klass) })
     end
 
     it "leaves other subscriptions to the same class intact" do
       expect do |handler_1|
-        removed = bus.subscribe(described_class::RunCompleted, &handler_1)
+        removed = bus.subscribe(Stoplight::Domain::Telemetry::RunCompleted, &handler_1)
 
         expect do |handler_2|
-          bus.subscribe(described_class::RunCompleted, &handler_2)
+          bus.subscribe(Stoplight::Domain::Telemetry::RunCompleted, &handler_2)
           bus.unsubscribe(removed)
           bus.publish(event)
         end.to yield_with_args(event)
@@ -248,42 +248,42 @@ RSpec.describe Stoplight::Domain::Telemetry do
     end
 
     it "is a no-op when the token was already removed" do
-      subscription = bus.subscribe(described_class::RunCompleted) {}
+      subscription = bus.subscribe(Stoplight::Domain::Telemetry::RunCompleted) {}
       bus.unsubscribe(subscription)
 
       expect { bus.unsubscribe(subscription) }.not_to raise_error
     end
 
     it "is a no-op for an unknown token" do
-      expect { bus.unsubscribe(described_class::Subscription.new) }.not_to raise_error
+      expect { bus.unsubscribe(Stoplight::Domain::Telemetry::Subscription.new) }.not_to raise_error
     end
   end
 
   describe "#subscribed?" do
     it "is false when no handler covers the event class" do
-      bus.subscribe(described_class::TrafficBreached) {}
+      bus.subscribe(Stoplight::Domain::Telemetry::TrafficBreached) {}
 
-      expect(bus).not_to be_subscribed(described_class::RunCompleted)
+      expect(bus).not_to be_subscribed(Stoplight::Domain::Telemetry::RunCompleted)
     end
 
     it "is true when a handler subscribes to that exact class" do
-      bus.subscribe(described_class::RunCompleted) {}
+      bus.subscribe(Stoplight::Domain::Telemetry::RunCompleted) {}
 
-      expect(bus).to be_subscribed(described_class::RunCompleted)
+      expect(bus).to be_subscribed(Stoplight::Domain::Telemetry::RunCompleted)
     end
 
     it "is true for any event class when a firehose handler is subscribed" do
       bus.subscribe {}
 
-      expect(bus).to be_subscribed(described_class::RunCompleted)
-      expect(bus).to be_subscribed(described_class::LightRegistered)
+      expect(bus).to be_subscribed(Stoplight::Domain::Telemetry::RunCompleted)
+      expect(bus).to be_subscribed(Stoplight::Domain::Telemetry::LightRegistered)
     end
 
     it "is true for transition classes when a StateTransitioned handler is subscribed" do
-      bus.subscribe(described_class::StateTransitioned) {}
+      bus.subscribe(Stoplight::Domain::Telemetry::StateTransitioned) {}
 
-      expect(bus).to be_subscribed(described_class::TrafficBreached)
-      expect(bus).not_to be_subscribed(described_class::RunCompleted)
+      expect(bus).to be_subscribed(Stoplight::Domain::Telemetry::TrafficBreached)
+      expect(bus).not_to be_subscribed(Stoplight::Domain::Telemetry::RunCompleted)
     end
   end
 

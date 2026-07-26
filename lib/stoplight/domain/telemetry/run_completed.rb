@@ -2,7 +2,7 @@
 
 module Stoplight
   module Domain
-    class Telemetry
+    module Telemetry
       # Emitted for every Light#run.
       RunCompleted = Data.define(
         :outcome,

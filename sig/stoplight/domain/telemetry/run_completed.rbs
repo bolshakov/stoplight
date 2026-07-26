@@ -1,6 +1,6 @@
 module Stoplight
   module Domain
-    class Telemetry
+    module Telemetry
       # Emitted for every Light#run.
       class RunCompleted < Data
         attr_reader outcome: run_outcome

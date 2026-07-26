@@ -1,6 +1,6 @@
 module Stoplight
   module Domain
-    class Telemetry
+    module Telemetry
       type subscription_handler = ^(Envelope[event]) -> void
       type subscription_filter =  nil | singleton(RunCompleted) | singleton(TrafficBreached) | singleton(RecoveryStarted)
         | singleton(RecoverySucceeded) | singleton(RecoveryFailed) | singleton(LockChanged)

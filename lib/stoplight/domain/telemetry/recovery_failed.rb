@@ -2,7 +2,7 @@
 
 module Stoplight
   module Domain
-    class Telemetry
+    module Telemetry
       # state_transitioned variant: recovery policy sent the light back to red.
       RecoveryFailed = Data.define(
         :from_color,

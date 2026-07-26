@@ -3,7 +3,7 @@
 RSpec.describe Stoplight::Domain::Telemetry::Emitter do
   subject(:emitter) { described_class.new(bus:, clock:, system_name:, light_name:, error_notifier:) }
 
-  let(:bus) { instance_double(Stoplight::Domain::Telemetry) }
+  let(:bus) { instance_double(Stoplight::Domain::Telemetry::Bus) }
   let(:clock) { instance_double(NullClock) }
   let(:system_name) { SecureRandom.uuid }
   let(:light_name) { SecureRandom.uuid }

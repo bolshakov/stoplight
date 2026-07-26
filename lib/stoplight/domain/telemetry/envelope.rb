@@ -2,7 +2,7 @@
 
 module Stoplight
   module Domain
-    class Telemetry
+    module Telemetry
       # Wraps every published event.
       Envelope = Data.define(
         :system_name,

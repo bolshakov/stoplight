@@ -1,6 +1,6 @@
 module Stoplight
   module Domain
-    class Telemetry
+    module Telemetry
       # The serializable subset of a light's configuration. No live objects (notifiers, data stores, procs) cross the
       # telemetry boundary.
       class Settings < Data

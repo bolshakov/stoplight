@@ -1,6 +1,6 @@
 module Stoplight
   module Domain
-    class Telemetry
+    module Telemetry
       # state_transitioned variant: manual lock override changed.
       #
       # Emitted even when the effective color is unchanged (from_color == to_color), so the lock timeline is complete.
