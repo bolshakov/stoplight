@@ -2,7 +2,7 @@
 
 module Stoplight
   module Domain
-    class Telemetry
+    module Telemetry
       # Emitted for every recovery probe (a run executed while yellow, under the recovery lock).
       RecoveryProbeCompleted = Data.define(
         :outcome,

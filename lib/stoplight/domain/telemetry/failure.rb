@@ -2,7 +2,7 @@
 
 module Stoplight
   module Domain
-    class Telemetry
+    module Telemetry
       # Carries the live exception.
       Failure = Data.define(
         :exception,

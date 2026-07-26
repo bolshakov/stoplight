@@ -2,7 +2,7 @@
 
 module Stoplight
   module Domain
-    class Telemetry
+    module Telemetry
       # Builds and emits RunCompleted events for one light color.
       #
       # @api private

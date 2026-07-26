@@ -1,6 +1,6 @@
 module Stoplight
   module Domain
-    class Telemetry
+    module Telemetry
       # The serializable subset of MetricsSnapshot. successes/errors are nil for non-windowed metrics.
       class Metrics < Data
         attr_reader successes: Integer?

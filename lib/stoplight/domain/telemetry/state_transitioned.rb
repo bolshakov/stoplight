@@ -2,7 +2,7 @@
 
 module Stoplight
   module Domain
-    class Telemetry
+    module Telemetry
       # Runtime name for the +state_transitioned+ union: a marker module included by every transition variant.
       module StateTransitioned
       end

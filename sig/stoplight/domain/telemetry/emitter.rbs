@@ -1,6 +1,6 @@
 module Stoplight
   module Domain
-    class Telemetry
+    module Telemetry
       # The producer side of the bus. One per light, bound to its coordinates at construction time in
       # wiring, responsible for building envelopes. Injected into strategies, trackers, and Light the same
       # way notifiers are today.

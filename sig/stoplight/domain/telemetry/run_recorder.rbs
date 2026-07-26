@@ -1,6 +1,6 @@
 module Stoplight
   module Domain
-    class Telemetry
+    module Telemetry
       # Builds and emits RunCompleted events for one light color.
       class RunRecorder
         @emitter: Telemetry::Emitter

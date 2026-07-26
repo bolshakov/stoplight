@@ -1,6 +1,6 @@
 module Stoplight
   module Domain
-    class Telemetry
+    module Telemetry
       # state_transitioned variant: traffic control tripped the light.
       class TrafficBreached < Data
         include StateTransitioned

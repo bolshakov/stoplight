@@ -2,7 +2,7 @@
 
 module Stoplight
   module Domain
-    class Telemetry
+    module Telemetry
       class Emitter
         def initialize(bus:, clock:, system_name:, light_name:, error_notifier:)
           @bus = bus

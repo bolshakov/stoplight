@@ -59,7 +59,7 @@ module Stoplight
         @lights = Concurrent::Map.new
         @failover_system = failover_system
         @registry = registry
-        @telemetry = Domain::Telemetry.new(error_notifier: config.error_notifier)
+        @telemetry = Domain::Telemetry::Bus.new(error_notifier: config.error_notifier)
       end
 
       # Registers and returns a light.

@@ -2,7 +2,7 @@
 
 module Stoplight
   module Domain
-    class Telemetry
+    module Telemetry
       # The serializable subset of MetricsSnapshot.
       Metrics = Data.define(
         :successes,

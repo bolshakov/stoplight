@@ -1,6 +1,6 @@
 module Stoplight
   module Domain
-    class Telemetry
+    module Telemetry
       # Emitted once per (process instance, system, light): the cache-miss branch of System#light.
       #
       # Consumers deduplicate by (system_name, light_name) + settings content.
