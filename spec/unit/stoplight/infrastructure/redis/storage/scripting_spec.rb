@@ -186,4 +186,37 @@ RSpec.describe Stoplight::Infrastructure::Redis::Storage::Scripting, :redis do
       end.to raise_error(::Redis::CommandError) { |error| expect(error.message).not_to include("NOSCRIPT") }
     end
   end
+
+  context "when the script is not loaded" do
+    let(:retry_attempts) { 1 }
+
+    # Initial call plus retries
+    let(:total_attempts) { 1 + retry_attempts }
+
+    it "does not propagate error if retries succeed within REDIS_NOSCRIPT_MAX_RETRY attempts" do
+      responses = [
+        -> { raise ::Redis::CommandError.new("NOSCRIPT") },    # Initial call fails
+        -> { "success" }                                       # First retry succeeds
+      ]
+
+      allow(redis).to receive(:evalsha) { responses.shift.call }
+
+      script_manager.call(script_name, args: [value], keys: [key])
+      expect(redis).to have_received(:evalsha).exactly(total_attempts).times
+    end
+
+    it "propagates error if retries are exhausted" do
+      responses = [
+        -> { raise ::Redis::CommandError.new("NOSCRIPT") },    # Initial call fails
+        -> { raise ::Redis::CommandError.new("NOSCRIPT") }     # First retry also fails => raise
+      ]
+
+      allow(redis).to receive(:evalsha) { responses.shift.call }
+
+      expect do
+        script_manager.call(script_name, args: [value], keys: [key])
+      end.to raise_error(::Redis::CommandError)
+      expect(redis).to have_received(:evalsha).exactly(total_attempts).times
+    end
+  end
 end
