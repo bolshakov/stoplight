@@ -7,7 +7,7 @@ module Stoplight
       # @param from_color The previous state color of the Stoplight.
       # @param to_color The new state color of the Stoplight.
       # @param error The error (if any) that caused the state change.
-      def notify: (_LightInfo, Domain::color from_color, Domain::color to_color, ?StandardError? error) -> void
+      def notify: (Domain::LightInfo, Domain::color from_color, Domain::color to_color, ?StandardError? error) -> void
 
       # Object methods needed for comparison/inspection
       def ==: (untyped) -> bool

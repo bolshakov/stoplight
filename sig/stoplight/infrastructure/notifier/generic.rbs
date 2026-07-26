@@ -9,7 +9,7 @@ module Stoplight
 
         def initialize: (T object, ?notification_formatter? formatter) -> void
 
-        def notify: (_LightInfo light, Domain::color, Domain::color, StandardError?) -> String
+        def notify: (Domain::LightInfo light, Domain::color, Domain::color, StandardError?) -> String
 
         private def put: (String) -> void
       end

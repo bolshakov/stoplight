@@ -8,13 +8,13 @@ module Stoplight
           attr_reader primary_store: Domain::_StateStore
           attr_reader error_notifier: Domain::error_notifier
           attr_reader failover_store: Domain::_StateStore
-          attr_reader circuit_breaker: _Light
+          attr_reader circuit_breaker: Domain::Light
 
           def initialize: (
             primary_store: Domain::_StateStore,
             error_notifier: Domain::error_notifier,
             failover_store: Domain::_StateStore,
-            circuit_breaker: _Light,
+            circuit_breaker: Domain::Light,
           ) -> void
 
           def fallback: [T] { () -> T } -> ^(StandardError?) -> T

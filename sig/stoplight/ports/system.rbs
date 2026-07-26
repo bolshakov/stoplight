@@ -16,10 +16,10 @@ module Stoplight
       ?tracked_errors: optional[Array[Module] | Module],
       ?traffic_control: optional[Wiring::traffic_control],
       ?traffic_recovery: optional[Wiring::traffic_recovery]
-    ) -> _Light
+    ) -> Domain::Light
 
-    def light: (String name) -> _Light
+    def light: (String name) -> Domain::Light
 
-    def telemetry: -> _Telemetry
+    def telemetry: -> Domain::_Telemetry
   end
 end

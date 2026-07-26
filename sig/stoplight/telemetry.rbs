@@ -13,10 +13,5 @@ module Stoplight
     class LightRegistered = Domain::Telemetry::LightRegistered
 
     module StateTransitioned = Domain::Telemetry::StateTransitioned
-
-    type event = Domain::Telemetry::event
-    type state_transitioned = Domain::Telemetry::state_transitioned
-    type envelope[T < Domain::Telemetry::event] = Domain::Telemetry::Envelope[T]
-    type subscription = Domain::Telemetry::Subscription
   end
 end

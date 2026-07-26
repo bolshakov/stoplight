@@ -4,7 +4,7 @@ module Stoplight
       include _System
 
       @name: String
-      @lights: Concurrent::Map[String, [_Light, Integer, String?]]
+      @lights: Concurrent::Map[String, [Domain::Light, Integer, String?]]
       @failover_system: _System?
       @registry: Domain::_Registry
       @telemetry: Domain::_TelemetryPublisher

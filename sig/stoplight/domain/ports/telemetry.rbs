@@ -1,0 +1,28 @@
+module Stoplight
+  module Domain
+    # Consumer-facing side of the telemetry bus: subscription only. The producer side is internal
+    # (see Domain::_TelemetryPublisher). This is what +_System#telemetry+ returns.
+    interface _Telemetry
+      # Supports the following variants:
+      #  - Firehose (no filter): every event, including types added in future versions - filter by payload class
+      #    (+case envelope.payload+ narrows the union).
+      #  - Filtered by event class: only that event, with the envelope's payload pre-narrowed.
+      #  - Filtered by +StateTransitioned+: the closed transition union - the complete color timeline.
+      #
+      # @raise [Stoplight::Error::TooManySubscriptions] if the bus's subscription cap is reached.
+      def subscribe: () { (Telemetry::Envelope[Telemetry::event]) -> void } -> Telemetry::Subscription
+        | (singleton(Telemetry::RunCompleted)) { (Telemetry::Envelope[Telemetry::RunCompleted]) -> void } -> Telemetry::Subscription
+        | (singleton(Telemetry::TrafficBreached)) { (Telemetry::Envelope[Telemetry::TrafficBreached]) -> void } -> Telemetry::Subscription
+        | (singleton(Telemetry::RecoveryStarted)) { (Telemetry::Envelope[Telemetry::RecoveryStarted]) -> void } -> Telemetry::Subscription
+        | (singleton(Telemetry::RecoverySucceeded)) { (Telemetry::Envelope[Telemetry::RecoverySucceeded]) -> void } -> Telemetry::Subscription
+        | (singleton(Telemetry::RecoveryFailed)) { (Telemetry::Envelope[Telemetry::RecoveryFailed]) -> void } -> Telemetry::Subscription
+        | (singleton(Telemetry::LockChanged)) { (Telemetry::Envelope[Telemetry::LockChanged]) -> void } -> Telemetry::Subscription
+        | (singleton(Telemetry::RecoveryProbeCompleted)) { (Telemetry::Envelope[Telemetry::RecoveryProbeCompleted]) -> void } -> Telemetry::Subscription
+        | (singleton(Telemetry::LightRegistered)) { (Telemetry::Envelope[Telemetry::LightRegistered]) -> void } -> Telemetry::Subscription
+        | (singleton(Telemetry::StateTransitioned)) { (Telemetry::Envelope[Telemetry::state_transitioned]) -> void } -> Telemetry::Subscription
+
+      # Idempotent: removing an already-removed or unknown token is a no-op.
+      def unsubscribe: (Telemetry::Subscription) -> void
+    end
+  end
+end
