@@ -92,11 +92,11 @@ module RuboCop
           return unless @current_layer == :domain
           return unless node.receiver
 
-          # Check for Stoplight.light(), Stoplight.register(), or Stoplight.configure()
+          # Check for Stoplight.light() or Stoplight.configure()
           if node.receiver.const_type?
             receiver_name = extract_constant_path(node.receiver)
             if receiver_name == "Stoplight" &&
-                [:light, :register, :system_light, :configure].include?(node.method_name)
+                [:light, :register, :configure].include?(node.method_name)
               add_offense(
                 node,
                 message: format(
