@@ -10,10 +10,6 @@ module Stoplight
       def initialize: (
           name: String,
         ) -> void
-
-      def with: (
-          ?name: String,
-      ) -> LightInfo
     end
   end
 end

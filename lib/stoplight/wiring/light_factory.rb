@@ -141,7 +141,7 @@ module Stoplight
         when DataStore::Redis
           data_store_config.redis
         else
-          raise TypeError, "Expected Stoplight::DataStore::Redis, got #{data_store_config.class}"
+          raise TypeError, "Expected Stoplight::DataStore::Redis, got #{data_store_config}"
         end
       end
 

@@ -3,7 +3,7 @@ module Stoplight
     module Tracker
       class RecoveryProbe
         attr_reader traffic_recovery: _TrafficRecovery
-        attr_reader notifiers: Array[state_transition_notifier]
+        attr_reader notifiers: Array[_StateTransitionNotifier]
         attr_reader config: Config
         attr_reader metrics_store: _MetricsStore
         attr_reader state_store: _StateStore
@@ -11,7 +11,7 @@ module Stoplight
         def initialize: (
           config: Config,
           traffic_recovery: _TrafficRecovery,
-          notifiers: Array[state_transition_notifier],
+          notifiers: Array[_StateTransitionNotifier],
           metrics_store: _MetricsStore,
           state_store: _StateStore,
         ) -> void

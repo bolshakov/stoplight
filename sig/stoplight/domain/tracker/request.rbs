@@ -4,14 +4,14 @@ module Stoplight
       class Request
         attr_reader config: Config
         attr_reader traffic_control: _TrafficControl
-        attr_reader notifiers: Array[state_transition_notifier]
+        attr_reader notifiers: Array[_StateTransitionNotifier]
         attr_reader metrics_store: _MetricsStore
         attr_reader state_store: _StateStore
 
         def initialize: (
           config: Config,
           traffic_control: _TrafficControl,
-          notifiers: Array[state_transition_notifier],
+          notifiers: Array[_StateTransitionNotifier],
           metrics_store: _MetricsStore,
           state_store: _StateStore,
         ) -> void

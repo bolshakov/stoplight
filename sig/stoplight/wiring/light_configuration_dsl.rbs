@@ -3,10 +3,10 @@ module Stoplight
     class LightConfigurationDsl
       def initialize: (
         name: String,
-        ?cool_off_time: optional[duration],
-        ?threshold: optional[percentage | Integer],
+        ?cool_off_time: optional[Domain::duration_seconds],
+        ?threshold: optional[Domain::percentage | Integer],
         ?recovery_threshold: optional[Integer],
-        ?window_size: optional[duration?],
+        ?window_size: optional[Domain::duration_seconds?],
         ?tracked_errors: optional[Array[Module] | Module],
         ?skipped_errors: optional[Array[Module] | Module],
         ?traffic_control: optional[traffic_control],
@@ -20,10 +20,10 @@ module Stoplight
       private
 
       attr_reader name: String
-      attr_reader cool_off_time: optional[duration]
-      attr_reader threshold: optional[percentage | Integer]
+      attr_reader cool_off_time: optional[Domain::duration_seconds]
+      attr_reader threshold: optional[Domain::percentage | Integer]
       attr_reader recovery_threshold: optional[Integer]
-      attr_reader window_size: optional[duration?]
+      attr_reader window_size: optional[Domain::duration_seconds?]
       attr_reader tracked_errors: optional[Array[Module]]
       attr_reader skipped_errors: optional[Array[Module]]
       attr_reader traffic_control: optional[Domain::_TrafficControl]

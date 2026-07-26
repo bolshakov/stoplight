@@ -6,7 +6,7 @@ module Stoplight
         @scripting: Infrastructure::Redis::Storage::Scripting
         @key_space: Infrastructure::Redis::Storage::KeySpace
         @config: Domain::Config
-        @error_notifier: error_notifier
+        @error_notifier: Domain::error_notifier
         @failover_light: Domain::Light
         @clock: Domain::_Clock
 
@@ -22,7 +22,7 @@ module Stoplight
           scripting: Infrastructure::Redis::Storage::Scripting,
           key_space: Infrastructure::Redis::Storage::KeySpace,
           config: Domain::Config,
-          error_notifier: error_notifier,
+          error_notifier: Domain::error_notifier,
           failover_light: Domain::Light,
           clock: Domain::_Clock,
           ) -> void

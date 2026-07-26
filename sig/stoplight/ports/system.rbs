@@ -8,10 +8,10 @@ module Stoplight
 
     def register: (
       String name,
-      ?cool_off_time: optional[duration],
-      ?threshold: optional[percentage | Integer],
+      ?cool_off_time: optional[Domain::duration_seconds],
+      ?threshold: optional[Domain::percentage | Integer],
       ?recovery_threshold: optional[Integer],
-      ?window_size: optional[duration?],
+      ?window_size: optional[Domain::duration_seconds?],
       ?skipped_errors: optional[Array[Module] | Module],
       ?tracked_errors: optional[Array[Module] | Module],
       ?traffic_control: optional[traffic_control],

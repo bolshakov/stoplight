@@ -6,13 +6,13 @@ module Stoplight
           include Domain::_StateStore
 
           attr_reader primary_store: Domain::_StateStore
-          attr_reader error_notifier: error_notifier
+          attr_reader error_notifier: Domain::error_notifier
           attr_reader failover_store: Domain::_StateStore
           attr_reader circuit_breaker: _Light
 
           def initialize: (
             primary_store: Domain::_StateStore,
-            error_notifier: error_notifier,
+            error_notifier: Domain::error_notifier,
             failover_store: Domain::_StateStore,
             circuit_breaker: _Light,
           ) -> void

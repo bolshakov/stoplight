@@ -2,7 +2,7 @@ module Stoplight
   module Infrastructure
     module Notifier
       class IO
-        include _StateTransitionNotifier
+        include Domain::_StateTransitionNotifier
         include Generic[::IO]
 
         def io: -> ::IO

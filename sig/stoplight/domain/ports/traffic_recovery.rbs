@@ -1,7 +1,5 @@
 module Stoplight
   module Domain
-    type decision = :green | :yellow | :red
-
     # Strategies for determining how to recover traffic flow through the Stoplight.
     # These strategies evaluate recovery metrics to decide which color the Stoplight should
     # transition to during the recovery process.
@@ -37,7 +35,7 @@ module Stoplight
 
       # Determines the appropriate recovery state based on the Stoplight's
       # current metrics and recovery progress.
-      def determine_color: (Config, Domain::MetricsSnapshot) -> decision
+      def determine_color: (Config, Domain::MetricsSnapshot) -> recovery_decision
 
       # Object methods
       def ==: (untyped) -> bool

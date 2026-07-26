@@ -16,7 +16,7 @@ module Stoplight
         def state_snapshot: (Domain::Config) -> Domain::StateSnapshot
         def metrics_snapshot: (Domain::Config) -> Domain::MetricsSnapshot
         def delete: (Domain::Config) -> void
-        def lock: (Domain::Config, color) -> void
+        def lock: (Domain::Config, Domain::color) -> void
         def unlock: (Domain::Config) -> void
 
         private

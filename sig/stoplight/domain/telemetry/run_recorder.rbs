@@ -10,8 +10,8 @@ module Stoplight
 
         def subscribed?: () -> bool
 
-        def record_success: (duration_ms: Float?, ?error: StandardError?) -> void
-        def record_failure: (StandardError, duration_ms: Float?, fallback_used: bool) -> void
+        def record_success: (duration_ms: duration_ms?, ?error: StandardError?) -> void
+        def record_failure: (StandardError, duration_ms: duration_ms?, fallback_used: bool) -> void
         def record_blocked: (fallback_used: bool, retry_after: Time?) -> void
 
         private def emit: (

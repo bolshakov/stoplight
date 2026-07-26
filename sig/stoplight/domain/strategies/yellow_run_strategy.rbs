@@ -7,7 +7,7 @@ module Stoplight
         attr_reader state_store: Domain::_StateStore
         attr_reader metrics_store: _MetricsStore
         attr_reader recovery_lock_store: _RecoveryLockStore
-        attr_reader notifiers: Array[state_transition_notifier]
+        attr_reader notifiers: Array[_StateTransitionNotifier]
         attr_reader request_tracker: Tracker::RecoveryProbe
 
         @name: String
@@ -17,7 +17,7 @@ module Stoplight
 
         def initialize: (
           name: String,
-          notifiers: Array[state_transition_notifier],
+          notifiers: Array[_StateTransitionNotifier],
           request_tracker: Tracker::RecoveryProbe,
           state_store: _StateStore,
           metrics_store: _MetricsStore,
@@ -30,19 +30,19 @@ module Stoplight
         def with_recovery_lock: [T] (
             fallback: (^(StandardError?) -> T)?,
             state_snapshot: StateSnapshot,
-          ) { (Float?) -> T } -> T
+          ) { (duration_ms?) -> T } -> T
 
         def capture_started_at: () -> Float?
-        def duration_since: (Float?) -> Float?
+        def duration_since: (duration_ms?) -> duration_ms?
 
         def record_recovery_probe_success: (
-            duration_ms: Float?,
+            duration_ms: duration_ms?,
             ?error: StandardError?
           ) -> void
 
         def record_recovery_probe_failure: (
             StandardError,
-            duration_ms: Float?,
+            duration_ms: duration_ms?,
             fallback_used: bool,
           ) -> void
 

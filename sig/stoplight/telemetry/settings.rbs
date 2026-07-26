@@ -4,10 +4,10 @@ module Stoplight
       # The serializable subset of a light's configuration. No live objects (notifiers, data stores, procs) cross the
       # telemetry boundary.
       class Settings < Data
-        attr_reader cool_off_time: duration
+        attr_reader cool_off_time: duration_seconds
         attr_reader threshold: Float | Integer
         attr_reader recovery_threshold: Integer
-        attr_reader window_size: duration?
+        attr_reader window_size: duration_seconds?
         # Constant names of the error matchers (matchers are named constants responding to #===).
         attr_reader tracked_errors: Array[String]
         attr_reader skipped_errors: Array[String]
@@ -18,10 +18,10 @@ module Stoplight
         attr_reader traffic_recovery_params: Hash[String, untyped]
 
         def self.new: (
-            cool_off_time: duration,
+            cool_off_time: duration_seconds,
             threshold: Float | Integer,
             recovery_threshold: Integer,
-            window_size: duration?,
+            window_size: duration_seconds?,
             tracked_errors: Array[String],
             skipped_errors: Array[String],
             traffic_control: String,
@@ -31,10 +31,10 @@ module Stoplight
           ) -> instance
 
         def initialize: (
-            cool_off_time: duration,
+            cool_off_time: duration_seconds,
             threshold: Float | Integer,
             recovery_threshold: Integer,
-            window_size: duration?,
+            window_size: duration_seconds?,
             tracked_errors: Array[String],
             skipped_errors: Array[String],
             traffic_control: String,

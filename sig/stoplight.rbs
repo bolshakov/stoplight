@@ -9,15 +9,15 @@ module Stoplight
   def self.ensure_configured: -> void
   def self.__stoplight__system: (
       _ToS name,
-      ?cool_off_time: optional[duration],
-      ?threshold: optional[percentage | Integer],
+      ?cool_off_time: optional[Domain::duration_seconds],
+      ?threshold: optional[Domain::percentage | Integer],
       ?recovery_threshold: optional[Integer],
-      ?window_size: optional[duration?],
+      ?window_size: optional[Domain::duration_seconds?],
       ?tracked_errors: optional[Array[Module]],
       ?skipped_errors: optional[Array[Module]],
-      ?data_store: optional[data_store],
-      ?error_notifier: optional[error_notifier],
-      ?notifiers: optional[Array[state_transition_notifier]],
+      ?data_store: optional[Domain::_DataStore],
+      ?error_notifier: optional[Domain::error_notifier],
+      ?notifiers: optional[Array[Domain::_StateTransitionNotifier]],
       ?traffic_control: optional[traffic_control],
       ?traffic_recovery: optional[traffic_recovery],
     ) -> _System
@@ -27,41 +27,20 @@ module Stoplight
 
   type optional[T] = Undefined | T
 
-  type timestamp = Float | Integer
   type redis = ::Redis | ConnectionPool[::Redis]
 
-  # Light Colors
-  type green = "green"
-  type yellow = "yellow"
-  type red = "red"
-  type color = green | yellow | red
-
-  # Light States
-  type unlocked = "unlocked"
-  type locked_green = "locked_green"
-  type locked_red = "locked_red"
-  type state = unlocked | locked_green | locked_red
-
-  # Duration in seconds (1, 23, 0.4, etc.)
-  type duration = Float | Integer
-  # Percentage as decimal (0.0 to 1.0)
-  type percentage = Float
-
-  type error_notifier = ^(StandardError) -> void
   type traffic_control = :consecutive_errors | :error_rate | {error_rate: {min_requests: Integer}}
   type traffic_recovery = :consecutive_successes
-  type data_store = DataStore::Redis | DataStore::Memory
-  type state_transition_notifier = _StateTransitionNotifier
-  type notification_formatter = ^(_LightInfo light, color, color, StandardError?) -> String
+  type notification_formatter = ^(_LightInfo light, Domain::color, Domain::color, StandardError?) -> String
 
   def self.configure: (?trust_me_im_an_engineer: bool) ?{ (_Configuration) -> void } -> void
 
   def self.register: (
       String name,
-      ?cool_off_time: optional[duration],
-      ?threshold: optional[percentage | Integer],
+      ?cool_off_time: optional[Domain::duration_seconds],
+      ?threshold: optional[Domain::percentage | Integer],
       ?recovery_threshold: optional[Integer],
-      ?window_size: optional[duration?],
+      ?window_size: optional[Domain::duration_seconds?],
       ?tracked_errors: optional[Array[Module] | Module],
       ?skipped_errors: optional[Array[Module] | Module],
       ?traffic_control: optional[traffic_control],
@@ -75,10 +54,10 @@ module Kernel
   # For a method usable both as Kernel.Stoplight() and just Stoplight()
   def self?.Stoplight: (
       String name,
-      ?cool_off_time: Stoplight::optional[Stoplight::duration],
-      ?threshold: Stoplight::optional[Stoplight::percentage | Integer],
+      ?cool_off_time: Stoplight::optional[Stoplight::Domain::duration_seconds],
+      ?threshold: Stoplight::optional[Stoplight::Domain::percentage | Integer],
       ?recovery_threshold: Stoplight::optional[Integer],
-      ?window_size: Stoplight::optional[Stoplight::duration?],
+      ?window_size: Stoplight::optional[Stoplight::Domain::duration_seconds?],
       ?tracked_errors: Stoplight::optional[Array[Module] | Module],
       ?skipped_errors: Stoplight::optional[Array[Module] | Module],
       ?traffic_control: Stoplight::optional[Stoplight::traffic_control],

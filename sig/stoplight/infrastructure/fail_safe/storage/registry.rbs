@@ -6,13 +6,13 @@ module Stoplight
           include Domain::_Registry
 
           @primary_registry: Domain::_Registry
-          @error_notifier: error_notifier
+          @error_notifier: Domain::error_notifier
           @failover_registry: Domain::_Registry
           @circuit_breaker: _Light
 
           def initialize: (
             primary_registry: Domain::_Registry,
-            error_notifier: error_notifier,
+            error_notifier: Domain::error_notifier,
             failover_registry: Domain::_Registry,
             circuit_breaker: _Light
           ) -> void
