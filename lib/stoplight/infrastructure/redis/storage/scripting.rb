@@ -11,9 +11,6 @@ module Stoplight
           INCLUDE_DIRECTIVE = /^--\s*@include\s+([\w\-\/]+)$/
           private_constant :INCLUDE_DIRECTIVE
 
-          REDIS_NOSCRIPT_MAX_RETRY = 1
-          private_constant :REDIS_NOSCRIPT_MAX_RETRY
-
           class << self
             def default_scripts_root = SCRIPTS_ROOT
           end
@@ -25,15 +22,15 @@ module Stoplight
           end
 
           def call(script_name, keys: [], args: [])
-            retries = 0
+            retried = false
 
             begin
               redis.then do |client|
                 client.evalsha(script_sha(script_name), keys: keys.map(&:to_s), argv: args.map(&:to_s))
               end
             rescue ::Redis::CommandError => error
-              if error.message.include?("NOSCRIPT") && retries < REDIS_NOSCRIPT_MAX_RETRY
-                retries += 1
+              if error.message.include?("NOSCRIPT") && !retried
+                retried = true
                 warn "Stoplight is unable to find the script '#{script_name}' in Redis's script cache. Reloading and retrying..."
                 reload_script(script_name)
                 retry
