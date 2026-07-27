@@ -188,15 +188,13 @@ RSpec.describe Stoplight::Infrastructure::Redis::Storage::Scripting, :redis do
   end
 
   context "when the script is not loaded" do
-    let(:retry_attempts) { 1 }
+    # Initial call plus one retry
+    let(:total_attempts) { 2 }
 
-    # Initial call plus retries
-    let(:total_attempts) { 1 + retry_attempts }
-
-    it "does not propagate error if retries succeed within REDIS_NOSCRIPT_MAX_RETRY attempts" do
+    it "does not propagate error if retry succeeds" do
       responses = [
         -> { raise ::Redis::CommandError.new("NOSCRIPT") },    # Initial call fails
-        -> { "success" }                                       # First retry succeeds
+        -> { "success" }                                       # retry succeeds
       ]
 
       allow(redis).to receive(:evalsha) { responses.shift.call }
@@ -208,7 +206,7 @@ RSpec.describe Stoplight::Infrastructure::Redis::Storage::Scripting, :redis do
     it "propagates error if retries are exhausted" do
       responses = [
         -> { raise ::Redis::CommandError.new("NOSCRIPT") },    # Initial call fails
-        -> { raise ::Redis::CommandError.new("NOSCRIPT") }     # First retry also fails => raise
+        -> { raise ::Redis::CommandError.new("NOSCRIPT") }     # retry also fails => raise
       ]
 
       allow(redis).to receive(:evalsha) { responses.shift.call }
