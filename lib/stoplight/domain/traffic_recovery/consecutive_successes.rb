@@ -60,6 +60,8 @@ module Stoplight
         def hash = self.class.hash
 
         def ==(other) = other.is_a?(self.class)
+
+        def name = NAME.to_s
       end
     end
   end

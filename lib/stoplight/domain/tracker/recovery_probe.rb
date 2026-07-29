@@ -41,23 +41,13 @@ module Stoplight
 
           return if recovery_result == TrafficRecovery::YELLOW
 
-          from_color, to_color = case recovery_result
-          when TrafficRecovery::GREEN then [Color::YELLOW, Color::GREEN]
-          when TrafficRecovery::RED then [Color::YELLOW, Color::RED]
-          else
-            raise "recovery strategy returned unexpected color: #{recovery_result}"
-          end
-
-          if state_store.transition_to_color(to_color)
-            metrics_store.clear
-            info = LightInfo.new(name: config.name)
-            notifiers.each do |notifier|
-              notifier.notify(info, from_color, to_color, nil)
-            end
-            if to_color.to_sym == TrafficRecovery::GREEN
+          case recovery_result
+          when TrafficRecovery::GREEN
+            to_color = Color::GREEN
+            if transition(from_color: Color::YELLOW, to_color:)
               emitter.emit(Telemetry::RecoverySucceeded) do
-                Telemetry::RecoverySucceeded.new(from_color: Color::YELLOW, to_color: Color::GREEN,
-                  policy: TrafficRecovery::ConsecutiveSuccesses::NAME.to_s,
+                Telemetry::RecoverySucceeded.new(from_color: Color::YELLOW, to_color:,
+                  policy: traffic_recovery.name,
                   metrics: Telemetry::Metrics.new(
                     successes: recovery_metrics.successes,
                     errors: recovery_metrics.errors,
@@ -66,7 +56,21 @@ module Stoplight
                   ))
               end
             end
+          when TrafficRecovery::RED
+            transition(from_color: Color::YELLOW, to_color: Color::RED)
+          else
+            raise "recovery strategy returned unexpected color: #{recovery_result}"
           end
+        end
+
+        def transition(from_color:, to_color:)
+          return false unless state_store.transition_to_color(to_color)
+          metrics_store.clear
+          info = LightInfo.new(name: config.name)
+          notifiers.each do |notifier|
+            notifier.notify(info, from_color, to_color, nil)
+          end
+          true
         end
       end
     end

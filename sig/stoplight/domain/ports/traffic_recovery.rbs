@@ -40,6 +40,7 @@ module Stoplight
       # Object methods
       def ==: (untyped) -> bool
       def is_a?: (untyped) -> bool
+      def name: -> String
     end
   end
 end

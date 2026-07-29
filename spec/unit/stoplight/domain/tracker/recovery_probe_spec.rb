@@ -11,6 +11,7 @@ RSpec.describe Stoplight::Domain::Tracker::RecoveryProbe do
   let(:config) { instance_double(Stoplight::Domain::Config, name: name) }
   let(:name) { SecureRandom.uuid }
   let(:emitter) { TestTelemetryEmitter.new }
+  let(:policy_name) { SecureRandom.uuid }
 
   shared_examples "when recover to" do |recover_to:, transition_from:, transition_to:|
     context "when recover to #{recover_to}" do
@@ -26,6 +27,7 @@ RSpec.describe Stoplight::Domain::Tracker::RecoveryProbe do
       before do
         allow(traffic_recovery).to receive(:determine_color).with(config, metrics_after_probe).and_return(recover_to)
         allow(state_store).to receive(:transition_to_color).with(transition_to).and_return(true)
+        allow(traffic_recovery).to receive(:name).and_return(policy_name)
       end
 
       it "sends notifications" do
@@ -136,13 +138,14 @@ RSpec.describe Stoplight::Domain::Tracker::RecoveryProbe do
       before do
         allow(traffic_recovery).to receive(:determine_color).and_return(Stoplight::Domain::TrafficRecovery::GREEN)
         allow(state_store).to receive(:transition_to_color).with(Stoplight::Color::GREEN).and_return(true)
+        allow(traffic_recovery).to receive(:name).and_return(policy_name)
       end
 
       it "emits a RecoverySucceeded event with the transition details" do
         expect { recorder.record_success }.to emit(Stoplight::Domain::Telemetry::RecoverySucceeded).with(
           from_color: Stoplight::Color::YELLOW,
           to_color: Stoplight::Color::GREEN,
-          policy: "consecutive_successes",
+          policy: policy_name,
           metrics: Stoplight::Domain::Telemetry::Metrics.new(
             successes: metrics_after_probe.successes,
             errors: metrics_after_probe.errors,
@@ -173,6 +176,17 @@ RSpec.describe Stoplight::Domain::Tracker::RecoveryProbe do
     context "when the light stays yellow" do
       before do
         allow(traffic_recovery).to receive(:determine_color).and_return(Stoplight::Domain::TrafficRecovery::YELLOW)
+      end
+
+      it "does not emit a RecoverySucceeded event" do
+        expect { recorder.record_success }.not_to emit(Stoplight::Domain::Telemetry::RecoverySucceeded)
+      end
+    end
+
+    context "when the probe changes from yellow to red" do
+      before do
+        allow(traffic_recovery).to receive(:determine_color).and_return(Stoplight::Domain::TrafficRecovery::RED)
+        allow(state_store).to receive(:transition_to_color).with(Stoplight::Color::RED).and_return(true)
       end
 
       it "does not emit a RecoverySucceeded event" do
