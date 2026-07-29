@@ -22,6 +22,14 @@ Stoplight ships type signatures and checks them with Steep under strict mode.
   spend effort typing them, but don't move typed code into them to avoid checks.
 - Workflow when editing `lib/`: change code - update `sig/` -> `bundle exec steep check`
   -> `bundle exec standardrb`.
+- To check the exact type Steep inferred at a position - e.g. confirming an overloaded
+  method's block argument narrows to the right event class, or that a value isn't silently
+  `untyped` (`steep check` passing only proves no diagnostic fired, and `untyped` never
+  fires one) - run `bundle exec steep server start`, then
+  `bundle exec steep query hover path/to/file.rb:LINE:COLUMN`, then
+  `bundle exec steep server stop`. `steep query` is marked experimental upstream (output
+  format may change without deprecation), so treat it as an ad hoc verification tool, not
+  as the basis for a permanent automated test.
 - To distinguish `nil` and undefined values, use `optional[T]` type and `T.undefined` helper
 - To unwrap nilable values, use `T.must()` helper - raises TypeError when nil.
 
