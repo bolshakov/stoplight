@@ -7,6 +7,7 @@ module Stoplight
         attr_reader config: Config
         attr_reader metrics_store: _MetricsStore
         attr_reader state_store: _StateStore
+        attr_reader emitter: Telemetry::Emitter
 
         def initialize: (
           config: Config,
@@ -14,11 +15,13 @@ module Stoplight
           notifiers: Array[_StateTransitionNotifier],
           metrics_store: _MetricsStore,
           state_store: _StateStore,
+          emitter: Telemetry::Emitter,
         ) -> void
 
         def record_failure: (StandardError exception) -> void
         def record_success: -> void
         def recover: -> void
+        def transition: (from_color: color, to_color: color) -> bool
       end
     end
   end
