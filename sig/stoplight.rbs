@@ -1,4 +1,6 @@
 module Stoplight
+  extend _System
+
   T: singleton(Types)
   CONFIG_MUTEX: Mutex
 
@@ -28,20 +30,6 @@ module Stoplight
   type optional[T] = Undefined | T
 
   def self.configure: (?trust_me_im_an_engineer: bool) ?{ (Wiring::DefaultConfiguration) -> void } -> void
-
-  def self.register: (
-      String name,
-      ?cool_off_time: optional[Domain::duration_seconds],
-      ?threshold: optional[Domain::percentage | Integer],
-      ?recovery_threshold: optional[Integer],
-      ?window_size: optional[Domain::duration_seconds?],
-      ?tracked_errors: optional[Array[Module] | Module],
-      ?skipped_errors: optional[Array[Module] | Module],
-      ?traffic_control: optional[Wiring::traffic_control],
-      ?traffic_recovery: optional[Wiring::traffic_recovery],
-    ) -> Domain::Light
-
-  def self.light: (String name) -> Domain::Light
 end
 
 module Kernel

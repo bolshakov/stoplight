@@ -29,6 +29,10 @@ module StoplightWorld
   #   @return [any] the last argument received by a fallback function
   attr_accessor :last_fallback_received_argument
 
+  # @!attribute received_telemetry_events
+  #   @return [Array<Stoplight::Domain::Telemetry::Envelope>] events captured by scenario telemetry subscriptions
+  attr_reader :received_telemetry_events
+
   # Provides access to the echo service used for testing.
   #
   # @return [EchoService] The echo service instance.
@@ -58,6 +62,7 @@ module StoplightWorld
     @last_exception = nil
     @last_result = nil
     @last_fallback_received_argument = :nothing
+    @received_telemetry_events = []
     Stoplight.configure(trust_me_im_an_engineer: true) do |config|
       config.data_store = case ENV.fetch("STOPLIGHT_DATA_STORE", "Memory")
       when "Memory"

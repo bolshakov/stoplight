@@ -49,7 +49,7 @@ Full detail: `docs/architecture.md`.
 - Let zeitwerk autoload - no manual `require` inside `lib/`. File path = constant path.
 - Internal-but-public plumbing uses the `__stoplight__` prefix.
 - Public surface is only: `Stoplight()`, `Stoplight.register`, `Stoplight.light`,
-  `Stoplight.configure`, `Light#run`
+  `Stoplight.configure`, `Stoplight.telemetry`, `Light#run`
 - Public API methods require a doc comment with at least one usage example -
   see `lib/stoplight.rb` for the pattern. Document behavior, not types - types
   belong in RBS (`docs/types_and_rbs.md`).
