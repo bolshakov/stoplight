@@ -1,0 +1,15 @@
+module Stoplight
+  module Domain
+    module Telemetry
+      class Consumer
+        include _Telemetry
+
+        # untyped, not _Telemetry: forwarding (...) can't statically resolve which of
+        # _Telemetry#subscribe's per-event-class overloads a given call site picked.
+        @telemetry: untyped
+
+        def initialize: (_Telemetry) -> void
+      end
+    end
+  end
+end

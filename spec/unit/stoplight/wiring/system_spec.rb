@@ -175,6 +175,26 @@ RSpec.describe Stoplight::Wiring::System do
     end
   end
 
+  describe "#telemetry" do
+    let(:system_config) { Stoplight::Wiring::DefaultConfig.with(name: SecureRandom.uuid) }
+    let(:received) { [] }
+
+    it "delivers events published while running a light registered on this system" do
+      system.telemetry.subscribe(Stoplight::Telemetry::RunCompleted) { |envelope| received << envelope }
+
+      system.register("stripe")
+      system.light("stripe").run { "ok" }
+
+      expect(received.size).to eq(1)
+      expect(received.first.payload).to be_a(Stoplight::Telemetry::RunCompleted)
+    end
+
+    it "does not expose the producer side of the bus" do
+      expect(system.telemetry).not_to respond_to(:publish)
+      expect(system.telemetry).not_to respond_to(:subscribed?)
+    end
+  end
+
   describe "#light" do
     let(:system_config) { Stoplight::Wiring::DefaultConfig.with(name: SecureRandom.uuid) }
     let(:light) { system.light("stripe") }

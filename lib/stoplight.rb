@@ -68,29 +68,7 @@ module Stoplight # rubocop:disable Style/Documentation
     # @example
     #   Stoplight.register("stripe", threshold: 5, cool_off_time: 60)
     #
-    def register(
-      name,
-      cool_off_time: T.undefined,
-      threshold: T.undefined,
-      recovery_threshold: T.undefined,
-      window_size: T.undefined,
-      tracked_errors: T.undefined,
-      skipped_errors: T.undefined,
-      traffic_control: T.undefined,
-      traffic_recovery: T.undefined
-    )
-      state.default_system.register(
-        name,
-        cool_off_time:,
-        threshold:,
-        recovery_threshold:,
-        window_size:,
-        tracked_errors:,
-        skipped_errors:,
-        traffic_control:,
-        traffic_recovery:
-      )
-    end
+    def register(...) = state.default_system.register(...)
 
     # Returns a Light previously registered.
     #
@@ -100,7 +78,14 @@ module Stoplight # rubocop:disable Style/Documentation
     #   Stoplight.register("stripe", threshold: 5)
     #   Stoplight.light("stripe")
     #
-    def light(name) = state.default_system.light(name)
+    def light(...) = state.default_system.light(...)
+
+    # Returns the consumer side of the default system's telemetry bus.
+    #
+    # @example
+    #   Stoplight.telemetry.subscribe(Stoplight::Telemetry::RunCompleted) { |envelope| track(envelope) }
+    #
+    def telemetry = state.default_system.telemetry
 
     # Creates a new named system with the given configuration.
     #

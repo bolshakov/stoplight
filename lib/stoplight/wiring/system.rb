@@ -47,6 +47,11 @@ module Stoplight
       #   @api private
       attr_reader :system_config
 
+      # Returns the consumer (subscribe-only) side of the telemetry bus.
+      def telemetry
+        Domain::Telemetry::Consumer.new(@telemetry)
+      end
+
       # @param failover_system is a system used to create lights that protects components
       #   of this system. For example if your system uses Redis data store, or notifiers that
       #   communicate with external systems, they could go off. Failover system hosts

@@ -54,6 +54,16 @@ RSpec.describe "Stoplight" do
         .to_stderr
     end
 
+    it "drops telemetry subscriptions made before reconfiguring" do
+      received = []
+      Stoplight.telemetry.subscribe(Stoplight::Telemetry::RunCompleted) { |envelope| received << envelope }
+
+      Stoplight.configure(trust_me_im_an_engineer: true) {}
+      Stoplight(SecureRandom.uuid).run { "ok" }
+
+      expect(received).to be_empty
+    end
+
     it "allows configuration with a block" do
       Stoplight.configure(trust_me_im_an_engineer: true) do |config|
         config.window_size = 30
@@ -104,6 +114,23 @@ RSpec.describe "Stoplight" do
       it "raises an error" do
         expect { Stoplight.light(name) }.to raise_error(Stoplight::Error::UnregisteredLightError, /#{name}/)
       end
+    end
+  end
+
+  describe ".telemetry" do
+    it "delivers events published while running a registered light" do
+      received = []
+      Stoplight.telemetry.subscribe(Stoplight::Telemetry::RunCompleted) { |envelope| received << envelope }
+
+      Stoplight(name).run { "ok" }
+
+      expect(received.size).to eq(1)
+      expect(received.first.payload).to be_a(Stoplight::Telemetry::RunCompleted)
+    end
+
+    it "does not expose the producer side of the bus" do
+      expect(Stoplight.telemetry).not_to respond_to(:publish)
+      expect(Stoplight.telemetry).not_to respond_to(:subscribed?)
     end
   end
 
