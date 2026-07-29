@@ -46,8 +46,7 @@ module Stoplight # rubocop:disable Style/Documentation
     #   it will not be possible to change the configuration of existing circuit breakers. If you do so, the method
     #   produces a warning:
     #
-    #     "Stoplight reconfigured. Existing circuit breakers will not see the new configuration. New
-    #       configuration: ...f
+    #     "Stoplight reconfigured. Existing circuit breakers will not see new configuration"
     #
     #   If you really know what you are doing, you can pass the +trust_me_im_an_engineer+ parameter as +true+ to
     #   suppress this warning, which could be useful in test environments.
