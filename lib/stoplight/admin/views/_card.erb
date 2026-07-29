@@ -50,11 +50,13 @@
       </svg>
     </button>
 
+    <% action_classes = "flex items-center py-2 px-4 text-sm " + (settings.read_only? ? "text-gray-400 dark:text-gray-500 cursor-not-allowed" : "hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white") %>
+
     <!-- Dropdown menu -->
     <div id="dropdownDotsHorizontal-<%= light.id %>" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-44 dark:bg-gray-700 dark:divide-gray-600">
       <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownMenuIconHorizontalButton">
         <li>
-          <a href="<%= url("/unlock?names=#{light_name}") %>" data-turbo-method="post" class="flex items-center py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+          <a <%= control_attributes(url("/unlock?names=#{light_name}")) %> class="<%= action_classes %>">
             <svg class="flex w-4 h-4 me-1.5 shrink-0" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="16" r="1"/>
               <rect width="18" height="12" x="3" y="10" rx="2"/>
@@ -64,7 +66,7 @@
           </a>
         </li>
         <li>
-          <a href="<%= url("/red?names=#{light_name}") %>" data-turbo-method="post" class="flex items-center py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+          <a <%= control_attributes(url("/red?names=#{light_name}")) %> class="<%= action_classes %>">
             <svg class="flex w-4 h-4 me-1.5 text-red-600 shrink-0" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="16" r="1"/>
               <rect x="3" y="10" width="18" height="12" rx="2"/>
@@ -74,7 +76,7 @@
           </a>
         </li>
         <li>
-          <a href="<%= url("/green?names=#{light_name}") %>" data-turbo-method="post" class="flex items-center py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+          <a <%= control_attributes(url("/green?names=#{light_name}")) %> class="<%= action_classes %>">
             <svg class="flex w-4 h-4 me-1.5 text-green-600 shrink-0" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="16" r="1"/>
               <rect x="3" y="10" width="18" height="12" rx="2"/>
@@ -84,7 +86,7 @@
           </a>
         </li>
         <li>
-          <a href="<%= url("/remove?names=#{light_name}") %>" data-turbo-method="post" data-turbo-confirm="Are you sure you want to remove this light?" class="flex items-center py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+          <a <%= control_attributes(url("/remove?names=#{light_name}"), confirm: "Are you sure you want to remove this light?") %> class="<%= action_classes %>">
             <svg class="flex w-4 h-4 me-1.5 text-red-600 shrink-0" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="3 6 5 6 21 6"/>
               <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
