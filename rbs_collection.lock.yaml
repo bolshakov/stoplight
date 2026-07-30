@@ -50,7 +50,7 @@ gems:
   source:
     type: git
     name: ruby/gem_rbs_collection
-    revision: 3f5e8df1ce89ea06067fa42263012c968b4e583e
+    revision: f81da1e6dd0a6193d96979f3d616fc45829d1de6
     remote: https://github.com/ruby/gem_rbs_collection.git
     repo_dir: gems
 - name: concurrent-ruby
