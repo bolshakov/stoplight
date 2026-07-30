@@ -5,5 +5,8 @@ module Stoplight
     ASSET_DIGESTS: Hash[String, String]
     ONE_YEAR_IN_SECONDS: Integer
     include Helpers
+
+    self.@systems: Array[Wiring::System]
+    def self.add_system: (Wiring::System) -> void
   end
 end

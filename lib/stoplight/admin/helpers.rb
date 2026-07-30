@@ -11,11 +11,13 @@ module Stoplight
 
       # @return [Stoplight::Admin::Dependencies]
       def dependencies
-        if settings.data_store.is_a?(Stoplight::DataStore::Memory)
-          raise "Stoplight Admin requires a persistent data store, but the current data store is Memory. " \
-            "Please configure a different data store in your Stoplight configuration."
+        settings.systems.each do |system|
+          unless system.persistent?
+            raise TypeError, "Stoplight Admin requires a persistent data store, but the current data store is Memory. " \
+                  "Please configure a different data store in your Stoplight configuration."
+          end
         end
-        Dependencies.new(system: Stoplight.__stoplight__default_system)
+        Dependencies.new(system: settings.systems.first)
       end
 
       def asset_path(name)

@@ -66,6 +66,17 @@ module Stoplight
         @telemetry = Domain::Telemetry::Bus.new(error_notifier: config.error_notifier)
       end
 
+      def persistent?
+        case @config.data_store
+        when DataStore::Redis
+          true
+        when DataStore::Memory
+          false
+        else
+          raise T.absurd(@config.data_store)
+        end
+      end
+
       # Registers and returns a light.
       #
       # If a light with this name already exists, returns it.
