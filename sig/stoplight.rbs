@@ -24,7 +24,7 @@ module Stoplight
       ?traffic_recovery: optional[Wiring::traffic_recovery],
     ) -> _System
   def self.__stoplight__default_configuration: -> Domain::Config
-  def self.__stoplight__default_system: -> _System
+  def self.__stoplight__default_system: -> Wiring::System
   def self.state: -> Wiring::GlobalState
 
   type optional[T] = Undefined | T

@@ -5,11 +5,9 @@ module Stoplight
     module Actions
       # This action removes a light's metadata from Redis
       class Remove < Action
-        # @param params [Hash] query parameters
-        # @return [void]
         def call(params)
           light_names(params).each do |name|
-            lights_repository.remove(name)
+            @lights_repository.remove(name)
           end
         end
 

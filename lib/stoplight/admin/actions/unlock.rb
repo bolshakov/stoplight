@@ -5,11 +5,9 @@ module Stoplight
     module Actions
       # This action unlocks light
       class Unlock < Action
-        # @param params [Hash] query parameters
-        # @return [void]
         def call(params)
           light_names(params).each do |name|
-            lights_repository.unlock(name)
+            @lights_repository.unlock(name)
           end
         end
 

@@ -1,0 +1,30 @@
+module Stoplight
+  class Admin
+    class LightsStats
+      EMPTY_STATS: Hash[Symbol, Integer]
+
+      attr_reader lights: Array[LightsRepository::Light]
+      @lights: Array[LightsRepository::Light]
+
+      def self.call: (Array[LightsRepository::Light]) -> Hash[Symbol, Integer]
+
+      def initialize: (Array[LightsRepository::Light]) -> void
+
+      def call: -> Hash[Symbol, Integer]
+
+      private
+
+      def size: -> Integer
+
+      def count_lights: (Domain::color)-> Integer
+      def count_red: -> Integer
+      def count_green: -> Integer
+      def count_yellow: -> Integer
+
+      def percent_lights: (Domain::color)-> Integer
+      def percent_green: -> Integer
+      def percent_red: -> Integer
+      def percent_yellow: -> Integer
+    end
+  end
+end

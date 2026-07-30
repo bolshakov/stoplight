@@ -4,9 +4,9 @@ module Stoplight
   class Admin
     module Helpers
       COLORS = [
-        GREEN = Stoplight::Color::GREEN,
-        YELLOW = Stoplight::Color::YELLOW,
-        RED = Stoplight::Color::RED
+        Color::GREEN,
+        Color::YELLOW,
+        Color::RED
       ].freeze
 
       # @return [Stoplight::Admin::Dependencies]

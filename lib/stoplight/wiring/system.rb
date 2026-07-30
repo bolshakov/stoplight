@@ -43,9 +43,8 @@ module Stoplight
     #   if the name was never registered.
     class System
       attr_reader :name
-      # @!attribute system_config
-      #   @api private
-      attr_reader :system_config
+      # @api private
+      attr_reader :config
 
       # Returns the consumer (subscribe-only) side of the telemetry bus.
       def telemetry
@@ -60,7 +59,7 @@ module Stoplight
       #   external failover.
       def initialize(config:, failover_system:, registry:)
         @name = config.name
-        @system_config = config
+        @config = config
         @lights = Concurrent::Map.new
         @failover_system = failover_system
         @registry = registry
@@ -110,7 +109,7 @@ module Stoplight
 
         light, existing_digest, existing_source_line = @lights.compute_if_absent(name) do
           source_line = caller(6, 1)&.first # Very expensive call
-          config = light_dsl.configure!(system_config)
+          config = light_dsl.configure!(@config)
           built = LightFactory.new(
             system_name: @name, config:,
             failover_system: @failover_system,

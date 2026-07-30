@@ -19,15 +19,15 @@ end
 module Stoplight
   class Admin < Sinatra::Base
     COLORS = [
-      GREEN = Stoplight::Color::GREEN,
-      YELLOW = Stoplight::Color::YELLOW,
-      RED = Stoplight::Color::RED
+      Color::GREEN,
+      Color::YELLOW,
+      Color::RED
     ].freeze
     private_constant :COLORS
 
-    ASSETS_PATH = File.join(__dir__, "admin", "assets")
-    ASSET_DIGESTS = Dir.children(ASSETS_PATH).each_with_object({}) do |name, h|
-      h[name] = Digest::SHA256.file(File.join(ASSETS_PATH, name)).hexdigest[0, 8]
+    ASSETS_PATH = File.join(T.must(__dir__), "admin", "assets")
+    ASSET_DIGESTS = Dir.children(ASSETS_PATH).to_h do |name|
+      [name, T.must(Digest::SHA256.file(File.join(ASSETS_PATH, name)).hexdigest[0, 8])]
     end.freeze
 
     ONE_YEAR_IN_SECONDS = 60 * 60 * 24 * 365
@@ -37,7 +37,7 @@ module Stoplight
 
     set :protection, except: %i[json_csrf]
     set :data_store, proc { Stoplight.__stoplight__default_configuration.data_store }
-    set :views, File.join(__dir__, "admin", "views")
+    set :views, File.join(T.must(__dir__), "admin", "views")
     set :nonce, proc { |request| }
     set :public_folder, ASSETS_PATH
     set :static_cache_control, [:public, max_age: ONE_YEAR_IN_SECONDS, immutable: true]

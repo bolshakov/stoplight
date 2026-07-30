@@ -1,0 +1,9 @@
+module Stoplight
+  class Admin < Sinatra::Base
+    COLORS: Array[Domain::color]
+    ASSETS_PATH: String
+    ASSET_DIGESTS: Hash[String, String]
+    ONE_YEAR_IN_SECONDS: Integer
+    include Helpers
+  end
+end

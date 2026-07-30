@@ -5,6 +5,8 @@ module Stoplight
   # with shared infrastructure configuration and defaults.
   interface _System
     def name: -> String
+    # @api private
+    def config: -> Domain::Config
 
     def register: (
       String name,

@@ -1,0 +1,23 @@
+# frozen_string_literal: true
+
+module Stoplight
+  class Admin
+    module Actions
+      class Stats < Action
+        @lights_stats: singleton(Stoplight::Admin::LightsStats)
+
+        # @param lights_stats [Class<Stoplight::Admin::LightsStats>]
+        def initialize: (
+            lights_stats: singleton(Stoplight::Admin::LightsStats),
+            lights_repository: LightsRepository,
+          ) -> void
+
+        # @return [(Stoplight::Admin::LightsRepository::Light)]
+        def call: (*untyped) -> [
+          Array[LightsRepository::Light],
+          Hash[Symbol, Integer],
+        ]
+      end
+    end
+  end
+end
