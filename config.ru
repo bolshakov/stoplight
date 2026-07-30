@@ -15,4 +15,6 @@ end
 
 Stoplight::Admin.set :environment, :production
 
+Stoplight::Admin.set :read_only, ENV.fetch("STOPLIGHT_ADMIN_READ_ONLY", "false") == "true"
+
 run Stoplight::Admin

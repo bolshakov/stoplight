@@ -55,6 +55,40 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
         expect(last_response.body).to_not include("No lights found")
         expect(last_response.body).not_to include("Ensure that your Stoplight data store is properly configured and that your Stoplight blocks have been run.")
       end
+
+      it "links the light actions" do
+        get "/"
+
+        expect(last_response).to be_ok
+
+        expect(last_response.body).to include(%(href="http://#{last_request.env["HTTP_HOST"]}/unlock?names=foo" data-turbo-method="post"))
+        expect(last_response.body).to include(%(href="http://#{last_request.env["HTTP_HOST"]}/red?names=foo" data-turbo-method="post"))
+        expect(last_response.body).to include(%(href="http://#{last_request.env["HTTP_HOST"]}/green?names=foo" data-turbo-method="post"))
+
+        expect(last_response.body).to_not include("Read-only")
+      end
+
+      it "asks for confirmation before removing a light, and only before removing" do
+        get "/"
+
+        expect(last_response).to be_ok
+
+        expect(last_response.body).to include(
+          %(href="http://#{last_request.env["HTTP_HOST"]}/remove?names=foo" data-turbo-method="post" data-turbo-confirm="Are you sure you want to remove this light?")
+        )
+        expect(last_response.body.scan("data-turbo-confirm").count).to eq(1)
+      end
+    end
+
+    context "with a light that is not green" do
+      before { light.lock(Stoplight::Color::RED) }
+
+      it "links Lock All Green" do
+        get "/"
+
+        expect(last_response).to be_ok
+        expect(last_response.body).to include(%(href="http://#{last_request.env["HTTP_HOST"]}/green_all" data-turbo-method="post"))
+      end
     end
 
     context "when light has multiple consecutive failures" do
@@ -216,6 +250,139 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
       get "/stats"
       expect(last_response).to be_ok
       expect(response_body.fetch("lights").map { |h| h.fetch("name") }).to contain_exactly("bar")
+    end
+  end
+
+  context "when the admin panel is read-only" do
+    around do |example|
+      previous_setting = Stoplight::Admin.settings.read_only
+      Stoplight::Admin.set :read_only, true
+      example.run
+    ensure
+      Stoplight::Admin.set :read_only, previous_setting
+    end
+
+    describe "GET /" do
+      before { light.run(&light_condition) }
+
+      it "tells the operator the panel is read-only" do
+        get "/"
+
+        expect(last_response).to be_ok
+        expect(last_response.body).to include("Read-only")
+      end
+
+      it "renders the light actions without links" do
+        get "/"
+
+        expect(last_response).to be_ok
+        expect(last_response.body).to include("Unlock", "Lock Red", "Lock Green", "Remove")
+
+        expect(last_response.body).to_not include("/unlock?names=foo")
+        expect(last_response.body).to_not include("/red?names=foo")
+        expect(last_response.body).to_not include("/green?names=foo")
+        expect(last_response.body).to_not include("/remove?names=foo")
+      end
+
+      context "when some lights are not green" do
+        before { light.lock(Stoplight::Color::RED) }
+
+        it "renders Lock All Green without a link" do
+          get "/"
+
+          expect(last_response).to be_ok
+          expect(last_response.body).to include("Lock All Green")
+          expect(last_response.body).to_not include("/green_all")
+        end
+      end
+    end
+
+    describe "GET /stats" do
+      before { light.run(&light_condition) }
+
+      it "serves the stats" do
+        get "/stats"
+
+        expect(last_response).to be_ok
+        expect(response_body.fetch("lights").map { |h| h.fetch("name") }).to contain_exactly("foo")
+      end
+    end
+
+    it "serves HEAD requests" do
+      head "/"
+
+      expect(last_response).to be_ok
+    end
+
+    it "refuses a verb it has no route for, rather than only the ones it does" do
+      delete "/green"
+
+      expect(last_response.status).to eq(403)
+    end
+
+    describe "POST /unlock" do
+      before do
+        light.run(&light_condition)
+        light.lock(Stoplight::Color::GREEN)
+      end
+
+      it "refuses to unlock the light" do
+        post "/unlock", names: "foo"
+
+        expect(last_response.status).to eq(403)
+        expect(last_response.body).to include("read-only mode")
+        expect(light.state).to eq("locked_green")
+      end
+    end
+
+    describe "POST /green" do
+      before { light.run(&light_condition) }
+
+      it "refuses to lock the light" do
+        post "/green", names: "foo"
+
+        expect(last_response.status).to eq(403)
+        expect(light.state).to eq("unlocked")
+      end
+    end
+
+    describe "POST /red" do
+      before { light.run(&light_condition) }
+
+      it "refuses to lock the light" do
+        post "/red", names: "foo"
+
+        expect(last_response.status).to eq(403)
+        expect(light.state).to eq("unlocked")
+      end
+    end
+
+    describe "POST /green_all" do
+      before { light.lock(Stoplight::Color::RED) }
+
+      it "refuses to lock the lights" do
+        post "/green_all"
+
+        expect(last_response.status).to eq(403)
+        expect(light.state).to eq("locked_red")
+      end
+    end
+
+    describe "POST /remove" do
+      before do
+        light.run { raise "whoops" }
+      rescue
+        nil
+      end
+
+      it "refuses to remove the light" do
+        post "/remove", names: "foo"
+
+        expect(last_response.status).to eq(403)
+
+        get "/stats"
+        expect(response_body.fetch("lights").map { |h| h.fetch("name") }).to contain_exactly("foo")
+      end
     end
   end
 end

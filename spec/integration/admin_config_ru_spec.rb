@@ -16,7 +16,34 @@ RSpec.describe "config.ru", :redis do
     ENV["REDIS_URL"] = original_redis_url
   end
 
+  around do |example|
+    original_read_only = Stoplight::Admin.settings.read_only
+    original_environment = Stoplight::Admin.settings.environment
+    original_env = ENV["STOPLIGHT_ADMIN_READ_ONLY"]
+    example.run
+  ensure
+    Stoplight::Admin.set :read_only, original_read_only
+    Stoplight::Admin.set :environment, original_environment
+    ENV["STOPLIGHT_ADMIN_READ_ONLY"] = original_env
+  end
+
   before { Stoplight.__stoplight__reset! }
+
+  it "runs the panel read-only when STOPLIGHT_ADMIN_READ_ONLY is true" do
+    ENV["STOPLIGHT_ADMIN_READ_ONLY"] = "true"
+
+    post "/green", names: "foo"
+
+    expect(last_response.status).to eq(403)
+  end
+
+  it "leaves the panel writable when STOPLIGHT_ADMIN_READ_ONLY holds any other value" do
+    ENV["STOPLIGHT_ADMIN_READ_ONLY"] = "1"
+
+    post "/green", names: "foo"
+
+    expect(last_response.status).to eq(302)
+  end
 
   it "surfaces a light a separate process already wrote to the same Redis" do
     Stoplight.configure(trust_me_im_an_engineer: true) { |config| config.data_store = Stoplight::DataStore::Redis.new(redis) }

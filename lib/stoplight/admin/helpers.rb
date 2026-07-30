@@ -22,6 +22,28 @@ module Stoplight
         url("/#{name}?v=#{ASSET_DIGESTS.fetch(name)}")
       end
 
+      # A read-only control keeps its place but loses its href, so there is nothing to follow
+      # and nothing to copy out of the page. aria-disabled carries that state to assistive
+      # technology, which the styling alone does not reach.
+      #
+      # @example The same control, writable and read-only
+      #   control_attributes(url("/red?names=foo"))
+      #   # => href="http://localhost/red?names=foo" data-turbo-method="post"
+      #
+      #   # once `set :read_only, true`
+      #   # => aria-disabled="true" title="Disabled in read-only mode"
+      #
+      # @param confirm [String, nil] message to confirm before following the link
+      def control_attributes(href, confirm: nil)
+        return %(aria-disabled="true" title="Disabled in read-only mode") if settings.read_only?
+
+        [
+          %(href="#{CGI.escapeHTML(href)}"),
+          %(data-turbo-method="post"),
+          (%(data-turbo-confirm="#{CGI.escapeHTML(confirm)}") if confirm)
+        ].compact.join(" ")
+      end
+
       def time_ago_in_words(time)
         time_difference = Time.now.utc - time
         if time_difference < 1

@@ -17,6 +17,20 @@ rescue LoadError
 end
 
 module Stoplight
+  # A Sinatra dashboard listing every light, its color, and its recent failures, with
+  # controls to lock a light green or red, unlock it, or remove it.
+  #
+  # Setting +read_only+ deploys it as an observation-only dashboard: every light stays
+  # visible, and every control that would change one is refused with 403 rather than merely
+  # hidden, so calling the endpoints directly does not get around it. The standalone Docker
+  # image reads the same option from +STOPLIGHT_ADMIN_READ_ONLY+, for the exact string +true+.
+  #
+  # This is not access control - it has no notion of users, and anyone who reaches the panel
+  # still reads every light name and failure message. Keep it behind authentication either way.
+  #
+  # @example Observing without being able to change anything
+  #   Stoplight::Admin.set :read_only, true
+  #   mount Stoplight::Admin => "/stoplights"
   class Admin < Sinatra::Base
     COLORS = [
       Color::GREEN,
@@ -36,11 +50,20 @@ module Stoplight
     helpers Helpers
 
     set :protection, except: %i[json_csrf]
+    set :read_only, false
     set :data_store, proc { Stoplight.__stoplight__default_configuration.data_store }
     set :views, File.join(T.must(__dir__), "admin", "views")
     set :nonce, proc { |request| }
     set :public_folder, ASSETS_PATH
     set :static_cache_control, [:public, max_age: ONE_YEAR_IN_SECONDS, immutable: true]
+
+    # Gates on the request method rather than on a list of paths, so a write route added
+    # later is refused without anyone having to remember this filter exists.
+    before do
+      if settings.read_only? && !request.get? && !request.head?
+        halt 403, "Stoplight Admin is running in read-only mode."
+      end
+    end
 
     get "/" do
       lights, stats = dependencies.stats_action.call
