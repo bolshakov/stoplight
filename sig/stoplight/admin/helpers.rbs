@@ -1,0 +1,11 @@
+module Stoplight
+  class Admin
+    module Helpers : Sinatra::Base
+      COLORS: Array[Domain::color]
+
+      def dependencies: -> Dependencies
+      def asset_path: (String) -> String
+      def time_ago_in_words: (Time) -> String
+    end
+  end
+end

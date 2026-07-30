@@ -4,5 +4,6 @@ module Stoplight
 
     def self.undefined: -> Undefined
     def self.must: [T] (T? value) -> T
+    def self.absurd: (?untyped)-> TypeError
   end
 end

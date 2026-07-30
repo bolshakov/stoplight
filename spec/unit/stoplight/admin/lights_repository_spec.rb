@@ -2,7 +2,7 @@
 
 RSpec.describe Stoplight::Admin::LightsRepository, :redis do
   subject(:repository) do
-    described_class.new(registry:, storage:, system_config: system.system_config)
+    described_class.new(registry:, storage:, system_config: system.config)
   end
 
   let(:system) { Stoplight.__stoplight__system(SecureRandom.uuid) }

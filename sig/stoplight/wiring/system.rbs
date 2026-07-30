@@ -8,8 +8,7 @@ module Stoplight
       @failover_system: _System?
       @registry: Domain::_Registry
       @telemetry: Domain::Telemetry::Bus
-
-      attr_reader system_config: Domain::Config
+      @config: Domain::Config
 
       def initialize: (config: Domain::Config, failover_system: _System?, registry: Domain::_Registry) -> void
 

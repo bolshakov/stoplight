@@ -1,0 +1,38 @@
+module Stoplight
+  class Admin
+    class LightsRepository
+      class Light
+        COLORS: Array[Domain::color]
+
+        attr_reader color: Domain::color
+        attr_reader name: String
+
+        @id: String
+        @name: String
+        @color: Domain::color
+        @state: Domain::state
+        @failures: Array[Domain::Failure]
+        @failure_count: Integer?
+        @latest_failure: Domain::Failure?
+
+        def initialize: (
+            name: String,
+            color: Domain::color,
+            state: Domain::state,
+            failures: Array[Domain::Failure],
+            ?failure_count: Integer?
+          ) -> void
+
+        def locked?: -> bool
+        def unlocked?: -> bool
+        def as_json: -> Hash[Symbol, _ToS]
+        def default_sort_key: -> Array[Comparable]
+        def last_check: -> Time?
+        def last_check_in_words: -> String?
+        def description_title: -> String
+        def description_message: -> String
+        def description_comment: -> String
+      end
+    end
+  end
+end

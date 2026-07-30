@@ -9,7 +9,7 @@ module Stoplight
         # @return [void]
         def call(params)
           light_names(params).each do |name|
-            lights_repository.lock(name, GREEN)
+            @lights_repository.lock(name, Color::GREEN)
           end
         end
 

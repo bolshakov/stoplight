@@ -7,10 +7,10 @@ module Stoplight
       class LockAllGreen < Action
         # @return [void]
         def call(*)
-          lights_repository
-            .with_color(RED, YELLOW)
+          @lights_repository
+            .with_color(Color::RED, Color::YELLOW)
             .map(&:name)
-            .each { |name| lights_repository.lock(name, GREEN) }
+            .each { |name| @lights_repository.lock(name, Color::GREEN) }
         end
       end
     end

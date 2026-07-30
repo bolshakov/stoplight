@@ -1,0 +1,6 @@
+module Sinatra
+  class Base
+    # TODO: temporarily fix https://github.com/ruby/gem_rbs_collection/pull/1057
+    def erb: (untyped template, ?::Hash[untyped, untyped] options, ?::Hash[untyped, untyped] locals) ?{ () -> untyped } -> untyped
+  end
+end

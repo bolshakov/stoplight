@@ -1,0 +1,12 @@
+
+module Stoplight
+  class Admin
+    module Actions
+      class Action
+        @lights_repository: LightsRepository
+
+        def initialize: (lights_repository: LightsRepository) -> void
+      end
+    end
+  end
+end

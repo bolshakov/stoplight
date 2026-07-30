@@ -9,7 +9,6 @@ module Stoplight
         @system_config = system_config
       end
 
-      # @return [<Stoplight::Admin::LightsRepository::Light>]
       def all
         @registry
           .names
@@ -17,9 +16,6 @@ module Stoplight
           .sort_by(&:default_sort_key)
       end
 
-      # @param colors <String>] colors name
-      # @return [<Stoplight::Admin::LightsRepository::Light>] lights with the requested colors
-      #
       def with_color(*colors)
         requested_colors = Array(colors)
 
@@ -28,24 +24,20 @@ module Stoplight
         end
       end
 
-      # @param name [String] locks light by its name
-      # @param color [String, nil] locks to this color. When nil is given, locks to the current
-      #   color
-      # @return [void]
+      # @param name locks light by its name
+      # @param color locks to this color. When nil is given, locks to the current color
       def lock(name, color = nil)
         config = build_config(name)
         color ||= @storage.state_snapshot(config).color
         @storage.lock(config, color)
       end
 
-      # @param name [String] unlocks light by its name
-      # @return [void]
+      # @param name unlocks light by its name
       def unlock(name)
         @storage.unlock(build_config(name))
       end
 
-      # @param name [String] removes light metadata by its name
-      # @return [void]
+      # @param name removes light metadata by its name
       def remove(name)
         config = @system_config.with(name:)
         @storage.delete(config)

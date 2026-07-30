@@ -7,6 +7,17 @@ module Stoplight
     UNDEFINED = Undefined.instance
     def self.undefined = UNDEFINED
 
+    def self.absurd(value = nil)
+      msg = "Control flow reached T.absurd."
+
+      case value
+      when Kernel
+        msg += " Got value: #{value}"
+      end
+
+      TypeError.new(msg)
+    end
+
     # Asserts a value is non-nil, returning it with a narrowed type.
     #
     # Use this to satisfy Steep's flow typing when you know a nilable value

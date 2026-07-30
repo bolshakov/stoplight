@@ -8,8 +8,6 @@ module Stoplight
         percent_red: 0, percent_yellow: 0, percent_green: 0
       }.freeze
 
-      # @!attribute lights
-      #   @return [<Stoplight::Admin::LightsRepository::Light>]
       attr_reader :lights
       private :lights
 
@@ -38,27 +36,27 @@ module Stoplight
       end
 
       private def count_red
-        count_lights(RED)
+        count_lights(Color::RED)
       end
 
       private def percent_red
-        percent_lights(RED)
+        percent_lights(Color::RED)
       end
 
       private def count_green
-        count_lights(GREEN)
+        count_lights(Color::GREEN)
       end
 
       private def percent_green
-        percent_lights(GREEN)
+        percent_lights(Color::GREEN)
       end
 
       private def count_yellow
-        count_lights(YELLOW)
+        count_lights(Color::YELLOW)
       end
 
       private def percent_yellow
-        percent_lights(YELLOW)
+        percent_lights(Color::YELLOW)
       end
 
       private def count_lights(color)
