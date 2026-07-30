@@ -29,8 +29,21 @@ module Stoplight
   # still reads every light name and failure message. Keep it behind authentication either way.
   #
   # @example Observing without being able to change anything
-  #   Stoplight::Admin.set :read_only, true
+  #   Stoplightt::Admin.conrfigure do |config|
+  #     config.read_only = true
+  #   end
+  #
   #   mount Stoplight::Admin => "/stoplights"
+  #
+  # @example configue multiple systems
+  #   Core = Stoplight.__stoplight__system("Core", data_store:)
+  #   Analytics = Stoplight.__stoplight__system("Analytics", data_store:)
+  #
+  #   Stoplight::Admin.configure do |config|
+  #     config.add_system Core
+  #     config.add_system Analytics
+  #   end
+  #
   class Admin < Sinatra::Base
     COLORS = [
       Color::GREEN,
@@ -48,6 +61,19 @@ module Stoplight
     private_constant :ONE_YEAR_IN_SECONDS
 
     helpers Helpers
+    @systems = []
+
+    def self.add_system(system)
+      @systems << system
+    end
+
+    set :systems do
+      if @systems.empty?
+        [Stoplight.__stoplight__default_system]
+      else
+        @systems
+      end
+    end
 
     set :protection, except: %i[json_csrf]
     set :read_only, false

@@ -234,26 +234,4 @@ end
 #   # When 66.6% error rate reached withing a sliding 5 minute window, the circuit breaker will trip.
 #   light = Stoplight("Payment API", traffic_control: :error_rate, threshold: 0.666, window_size: 300)
 #
-def Stoplight(
-  name,
-  cool_off_time: Stoplight::T.undefined,
-  threshold: Stoplight::T.undefined,
-  recovery_threshold: Stoplight::T.undefined,
-  window_size: Stoplight::T.undefined,
-  tracked_errors: Stoplight::T.undefined,
-  skipped_errors: Stoplight::T.undefined,
-  traffic_control: Stoplight::T.undefined,
-  traffic_recovery: Stoplight::T.undefined
-) # rubocop:disable Naming/MethodName
-  Stoplight.register(
-    name,
-    cool_off_time:,
-    threshold:,
-    recovery_threshold:,
-    window_size:,
-    tracked_errors:,
-    skipped_errors:,
-    traffic_control:,
-    traffic_recovery:
-  )
-end
+def Stoplight(...) = Stoplight.register(...) # rubocop:disable Naming/MethodName

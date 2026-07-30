@@ -12,6 +12,7 @@ module Stoplight
 
       def initialize: (config: Domain::Config, failover_system: _System?, registry: Domain::_Registry) -> void
 
+      def persistent?: -> bool
       def __stoplight__storage: -> Storage
       def __stoplight__registry: -> Domain::_Registry
     end

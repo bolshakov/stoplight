@@ -9,8 +9,8 @@ RSpec.describe Stoplight::Admin::Helpers, :redis do
     end
   end
 
-  let(:data_store) { Stoplight::DataStore::Redis.new(redis) }
-  let(:settings) { class_double(Stoplight::Admin, data_store: data_store) }
+  let(:systems) { [instance_double(Stoplight::Wiring::System, persistent?: true)] }
+  let(:settings) { class_double(Stoplight::Admin, systems: systems) }
 
   before do
     allow(helper).to receive(:settings).and_return(settings)
@@ -21,19 +21,27 @@ RSpec.describe Stoplight::Admin::Helpers, :redis do
       expect(helper.dependencies).to be_an_instance_of(Stoplight::Admin::Dependencies)
     end
 
-    context "with Redis data store" do
-      let(:data_store) { Stoplight::DataStore::Redis.new(redis) }
+    context "with persistent data store" do
+      let(:systems) do
+        [
+          instance_double(Stoplight::Wiring::System, persistent?: true)
+        ]
+      end
 
       it "does not raise an error" do
         expect { helper.dependencies }.to_not raise_error
       end
     end
 
-    context "with Memory data store" do
-      let(:data_store) { Stoplight::DataStore::Memory.new }
+    context "with non-persistent data store" do
+      let(:systems) do
+        [
+          instance_double(Stoplight::Wiring::System, persistent?: false)
+        ]
+      end
 
       it "raises an error" do
-        expect { helper.dependencies }.to raise_error StandardError, /Stoplight Admin requires a persistent data store/
+        expect { helper.dependencies }.to raise_error TypeError, /Stoplight Admin requires a persistent data store/
       end
     end
   end
