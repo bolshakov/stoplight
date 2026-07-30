@@ -36,8 +36,8 @@ module Stoplight
   #   mount Stoplight::Admin => "/stoplights"
   #
   # @example configue multiple systems
-  #   Core = Stoplight.__stoplight__system("Core", data_store:)
-  #   Analytics = Stoplight.__stoplight__system("Analytics", data_store:)
+  #   Core = Stoplight.register_system("Core", data_store:)
+  #   Analytics = Stoplight.register_system("Analytics", data_store:)
   #
   #   Stoplight::Admin.configure do |config|
   #     config.add_system Core

@@ -134,20 +134,20 @@ RSpec.describe "Stoplight" do
     end
   end
 
-  describe ".__stoplight__system" do
+  describe ".register_system" do
     context "name is not in use yet" do
-      subject(:system) { Stoplight.__stoplight__system(SecureRandom.uuid) }
+      subject(:system) { Stoplight.register_system(SecureRandom.uuid) }
 
       it { is_expected.to be_kind_of(Stoplight::Wiring::System) }
     end
 
     context "name is already in use" do
-      subject(:system) { Stoplight.__stoplight__system(name) }
+      subject(:system) { Stoplight.register_system(name) }
 
       let(:name) { SecureRandom.uuid }
 
       it "raises argument error" do
-        Stoplight.__stoplight__system(name)
+        Stoplight.register_system(name)
 
         expect { system }.to raise_error(ArgumentError)
       end
@@ -181,7 +181,7 @@ RSpec.describe "Stoplight" do
         # system's default threshold of 3 in a single notifiers.each pass. If all
         # notifiers share one circuit breaker (the bug), the breaker trips before
         # SpyNotifier runs and SpyNotifier never sees the green→red transition.
-        system = Stoplight.__stoplight__system(
+        system = Stoplight.register_system(
           SecureRandom.uuid,
           threshold: 1,
           notifiers: [BrokenNotifier.new, BrokenNotifier.new, BrokenNotifier.new, spy_notifier]

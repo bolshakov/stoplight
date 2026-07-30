@@ -12,7 +12,8 @@ module Stoplight
     # This prevents subtle bugs where circuits silently interfere with each other.
     #
     # @example Basic usage
-    #   billing = Stoplight.__stoplight__system(:billing,
+    #   billing = Stoplight.register_system(
+    #     "Billing",
     #     data_store: billing_redis,
     #     threshold: 5,
     #     window_size: 300
@@ -25,15 +26,15 @@ module Stoplight
     #   billing.light("paypal").run { ... }
     #
     # @example Multi-tenancy
-    #   tenant_a = Stoplight.__stoplight__system(:tenant_a, data_store: tenant_a_redis)
-    #   tenant_b = Stoplight.__stoplight__system(:tenant_b, data_store: tenant_b_redis)
+    #   tenant_a = Stoplight.register_system("Tenant A", data_store: tenant_a_redis)
+    #   tenant_b = Stoplight.register_system("Tenant B", data_store: tenant_b_redis)
     #
     #   # Same circuit name, completely isolated
     #   tenant_a.register("api")
     #   tenant_b.register("api")
     #
     # @example Configuration inheritance
-    #   system = Stoplight.__stoplight__system(:payments, threshold: 3, cool_off_time: 600)
+    #   system = Stoplight.register_system("Payments", threshold: 3, cool_off_time: 600)
     #
     #   system.register("stripe")                # Inherits threshold: 3
     #   system.register("paypal", threshold: 5)  # Overrides threshold

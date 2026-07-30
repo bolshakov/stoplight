@@ -100,45 +100,14 @@ module Stoplight # rubocop:disable Style/Documentation
     #   for repeated access. Calling this method twice with the same name raises an error.
     #
     # @example Creating a system for payment services
-    #   Payments = Stoplight.__stoplight__system(:payments, threshold: 3, cool_off_time: 30)
+    #   Payments = Stoplight.register_system("Payments", threshold: 3, cool_off_time: 30)
     #   Payments.register("stripe")
     #   Payments.light("stripe").run { process_payment }
     #
     # @example Isolated system with dedicated data store
-    #   Analytics = Stoplight.__stoplight__system(:analytics, data_store: analytics_redis)
+    #   Analytics = Stoplight.register_system("Analytics", data_store: analytics_redis)
     #
-    # @api private
-    def __stoplight__system(
-      name,
-      cool_off_time: T.undefined,
-      threshold: T.undefined,
-      recovery_threshold: T.undefined,
-      window_size: T.undefined,
-      tracked_errors: T.undefined,
-      skipped_errors: T.undefined,
-      data_store: T.undefined,
-      error_notifier: T.undefined,
-      notifiers: T.undefined,
-      traffic_control: T.undefined,
-      traffic_recovery: T.undefined
-    )
-      state.create_system(
-        config: Wiring::SystemConfigurationDsl.new(
-          name: name.to_s,
-          cool_off_time:,
-          threshold:,
-          recovery_threshold:,
-          window_size:,
-          tracked_errors:,
-          skipped_errors:,
-          traffic_control:,
-          traffic_recovery:,
-          data_store:,
-          error_notifier:,
-          notifiers:
-        ).configure!(state.default_config)
-      )
-    end
+    def register_system(...) = state.register_system(...)
 
     # Resets Stoplight to an unconfigured state.
     #
