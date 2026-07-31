@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Stoplight::Wiring::System::Storage do
-  let(:system) { Stoplight.__stoplight__system(SecureRandom.uuid.to_sym) }
+  let(:system) { Stoplight.register_system(SecureRandom.uuid.to_sym) }
 
   subject(:storage) { system.__stoplight__storage }
 

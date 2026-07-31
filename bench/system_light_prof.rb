@@ -14,7 +14,7 @@ PROF_TYPES = {
   callstack: RubyProf::CallStackPrinter
 }.freeze
 
-system = Stoplight.__stoplight__system("default 2")
+system = Stoplight.register_system("default 2")
 system.register("bar", threshold: 4)
 
 def profile_scenario(name, &block)

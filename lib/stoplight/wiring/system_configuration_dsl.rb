@@ -4,7 +4,7 @@ module Stoplight
   module Wiring
     class SystemConfigurationDsl
       def initialize(
-        name:,
+        name,
         cool_off_time: T.undefined,
         threshold: T.undefined,
         recovery_threshold: T.undefined,
@@ -17,7 +17,7 @@ module Stoplight
         traffic_control: T.undefined,
         traffic_recovery: T.undefined
       )
-        @name = name
+        @name = name.to_s
         @cool_off_time = cool_off_time
         @threshold = threshold
         @recovery_threshold = recovery_threshold

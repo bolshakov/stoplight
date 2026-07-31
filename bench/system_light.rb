@@ -4,7 +4,7 @@ require "benchmark/ips"
 require_relative "../lib/stoplight"
 Stoplight(SecureRandom.uuid, threshold: 10)
 
-system = Stoplight.__stoplight__system("default")
+system = Stoplight.register_system("default")
 
 Benchmark.ips do |b|
   b.report("before") { system.register("bar", threshold: 4) }

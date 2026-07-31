@@ -2,7 +2,7 @@ module Stoplight
   module Wiring
     class SystemConfigurationDsl
       def initialize: (
-        name: String,
+        _ToS name,
         ?cool_off_time: optional[Domain::duration_seconds],
         ?threshold: optional[Domain::percentage | Integer],
         ?recovery_threshold: optional[Integer],

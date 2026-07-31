@@ -12,11 +12,45 @@ module Stoplight
       def initialize(default_config:)
         @default_config = default_config.with(name: DEFAULT_SYSTEM_NAME)
         @systems = Concurrent::Map.new
-        @default_system = create_system(config: default_config.with(name: "default"))
+        @default_system = register_system_with_config(default_config.with(name: "Default"))
       end
 
-      def create_system(config:)
-        @systems.compute(config.name.to_s) do |existing_system|
+      def register_system(
+        name,
+        cool_off_time: T.undefined,
+        threshold: T.undefined,
+        recovery_threshold: T.undefined,
+        window_size: T.undefined,
+        tracked_errors: T.undefined,
+        skipped_errors: T.undefined,
+        data_store: T.undefined,
+        error_notifier: T.undefined,
+        notifiers: T.undefined,
+        traffic_control: T.undefined,
+        traffic_recovery: T.undefined
+      )
+        register_system_with_config(
+          Wiring::SystemConfigurationDsl.new(
+            name,
+            cool_off_time:,
+            threshold:,
+            recovery_threshold:,
+            window_size:,
+            tracked_errors:,
+            skipped_errors:,
+            traffic_control:,
+            traffic_recovery:,
+            data_store:,
+            error_notifier:,
+            notifiers:
+          ).configure!(@default_config)
+        )
+      end
+
+      private
+
+      def register_system_with_config(config)
+        @systems.compute(config.name) do |existing_system|
           if existing_system
             raise ArgumentError, "system `#{config.name}` is already in use"
           else
@@ -36,8 +70,6 @@ module Stoplight
           end
         end
       end
-
-      private
 
       def create_registry(config, failover_system)
         case config.data_store

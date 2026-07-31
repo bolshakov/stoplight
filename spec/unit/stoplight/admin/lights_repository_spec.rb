@@ -5,7 +5,7 @@ RSpec.describe Stoplight::Admin::LightsRepository, :redis do
     described_class.new(registry:, storage:, system_config: system.config)
   end
 
-  let(:system) { Stoplight.__stoplight__system(SecureRandom.uuid) }
+  let(:system) { Stoplight.register_system(SecureRandom.uuid) }
   let(:storage) { system.__stoplight__storage }
   let(:registry) { instance_double(Stoplight::Infrastructure::Redis::Storage::Registry) }
   let(:data_store_config) { Stoplight::DataStore::Redis.new(redis) }

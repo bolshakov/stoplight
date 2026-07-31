@@ -80,5 +80,5 @@ module StoplightWorld
     end
   end
 
-  def system = @system ||= Stoplight.__stoplight__system(SecureRandom.uuid)
+  def system = @system ||= Stoplight.register_system(SecureRandom.uuid)
 end
