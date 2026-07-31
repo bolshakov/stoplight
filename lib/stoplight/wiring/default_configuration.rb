@@ -46,7 +46,7 @@ module Stoplight
     #
     class DefaultConfiguration
       def initialize
-        @config = DefaultConfig.with
+        @config = DefaultConfig
         @cool_off_time = T.undefined
         @threshold = T.undefined
         @recovery_threshold = T.undefined

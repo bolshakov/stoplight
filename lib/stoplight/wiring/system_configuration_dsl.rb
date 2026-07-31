@@ -18,6 +18,7 @@ module Stoplight
         traffic_recovery: T.undefined
       )
         @name = name.to_s
+        @id = Domain::Id.for(@name)
         @cool_off_time = cool_off_time
         @threshold = threshold
         @recovery_threshold = recovery_threshold
@@ -34,6 +35,7 @@ module Stoplight
       def configure!(default_config)
         ConfigCompatibilityValidator.call(
           config: default_config.with(
+            id: @id,
             name:,
             cool_off_time:,
             threshold:,

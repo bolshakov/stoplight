@@ -10,6 +10,7 @@ module Stoplight
 
           def self.hash_name: (_ToS) -> String
 
+          def self.new: (system_id: String, light_id: String) -> instance
           def initialize: (system_id: String, light_id: String) -> void
           def key: (*_ToS) -> String
         end

@@ -1,8 +1,10 @@
 module Stoplight
   module Wiring
     class LightConfigurationDsl
+      @id: String
+
       def initialize: (
-        name: String,
+        name: _ToS,
         ?cool_off_time: optional[Domain::duration_seconds],
         ?threshold: optional[Domain::percentage | Integer],
         ?recovery_threshold: optional[Integer],

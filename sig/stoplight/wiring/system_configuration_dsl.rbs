@@ -1,6 +1,8 @@
 module Stoplight
   module Wiring
     class SystemConfigurationDsl
+      @id: String
+
       def initialize: (
         _ToS name,
         ?cool_off_time: optional[Domain::duration_seconds],

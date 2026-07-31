@@ -7,7 +7,8 @@ module Stoplight
     #
     # @api private
     class LightFactory
-      def initialize(system_name:, config:, failover_system:, telemetry:)
+      def initialize(system_id:, system_name:, config:, failover_system:, telemetry:)
+        @system_id = system_id
         @system_name = system_name
         @failover_system = failover_system
         @config = config
@@ -29,7 +30,7 @@ module Stoplight
 
         @emitter = Domain::Telemetry::Emitter.new(
           bus: telemetry,
-          system_name: system_name,
+          system_name: @system_name,
           light_name: config.name,
           clock: @clock,
           error_notifier: @error_notifier
@@ -68,9 +69,9 @@ module Stoplight
       def storage_scripting = Infrastructure::Redis::Storage::Scripting.new(redis:)
       def failover_system = T.must(@failover_system)
 
-      def key_space = @key_space ||= Infrastructure::Redis::Storage::KeySpace.build(
-        system_name: system_name,
-        light_name: config.name
+      def key_space = @key_space ||= Infrastructure::Redis::Storage::KeySpace.new(
+        system_id: @system_id,
+        light_id: @config.id
       )
 
       def storage_set

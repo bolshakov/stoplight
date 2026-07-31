@@ -39,7 +39,7 @@ module Stoplight
 
       # @param name removes light metadata by its name
       def remove(name)
-        config = @system_config.with(name:)
+        config = build_config(name)
         @storage.delete(config)
         @registry.unregister(name)
       end
@@ -62,10 +62,10 @@ module Stoplight
 
       private def build_config(name)
         config = @registry.config_for(name)
-        return @system_config.with(name:) if config.nil?
+        return @system_config.with(name:, id: Domain::Id.for(name)) if config.nil?
 
         overrides = config.slice("cool_off_time", "window_size").compact.transform_keys(&:to_sym)
-        @system_config.with(name:, **overrides)
+        @system_config.with(name:, id: Domain::Id.for(name), **overrides)
       end
     end
   end

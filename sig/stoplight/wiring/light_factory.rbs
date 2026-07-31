@@ -25,6 +25,7 @@ module Stoplight
       attr_reader config: Domain::Config
       attr_reader system_name: String
 
+      @system_id: String
       @notifiers: Array[Domain::_StateTransitionNotifier]
       @name: String
       @cool_off_time: Domain::duration_seconds
@@ -36,6 +37,7 @@ module Stoplight
       @key_space: Infrastructure::Redis::Storage::KeySpace
 
       def initialize: (
+          system_id: String,
           config: Domain::Config,
           system_name: String,
           failover_system: _System?,

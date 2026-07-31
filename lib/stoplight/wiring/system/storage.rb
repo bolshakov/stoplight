@@ -5,7 +5,8 @@ module Stoplight
     class System
       # Only for admin panel use.
       class Storage
-        def initialize(system_name:, failover_system:, telemetry:)
+        def initialize(system_id:, system_name:, failover_system:, telemetry:)
+          @system_id = system_id
           @system_name = system_name
           @failover_system = failover_system
           @factories = {}
@@ -47,6 +48,7 @@ module Stoplight
 
         private def light_factory(config)
           @factories[config] ||= LightFactory.new(
+            system_id: @system_id,
             system_name: @system_name,
             config:,
             failover_system: @failover_system,

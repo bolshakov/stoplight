@@ -6,13 +6,10 @@ module Stoplight
       attr_reader :default_system
       attr_reader :default_config
 
-      DEFAULT_SYSTEM_NAME = "__stoplight__default_system"
-      private_constant :DEFAULT_SYSTEM_NAME
-
       def initialize(default_config:)
-        @default_config = default_config.with(name: DEFAULT_SYSTEM_NAME)
+        @default_config = default_config
         @systems = Concurrent::Map.new
-        @default_system = register_system_with_config(default_config.with(name: "Default"))
+        @default_system = register_system_with_config(@default_config)
       end
 
       def register_system(

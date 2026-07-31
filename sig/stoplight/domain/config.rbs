@@ -1,6 +1,7 @@
 module Stoplight
   module Domain
     class Config < Data
+      attr_reader id: String
       attr_reader threshold: percentage | Integer
       attr_reader window_size: duration_seconds?
       attr_reader tracked_errors: Array[Module]
@@ -15,6 +16,7 @@ module Stoplight
       attr_reader data_store: _DataStore
 
       def self.new: (
+          id: String,
           name: String,
           cool_off_time: duration_seconds,
           threshold: percentage | Integer,
@@ -30,6 +32,7 @@ module Stoplight
         ) -> instance
 
       def initialize: (
+          id:  String,
           name: String,
           cool_off_time: duration_seconds,
           threshold: percentage | Integer,
@@ -47,6 +50,7 @@ module Stoplight
       def cool_off_time_in_milliseconds: () -> Integer
 
       def with: (
+          ?id: optional[String],
           ?name: optional[String],
           ?cool_off_time: optional[duration_seconds],
           ?threshold: optional[percentage | Integer],
