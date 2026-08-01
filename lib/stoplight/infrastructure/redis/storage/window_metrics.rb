@@ -41,7 +41,7 @@ module Stoplight
             @redis = redis
             @config = config
             @key_space = key_space
-            @metrics_key = key_space.key(:window_metrics)
+            @metrics_key = key_space.join("window_metrics")
             @window_size = T.must(config.window_size).to_i
           end
 
@@ -119,7 +119,7 @@ module Stoplight
           # @param time [Time, Numeric] The time for which to generate the key.
           # @return [String] The generated Redis key.
           def bucket_key(metric:, time:)
-            key_space.key(:window_metrics, metric, bucket_start_for(time))
+            key_space.join("window_metrics", metric, bucket_start_for(time).to_s)
           end
 
           # Retrieves the list of Redis bucket keys required to cover a specific time window.
@@ -156,13 +156,13 @@ module Stoplight
           def bucket_size = 3600 # 1 hour
           def bucket_ttl = @window_size + bucket_size
 
-          def successes_key(time:) = bucket_key(metric: :success, time:)
+          def successes_key(time:) = bucket_key(metric: "success", time:)
 
-          def errors_key(time:) = bucket_key(metric: :failure, time:)
+          def errors_key(time:) = bucket_key(metric: "failure", time:)
 
-          def failure_bucket_keys(window_end) = buckets_for_window(metric: :failure, window_end:)
+          def failure_bucket_keys(window_end) = buckets_for_window(metric: "failure", window_end:)
 
-          def success_bucket_keys(window_end) = buckets_for_window(metric: :success, window_end:)
+          def success_bucket_keys(window_end) = buckets_for_window(metric: "success", window_end:)
 
           def snapshot_window(window_end_ts)
             [window_end_ts - @window_size, success_bucket_keys(window_end_ts), failure_bucket_keys(window_end_ts)]

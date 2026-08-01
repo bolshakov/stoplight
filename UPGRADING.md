@@ -1,4 +1,5 @@
-## Stoplight 6.0 
+## Stoplight 6.0  - WIP
+A list of breaking changes in the future version, to be described in more details:
 - Removed Light#with() method 
 - Removed Light's `#with_data_store`, `#with_cool_off_time`, `#with_threshold`, `#with_window_size`, `#with_notifiers`, 
   `#with_error_notifier`, `#with_tracked_errors`, `#with_skipped_errors`
@@ -11,6 +12,7 @@
 - RBS Types Changes
   - Stoplight::_StateTransitionNotifier  -> Stoplight::Domain::_StateTransitionNotifier
   - Stoplight::_ExceptionMatcher -> Stoplight::Domain::_ExceptionMatcher
+- key version bumps v5 → v6; existing v5 keys are orphaned
 
 ## Stoplight 5.0 
 

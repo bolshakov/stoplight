@@ -12,7 +12,7 @@ module Stoplight
             redis: redis,
             clock: Domain::_Clock,
             scripting: Scripting,
-            key_space: KeySpace,
+            key_space: Key,
           ) -> void
 
           private def build_metrics_snapshot: (

@@ -4,7 +4,7 @@ module Stoplight
       class Backend < DataStoreBackend
         @redis: Infrastructure::redis
         @scripting: Infrastructure::Redis::Storage::Scripting
-        @key_space: Infrastructure::Redis::Storage::KeySpace
+        @key_space: Infrastructure::Redis::Key
         @config: Domain::Config
         @error_notifier: Domain::error_notifier
         @failover_light: Domain::Light
@@ -20,7 +20,7 @@ module Stoplight
         def initialize: (
           redis: Infrastructure::redis,
           scripting: Infrastructure::Redis::Storage::Scripting,
-          key_space: Infrastructure::Redis::Storage::KeySpace,
+          key_space: Infrastructure::Redis::Key,
           config: Domain::Config,
           error_notifier: Domain::error_notifier,
           failover_light: Domain::Light,

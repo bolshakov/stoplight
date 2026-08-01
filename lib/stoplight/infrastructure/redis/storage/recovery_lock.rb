@@ -53,7 +53,7 @@ module Stoplight
           attr_reader :scripting
           attr_reader :key_space
 
-          def lock_key = key_space.key(:locks, :recovery)
+          def lock_key = key_space.join("locks", "recovery")
           def lock_timeout = config.cool_off_time_in_milliseconds
         end
       end
