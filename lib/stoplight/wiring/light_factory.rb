@@ -17,7 +17,9 @@ module Stoplight
         @cool_off_time = config.cool_off_time
 
         @data_store_config = config.data_store
-        @error_notifier = config.error_notifier
+        @error_notifier = Infrastructure::FailSafe::ErrorNotifier.new(
+          error_notifier: config.error_notifier
+        )
         @notifiers = config.notifiers
         @traffic_recovery = config.traffic_recovery
         @traffic_control = config.traffic_control
