@@ -123,6 +123,7 @@ module Stoplight
           source_line = caller(6, 1)&.first # Very expensive call
           config = light_dsl.configure!(@config)
           built = LightFactory.new(
+            system_id: @config.id,
             system_name: @name, config:,
             failover_system: @failover_system,
             telemetry: @telemetry
@@ -157,6 +158,7 @@ module Stoplight
       # @api private
       def __stoplight__storage
         Storage.new(
+          system_id: @config.id,
           system_name: @name,
           failover_system: T.must(@failover_system), # works only with redis ds
           telemetry: @telemetry

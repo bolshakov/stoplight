@@ -5,15 +5,14 @@ module Stoplight
         class Registry
           include Domain::_Registry
 
-          REDIS_KEY: String
           @redis: redis
-          @key_space: SystemKeySpace
+          @key_space: Key
           @clock: Domain::_Clock
           @config_serializer: singleton(ConfigSerializer)
 
           def initialize: (
               redis: redis,
-              key_space: SystemKeySpace,
+              key_space: Key,
               clock: Domain::_Clock,
               config_serializer: singleton(ConfigSerializer),
             ) -> void

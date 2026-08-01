@@ -6,11 +6,8 @@ RSpec.describe Stoplight::Infrastructure::Redis::Storage::RecoveryMetrics, :redi
   subject(:metrics_store) { described_class.new(scripting:, redis:, key_space:, clock:) }
 
   let(:clock) { Stoplight::Infrastructure::SystemClock.new }
-  let(:key_space) { Stoplight::Infrastructure::Redis::Storage::KeySpace.build(light_name:, system_name:) }
+  let(:key_space) { Stoplight::DataStore::Redis.key_space.join(SecureRandom.uuid) }
   let(:scripting) { Stoplight::Infrastructure::Redis::Storage::Scripting.new(redis:) }
-
-  let(:light_name) { SecureRandom.uuid }
-  let(:system_name) { SecureRandom.uuid }
 
   it_behaves_like "Stoplight::Domain::DataStore#get_recovery_metrics" do
     def get_metrics = metrics_store.metrics_snapshot

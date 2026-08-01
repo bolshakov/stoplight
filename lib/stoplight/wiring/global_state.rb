@@ -6,13 +6,10 @@ module Stoplight
       attr_reader :default_system
       attr_reader :default_config
 
-      DEFAULT_SYSTEM_NAME = "__stoplight__default_system"
-      private_constant :DEFAULT_SYSTEM_NAME
-
       def initialize(default_config:)
-        @default_config = default_config.with(name: DEFAULT_SYSTEM_NAME)
+        @default_config = default_config
         @systems = Concurrent::Map.new
-        @default_system = register_system_with_config(default_config.with(name: "Default"))
+        @default_system = register_system_with_config(@default_config)
       end
 
       def register_system(
@@ -77,7 +74,7 @@ module Stoplight
           Infrastructure::FailSafe::Storage::Registry.new(
             primary_registry: Infrastructure::Redis::Storage::Registry.new(
               redis: config.data_store.redis,
-              key_space: Infrastructure::Redis::Storage::SystemKeySpace.build(system_name: config.name.to_s),
+              key_space: config.data_store.key_space.join(config.id),
               clock: Infrastructure::SystemClock.new,
               config_serializer: Infrastructure::ConfigSerializer
             ),

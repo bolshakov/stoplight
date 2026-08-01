@@ -58,7 +58,7 @@ module Stoplight
             @clock = clock
             @scripting = scripting
             @redis = redis
-            @metrics_key = key_space.key(:metrics)
+            @metrics_key = key_space.join("metrics")
           end
 
           # Get metrics for the current light

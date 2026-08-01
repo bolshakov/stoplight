@@ -3,12 +3,9 @@
 require "rantly/rspec_extensions"
 
 RSpec.describe "Stoplight::Infrastructure::Redis::Storage::WindowMetrics bucket alignment", :redis do
-  let(:key_space) { Stoplight::Infrastructure::Redis::Storage::KeySpace.build(light_name:, system_name:) }
+  let(:key_space) { Stoplight::DataStore::Redis.key_space.join(SecureRandom.uuid) }
   let(:clock) { Stoplight::Infrastructure::SystemClock.new }
   let(:scripting) { Stoplight::Infrastructure::Redis::Storage::Scripting.new(redis:) }
-
-  let(:light_name) { SecureRandom.uuid }
-  let(:system_name) { SecureRandom.uuid }
 
   let(:metric) { "failures" }
 

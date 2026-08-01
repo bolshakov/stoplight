@@ -22,7 +22,7 @@ module Stoplight
         #     clock: SystemClock.new,
         #     redis: Redis.new,
         #     scripting: Scripting.new(redis:),
-        #     key_space: KeySpace.build(light_name: "payments", system_name: "main"),
+        #     key_space:,
         #     cool_off_time: 60
         #   )
         #
@@ -46,7 +46,7 @@ module Stoplight
             @clock = clock
             @cool_off_time = cool_off_time
 
-            @state_key = key_space.key(:state)
+            @state_key = key_space.join("state")
           end
 
           def set_state(state)

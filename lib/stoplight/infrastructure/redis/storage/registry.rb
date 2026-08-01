@@ -5,9 +5,6 @@ module Stoplight
     module Redis
       module Storage
         class Registry
-          REDIS_KEY = "lights"
-          private_constant :REDIS_KEY
-
           def initialize(redis:, key_space:, clock:, config_serializer:)
             @redis = redis
             @key_space = key_space
@@ -52,9 +49,7 @@ module Stoplight
             light_info["config"]
           end
 
-          private def key
-            @key_space.key(REDIS_KEY)
-          end
+          private def key = @key_space.join("lights")
         end
       end
     end

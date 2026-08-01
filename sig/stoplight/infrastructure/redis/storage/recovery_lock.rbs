@@ -8,13 +8,13 @@ module Stoplight
           attr_reader config: Domain::Config
           attr_reader redis: redis
           attr_reader scripting: Scripting
-          attr_reader key_space: KeySpace
+          attr_reader key_space: Key
 
           def initialize: (
             config: Domain::Config,
             redis: redis,
             scripting: Scripting,
-            key_space: KeySpace
+            key_space: Key
           ) -> void
 
           def lock_key: -> String

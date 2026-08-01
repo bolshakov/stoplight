@@ -7,7 +7,7 @@ module Stoplight
 
           attr_reader redis: redis
           attr_reader scripting: Scripting
-          attr_reader key_space: KeySpace
+          attr_reader key_space: Key
           attr_reader clock: Domain::_Clock
           attr_reader cool_off_time: Domain::timestamp
           attr_reader state_key: String
@@ -16,7 +16,7 @@ module Stoplight
             clock: Domain::_Clock,
             redis: redis,
             scripting: Scripting,
-            key_space: KeySpace,
+            key_space: Key,
             cool_off_time: Domain::timestamp
           ) -> void
 

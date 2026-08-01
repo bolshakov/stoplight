@@ -2,12 +2,14 @@ module Stoplight
   module Wiring
     class System
       class Storage
+        @system_id: String
         @system_name: String
         @failover_system: _System
         @factories: Hash[Domain::Config, LightFactory]
         @telemetry: Domain::_TelemetryPublisher
 
         def initialize: (
+            system_id: String,
             system_name: String,
             failover_system: _System,
             telemetry: Domain::_TelemetryPublisher
