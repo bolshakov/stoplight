@@ -2,6 +2,7 @@
 
 RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
   let(:light) { Stoplight("foo") }
+  let(:id) { Stoplight::Domain::Id.for("foo") }
   let(:light_condition) { proc { 1 / 1 == 0 } }
 
   before do
@@ -153,7 +154,7 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
                  "percent_yellow" => 0,
                  "percent_green" => 100},
               "lights" => [
-                {"color" => "green", "failures" => [], "locked" => false, "name" => "foo"}
+                {"id" => id, "color" => "green", "failures" => [], "locked" => false, "name" => "foo"}
               ]
             }
           )
@@ -168,7 +169,7 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
     end
 
     it "locks the light" do
-      post "/unlock", names: "foo"
+      post "/unlock", ids: id
 
       expect(last_response.status).to eq(302)
       expect(last_response.headers["location"]).to include("#{last_request.env["HTTP_HOST"]}/")
@@ -180,7 +181,7 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
     before { light.run(&light_condition) }
 
     it "locks the light" do
-      post "/green", names: "foo"
+      post "/green", ids: id
 
       expect(last_response.status).to eq(302)
       expect(last_response.headers["location"]).to include("#{last_request.env["HTTP_HOST"]}/")
@@ -192,7 +193,7 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
     before { light.run(&light_condition) }
 
     it "locks the light" do
-      post "/red", names: "foo"
+      post "/red", ids: id
 
       expect(last_response.status).to eq(302)
       expect(last_response.headers["location"]).to include("#{last_request.env["HTTP_HOST"]}/")
@@ -242,7 +243,7 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
     end
 
     it "removes the specified light metadata and redirects" do
-      post "/remove", names: "foo"
+      post "/remove", ids: id
 
       expect(last_response.status).to eq(302)
       expect(last_response.headers["location"]).to include("#{last_request.env["HTTP_HOST"]}/")
@@ -327,7 +328,7 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
       end
 
       it "refuses to unlock the light" do
-        post "/unlock", names: "foo"
+        post "/unlock", ids: id
 
         expect(last_response.status).to eq(403)
         expect(last_response.body).to include("read-only mode")
@@ -339,7 +340,7 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
       before { light.run(&light_condition) }
 
       it "refuses to lock the light" do
-        post "/green", names: "foo"
+        post "/green", ids: id
 
         expect(last_response.status).to eq(403)
         expect(light.state).to eq("unlocked")
@@ -350,7 +351,7 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
       before { light.run(&light_condition) }
 
       it "refuses to lock the light" do
-        post "/red", names: "foo"
+        post "/red", ids: id
 
         expect(last_response.status).to eq(403)
         expect(light.state).to eq("unlocked")
@@ -376,12 +377,12 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
       end
 
       it "refuses to remove the light" do
-        post "/remove", names: "foo"
+        post "/remove", ids: id
 
         expect(last_response.status).to eq(403)
 
         get "/stats"
-        expect(response_body.fetch("lights").map { |h| h.fetch("name") }).to contain_exactly("foo")
+        expect(response_body.fetch("lights").map { |h| h.fetch("id") }).to contain_exactly(id)
       end
     end
   end

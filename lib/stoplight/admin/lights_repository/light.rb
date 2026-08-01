@@ -20,8 +20,8 @@ module Stoplight
         attr_reader :failures
         attr_reader :failure_count
 
-        def initialize(name:, color:, state:, failures:, failure_count: nil)
-          @id = SecureRandom.uuid
+        def initialize(id:, name:, color:, state:, failures:, failure_count: nil)
+          @id = id
           @name = name
           @color = color
           @state = state
@@ -41,6 +41,7 @@ module Stoplight
         # @return [Hash]
         def as_json
           {
+            id: @id,
             name: @name,
             color: @color,
             failures: @failures,

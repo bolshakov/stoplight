@@ -17,18 +17,21 @@ RSpec.describe Stoplight::Admin::LightsStats do
       let(:lights) do
         [
           Stoplight::Admin::LightsRepository::Light.new(
+            id: "a",
             name: "green",
             color: "green",
             state: "unlocked",
             failures: []
           ),
           Stoplight::Admin::LightsRepository::Light.new(
+            id: "b",
             name: "yellow",
             color: "yellow",
             state: "unlocked",
             failures: []
           ),
           Stoplight::Admin::LightsRepository::Light.new(
+            id: "c",
             name: "red",
             color: "red",
             state: "locked",

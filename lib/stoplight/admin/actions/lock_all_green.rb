@@ -9,8 +9,7 @@ module Stoplight
         def call(*)
           @lights_repository
             .with_color(Color::RED, Color::YELLOW)
-            .map(&:name)
-            .each { |name| @lights_repository.lock(name, Color::GREEN) }
+            .each { |light| @lights_repository.lock(light.id, Color::GREEN) }
         end
       end
     end

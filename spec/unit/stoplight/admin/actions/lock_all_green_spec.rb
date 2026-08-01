@@ -6,8 +6,8 @@ RSpec.describe Stoplight::Admin::Actions::LockAllGreen do
   let(:action) { described_class.new(lights_repository: lights_repository) }
   let(:lights_repository) { instance_double(Stoplight::Admin::LightsRepository) }
 
-  let(:red_light) { instance_double(Stoplight::Admin::LightsRepository::Light, name: "red-light") }
-  let(:yellow_light) { instance_double(Stoplight::Admin::LightsRepository::Light, name: "yellow-light") }
+  let(:red_light) { instance_double(Stoplight::Admin::LightsRepository::Light, id: "red-light") }
+  let(:yellow_light) { instance_double(Stoplight::Admin::LightsRepository::Light, id: "yellow-light") }
 
   it "fetches red and yellow lights and lock them green" do
     expect(lights_repository).to receive(:with_color).with("red", "yellow") { [red_light, yellow_light] }

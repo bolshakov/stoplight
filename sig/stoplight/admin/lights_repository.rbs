@@ -19,8 +19,8 @@ module Stoplight
 
       private
 
-      def load_light_view: (String) -> Light
-      def build_config: (String) -> Domain::Config
+      def load_light_view: (String) -> Light?
+      def build_config: (String) -> Domain::Config?
     end
   end
 end

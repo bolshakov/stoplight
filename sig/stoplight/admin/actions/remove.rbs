@@ -6,10 +6,6 @@ module Stoplight
       # This action removes a light's metadata from Redis
       class Remove < Action
         def call: (Sinatra::IndifferentHash) -> void
-
-        private
-
-        def light_names: (Sinatra::IndifferentHash) -> Array[String]
       end
     end
   end

@@ -128,7 +128,7 @@ module Stoplight
             failover_system: @failover_system,
             telemetry: @telemetry
           ).build
-          @registry.register(name, config:)
+          @registry.register(config)
           [built, config_digest, source_line]
         end
 

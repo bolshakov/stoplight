@@ -3,10 +3,10 @@ module Stoplight
     # Holds the information about existing lights.
     # Each system has its own registry so you can query lights belonging to it.
     interface _Registry
-      def names: -> Array[String]
-      def register: (String name, config: Config) -> void
-      def unregister: (String name) -> void
-      def config_for: (String name) -> Hash[String, untyped]?
+      def ids: -> Array[String]
+      def register: (Config) -> void
+      def unregister: (String id) -> void
+      def config_for: (String id) -> Hash[String, untyped]?
     end
   end
 end

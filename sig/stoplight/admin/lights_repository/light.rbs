@@ -4,6 +4,7 @@ module Stoplight
       class Light
         COLORS: Array[Domain::color]
 
+        attr_reader id: String
         attr_reader color: Domain::color
         attr_reader name: String
 
@@ -16,6 +17,7 @@ module Stoplight
         @latest_failure: Domain::Failure?
 
         def initialize: (
+            id: String,
             name: String,
             color: Domain::color,
             state: Domain::state,

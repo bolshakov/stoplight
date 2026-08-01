@@ -163,7 +163,9 @@ RSpec.describe Stoplight::Wiring::System do
       it "registers the light name when a new light is created" do
         system.register("stripe")
 
-        expect(registry).to have_received(:register).with("stripe", config: anything)
+        expect(registry).to have_received(:register) do |config|
+          expect(config.name).to eq("stripe")
+        end
       end
 
       it "does not register again on repeated calls with the same name" do

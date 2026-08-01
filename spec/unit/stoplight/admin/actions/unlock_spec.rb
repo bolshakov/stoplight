@@ -5,34 +5,37 @@ RSpec.describe Stoplight::Admin::Actions::Unlock do
 
   let(:action) { described_class.new(lights_repository: lights_repository) }
   let(:lights_repository) { instance_double(Stoplight::Admin::LightsRepository) }
-  let(:params) { {names: names} }
+  let(:params) { {ids: ids} }
 
   context "when just one light name is provided" do
-    let(:names) { "testing-light" }
+    let(:id) { SecureRandom.uuid }
+    let(:ids) { id }
 
     it "unlocks this light" do
-      expect(lights_repository).to receive(:unlock).with("testing-light")
+      expect(lights_repository).to receive(:unlock).with(id)
 
       call
     end
   end
 
   context "when two lights are provided" do
-    let(:names) { ["testing-light-1", "testing-light-2"] }
+    let(:id1) { SecureRandom.uuid }
+    let(:id2) { SecureRandom.uuid }
+    let(:ids) { [id1, id2] }
 
     it "unlocks these lights" do
-      expect(lights_repository).to receive(:unlock).with("testing-light-1")
-      expect(lights_repository).to receive(:unlock).with("testing-light-2")
+      expect(lights_repository).to receive(:unlock).with(id1)
+      expect(lights_repository).to receive(:unlock).with(id2)
 
       call
     end
   end
 
   context "when the light name is has escape characters" do
-    let(:names) { "testing%3Dlight" }
+    let(:ids) { SecureRandom.uuid }
 
     it "unescapes it and unlocks this light" do
-      expect(lights_repository).to receive(:unlock).with("testing=light")
+      expect(lights_repository).to receive(:unlock).with(ids)
 
       call
     end

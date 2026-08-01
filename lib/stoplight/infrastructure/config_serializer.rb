@@ -6,6 +6,8 @@ module Stoplight
       class << self
         def call(config)
           {
+            "id" => config.id,
+            "name" => config.name,
             "cool_off_time" => config.cool_off_time,
             "threshold" => config.threshold,
             "recovery_threshold" => config.recovery_threshold,

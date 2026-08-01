@@ -25,7 +25,7 @@ RSpec.describe Stoplight::Infrastructure::Memory::Storage::Registry do
     end
 
     context "when the light is registered" do
-      before { registry.register("stripe", config:) }
+      before { registry.register(config) }
 
       it "is still nil, since the memory registry is a no-op" do
         is_expected.to be_nil

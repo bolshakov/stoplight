@@ -6,14 +6,9 @@ module Stoplight
       # This action locks light
       class Lock < Action
         def call(params)
-          light_names(params).each do |name|
-            @lights_repository.lock(name)
+          Array(params[:ids]).each do |id|
+            @lights_repository.lock(id)
           end
-        end
-
-        private def light_names(params)
-          Array(params[:names])
-            .map { |name| CGI.unescape(name) }
         end
       end
     end

@@ -3,12 +3,14 @@
 RSpec.describe Stoplight::Admin::LightsRepository::Light do
   subject(:light) do
     described_class.new(
-      name: name,
-      color: color,
-      state: state,
-      failures: failures
+      id:,
+      name:,
+      color:,
+      state:,
+      failures:
     )
   end
+  let(:id) { SecureRandom.uuid }
   let(:failures) { [latest_failure] }
   let(:latest_failure) { Stoplight::Domain::Failure.from_error(latest_exception, time: Time.now) }
   let(:latest_exception) { StandardError.new("bang!") }
@@ -137,8 +139,9 @@ RSpec.describe Stoplight::Admin::LightsRepository::Light do
 
     it "returns a hash with the light's attributes" do
       is_expected.to eq({
-        name: name,
-        color: color,
+        id:,
+        name:,
+        color:,
         locked: false,
         failures: failures
       })

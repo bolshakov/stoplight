@@ -8,14 +8,9 @@ module Stoplight
         # @param params [Hash] query parameters
         # @return [void]
         def call(params)
-          light_names(params).each do |name|
+          Array(params[:ids]).each do |name|
             @lights_repository.lock(name, Color::GREEN)
           end
-        end
-
-        private def light_names(params)
-          Array(params[:names])
-            .map { |name| CGI.unescape(name) }
         end
       end
     end
