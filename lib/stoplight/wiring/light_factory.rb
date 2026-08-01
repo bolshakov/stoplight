@@ -69,10 +69,14 @@ module Stoplight
       def storage_scripting = Infrastructure::Redis::Storage::Scripting.new(redis:)
       def failover_system = T.must(@failover_system)
 
-      def key_space = @key_space ||= Infrastructure::Redis::Storage::KeySpace.new(
-        system_id: @system_id,
-        light_id: @config.id
-      )
+      def key_space
+        @key_space ||= case data_store_config
+        when DataStore::Redis
+          data_store_config.key_space.join(@system_id, "{#{@config.id}}")
+        else
+          raise T.absurd(data_store_config)
+        end
+      end
 
       def storage_set
         @storage_set ||= StorageSetBuilder.new(backend: build_backend, windowed: !config.window_size.nil?).build
@@ -143,7 +147,7 @@ module Stoplight
         when DataStore::Redis
           data_store_config.redis
         else
-          raise TypeError, "Expected Stoplight::DataStore::Redis, got #{data_store_config}"
+          raise T.absurd(data_store_config)
         end
       end
 

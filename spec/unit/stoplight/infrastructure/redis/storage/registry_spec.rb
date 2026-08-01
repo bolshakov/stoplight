@@ -4,7 +4,7 @@ RSpec.describe Stoplight::Infrastructure::Redis::Storage::Registry, :redis do
   subject(:registry) { described_class.new(redis:, key_space:, clock:, config_serializer:) }
 
   let(:config_serializer) { Stoplight::Infrastructure::ConfigSerializer }
-  let(:key_space) { Stoplight::Infrastructure::Redis::Storage::SystemKeySpace.new(system_id: SecureRandom.uuid) }
+  let(:key_space) { Stoplight::Infrastructure::Redis::Key.new(:stoplight) }
   let(:clock) { Stoplight::Infrastructure::SystemClock.new }
   let(:config) do
     instance_double(
@@ -65,7 +65,7 @@ RSpec.describe Stoplight::Infrastructure::Redis::Storage::Registry, :redis do
     it "persists the serialized config" do
       registry.register("stripe", config:)
 
-      payload = redis.with { |conn| conn.hget(key_space.key("lights"), "stripe") }
+      payload = redis.with { |conn| conn.hget(key_space.join("lights"), "stripe") }
       parsed = JSON.parse(payload)
 
       expect(parsed["config"]).to eq(Stoplight::Infrastructure::ConfigSerializer.call(config))

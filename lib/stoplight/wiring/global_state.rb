@@ -74,7 +74,7 @@ module Stoplight
           Infrastructure::FailSafe::Storage::Registry.new(
             primary_registry: Infrastructure::Redis::Storage::Registry.new(
               redis: config.data_store.redis,
-              key_space: Infrastructure::Redis::Storage::SystemKeySpace.build(system_name: config.name.to_s),
+              key_space: config.data_store.key_space.join(config.id),
               clock: Infrastructure::SystemClock.new,
               config_serializer: Infrastructure::ConfigSerializer
             ),

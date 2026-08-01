@@ -10,12 +10,7 @@ RSpec.describe Stoplight::Wiring::Redis::Backend, :redis do
 
     let(:clock) { instance_double(NullClock) }
     let(:scripting) { instance_double(Stoplight::Infrastructure::Redis::Storage::Scripting) }
-    let(:key_space) do
-      Stoplight::Infrastructure::Redis::Storage::KeySpace.new(
-        system_id: SecureRandom.uuid,
-        light_id: SecureRandom.uuid
-      )
-    end
+    let(:key_space) { Stoplight::DataStore::Redis.key_space.join(SecureRandom.uuid) }
     let(:error_notifier) { ->(e) { warn e } }
     let(:failover_light) { instance_double(Stoplight::Domain::Light) }
   end
