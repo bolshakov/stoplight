@@ -124,8 +124,9 @@ module Stoplight
       redirect to("/")
     end
 
-    post "/remove" do
-      dependencies.remove_action.call(params)
+    delete "/:light_id" do
+      light_id = T.must(params[:light_id])
+      dependencies.remove_action.call(light_id:)
 
       redirect to("/")
     end

@@ -49,7 +49,11 @@ module Stoplight
       end
 
       def remove_action
-        Stoplight::Admin::Actions::Remove.new(lights_repository: lights_repository)
+        Stoplight::Admin::Actions::Remove.new(
+          config_registry: config_registry,
+          storage: @storage,
+          registry: @system.__stoplight__registry
+        )
       end
     end
   end

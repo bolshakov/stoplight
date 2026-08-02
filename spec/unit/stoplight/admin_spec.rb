@@ -76,7 +76,7 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
         expect(last_response).to be_ok
 
         expect(last_response.body).to include(
-          %(href="http://#{last_request.env["HTTP_HOST"]}/remove?names=foo" data-turbo-method="post" data-turbo-confirm="Are you sure you want to remove this light?")
+          %(href="http://#{last_request.env["HTTP_HOST"]}/#{light_id}" data-turbo-method="delete" data-turbo-confirm="Are you sure you want to remove this light?")
         )
         expect(last_response.body.scan("data-turbo-confirm").count).to eq(1)
       end
@@ -240,7 +240,7 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
     end
   end
 
-  describe "POST /remove" do
+  describe "DELETE /{light_id}" do
     let(:another_light) { Stoplight("bar") }
 
     before do
@@ -252,7 +252,7 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
     end
 
     it "removes the specified light metadata and redirects" do
-      post "/remove", ids: id
+      delete "/#{light_id}"
 
       expect(last_response.status).to eq(302)
       expect(last_response.headers["location"]).to include("#{last_request.env["HTTP_HOST"]}/")
@@ -328,14 +328,14 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
       expect(last_response.status).to eq(403)
     end
 
-    describe "POST /unlock" do
+    describe "PATCH /{light_id}/unlock" do
       before do
         light.run(&light_condition)
         light.lock(Stoplight::Color::GREEN)
       end
 
       it "refuses to unlock the light" do
-        post "/unlock", ids: id
+        patch "/#{light_id}/unlock"
 
         expect(last_response.status).to eq(403)
         expect(last_response.body).to include("read-only mode")
@@ -343,22 +343,11 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
       end
     end
 
-    describe "POST /green" do
+    describe "PATCH /{light_id}/lock" do
       before { light.run(&light_condition) }
 
       it "refuses to lock the light" do
-        post "/green", ids: id
-
-        expect(last_response.status).to eq(403)
-        expect(light.state).to eq("unlocked")
-      end
-    end
-
-    describe "POST /red" do
-      before { light.run(&light_condition) }
-
-      it "refuses to lock the light" do
-        post "/red", ids: id
+        patch "/#{light_id}/lock"
 
         expect(last_response.status).to eq(403)
         expect(light.state).to eq("unlocked")
@@ -376,7 +365,7 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
       end
     end
 
-    describe "POST /remove" do
+    describe "DELETE /{light_id}" do
       before do
         light.run { raise "whoops" }
       rescue
@@ -384,7 +373,7 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
       end
 
       it "refuses to remove the light" do
-        post "/remove", ids: id
+        delete "/#{light_id}"
 
         expect(last_response.status).to eq(403)
 
