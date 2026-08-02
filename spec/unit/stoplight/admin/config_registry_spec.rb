@@ -36,4 +36,33 @@ RSpec.describe Stoplight::Admin::ConfigRegistry, :redis do
       end
     end
   end
+
+  describe "#all" do
+    subject(:configs) { repository.all }
+
+    context "when the light exists" do
+      let(:name1) { SecureRandom.uuid }
+      let(:id1) { Stoplight::Domain::Id.for(name1) }
+      let(:name2) { SecureRandom.uuid }
+      let(:id1) { Stoplight::Domain::Id.for(name2) }
+
+      before do
+        system.register(name1)
+        system.register(name2)
+      end
+
+      it "loads the light config" do
+        expect(configs).to contain_exactly(
+          have_attributes(name: name1),
+          have_attributes(name: name2)
+        )
+      end
+    end
+
+    context "when no light was ever registered on this system" do
+      it "returns nil" do
+        expect(configs).to be_empty
+      end
+    end
+  end
 end

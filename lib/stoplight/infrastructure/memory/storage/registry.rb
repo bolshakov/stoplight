@@ -6,6 +6,7 @@ module Stoplight
       module Storage
         class Registry
           def ids = []
+          def all_configs = []
 
           def register(config) = nil
           def unregister(id) = nil

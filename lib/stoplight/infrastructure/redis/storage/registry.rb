@@ -40,6 +40,16 @@ module Stoplight
             end
           end
 
+          def all_configs
+            raw_lights_info = @redis.with do |conn|
+              conn.hgetall(key)
+            end
+            return [] unless raw_lights_info
+            raw_lights_info
+              .filter_map { |_, config| config }
+              .map { |config| JSON.parse(config)["config"] }
+          end
+
           def config_for(id)
             raw_light_info = @redis.with do |conn|
               conn.hget(key, id)

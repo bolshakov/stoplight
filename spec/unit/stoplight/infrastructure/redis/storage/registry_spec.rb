@@ -96,4 +96,28 @@ RSpec.describe Stoplight::Infrastructure::Redis::Storage::Registry, :redis do
       it { is_expected.to be_nil }
     end
   end
+
+  describe "#all_configs" do
+    subject { registry.all_configs }
+
+    context "when the light is registered" do
+      let(:config2) { config.with(id: "paypal") }
+
+      before do
+        registry.register(config)
+        registry.register(config2)
+      end
+
+      it "returns all persisted configs" do
+        is_expected.to contain_exactly(
+          Stoplight::Infrastructure::ConfigSerializer.call(config),
+          Stoplight::Infrastructure::ConfigSerializer.call(config2)
+        )
+      end
+    end
+
+    context "when the light was never registered" do
+      it { is_expected.to be_empty }
+    end
+  end
 end

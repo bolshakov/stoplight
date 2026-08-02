@@ -10,6 +10,7 @@ module Stoplight
       def stats_action: -> Actions::Stats
       def unlock_action: -> Actions::Unlock
       def lock_action: -> Actions::Lock
+      def lock_all_action: -> Actions::LockAll
       def green_all_action: -> Actions::LockAllGreen
       def remove_action: -> Actions::Remove
     end

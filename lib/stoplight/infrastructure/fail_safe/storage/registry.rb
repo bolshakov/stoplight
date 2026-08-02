@@ -22,6 +22,16 @@ module Stoplight
             end
           end
 
+          def all_configs
+            fallback = ->(error) {
+              @error_notifier.call(error) if error
+              @failover_registry.all_configs
+            }
+            @circuit_breaker.run(fallback) do
+              @primary_registry.all_configs
+            end
+          end
+
           def register(config)
             fallback = ->(error) {
               @error_notifier.call(error) if error

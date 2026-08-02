@@ -89,7 +89,7 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
         get "/"
 
         expect(last_response).to be_ok
-        expect(last_response.body).to include(%(href="http://#{last_request.env["HTTP_HOST"]}/green_all" data-turbo-method="post"))
+        expect(last_response.body).to include(%(href="http://#{last_request.env["HTTP_HOST"]}/lock?color=green" data-turbo-method="patch"))
       end
     end
 
@@ -210,7 +210,7 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
     end
   end
 
-  describe "POST /green_all" do
+  describe "PATCH /lock" do
     let(:another_light) { Stoplight("bar") }
     let(:green_light) { Stoplight("baz") }
 
@@ -221,7 +221,7 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
     end
 
     it "locks non-green lights" do
-      post "/green_all"
+      patch "/lock", color: "green"
 
       expect(last_response.status).to eq(302)
       expect(last_response.headers["location"]).to include("#{last_request.env["HTTP_HOST"]}/")
@@ -232,7 +232,7 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
     end
 
     it "does not lock green lights" do
-      post "/green_all"
+      patch "/lock", color: "green"
 
       expect(last_response.status).to eq(302)
       expect(last_response.headers["location"]).to include("#{last_request.env["HTTP_HOST"]}/")
@@ -354,11 +354,11 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
       end
     end
 
-    describe "POST /green_all" do
+    describe "PATCH /lock" do
       before { light.lock(Stoplight::Color::RED) }
 
       it "refuses to lock the lights" do
-        post "/green_all"
+        patch "/lock"
 
         expect(last_response.status).to eq(403)
         expect(light.state).to eq("locked_red")

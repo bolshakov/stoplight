@@ -44,6 +44,13 @@ module Stoplight
         )
       end
 
+      def lock_all_action
+        Stoplight::Admin::Actions::LockAll.new(
+          storage: @storage,
+          config_registry: config_registry
+        )
+      end
+
       def green_all_action
         Stoplight::Admin::Actions::LockAllGreen.new(lights_repository: lights_repository)
       end
