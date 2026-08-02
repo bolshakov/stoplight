@@ -36,12 +36,12 @@ module Stoplight
       #   # => aria-disabled="true" title="Disabled in read-only mode"
       #
       # @param confirm [String, nil] message to confirm before following the link
-      def control_attributes(href, confirm: nil)
+      def control_attributes(href, confirm: nil, verb: "post")
         return %(aria-disabled="true" title="Disabled in read-only mode") if settings.read_only?
 
         [
           %(href="#{CGI.escapeHTML(href)}"),
-          %(data-turbo-method="post"),
+          %(data-turbo-method="#{verb}"),
           (%(data-turbo-confirm="#{CGI.escapeHTML(confirm)}") if confirm)
         ].compact.join(" ")
       end

@@ -1,0 +1,15 @@
+module Stoplight
+  class Admin
+    class ConfigRegistry
+      @registry: Domain::_Registry
+      @system_config: Domain::Config
+
+      def initialize: (
+          registry: Domain::_Registry,
+          system_config: Domain::Config
+        ) -> void
+
+      def find_by_id: (String) -> Domain::Config?
+    end
+  end
+end

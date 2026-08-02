@@ -5,6 +5,14 @@ module Stoplight
     class Dependencies
       def initialize(system:)
         @system = system
+        @storage = @system.__stoplight__storage
+      end
+
+      def config_registry
+        ConfigRegistry.new(
+          registry: @system.__stoplight__registry,
+          system_config: @system.config
+        )
       end
 
       def lights_repository
@@ -23,7 +31,10 @@ module Stoplight
       end
 
       def unlock_action
-        Stoplight::Admin::Actions::Unlock.new(lights_repository: lights_repository)
+        Stoplight::Admin::Actions::Unlock.new(
+          storage: @system.__stoplight__storage,
+          config_registry: config_registry
+        )
       end
 
       def green_action

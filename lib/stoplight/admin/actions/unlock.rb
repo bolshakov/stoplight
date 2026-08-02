@@ -5,9 +5,17 @@ module Stoplight
     module Actions
       # This action unlocks light
       class Unlock < Action
-        def call(params)
-          Array(params[:ids]).each do |name|
-            @lights_repository.unlock(name)
+        def initialize(config_registry:, storage:)
+          @config_registry = config_registry
+          @storage = storage
+        end
+
+        def call(light_id:)
+          config = @config_registry.find_by_id(light_id)
+          if config
+            @storage.unlock(config)
+          else
+            halt 404
           end
         end
       end

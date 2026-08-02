@@ -129,20 +129,6 @@ RSpec.describe Stoplight::Admin::LightsRepository, :redis do
     end
   end
 
-  describe "#unlock" do
-    subject(:unlock) { repository.unlock(id) }
-
-    before do
-      light.lock("red")
-    end
-
-    it "unlocks the light" do
-      expect { unlock }
-        .to change(light, :state)
-        .to("unlocked")
-    end
-  end
-
   describe "#remove" do
     subject(:remove) { repository.remove(id) }
 

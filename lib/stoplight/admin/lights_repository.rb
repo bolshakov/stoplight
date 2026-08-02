@@ -33,12 +33,6 @@ module Stoplight
         @storage.lock(config, color)
       end
 
-      # @param id unlocks light by its name
-      def unlock(id)
-        config = build_config(id)
-        @storage.unlock(config) if config
-      end
-
       # @param id removes light metadata by its name
       def remove(id)
         config = build_config(id)

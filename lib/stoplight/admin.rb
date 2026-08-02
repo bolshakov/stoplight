@@ -103,8 +103,9 @@ module Stoplight
       json({stats: stats, lights: lights.map(&:as_json)})
     end
 
-    post "/unlock" do
-      dependencies.unlock_action.call(params)
+    patch "/:light_id/unlock" do
+      light_id = T.must(params[:light_id])
+      dependencies.unlock_action.call(light_id:)
 
       redirect to("/")
     end

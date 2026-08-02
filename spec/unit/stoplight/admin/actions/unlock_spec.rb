@@ -1,43 +1,36 @@
 # frozen_string_literal: true
 
 RSpec.describe Stoplight::Admin::Actions::Unlock do
-  subject(:call) { action.call(params) }
+  subject(:call) { action.call(light_id:) }
 
-  let(:action) { described_class.new(lights_repository: lights_repository) }
-  let(:lights_repository) { instance_double(Stoplight::Admin::LightsRepository) }
-  let(:params) { {ids: ids} }
+  let(:action) { described_class.new(config_registry:, storage:) }
+  let(:config_registry) { instance_double(Stoplight::Admin::ConfigRegistry) }
+  let(:storage) { instance_double(Stoplight::Wiring::System::Storage) }
+  let(:light_id) { SecureRandom.uuid }
 
-  context "when just one light name is provided" do
-    let(:id) { SecureRandom.uuid }
-    let(:ids) { id }
+  before do
+    allow(config_registry).to receive(:find_by_id).with(light_id).and_return(config)
+  end
+
+  context "when existing light name is provided" do
+    let(:config) { instance_double(Stoplight::Domain::Config) }
 
     it "unlocks this light" do
-      expect(lights_repository).to receive(:unlock).with(id)
+      expect(storage).to receive(:unlock).with(config)
 
       call
     end
   end
 
-  context "when two lights are provided" do
-    let(:id1) { SecureRandom.uuid }
-    let(:id2) { SecureRandom.uuid }
-    let(:ids) { [id1, id2] }
-
-    it "unlocks these lights" do
-      expect(lights_repository).to receive(:unlock).with(id1)
-      expect(lights_repository).to receive(:unlock).with(id2)
-
-      call
-    end
-  end
-
-  context "when the light name is has escape characters" do
-    let(:ids) { SecureRandom.uuid }
+  context "when light does not exists" do
+    let(:config) { nil }
 
     it "unescapes it and unlocks this light" do
-      expect(lights_repository).to receive(:unlock).with(ids)
+      expect(storage).not_to receive(:unlock)
 
-      call
+      expect do
+        call
+      end.to throw_symbol(:halt, 404)
     end
   end
 end

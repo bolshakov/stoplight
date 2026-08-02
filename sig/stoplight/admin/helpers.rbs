@@ -6,7 +6,7 @@ module Stoplight
       def dependencies: -> Dependencies
       def asset_path: (String) -> String
       def time_ago_in_words: (Time) -> String
-      def control_attributes: (String href, ?confirm: String?) -> String
+      def control_attributes: (String href, ?confirm: String?, ?verb: String?) -> String
     end
   end
 end

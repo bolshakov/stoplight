@@ -14,7 +14,6 @@ module Stoplight
       def all: -> Array[Light]
       def with_color: (*Domain::color) -> Array[Light]
       def lock: (String, ?Domain::color?) -> void
-      def unlock: (String) -> void
       def remove: (String) -> void
 
       private

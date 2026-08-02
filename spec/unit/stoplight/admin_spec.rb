@@ -3,6 +3,7 @@
 RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
   let(:light) { Stoplight("foo") }
   let(:id) { Stoplight::Domain::Id.for("foo") }
+  let(:light_id) { id }
   let(:light_condition) { proc { 1 / 1 == 0 } }
 
   before do
@@ -62,7 +63,7 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
 
         expect(last_response).to be_ok
 
-        expect(last_response.body).to include(%(href="http://#{last_request.env["HTTP_HOST"]}/unlock?names=foo" data-turbo-method="post"))
+        expect(last_response.body).to include(%(href="http://#{last_request.env["HTTP_HOST"]}/#{light_id}/unlock" data-turbo-method="patch"))
         expect(last_response.body).to include(%(href="http://#{last_request.env["HTTP_HOST"]}/red?names=foo" data-turbo-method="post"))
         expect(last_response.body).to include(%(href="http://#{last_request.env["HTTP_HOST"]}/green?names=foo" data-turbo-method="post"))
 
@@ -162,18 +163,24 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
     end
   end
 
-  describe "POST /unlock" do
+  describe "PATCH /unlock" do
     before do
       light.run(&light_condition)
       light.lock(Stoplight::Color::GREEN)
     end
 
-    it "locks the light" do
-      post "/unlock", ids: id
+    it "unlocks the light" do
+      patch "/#{id}/unlock"
 
       expect(last_response.status).to eq(302)
       expect(last_response.headers["location"]).to include("#{last_request.env["HTTP_HOST"]}/")
       expect(light.state).to eq "unlocked"
+    end
+
+    it "cannot unlock non-existent light" do
+      patch "/#{SecureRandom.uuid}/unlock"
+
+      expect(last_response.status).to eq(404)
     end
   end
 
@@ -279,7 +286,7 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
         expect(last_response).to be_ok
         expect(last_response.body).to include("Unlock", "Lock Red", "Lock Green", "Remove")
 
-        expect(last_response.body).to_not include("/unlock?names=foo")
+        expect(last_response.body).to_not include("/#{light_id}/unlock")
         expect(last_response.body).to_not include("/red?names=foo")
         expect(last_response.body).to_not include("/green?names=foo")
         expect(last_response.body).to_not include("/remove?names=foo")
