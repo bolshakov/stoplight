@@ -5,9 +5,17 @@ module Stoplight
     module Actions
       # This action locks light
       class Lock < Action
-        def call(params)
-          Array(params[:ids]).each do |id|
-            @lights_repository.lock(id)
+        def initialize(config_registry:, storage:)
+          @config_registry = config_registry
+          @storage = storage
+        end
+
+        def call(light_id:, color:)
+          config = @config_registry.find_by_id(light_id)
+          if config
+            @storage.lock(config, color)
+          else
+            halt 404
           end
         end
       end

@@ -9,8 +9,7 @@ module Stoplight
       def lights_repository: -> LightsRepository
       def stats_action: -> Actions::Stats
       def unlock_action: -> Actions::Unlock
-      def green_action: -> Actions::LockGreen
-      def red_action: -> Actions::LockRed
+      def lock_action: -> Actions::Lock
       def green_all_action: -> Actions::LockAllGreen
       def remove_action: -> Actions::Remove
     end

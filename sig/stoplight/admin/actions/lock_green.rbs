@@ -1,9 +1,0 @@
-module Stoplight
-  class Admin
-    module Actions
-      class LockGreen < Action
-        def call: (Sinatra::IndifferentHash) -> void
-      end
-    end
-  end
-end

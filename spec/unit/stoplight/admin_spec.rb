@@ -64,8 +64,8 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
         expect(last_response).to be_ok
 
         expect(last_response.body).to include(%(href="http://#{last_request.env["HTTP_HOST"]}/#{light_id}/unlock" data-turbo-method="patch"))
-        expect(last_response.body).to include(%(href="http://#{last_request.env["HTTP_HOST"]}/red?names=foo" data-turbo-method="post"))
-        expect(last_response.body).to include(%(href="http://#{last_request.env["HTTP_HOST"]}/green?names=foo" data-turbo-method="post"))
+        expect(last_response.body).to include(%(href="http://#{last_request.env["HTTP_HOST"]}/#{light_id}/lock?color=green" data-turbo-method="patch"))
+        expect(last_response.body).to include(%(href="http://#{last_request.env["HTTP_HOST"]}/#{light_id}/lock?color=red" data-turbo-method="patch"))
 
         expect(last_response.body).to_not include("Read-only")
       end
@@ -163,7 +163,7 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
     end
   end
 
-  describe "PATCH /unlock" do
+  describe "PATCH /{light_id}/unlock" do
     before do
       light.run(&light_condition)
       light.lock(Stoplight::Color::GREEN)
@@ -184,27 +184,29 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
     end
   end
 
-  describe "POST /green" do
+  describe "PATCH /{light_id}/lock" do
     before { light.run(&light_condition) }
 
-    it "locks the light" do
-      post "/green", ids: id
+    it "locks the light green" do
+      patch "/#{light_id}/lock", color: "green"
 
       expect(last_response.status).to eq(302)
       expect(last_response.headers["location"]).to include("#{last_request.env["HTTP_HOST"]}/")
       expect(light.state).to eq "locked_green"
     end
-  end
 
-  describe "POST /red" do
-    before { light.run(&light_condition) }
-
-    it "locks the light" do
-      post "/red", ids: id
+    it "locks the light red" do
+      patch "/#{light_id}/lock", color: "red"
 
       expect(last_response.status).to eq(302)
       expect(last_response.headers["location"]).to include("#{last_request.env["HTTP_HOST"]}/")
       expect(light.state).to eq "locked_red"
+    end
+
+    it "cannot lock non-existent light" do
+      patch "/#{SecureRandom.uuid}/lcok", color: "green"
+
+      expect(last_response.status).to eq(404)
     end
   end
 
@@ -287,9 +289,7 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
         expect(last_response.body).to include("Unlock", "Lock Red", "Lock Green", "Remove")
 
         expect(last_response.body).to_not include("/#{light_id}/unlock")
-        expect(last_response.body).to_not include("/red?names=foo")
-        expect(last_response.body).to_not include("/green?names=foo")
-        expect(last_response.body).to_not include("/remove?names=foo")
+        expect(last_response.body).to_not include("/#{light_id}/lock")
       end
 
       context "when some lights are not green" do

@@ -7,6 +7,7 @@ RSpec.describe "config.ru", :redis do
   include Rack::Test::Methods
 
   let(:app) { Rack::Builder.parse_file(File.expand_path("../../config.ru", __dir__)) }
+  let(:light_id) { SecureRandom.uuid }
 
   around do |example|
     original_redis_url = ENV["REDIS_URL"]
@@ -32,7 +33,7 @@ RSpec.describe "config.ru", :redis do
   it "runs the panel read-only when STOPLIGHT_ADMIN_READ_ONLY is true" do
     ENV["STOPLIGHT_ADMIN_READ_ONLY"] = "true"
 
-    post "/green", names: "foo"
+    patch "/#{light_id}/lock", color: "green"
 
     expect(last_response.status).to eq(403)
   end
@@ -40,9 +41,9 @@ RSpec.describe "config.ru", :redis do
   it "leaves the panel writable when STOPLIGHT_ADMIN_READ_ONLY holds any other value" do
     ENV["STOPLIGHT_ADMIN_READ_ONLY"] = "1"
 
-    post "/green", names: "foo"
+    patch "/#{light_id}/lock", color: "green"
 
-    expect(last_response.status).to eq(302)
+    expect(last_response.status).to eq(404)
   end
 
   it "surfaces a light a separate process already wrote to the same Redis" do

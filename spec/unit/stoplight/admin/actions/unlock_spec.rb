@@ -12,7 +12,7 @@ RSpec.describe Stoplight::Admin::Actions::Unlock do
     allow(config_registry).to receive(:find_by_id).with(light_id).and_return(config)
   end
 
-  context "when existing light name is provided" do
+  context "when existing light id is provided" do
     let(:config) { instance_double(Stoplight::Domain::Config) }
 
     it "unlocks this light" do
@@ -25,7 +25,7 @@ RSpec.describe Stoplight::Admin::Actions::Unlock do
   context "when light does not exists" do
     let(:config) { nil }
 
-    it "unescapes it and unlocks this light" do
+    it "throws halt" do
       expect(storage).not_to receive(:unlock)
 
       expect do

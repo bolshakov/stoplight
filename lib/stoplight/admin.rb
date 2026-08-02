@@ -110,14 +110,10 @@ module Stoplight
       redirect to("/")
     end
 
-    post "/green" do
-      dependencies.green_action.call(params)
-
-      redirect to("/")
-    end
-
-    post "/red" do
-      dependencies.red_action.call(params)
+    patch "/:light_id/lock" do
+      light_id = T.must(params[:light_id])
+      color = T.must(params[:color])
+      dependencies.lock_action.call(light_id:, color:)
 
       redirect to("/")
     end

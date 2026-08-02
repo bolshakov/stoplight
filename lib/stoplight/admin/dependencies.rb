@@ -32,17 +32,16 @@ module Stoplight
 
       def unlock_action
         Stoplight::Admin::Actions::Unlock.new(
-          storage: @system.__stoplight__storage,
+          storage: @storage,
           config_registry: config_registry
         )
       end
 
-      def green_action
-        Stoplight::Admin::Actions::LockGreen.new(lights_repository: lights_repository)
-      end
-
-      def red_action
-        Stoplight::Admin::Actions::LockRed.new(lights_repository: lights_repository)
+      def lock_action
+        Stoplight::Admin::Actions::Lock.new(
+          storage: @storage,
+          config_registry: config_registry
+        )
       end
 
       def green_all_action
