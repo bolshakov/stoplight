@@ -2,11 +2,15 @@ module Stoplight
   class Admin
     module Actions
       class Lock < Action
-        def call: (Sinatra::IndifferentHash) -> void
+        @config_registry: ConfigRegistry
+        @storage: Wiring::System::Storage
 
-        private
+        def initialize: (
+            config_registry: ConfigRegistry,
+            storage: Wiring::System::Storage
+          ) -> void
 
-        def light_names: (Sinatra::IndifferentHash) -> Array[String]
+        def call: (light_id: String, color: Domain::color) -> void
       end
     end
   end

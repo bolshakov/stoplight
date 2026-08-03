@@ -7,6 +7,8 @@ RSpec.describe Stoplight::Infrastructure::ConfigSerializer do
     let(:config) do
       instance_double(
         Stoplight::Domain::Config,
+        id: "fffffff",
+        name: "Payment Gateway",
         cool_off_time: 60.0,
         threshold: 5,
         recovery_threshold: 1,
@@ -16,6 +18,14 @@ RSpec.describe Stoplight::Infrastructure::ConfigSerializer do
         traffic_control: Stoplight::Domain::TrafficControl::ConsecutiveErrors.new,
         traffic_recovery: Stoplight::Domain::TrafficRecovery::ConsecutiveSuccesses.new
       )
+    end
+
+    it "includes the id" do
+      expect(serialized["id"]).to eq("fffffff")
+    end
+
+    it "includes the name" do
+      expect(serialized["name"]).to eq("Payment Gateway")
     end
 
     it "includes the cool_off_time" do
@@ -54,6 +64,8 @@ RSpec.describe Stoplight::Infrastructure::ConfigSerializer do
       let(:config) do
         instance_double(
           Stoplight::Domain::Config,
+          id: "fffffff",
+          name: "Payment Gateway",
           cool_off_time: 60.0,
           threshold: 5,
           recovery_threshold: 1,
@@ -74,6 +86,8 @@ RSpec.describe Stoplight::Infrastructure::ConfigSerializer do
       let(:config) do
         instance_double(
           Stoplight::Domain::Config,
+          id: "fffffff",
+          name: "Payment Gateway",
           cool_off_time: 60.0,
           threshold: 5,
           recovery_threshold: 1,
@@ -93,6 +107,8 @@ RSpec.describe Stoplight::Infrastructure::ConfigSerializer do
       let(:config) do
         instance_double(
           Stoplight::Domain::Config,
+          id: "fffffff",
+          name: "Payment Gateway",
           cool_off_time: 60.0,
           threshold: 5,
           recovery_threshold: 1,

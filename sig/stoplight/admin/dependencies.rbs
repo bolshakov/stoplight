@@ -2,14 +2,14 @@ module Stoplight
   class Admin
     class Dependencies
       @system: Wiring::System
+      @storage: Wiring::System::Storage
 
       def initialize: (system: Wiring::System) -> void
-      def lights_repository: -> LightsRepository
+      def config_registry: -> ConfigRegistry
       def stats_action: -> Actions::Stats
       def unlock_action: -> Actions::Unlock
-      def green_action: -> Actions::LockGreen
-      def red_action: -> Actions::LockRed
-      def green_all_action: -> Actions::LockAllGreen
+      def lock_action: -> Actions::Lock
+      def lock_all_action: -> Actions::LockAll
       def remove_action: -> Actions::Remove
     end
   end

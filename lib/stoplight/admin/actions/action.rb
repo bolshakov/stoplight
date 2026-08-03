@@ -5,8 +5,10 @@ module Stoplight
     module Actions
       # @abstract
       class Action
-        def initialize(lights_repository:)
-          @lights_repository = lights_repository
+        # Unwinds to Sinatra's route dispatch via `throw :halt`, skipping the rest of the
+        # action and the route block, and using +status+ as the response status.
+        def halt(status)
+          throw :halt, status
         end
       end
     end

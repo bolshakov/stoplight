@@ -13,6 +13,10 @@ A list of breaking changes in the future version, to be described in more detail
   - Stoplight::_StateTransitionNotifier  -> Stoplight::Domain::_StateTransitionNotifier
   - Stoplight::_ExceptionMatcher -> Stoplight::Domain::_ExceptionMatcher
 - key version bumps v5 → v6; existing v5 keys are orphaned
+- Admin dashboard routes are now RESTful and id-based instead of name-based query params:
+  `POST /unlock`, `/green`, `/red`, `/green_all`, `/remove` (with `?names=`) became
+  `PATCH /:light_id/unlock`, `PATCH /:light_id/lock?color=`, `PATCH /lock?color=`,
+  `DELETE /:light_id`
 
 ## Stoplight 5.0 
 

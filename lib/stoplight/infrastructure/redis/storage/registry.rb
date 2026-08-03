@@ -12,17 +12,17 @@ module Stoplight
             @config_serializer = config_serializer
           end
 
-          def names
+          def ids
             @redis.with do |conn|
               conn.hkeys(key)
             end
           end
 
-          def register(name, config:)
+          def register(config)
             @redis.with do |conn|
               conn.hset(
                 key,
-                name,
+                config.id,
                 {
                   meta: {
                     version: 1,
@@ -34,15 +34,31 @@ module Stoplight
             end
           end
 
-          def unregister(name)
+          def unregister(id)
             @redis.with do |conn|
-              conn.hdel(key, name)
+              conn.hdel(key, id)
             end
           end
 
-          def config_for(name)
+          def all_configs
+            raw_lights_info = @redis.with do |conn|
+              conn.hgetall(key)
+            end
+            return [] unless raw_lights_info
+            raw_lights_info.filter_map do |_, config|
+              next unless config
+
+              begin
+                JSON.parse(config)["config"]
+              rescue JSON::ParserError
+                nil
+              end
+            end
+          end
+
+          def config_for(id)
             raw_light_info = @redis.with do |conn|
-              conn.hget(key, name)
+              conn.hget(key, id)
             end
             return unless raw_light_info
             light_info = JSON.parse(raw_light_info)

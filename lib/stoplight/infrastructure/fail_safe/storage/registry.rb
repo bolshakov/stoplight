@@ -12,43 +12,53 @@ module Stoplight
             @circuit_breaker = circuit_breaker
           end
 
-          def names
+          def ids
             fallback = ->(error) {
               @error_notifier.call(error) if error
-              @failover_registry.names
+              @failover_registry.ids
             }
             @circuit_breaker.run(fallback) do
-              @primary_registry.names
+              @primary_registry.ids
             end
           end
 
-          def register(name, config:)
+          def all_configs
             fallback = ->(error) {
               @error_notifier.call(error) if error
-              @failover_registry.register(name, config:)
+              @failover_registry.all_configs
             }
             @circuit_breaker.run(fallback) do
-              @primary_registry.register(name, config:)
+              @primary_registry.all_configs
             end
           end
 
-          def unregister(name)
+          def register(config)
             fallback = ->(error) {
               @error_notifier.call(error) if error
-              @failover_registry.unregister(name)
+              @failover_registry.register(config)
             }
             @circuit_breaker.run(fallback) do
-              @primary_registry.unregister(name)
+              @primary_registry.register(config)
             end
           end
 
-          def config_for(name)
+          def unregister(id)
             fallback = ->(error) {
               @error_notifier.call(error) if error
-              @failover_registry.config_for(name)
+              @failover_registry.unregister(id)
             }
             @circuit_breaker.run(fallback) do
-              @primary_registry.config_for(name)
+              @primary_registry.unregister(id)
+            end
+          end
+
+          def config_for(id)
+            fallback = ->(error) {
+              @error_notifier.call(error) if error
+              @failover_registry.config_for(id)
+            }
+            @circuit_breaker.run(fallback) do
+              @primary_registry.config_for(id)
             end
           end
         end

@@ -5,11 +5,12 @@ module Stoplight
     module Memory
       module Storage
         class Registry
-          def names = []
+          def ids = []
+          def all_configs = []
 
-          def register(name, config:) = nil
-          def unregister(name) = nil
-          def config_for(name) = nil
+          def register(config) = nil
+          def unregister(id) = nil
+          def config_for(id) = nil
         end
       end
     end

@@ -9,7 +9,8 @@ RSpec.describe Stoplight::Admin::Helpers, :redis do
     end
   end
 
-  let(:systems) { [instance_double(Stoplight::Wiring::System, persistent?: true)] }
+  let(:systems) { [instance_double(Stoplight::Wiring::System, persistent?: true, __stoplight__storage: storage)] }
+  let(:storage) { instance_double(Stoplight::Wiring::System::Storage) }
   let(:settings) { class_double(Stoplight::Admin, systems: systems) }
 
   before do
@@ -24,7 +25,7 @@ RSpec.describe Stoplight::Admin::Helpers, :redis do
     context "with persistent data store" do
       let(:systems) do
         [
-          instance_double(Stoplight::Wiring::System, persistent?: true)
+          instance_double(Stoplight::Wiring::System, persistent?: true, __stoplight__storage: storage)
         ]
       end
 

@@ -1,40 +1,50 @@
 # frozen_string_literal: true
 
 RSpec.describe Stoplight::Admin::Actions::Lock do
-  subject(:call) { action.call(params) }
+  subject(:call) { action.call(light_id:, color:) }
 
-  let(:action) { described_class.new(lights_repository: lights_repository) }
-  let(:lights_repository) { instance_double(Stoplight::Admin::LightsRepository) }
-  let(:params) { {names: names} }
+  let(:action) { described_class.new(config_registry:, storage:) }
+  let(:config_registry) { instance_double(Stoplight::Admin::ConfigRegistry) }
+  let(:storage) { instance_double(Stoplight::Wiring::System::Storage) }
+  let(:light_id) { SecureRandom.uuid }
+  let(:color) { "green" }
 
-  context "when just one light name is provided" do
-    let(:names) { "testing-light" }
+  before do
+    allow(config_registry).to receive(:find_by_id).with(light_id).and_return(config)
+  end
+
+  context "when existing light id is provided" do
+    let(:config) { instance_double(Stoplight::Domain::Config) }
 
     it "locks this light" do
-      expect(lights_repository).to receive(:lock).with("testing-light")
+      expect(storage).to receive(:lock).with(config, color)
 
       call
     end
   end
 
-  context "when two lights are provided" do
-    let(:names) { ["testing-light-1", "testing-light-2"] }
+  context "when light does not exists" do
+    let(:config) { nil }
 
-    it "locks these lights" do
-      expect(lights_repository).to receive(:lock).with("testing-light-1")
-      expect(lights_repository).to receive(:lock).with("testing-light-2")
+    it "throws halt" do
+      expect(storage).not_to receive(:lock)
 
-      call
+      expect do
+        call
+      end.to throw_symbol(:halt, 404)
     end
   end
 
-  context "when the light name is has escape characters" do
-    let(:names) { "testing%3Dlight" }
+  context "when color is not lockable" do
+    let(:color) { "yellow" }
+    let(:config) { instance_double(Stoplight::Domain::Config) }
 
-    it "unescapes it and locks this light" do
-      expect(lights_repository).to receive(:lock).with("testing=light")
+    it "throws halt without locking" do
+      expect(storage).not_to receive(:lock)
 
-      call
+      expect do
+        call
+      end.to throw_symbol(:halt, 400)
     end
   end
 end

@@ -3,12 +3,12 @@ module Stoplight
     class LightsStats
       EMPTY_STATS: Hash[Symbol, Integer]
 
-      attr_reader lights: Array[LightsRepository::Light]
-      @lights: Array[LightsRepository::Light]
+      attr_reader lights: Array[LightView]
+      @lights: Array[LightView]
 
-      def self.call: (Array[LightsRepository::Light]) -> Hash[Symbol, Integer]
+      def self.call: (Array[LightView]) -> Hash[Symbol, Integer]
 
-      def initialize: (Array[LightsRepository::Light]) -> void
+      def initialize: (Array[LightView]) -> void
 
       def call: -> Hash[Symbol, Integer]
 

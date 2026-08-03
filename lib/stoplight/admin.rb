@@ -103,32 +103,31 @@ module Stoplight
       json({stats: stats, lights: lights.map(&:as_json)})
     end
 
-    post "/unlock" do
-      dependencies.unlock_action.call(params)
+    patch "/:light_id/unlock" do
+      light_id = T.must(params[:light_id])
+      dependencies.unlock_action.call(light_id:)
 
       redirect to("/")
     end
 
-    post "/green" do
-      dependencies.green_action.call(params)
+    patch "/:light_id/lock" do
+      light_id = T.must(params[:light_id])
+      color = T.must(params[:color])
+      dependencies.lock_action.call(light_id:, color:)
 
       redirect to("/")
     end
 
-    post "/red" do
-      dependencies.red_action.call(params)
+    patch "/lock" do
+      color = T.must(params[:color])
+      dependencies.lock_all_action.call(color:)
 
       redirect to("/")
     end
 
-    post "/green_all" do
-      dependencies.green_all_action.call
-
-      redirect to("/")
-    end
-
-    post "/remove" do
-      dependencies.remove_action.call(params)
+    delete "/:light_id" do
+      light_id = T.must(params[:light_id])
+      dependencies.remove_action.call(light_id:)
 
       redirect to("/")
     end

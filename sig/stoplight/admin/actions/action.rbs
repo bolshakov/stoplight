@@ -3,9 +3,7 @@ module Stoplight
   class Admin
     module Actions
       class Action
-        @lights_repository: LightsRepository
-
-        def initialize: (lights_repository: LightsRepository) -> void
+        def halt: (Integer status) -> void
       end
     end
   end

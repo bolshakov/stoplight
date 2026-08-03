@@ -1,7 +1,7 @@
 module Stoplight
   class Admin
     module Actions
-      class Unlock < Action
+      class LockAll < Action
         @config_registry: ConfigRegistry
         @storage: Wiring::System::Storage
 
@@ -10,7 +10,7 @@ module Stoplight
             storage: Wiring::System::Storage
           ) -> void
 
-        def call: (light_id: String) -> void
+        def call: (color: Domain::color)-> void
       end
     end
   end

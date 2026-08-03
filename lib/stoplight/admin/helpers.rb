@@ -29,19 +29,20 @@ module Stoplight
       # technology, which the styling alone does not reach.
       #
       # @example The same control, writable and read-only
-      #   control_attributes(url("/red?names=foo"))
-      #   # => href="http://localhost/red?names=foo" data-turbo-method="post"
+      #   control_attributes(url("/light-id/lock?color=red"), verb: "patch")
+      #   # => href="http://localhost/light-id/lock?color=red" data-turbo-method="patch"
       #
       #   # once `set :read_only, true`
       #   # => aria-disabled="true" title="Disabled in read-only mode"
       #
       # @param confirm [String, nil] message to confirm before following the link
-      def control_attributes(href, confirm: nil)
+      # @param verb [String] the HTTP verb Turbo should use to follow the link
+      def control_attributes(href, confirm: nil, verb: "post")
         return %(aria-disabled="true" title="Disabled in read-only mode") if settings.read_only?
 
         [
           %(href="#{CGI.escapeHTML(href)}"),
-          %(data-turbo-method="post"),
+          %(data-turbo-method="#{verb}"),
           (%(data-turbo-confirm="#{CGI.escapeHTML(confirm)}") if confirm)
         ].compact.join(" ")
       end

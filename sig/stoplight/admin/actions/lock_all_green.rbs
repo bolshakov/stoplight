@@ -1,9 +1,0 @@
-module Stoplight
-  class Admin
-    module Actions
-      class LockAllGreen < Action
-        def call: (*untyped) -> void
-      end
-    end
-  end
-end

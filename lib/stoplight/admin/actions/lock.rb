@@ -5,15 +5,20 @@ module Stoplight
     module Actions
       # This action locks light
       class Lock < Action
-        def call(params)
-          light_names(params).each do |name|
-            @lights_repository.lock(name)
-          end
+        def initialize(config_registry:, storage:)
+          @config_registry = config_registry
+          @storage = storage
         end
 
-        private def light_names(params)
-          Array(params[:names])
-            .map { |name| CGI.unescape(name) }
+        def call(light_id:, color:)
+          halt 400 unless [Color::RED, Color::GREEN].include?(color)
+
+          config = @config_registry.find_by_id(light_id)
+          if config
+            @storage.lock(config, color)
+          else
+            halt 404
+          end
         end
       end
     end
