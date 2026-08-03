@@ -3,10 +3,11 @@ module Stoplight
     module Helpers : Sinatra::Base
       COLORS: Array[Domain::color]
 
-      def dependencies: -> Dependencies
+      def dependencies: (Wiring::System)-> Dependencies
       def asset_path: (String) -> String
       def time_ago_in_words: (Time) -> String
       def control_attributes: (String href, ?confirm: String?, ?verb: String?) -> String
+      def find_system: (String) -> Wiring::System
     end
   end
 end

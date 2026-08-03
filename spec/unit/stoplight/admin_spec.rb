@@ -1,120 +1,146 @@
 # frozen_string_literal: true
 
 RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
-  let(:light) { Stoplight("foo") }
-  let(:id) { Stoplight::Domain::Id.for("foo") }
+  let(:light) { system.register(light_name) }
+  let(:light_name) { SecureRandom.uuid }
+  let(:id) { Stoplight::Domain::Id.for(light_name) }
   let(:light_id) { id }
   let(:light_condition) { proc { 1 / 1 == 0 } }
+  let(:data_store) { Stoplight::DataStore::Redis.new(redis) }
+  let(:system) { Stoplight.register_system(SecureRandom.uuid, data_store:) }
+  let(:system_id) { system.config.id }
 
   before do
     Stoplight.configure(trust_me_im_an_engineer: true) do |config|
-      config.data_store = Stoplight::DataStore::Redis.new(redis)
+      config.data_store = data_store
     end
+    Stoplight::Admin.set :systems, [system]
   end
 
   describe "GET /" do
-    it "renders favicon, svg icon, and apple-touch-icon links with cache-busting digests" do
+    it "redirects to first system's lights" do
       get "/"
 
-      expect(last_response).to be_ok
-
-      host = last_request.env["HTTP_HOST"]
-      digests = Stoplight::Admin::ASSET_DIGESTS
-
-      expect(last_response.body).to include(%(<link rel="icon" href="http://#{host}/favicon.ico?v=#{digests.fetch("favicon.ico")}" sizes="32x32">))
-      expect(last_response.body).to include(%(<link rel="icon" href="http://#{host}/icon.svg?v=#{digests.fetch("icon.svg")}" type="image/svg+xml">))
-      expect(last_response.body).to include(%(<link rel="apple-touch-icon" href="http://#{host}/apple-touch-icon.png?v=#{digests.fetch("apple-touch-icon.png")}">))
+      expect(last_response.status).to eq(302)
+      expect(last_response.headers["location"]).to include("#{last_request.env["HTTP_HOST"]}/systems/#{system_id}/lights")
     end
+  end
 
-    context "with no lights" do
-      it "renders home page correctly" do
-        get "/"
+  describe "GET /systems/{system}/lights" do
+    context "when system is not added to admin" do
+      let(:system_id) { "deadbeaf" }
 
-        expect(last_response).to be_ok
-        expect(last_response.body).to include("Stoplight Admin")
-        expect(last_response.body).to include("No lights found")
-        expect(last_response.body).to include("Ensure that your Stoplight data store is properly configured and that your Stoplight blocks have been run.")
-        expect(last_response.body).to include("Refresh Lights")
+      it "renders not found error" do
+        get "/systems/#{system_id}/lights"
+
+        expect(last_response).to be_not_found
       end
     end
 
-    context "with some lights" do
-      before { light.run(&light_condition) }
-
-      it "renders home page correctly" do
-        get "/"
+    context "when system is added" do
+      it "renders favicon, svg icon, and apple-touch-icon links with cache-busting digests" do
+        get "/systems/#{system_id}/lights"
 
         expect(last_response).to be_ok
 
-        expect(last_response.body).to include("Healthy")
-        expect(last_response.body).to include("No recent errors")
-        expect(last_response.body).to include("Operating normally")
-        expect(last_response.body).to include("Unlock")
-        expect(last_response.body).to include("Lock Red")
-        expect(last_response.body).to include("Lock Green")
-        expect(last_response.body).to include("Failures")
+        host = last_request.env["HTTP_HOST"]
+        digests = Stoplight::Admin::ASSET_DIGESTS
 
-        expect(last_response.body).to_not include("No lights found")
-        expect(last_response.body).not_to include("Ensure that your Stoplight data store is properly configured and that your Stoplight blocks have been run.")
+        expect(last_response.body).to include(%(<link rel="icon" href="http://#{host}/favicon.ico?v=#{digests.fetch("favicon.ico")}" sizes="32x32">))
+        expect(last_response.body).to include(%(<link rel="icon" href="http://#{host}/icon.svg?v=#{digests.fetch("icon.svg")}" type="image/svg+xml">))
+        expect(last_response.body).to include(%(<link rel="apple-touch-icon" href="http://#{host}/apple-touch-icon.png?v=#{digests.fetch("apple-touch-icon.png")}">))
       end
 
-      it "links the light actions" do
-        get "/"
+      context "with no lights" do
+        it "renders home page correctly" do
+          get "/systems/#{system_id}/lights"
 
-        expect(last_response).to be_ok
-
-        expect(last_response.body).to include(%(href="http://#{last_request.env["HTTP_HOST"]}/#{light_id}/unlock" data-turbo-method="patch"))
-        expect(last_response.body).to include(%(href="http://#{last_request.env["HTTP_HOST"]}/#{light_id}/lock?color=green" data-turbo-method="patch"))
-        expect(last_response.body).to include(%(href="http://#{last_request.env["HTTP_HOST"]}/#{light_id}/lock?color=red" data-turbo-method="patch"))
-
-        expect(last_response.body).to_not include("Read-only")
-      end
-
-      it "asks for confirmation before removing a light, and only before removing" do
-        get "/"
-
-        expect(last_response).to be_ok
-
-        expect(last_response.body).to include(
-          %(href="http://#{last_request.env["HTTP_HOST"]}/#{light_id}" data-turbo-method="delete" data-turbo-confirm="Are you sure you want to remove this light?")
-        )
-        expect(last_response.body.scan("data-turbo-confirm").count).to eq(1)
-      end
-    end
-
-    context "with a light that is not green" do
-      before { light.lock(Stoplight::Color::RED) }
-
-      it "links Lock All Green" do
-        get "/"
-
-        expect(last_response).to be_ok
-        expect(last_response.body).to include(%(href="http://#{last_request.env["HTTP_HOST"]}/lock?color=green" data-turbo-method="patch"))
-      end
-    end
-
-    context "when light has multiple consecutive failures" do
-      let(:light) { Stoplight("failing") }
-
-      before do
-        3.times do
-          light.run { raise "whoops" }
-        rescue
-          nil
+          expect(last_response).to be_ok
+          expect(last_response.body).to include("Stoplight Admin")
+          expect(last_response.body).to include("No lights found")
+          expect(last_response.body).to include("Ensure that your Stoplight data store is properly configured and that your Stoplight blocks have been run.")
+          expect(last_response.body).to include("Refresh Lights")
         end
       end
 
-      it "displays the correct failure count" do
-        get "/"
+      context "with some lights" do
+        before { light.run(&light_condition) }
 
-        expect(last_response).to be_ok
+        it "renders home page correctly" do
+          get "/systems/#{system_id}/lights"
 
-        expect(last_response.body).to include(">Failures:</span> 3")
+          expect(last_response).to be_ok
+
+          expect(last_response.body).to include("Healthy")
+          expect(last_response.body).to include("No recent errors")
+          expect(last_response.body).to include("Operating normally")
+          expect(last_response.body).to include("Unlock")
+          expect(last_response.body).to include("Lock Red")
+          expect(last_response.body).to include("Lock Green")
+          expect(last_response.body).to include("Failures")
+
+          expect(last_response.body).to_not include("No lights found")
+          expect(last_response.body).not_to include("Ensure that your Stoplight data store is properly configured and that your Stoplight blocks have been run.")
+        end
+
+        it "links the light actions" do
+          get "/systems/#{system_id}/lights"
+
+          expect(last_response).to be_ok
+
+          expect(last_response.body).to include(%(href="http://#{last_request.env["HTTP_HOST"]}/#{light_id}/unlock" data-turbo-method="patch"))
+          expect(last_response.body).to include(%(href="http://#{last_request.env["HTTP_HOST"]}/#{light_id}/lock?color=green" data-turbo-method="patch"))
+          expect(last_response.body).to include(%(href="http://#{last_request.env["HTTP_HOST"]}/#{light_id}/lock?color=red" data-turbo-method="patch"))
+
+          expect(last_response.body).to_not include("Read-only")
+        end
+
+        it "asks for confirmation before removing a light, and only before removing" do
+          get "/systems/#{system_id}/lights"
+
+          expect(last_response).to be_ok
+
+          expect(last_response.body).to include(
+            %(href="http://#{last_request.env["HTTP_HOST"]}/#{light_id}" data-turbo-method="delete" data-turbo-confirm="Are you sure you want to remove this light?")
+          )
+          expect(last_response.body.scan("data-turbo-confirm").count).to eq(1)
+        end
+      end
+
+      context "with a light that is not green" do
+        before { light.lock(Stoplight::Color::RED) }
+
+        it "links Lock All Green" do
+          get "/systems/#{system_id}/lights"
+
+          expect(last_response).to be_ok
+          expect(last_response.body).to include(%(href="http://#{last_request.env["HTTP_HOST"]}/lock?color=green" data-turbo-method="patch"))
+        end
+      end
+
+      context "when light has multiple consecutive failures" do
+        let(:light) { system.register(SecureRandom.uuid) }
+
+        before do
+          3.times do
+            light.run(->(_) {}) { raise "whoops" }
+          end
+        end
+
+        it "displays the correct failure count" do
+          get "/systems/#{system_id}/lights"
+
+          expect(last_response).to be_ok
+
+          expect(last_response.body).to include(">Failures:</span> 3")
+        end
       end
     end
   end
 
   describe "GET /stats" do
+    let(:system) { Stoplight.__stoplight__default_system }
+
     context "with no lights" do
       it "returns expected response" do
         get "/stats"
@@ -144,26 +170,27 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
 
         expect(last_response).to be_ok
 
-        expect(response_body)
-          .to eq(
-            {
-              "stats" =>
-                {"count_red" => 0,
-                 "count_yellow" => 0,
-                 "count_green" => 1,
-                 "percent_red" => 0,
-                 "percent_yellow" => 0,
-                 "percent_green" => 100},
-              "lights" => [
-                {"id" => id, "color" => "green", "failures" => [], "locked" => false, "name" => "foo"}
-              ]
-            }
-          )
+        expect(response_body).to eq(
+          {
+            "stats" =>
+              {"count_red" => 0,
+               "count_yellow" => 0,
+               "count_green" => 1,
+               "percent_red" => 0,
+               "percent_yellow" => 0,
+               "percent_green" => 100},
+            "lights" => [
+              {"id" => id, "color" => "green", "failures" => [], "locked" => false, "name" => light_name}
+            ]
+          }
+        )
       end
     end
   end
 
   describe "PATCH /{light_id}/unlock" do
+    let(:system) { Stoplight.__stoplight__default_system }
+
     before do
       light.run(&light_condition)
       light.lock(Stoplight::Color::GREEN)
@@ -185,6 +212,8 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
   end
 
   describe "PATCH /{light_id}/lock" do
+    let(:system) { Stoplight.__stoplight__default_system }
+
     before { light.run(&light_condition) }
 
     it "locks the light green" do
@@ -211,8 +240,10 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
   end
 
   describe "PATCH /lock" do
-    let(:another_light) { Stoplight("bar") }
-    let(:green_light) { Stoplight("baz") }
+    let(:system) { Stoplight.__stoplight__default_system }
+
+    let(:another_light) { system.register("bar") }
+    let(:green_light) { system.register("baz") }
 
     before do
       [light, another_light].each do |light|
@@ -248,13 +279,13 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
   end
 
   describe "DELETE /{light_id}" do
-    let(:another_light) { Stoplight("bar") }
+    let(:system) { Stoplight.__stoplight__default_system }
+
+    let(:another_light) { system.register("bar") }
 
     before do
       [light, another_light].each do |l|
-        l.run { raise "whoops" }
-      rescue
-        nil
+        l.run(->(_) {}) { raise "whoops" }
       end
     end
 
@@ -271,6 +302,8 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
   end
 
   context "when the admin panel is read-only" do
+    let(:system) { Stoplight.__stoplight__default_system }
+
     around do |example|
       previous_setting = Stoplight::Admin.settings.read_only
       Stoplight::Admin.set :read_only, true
@@ -279,18 +312,18 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
       Stoplight::Admin.set :read_only, previous_setting
     end
 
-    describe "GET /" do
+    describe "GET /systems/{system}/lights" do
       before { light.run(&light_condition) }
 
       it "tells the operator the panel is read-only" do
-        get "/"
+        get "/systems/#{system_id}/lights"
 
         expect(last_response).to be_ok
         expect(last_response.body).to include("Read-only")
       end
 
       it "renders the light actions without links" do
-        get "/"
+        get "/systems/#{system_id}/lights"
 
         expect(last_response).to be_ok
         expect(last_response.body).to include("Unlock", "Lock Red", "Lock Green", "Remove")
@@ -303,7 +336,7 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
         before { light.lock(Stoplight::Color::RED) }
 
         it "renders Lock All Green without a link" do
-          get "/"
+          get "/systems/#{system_id}/lights"
 
           expect(last_response).to be_ok
           expect(last_response.body).to include("Lock All Green")
@@ -319,12 +352,12 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
         get "/stats"
 
         expect(last_response).to be_ok
-        expect(response_body.fetch("lights").map { |h| h.fetch("name") }).to contain_exactly("foo")
+        expect(response_body.fetch("lights").map { |h| h.fetch("name") }).to contain_exactly(light_name)
       end
     end
 
     it "serves HEAD requests" do
-      head "/"
+      head "/systems/#{system_id}/lights"
 
       expect(last_response).to be_ok
     end

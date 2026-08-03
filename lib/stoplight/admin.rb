@@ -64,6 +64,11 @@ module Stoplight
     @systems = []
 
     def self.add_system(system)
+      unless system.persistent?
+        raise TypeError, "Stoplight Admin requires a persistent data store, but the current data store is not. " \
+          "Please configure a different data store in your Stoplight configuration."
+      end
+
       @systems << system
     end
 
@@ -92,20 +97,20 @@ module Stoplight
     end
 
     get "/" do
-      lights, stats = dependencies.stats_action.call
+      system = settings.systems.first
 
-      erb :index, locals: stats.merge(lights: lights, nonce: settings.nonce(request))
+      redirect to("/systems/#{system.config.id}/lights")
     end
 
     get "/stats" do
-      lights, stats = dependencies.stats_action.call
+      lights, stats = dependencies(settings.systems.first).stats_action.call
 
       json({stats: stats, lights: lights.map(&:as_json)})
     end
 
     patch "/:light_id/unlock" do
       light_id = T.must(params[:light_id])
-      dependencies.unlock_action.call(light_id:)
+      dependencies(settings.systems.first).unlock_action.call(light_id:)
 
       redirect to("/")
     end
@@ -113,23 +118,32 @@ module Stoplight
     patch "/:light_id/lock" do
       light_id = T.must(params[:light_id])
       color = T.must(params[:color])
-      dependencies.lock_action.call(light_id:, color:)
+      dependencies(settings.systems.first).lock_action.call(light_id:, color:)
 
       redirect to("/")
     end
 
     patch "/lock" do
       color = T.must(params[:color])
-      dependencies.lock_all_action.call(color:)
+      dependencies(settings.systems.first).lock_all_action.call(color:)
 
       redirect to("/")
     end
 
     delete "/:light_id" do
       light_id = T.must(params[:light_id])
-      dependencies.remove_action.call(light_id:)
+      dependencies(settings.systems.first).remove_action.call(light_id:)
 
       redirect to("/")
+    end
+
+    get "/systems/:system_id/lights" do
+      system_id = T.must(params[:system_id])
+      system = find_system(system_id)
+
+      lights, stats = dependencies(system).stats_action.call
+
+      erb :index, locals: stats.merge(lights: lights, nonce: settings.nonce(request))
     end
   end
 end

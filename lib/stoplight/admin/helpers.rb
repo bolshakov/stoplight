@@ -9,15 +9,8 @@ module Stoplight
         Color::RED
       ].freeze
 
-      # @return [Stoplight::Admin::Dependencies]
-      def dependencies
-        settings.systems.each do |system|
-          unless system.persistent?
-            raise TypeError, "Stoplight Admin requires a persistent data store, but the current data store is Memory. " \
-                  "Please configure a different data store in your Stoplight configuration."
-          end
-        end
-        Dependencies.new(system: settings.systems.first)
+      def dependencies(system)
+        Dependencies.new(system:)
       end
 
       def asset_path(name)
@@ -59,6 +52,12 @@ module Stoplight
           "#{(time_difference / 3600).to_i}h ago"
         else
           "#{(time_difference / 86400).to_i}d ago"
+        end
+      end
+
+      def find_system(system_id)
+        settings.systems.find(-> { halt 404 }) do |system|
+          system.config.id == system_id
         end
       end
     end

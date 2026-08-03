@@ -9,7 +9,8 @@ RSpec.describe Stoplight::Admin::Helpers, :redis do
     end
   end
 
-  let(:systems) { [instance_double(Stoplight::Wiring::System, persistent?: true, __stoplight__storage: storage)] }
+  let(:systems) { [system] }
+  let(:system) { instance_double(Stoplight::Wiring::System, persistent?: true, __stoplight__storage: storage) }
   let(:storage) { instance_double(Stoplight::Wiring::System::Storage) }
   let(:settings) { class_double(Stoplight::Admin, systems: systems) }
 
@@ -19,31 +20,7 @@ RSpec.describe Stoplight::Admin::Helpers, :redis do
 
   describe "#dependencies" do
     it "returns Dependencies" do
-      expect(helper.dependencies).to be_an_instance_of(Stoplight::Admin::Dependencies)
-    end
-
-    context "with persistent data store" do
-      let(:systems) do
-        [
-          instance_double(Stoplight::Wiring::System, persistent?: true, __stoplight__storage: storage)
-        ]
-      end
-
-      it "does not raise an error" do
-        expect { helper.dependencies }.to_not raise_error
-      end
-    end
-
-    context "with non-persistent data store" do
-      let(:systems) do
-        [
-          instance_double(Stoplight::Wiring::System, persistent?: false)
-        ]
-      end
-
-      it "raises an error" do
-        expect { helper.dependencies }.to raise_error TypeError, /Stoplight Admin requires a persistent data store/
-      end
+      expect(helper.dependencies(system)).to be_an_instance_of(Stoplight::Admin::Dependencies)
     end
   end
 end
