@@ -119,5 +119,16 @@ RSpec.describe Stoplight::Infrastructure::Redis::Storage::Registry, :redis do
     context "when the light was never registered" do
       it { is_expected.to be_empty }
     end
+
+    context "when one stored record is corrupted" do
+      before do
+        registry.register(config)
+        redis.with { |conn| conn.hset(key_space.join("lights"), "corrupted", "not json") }
+      end
+
+      it "skips the corrupted record and returns the rest" do
+        is_expected.to contain_exactly(Stoplight::Infrastructure::ConfigSerializer.call(config))
+      end
+    end
   end
 end

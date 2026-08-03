@@ -74,6 +74,42 @@ RSpec.describe Stoplight::Infrastructure::FailSafe::Storage::Registry do
     end
   end
 
+  describe "#all_configs" do
+    subject { fail_safe.all_configs }
+
+    context "when primary registry does not fail" do
+      it "returns configs from the primary registry" do
+        expect(primary_registry).to receive(:all_configs).and_return([{"threshold" => 5}])
+
+        is_expected.to eq([{"threshold" => 5}])
+      end
+    end
+
+    context "when primary registry fails" do
+      let(:error) { StandardError.new("connection refused") }
+
+      it "notifies the error and returns configs from the failover registry" do
+        expect(primary_registry).to receive(:all_configs).and_raise(error)
+        expect(error_notifier).to receive(:call).with(error)
+        expect(failover_registry).to receive(:all_configs).and_return([])
+
+        is_expected.to eq([])
+      end
+    end
+
+    context "when the circuit is open" do
+      let(:circuit_breaker) { open_circuit_breaker_class.new }
+
+      it "does not notify and returns configs from the failover registry" do
+        expect(primary_registry).not_to receive(:all_configs)
+        expect(error_notifier).not_to receive(:call)
+        expect(failover_registry).to receive(:all_configs).and_return([])
+
+        is_expected.to eq([])
+      end
+    end
+  end
+
   describe "#register" do
     subject(:register) { fail_safe.register(config) }
     let(:config) { instance_double(Stoplight::Domain::Config, name: "stripe") }

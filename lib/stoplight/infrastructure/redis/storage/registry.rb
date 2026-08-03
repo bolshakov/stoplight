@@ -45,9 +45,15 @@ module Stoplight
               conn.hgetall(key)
             end
             return [] unless raw_lights_info
-            raw_lights_info
-              .filter_map { |_, config| config }
-              .map { |config| JSON.parse(config)["config"] }
+            raw_lights_info.filter_map do |_, config|
+              next unless config
+
+              begin
+                JSON.parse(config)["config"]
+              rescue JSON::ParserError
+                nil
+              end
+            end
           end
 
           def config_for(id)
