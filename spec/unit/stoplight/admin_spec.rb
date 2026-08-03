@@ -234,24 +234,22 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
     end
   end
 
-  describe "PATCH /{light_id}/unlock" do
-    let(:system) { Stoplight.__stoplight__default_system }
-
+  describe "PATCH /systems/{system_id}/lights/{light_id}/unlock" do
     before do
       light.run(&light_condition)
       light.lock(Stoplight::Color::GREEN)
     end
 
     it "unlocks the light" do
-      patch "/#{id}/unlock"
+      patch "/systems/#{system_id}/lights/#{id}/unlock"
 
       expect(last_response.status).to eq(302)
-      expect(last_response.headers["location"]).to include("#{last_request.env["HTTP_HOST"]}/")
+      expect(last_response.headers["location"]).to include("#{last_request.env["HTTP_HOST"]}/systems/#{system_id}/lights")
       expect(light.state).to eq "unlocked"
     end
 
     it "cannot unlock non-existent light" do
-      patch "/#{SecureRandom.uuid}/unlock"
+      patch "/systems/#{system_id}/lights/#{SecureRandom.uuid}/unlock"
 
       expect(last_response.status).to eq(404)
     end
@@ -421,7 +419,7 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
       end
 
       it "refuses to unlock the light" do
-        patch "/#{light_id}/unlock"
+        patch "/systems/#{system_id}/#{light_id}/unlock"
 
         expect(last_response.status).to eq(403)
         expect(last_response.body).to include("read-only mode")

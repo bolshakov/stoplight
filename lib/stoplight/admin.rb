@@ -127,11 +127,13 @@ module Stoplight
       json({stats: stats, lights: lights.map(&:as_json)})
     end
 
-    patch "/:light_id/unlock" do
+    patch "/systems/:system_id/lights/:light_id/unlock" do
       light_id = T.must(params[:light_id])
-      dependencies(settings.systems.first).unlock_action.call(light_id:)
+      system_id = T.must(params[:system_id])
+      system = find_system(system_id)
+      dependencies(system).unlock_action.call(light_id:)
 
-      redirect to("/")
+      redirect to("/systems/#{system.config.id}/lights")
     end
 
     patch "/:light_id/lock" do
