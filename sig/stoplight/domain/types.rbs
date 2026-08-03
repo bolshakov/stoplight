@@ -17,7 +17,7 @@ module Stoplight
     type state = unlocked | locked_green | locked_red
 
     type recovery_decision = :green | :yellow | :red
-    type error_notifier = ^(StandardError) -> void
+    type error_notifier = _ErrorNotifier
 
     # Percentage as decimal (0.0 to 1.0)
     type percentage = Float

@@ -24,7 +24,7 @@ module Stoplight
         # The producer side (publish/subscribed?), what wiring injects into Emitter.
         include _TelemetryPublisher
 
-        @error_notifier: ^(StandardError) -> void
+        @error_notifier: error_notifier
         @mutex: Mutex
         @max_subscriptions: Integer
         @subscriptions: Array[[Subscription, subscription_filter, subscription_handler]]
