@@ -155,11 +155,13 @@ module Stoplight
       redirect to("/systems/#{system_id}/lights")
     end
 
-    delete "/:light_id" do
+    delete "/systems/:system_id/lights/:light_id" do
       light_id = T.must(params[:light_id])
-      dependencies(settings.systems.first).remove_action.call(light_id:)
+      system_id = T.must(params[:system_id])
+      system = find_system(system_id)
+      dependencies(system).remove_action.call(light_id:)
 
-      redirect to("/")
+      redirect to("/systems/#{system_id}/lights")
     end
   end
 end

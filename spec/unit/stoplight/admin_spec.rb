@@ -318,9 +318,7 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
     end
   end
 
-  describe "DELETE /{light_id}" do
-    let(:system) { Stoplight.__stoplight__default_system }
-
+  describe "DELETE /systems/{system_id}/lights/{light_id}" do
     let(:another_light) { system.register("bar") }
 
     before do
@@ -330,20 +328,18 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
     end
 
     it "removes the specified light metadata and redirects" do
-      delete "/#{light_id}"
+      delete "/systems/#{system_id}/lights/#{light_id}"
 
       expect(last_response.status).to eq(302)
       expect(last_response.headers["location"]).to include("#{last_request.env["HTTP_HOST"]}/")
 
-      get "/stats"
+      get "/systems/#{system_id}/lights.json"
       expect(last_response).to be_ok
       expect(response_body.fetch("lights").map { |h| h.fetch("name") }).to contain_exactly("bar")
     end
   end
 
   context "when the admin panel is read-only" do
-    let(:system) { Stoplight.__stoplight__default_system }
-
     around do |example|
       previous_setting = Stoplight::Admin.settings.read_only
       Stoplight::Admin.set :read_only, true
@@ -451,11 +447,11 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
       end
 
       it "refuses to remove the light" do
-        delete "/#{light_id}"
+        delete "/systems/#{system_id}/lights/#{light_id}"
 
         expect(last_response.status).to eq(403)
 
-        get "/stats"
+        get "/systems/#{system_id}/lights.json"
         expect(response_body.fetch("lights").map { |h| h.fetch("id") }).to contain_exactly(id)
       end
     end
