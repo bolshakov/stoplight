@@ -40,10 +40,13 @@ RSpec.describe "config.ru", :redis do
 
   it "leaves the panel writable when STOPLIGHT_ADMIN_READ_ONLY holds any other value" do
     ENV["STOPLIGHT_ADMIN_READ_ONLY"] = "1"
+    app # force config.ru's Stoplight.configure to run before registering the light
+    Stoplight.register("foo")
 
-    patch "/#{light_id}/lock", color: "green"
+    patch "/#{Stoplight::Domain::Id.for("foo")}/lock", color: "green"
 
-    expect(last_response.status).to eq(404)
+    expect(last_response.status).to eq(302)
+    expect(Stoplight.light("foo").state).to eq("locked_green")
   end
 
   it "surfaces a light a separate process already wrote to the same Redis" do

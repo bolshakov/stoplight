@@ -44,7 +44,7 @@ RSpec.describe Stoplight::Admin::ConfigRegistry, :redis do
       let(:name1) { SecureRandom.uuid }
       let(:id1) { Stoplight::Domain::Id.for(name1) }
       let(:name2) { SecureRandom.uuid }
-      let(:id1) { Stoplight::Domain::Id.for(name2) }
+      let(:id2) { Stoplight::Domain::Id.for(name2) }
 
       before do
         system.register(name1)
@@ -53,14 +53,14 @@ RSpec.describe Stoplight::Admin::ConfigRegistry, :redis do
 
       it "loads the light config" do
         expect(configs).to contain_exactly(
-          have_attributes(name: name1),
-          have_attributes(name: name2)
+          have_attributes(id: id1, name: name1),
+          have_attributes(id: id2, name: name2)
         )
       end
     end
 
     context "when no light was ever registered on this system" do
-      it "returns nil" do
+      it "returns an empty array" do
         expect(configs).to be_empty
       end
     end

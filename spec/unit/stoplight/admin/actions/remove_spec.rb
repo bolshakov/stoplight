@@ -27,7 +27,7 @@ RSpec.describe Stoplight::Admin::Actions::Remove do
   context "when non-existing light removed" do
     let(:config) { nil }
 
-    it "removes this light" do
+    it "does not remove anything and halts 404" do
       expect(storage).not_to receive(:delete)
       expect(registry).not_to receive(:unregister)
 
