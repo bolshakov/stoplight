@@ -108,7 +108,12 @@ module Stoplight
 
       lights, stats = dependencies(system).stats_action.call
 
-      erb :index, locals: stats.merge(lights: lights, nonce: settings.nonce(request))
+      erb :index, locals: stats.merge(
+        lights: lights,
+        nonce: settings.nonce(request),
+        system_id: system_id,
+        system: system
+      )
     end
 
     # Keep this endpoint for backward compatibility. Any monitoring system polling this

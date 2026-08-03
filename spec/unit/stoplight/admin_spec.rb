@@ -88,9 +88,9 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
 
           expect(last_response).to be_ok
 
-          expect(last_response.body).to include(%(href="http://#{last_request.env["HTTP_HOST"]}/#{light_id}/unlock" data-turbo-method="patch"))
-          expect(last_response.body).to include(%(href="http://#{last_request.env["HTTP_HOST"]}/#{light_id}/lock?color=green" data-turbo-method="patch"))
-          expect(last_response.body).to include(%(href="http://#{last_request.env["HTTP_HOST"]}/#{light_id}/lock?color=red" data-turbo-method="patch"))
+          expect(last_response.body).to include(%(href="http://#{last_request.env["HTTP_HOST"]}/systems/#{system_id}/lights/#{light_id}/unlock" data-turbo-method="patch"))
+          expect(last_response.body).to include(%(href="http://#{last_request.env["HTTP_HOST"]}/systems/#{system_id}/lights/#{light_id}/lock?color=green" data-turbo-method="patch"))
+          expect(last_response.body).to include(%(href="http://#{last_request.env["HTTP_HOST"]}/systems/#{system_id}/lights/#{light_id}/lock?color=red" data-turbo-method="patch"))
 
           expect(last_response.body).to_not include("Read-only")
         end
@@ -101,7 +101,7 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
           expect(last_response).to be_ok
 
           expect(last_response.body).to include(
-            %(href="http://#{last_request.env["HTTP_HOST"]}/#{light_id}" data-turbo-method="delete" data-turbo-confirm="Are you sure you want to remove this light?")
+            %(href="http://#{last_request.env["HTTP_HOST"]}/systems/#{system_id}/lights/#{light_id}" data-turbo-method="delete" data-turbo-confirm="Are you sure you want to remove this light?")
           )
           expect(last_response.body.scan("data-turbo-confirm").count).to eq(1)
         end
@@ -114,7 +114,7 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
           get "/systems/#{system_id}/lights"
 
           expect(last_response).to be_ok
-          expect(last_response.body).to include(%(href="http://#{last_request.env["HTTP_HOST"]}/lock?color=green" data-turbo-method="patch"))
+          expect(last_response.body).to include(%(href="http://#{last_request.env["HTTP_HOST"]}/systems/#{system_id}/lights/lock?color=green" data-turbo-method="patch"))
         end
       end
 

@@ -4,6 +4,7 @@ module Stoplight
       COLORS: Array[Domain::color]
 
       def dependencies: (Wiring::System)-> Dependencies
+      def system_url: (String system_id, String path) -> untyped
       def asset_path: (String) -> String
       def time_ago_in_words: (Time) -> String
       def control_attributes: (String href, ?confirm: String?, ?verb: String?) -> String
