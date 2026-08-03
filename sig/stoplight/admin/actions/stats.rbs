@@ -5,18 +5,23 @@ module Stoplight
     module Actions
       class Stats < Action
         @lights_stats: singleton(Stoplight::Admin::LightsStats)
+        @config_registry: ConfigRegistry
+        @storage: Wiring::System::Storage
 
         # @param lights_stats [Class<Stoplight::Admin::LightsStats>]
         def initialize: (
             lights_stats: singleton(Stoplight::Admin::LightsStats),
-            lights_repository: LightsRepository,
+            config_registry: ConfigRegistry,
+            storage: Wiring::System::Storage,
           ) -> void
 
-        # @return [(Stoplight::Admin::LightsRepository::Light)]
-        def call: (*untyped) -> [
-          Array[LightsRepository::Light],
+        # @return [(Stoplight::Admin::LightView)]
+        def call: -> [
+          Array[LightView],
           Hash[Symbol, Integer],
         ]
+
+        private def build_light: (Domain::Config) -> LightView
       end
     end
   end

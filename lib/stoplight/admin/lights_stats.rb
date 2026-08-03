@@ -17,7 +17,7 @@ module Stoplight
         end
       end
 
-      # @param lights [<Stoplight::Admin::LightsRepository::Light>]
+      # @param lights [<Stoplight::Admin::LightView>]
       def initialize(lights)
         @lights = lights
       end

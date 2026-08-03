@@ -6,12 +6,10 @@ module Stoplight
 
       def initialize: (system: Wiring::System) -> void
       def config_registry: -> ConfigRegistry
-      def lights_repository: -> LightsRepository
       def stats_action: -> Actions::Stats
       def unlock_action: -> Actions::Unlock
       def lock_action: -> Actions::Lock
       def lock_all_action: -> Actions::LockAll
-      def green_all_action: -> Actions::LockAllGreen
       def remove_action: -> Actions::Remove
     end
   end

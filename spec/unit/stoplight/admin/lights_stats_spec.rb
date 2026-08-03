@@ -16,21 +16,21 @@ RSpec.describe Stoplight::Admin::LightsStats do
     context "when there are lights" do
       let(:lights) do
         [
-          Stoplight::Admin::LightsRepository::Light.new(
+          Stoplight::Admin::LightView.new(
             id: "a",
             name: "green",
             color: "green",
             state: "unlocked",
             failures: []
           ),
-          Stoplight::Admin::LightsRepository::Light.new(
+          Stoplight::Admin::LightView.new(
             id: "b",
             name: "yellow",
             color: "yellow",
             state: "unlocked",
             failures: []
           ),
-          Stoplight::Admin::LightsRepository::Light.new(
+          Stoplight::Admin::LightView.new(
             id: "c",
             name: "red",
             color: "red",
