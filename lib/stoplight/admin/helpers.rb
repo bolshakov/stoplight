@@ -14,7 +14,7 @@ module Stoplight
       end
 
       def system_url(system_id, path)
-        path = "/#{path}" unless path.starts_with?("/")
+        path = "/#{path}" unless path.start_with?("/")
 
         url("/systems/#{system_id}#{path}")
       end
