@@ -146,11 +146,13 @@ module Stoplight
       redirect to("/systems/#{system_id}/lights")
     end
 
-    patch "/lock" do
+    patch "/systems/:system_id/lights/lock" do
       color = T.must(params[:color])
-      dependencies(settings.systems.first).lock_all_action.call(color:)
+      system_id = T.must(params[:system_id])
+      system = find_system(system_id)
+      dependencies(system).lock_all_action.call(color:)
 
-      redirect to("/")
+      redirect to("/systems/#{system_id}/lights")
     end
 
     delete "/:light_id" do

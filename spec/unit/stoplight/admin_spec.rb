@@ -270,7 +270,7 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
       patch "/systems/#{system_id}/lights/#{light_id}/lock", color: "red"
 
       expect(last_response.status).to eq(302)
-      expect(last_response.headers["location"]).to include("#{last_request.env["HTTP_HOST"]}/")
+      expect(last_response.headers["location"]).to include("#{last_request.env["HTTP_HOST"]}/systems/#{system_id}/lights")
       expect(light.state).to eq "locked_red"
     end
 
@@ -281,9 +281,7 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
     end
   end
 
-  describe "PATCH /lock" do
-    let(:system) { Stoplight.__stoplight__default_system }
-
+  describe "PATCH /systems/{system_id}/lights/lock" do
     let(:another_light) { system.register("bar") }
     let(:green_light) { system.register("baz") }
 
@@ -294,10 +292,10 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
     end
 
     it "locks non-green lights" do
-      patch "/lock", color: "green"
+      patch "/systems/#{system_id}/lights/lock", color: "green"
 
       expect(last_response.status).to eq(302)
-      expect(last_response.headers["location"]).to include("#{last_request.env["HTTP_HOST"]}/")
+      expect(last_response.headers["location"]).to include("#{last_request.env["HTTP_HOST"]}/systems/#{system_id}/lights")
 
       [light, another_light].each do |light|
         expect(light.state).to eq "locked_green"
@@ -305,15 +303,15 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
     end
 
     it "does not lock green lights" do
-      patch "/lock", color: "green"
+      patch "/systems/#{system_id}/lights/lock", color: "green"
 
       expect(last_response.status).to eq(302)
-      expect(last_response.headers["location"]).to include("#{last_request.env["HTTP_HOST"]}/")
+      expect(last_response.headers["location"]).to include("#{last_request.env["HTTP_HOST"]}/systems/#{system_id}/lights")
       expect(green_light.state).to_not eq("locked_green")
     end
 
     it "refuses to bulk-lock lights to any color other than green" do
-      patch "/lock", color: "red"
+      patch "/systems/#{system_id}/lights/lock", color: "red"
 
       expect(last_response.status).to eq(400)
       expect(light.state).to eq("locked_red")
@@ -436,11 +434,11 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
       end
     end
 
-    describe "PATCH /lock" do
+    describe "PATCH /systems/{system_id}/lights/lock" do
       before { light.lock(Stoplight::Color::RED) }
 
       it "refuses to lock the lights" do
-        patch "/lock"
+        patch "/systems/#{system_id}/lights/lock"
 
         expect(last_response.status).to eq(403)
         expect(light.state).to eq("locked_red")
@@ -449,9 +447,7 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
 
     describe "DELETE /{light_id}" do
       before do
-        light.run { raise "whoops" }
-      rescue
-        nil
+        light.run(->(_) {}) { raise "whoops" }
       end
 
       it "refuses to remove the light" do
