@@ -26,7 +26,7 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
     end
   end
 
-  describe "GET /systems/{system}/lights" do
+  describe "GET /systems/{system_id}/lights" do
     context "when system is not added to admin" do
       let(:system_id) { "deadbeaf" }
 
@@ -139,8 +139,6 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
   end
 
   describe "GET /stats" do
-    let(:system) { Stoplight.__stoplight__default_system }
-
     context "with no lights" do
       it "returns expected response" do
         get "/stats"
@@ -165,8 +163,56 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
     context "with some lights" do
       before { light.run(&light_condition) }
 
-      it "returns expected response" do
+      it "returns lights of the first system" do
         get "/stats"
+
+        expect(last_response).to be_ok
+
+        expect(response_body).to eq(
+          {
+            "stats" =>
+              {"count_red" => 0,
+               "count_yellow" => 0,
+               "count_green" => 1,
+               "percent_red" => 0,
+               "percent_yellow" => 0,
+               "percent_green" => 100},
+            "lights" => [
+              {"id" => id, "color" => "green", "failures" => [], "locked" => false, "name" => light_name}
+            ]
+          }
+        )
+      end
+    end
+  end
+
+  describe "GET /systems/{system_id}/lights.json" do
+    context "with no lights" do
+      it "returns expected response" do
+        get "/systems/#{system_id}/lights.json"
+
+        expect(last_response).to be_ok
+        expect(response_body)
+          .to eq(
+            {
+              "stats" =>
+                {"count_red" => 0,
+                 "count_yellow" => 0,
+                 "count_green" => 0,
+                 "percent_red" => 0,
+                 "percent_yellow" => 0,
+                 "percent_green" => 0},
+              "lights" => []
+            }
+          )
+      end
+    end
+
+    context "with some lights" do
+      before { light.run(&light_condition) }
+
+      it "returns expected response" do
+        get "/systems/#{system_id}/lights.json"
 
         expect(last_response).to be_ok
 

@@ -102,8 +102,27 @@ module Stoplight
       redirect to("/systems/#{system.config.id}/lights")
     end
 
+    get "/systems/:system_id/lights" do
+      system_id = T.must(params[:system_id])
+      system = find_system(system_id)
+
+      lights, stats = dependencies(system).stats_action.call
+
+      erb :index, locals: stats.merge(lights: lights, nonce: settings.nonce(request))
+    end
+
+    # Keep this endpoint for backward compatibility. Any monitoring system polling this
+    # endpoint keep receiving the first system's (likely default one) lighs
     get "/stats" do
       lights, stats = dependencies(settings.systems.first).stats_action.call
+
+      json({stats: stats, lights: lights.map(&:as_json)})
+    end
+
+    get "/systems/:system_id/lights.json" do
+      system_id = T.must(params[:system_id])
+      system = find_system(system_id)
+      lights, stats = dependencies(system).stats_action.call
 
       json({stats: stats, lights: lights.map(&:as_json)})
     end
@@ -135,15 +154,6 @@ module Stoplight
       dependencies(settings.systems.first).remove_action.call(light_id:)
 
       redirect to("/")
-    end
-
-    get "/systems/:system_id/lights" do
-      system_id = T.must(params[:system_id])
-      system = find_system(system_id)
-
-      lights, stats = dependencies(system).stats_action.call
-
-      erb :index, locals: stats.merge(lights: lights, nonce: settings.nonce(request))
     end
   end
 end
