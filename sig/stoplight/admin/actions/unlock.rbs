@@ -10,8 +10,7 @@ module Stoplight
             storage: Wiring::System::Storage
           ) -> void
 
-        def call: (light_id: String) -> Domain::state
-                | (light_id: String) -> void
+        def call: (light_id: String) -> void
       end
     end
   end

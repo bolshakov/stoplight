@@ -27,4 +27,30 @@ RSpec.describe Stoplight::Admin::Actions::LockAll do
 
     call
   end
+
+  context "when color is red" do
+    subject(:call) { action.call(color: Stoplight::Color::RED) }
+
+    it "throws halt without fetching or locking any light" do
+      expect(config_registry).not_to receive(:all)
+      expect(storage).not_to receive(:lock)
+
+      expect do
+        call
+      end.to throw_symbol(:halt, 400)
+    end
+  end
+
+  context "when color is not lockable" do
+    subject(:call) { action.call(color: "yellow") }
+
+    it "throws halt without fetching or locking any light" do
+      expect(config_registry).not_to receive(:all)
+      expect(storage).not_to receive(:lock)
+
+      expect do
+        call
+      end.to throw_symbol(:halt, 400)
+    end
+  end
 end

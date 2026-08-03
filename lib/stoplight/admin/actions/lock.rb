@@ -11,6 +11,8 @@ module Stoplight
         end
 
         def call(light_id:, color:)
+          halt 400 unless [Color::RED, Color::GREEN].include?(color)
+
           config = @config_registry.find_by_id(light_id)
           if config
             @storage.lock(config, color)

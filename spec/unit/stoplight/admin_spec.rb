@@ -204,7 +204,7 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
     end
 
     it "cannot lock non-existent light" do
-      patch "/#{SecureRandom.uuid}/lcok", color: "green"
+      patch "/#{SecureRandom.uuid}/lock", color: "green"
 
       expect(last_response.status).to eq(404)
     end
@@ -237,6 +237,13 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
       expect(last_response.status).to eq(302)
       expect(last_response.headers["location"]).to include("#{last_request.env["HTTP_HOST"]}/")
       expect(green_light.state).to_not eq("locked_green")
+    end
+
+    it "refuses to bulk-lock lights to any color other than green" do
+      patch "/lock", color: "red"
+
+      expect(last_response.status).to eq(400)
+      expect(light.state).to eq("locked_red")
     end
   end
 
@@ -300,7 +307,7 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
 
           expect(last_response).to be_ok
           expect(last_response.body).to include("Lock All Green")
-          expect(last_response.body).to_not include("/green_all")
+          expect(last_response.body).to_not include("/lock?color=green")
         end
       end
     end

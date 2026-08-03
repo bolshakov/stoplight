@@ -16,7 +16,7 @@ RSpec.describe Stoplight::Admin::Actions::Lock do
   context "when existing light id is provided" do
     let(:config) { instance_double(Stoplight::Domain::Config) }
 
-    it "unlocks this light" do
+    it "locks this light" do
       expect(storage).to receive(:lock).with(config, color)
 
       call
@@ -32,6 +32,19 @@ RSpec.describe Stoplight::Admin::Actions::Lock do
       expect do
         call
       end.to throw_symbol(:halt, 404)
+    end
+  end
+
+  context "when color is not lockable" do
+    let(:color) { "yellow" }
+    let(:config) { instance_double(Stoplight::Domain::Config) }
+
+    it "throws halt without locking" do
+      expect(storage).not_to receive(:lock)
+
+      expect do
+        call
+      end.to throw_symbol(:halt, 400)
     end
   end
 end

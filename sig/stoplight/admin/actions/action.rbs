@@ -3,13 +3,7 @@ module Stoplight
   class Admin
     module Actions
       class Action
-        @lights_repository: LightsRepository
-
-        def initialize: (lights_repository: LightsRepository) -> void
-
-        # Exit the current block, halts any further processing
-        # of the request, and returns the specified response.
-        def halt: (*untyped response) -> untyped
+        def halt: (Integer status) -> void
       end
     end
   end
