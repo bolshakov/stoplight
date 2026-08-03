@@ -255,21 +255,19 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
     end
   end
 
-  describe "PATCH /{light_id}/lock" do
-    let(:system) { Stoplight.__stoplight__default_system }
-
+  describe "PATCH /systems/{system_id}/{light_id}/lock" do
     before { light.run(&light_condition) }
 
     it "locks the light green" do
-      patch "/#{light_id}/lock", color: "green"
+      patch "/systems/#{system_id}/lights/#{light_id}/lock", color: "green"
 
       expect(last_response.status).to eq(302)
-      expect(last_response.headers["location"]).to include("#{last_request.env["HTTP_HOST"]}/")
+      expect(last_response.headers["location"]).to include("#{last_request.env["HTTP_HOST"]}/systems/#{system_id}/lights")
       expect(light.state).to eq "locked_green"
     end
 
     it "locks the light red" do
-      patch "/#{light_id}/lock", color: "red"
+      patch "/systems/#{system_id}/lights/#{light_id}/lock", color: "red"
 
       expect(last_response.status).to eq(302)
       expect(last_response.headers["location"]).to include("#{last_request.env["HTTP_HOST"]}/")
@@ -277,7 +275,7 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
     end
 
     it "cannot lock non-existent light" do
-      patch "/#{SecureRandom.uuid}/lock", color: "green"
+      patch "/systems/#{system_id}/lights/#{SecureRandom.uuid}/lock", color: "green"
 
       expect(last_response.status).to eq(404)
     end
@@ -412,7 +410,7 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
       expect(last_response.status).to eq(403)
     end
 
-    describe "PATCH /{light_id}/unlock" do
+    describe "PATCH /systems/{system_id}/lights/{light_id}/unlock" do
       before do
         light.run(&light_condition)
         light.lock(Stoplight::Color::GREEN)
@@ -427,11 +425,11 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
       end
     end
 
-    describe "PATCH /{light_id}/lock" do
+    describe "PATCH /systems/{system_id}/lights/{light_id}/lock" do
       before { light.run(&light_condition) }
 
       it "refuses to lock the light" do
-        patch "/#{light_id}/lock"
+        patch "/systems/#{system_id}/lights/#{light_id}/lock"
 
         expect(last_response.status).to eq(403)
         expect(light.state).to eq("unlocked")
