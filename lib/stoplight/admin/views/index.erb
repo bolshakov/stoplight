@@ -36,7 +36,7 @@
   </style>
   <section class="grid gap-4 lights-grid">
     <% lights.each do |light| %>
-      <%= erb :_card, locals: { light:, color: light.color } %>
+      <%= erb :_card, locals: { light:, color: light.color, system_id: } %>
     <% end %>
   </section>
 <% end %>
