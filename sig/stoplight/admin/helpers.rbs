@@ -9,6 +9,8 @@ module Stoplight
       def time_ago_in_words: (Time) -> String
       def control_attributes: (String href, ?confirm: String?, ?verb: String?) -> String
       def find_system: (String) -> Wiring::System
+      def current_system_id: -> String
+      def current_system: -> Wiring::System
     end
   end
 end

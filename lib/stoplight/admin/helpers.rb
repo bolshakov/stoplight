@@ -64,6 +64,14 @@ module Stoplight
           system.config.id == system_id
         end
       end
+
+      def current_system_id
+        T.must(params[:system_id])
+      end
+
+      def current_system
+        find_system(current_system_id)
+      end
     end
   end
 end

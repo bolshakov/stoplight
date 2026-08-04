@@ -109,15 +109,12 @@ module Stoplight
     end
 
     get "/systems/:system_id/lights" do
-      system_id = T.must(params[:system_id])
-      system = find_system(system_id)
-
-      lights, stats = dependencies(system).stats_action.call
+      lights, stats = dependencies(current_system).stats_action.call
 
       erb :index, locals: stats.merge(
         lights: lights,
         nonce: settings.nonce(request),
-        system_id: system_id
+        system_id: current_system_id
       )
     end
 
@@ -130,48 +127,38 @@ module Stoplight
     end
 
     get "/systems/:system_id/lights.json" do
-      system_id = T.must(params[:system_id])
-      system = find_system(system_id)
-      lights, stats = dependencies(system).stats_action.call
+      lights, stats = dependencies(current_system).stats_action.call
 
       json({stats: stats, lights: lights.map(&:as_json)})
     end
 
     patch "/systems/:system_id/lights/:light_id/unlock" do
       light_id = T.must(params[:light_id])
-      system_id = T.must(params[:system_id])
-      system = find_system(system_id)
-      dependencies(system).unlock_action.call(light_id:)
+      dependencies(current_system).unlock_action.call(light_id:)
 
-      redirect to("/systems/#{system_id}/lights")
+      redirect to("/systems/#{current_system_id}/lights")
     end
 
     patch "/systems/:system_id/lights/:light_id/lock" do
       light_id = T.must(params[:light_id])
-      system_id = T.must(params[:system_id])
-      system = find_system(system_id)
       color = T.must(params[:color])
-      dependencies(system).lock_action.call(light_id:, color:)
+      dependencies(current_system).lock_action.call(light_id:, color:)
 
-      redirect to("/systems/#{system_id}/lights")
+      redirect to("/systems/#{current_system_id}/lights")
     end
 
     patch "/systems/:system_id/lights/lock" do
       color = T.must(params[:color])
-      system_id = T.must(params[:system_id])
-      system = find_system(system_id)
-      dependencies(system).lock_all_action.call(color:)
+      dependencies(current_system).lock_all_action.call(color:)
 
-      redirect to("/systems/#{system_id}/lights")
+      redirect to("/systems/#{current_system_id}/lights")
     end
 
     delete "/systems/:system_id/lights/:light_id" do
       light_id = T.must(params[:light_id])
-      system_id = T.must(params[:system_id])
-      system = find_system(system_id)
-      dependencies(system).remove_action.call(light_id:)
+      dependencies(current_system).remove_action.call(light_id:)
 
-      redirect to("/systems/#{system_id}/lights")
+      redirect to("/systems/#{current_system_id}/lights")
     end
   end
 end
