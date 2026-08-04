@@ -8,5 +8,9 @@ module Stoplight
 
     self.@systems: Array[Wiring::System]
     def self.add_system: (Wiring::System) -> void
+
+    private
+
+    def self.validate_persistent_system!: (Wiring::System) -> void
   end
 end

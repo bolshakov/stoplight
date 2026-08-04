@@ -64,17 +64,23 @@ module Stoplight
     @systems = []
 
     def self.add_system(system)
-      unless system.persistent?
-        raise TypeError, "Stoplight Admin requires a persistent data store, but the current data store is not. " \
-          "Please configure a different data store in your Stoplight configuration."
-      end
-
+      validate_persistent_system!(system)
       @systems << system
     end
 
+    def self.validate_persistent_system!(system)
+      return if system.persistent?
+
+      raise TypeError, "Stoplight Admin requires a persistent data store, but the current data store is not. " \
+        "Please configure a different data store in your Stoplight configuration."
+    end
+    private_class_method :validate_persistent_system!
+
     set :systems do
       if @systems.empty?
-        [Stoplight.__stoplight__default_system]
+        default_system = Stoplight.__stoplight__default_system
+        validate_persistent_system!(default_system)
+        [default_system]
       else
         @systems
       end

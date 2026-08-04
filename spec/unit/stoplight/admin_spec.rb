@@ -21,6 +21,29 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
     Stoplight::Admin.instance_variable_set(:@systems, [])
   end
 
+  describe ".add_system" do
+    it "raises for a non-persistent system" do
+      non_persistent_system = instance_double(Stoplight::Wiring::System, persistent?: false)
+
+      expect { Stoplight::Admin.add_system(non_persistent_system) }
+        .to raise_error(TypeError, /Stoplight Admin requires a persistent data store/)
+    end
+  end
+
+  describe ".systems" do
+    context "when no system has been explicitly added" do
+      before { Stoplight::Admin.instance_variable_set(:@systems, []) }
+
+      it "raises if the default system is not persistent" do
+        allow(Stoplight).to receive(:__stoplight__default_system)
+          .and_return(instance_double(Stoplight::Wiring::System, persistent?: false))
+
+        expect { Stoplight::Admin.settings.systems }
+          .to raise_error(TypeError, /Stoplight Admin requires a persistent data store/)
+      end
+    end
+  end
+
   describe "GET /" do
     it "redirects to first system's lights" do
       get "/"
