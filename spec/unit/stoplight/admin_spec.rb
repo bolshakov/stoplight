@@ -14,7 +14,11 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
     Stoplight.configure(trust_me_im_an_engineer: true) do |config|
       config.data_store = data_store
     end
-    Stoplight::Admin.set :systems, [system]
+    Stoplight::Admin.add_system(system)
+  end
+
+  after do
+    Stoplight::Admin.instance_variable_set(:@systems, [])
   end
 
   describe "GET /" do
@@ -255,7 +259,7 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
     end
   end
 
-  describe "PATCH /systems/{system_id}/{light_id}/lock" do
+  describe "PATCH /systems/{system_id}/lights/{light_id}/lock" do
     before { light.run(&light_condition) }
 
     it "locks the light green" do
@@ -348,7 +352,7 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
       Stoplight::Admin.set :read_only, previous_setting
     end
 
-    describe "GET /systems/{system}/lights" do
+    describe "GET /systems/{system_id}/lights" do
       before { light.run(&light_condition) }
 
       it "tells the operator the panel is read-only" do
@@ -411,7 +415,7 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
       end
 
       it "refuses to unlock the light" do
-        patch "/systems/#{system_id}/#{light_id}/unlock"
+        patch "/systems/#{system_id}/lights/#{light_id}/unlock"
 
         expect(last_response.status).to eq(403)
         expect(last_response.body).to include("read-only mode")
@@ -441,7 +445,7 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
       end
     end
 
-    describe "DELETE /{light_id}" do
+    describe "DELETE /systems/{system_id}/lights/{light_id}" do
       before do
         light.run(->(_) {}) { raise "whoops" }
       end

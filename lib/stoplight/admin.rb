@@ -111,13 +111,12 @@ module Stoplight
       erb :index, locals: stats.merge(
         lights: lights,
         nonce: settings.nonce(request),
-        system_id: system_id,
-        system: system
+        system_id: system_id
       )
     end
 
     # Keep this endpoint for backward compatibility. Any monitoring system polling this
-    # endpoint keep receiving the first system's (likely default one) lighs
+    # endpoint will keep receiving the first system's (likely default one) lights
     get "/stats" do
       lights, stats = dependencies(settings.systems.first).stats_action.call
 
