@@ -44,6 +44,62 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
     end
   end
 
+  describe "multi-system isolation" do
+    let(:other_data_store) { Stoplight::DataStore::Redis.new(redis) }
+    let(:other_system) { Stoplight.register_system(SecureRandom.uuid, data_store: other_data_store) }
+    let(:other_light_name) { SecureRandom.uuid }
+    let(:other_light) { other_system.register(other_light_name) }
+    let(:other_light_id) { Stoplight::Domain::Id.for(other_light_name) }
+
+    before do
+      Stoplight::Admin.add_system(other_system)
+      light.run(&light_condition)
+      other_light.run(&light_condition)
+    end
+
+    it "scopes GET /systems/{system_id}/lights.json to the requested system's lights" do
+      get "/systems/#{system_id}/lights.json"
+
+      expect(response_body.fetch("lights").map { |h| h.fetch("name") }).to contain_exactly(light_name)
+    end
+
+    it "does not unlock a light belonging to another system" do
+      other_light.lock(Stoplight::Color::GREEN)
+
+      patch "/systems/#{system_id}/lights/#{other_light_id}/unlock"
+
+      expect(last_response.status).to eq(404)
+      expect(other_light.state).to eq("locked_green")
+    end
+
+    it "does not lock a light belonging to another system" do
+      patch "/systems/#{system_id}/lights/#{other_light_id}/lock", color: "green"
+
+      expect(last_response.status).to eq(404)
+      expect(other_light.state).to eq("unlocked")
+    end
+
+    it "bulk-locks only the requested system's lights" do
+      light.lock(Stoplight::Color::RED)
+      other_light.lock(Stoplight::Color::RED)
+
+      patch "/systems/#{system_id}/lights/lock", color: "green"
+
+      expect(last_response.status).to eq(302)
+      expect(light.state).to eq("locked_green")
+      expect(other_light.state).to eq("locked_red")
+    end
+
+    it "does not delete a light belonging to another system" do
+      delete "/systems/#{system_id}/lights/#{other_light_id}"
+
+      expect(last_response.status).to eq(404)
+
+      get "/systems/#{other_system.config.id}/lights.json"
+      expect(response_body.fetch("lights").map { |h| h.fetch("name") }).to contain_exactly(other_light_name)
+    end
+  end
+
   describe "GET /" do
     it "redirects to first system's lights" do
       get "/"
