@@ -26,6 +26,10 @@ RSpec.describe Stoplight::Error do
   end
 
   describe "::RedLight" do
+    let(:light_name) { "holy_light" }
+    let(:cool_off_time) { 60 }
+    let(:retry_after) { Time.now + 60 }
+
     it "is a class" do
       expect(described_class::RedLight).to be_a(Class)
     end
@@ -35,16 +39,15 @@ RSpec.describe Stoplight::Error do
     end
 
     it "record correct exception message with a light name" do
-      error = described_class::RedLight.new("example-zero", cool_off_time: 60, retry_after: nil)
+      error = described_class::RedLight.new(light_name, cool_off_time:, retry_after:)
 
-      expect(error.message).to eq('Stoplight "example-zero" is red - network traffic stopped until recovery.')
+      expect(error.message).to eq("Stoplight \"#{light_name}\" is red - network traffic stopped until recovery.")
     end
 
     it "exposes the error metadata" do
-      retry_after = Time.now + 60
-      error = described_class::RedLight.new("example-zero", cool_off_time: 60, retry_after:)
+      error = described_class::RedLight.new(light_name, cool_off_time:, retry_after:)
 
-      expect(error).to have_attributes(light_name: "example-zero", cool_off_time: 60, retry_after:)
+      expect(error).to have_attributes(light_name:, cool_off_time:, retry_after:)
     end
   end
 end
