@@ -19,7 +19,7 @@ Feature: Stoplight Basic Functionality
     When 1 request is made
     Then the light fails with error:
       | Type        | Stoplight::Error::RedLight |
-      | Message     | basic-service |
+      | Message     | Stoplight "basic-service" is red - network traffic stopped until recovery. |
 
   Scenario: Light count all failures regardless of time
     Given the service starts failing with "connection-timeout"

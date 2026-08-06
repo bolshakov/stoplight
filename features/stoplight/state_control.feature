@@ -26,7 +26,7 @@ Feature: Stoplight State Control
     And 1 request is made
     Then the light fails with error:
       | Type        | Stoplight::Error::RedLight |
-      | Message     | manual-control             |
+      | Message     | Stoplight "manual-control" is red - network traffic stopped until recovery. |
     And the light color is red
     And the light is in "locked_red" state
 

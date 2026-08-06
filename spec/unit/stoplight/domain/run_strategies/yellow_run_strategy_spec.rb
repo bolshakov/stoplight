@@ -281,7 +281,8 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
 
         it "raises RedLight without yielding" do
           expect do |code|
-            expect { strategy.execute(fallback, state_snapshot:, error_tracking_policy:, &code) }.to raise_error(Stoplight::Error::RedLight, name) { |error|
+            expect { strategy.execute(fallback, state_snapshot:, error_tracking_policy:, &code) }.to raise_error(Stoplight::Error::RedLight) { |error|
+              expect(error.light_name).to eq(name)
               expect(error.cool_off_time).to eq(cool_off_time)
               expect(error.retry_after).to eq(state_snapshot.recovery_scheduled_after)
             }
@@ -302,7 +303,9 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
           expect do
             expect do
               strategy.execute(fallback, state_snapshot:, error_tracking_policy:) {}
-            end.to raise_error(Stoplight::Error::RedLight, name)
+            end.to raise_error(Stoplight::Error::RedLight) { |error|
+              expect(error.light_name).to eq(name)
+            }
           end.to emit(Stoplight::Domain::Telemetry::RunCompleted).with(
             outcome: :blocked,
             color: "yellow",

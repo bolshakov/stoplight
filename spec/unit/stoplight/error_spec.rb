@@ -33,5 +33,18 @@ RSpec.describe Stoplight::Error do
     it "is a subclass of StandardError" do
       expect(described_class::RedLight).to be < described_class::Base
     end
+
+    it "record correct exception message with a light name" do
+      error = described_class::RedLight.new("example-zero", cool_off_time: 60, retry_after: nil)
+
+      expect(error.message).to eq('Stoplight "example-zero" is red - network traffic stopped until recovery.')
+    end
+
+    it "exposes the error metadata" do
+      retry_after = Time.now + 60
+      error = described_class::RedLight.new("example-zero", cool_off_time: 60, retry_after:)
+
+      expect(error).to have_attributes(light_name: "example-zero", cool_off_time: 60, retry_after:)
+    end
   end
 end
