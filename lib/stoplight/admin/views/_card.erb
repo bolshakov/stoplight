@@ -24,7 +24,7 @@
 
     <div class="flex-1 min-w-0 ms-4">
       <p class="text-sm font-medium text-gray-900 truncate dark:text-white">
-        <%= light.name %>
+        <%= CGI.escapeHTML(light.name) %>
       </p>
       <span class="flex items-center text-sm font-medium text-gray-500 dark:text-gray-400 truncate me-3">
         <span class="flex w-2.5 h-2.5 bg-<%= color %>-600 rounded-full me-1.5 shrink-0"></span>
@@ -104,9 +104,9 @@
   <div class="p-4 my-4 text-sm text-<%= color %>-800 rounded-lg bg-<%= color %>-50 dark:bg-gray-800 dark:text-<%= color %>-400">
     <div class="flex justify-between items-center">
       <div class="pr-4">
-        <p class="font-semibold"><%= light.description_title %></p>
-        <p class="font-medium"><%= light.description_message %></p>
-        <p><%= light.description_comment %></p>
+        <p class="font-semibold"><%= CGI.escapeHTML(light.description_title) %></p>
+        <p class="font-medium"><%= CGI.escapeHTML(light.description_message) %></p>
+        <p><%= CGI.escapeHTML(light.description_comment) %></p>
       </div>
       <% if light.latest_failure %>
         <div class="whitespace-nowrap text-center" style="margin-bottom: auto;">
