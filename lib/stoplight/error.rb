@@ -18,7 +18,7 @@ module Stoplight
     end
 
     class RedLight < Base
-      EXCEPTION_MESSAGE = 'Stoplight "%{light_name}" is red - network traffic stopped until recovery.'
+      EXCEPTION_MESSAGE = 'Stoplight "%{light_name}" is red - traffic stopped until recovery.'
       private_constant :EXCEPTION_MESSAGE
 
       # @!attribute light_name

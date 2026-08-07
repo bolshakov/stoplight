@@ -41,7 +41,7 @@ RSpec.describe Stoplight::Error do
     it "record correct exception message with a light name" do
       error = described_class::RedLight.new(light_name, cool_off_time:, retry_after:)
 
-      expect(error.message).to eq("Stoplight \"#{light_name}\" is red - network traffic stopped until recovery.")
+      expect(error.message).to eq("Stoplight \"#{light_name}\" is red - traffic stopped until recovery.")
     end
 
     it "exposes the error metadata" do
