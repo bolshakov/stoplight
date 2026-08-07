@@ -18,6 +18,9 @@ module Stoplight
     end
 
     class RedLight < Base
+      EXCEPTION_MESSAGE = 'Stoplight "%{light_name}" is red - traffic stopped until recovery.'
+      private_constant :EXCEPTION_MESSAGE
+
       # @!attribute light_name
       #   @return [String] The light's name
       attr_reader :light_name
@@ -45,7 +48,7 @@ module Stoplight
         @cool_off_time = cool_off_time
         @retry_after = retry_after
 
-        super(light_name)
+        super(format(EXCEPTION_MESSAGE, light_name: light_name))
       end
     end
   end

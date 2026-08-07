@@ -16,6 +16,8 @@ module Stoplight
     end
 
     class RedLight < Base
+      EXCEPTION_MESSAGE: String
+
       attr_reader light_name: String
       attr_reader cool_off_time: Numeric
       attr_reader retry_after: Time?

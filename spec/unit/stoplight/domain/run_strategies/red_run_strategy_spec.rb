@@ -47,7 +47,8 @@ RSpec.describe Stoplight::Domain::Strategies::RedRunStrategy, :freeze do
     let(:fallback) { nil }
 
     it "records and raises the error" do
-      expect { result }.to raise_error(Stoplight::Error::RedLight, name) { |error|
+      expect { result }.to raise_error(Stoplight::Error::RedLight) { |error|
+        expect(error.light_name).to eq(name)
         expect(error.cool_off_time).to eq(cool_off_time)
         expect(error.retry_after).to eq(state_snapshot.recovery_scheduled_after)
       }
