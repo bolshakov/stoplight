@@ -64,23 +64,24 @@ module Stoplight
     @systems = []
 
     def self.add_system(system)
-      validate_persistent_system!(system)
-      @systems << system
+      @systems << validate_persistent_system!(system)
+    end
+
+    def self.__stoplight__reset_systems!
+      @systems = []
     end
 
     def self.validate_persistent_system!(system)
-      return if system.persistent?
+      return system if system.persistent?
 
-      raise TypeError, "Stoplight Admin requires a persistent data store, but the current data store is not. " \
+      raise TypeError, "Stoplight Admin requires a persistent data store, but the current data store is not persistent. " \
         "Please configure a different data store in your Stoplight configuration."
     end
     private_class_method :validate_persistent_system!
 
     set :systems do
       if @systems.empty?
-        default_system = Stoplight.__stoplight__default_system
-        validate_persistent_system!(default_system)
-        [default_system]
+        [validate_persistent_system!(Stoplight.__stoplight__default_system)]
       else
         @systems
       end
@@ -105,11 +106,11 @@ module Stoplight
     get "/" do
       system = settings.systems.first
 
-      redirect to("/systems/#{system.config.id}/lights")
+      redirect system_url(system.config.id, "/lights")
     end
 
     get "/systems/:system_id/lights" do
-      lights, stats = dependencies(current_system).stats_action.call
+      lights, stats = dependencies.stats_action.call
 
       erb :index, locals: stats.merge(
         lights: lights,
@@ -118,47 +119,47 @@ module Stoplight
       )
     end
 
-    # Keep this endpoint for backward compatibility. Any monitoring system polling this
-    # endpoint will keep receiving the first system's (likely default one) lights
+    # Always reports the first configured system, regardless of which system is "current" -
+    # for external monitors that already poll this unscoped path.
     get "/stats" do
-      lights, stats = dependencies(settings.systems.first).stats_action.call
+      lights, stats = Dependencies.new(system: settings.systems.first).stats_action.call
 
       json({stats: stats, lights: lights.map(&:as_json)})
     end
 
     get "/systems/:system_id/lights.json" do
-      lights, stats = dependencies(current_system).stats_action.call
+      lights, stats = dependencies.stats_action.call
 
       json({stats: stats, lights: lights.map(&:as_json)})
     end
 
     patch "/systems/:system_id/lights/:light_id/unlock" do
       light_id = T.must(params[:light_id])
-      dependencies(current_system).unlock_action.call(light_id:)
+      dependencies.unlock_action.call(light_id:)
 
-      redirect to("/systems/#{current_system_id}/lights")
+      redirect system_url(current_system_id, "/lights")
     end
 
     patch "/systems/:system_id/lights/:light_id/lock" do
       light_id = T.must(params[:light_id])
       color = T.must(params[:color])
-      dependencies(current_system).lock_action.call(light_id:, color:)
+      dependencies.lock_action.call(light_id:, color:)
 
-      redirect to("/systems/#{current_system_id}/lights")
+      redirect system_url(current_system_id, "/lights")
     end
 
     patch "/systems/:system_id/lights/lock" do
       color = T.must(params[:color])
-      dependencies(current_system).lock_all_action.call(color:)
+      dependencies.lock_all_action.call(color:)
 
-      redirect to("/systems/#{current_system_id}/lights")
+      redirect system_url(current_system_id, "/lights")
     end
 
     delete "/systems/:system_id/lights/:light_id" do
       light_id = T.must(params[:light_id])
-      dependencies(current_system).remove_action.call(light_id:)
+      dependencies.remove_action.call(light_id:)
 
-      redirect to("/systems/#{current_system_id}/lights")
+      redirect system_url(current_system_id, "/lights")
     end
   end
 end

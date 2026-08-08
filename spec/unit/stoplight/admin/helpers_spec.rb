@@ -19,8 +19,28 @@ RSpec.describe Stoplight::Admin::Helpers, :redis do
   end
 
   describe "#dependencies" do
-    it "returns Dependencies" do
-      expect(helper.dependencies(system)).to be_an_instance_of(Stoplight::Admin::Dependencies)
+    before { allow(helper).to receive(:current_system).and_return(system) }
+
+    it "returns Dependencies for the current system" do
+      expect(Stoplight::Admin::Dependencies).to receive(:new).with(system:).and_call_original
+
+      expect(helper.dependencies).to be_an_instance_of(Stoplight::Admin::Dependencies)
+    end
+  end
+
+  describe "#show_system_switcher?" do
+    context "with one system configured" do
+      it "returns false" do
+        expect(helper.show_system_switcher?).to be false
+      end
+    end
+
+    context "with more than one system configured" do
+      let(:systems) { [system, system] }
+
+      it "returns true" do
+        expect(helper.show_system_switcher?).to be true
+      end
     end
   end
 end

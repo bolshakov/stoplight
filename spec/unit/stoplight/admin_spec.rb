@@ -18,7 +18,7 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
   end
 
   after do
-    Stoplight::Admin.instance_variable_set(:@systems, [])
+    Stoplight::Admin.__stoplight__reset_systems!
   end
 
   describe ".add_system" do
@@ -30,9 +30,19 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
     end
   end
 
+  describe ".__stoplight__reset_systems!" do
+    it "clears every explicitly added system" do
+      expect(Stoplight::Admin.settings.systems).to eq([system])
+
+      Stoplight::Admin.__stoplight__reset_systems!
+
+      expect(Stoplight::Admin.settings.systems).to eq([Stoplight.__stoplight__default_system])
+    end
+  end
+
   describe ".systems" do
     context "when no system has been explicitly added" do
-      before { Stoplight::Admin.instance_variable_set(:@systems, []) }
+      before { Stoplight::Admin.__stoplight__reset_systems! }
 
       it "raises if the default system is not persistent" do
         allow(Stoplight).to receive(:__stoplight__default_system)
@@ -106,6 +116,21 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
 
       expect(last_response.status).to eq(302)
       expect(last_response.headers["location"]).to include("#{last_request.env["HTTP_HOST"]}/systems/#{system_id}/lights")
+    end
+
+    context "with more than one system configured" do
+      let(:other_data_store) { Stoplight::DataStore::Redis.new(redis) }
+      let(:other_system) { Stoplight.register_system(SecureRandom.uuid, data_store: other_data_store) }
+
+      before { Stoplight::Admin.add_system(other_system) }
+
+      it "redirects to the first-registered system's lights, not the last" do
+        get "/"
+
+        expect(last_response.status).to eq(302)
+        expect(last_response.headers["location"]).to include("/systems/#{system_id}/lights")
+        expect(last_response.headers["location"]).not_to include("/systems/#{other_system.config.id}/lights")
+      end
     end
   end
 
@@ -201,6 +226,20 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
         end
       end
 
+      context "when the light's name contains HTML" do
+        let(:light_name) { %(<script>alert("xss")</script>) }
+
+        before { light.run(&light_condition) }
+
+        it "escapes the light's name" do
+          get "/systems/#{system_id}/lights"
+
+          expect(last_response).to be_ok
+          expect(last_response.body).not_to include(light_name)
+          expect(last_response.body).to include(CGI.escapeHTML(light_name))
+        end
+      end
+
       context "when light has multiple consecutive failures" do
         let(:light) { system.register(SecureRandom.uuid) }
 
@@ -217,6 +256,82 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
 
           expect(last_response.body).to include(">Failures:</span> 3")
         end
+      end
+
+      context "when the latest failure's message contains HTML" do
+        let(:light) { system.register(SecureRandom.uuid) }
+        let(:failure_message) { %(<script>alert("xss")</script>) }
+
+        before { 3.times { light.run(->(_) {}) { raise failure_message } } }
+
+        it "escapes the failure message in the light's description" do
+          get "/systems/#{system_id}/lights"
+
+          expect(last_response).to be_ok
+          expect(last_response.body).not_to include(failure_message)
+          expect(last_response.body).to include(CGI.escapeHTML(failure_message))
+        end
+      end
+    end
+  end
+
+  describe "system switcher" do
+    context "with a single system configured" do
+      it "does not render the switcher" do
+        get "/systems/#{system_id}/lights"
+
+        expect(last_response).to be_ok
+        expect(last_response.body).not_to include("systemMenuButton")
+      end
+    end
+
+    context "with more than one system configured" do
+      let(:other_data_store) { Stoplight::DataStore::Redis.new(redis) }
+      let(:other_system) { Stoplight.register_system(SecureRandom.uuid, data_store: other_data_store) }
+      before { Stoplight::Admin.add_system(other_system) }
+
+      it "renders a switcher button and menu listing every configured system" do
+        get "/systems/#{system_id}/lights"
+
+        expect(last_response).to be_ok
+        expect(last_response.body).to include("systemMenuButton")
+        expect(last_response.body).to include(system.name)
+        expect(last_response.body).to include(other_system.name)
+      end
+
+      it "links each menu row to that system's dashboard" do
+        get "/systems/#{system_id}/lights"
+
+        host = last_request.env["HTTP_HOST"]
+        expect(last_response.body).to include(%(href="http://#{host}/systems/#{other_system.config.id}/lights"))
+      end
+
+      it "highlights the current system's row in the menu" do
+        get "/systems/#{system_id}/lights"
+
+        host = last_request.env["HTTP_HOST"]
+        expect(last_response.body).to include(
+          %(href="http://#{host}/systems/#{system_id}/lights" class="block px-4 py-2 bg-blue-50 text-blue-700)
+        )
+        expect(last_response.body).to include(
+          %(href="http://#{host}/systems/#{other_system.config.id}/lights" class="block px-4 py-2 hover:bg-gray-100)
+        )
+      end
+    end
+
+    context "when a system's name contains HTML" do
+      let(:other_data_store) { Stoplight::DataStore::Redis.new(redis) }
+      let(:other_system_name) { %(<script>alert("xss")</script>) }
+      let(:other_system) { Stoplight.register_system(other_system_name, data_store: other_data_store) }
+
+      before { Stoplight::Admin.add_system(other_system) }
+
+      it "escapes the other system's name in the switcher menu" do
+        get "/systems/#{system_id}/lights"
+
+        expect(last_response).to be_ok
+        expect(last_response.body).not_to include(other_system_name)
+        expect(last_response.body).to include(CGI.escapeHTML(other_system_name))
       end
     end
   end
@@ -267,9 +382,34 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
         )
       end
     end
+
+    context "with more than one system configured" do
+      let(:other_data_store) { Stoplight::DataStore::Redis.new(redis) }
+      let(:other_system) { Stoplight.register_system(SecureRandom.uuid, data_store: other_data_store) }
+      let(:other_light) { other_system.register(SecureRandom.uuid) }
+
+      before do
+        Stoplight::Admin.add_system(other_system)
+        other_light.run { "ok" }
+      end
+
+      it "returns only the first-registered system's lights, not the last" do
+        get "/stats"
+
+        expect(last_response).to be_ok
+        other_light_id = Stoplight::Domain::Id.for(other_light.name)
+        expect(response_body["lights"].map { |light| light["id"] }).not_to include(other_light_id)
+      end
+    end
   end
 
   describe "GET /systems/{system_id}/lights.json" do
+    it "returns not found for an unknown system_id" do
+      get "/systems/deadbeaf/lights.json"
+
+      expect(last_response).to be_not_found
+    end
+
     context "with no lights" do
       it "returns expected response" do
         get "/systems/#{system_id}/lights.json"
@@ -336,6 +476,12 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
 
       expect(last_response.status).to eq(404)
     end
+
+    it "returns not found for an unknown system_id" do
+      patch "/systems/deadbeaf/lights/#{light_id}/unlock"
+
+      expect(last_response).to be_not_found
+    end
   end
 
   describe "PATCH /systems/{system_id}/lights/{light_id}/lock" do
@@ -361,6 +507,12 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
       patch "/systems/#{system_id}/lights/#{SecureRandom.uuid}/lock", color: "green"
 
       expect(last_response.status).to eq(404)
+    end
+
+    it "returns not found for an unknown system_id" do
+      patch "/systems/deadbeaf/lights/#{light_id}/lock", color: "green"
+
+      expect(last_response).to be_not_found
     end
   end
 
@@ -399,6 +551,12 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
       expect(last_response.status).to eq(400)
       expect(light.state).to eq("locked_red")
     end
+
+    it "returns not found for an unknown system_id" do
+      patch "/systems/deadbeaf/lights/lock", color: "green"
+
+      expect(last_response).to be_not_found
+    end
   end
 
   describe "DELETE /systems/{system_id}/lights/{light_id}" do
@@ -419,6 +577,12 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
       get "/systems/#{system_id}/lights.json"
       expect(last_response).to be_ok
       expect(response_body.fetch("lights").map { |h| h.fetch("name") }).to contain_exactly("bar")
+    end
+
+    it "returns not found for an unknown system_id" do
+      delete "/systems/deadbeaf/lights/#{light_id}"
+
+      expect(last_response).to be_not_found
     end
   end
 

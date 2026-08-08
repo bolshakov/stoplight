@@ -9,8 +9,8 @@ module Stoplight
         Color::RED
       ].freeze
 
-      def dependencies(system)
-        Dependencies.new(system:)
+      def dependencies
+        Dependencies.new(system: current_system)
       end
 
       def system_url(system_id, path)
@@ -71,6 +71,10 @@ module Stoplight
 
       def current_system
         find_system(current_system_id)
+      end
+
+      def show_system_switcher?
+        settings.systems.size > 1
       end
     end
   end
