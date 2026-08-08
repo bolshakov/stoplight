@@ -194,6 +194,70 @@ RSpec.describe Stoplight::Infrastructure::Redis::DataStore, :redis do
       def state_snapshot = data_store.get_state_snapshot(config)
       def clear = data_store.delete_light(config)
     end
+
+    describe "#record_failure" do
+      context "without window_size" do
+        let(:window_size) { nil }
+
+        it "uses default value as metrics_ttl when calling scripting" do
+          expect(scripting).to receive(:call).with(
+            :record_failure,
+            hash_including(
+              args: array_including(86_400)
+            )
+          ).and_call_original
+
+          data_store.record_failure(config, StandardError.new)
+        end
+      end
+
+      context "with window_size" do
+        let(:window_size) { 333 }
+
+        it "uses window_size as metrics_ttl when calling scripting" do
+          expect(scripting).to receive(:call).with(
+            :record_failure,
+            hash_including(
+              args: array_including(window_size)
+            )
+          ).and_call_original
+
+          data_store.record_failure(config, StandardError.new)
+        end
+      end
+    end
+
+    describe "#record_success" do
+      context "without window_size" do
+        let(:window_size) { nil }
+
+        it "uses default value as metrics_ttl when calling scripting" do
+          expect(scripting).to receive(:call).with(
+            :record_success,
+            hash_including(
+              args: array_including(86_400)
+            )
+          ).and_call_original
+
+          data_store.record_success(config)
+        end
+      end
+
+      context "with window_size" do
+        let(:window_size) { 333 }
+
+        it "uses window_size as metrics_ttl when calling scripting" do
+          expect(scripting).to receive(:call).with(
+            :record_success,
+            hash_including(
+              args: array_including(window_size)
+            )
+          ).and_call_original
+
+          data_store.record_success(config)
+        end
+      end
+    end
   end
 
   it_behaves_like Stoplight::Infrastructure::Redis::DataStore do

@@ -57,7 +57,7 @@ module Stoplight
         private def errors_key: (Domain::Config config, time: Time) -> String
         private def recovery_metrics_key: (Domain::Config config) -> String
         private def metadata_key: (Domain::Config config) -> String
-        private def metrics_ttl: -> Integer
+        private def metrics_ttl: (Domain::Config) -> Integer
         private def metadata_ttl: -> Integer
         private def detect_clock_skew: -> void
         private def should_sample?: (Float) -> bool

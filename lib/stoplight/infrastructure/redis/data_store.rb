@@ -242,7 +242,7 @@ module Stoplight
 
           scripting.call(
             :record_failure,
-            args: [current_ts, SecureRandom.hex(12), serialize_failure(failure), metrics_ttl, metadata_ttl],
+            args: [current_ts, SecureRandom.hex(12), serialize_failure(failure), metrics_ttl(config), metadata_ttl],
             keys: [
               metadata_key(config),
               config.window_size && errors_key(config, time: current_ts)
@@ -255,7 +255,7 @@ module Stoplight
 
           scripting.call(
             :record_success,
-            args: [current_ts, request_id, metrics_ttl, metadata_ttl],
+            args: [current_ts, request_id, metrics_ttl(config), metadata_ttl],
             keys: [
               metadata_key(config),
               config.window_size && successes_key(config, time: current_ts)
@@ -481,8 +481,8 @@ module Stoplight
         METRICS_TTL = 86400 # 1 day
         private_constant :METRICS_TTL
 
-        private def metrics_ttl
-          METRICS_TTL
+        private def metrics_ttl(config)
+          config.window_size || METRICS_TTL
         end
 
         METADATA_TTL = 86400 * 7 # 7 days
