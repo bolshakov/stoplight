@@ -18,20 +18,21 @@ module Stoplight
           def initialize(redis:, scripts_root: self.class.default_scripts_root)
             @scripts_root = scripts_root
             @redis = redis
-            @shas = {}
+            @shas = Hash.new do |hash, script_name|
+              hash[script_name] = Digest::SHA1.hexdigest(resolve_source(script_name))
+            end
           end
 
           def call(script_name, keys: [], args: [])
             retried = false
 
             begin
-              redis.then do |client|
-                client.evalsha(script_sha(script_name), keys: keys.map(&:to_s), argv: args.map(&:to_s))
+              @redis.then do |client|
+                client.evalsha(@shas[script_name], keys: keys.map(&:to_s), argv: args.map(&:to_s))
               end
             rescue ::Redis::CommandError => error
               if error.message.include?("NOSCRIPT") && !retried
                 retried = true
-                warn "Stoplight is unable to find the script '#{script_name}' in Redis's script cache. Reloading and retrying..."
                 reload_script(script_name)
                 retry
               else
@@ -42,26 +43,14 @@ module Stoplight
 
           private
 
-          attr_reader :scripts_root
-          attr_reader :redis
-          attr_reader :shas
-
           def reload_script(script_name)
-            shas.delete(script_name)
-            script_sha(script_name)
-          end
-
-          def script_sha(script_name)
-            if shas.key?(script_name)
-              shas[script_name]
-            else
-              shas[script_name] = redis.then { |client| client.script(:load, resolve_source(script_name)) }
-            end
+            warn "Stoplight is unable to find the script '#{script_name}' in Redis's script cache. Reloading and retrying..."
+            @redis.then { |client| client.script(:load, resolve_source(script_name)) }
           end
 
           # Redis's Lua sandbox has no `require`, so an included script is spliced in as source text.
           def resolve_source(script_name)
-            source = File.read(File.join(scripts_root, "#{script_name}.lua"))
+            source = File.read(File.join(@scripts_root, "#{script_name}.lua"))
             source.gsub(INCLUDE_DIRECTIVE) { resolve_source(T.must(Regexp.last_match(1))) }
           end
         end

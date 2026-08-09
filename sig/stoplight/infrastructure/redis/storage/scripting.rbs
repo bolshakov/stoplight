@@ -9,11 +9,9 @@ module Stoplight
 
           def self.default_scripts_root: -> String
 
-          attr_reader scripts_root: String
-
-          attr_reader shas: Hash[String, String]
-
-          attr_reader redis: redis
+          @scripts_root: String
+          @shas: Hash[String, String]
+          @redis: redis
 
           def initialize: (
               redis: redis,
@@ -26,9 +24,7 @@ module Stoplight
               ?args: Array[_ToS]
             ) -> untyped
 
-          private def reload_script: (String script_name) -> String
-
-          private def script_sha: (String script_name) -> String
+          private def reload_script: (String script_name) -> void
 
           private def resolve_source: (String script_name) -> String
         end

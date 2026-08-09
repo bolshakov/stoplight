@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Stoplight::Infrastructure::Redis::Storage::Scripting, :redis do
-  subject(:script_manager) { described_class.new(redis:, scripts_root:) }
+  subject(:script_manager) { script_manager_factory }
 
   let(:script_file) { Tempfile.create(["script", ".lua"]) }
   let(:script_file_path) { Pathname.new(script_file.path) }
@@ -22,6 +22,8 @@ RSpec.describe Stoplight::Infrastructure::Redis::Storage::Scripting, :redis do
 
   let(:value) { SecureRandom.uuid }
   let(:key) { SecureRandom.uuid }
+
+  def script_manager_factory = described_class.new(redis:, scripts_root:)
 
   it "can call existing script" do
     result = script_manager.call(script_name, args: [value], keys: [key])
@@ -215,6 +217,26 @@ RSpec.describe Stoplight::Infrastructure::Redis::Storage::Scripting, :redis do
         script_manager.call(script_name, args: [value], keys: [key])
       end.to raise_error(::Redis::CommandError)
       expect(redis).to have_received(:evalsha).exactly(total_attempts).times
+    end
+  end
+
+  context "when two scripting instances call the same script" do
+    let(:script_sha) { Digest::SHA1.hexdigest(script) }
+
+    before do
+      redis.script(:flush, :sync)
+    end
+
+    it "loads script only once" do
+      expect(redis).to receive(:script).with(:load, script).and_call_original.once
+
+      script_manager1 = script_manager_factory
+      script_manager1.call(script_name, args: [value], keys: [key])
+
+      expect(redis).not_to receive(:script)
+      script_manager2 = script_manager_factory
+
+      script_manager2.call(script_name, args: [value], keys: [key])
     end
   end
 end
