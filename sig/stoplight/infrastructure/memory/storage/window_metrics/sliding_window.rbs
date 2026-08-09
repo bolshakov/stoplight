@@ -12,13 +12,13 @@ module Stoplight
 
             def increment: -> void
 
-            def sum_in_window: (Time window_start) -> Integer
+            def sum_in_window: (Domain::duration_seconds window_size) -> Integer
 
-            private def slide_window!: (Time window_start) -> void
+            private def slide_window!: (Float window_start) -> void
 
             private def current_bucket: -> Integer
 
-            private def bucket_for_time: (Time time) -> Integer
+            private def monotonic_seconds: -> Float
 
             def inspect: -> String
           end

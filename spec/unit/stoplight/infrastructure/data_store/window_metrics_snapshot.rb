@@ -9,7 +9,7 @@ RSpec.shared_examples "a window metrics snapshot" do
         let(:window_size) { 5000 }
 
         before do
-          Timecop.freeze(Time.now - window_size - 10) do
+          Timecop.freeze(-window_size - 10) do
             record_success
           end
         end
@@ -27,7 +27,7 @@ RSpec.shared_examples "a window metrics snapshot" do
         let(:window_size) { 5000 }
 
         before do
-          Timecop.freeze(Time.now - window_size - 10) do
+          Timecop.freeze(-window_size - 10) do
             record_failure(error)
           end
         end

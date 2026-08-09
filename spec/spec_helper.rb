@@ -28,6 +28,8 @@ require_relative "support/route_helpers"
 require_relative "support/matchers/emit"
 
 Timecop.safe_mode = true
+# Window buckets age on the monotonic clock; travel/freeze must move it too.
+Timecop.mock_process_clock = true
 
 require File.expand_path("dummy/config/environment", __dir__)
 require "ammeter/init"

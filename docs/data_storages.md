@@ -42,6 +42,11 @@ run are meaningful regardless of which backend they run against. If you change b
 in one backend, change it in all of them (and add/adjust the property or integration
 spec that pins the invariant).
 
+Known exception: the Memory backend ages its metrics window on the monotonic clock,
+so wall-clock steps (NTP) cannot corrupt it. Redis windows stay on wall time because
+monotonic readings are not comparable across hosts; under a wall-clock step the two
+backends can briefly disagree about window membership.
+
 ## Backward compatibility
 
 Don't change a backend's key layout without a deliberate deprecation - existing users

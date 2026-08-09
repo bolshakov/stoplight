@@ -26,14 +26,14 @@ module Stoplight
               @clock = clock
             end
 
-            # Increment the count at a given timestamp
+            # Increment the count at the current monotonic second
             def increment
               @buckets[current_bucket] += 1
               @running_sum += 1
             end
 
-            def sum_in_window(window_start)
-              slide_window!(window_start)
+            def sum_in_window(window_size)
+              slide_window!(monotonic_seconds - window_size)
               @running_sum
             end
 
@@ -58,11 +58,13 @@ module Stoplight
             end
 
             def current_bucket
-              bucket_for_time(@clock.current_time)
+              monotonic_seconds.to_i
             end
 
-            def bucket_for_time(time)
-              time.to_i
+            # Monotonic, so a wall-clock step (NTP) cannot break FIFO eviction;
+            # the clock port returns float milliseconds.
+            def monotonic_seconds
+              @clock.monotonic_time / 1000.0
             end
           end
         end

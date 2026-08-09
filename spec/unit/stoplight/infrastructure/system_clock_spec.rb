@@ -18,10 +18,6 @@ RSpec.describe Stoplight::Infrastructure::SystemClock do
   describe "#monotonic_time" do
     subject(:monotonic_time) { clock.monotonic_time }
 
-    around do |example|
-      Timecop.freeze { example.run }
-    end
-
     it "returns monotonic time in milliseconds" do
       expect(monotonic_time).to be_within(10).of(Process.clock_gettime(Process::CLOCK_MONOTONIC, :float_millisecond))
     end
