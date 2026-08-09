@@ -1,69 +1,67 @@
 # frozen_string_literal: true
 
 RSpec.describe Stoplight::Infrastructure::Memory::Storage::WindowMetrics::SlidingWindow do
-  let(:counter) { described_class.new(clock:) }
-  let(:clock) { Stoplight::Infrastructure::SystemClock.new }
+  subject(:counter) { described_class.new(clock:) }
 
-  around do |example|
-    Timecop.freeze do
-      example.run
-    end
+  let(:clock) { instance_double(NullClock) }
+
+  # Position the monotonic clock at an absolute second.
+  def at(seconds)
+    allow(clock).to receive(:monotonic_time).and_return(seconds * 1000.0)
   end
 
   describe "#increment" do
     it "increments the count for the given time" do
+      at(100)
       counter.increment
       counter.increment
       counter.increment
 
-      expect(counter.sum_in_window(Time.now - 10)).to eq(3)
+      expect(counter.sum_in_window(10)).to eq(3)
     end
 
     it "when empty returns zero sum" do
-      expect(counter.sum_in_window(Time.now)).to eq(0)
-      expect(counter.sum_in_window(Time.now - 100)).to eq(0)
-      expect(counter.sum_in_window(Time.now - 10000)).to eq(0)
+      at(100)
+      expect(counter.sum_in_window(0)).to eq(0)
+      expect(counter.sum_in_window(100)).to eq(0)
+      expect(counter.sum_in_window(10000)).to eq(0)
     end
 
     it "increments the count for the different seconds" do
-      Timecop.freeze(Time.now - 2) do
-        counter.increment
-        counter.increment
-      end
-      Timecop.freeze(Time.now - 1) do
-        counter.increment
-        counter.increment
-      end
-      Timecop.freeze(Time.now) do
-        counter.increment
-      end
+      at(98)
+      counter.increment
+      counter.increment
+      at(99)
+      counter.increment
+      counter.increment
+      at(100)
+      counter.increment
 
-      expect(counter.sum_in_window(Time.now - 2)).to eq(5)
-      expect(counter.sum_in_window(Time.now - 1)).to eq(3)
-      expect(counter.sum_in_window(Time.now)).to eq(1)
+      expect(counter.sum_in_window(2)).to eq(5)
+      expect(counter.sum_in_window(1)).to eq(3)
+      expect(counter.sum_in_window(0)).to eq(1)
     end
 
     it "increments the count for the different sparsely distributed seconds" do
-      Timecop.freeze(Time.now - 20) do
-        counter.increment
-      end
-      Timecop.freeze(Time.now - 10) do
-        counter.increment
-      end
-      Timecop.freeze(Time.now - 5) do
-        counter.increment
-      end
+      at(80)
+      counter.increment
+      at(90)
+      counter.increment
+      at(95)
+      counter.increment
+      at(100)
 
-      expect(counter.sum_in_window(Time.now - 60)).to eq(3)
-      expect(counter.sum_in_window(Time.now - 15)).to eq(2)
-      expect(counter.sum_in_window(Time.now - 5)).to eq(1)
-      expect(counter.sum_in_window(Time.now - 2)).to eq(0)
+      expect(counter.sum_in_window(60)).to eq(3)
+      expect(counter.sum_in_window(15)).to eq(2)
+      expect(counter.sum_in_window(5)).to eq(1)
+      expect(counter.sum_in_window(2)).to eq(0)
     end
   end
 
   describe "#sum_in_window" do
     it "returns zero when no increments in the window" do
-      expect(counter.sum_in_window(Time.now)).to eq(0)
+      at(100)
+      expect(counter.sum_in_window(0)).to eq(0)
     end
   end
 end
