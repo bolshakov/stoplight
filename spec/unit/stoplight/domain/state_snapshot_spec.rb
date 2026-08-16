@@ -46,6 +46,13 @@ RSpec.describe Stoplight::Domain::StateSnapshot do
       it { is_expected.to be(Stoplight::Color::YELLOW) }
     end
 
+    context "when threshold is breached and recovery is in the future" do
+      let(:breached_at) { time - 3 }
+      let(:recovery_started_at) { time + 3 }
+
+      it { is_expected.to be(Stoplight::Color::RED) }
+    end
+
     context "when threshold breached" do
       let(:breached_at) { time - 3 }
 

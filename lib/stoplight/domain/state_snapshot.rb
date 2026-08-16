@@ -29,7 +29,7 @@ module Stoplight
           Color::GREEN
         elsif locked_state == State::LOCKED_RED
           Color::RED
-        elsif (recovery_scheduled_after && recovery_scheduled_after! < time) || recovery_started_at
+        elsif (recovery_scheduled_after && recovery_scheduled_after! < time) || recovery_started?
           Color::YELLOW
         elsif breached_at
           Color::RED
