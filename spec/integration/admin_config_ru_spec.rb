@@ -56,8 +56,9 @@ RSpec.describe "config.ru", :redis do
     Stoplight.register("foo")
     Stoplight.light("foo").run { "ok" }
     Stoplight.__stoplight__reset!
+    system_id = Stoplight.__stoplight__default_system.config.id
 
-    get "/"
+    get "/systems/#{system_id}/lights"
 
     expect(last_response.body).not_to include("No lights found")
   end

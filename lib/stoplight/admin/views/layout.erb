@@ -43,6 +43,28 @@
 
             <div class="hidden w-full md:block md:w-auto" id="navbar-default">
               <ul class="font-medium flex flex-col p-4 md:p-0 mt-4 border border-gray-100 rounded-lg bg-gray-50 md:flex-row md:space-x-8 rtl:space-x-reverse md:mt-0 md:border-0 md:bg-white dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700">
+                <% if show_system_switcher? %>
+                  <li class="relative me-2 mb-2">
+                    <button id="systemMenuButton" data-dropdown-toggle="systemMenu" type="button"
+                      class="flex items-center gap-2 py-2.5 px-4 text-sm font-medium text-gray-900 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-100 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-700">
+                      <%= CGI.escapeHTML(current_system.name) %>
+                      <svg class="w-2.5 h-2.5 ms-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 6" fill="none">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
+                      </svg>
+                    </button>
+                    <div id="systemMenu" class="z-10 hidden w-60 bg-white divide-y divide-gray-100 rounded-lg shadow-lg border border-gray-100 dark:bg-gray-700 dark:divide-gray-600 dark:border-gray-600">
+                      <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="systemMenuButton">
+                        <% settings.systems.each do |other_system| %>
+                          <li>
+                            <a href="<%= system_url(other_system.config.id, "/lights") %>" class="block px-4 py-2 <%= (other_system.config.id == current_system_id) ? "bg-blue-50 text-blue-700 dark:bg-gray-600 dark:text-white" : "hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" %>">
+                              <%= CGI.escapeHTML(other_system.name) %>
+                            </a>
+                          </li>
+                        <% end %>
+                      </ul>
+                    </div>
+                  </li>
+                <% end %>
                 <% if count_red + count_yellow > 0 %>
                   <li>
                     <a <%= control_attributes(system_url(system_id, '/lights/lock?color=green'), verb: "patch") %> class="inline-flex items-center font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 border bg-white dark:bg-gray-800 <%= settings.read_only? ? "text-gray-400 border-gray-200 cursor-not-allowed dark:text-gray-500 dark:border-gray-700" : "text-gray-900 border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700" %>">
