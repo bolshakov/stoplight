@@ -104,7 +104,7 @@ module Stoplight
         end
 
         def capture_started_at
-          @clock.monotonic_time if @run_recorder.subscribed?
+          @clock.monotonic_time if @run_recorder.subscribed? || request_tracker.subscribed?
         end
 
         def duration_since(started_at)
@@ -113,12 +113,12 @@ module Stoplight
 
         def record_recovery_probe_success(duration_ms:, error: nil)
           @run_recorder.record_success(duration_ms:, error:)
-          request_tracker.record_success
+          request_tracker.record_success(duration_ms:)
         end
 
         def record_recovery_probe_failure(error, duration_ms:, fallback_used:)
           @run_recorder.record_failure(error, duration_ms:, fallback_used:)
-          request_tracker.record_failure(error)
+          request_tracker.record_failure(error, duration_ms:)
         end
 
         def enter_recovery(state_snapshot)

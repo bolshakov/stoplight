@@ -4,22 +4,23 @@ module Stoplight
       # Emitted for every recovery probe.
       class RecoveryProbeCompleted < Data
         attr_reader outcome: probe_outcome
-        # Latency of the recovering dependency.
-        attr_reader duration_ms: Float
+        # Latency of the recovering dependency. nil when nobody was subscribed at the start of the
+        # probe (same measurement race as RunCompleted#duration_ms).
+        attr_reader duration_ms: Float?
         attr_reader failure: Failure?
         # Recovery metrics after this probe.
         attr_reader progress: Metrics
 
         def self.new: (
             outcome: probe_outcome,
-            duration_ms: Float,
+            duration_ms: Float?,
             failure: Failure?,
             progress: Metrics
           ) -> instance
 
         def initialize: (
             outcome: probe_outcome,
-            duration_ms: Float,
+            duration_ms: Float?,
             failure: Failure?,
             progress: Metrics
           ) -> void

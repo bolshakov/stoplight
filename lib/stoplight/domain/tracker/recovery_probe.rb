@@ -13,17 +13,20 @@ module Stoplight
           @emitter = emitter
         end
 
+        # True when any subscriber would receive a RecoveryProbeCompleted event.
+        def subscribed? = emitter.subscribed?(Telemetry::RecoveryProbeCompleted)
+
         # @param exception [Exception]
-        def record_failure(exception)
+        def record_failure(exception, duration_ms:)
           metrics_store.record_failure(exception)
 
-          recover
+          recover(outcome: :failure, duration_ms:, failure: Telemetry::Failure.new(exception:, tracked: true))
         end
 
-        def record_success
+        def record_success(duration_ms:)
           metrics_store.record_success
 
-          recover
+          recover(outcome: :success, duration_ms:, failure: nil)
         end
 
         private
@@ -35,8 +38,23 @@ module Stoplight
         attr_reader :state_store
         attr_reader :emitter
 
-        def recover
+        def recover(outcome:, duration_ms:, failure:)
           recovery_metrics = metrics_store.metrics_snapshot
+
+          # Fires on every probe, whatever the outcome - it's a per-probe measurement, not a
+          # state transition, so there's no dedup guard here.
+          emitter.emit(Telemetry::RecoveryProbeCompleted) do
+            Telemetry::RecoveryProbeCompleted.new(
+              outcome:, duration_ms:, failure:,
+              progress: Telemetry::Metrics.new(
+                successes: recovery_metrics.successes,
+                errors: recovery_metrics.errors,
+                consecutive_errors: recovery_metrics.consecutive_errors,
+                consecutive_successes: recovery_metrics.consecutive_successes
+              )
+            )
+          end
+
           recovery_result = traffic_recovery.determine_color(config, recovery_metrics)
 
           return if recovery_result == TrafficRecovery::YELLOW

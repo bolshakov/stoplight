@@ -12,6 +12,7 @@ RSpec.describe Stoplight::Domain::Tracker::RecoveryProbe do
   let(:name) { SecureRandom.uuid }
   let(:emitter) { TestTelemetryEmitter.new }
   let(:policy_name) { SecureRandom.uuid }
+  let(:probe_duration_ms) { 12.5 }
 
   shared_examples "when recover to" do |recover_to:, transition_from:, transition_to:|
     context "when recover to #{recover_to}" do
@@ -64,7 +65,10 @@ RSpec.describe Stoplight::Domain::Tracker::RecoveryProbe do
       transition_to: Stoplight::Color::RED
 
     context "when recover to unexpected to outcome" do
-      let(:metrics_after_probe) { instance_double(Stoplight::Domain::MetricsSnapshot) }
+      let(:metrics_after_probe) {
+        instance_double(Stoplight::Domain::MetricsSnapshot,
+          successes: 5, errors: 2, consecutive_errors: 0, consecutive_successes: 3)
+      }
       let(:recover_to) { "unexpected" }
 
       before do
@@ -77,7 +81,10 @@ RSpec.describe Stoplight::Domain::Tracker::RecoveryProbe do
     end
 
     context "when recover to YELLOW (needs more probes)" do
-      let(:metrics_after_probe) { instance_double(Stoplight::Domain::MetricsSnapshot) }
+      let(:metrics_after_probe) {
+        instance_double(Stoplight::Domain::MetricsSnapshot,
+          successes: 5, errors: 2, consecutive_errors: 0, consecutive_successes: 3)
+      }
       let(:recover_to) { Stoplight::Domain::TrafficRecovery::YELLOW }
 
       before do
@@ -95,7 +102,7 @@ RSpec.describe Stoplight::Domain::Tracker::RecoveryProbe do
   end
 
   describe "#record_success" do
-    subject(:record_probe) { recorder.record_success }
+    subject(:record_probe) { recorder.record_success(duration_ms: probe_duration_ms) }
 
     before do
       allow(metrics_store).to receive(:record_success)
@@ -106,7 +113,7 @@ RSpec.describe Stoplight::Domain::Tracker::RecoveryProbe do
   end
 
   describe "#record_failure" do
-    subject(:record_probe) { recorder.record_failure(exception) }
+    subject(:record_probe) { recorder.record_failure(exception, duration_ms: probe_duration_ms) }
 
     let(:exception) { KeyError.new("bang") }
 
@@ -142,7 +149,7 @@ RSpec.describe Stoplight::Domain::Tracker::RecoveryProbe do
       end
 
       it "emits a RecoverySucceeded event with the transition details" do
-        expect { recorder.record_success }.to emit(Stoplight::Domain::Telemetry::RecoverySucceeded).with(
+        expect { recorder.record_success(duration_ms: probe_duration_ms) }.to emit(Stoplight::Domain::Telemetry::RecoverySucceeded).with(
           from_color: Stoplight::Color::YELLOW,
           to_color: Stoplight::Color::GREEN,
           policy: policy_name,
@@ -156,7 +163,7 @@ RSpec.describe Stoplight::Domain::Tracker::RecoveryProbe do
       end
 
       it "emits exactly one RecoverySucceeded event" do
-        recorder.record_success
+        recorder.record_success(duration_ms: probe_duration_ms)
 
         count = emitter.emitted.count { |event| event.instance_of?(Stoplight::Domain::Telemetry::RecoverySucceeded) }
         expect(count).to eq(1)
@@ -168,7 +175,7 @@ RSpec.describe Stoplight::Domain::Tracker::RecoveryProbe do
         end
 
         it "does not emit a RecoverySucceeded event" do
-          expect { recorder.record_success }.not_to emit(Stoplight::Domain::Telemetry::RecoverySucceeded)
+          expect { recorder.record_success(duration_ms: probe_duration_ms) }.not_to emit(Stoplight::Domain::Telemetry::RecoverySucceeded)
         end
       end
     end
@@ -179,7 +186,7 @@ RSpec.describe Stoplight::Domain::Tracker::RecoveryProbe do
       end
 
       it "does not emit a RecoverySucceeded event" do
-        expect { recorder.record_success }.not_to emit(Stoplight::Domain::Telemetry::RecoverySucceeded)
+        expect { recorder.record_success(duration_ms: probe_duration_ms) }.not_to emit(Stoplight::Domain::Telemetry::RecoverySucceeded)
       end
     end
 
@@ -190,8 +197,63 @@ RSpec.describe Stoplight::Domain::Tracker::RecoveryProbe do
       end
 
       it "does not emit a RecoverySucceeded event" do
-        expect { recorder.record_success }.not_to emit(Stoplight::Domain::Telemetry::RecoverySucceeded)
+        expect { recorder.record_success(duration_ms: probe_duration_ms) }.not_to emit(Stoplight::Domain::Telemetry::RecoverySucceeded)
       end
+    end
+  end
+
+  describe "RecoveryProbeCompleted telemetry" do
+    let(:metrics_after_probe) {
+      instance_double(Stoplight::Domain::MetricsSnapshot,
+        successes: 5,
+        errors: 2,
+        consecutive_errors: 0,
+        consecutive_successes: 3)
+    }
+    let(:progress) {
+      Stoplight::Domain::Telemetry::Metrics.new(successes: 5, errors: 2, consecutive_errors: 0, consecutive_successes: 3)
+    }
+
+    before do
+      allow(metrics_store).to receive(:record_success)
+      allow(metrics_store).to receive(:record_failure)
+      allow(metrics_store).to receive(:metrics_snapshot).and_return(metrics_after_probe)
+      # stay yellow so the probe outcome is the only thing under test
+      allow(traffic_recovery).to receive(:determine_color).and_return(Stoplight::Domain::TrafficRecovery::YELLOW)
+    end
+
+    it "reports a successful probe with the post-probe metrics" do
+      expect { recorder.record_success(duration_ms: 12.5) }.to emit(Stoplight::Domain::Telemetry::RecoveryProbeCompleted).with(
+        outcome: :success,
+        duration_ms: 12.5,
+        failure: nil,
+        progress:
+      )
+    end
+
+    it "reports a failed probe carrying the tracked exception" do
+      exception = KeyError.new("bang")
+
+      expect { recorder.record_failure(exception, duration_ms: 3.0) }.to emit(Stoplight::Domain::Telemetry::RecoveryProbeCompleted).with(
+        outcome: :failure,
+        duration_ms: 3.0,
+        failure: have_attributes(exception:, tracked: true),
+        progress:
+      )
+    end
+
+    it "fires on every probe, even when the light stays yellow" do
+      recorder.record_success(duration_ms: 1.0)
+
+      count = emitter.emitted.count { |event| event.instance_of?(Stoplight::Domain::Telemetry::RecoveryProbeCompleted) }
+      expect(count).to eq(1)
+    end
+
+    it "passes duration_ms through untouched when measurement was skipped" do
+      expect { recorder.record_success(duration_ms: nil) }.to emit(Stoplight::Domain::Telemetry::RecoveryProbeCompleted).with(
+        outcome: :success,
+        duration_ms: nil
+      )
     end
   end
 end
