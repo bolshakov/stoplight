@@ -14,6 +14,7 @@ module Stoplight
         @config: Domain::Config
         @clock: _Clock
         @run_recorder: Telemetry::RunRecorder
+        @emitter: Telemetry::Emitter
 
         def initialize: (
           name: String,
@@ -24,7 +25,8 @@ module Stoplight
           recovery_lock_store: _RecoveryLockStore,
           config: Config,
           clock: _Clock,
-          run_recorder: Telemetry::RunRecorder
+          run_recorder: Telemetry::RunRecorder,
+          emitter: Telemetry::Emitter
         ) -> void
 
         def with_recovery_lock: [T] (

@@ -20,7 +20,8 @@ module Stoplight
           recovery_lock_store:,
           config:, # FIXME: needed for backward compatibility, remove when notifier accepts light config
           clock:,
-          run_recorder:
+          run_recorder:,
+          emitter:
         )
           @notifiers = notifiers
           @request_tracker = request_tracker
@@ -31,6 +32,7 @@ module Stoplight
           @config = config
           @clock = clock
           @run_recorder = run_recorder
+          @emitter = emitter
         end
 
         # Executes the provided code block when the light is in the yellow state.
@@ -126,6 +128,13 @@ module Stoplight
 
           state_store.transition_to_color(Color::YELLOW)
           metrics_store.clear
+          @emitter.emit(Telemetry::RecoveryStarted) do
+            Telemetry::RecoveryStarted.new(
+              from_color: Color::RED,
+              to_color: Color::YELLOW,
+              breached_at: T.must(state_snapshot.breached_at)
+            )
+          end
           light_info = LightInfo.new(name: @name)
           notifiers.each do |notifier|
             notifier.notify(light_info, Color::RED, Color::YELLOW, nil)
