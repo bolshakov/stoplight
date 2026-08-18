@@ -11,7 +11,8 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
       recovery_lock_store:,
       config:,
       run_recorder:,
-      clock:
+      clock:,
+      emitter:
     )
   end
 
@@ -325,22 +326,39 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
     context "when recovery has already started" do
       let(:state_snapshot) { instance_double(Stoplight::Domain::StateSnapshot, recovery_started?: true) }
 
-      it "does not send notifications" do
+      it "does not send notifications or emit events" do
         expect(notifier).not_to receive(:notify)
 
-        enter_recovery
+        expect {
+          enter_recovery
+        }.not_to emit(Stoplight::Domain::Telemetry::RecoveryStarted)
       end
     end
 
     context "when recovery has not yet started" do
-      let(:state_snapshot) { instance_double(Stoplight::Domain::StateSnapshot, recovery_started?: false) }
+      let(:state_snapshot) { instance_double(Stoplight::Domain::StateSnapshot, recovery_started?: false, breached_at:) }
+      let(:breached_at) { instance_double(Time) }
 
-      it "notifies if able to transition to YELLO" do
+      it "notifies if able to transition to YELLOW" do
         expect(metrics_store).to receive(:clear)
         expect(state_store).to receive(:transition_to_color).with(Stoplight::Color::YELLOW)
         expect(notifier).to receive(:notify).with(have_attributes(name:), Stoplight::Color::RED, Stoplight::Color::YELLOW, nil)
 
         enter_recovery
+      end
+
+      it "emits RecoveryStarted" do
+        allow(metrics_store).to receive(:clear)
+        allow(state_store).to receive(:transition_to_color)
+        allow(notifier).to receive(:notify)
+
+        expect {
+          enter_recovery
+        }.to emit(Stoplight::Domain::Telemetry::RecoveryStarted).with(
+          from_color: Stoplight::Color::RED,
+          to_color: Stoplight::Color::YELLOW,
+          breached_at:
+        )
       end
     end
   end

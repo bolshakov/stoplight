@@ -131,7 +131,8 @@ module Stoplight
           recovery_lock_store:,
           config: @config,
           clock:,
-          run_recorder: run_recorder(Color::YELLOW)
+          run_recorder: run_recorder(Color::YELLOW),
+          emitter: @emitter
         )
       end
 
