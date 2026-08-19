@@ -50,6 +50,8 @@ module Stoplight
           requests >= min_requests && error_rate >= config.threshold
         end
 
+        def name = NAME.to_s
+
         def ==(other)
           other.is_a?(self.class) && min_requests == other.min_requests
         end

@@ -118,6 +118,12 @@ RSpec.describe Stoplight::Domain::TrafficControl::ConsecutiveErrors do
     end
   end
 
+  describe "#name" do
+    it "returns the policy name as a string" do
+      expect(described_class.new.name).to eq("consecutive_errors")
+    end
+  end
+
   describe "#eql?" do
     it "returns true for equal instances" do
       strategy_a = described_class.new
