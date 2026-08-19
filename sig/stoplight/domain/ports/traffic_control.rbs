@@ -22,6 +22,10 @@ module Stoplight
     #       error_rate = metrics.failures.fdiv(total)
     #       error_rate >= 0.5 # Stop traffic when error rate reaches 50%
     #     end
+    #
+    #     def name
+    #       "error_rate_custom"
+    #     end
     #   end
     #
     interface _TrafficControl
@@ -32,6 +36,9 @@ module Stoplight
       # current state and metrics.
       # @return +true+ if traffic should be stopped otherwise false
       def stop_traffic?: (Config, Domain::MetricsSnapshot) -> bool
+
+      # Returns a string identifier for this policy (e.g. "consecutive_errors", "error_rate").
+      def name: () -> String
 
       # Object methods
       def ==: (untyped) -> bool

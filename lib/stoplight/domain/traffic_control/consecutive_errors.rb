@@ -43,6 +43,8 @@ module Stoplight
           metrics.consecutive_errors >= config.threshold
         end
 
+        def name = NAME.to_s
+
         def hash = self.class.hash
 
         def ==(other)

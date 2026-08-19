@@ -10,12 +10,13 @@ module Stoplight
       #
       # @api private
       class Request
-        def initialize(traffic_control:, notifiers:, config:, metrics_store:, state_store:)
+        def initialize(traffic_control:, notifiers:, config:, metrics_store:, state_store:, emitter:)
           @traffic_control = traffic_control
           @notifiers = notifiers
           @config = config
           @metrics_store = metrics_store
           @state_store = state_store
+          @emitter = emitter
         end
 
         def record_failure(exception)
@@ -33,6 +34,7 @@ module Stoplight
         attr_reader :config
         attr_reader :metrics_store
         attr_reader :state_store
+        attr_reader :emitter
 
         def transition_to_red(exception, metrics:)
           if traffic_control.stop_traffic?(config, metrics)
@@ -42,6 +44,20 @@ module Stoplight
               info = LightInfo.new(name: config.name)
               notifiers.each do |notifier|
                 notifier.notify(info, Color::GREEN, Color::RED, exception)
+              end
+              emitter.emit(Telemetry::TrafficBreached) do
+                Telemetry::TrafficBreached.new(
+                  from_color: Color::GREEN,
+                  to_color: Color::RED,
+                  policy: traffic_control.name,
+                  failure: Telemetry::Failure.new(exception:, tracked: true),
+                  metrics: Telemetry::Metrics.new(
+                    successes: metrics.successes,
+                    errors: metrics.errors,
+                    consecutive_errors: metrics.consecutive_errors,
+                    consecutive_successes: metrics.consecutive_successes
+                  )
+                )
               end
             end
           end

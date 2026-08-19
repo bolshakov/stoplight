@@ -170,6 +170,12 @@ RSpec.describe Stoplight::Domain::TrafficControl::ErrorRate do
     end
   end
 
+  describe "#name" do
+    it "returns the policy name as a string" do
+      expect(described_class.new.name).to eq("error_rate")
+    end
+  end
+
   describe "#eql?" do
     it "returns true for same class and same min_requests" do
       strategy_a = described_class.new
