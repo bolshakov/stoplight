@@ -29,7 +29,7 @@ module Stoplight
           Color::GREEN
         elsif locked_state == State::LOCKED_RED
           Color::RED
-        elsif (recovery_scheduled_after && recovery_scheduled_after! < time) || recovery_started_at
+        elsif (recovery_scheduled_after && recovery_scheduled_after! < time) || recovery_started?
           Color::YELLOW
         elsif breached_at
           Color::RED
@@ -44,11 +44,7 @@ module Stoplight
       # This method indicates whether the recovery has already started explicitly
       #
       def recovery_started?
-        if recovery_started_at.nil?
-          false
-        else
-          recovery_started_at! <= time
-        end
+        !!recovery_started_at
       end
 
       def recovery_started_at!
