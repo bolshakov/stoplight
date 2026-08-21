@@ -44,11 +44,7 @@ module Stoplight
       # This method indicates whether the recovery has already started explicitly
       #
       def recovery_started?
-        if recovery_started_at.nil?
-          false
-        else
-          recovery_started_at! <= time
-        end
+        !!recovery_started_at
       end
 
       def recovery_started_at!
