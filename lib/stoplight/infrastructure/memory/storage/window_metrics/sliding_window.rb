@@ -35,8 +35,8 @@ module Stoplight
               @running_sum += 1
             end
 
-            def sum_in_window(window_size)
-              slide_window!(monotonic_seconds - window_size)
+            def sum_in_window
+              slide_window!(monotonic_seconds - @window_size)
               @running_sum
             end
 
