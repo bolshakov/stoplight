@@ -18,17 +18,20 @@ module Stoplight
           # @note Not thread-safe; synchronization must be handled externally
           # @api private
           class SlidingWindow
-            def initialize(clock:)
+            def initialize(clock:, window_size:)
               # A hash mapping time buckets to their counts
               @buckets = Hash.new { |buckets, bucket| buckets[bucket] = 0 }
               # The running sum of all increments in the current window
               @running_sum = 0
               @clock = clock
+              @window_size = window_size
             end
 
             # Increment the count at the current monotonic second
             def increment
-              @buckets[current_bucket] += 1
+              timestamp = monotonic_seconds
+              slide_window!(timestamp - @window_size)
+              @buckets[timestamp.to_i] += 1
               @running_sum += 1
             end
 
@@ -55,10 +58,6 @@ module Stoplight
                   @buckets.shift
                 end
               end
-            end
-
-            def current_bucket
-              monotonic_seconds.to_i
             end
 
             # Monotonic, so a wall-clock step (NTP) cannot break FIFO eviction;

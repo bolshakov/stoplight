@@ -7,16 +7,15 @@ module Stoplight
             @buckets: Hash[Integer, Integer]
             @running_sum: Integer
             @clock: Domain::_Clock
+            @window_size: Domain::duration_seconds
 
-            def initialize: (clock: Domain::_Clock) -> void
+            def initialize: (clock: Domain::_Clock, window_size: Domain::duration_seconds) -> void
 
             def increment: -> void
 
             def sum_in_window: (Domain::duration_seconds window_size) -> Integer
 
             private def slide_window!: (Float window_start) -> void
-
-            private def current_bucket: -> Integer
 
             private def monotonic_seconds: -> Float
 
