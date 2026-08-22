@@ -14,13 +14,16 @@ module Stoplight
       @failures: Array[Domain::Failure]
       @failure_count: Integer?
       @latest_failure: Domain::Failure?
+      @recovery_metrics_snapshot: Domain::MetricsSnapshot?
+      @config: Domain::Config
 
       def initialize: (
           id: String,
-          name: String,
+          config: Domain::Config,
           color: Domain::color,
           state: Domain::state,
           failures: Array[Domain::Failure],
+          recovery_metrics_snapshot: Domain::MetricsSnapshot?,
           ?failure_count: Integer?
         ) -> void
 

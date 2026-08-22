@@ -55,6 +55,7 @@ module Stoplight
       def state_store = storage_set.state_store
       def metrics_store = storage_set.metrics_store
       def lock_control = Domain::LockControl.new(state_store:, emitter: @emitter)
+      def recovery_metrics_store = storage_set.recovery_metrics_store
 
       private
 
@@ -67,7 +68,6 @@ module Stoplight
       attr_reader :system_name
 
       def recovery_lock_store = storage_set.recovery_lock_store
-      def recovery_metrics_store = storage_set.recovery_metrics_store
       def storage_scripting = Infrastructure::Redis::Storage::Scripting.new(redis:)
       def failover_system = T.must(@failover_system)
 

@@ -19,14 +19,16 @@ module Stoplight
       attr_reader :failures
       attr_reader :failure_count
 
-      def initialize(id:, name:, color:, state:, failures:, failure_count: nil)
+      def initialize(config:, id:, color:, state:, failures:, recovery_metrics_snapshot:, failure_count: nil)
         @id = id
-        @name = name
+        @config = config
+        @name = config.name
         @color = color
         @state = state
         @failures = failures
         @failure_count = failure_count
         @latest_failure = @failures.first
+        @recovery_metrics_snapshot = recovery_metrics_snapshot
       end
 
       def locked?
@@ -56,6 +58,7 @@ module Stoplight
       def last_check = @latest_failure&.time # TODO: take into account positive checks as well
 
       # @return [String, nil]
+      # TODO: is this method still in use?
       def last_check_in_words
         last_error_time = @latest_failure&.time
         return unless last_error_time
@@ -134,7 +137,8 @@ module Stoplight
             "Will attempt recovery after cooling period"
           end
         when Stoplight::Color::YELLOW
-          "Allowing limited test traffic (0 of 1 requests)"
+          recovery_metrics_snapshot = T.must(@recovery_metrics_snapshot)
+          "Allowing limited test traffic (#{recovery_metrics_snapshot.consecutive_successes} of #{@config.recovery_threshold} requests)"
         when Stoplight::Color::GREEN
           if locked?
             "Override active - all requests processed"

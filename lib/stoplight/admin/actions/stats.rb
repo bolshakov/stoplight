@@ -19,14 +19,16 @@ module Stoplight
         private def build_light(config)
           state_snapshot = @storage.state_snapshot(config)
           metrics = @storage.metrics_snapshot(config)
+          recovery_metrics_snapshot = @storage.recovery_metrics_snapshot(config)
 
           LightView.new(
             id: config.id,
-            name: config.name,
+            config:,
             color: state_snapshot.color,
             state: state_snapshot.locked_state,
             failures: [metrics.last_error].compact,
-            failure_count: metrics.consecutive_errors
+            failure_count: metrics.consecutive_errors,
+            recovery_metrics_snapshot:
           )
         end
       end

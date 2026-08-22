@@ -36,10 +36,12 @@ RSpec.describe Stoplight::Admin::Actions::Stats do
     let(:metrics_snapshot) do
       instance_double(Stoplight::Domain::MetricsSnapshot, last_error: nil, consecutive_errors: 0)
     end
+    let(:recovery_metrics_snapshot) { instance_double(Stoplight::Domain::MetricsSnapshot) }
 
     before do
       allow(storage).to receive(:state_snapshot).with(config).and_return(state_snapshot)
       allow(storage).to receive(:metrics_snapshot).with(config).and_return(metrics_snapshot)
+      allow(storage).to receive(:recovery_metrics_snapshot).with(config).and_return(recovery_metrics_snapshot)
     end
 
     it "builds a light view from the config and its storage snapshots" do

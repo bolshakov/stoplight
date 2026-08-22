@@ -4,10 +4,11 @@ RSpec.describe Stoplight::Admin::LightView do
   subject(:light) do
     described_class.new(
       id:,
-      name:,
+      config:,
       color:,
       state:,
-      failures:
+      failures:,
+      recovery_metrics_snapshot:
     )
   end
   let(:id) { SecureRandom.uuid }
@@ -17,6 +18,8 @@ RSpec.describe Stoplight::Admin::LightView do
   let(:color) { "green" }
   let(:name) { "light-specs" }
   let(:state) { Stoplight::State::UNLOCKED }
+  let(:recovery_metrics_snapshot) { nil }
+  let(:config) { instance_double(Stoplight::Domain::Config, name:, recovery_threshold: 13) }
 
   describe "#description_title and #description_message" do
     subject(:description_title) { light.description_title }
@@ -65,17 +68,18 @@ RSpec.describe Stoplight::Admin::LightView do
 
     context "when the light is yellow" do
       let(:color) { Stoplight::Color::YELLOW }
+      let(:recovery_metrics_snapshot) { instance_double(Stoplight::Domain::MetricsSnapshot, consecutive_successes: 7) }
 
       it { expect(description_title).to eq("Testing Recovery") }
       it { expect(description_message).to eq("StandardError: bang!") }
-      it { expect(description_comment).to eq("Allowing limited test traffic (0 of 1 requests)") }
+      it { expect(description_comment).to eq("Allowing limited test traffic (7 of 13 requests)") }
 
       context "without an error" do
         let(:failures) { [] }
 
         it { expect(description_title).to eq("Testing Recovery") }
         it { expect(description_message).to eq("Not available") }
-        it { expect(description_comment).to eq("Allowing limited test traffic (0 of 1 requests)") }
+        it { expect(description_comment).to eq("Allowing limited test traffic (7 of 13 requests)") }
       end
     end
 

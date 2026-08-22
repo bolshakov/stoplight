@@ -16,6 +16,7 @@ module Stoplight
           ) -> void
 
         def state_snapshot: (Domain::Config) -> Domain::StateSnapshot
+        def recovery_metrics_snapshot: (Domain::Config) -> Domain::MetricsSnapshot
         def metrics_snapshot: (Domain::Config) -> Domain::MetricsSnapshot
         def delete: (Domain::Config) -> void
         def lock: (Domain::Config, Domain::color) -> void
@@ -24,6 +25,7 @@ module Stoplight
         private
 
         def state_store: (Domain::Config) -> Domain::_StateStore
+        def recovery_metrics_store: (Domain::Config) -> Domain::_MetricsStore
         def metrics_store: (Domain::Config) -> Domain::_MetricsStore
         def lock_control: (Domain::Config) -> Domain::LockControl
         def light_factory: (Domain::Config) -> LightFactory
