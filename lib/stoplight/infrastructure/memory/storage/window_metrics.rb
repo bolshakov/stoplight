@@ -78,8 +78,8 @@ module Stoplight
             @consecutive_successes = 0
             @last_error = nil
             @last_success_at = nil
-            @successes = SlidingWindow.new(clock: @clock)
-            @errors = SlidingWindow.new(clock: @clock)
+            @successes = SlidingWindow.new(clock: @clock, window_size: @window_size)
+            @errors = SlidingWindow.new(clock: @clock, window_size: @window_size)
           end
 
           def build_metrics_snapshot

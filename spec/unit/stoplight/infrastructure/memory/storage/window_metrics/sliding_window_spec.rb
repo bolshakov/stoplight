@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
 RSpec.describe Stoplight::Infrastructure::Memory::Storage::WindowMetrics::SlidingWindow do
-  subject(:counter) { described_class.new(clock:) }
+  subject(:counter) { described_class.new(clock:, window_size:) }
 
   let(:clock) { instance_double(NullClock) }
+  let(:window_size) { 60 }
 
   # Position the monotonic clock at an absolute second.
   def at(seconds)

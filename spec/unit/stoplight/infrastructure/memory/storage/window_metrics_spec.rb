@@ -23,6 +23,26 @@ RSpec.describe Stoplight::Infrastructure::Memory::Storage::WindowMetrics do
 
       metrics.record_success
     end
+
+    context "without taking snapshots" do
+      let(:window_size) { 10 }
+
+      it "keeps success buckets bounded to the configured window" do
+        monotonic_time = 0.0
+        allow(clock).to receive(:current_time).and_return(Time.utc(2026, 8, 7))
+        allow(clock).to receive(:monotonic_time) { monotonic_time }
+
+        (0..100).each do |second|
+          monotonic_time = second * 1_000.0
+          metrics.record_success
+        end
+
+        successes = metrics.instance_variable_get(:@successes)
+        buckets = successes.instance_variable_get(:@buckets)
+        expect(buckets.size).to eq(window_size + 1)
+        expect(buckets.keys).to contain_exactly(*(90..100))
+      end
+    end
   end
 
   describe "#record_failure" do
