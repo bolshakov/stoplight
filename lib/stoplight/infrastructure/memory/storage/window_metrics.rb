@@ -83,8 +83,8 @@ module Stoplight
           end
 
           def build_metrics_snapshot
-            errors = @errors.sum_in_window(@window_size)
-            successes = @successes.sum_in_window(@window_size)
+            errors = @errors.sum_in_window
+            successes = @successes.sum_in_window
 
             Domain::MetricsSnapshot.new(
               errors:,

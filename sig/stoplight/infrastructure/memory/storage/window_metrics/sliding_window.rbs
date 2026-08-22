@@ -13,7 +13,7 @@ module Stoplight
 
             def increment: -> void
 
-            def sum_in_window: (Domain::duration_seconds window_size) -> Integer
+            def sum_in_window: -> Integer
 
             private def slide_window!: (Float window_start) -> void
 

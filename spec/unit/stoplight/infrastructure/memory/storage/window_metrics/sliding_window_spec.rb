@@ -18,51 +18,52 @@ RSpec.describe Stoplight::Infrastructure::Memory::Storage::WindowMetrics::Slidin
       counter.increment
       counter.increment
 
-      expect(counter.sum_in_window(10)).to eq(3)
+      expect(counter.sum_in_window).to eq(3)
     end
 
     it "when empty returns zero sum" do
       at(100)
-      expect(counter.sum_in_window(0)).to eq(0)
-      expect(counter.sum_in_window(100)).to eq(0)
-      expect(counter.sum_in_window(10000)).to eq(0)
+      expect(counter.sum_in_window).to eq(0)
     end
 
-    it "increments the count for the different seconds" do
-      at(98)
-      counter.increment
-      counter.increment
-      at(99)
-      counter.increment
-      counter.increment
-      at(100)
-      counter.increment
+    context "when events span the configured window" do
+      let(:window_size) { 2 }
 
-      expect(counter.sum_in_window(2)).to eq(5)
-      expect(counter.sum_in_window(1)).to eq(3)
-      expect(counter.sum_in_window(0)).to eq(1)
+      it "counts events within the window" do
+        at(98)
+        counter.increment
+        counter.increment
+        at(99)
+        counter.increment
+        counter.increment
+        at(100)
+        counter.increment
+
+        expect(counter.sum_in_window).to eq(5)
+      end
     end
 
-    it "increments the count for the different sparsely distributed seconds" do
-      at(80)
-      counter.increment
-      at(90)
-      counter.increment
-      at(95)
-      counter.increment
-      at(100)
+    context "when events are sparsely distributed" do
+      let(:window_size) { 15 }
 
-      expect(counter.sum_in_window(60)).to eq(3)
-      expect(counter.sum_in_window(15)).to eq(2)
-      expect(counter.sum_in_window(5)).to eq(1)
-      expect(counter.sum_in_window(2)).to eq(0)
+      it "expires events outside the window" do
+        at(80)
+        counter.increment
+        at(90)
+        counter.increment
+        at(95)
+        counter.increment
+        at(100)
+
+        expect(counter.sum_in_window).to eq(2)
+      end
     end
   end
 
   describe "#sum_in_window" do
     it "returns zero when no increments in the window" do
       at(100)
-      expect(counter.sum_in_window(0)).to eq(0)
+      expect(counter.sum_in_window).to eq(0)
     end
   end
 end
