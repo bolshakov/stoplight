@@ -13,6 +13,10 @@ module Stoplight
           @telemetry = telemetry
         end
 
+        def recovery_metrics_snapshot(config)
+          recovery_metrics_store(config).metrics_snapshot
+        end
+
         def state_snapshot(config)
           state_store(config).state_snapshot
         end
@@ -32,6 +36,10 @@ module Stoplight
 
         def unlock(config)
           lock_control(config).unlock
+        end
+
+        private def recovery_metrics_store(config)
+          light_factory(config).recovery_metrics_store
         end
 
         private def state_store(config)
