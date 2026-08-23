@@ -22,6 +22,7 @@ RSpec.describe Stoplight::Admin::LightsStats do
             color: "green",
             state: "unlocked",
             failures: [],
+            state_snapshot: instance_double(Stoplight::Domain::StateSnapshot),
             recovery_metrics_snapshot: nil
           ),
           Stoplight::Admin::LightView.new(
@@ -30,6 +31,7 @@ RSpec.describe Stoplight::Admin::LightsStats do
             color: "yellow",
             state: "unlocked",
             failures: [],
+            state_snapshot: instance_double(Stoplight::Domain::StateSnapshot),
             recovery_metrics_snapshot: instance_double(Stoplight::Domain::MetricsSnapshot, requests: 4)
           ),
           Stoplight::Admin::LightView.new(
@@ -38,6 +40,7 @@ RSpec.describe Stoplight::Admin::LightsStats do
             color: "red",
             state: "locked",
             failures: [],
+            state_snapshot: instance_double(Stoplight::Domain::StateSnapshot),
             recovery_metrics_snapshot: nil
           )
         ]
