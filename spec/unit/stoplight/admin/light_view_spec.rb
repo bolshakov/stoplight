@@ -8,6 +8,7 @@ RSpec.describe Stoplight::Admin::LightView do
       color:,
       state:,
       failures:,
+      state_snapshot:,
       recovery_metrics_snapshot:
     )
   end
@@ -20,6 +21,10 @@ RSpec.describe Stoplight::Admin::LightView do
   let(:state) { Stoplight::State::UNLOCKED }
   let(:recovery_metrics_snapshot) { nil }
   let(:config) { instance_double(Stoplight::Domain::Config, name:, recovery_threshold: 13) }
+  let(:state_snapshot) do
+    instance_double(Stoplight::Domain::StateSnapshot, recovery_scheduled_after:)
+  end
+  let(:recovery_scheduled_after) { nil }
 
   describe "#description_title and #description_message" do
     subject(:description_title) { light.description_title }
@@ -28,6 +33,7 @@ RSpec.describe Stoplight::Admin::LightView do
 
     context "when the light is red" do
       let(:color) { Stoplight::Color::RED }
+      let(:recovery_scheduled_after) { 3.minute.from_now }
 
       context "when locked red with an errors" do
         let(:state) { Stoplight::State::LOCKED_RED }
@@ -53,7 +59,8 @@ RSpec.describe Stoplight::Admin::LightView do
 
         it { expect(description_title).to eq("Last Error") }
         it { expect(description_message).to eq("StandardError: bang!") }
-        it { expect(description_comment).to eq("Will attempt recovery after cooling period") }
+
+        it { expect(description_comment).to match(/Will attempt recovery in 2 minutes, \d+ seconds/) }
       end
 
       context "when unlocked without an error" do
@@ -62,17 +69,43 @@ RSpec.describe Stoplight::Admin::LightView do
 
         it { expect(description_title).to eq("Last Error") }
         it { expect(description_message).to eq("Not available") }
-        it { expect(description_comment).to eq("Will attempt recovery after cooling period") }
+        it { expect(description_comment).to match(/Will attempt recovery in 2 minutes, \d+ seconds/) }
+      end
+
+      context "when unlocked and recovery is overdue" do
+        let(:state) { Stoplight::State::UNLOCKED }
+        let(:recovery_scheduled_after) { 1.second.ago }
+
+        it { expect(description_comment).to eq("Recovery started: awaiting test traffic") }
+      end
+
+      context "when unlocked and recovery_scheduled_after is nil" do
+        let(:state) { Stoplight::State::UNLOCKED }
+        let(:recovery_scheduled_after) { nil }
+
+        it { expect(description_comment).to eq("Recovery started: awaiting test traffic") }
       end
     end
 
     context "when the light is yellow" do
       let(:color) { Stoplight::Color::YELLOW }
-      let(:recovery_metrics_snapshot) { instance_double(Stoplight::Domain::MetricsSnapshot, consecutive_successes: 7) }
+      let(:recovery_metrics_snapshot) { instance_double(Stoplight::Domain::MetricsSnapshot, consecutive_successes:) }
+      let(:consecutive_successes) { 7 }
 
       it { expect(description_title).to eq("Testing Recovery") }
       it { expect(description_message).to eq("StandardError: bang!") }
-      it { expect(description_comment).to eq("Allowing limited test traffic (7 of 13 requests)") }
+
+      context "without probes" do
+        let(:consecutive_successes) { 0 }
+
+        it { expect(description_comment).to eq("Recovery started: awaiting test traffic") }
+      end
+
+      context "with probes" do
+        let(:consecutive_successes) { 7 }
+
+        it { expect(description_comment).to eq("Allowing limited test traffic (7 of 13 requests)") }
+      end
 
       context "without an error" do
         let(:failures) { [] }
@@ -101,34 +134,6 @@ RSpec.describe Stoplight::Admin::LightView do
         it { expect(description_message).to eq("No recent errors") }
         it { expect(description_comment).to eq("Operating normally") }
       end
-    end
-  end
-
-  describe "#last_check_in_words" do
-    subject { light.last_check_in_words }
-
-    context "when the last check was more than a second ago" do
-      let(:latest_failure) { Stoplight::Domain::Failure.from_error(StandardError.new, time: Time.now) }
-
-      it { is_expected.to eq("just now") }
-    end
-
-    context "when the last check was less than a minute ago" do
-      let(:latest_failure) { Stoplight::Domain::Failure.from_error(StandardError.new, time: Time.now - 10) }
-
-      it { is_expected.to match(/\d+s ago/) }
-    end
-
-    context "when the last check was less than a hour ago" do
-      let(:latest_failure) { Stoplight::Domain::Failure.from_error(StandardError.new, time: Time.now - 300) }
-
-      it { is_expected.to match(/\d+m ago/) }
-    end
-
-    context "when the last check was less than a day ago" do
-      let(:latest_failure) { Stoplight::Domain::Failure.from_error(StandardError.new, time: Time.now - 7200) }
-
-      it { is_expected.to match(/\d+h ago/) }
     end
   end
 

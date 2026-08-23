@@ -28,6 +28,7 @@ module Stoplight
             state: state_snapshot.locked_state,
             failures: [metrics.last_error].compact,
             failure_count: metrics.consecutive_errors,
+            state_snapshot:,
             recovery_metrics_snapshot:
           )
         end

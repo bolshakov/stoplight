@@ -19,7 +19,16 @@ module Stoplight
       attr_reader :failures
       attr_reader :failure_count
 
-      def initialize(config:, id:, color:, state:, failures:, recovery_metrics_snapshot:, failure_count: nil)
+      def initialize(
+        config:,
+        id:,
+        color:,
+        state:,
+        failures:,
+        state_snapshot:,
+        recovery_metrics_snapshot:,
+        failure_count: nil
+      )
         @id = id
         @config = config
         @name = config.name
@@ -28,6 +37,7 @@ module Stoplight
         @failures = failures
         @failure_count = failure_count
         @latest_failure = @failures.first
+        @state_snapshot = state_snapshot
         @recovery_metrics_snapshot = recovery_metrics_snapshot
       end
 
@@ -57,24 +67,16 @@ module Stoplight
 
       def last_check = @latest_failure&.time # TODO: take into account positive checks as well
 
-      # @return [String, nil]
-      # TODO: is this method still in use?
-      def last_check_in_words
-        last_error_time = @latest_failure&.time
-        return unless last_error_time
-
-        time_difference = (Time.now.utc - last_error_time).to_i
-        if time_difference < 1
-          "just now"
-        elsif time_difference < 60
-          "#{time_difference.to_i}s ago"
-        elsif time_difference < 3600
-          "#{(time_difference / 60).to_i}m ago"
-        elsif time_difference < 86400
-          "#{(time_difference / 3600).to_i}h ago"
-        else
-          "#{(time_difference / 86400).to_i}d ago"
-        end
+      private def duration_in_words(seconds)
+        minutes = seconds / 60
+        seconds %= 60
+        hours = minutes / 60
+        minutes %= 60
+        parts = [] #: Array[String]
+        parts << "#{hours} #{(hours == 1) ? "hour" : "hours"}" if hours > 0
+        parts << "#{minutes} #{(minutes == 1) ? "minute" : "minutes"}" if minutes > 0
+        parts << "#{seconds} #{(seconds == 1) ? "second" : "seconds"}" if seconds > 0
+        parts.join(", ")
       end
 
       # @return [String]
@@ -133,12 +135,23 @@ module Stoplight
         when Stoplight::Color::RED
           if locked?
             "Override active - all requests blocked"
+          elsif (recovery_at = @state_snapshot.recovery_scheduled_after)
+            recovery_in = [0, (recovery_at - Time.now.utc).to_i].max
+            if recovery_in > 0
+              "Will attempt recovery in #{duration_in_words(recovery_in)}"
+            else
+              "Recovery started: awaiting test traffic"
+            end
           else
-            "Will attempt recovery after cooling period"
+            "Recovery started: awaiting test traffic"
           end
         when Stoplight::Color::YELLOW
           recovery_metrics_snapshot = T.must(@recovery_metrics_snapshot)
-          "Allowing limited test traffic (#{recovery_metrics_snapshot.consecutive_successes} of #{@config.recovery_threshold} requests)"
+          if recovery_metrics_snapshot.consecutive_successes.zero?
+            "Recovery started: awaiting test traffic"
+          else
+            "Allowing limited test traffic (#{recovery_metrics_snapshot.consecutive_successes} of #{@config.recovery_threshold} requests)"
+          end
         when Stoplight::Color::GREEN
           if locked?
             "Override active - all requests processed"
