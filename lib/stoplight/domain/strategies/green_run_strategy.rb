@@ -53,11 +53,11 @@ module Stoplight
         attr_reader :request_tracker
 
         def capture_started_at
-          @clock.monotonic_time if @run_recorder.subscribed?
+          @clock.monotonic_millis if @run_recorder.subscribed?
         end
 
         def duration_since(started_at)
-          @clock.monotonic_time - started_at if started_at
+          @clock.monotonic_millis - started_at if started_at
         end
 
         def record_error(error, duration_ms:, fallback_used:)

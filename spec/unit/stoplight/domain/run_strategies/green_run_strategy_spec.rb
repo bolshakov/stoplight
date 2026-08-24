@@ -13,7 +13,7 @@ RSpec.describe Stoplight::Domain::Strategies::GreenRunStrategy do
   let(:request_tracker) { instance_double(Stoplight::Domain::Tracker::Request) }
   let(:emitter) { TestTelemetryEmitter.new }
   let(:run_recorder) { Stoplight::Domain::Telemetry::RunRecorder.new(emitter:, color: Stoplight::Color::GREEN) }
-  let(:clock) { instance_double(NullClock, monotonic_time: 1.4) }
+  let(:clock) { instance_double(NullClock, monotonic_millis: 1.4) }
 
   context "when code executes successfully" do
     subject(:result) { strategy.execute(nil, state_snapshot: nil, error_tracking_policy:, &code) }
@@ -28,7 +28,7 @@ RSpec.describe Stoplight::Domain::Strategies::GreenRunStrategy do
 
     it "produces RunCompleted event" do
       expect(request_tracker).to receive(:record_success)
-      expect(clock).to receive(:monotonic_time).and_return(1.4, 2.2)
+      expect(clock).to receive(:monotonic_millis).and_return(1.4, 2.2)
 
       expect { result }.to emit(Stoplight::Domain::Telemetry::RunCompleted).with(
         outcome: :success,
@@ -49,7 +49,7 @@ RSpec.describe Stoplight::Domain::Strategies::GreenRunStrategy do
 
     it "does not measure duration" do
       expect(request_tracker).to receive(:record_success)
-      expect(clock).not_to receive(:monotonic_time)
+      expect(clock).not_to receive(:monotonic_millis)
 
       expect(result).to eq("Success")
     end
@@ -74,7 +74,7 @@ RSpec.describe Stoplight::Domain::Strategies::GreenRunStrategy do
 
         it "records failure, notify and raises the error" do
           expect(request_tracker).to receive(:record_failure).with(error)
-          expect(clock).to receive(:monotonic_time).and_return(1.4, 2.2)
+          expect(clock).to receive(:monotonic_millis).and_return(1.4, 2.2)
 
           expect do
             expect { result }.to raise_error(error)
@@ -99,7 +99,7 @@ RSpec.describe Stoplight::Domain::Strategies::GreenRunStrategy do
 
         it "records failure, notify and returns the fallback" do
           expect(request_tracker).to receive(:record_failure).with(error)
-          expect(clock).to receive(:monotonic_time).and_return(1.4, 2.2)
+          expect(clock).to receive(:monotonic_millis).and_return(1.4, 2.2)
 
           expect do
             expect(result).to eq("Fallback")
@@ -123,7 +123,7 @@ RSpec.describe Stoplight::Domain::Strategies::GreenRunStrategy do
 
       it "records success and raises the error" do
         expect(request_tracker).to receive(:record_success)
-        expect(clock).to receive(:monotonic_time).and_return(1.4, 2.2)
+        expect(clock).to receive(:monotonic_millis).and_return(1.4, 2.2)
 
         expect do
           expect { result }.to raise_error(StandardError, "Test error")
