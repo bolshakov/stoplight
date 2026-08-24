@@ -17,8 +17,6 @@ module Stoplight
 
             private def slide_window!: (Float window_start) -> void
 
-            private def monotonic_seconds: -> Float
-
             def inspect: -> String
           end
         end

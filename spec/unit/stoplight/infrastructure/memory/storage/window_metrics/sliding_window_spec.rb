@@ -8,7 +8,7 @@ RSpec.describe Stoplight::Infrastructure::Memory::Storage::WindowMetrics::Slidin
 
   # Position the monotonic clock at an absolute second.
   def at(seconds)
-    allow(clock).to receive(:monotonic_time).and_return(seconds * 1000.0)
+    allow(clock).to receive(:monotonic_seconds).and_return(seconds.to_f)
   end
 
   describe "#increment" do

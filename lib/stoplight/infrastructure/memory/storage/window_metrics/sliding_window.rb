@@ -29,14 +29,14 @@ module Stoplight
 
             # Increment the count at the current monotonic second
             def increment
-              timestamp = monotonic_seconds
+              timestamp = @clock.monotonic_seconds
               slide_window!(timestamp - @window_size)
               @buckets[timestamp.to_i] += 1
               @running_sum += 1
             end
 
             def sum_in_window
-              slide_window!(monotonic_seconds - @window_size)
+              slide_window!(@clock.monotonic_seconds - @window_size)
               @running_sum
             end
 
@@ -58,12 +58,6 @@ module Stoplight
                   @buckets.shift
                 end
               end
-            end
-
-            # Monotonic, so a wall-clock step (NTP) cannot break FIFO eviction;
-            # the clock port returns float milliseconds.
-            def monotonic_seconds
-              @clock.monotonic_time / 1000.0
             end
           end
         end
