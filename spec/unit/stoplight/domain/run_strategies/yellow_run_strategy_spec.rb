@@ -28,7 +28,7 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
   let(:config) { instance_double(Stoplight::Domain::Config, name:, cool_off_time:) }
   let(:emitter) { TestTelemetryEmitter.new }
   let(:run_recorder) { Stoplight::Domain::Telemetry::RunRecorder.new(emitter:, color: Stoplight::Color::YELLOW) }
-  let(:clock) { instance_double(NullClock, monotonic_time: 1.4) }
+  let(:clock) { instance_double(NullClock, monotonic_millis: 1.4) }
 
   describe "#exceute" do
     before do
@@ -57,7 +57,7 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
         it "produces RunCompleted event" do
           allow(request_tracker).to receive(:record_success)
           allow(recovery_lock_store).to receive(:release_lock).with(recovery_lock_token)
-          expect(clock).to receive(:monotonic_time).and_return(1.4, 2.2)
+          expect(clock).to receive(:monotonic_millis).and_return(1.4, 2.2)
 
           expect { result }.to emit(Stoplight::Domain::Telemetry::RunCompleted).with(
             outcome: :success,
@@ -79,7 +79,7 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
         it "does not measure duration" do
           expect(request_tracker).to receive(:record_success)
           expect(recovery_lock_store).to receive(:release_lock).with(recovery_lock_token)
-          expect(clock).not_to receive(:monotonic_time)
+          expect(clock).not_to receive(:monotonic_millis)
 
           expect(result).to eq("Success")
         end
@@ -111,7 +111,7 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
             it "produces RunCompleted event" do
               expect(request_tracker).to receive(:record_failure).with(error)
               allow(recovery_lock_store).to receive(:release_lock).with(recovery_lock_token)
-              expect(clock).to receive(:monotonic_time).and_return(1.4, 2.2)
+              expect(clock).to receive(:monotonic_millis).and_return(1.4, 2.2)
 
               expect do
                 expect { result }.to raise_error(error)
@@ -145,7 +145,7 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
             it "produces RunCompleted event" do
               expect(request_tracker).to receive(:record_failure).with(error)
               allow(recovery_lock_store).to receive(:release_lock).with(recovery_lock_token)
-              expect(clock).to receive(:monotonic_time).and_return(1.4, 2.2)
+              expect(clock).to receive(:monotonic_millis).and_return(1.4, 2.2)
 
               expect { result }.to emit(Stoplight::Domain::Telemetry::RunCompleted).with(
                 outcome: :failure,
@@ -166,7 +166,7 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
           it "records success and raises the error" do
             expect(request_tracker).to receive(:record_success)
             expect(recovery_lock_store).to receive(:release_lock).with(recovery_lock_token)
-            expect(clock).to receive(:monotonic_time).and_return(1.4, 2.2)
+            expect(clock).to receive(:monotonic_millis).and_return(1.4, 2.2)
 
             expect do
               expect { result }.to raise_error(StandardError, "Test error")
@@ -258,7 +258,7 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
         end
 
         it "does not measure duration for a blocked run" do
-          expect(clock).not_to receive(:monotonic_time)
+          expect(clock).not_to receive(:monotonic_millis)
 
           strategy.execute(fallback, state_snapshot:, error_tracking_policy:) {}
         end
@@ -291,7 +291,7 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
         end
 
         it "does not measure duration for a blocked run" do
-          expect(clock).not_to receive(:monotonic_time)
+          expect(clock).not_to receive(:monotonic_millis)
 
           begin
             strategy.execute(fallback, state_snapshot:, error_tracking_policy:) {}

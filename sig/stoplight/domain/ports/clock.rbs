@@ -12,7 +12,10 @@ module Stoplight
       def current_time: () -> Time
 
       # Returns monotonic time in ms
-      def monotonic_time: () -> Float
+      def monotonic_millis: () -> Float
+
+      # Returns monotonic time in s
+      def monotonic_seconds: () -> Float
 
       # Converts a Unix timestamp to a Time object.
       def at: (timestamp) -> Time

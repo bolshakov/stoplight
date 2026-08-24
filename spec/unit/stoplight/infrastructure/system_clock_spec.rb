@@ -15,11 +15,19 @@ RSpec.describe Stoplight::Infrastructure::SystemClock do
     end
   end
 
-  describe "#monotonic_time" do
-    subject(:monotonic_time) { clock.monotonic_time }
+  describe "#monotonic_millis" do
+    subject(:monotonic_millis) { clock.monotonic_millis }
 
     it "returns monotonic time in milliseconds" do
-      expect(monotonic_time).to be_within(10).of(Process.clock_gettime(Process::CLOCK_MONOTONIC, :float_millisecond))
+      expect(monotonic_millis).to be_within(10).of(Process.clock_gettime(Process::CLOCK_MONOTONIC, :float_millisecond))
+    end
+  end
+
+  describe "#monotonic_seconds" do
+    subject(:monotonic_seconds) { clock.monotonic_seconds }
+
+    it "returns monotonic time in seconds" do
+      expect(monotonic_seconds).to be_within(1).of(Process.clock_gettime(Process::CLOCK_MONOTONIC, :float_second))
     end
   end
 
