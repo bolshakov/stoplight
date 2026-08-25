@@ -3,26 +3,24 @@ module Stoplight
     class LightView
       COLORS: Array[Domain::color]
 
+      @state_snapshot: Domain::StateSnapshot
+      @metrics_snapshot: Domain::MetricsSnapshot
+      @recovery_metrics_snapshot: Domain::MetricsSnapshot?
+      @config: Domain::Config
+      @failures: Array[Domain::Failure]
+
+      def initialize: (
+          config: Domain::Config,
+          state_snapshot: Domain::StateSnapshot,
+          recovery_metrics_snapshot: Domain::MetricsSnapshot?,
+          metrics_snapshot: Domain::MetricsSnapshot,
+        ) -> void
+
       def id: -> String
       def color: -> Domain::color
       def name: -> String
       def state: -> Domain::state
-
-      @failures: Array[Domain::Failure]
-      @failure_count: Integer?
-      @latest_failure: Domain::Failure?
-      @state_snapshot: Domain::StateSnapshot
-      @recovery_metrics_snapshot: Domain::MetricsSnapshot?
-      @config: Domain::Config
-
-      def initialize: (
-          config: Domain::Config,
-          failures: Array[Domain::Failure],
-          state_snapshot: Domain::StateSnapshot,
-          recovery_metrics_snapshot: Domain::MetricsSnapshot?,
-          ?failure_count: Integer?
-        ) -> void
-
+      def failure_count: -> Integer
       def locked?: -> bool
       def unlocked?: -> bool
       def as_json: -> Hash[Symbol, _ToS]
@@ -32,6 +30,7 @@ module Stoplight
       def description_title: -> String
       def description_message: -> String
       def description_comment: -> String
+      def latest_failure: -> Domain::Failure?
     end
   end
 end

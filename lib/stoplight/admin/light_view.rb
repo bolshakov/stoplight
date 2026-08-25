@@ -11,23 +11,17 @@ module Stoplight
         Stoplight::Color::RED
       ].freeze
 
-      attr_reader :latest_failure
-      attr_reader :failures
-      attr_reader :failure_count
-
       def initialize(
         config:,
-        failures:,
         state_snapshot:,
-        recovery_metrics_snapshot:,
-        failure_count: nil
+        metrics_snapshot:,
+        recovery_metrics_snapshot:
       )
         @config = config
-        @failures = failures
-        @failure_count = failure_count
-        @latest_failure = @failures.first
         @state_snapshot = state_snapshot
         @recovery_metrics_snapshot = recovery_metrics_snapshot
+        @metrics_snapshot = metrics_snapshot
+        @failures = [metrics_snapshot.last_error].compact
       end
 
       def locked?
@@ -38,6 +32,8 @@ module Stoplight
       def id = @config.id
       def name = @config.name
       def state = @state_snapshot.locked_state
+      def latest_failure = @metrics_snapshot.last_error
+      def failure_count = @metrics_snapshot.consecutive_errors
 
       def unlocked?
         @state_snapshot.locked_state == Stoplight::State::UNLOCKED
@@ -49,7 +45,7 @@ module Stoplight
           id: @config.id,
           name: @config.name,
           color: @state_snapshot.color,
-          failures: @failures,
+          failures: Array(@metrics_snapshot.last_error),
           locked: locked?
         }
       end
@@ -59,7 +55,7 @@ module Stoplight
         [-COLORS.index(@state_snapshot.color).to_i, @config.name]
       end
 
-      def last_check = @latest_failure&.time # TODO: take into account positive checks as well
+      def last_check = @metrics_snapshot.last_error&.time # TODO: take into account positive checks as well
 
       private def duration_in_words(seconds)
         minutes = seconds / 60
@@ -77,7 +73,7 @@ module Stoplight
       def description_title
         case @state_snapshot.color
         when Stoplight::Color::RED
-          if locked? && @failures.empty?
+          if locked? && @metrics_snapshot.last_error.nil?
             "Locked Open"
           else
             "Last Error"
@@ -99,7 +95,7 @@ module Stoplight
       def description_message
         case @state_snapshot.color
         when Stoplight::Color::RED
-          if (latest_failure = @latest_failure)
+          if (latest_failure = @metrics_snapshot.last_error)
             "#{latest_failure.error_class}: #{latest_failure.error_message}"
           elsif locked?
             "Circuit manually locked open"
@@ -107,7 +103,7 @@ module Stoplight
             "Not available"
           end
         when Stoplight::Color::YELLOW
-          if (latest_failure = @latest_failure)
+          if (latest_failure = @metrics_snapshot.last_error)
             "#{latest_failure.error_class}: #{latest_failure.error_message}"
           else
             "Not available"

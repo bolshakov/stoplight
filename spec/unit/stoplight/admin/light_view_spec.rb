@@ -4,18 +4,21 @@ RSpec.describe Stoplight::Admin::LightView do
   subject(:light) do
     described_class.new(
       config:,
-      failures:,
       state_snapshot:,
+      metrics_snapshot:,
       recovery_metrics_snapshot:
     )
   end
   let(:id) { SecureRandom.uuid }
-  let(:failures) { [latest_failure] }
   let(:latest_failure) { Stoplight::Domain::Failure.from_error(latest_exception, time: Time.now) }
   let(:latest_exception) { StandardError.new("bang!") }
   let(:color) { "green" }
   let(:name) { "light-specs" }
   let(:state) { Stoplight::State::UNLOCKED }
+  let(:metrics_snapshot) do
+    instance_double(Stoplight::Domain::MetricsSnapshot,
+      last_error: latest_failure)
+  end
   let(:recovery_metrics_snapshot) { nil }
   let(:config) { instance_double(Stoplight::Domain::Config, id:, name:, recovery_threshold: 13) }
   let(:state_snapshot) do
@@ -34,7 +37,6 @@ RSpec.describe Stoplight::Admin::LightView do
 
       context "when locked red with an errors" do
         let(:state) { Stoplight::State::LOCKED_RED }
-        let(:failures) { [latest_failure] }
 
         it { expect(description_title).to eq("Last Error") }
         it { expect(description_message).to eq("StandardError: bang!") }
@@ -43,7 +45,7 @@ RSpec.describe Stoplight::Admin::LightView do
 
       context "when locked red without errors" do
         let(:state) { Stoplight::State::LOCKED_RED }
-        let(:failures) { [] }
+        let(:latest_failure) { nil }
 
         it { expect(description_title).to eq("Locked Open") }
         it { expect(description_message).to eq("Circuit manually locked open") }
@@ -52,7 +54,6 @@ RSpec.describe Stoplight::Admin::LightView do
 
       context "when unlocked" do
         let(:state) { Stoplight::State::UNLOCKED }
-        let(:failures) { [latest_failure] }
 
         it { expect(description_title).to eq("Last Error") }
         it { expect(description_message).to eq("StandardError: bang!") }
@@ -62,7 +63,7 @@ RSpec.describe Stoplight::Admin::LightView do
 
       context "when unlocked without an error" do
         let(:state) { Stoplight::State::UNLOCKED }
-        let(:failures) { [] }
+        let(:latest_failure) { nil }
 
         it { expect(description_title).to eq("Last Error") }
         it { expect(description_message).to eq("Not available") }
@@ -105,7 +106,7 @@ RSpec.describe Stoplight::Admin::LightView do
       end
 
       context "without an error" do
-        let(:failures) { [] }
+        let(:latest_failure) { nil }
 
         it { expect(description_title).to eq("Testing Recovery") }
         it { expect(description_message).to eq("Not available") }
@@ -149,7 +150,7 @@ RSpec.describe Stoplight::Admin::LightView do
         name:,
         color:,
         locked: false,
-        failures: failures
+        failures: [latest_failure]
       })
     end
   end
