@@ -11,6 +11,8 @@ module Stoplight
         Stoplight::Color::RED
       ].freeze
 
+      attr_reader :failures
+
       def initialize(
         config:,
         state_snapshot:,
@@ -55,7 +57,13 @@ module Stoplight
         [-COLORS.index(@state_snapshot.color).to_i, @config.name]
       end
 
-      def last_check = @metrics_snapshot.last_error&.time # TODO: take into account positive checks as well
+      def last_check = [
+        @metrics_snapshot.last_error_at,
+        @metrics_snapshot.last_success_at,
+        @recovery_metrics_snapshot.last_error_at,
+        @recovery_metrics_snapshot.last_success_at,
+        @state_snapshot.breached_at
+      ].compact.max
 
       private def duration_in_words(seconds)
         minutes = seconds / 60
@@ -136,7 +144,7 @@ module Stoplight
             "Recovery started: awaiting test traffic"
           end
         when Stoplight::Color::YELLOW
-          recovery_metrics_snapshot = T.must(@recovery_metrics_snapshot)
+          recovery_metrics_snapshot = @recovery_metrics_snapshot
           if recovery_metrics_snapshot.consecutive_successes.zero?
             "Recovery started: awaiting test traffic"
           else

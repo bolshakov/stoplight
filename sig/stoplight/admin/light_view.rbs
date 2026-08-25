@@ -3,16 +3,18 @@ module Stoplight
     class LightView
       COLORS: Array[Domain::color]
 
+      attr_reader failures: Array[Domain::Failure]
+
       @state_snapshot: Domain::StateSnapshot
       @metrics_snapshot: Domain::MetricsSnapshot
-      @recovery_metrics_snapshot: Domain::MetricsSnapshot?
+      @recovery_metrics_snapshot: Domain::MetricsSnapshot
       @config: Domain::Config
       @failures: Array[Domain::Failure]
 
       def initialize: (
           config: Domain::Config,
           state_snapshot: Domain::StateSnapshot,
-          recovery_metrics_snapshot: Domain::MetricsSnapshot?,
+          recovery_metrics_snapshot: Domain::MetricsSnapshot,
           metrics_snapshot: Domain::MetricsSnapshot,
         ) -> void
 
