@@ -18,19 +18,19 @@ RSpec.describe Stoplight::Admin::LightsStats do
         [
           Stoplight::Admin::LightView.new(
             config: instance_double(Stoplight::Domain::Config, name: "green", id: "a"),
-            failures: [],
+            metrics_snapshot: instance_double(Stoplight::Domain::MetricsSnapshot, last_error: nil),
             state_snapshot: instance_double(Stoplight::Domain::StateSnapshot, color: "green", locked_state: "unlocked"),
             recovery_metrics_snapshot: nil
           ),
           Stoplight::Admin::LightView.new(
             config: instance_double(Stoplight::Domain::Config, name: "yellow", id: "b"),
-            failures: [],
+            metrics_snapshot: instance_double(Stoplight::Domain::MetricsSnapshot, last_error: nil),
             state_snapshot: instance_double(Stoplight::Domain::StateSnapshot, color: "yellow", locked_state: "unlocked"),
             recovery_metrics_snapshot: instance_double(Stoplight::Domain::MetricsSnapshot, requests: 4)
           ),
           Stoplight::Admin::LightView.new(
             config: instance_double(Stoplight::Domain::Config, name: "red", id: "c"),
-            failures: [],
+            metrics_snapshot: instance_double(Stoplight::Domain::MetricsSnapshot, last_error: nil),
             state_snapshot: instance_double(Stoplight::Domain::StateSnapshot, color: "red", locked_state: "locked"),
             recovery_metrics_snapshot: nil
           )
