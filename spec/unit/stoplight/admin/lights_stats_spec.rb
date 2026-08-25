@@ -17,30 +17,21 @@ RSpec.describe Stoplight::Admin::LightsStats do
       let(:lights) do
         [
           Stoplight::Admin::LightView.new(
-            id: "a",
-            config: instance_double(Stoplight::Domain::Config, name: "green"),
-            color: "green",
-            state: "unlocked",
+            config: instance_double(Stoplight::Domain::Config, name: "green", id: "a"),
             failures: [],
-            state_snapshot: instance_double(Stoplight::Domain::StateSnapshot),
+            state_snapshot: instance_double(Stoplight::Domain::StateSnapshot, color: "green", locked_state: "unlocked"),
             recovery_metrics_snapshot: nil
           ),
           Stoplight::Admin::LightView.new(
-            id: "b",
-            config: instance_double(Stoplight::Domain::Config, name: "yellow"),
-            color: "yellow",
-            state: "unlocked",
+            config: instance_double(Stoplight::Domain::Config, name: "yellow", id: "b"),
             failures: [],
-            state_snapshot: instance_double(Stoplight::Domain::StateSnapshot),
+            state_snapshot: instance_double(Stoplight::Domain::StateSnapshot, color: "yellow", locked_state: "unlocked"),
             recovery_metrics_snapshot: instance_double(Stoplight::Domain::MetricsSnapshot, requests: 4)
           ),
           Stoplight::Admin::LightView.new(
-            id: "c",
-            config: instance_double(Stoplight::Domain::Config, name: "red"),
-            color: "red",
-            state: "locked",
+            config: instance_double(Stoplight::Domain::Config, name: "red", id: "c"),
             failures: [],
-            state_snapshot: instance_double(Stoplight::Domain::StateSnapshot),
+            state_snapshot: instance_double(Stoplight::Domain::StateSnapshot, color: "red", locked_state: "locked"),
             recovery_metrics_snapshot: nil
           )
         ]
