@@ -3,14 +3,11 @@ module Stoplight
     class LightView
       COLORS: Array[Domain::color]
 
-      attr_reader id: String
-      attr_reader color: Domain::color
-      attr_reader name: String
+      def id: -> String
+      def color: -> Domain::color
+      def name: -> String
+      def state: -> Domain::state
 
-      @id: String
-      @name: String
-      @color: Domain::color
-      @state: Domain::state
       @failures: Array[Domain::Failure]
       @failure_count: Integer?
       @latest_failure: Domain::Failure?
@@ -19,10 +16,7 @@ module Stoplight
       @config: Domain::Config
 
       def initialize: (
-          id: String,
           config: Domain::Config,
-          color: Domain::color,
-          state: Domain::state,
           failures: Array[Domain::Failure],
           state_snapshot: Domain::StateSnapshot,
           recovery_metrics_snapshot: Domain::MetricsSnapshot?,

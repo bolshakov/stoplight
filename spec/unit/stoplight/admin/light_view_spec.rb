@@ -3,10 +3,7 @@
 RSpec.describe Stoplight::Admin::LightView do
   subject(:light) do
     described_class.new(
-      id:,
       config:,
-      color:,
-      state:,
       failures:,
       state_snapshot:,
       recovery_metrics_snapshot:
@@ -20,9 +17,9 @@ RSpec.describe Stoplight::Admin::LightView do
   let(:name) { "light-specs" }
   let(:state) { Stoplight::State::UNLOCKED }
   let(:recovery_metrics_snapshot) { nil }
-  let(:config) { instance_double(Stoplight::Domain::Config, name:, recovery_threshold: 13) }
+  let(:config) { instance_double(Stoplight::Domain::Config, id:, name:, recovery_threshold: 13) }
   let(:state_snapshot) do
-    instance_double(Stoplight::Domain::StateSnapshot, recovery_scheduled_after:)
+    instance_double(Stoplight::Domain::StateSnapshot, recovery_scheduled_after:, color:, locked_state: state)
   end
   let(:recovery_scheduled_after) { nil }
 

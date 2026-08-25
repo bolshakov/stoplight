@@ -11,29 +11,18 @@ module Stoplight
         Stoplight::Color::RED
       ].freeze
 
-      attr_reader :id
       attr_reader :latest_failure
-      attr_reader :color
-      attr_reader :name
-      attr_reader :state
       attr_reader :failures
       attr_reader :failure_count
 
       def initialize(
         config:,
-        id:,
-        color:,
-        state:,
         failures:,
         state_snapshot:,
         recovery_metrics_snapshot:,
         failure_count: nil
       )
-        @id = id
         @config = config
-        @name = config.name
-        @color = color
-        @state = state
         @failures = failures
         @failure_count = failure_count
         @latest_failure = @failures.first
@@ -45,16 +34,21 @@ module Stoplight
         !unlocked?
       end
 
+      def color = @state_snapshot.color
+      def id = @config.id
+      def name = @config.name
+      def state = @state_snapshot.locked_state
+
       def unlocked?
-        @state == Stoplight::State::UNLOCKED
+        @state_snapshot.locked_state == Stoplight::State::UNLOCKED
       end
 
       # @return [Hash]
       def as_json
         {
-          id: @id,
-          name: @name,
-          color: @color,
+          id: @config.id,
+          name: @config.name,
+          color: @state_snapshot.color,
           failures: @failures,
           locked: locked?
         }
@@ -62,7 +56,7 @@ module Stoplight
 
       # @return [Array]
       def default_sort_key
-        [-COLORS.index(@color).to_i, @name]
+        [-COLORS.index(@state_snapshot.color).to_i, @config.name]
       end
 
       def last_check = @latest_failure&.time # TODO: take into account positive checks as well
@@ -81,7 +75,7 @@ module Stoplight
 
       # @return [String]
       def description_title
-        case @color
+        case @state_snapshot.color
         when Stoplight::Color::RED
           if locked? && @failures.empty?
             "Locked Open"
@@ -103,7 +97,7 @@ module Stoplight
 
       # @return [String]
       def description_message
-        case @color
+        case @state_snapshot.color
         when Stoplight::Color::RED
           if (latest_failure = @latest_failure)
             "#{latest_failure.error_class}: #{latest_failure.error_message}"
@@ -131,7 +125,7 @@ module Stoplight
 
       # @return [String]
       def description_comment
-        case @color
+        case @state_snapshot.color
         when Stoplight::Color::RED
           if locked?
             "Override active - all requests blocked"
