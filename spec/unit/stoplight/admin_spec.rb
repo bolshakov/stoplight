@@ -166,7 +166,7 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
           expect(last_response).to be_ok
           expect(last_response.body).to include("Stoplight Admin")
           expect(last_response.body).to include("No lights found")
-          expect(last_response.body).to include("Ensure that your Stoplight data store is properly configured and that your Stoplight blocks have been run.")
+          expect(last_response.body).to include("Ensure lights are registered and this Admin instance uses the same data store as your application.")
           expect(last_response.body).to include("Refresh Lights")
         end
       end
@@ -188,7 +188,7 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
           expect(last_response.body).to include("Failures")
 
           expect(last_response.body).to_not include("No lights found")
-          expect(last_response.body).not_to include("Ensure that your Stoplight data store is properly configured and that your Stoplight blocks have been run.")
+          expect(last_response.body).not_to include("Ensure lights are registered and this Admin instance uses the same data store as your application.")
         end
 
         it "links the light actions" do
