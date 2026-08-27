@@ -1,15 +1,18 @@
 local failure_ts_str = ARGV[1]
 local failure_ts = tonumber(ARGV[1])
-local failure_id = ARGV[2]
-local failure_json = ARGV[3]
-local zset_ttl = tonumber(ARGV[4])
-local metadata_ttl = tonumber(ARGV[5])
+local failure_json = ARGV[2]
+local zset_ttl = tonumber(ARGV[3])
+local metadata_ttl = tonumber(ARGV[4])
 -- window_start_ts passed as string from Ruby to avoid Lua float→string precision loss in ZCOUNT
-local window_start_ts_str = ARGV[6]
+local window_start_ts_str = ARGV[5]
 
 local metrics_key = KEYS[1]
 local failures_key = KEYS[2]
 local successes_key = KEYS[3]
+
+-- Unique member per event; two at the same timestamp would collapse in ZADD and
+-- undercount in ZCOUNT. Shared with record_success, no separate key needed.
+local failure_id = redis.call('HINCRBY', metrics_key, 'seq', 1)
 
 -- Record failure and prune expired entries
 redis.call('ZADD', failures_key, failure_ts, failure_id)

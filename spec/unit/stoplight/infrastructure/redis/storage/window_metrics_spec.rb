@@ -23,5 +23,23 @@ RSpec.describe Stoplight::Infrastructure::Redis::Storage::WindowMetrics, :redis 
 
       metrics.record_failure(StandardError.new)
     end
+
+    it "counts every failure individually even at the same timestamp" do
+      allow(clock).to receive(:current_time).and_return(Time.now)
+
+      3.times { metrics.record_failure(StandardError.new) }
+
+      expect(metrics.metrics_snapshot.errors).to eq(3)
+    end
+  end
+
+  describe "#record_success" do
+    it "counts every success individually even at the same timestamp" do
+      allow(clock).to receive(:current_time).and_return(Time.now)
+
+      3.times { metrics.record_success }
+
+      expect(metrics.metrics_snapshot.successes).to eq(3)
+    end
   end
 end

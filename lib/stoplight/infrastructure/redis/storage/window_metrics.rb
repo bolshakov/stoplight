@@ -47,7 +47,7 @@ module Stoplight
 
             @scripting.call(
               "window_metrics/record_success",
-              args: [timestamp, SecureRandom.hex(12), zset_ttl, metrics_ttl, window_start_ts],
+              args: [timestamp, zset_ttl, metrics_ttl, window_start_ts],
               keys: [@metrics_key, @success_key]
             )
           end
@@ -59,7 +59,7 @@ module Stoplight
             successes, errors, last_success_at, last_error_json, consecutive_errors, consecutive_successes =
               @scripting.call(
                 "window_metrics/record_failure",
-                args: [timestamp, SecureRandom.hex(12), serialize_exception(exception, timestamp:),
+                args: [timestamp, serialize_exception(exception, timestamp:),
                   zset_ttl, metrics_ttl, window_start_ts],
                 keys: [@metrics_key, @failure_key, @success_key]
               )
