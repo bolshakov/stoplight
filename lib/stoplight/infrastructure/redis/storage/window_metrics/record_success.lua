@@ -1,16 +1,17 @@
 local request_ts = tonumber(ARGV[1])
 local request_id = ARGV[2]
-local bucket_ttl = tonumber(ARGV[3])
+local zset_ttl = tonumber(ARGV[3])
 local metadata_ttl = tonumber(ARGV[4])
+-- window_start_ts passed as string from Ruby to avoid Lua float→string precision loss
+local window_start_ts_str = ARGV[5]
 
 local metrics_key = KEYS[1]
 local successes_key = KEYS[2]
 
--- Record success
-if successes_key ~= nil then
-  redis.call('ZADD', successes_key, request_ts, request_id)
-  redis.call('EXPIRE', successes_key, bucket_ttl) -- Not supported in Redis 6.2:, 'NX')
-end
+-- Record success and prune expired entries
+redis.call('ZADD', successes_key, request_ts, request_id)
+redis.call('ZREMRANGEBYSCORE', successes_key, '-inf', '(' .. window_start_ts_str)
+redis.call('EXPIRE', successes_key, zset_ttl)
 
 -- Update metadata
 local meta = redis.call('HMGET', metrics_key, 'last_success_at', 'consecutive_successes')
@@ -32,4 +33,4 @@ else
   )
 end
 
-redis.call('EXPIRE', metrics_key, metadata_ttl) -- Not supported in Redis 6.2:, 'GT')
+redis.call('EXPIRE', metrics_key, metadata_ttl)

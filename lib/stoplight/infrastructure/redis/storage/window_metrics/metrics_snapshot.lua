@@ -1,14 +1,18 @@
--- @include window_metrics/_metrics_snapshot
-
-local number_of_metric_buckets = tonumber(ARGV[1])
-local window_start_ts = tonumber(ARGV[2])
-local window_end_ts = tonumber(ARGV[3])
-local metrics_fields = {}
-for idx = 4, #ARGV do
-  table.insert(metrics_fields, ARGV[idx])
+-- window_start_ts_str and window_end_ts_str passed as strings from Ruby to avoid
+-- Lua float→string precision loss in ZCOUNT
+local window_start_ts_str = ARGV[1]
+local window_end_ts_str = ARGV[2]
+local metadata_fields = {}
+for idx = 3, #ARGV do
+  table.insert(metadata_fields, ARGV[idx])
 end
 
 local metrics_key = KEYS[1]
-local success_keys, failure_keys = slice_window_keys(KEYS, 1, number_of_metric_buckets)
+local successes_key = KEYS[2]
+local failures_key = KEYS[3]
 
-return build_metrics_snapshot(metrics_key, success_keys, failure_keys, window_start_ts, window_end_ts, metrics_fields)
+local successes = tonumber(redis.call('ZCOUNT', successes_key, window_start_ts_str, window_end_ts_str))
+local errors = tonumber(redis.call('ZCOUNT', failures_key, window_start_ts_str, window_end_ts_str))
+local metadata = redis.call('HMGET', metrics_key, unpack(metadata_fields))
+
+return {successes, errors, unpack(metadata)}

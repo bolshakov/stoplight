@@ -1,17 +1,20 @@
+local failure_ts_str = ARGV[1]
 local failure_ts = tonumber(ARGV[1])
 local failure_id = ARGV[2]
 local failure_json = ARGV[3]
-local bucket_ttl = tonumber(ARGV[4])
+local zset_ttl = tonumber(ARGV[4])
 local metadata_ttl = tonumber(ARGV[5])
+-- window_start_ts passed as string from Ruby to avoid Lua float→string precision loss in ZCOUNT
+local window_start_ts_str = ARGV[6]
 
 local metrics_key = KEYS[1]
 local failures_key = KEYS[2]
+local successes_key = KEYS[3]
 
--- Record failure
-if failures_key ~= nil then
-  redis.call('ZADD', failures_key, failure_ts, failure_id)
-  redis.call('EXPIRE', failures_key, bucket_ttl) -- Not supported in Redis 6.2:, 'NX')
-end
+-- Record failure and prune expired entries
+redis.call('ZADD', failures_key, failure_ts, failure_id)
+redis.call('ZREMRANGEBYSCORE', failures_key, '-inf', '(' .. window_start_ts_str)
+redis.call('EXPIRE', failures_key, zset_ttl)
 
 -- Update metadata
 local meta = redis.call('HMGET', metrics_key, 'last_error_at', 'consecutive_errors')
@@ -39,18 +42,11 @@ else
   )
   last_error_json_result = redis.call('HGET', metrics_key, 'last_error_json')
 end
-redis.call('EXPIRE', metrics_key, metadata_ttl) -- Not supported in Redis 6.2:, 'GT')
 
+redis.call('EXPIRE', metrics_key, metadata_ttl)
+
+local successes = tonumber(redis.call('ZCOUNT', successes_key, window_start_ts_str, failure_ts_str))
+local errors = tonumber(redis.call('ZCOUNT', failures_key, window_start_ts_str, failure_ts_str))
 local last_success_at = redis.call('HGET', metrics_key, 'last_success_at')
-
--- @include window_metrics/_metrics_snapshot
-
-local number_of_metric_buckets = tonumber(ARGV[6])
-local window_start_ts = tonumber(ARGV[7])
-local window_end_ts = tonumber(ARGV[8])
-
-local success_keys, failure_keys = slice_window_keys(KEYS, 2, number_of_metric_buckets)
-local successes = count_window_events(success_keys, window_start_ts, window_end_ts)
-local errors = count_window_events(failure_keys, window_start_ts, window_end_ts)
 
 return {successes, errors, last_success_at, last_error_json_result, consecutive_errors, consecutive_successes}
