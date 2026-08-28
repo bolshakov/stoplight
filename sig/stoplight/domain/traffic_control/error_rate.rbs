@@ -5,10 +5,9 @@ module Stoplight
         include _TrafficControl
 
         NAME: :error_rate
+        MIN_REQUESTS: Integer
 
-        attr_reader min_requests: Integer
-
-        def initialize: (?min_requests: Integer) -> void
+        def initialize: () -> void
       end
     end
   end

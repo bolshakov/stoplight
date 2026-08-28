@@ -11,8 +11,6 @@ module Stoplight
           Domain::TrafficControl::ConsecutiveErrors.new
         in Domain::TrafficControl::ErrorRate::NAME
           Domain::TrafficControl::ErrorRate.new
-        in {error_rate: error_rate_settings}
-          Domain::TrafficControl::ErrorRate.new(**error_rate_settings)
         else
           raise Stoplight::Error::ConfigurationError, <<~ERROR
             unsupported traffic_control strategy provided (`#{value}`). Supported options:

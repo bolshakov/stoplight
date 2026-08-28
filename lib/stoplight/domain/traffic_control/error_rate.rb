@@ -10,19 +10,15 @@ module Stoplight
       #   config = Stoplight::Domain::Config.new(threshold: 0.6, window_size: 300, traffic_control:)
       #
       # Will switch to red if 60% error rate reached within the 5-minute (300 seconds) sliding window.
-      # By default this traffic control strategy starts evaluating only after 10 requests have been made. You can
-      # adjust this by passing a different value for `min_requests` when initializing the strategy.
-      #
-      #   traffic_control = Stoplight::Domain::TrafficControl::ErrorRate.new(min_requests: 100)
       #
       # @api private
       class ErrorRate
         NAME = :error_rate
 
-        # @param min_requests Minimum number of requests before traffic control is applied.
-        #   until this number of requests is reached, the error rate will not be considered.
-        def initialize(min_requests: 10)
-          @min_requests = min_requests
+        MIN_REQUESTS = 100
+        private_constant :MIN_REQUESTS
+
+        def initialize
         end
 
         def check_compatibility(config)
@@ -32,10 +28,6 @@ module Stoplight
             CompatibilityResult.incompatible("`threshold` should be a number")
           elsif config.threshold < 0 || config.threshold > 1
             CompatibilityResult.incompatible("`threshold` should be between 0 and 1")
-          elsif !min_requests.is_a?(Integer)
-            CompatibilityResult.incompatible("`min_requests` should be an integer")
-          elsif min_requests <= 0
-            CompatibilityResult.incompatible("`min_requests` should be bigger than 0")
           else
             CompatibilityResult.compatible
           end
@@ -47,24 +39,20 @@ module Stoplight
 
           raise ArgumentError, "accepts only windowed metrics" if error_rate.nil? || requests.nil?
 
-          requests >= min_requests && error_rate >= config.threshold
+          requests >= MIN_REQUESTS && error_rate >= config.threshold
         end
 
         def name = NAME.to_s
 
         def ==(other)
-          other.is_a?(self.class) && min_requests == other.min_requests
+          other.is_a?(self.class)
         end
 
         def eql?(other)
           self == other
         end
 
-        def hash = [self.class, @min_requests].hash
-
-        protected
-
-        attr_reader :min_requests
+        def hash = self.class.hash
       end
     end
   end
