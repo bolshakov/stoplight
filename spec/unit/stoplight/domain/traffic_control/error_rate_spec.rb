@@ -1,9 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Stoplight::Domain::TrafficControl::ErrorRate do
-  subject(:traffic_control) { described_class.new(min_requests:) }
-
-  let(:min_requests) { 10 }
+  subject(:traffic_control) { described_class.new }
 
   describe "#check_compatibility" do
     subject(:availability) { traffic_control.check_compatibility(config) }
@@ -13,8 +11,6 @@ RSpec.describe Stoplight::Domain::TrafficControl::ErrorRate do
     let(:window_size) { 600 }
 
     context "when stoplight tracks running window" do
-      let(:window_size) { 600 }
-
       it { is_expected.to be_compatible }
     end
 
@@ -79,30 +75,6 @@ RSpec.describe Stoplight::Domain::TrafficControl::ErrorRate do
         expect(availability.error_messages).to eq("`threshold` should be a number")
       end
     end
-
-    context "when min_requests is less then 1" do
-      let(:min_requests) { 0 }
-      it { is_expected.to be_incompatible }
-      it "returns an error message" do
-        expect(availability.error_messages).to eq("`min_requests` should be bigger than 0")
-      end
-    end
-
-    context "when min_requests is negative" do
-      let(:min_requests) { -5 }
-      it { is_expected.to be_incompatible }
-      it "returns an error message" do
-        expect(availability.error_messages).to eq("`min_requests` should be bigger than 0")
-      end
-    end
-
-    context "when min_requests is not an integer" do
-      let(:min_requests) { 10.5 }
-      it { is_expected.to be_incompatible }
-      it "returns an error message" do
-        expect(availability.error_messages).to eq("`min_requests` should be an integer")
-      end
-    end
   end
 
   describe "#stop_traffic?" do
@@ -110,8 +82,8 @@ RSpec.describe Stoplight::Domain::TrafficControl::ErrorRate do
 
     let(:config) { instance_double(Stoplight::Domain::Config, threshold:) }
     let(:metadata) { instance_double(Stoplight::Domain::MetricsSnapshot, error_rate:, requests:) }
-
     let(:threshold) { 0.6 }
+    let(:min_requests) { 100 }
 
     context "when min requests satisfied" do
       let(:requests) { min_requests + 1 }
@@ -177,25 +149,12 @@ RSpec.describe Stoplight::Domain::TrafficControl::ErrorRate do
   end
 
   describe "#eql?" do
-    it "returns true for same class and same min_requests" do
-      strategy_a = described_class.new
-      strategy_b = described_class.new
-
-      expect(strategy_a.eql?(strategy_b)).to be(true)
+    it "returns true for two instances" do
+      expect(described_class.new.eql?(described_class.new)).to be(true)
     end
 
-    it "returns false when same class and different min_requests" do
-      strategy_a = described_class.new(min_requests: 10)
-      strategy_b = described_class.new(min_requests: 11)
-
-      expect(strategy_a.eql?(strategy_b)).to be(false)
-    end
-
-    it "returns false when different class and same min_requests" do
-      strategy_a = described_class.new(min_requests: 10)
-      strategy_b = Stoplight::Domain::TrafficControl::ConsecutiveErrors.new
-
-      expect(strategy_a.eql?(strategy_b)).to be(false)
+    it "returns false for a different class" do
+      expect(described_class.new.eql?(Stoplight::Domain::TrafficControl::ConsecutiveErrors.new)).to be(false)
     end
   end
 end

@@ -27,14 +27,6 @@ RSpec.describe Stoplight::Wiring::LightConfigurationDsl::TrafficControlDsl do
     end
   end
 
-  context "when :error_rate with options" do
-    let(:traffic_control) { {error_rate: {min_requests: 11}} }
-
-    it "returns an instance of Stoplight::Domain::TrafficControl::ErrorRate with min_requests" do
-      is_expected.to eq(Stoplight::Domain::TrafficControl::ErrorRate.new(min_requests: 11))
-    end
-  end
-
   context "when unsupported option" do
     let(:traffic_control) { :latency }
 

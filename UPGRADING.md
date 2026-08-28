@@ -1,5 +1,8 @@
 ## Stoplight 6.0  - WIP
 A list of breaking changes in the future version, to be described in more details:
+- `ErrorRate#new` no longer accepts `min_requests:`. The minimum sample guard is now a
+  fixed internal constant (100). Passing the keyword raises `ArgumentError`. Remove any
+  `min_requests:` arguments and any `{error_rate: {min_requests: N}}` DSL configuration.
 - Removed Light#with() method 
 - Removed Light's `#with_data_store`, `#with_cool_off_time`, `#with_threshold`, `#with_window_size`, `#with_notifiers`, 
   `#with_error_notifier`, `#with_tracked_errors`, `#with_skipped_errors`

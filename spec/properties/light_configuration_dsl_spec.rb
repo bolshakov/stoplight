@@ -30,7 +30,6 @@ RSpec.describe Stoplight::Wiring::LightConfigurationDsl do
           traffic_control: choose(
             :consecutive_errors,
             :error_rate,
-            {error_rate: {min_requests: integer.abs}},
             Stoplight::Types.undefined
           ),
           traffic_recovery: choose(

@@ -141,10 +141,10 @@ RSpec.describe "Light" do
       specify "with error rate" do
         light = Stoplight(SecureRandom.uuid, traffic_control: :error_rate, threshold: 0.5, window_size: 60)
 
-        5.times { light.run(fallback) {} }
+        50.times { light.run(fallback) {} }
         expect(light.color).to eq(Stoplight::Color::GREEN)
 
-        5.times { light.run(fallback, &failing_code) }
+        51.times { light.run(fallback, &failing_code) }
         expect(light.color).to eq(Stoplight::Color::RED)
       end
 

@@ -353,18 +353,9 @@ light = Stoplight(
 
 Monitors error rate over a 5-minute sliding window. The stoplight turns red when error rate exceeds 50%.
 
-```ruby
-light = Stoplight(
-  "Payment API", 
-  traffic_control: {
-    error_rate: { min_requests: 20 },
-  }, 
-  window_size: 300, 
-  threshold: 0.5,
-)
-```
-
-Only evaluates error rate after at least 20 requests within the window. Default `min_requests` is 10.
+Error rate evaluation starts only after 100 requests within the window — enough samples
+for a statistically reliable estimate. If your service handles fewer than 100 requests
+per window, the breaker will never trip on error rate; use `traffic_control: :consecutive_errors` instead.
 
 
 #### When to use:

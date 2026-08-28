@@ -12,9 +12,9 @@ Feature: Error Rate Traffic Control Strategy
         | Recovery Threshold | 2          |
 
   Scenario: Light transitions to red after threshold failures
-    Given 6 request are made
+    Given 60 requests are made
     And the service starts failing with "connection-timeout"
-    When 4 requests are made
+    When 40 requests are made
     Then the light color is red
     And notification about transition from green to red is sent
 
@@ -62,9 +62,9 @@ Feature: Error Rate Traffic Control Strategy
 
   Scenario: Light does not transition to to red after successful call
     Given the service starts failing with "connection-timeout"
-    When 9 requests are made
+    When 91 requests are made
     And the service recovers and starts functioning normally
-    And 1 request is made
+    And 8 requests are made
     And the service starts failing with "connection-timeout" again
     When 1 request is made
     Then the light color is red
