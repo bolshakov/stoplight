@@ -38,22 +38,7 @@ Stoplight uses [Semantic Versioning][]. Check out [the change log][] for a detai
 
 Stoplight operates like a traffic light with three states:
 
-```mermaid
-stateDiagram
-    Green --> Red: Errors reach threshold
-    Red --> Yellow: After cool_off_time
-    Yellow --> Green: Successful recovery
-    Yellow --> Red: Failed recovery
-    Green --> Green: Success
-    
-    classDef greenState fill:#28a745,stroke:#1e7e34,stroke-width:2px,color:#fff
-    classDef redState fill:#dc3545,stroke:#c82333,stroke-width:2px,color:#fff
-    classDef yellowState fill:#ffc107,stroke:#e0a800,stroke-width:2px,color:#000
-    
-    class Green greenState
-    class Red redState
-    class Yellow yellowState
-```
+![Stoplight state diagram][]
 
 - **Green**: Normal operation. Code runs as expected. (Circuit closed)
 - **Red**: Failure state. Fast-fails without running the code. (Circuit open)
@@ -676,3 +661,4 @@ Fowler’s [CircuitBreaker][] article.
 [Valkey's support policy]: https://valkey.io/topics/releases/
 [DragonflyDB]: https://www.dragonflydb.io/
 [DragonflyDB documentation]: https://www.dragonflydb.io/docs/managing-dragonfly/scripting#script-flags
+[Stoplight state diagram]: assets/state-diagram.svg
