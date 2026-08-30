@@ -5,12 +5,11 @@ module Stoplight
         class WindowMetrics < Metrics
           METRICS_FIELDS: Array[String]
 
-          attr_reader config: Domain::Config
-          attr_reader redis: redis
-          attr_reader scripting: Scripting
-          attr_reader metrics_key: String
-          attr_reader clock: Domain::_Clock
-          attr_reader key_space: Key
+          @redis: redis
+          @scripting: Scripting
+          @clock: Domain::_Clock
+          @metrics_key: Key
+          @ts_index_key: Key
           @window_size: Integer
 
           def initialize: (
@@ -21,17 +20,6 @@ module Stoplight
             key_space: Key
           ) -> void
 
-          def bucket_key: (metric: String, time: _ToI) -> String
-          def bucket_start_for: (_ToI time) -> Integer
-          def bucket_size: -> Integer
-          def bucket_ttl: -> Integer
-          def buckets_for_window: (metric: String, window_end: _ToI) -> Array[String]
-          def successes_key: (time: _ToI) -> String
-          def errors_key: (time: _ToI) -> String
-          def failure_bucket_keys: (_ToI window_end) -> Array[String]
-          def success_bucket_keys: (_ToI window_end) -> Array[String]
-          def snapshot_window: (Float window_end_ts) -> [Float, Array[String], Array[String]]
-
           def build_metrics_snapshot: (
             successes: Integer,
             errors: Integer,
@@ -39,7 +27,7 @@ module Stoplight
             consecutive_successes: String,
             last_error_json: String?,
             last_success_at: String?,
-            ) -> Domain::MetricsSnapshot
+          ) -> Domain::MetricsSnapshot
         end
       end
     end
