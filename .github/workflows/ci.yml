@@ -108,6 +108,7 @@ jobs:
           - 'redis:8.6'
           - 'valkey/valkey:7.2-alpine'
           - 'valkey/valkey:8.1-alpine'
+          - 'valkey/valkey:9.1-alpine'
         ruby: ['3.3', '3.4', '4.0' ]
     services:
       data-store:

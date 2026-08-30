@@ -621,7 +621,7 @@ We only actively support the latest major version of Stoplight.
 **Data Stores**: Current supported versions from upstream (versions that receive security updates):
 
 * Redis: 8.6.x, 8.4.x, 7.4.x (following [Redis's support policy])
-* Valkey: 8.0.x, 7.2.x (following [Valkey's support policy])
+* Valkey: 9.1.x, 9.0.x, 8.1.x, 8.0.x, 7.2.x (following [Valkey's support policy])
 * We test against the latest version of each major release
 
 For dependencies:
