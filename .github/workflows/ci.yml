@@ -103,10 +103,9 @@ jobs:
     strategy:
       matrix:
         data-store-image:
-          - 'redis:6.2'
-          - 'redis:7.2'
           - 'redis:7.4'
-          - 'redis:8.0'
+          - 'redis:8.4'
+          - 'redis:8.6'
           - 'valkey/valkey:7.2-alpine'
           - 'valkey/valkey:8.1-alpine'
         ruby: ['3.3', '3.4', '4.0' ]
