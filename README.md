@@ -615,7 +615,7 @@ We only actively support the latest major version of Stoplight.
 
 **Ruby**: Major versions that receive security updates (see [Ruby Maintenance Branches]):
 
-* Currently: Ruby 3.2.x, 3.3.x and 3.4.x
+* Currently: Ruby 3.3.x, 3.4.x and 4.0.x
 * We test against these versions in CI
 
 **Data Stores**: Current supported versions from upstream (versions that receive security updates):
@@ -635,7 +635,7 @@ For dependencies:
 * Ruby: When Ruby core team ends security support, we drop it in our next major release
 * Data Stores: When Redis/Valkey ends maintenance, we drop it in our next major release
 
-Example: "Ruby 3.2 reaches end-of-life in March 2026, so Stoplight 6.0 will require Ruby 3.3+"
+Example: "Ruby 3.3 reaches end-of-life in March 2027, so Stoplight 7.0 will require Ruby 3.4+"
 
 ## Development
 

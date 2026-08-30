@@ -109,7 +109,7 @@ jobs:
           - 'redis:8.0'
           - 'valkey/valkey:7.2-alpine'
           - 'valkey/valkey:8.1-alpine'
-        ruby: [ '3.2', '3.3', '3.4', '4.0' ]
+        ruby: ['3.3', '3.4', '4.0' ]
     services:
       data-store:
         image: ${{ matrix.data-store-image }}
