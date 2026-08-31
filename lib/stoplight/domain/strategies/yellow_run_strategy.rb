@@ -13,17 +13,15 @@ module Stoplight
       class YellowRunStrategy
         def initialize(
           name:,
-          notifiers:,
           request_tracker:,
           state_store:,
           metrics_store:,
           recovery_lock_store:,
-          config:, # FIXME: needed for backward compatibility, remove when notifier accepts light config
+          config:,
           clock:,
           run_recorder:,
           emitter:
         )
-          @notifiers = notifiers
           @request_tracker = request_tracker
           @state_store = state_store
           @metrics_store = metrics_store
@@ -75,7 +73,6 @@ module Stoplight
 
         private
 
-        attr_reader :notifiers
         attr_reader :request_tracker
         attr_reader :state_store
         attr_reader :metrics_store
@@ -134,10 +131,6 @@ module Stoplight
               to_color: Color::YELLOW,
               breached_at: T.must(state_snapshot.breached_at)
             )
-          end
-          light_info = LightInfo.new(name: @name)
-          notifiers.each do |notifier|
-            notifier.notify(light_info, Color::RED, Color::YELLOW, nil)
           end
         end
       end

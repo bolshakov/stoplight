@@ -4,7 +4,6 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
   subject(:strategy) do
     described_class.new(
       name:,
-      notifiers: notifiers,
       request_tracker:,
       state_store:,
       metrics_store:,
@@ -18,8 +17,6 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
 
   let(:name) { SecureRandom.uuid }
   let(:error_tracking_policy) { instance_double(Stoplight::Domain::ErrorTrackingPolicy) }
-  let(:notifiers) { [notifier] }
-  let(:notifier) { instance_double(NullNotifier) }
   let(:recovery_lock_store) { instance_double(NullRecoveryLockStore) }
   let(:state_store) { instance_double(NullStateStore) }
   let(:metrics_store) { instance_double(NullMetricsStore) }
@@ -325,9 +322,7 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
     context "when recovery has already started" do
       let(:state_snapshot) { instance_double(Stoplight::Domain::StateSnapshot, recovery_started?: true) }
 
-      it "does not send notifications or emit events" do
-        expect(notifier).not_to receive(:notify)
-
+      it "does not emit events" do
         expect {
           enter_recovery
         }.not_to emit(Stoplight::Domain::Telemetry::RecoveryStarted)
@@ -338,10 +333,9 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
       let(:state_snapshot) { instance_double(Stoplight::Domain::StateSnapshot, recovery_started?: false, breached_at:) }
       let(:breached_at) { instance_double(Time) }
 
-      it "notifies if able to transition to YELLOW" do
+      it "clears metrics and transitions to YELLOW" do
         expect(metrics_store).to receive(:clear)
         expect(state_store).to receive(:transition_to_color).with(Stoplight::Color::YELLOW)
-        expect(notifier).to receive(:notify).with(have_attributes(name:), Stoplight::Color::RED, Stoplight::Color::YELLOW, nil)
 
         enter_recovery
       end
@@ -349,7 +343,6 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
       it "emits RecoveryStarted" do
         allow(metrics_store).to receive(:clear)
         allow(state_store).to receive(:transition_to_color)
-        allow(notifier).to receive(:notify)
 
         expect {
           enter_recovery

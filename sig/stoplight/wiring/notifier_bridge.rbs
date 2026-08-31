@@ -1,0 +1,16 @@
+module Stoplight
+  module Wiring
+    class NotifierBridge
+      @light_name: String
+      @notifiers: Array[Domain::_StateTransitionNotifier]
+
+      def initialize: (light_name: String, notifiers: Array[Domain::_StateTransitionNotifier]) -> void
+
+      def subscribe: (Domain::_Telemetry) -> void
+
+      private
+
+      def notify: (Domain::Telemetry::Envelope[Domain::Telemetry::state_transitioned], error: StandardError?) -> void
+    end
+  end
+end

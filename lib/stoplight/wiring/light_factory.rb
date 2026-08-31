@@ -37,6 +37,7 @@ module Stoplight
           clock: @clock,
           error_notifier: @error_notifier
         )
+        @telemetry = telemetry
         @wrapped_notifiers = nil
       end
 
@@ -54,6 +55,8 @@ module Stoplight
         @emitter.emit(Domain::Telemetry::LightRegistered) do
           Domain::Telemetry::LightRegistered.new(settings: telemetry_settings)
         end
+
+        NotifierBridge.new(light_name: @name, notifiers:).subscribe(@telemetry) unless notifiers.empty?
 
         light
       end
@@ -105,13 +108,12 @@ module Stoplight
       end
 
       def request_tracker
-        Domain::Tracker::Request.new(traffic_control:, notifiers:, config:, metrics_store:, state_store:, emitter: @emitter)
+        Domain::Tracker::Request.new(traffic_control:, config:, metrics_store:, state_store:, emitter: @emitter)
       end
 
       def recovery_probe_tracker
         Domain::Tracker::RecoveryProbe.new(
           traffic_recovery:,
-          notifiers:,
           config:,
           metrics_store: recovery_metrics_store,
           state_store:,
@@ -130,7 +132,6 @@ module Stoplight
       def yellow_run_strategy
         Domain::Strategies::YellowRunStrategy.new(
           name: @name,
-          notifiers:,
           request_tracker: recovery_probe_tracker,
           state_store:,
           metrics_store:,
