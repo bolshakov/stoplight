@@ -195,6 +195,36 @@ RSpec.describe Stoplight::Wiring::System do
       expect(system.telemetry).not_to respond_to(:publish)
       expect(system.telemetry).not_to respond_to(:subscribed?)
     end
+
+    describe "LightRegistered" do
+      it "emits exactly one LightRegistered event when a light is registered for the first time" do
+        system.telemetry.subscribe(Stoplight::Telemetry::LightRegistered) { |envelope| received << envelope }
+
+        system.register("stripe")
+
+        expect(received.size).to eq(1)
+        expect(received.first.payload).to be_a(Stoplight::Telemetry::LightRegistered)
+      end
+
+      it "does not emit LightRegistered again when the same light is registered a second time" do
+        system.telemetry.subscribe(Stoplight::Telemetry::LightRegistered) { |envelope| received << envelope }
+
+        system.register("stripe")
+        system.register("stripe")
+
+        expect(received.size).to eq(1)
+      end
+
+      it "emits LightRegistered before any other telemetry event for the light" do
+        system.telemetry.subscribe { |envelope| received << envelope }
+
+        system.register("stripe")
+        system.light("stripe").run { "ok" }
+
+        expect(received[0].payload).to be_a(Stoplight::Telemetry::LightRegistered)
+        expect(received[1].payload).to be_a(Stoplight::Telemetry::RunCompleted)
+      end
+    end
   end
 
   describe "#light" do

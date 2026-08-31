@@ -41,7 +41,7 @@ module Stoplight
       end
 
       def build
-        Stoplight::Domain::Light.new(
+        light = Stoplight::Domain::Light.new(
           @name,
           state_store:,
           green_run_strategy:,
@@ -50,6 +50,12 @@ module Stoplight
           lock_control:,
           error_tracking_policy: @error_tracking_policy
         )
+
+        @emitter.emit(Domain::Telemetry::LightRegistered) do
+          Domain::Telemetry::LightRegistered.new(settings: telemetry_settings)
+        end
+
+        light
       end
 
       def state_store = storage_set.state_store
@@ -146,6 +152,22 @@ module Stoplight
 
       def run_recorder(color)
         Domain::Telemetry::RunRecorder.new(emitter: @emitter, color:)
+      end
+
+      def telemetry_settings
+        Domain::Telemetry::Settings.new(
+          cool_off_time: @config.cool_off_time,
+          threshold: @config.threshold,
+          recovery_threshold: @config.recovery_threshold,
+          window_size: @config.window_size,
+          tracked_errors: @config.tracked_errors.map { |matcher| Domain::MatcherValidator.call(matcher) },
+          skipped_errors: @config.skipped_errors.map { |matcher| Domain::MatcherValidator.call(matcher) },
+          traffic_control: @config.traffic_control.name,
+          traffic_recovery: @config.traffic_recovery.name,
+          # No strategy accepts constructor params yet; placeholder for forward compatibility.
+          traffic_control_params: {},
+          traffic_recovery_params: {}
+        )
       end
 
       def redis
