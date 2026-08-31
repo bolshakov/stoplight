@@ -66,8 +66,9 @@ module Stoplight
         @registry = registry
         @telemetry = Domain::Telemetry::Bus.new(error_notifier: config.error_notifier)
 
-        notifiers = wrapped_notifiers
-        NotifierBridge.new(notifiers:).subscribe(@telemetry) unless notifiers.empty?
+        unless config.notifiers.empty?
+          NotifierBridge.new(notifiers: wrapped_notifiers).subscribe(@telemetry)
+        end
       end
 
       def persistent?
