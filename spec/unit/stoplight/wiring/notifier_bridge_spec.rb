@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Stoplight::Wiring::NotifierBridge do
-  subject(:bridge) { described_class.new(light_name:, notifiers:) }
+  subject(:bridge) { described_class.new(notifiers:) }
 
   let(:light_name) { "checkout" }
   let(:notifiers) { [notifier] }
@@ -138,7 +138,7 @@ RSpec.describe Stoplight::Wiring::NotifierBridge do
     end
   end
 
-  describe "events for a different light" do
+  describe "events from multiple lights sharing the same system bus" do
     let(:payload) do
       Stoplight::Domain::Telemetry::RecoveryStarted.new(
         from_color: Stoplight::Color::RED,
@@ -147,10 +147,16 @@ RSpec.describe Stoplight::Wiring::NotifierBridge do
       )
     end
 
-    it "ignores them" do
-      expect(notifier).not_to receive(:notify)
+    it "notifies for each light, using its own name" do
+      expect(notifier).to receive(:notify).with(
+        have_attributes(name: "checkout"), Stoplight::Color::RED, Stoplight::Color::YELLOW, nil
+      )
+      expect(notifier).to receive(:notify).with(
+        have_attributes(name: "billing"), Stoplight::Color::RED, Stoplight::Color::YELLOW, nil
+      )
 
-      bus.publish(envelope(payload, light_name: "other-light"))
+      bus.publish(envelope(payload, light_name: "checkout"))
+      bus.publish(envelope(payload, light_name: "billing"))
     end
   end
 

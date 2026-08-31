@@ -7,8 +7,7 @@ module Stoplight
     #
     # @api private
     class NotifierBridge
-      def initialize(light_name:, notifiers:)
-        @light_name = light_name
+      def initialize(notifiers:)
         @notifiers = notifiers
       end
 
@@ -22,9 +21,7 @@ module Stoplight
       private
 
       def notify(envelope, error:)
-        return unless envelope.light_name == @light_name
-
-        info = Domain::LightInfo.new(name: @light_name)
+        info = Domain::LightInfo.new(name: envelope.light_name)
         payload = envelope.payload
 
         @notifiers.each do |notifier|

@@ -1,10 +1,9 @@
 module Stoplight
   module Wiring
     class NotifierBridge
-      @light_name: String
       @notifiers: Array[Domain::_StateTransitionNotifier]
 
-      def initialize: (light_name: String, notifiers: Array[Domain::_StateTransitionNotifier]) -> void
+      def initialize: (notifiers: Array[Domain::_StateTransitionNotifier]) -> void
 
       def subscribe: (Domain::_Telemetry) -> void
 

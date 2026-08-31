@@ -26,13 +26,10 @@ module Stoplight
       attr_reader system_name: String
 
       @system_id: String
-      @notifiers: Array[Domain::_StateTransitionNotifier]
       @name: String
       @cool_off_time: Domain::duration_seconds
       @error_tracking_policy: Domain::ErrorTrackingPolicy
-      @wrapped_notifiers: Array[Domain::_StateTransitionNotifier]?
       @emitter: Domain::Telemetry::Emitter
-      @telemetry: Domain::_TelemetryPublisher & Domain::_Telemetry
       @failover_system: _System?
       @storage_set: StorageSet
       @key_space: Infrastructure::Redis::Key
@@ -42,14 +39,13 @@ module Stoplight
           config: Domain::Config,
           system_name: String,
           failover_system: _System?,
-          telemetry: Domain::_TelemetryPublisher & Domain::_Telemetry
+          telemetry: Domain::_TelemetryPublisher
         ) -> void
 
       def lock_control: -> Domain::LockControl
       def storage_set: -> StorageSet
       def key_space: -> Infrastructure::Redis::Key
       def state_store: -> Domain::_StateStore
-      def notifiers: -> Array[Domain::_StateTransitionNotifier]
 
       def metrics_store: -> Domain::_MetricsStore
       def recovery_lock_store: -> Domain::_RecoveryLockStore

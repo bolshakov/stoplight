@@ -21,7 +21,6 @@ module Stoplight
         @error_notifier = Infrastructure::FailSafe::ErrorNotifier.new(
           error_notifier: config.error_notifier
         )
-        @notifiers = config.notifiers
         @traffic_recovery = config.traffic_recovery
         @traffic_control = config.traffic_control
 
@@ -37,8 +36,6 @@ module Stoplight
           clock: @clock,
           error_notifier: @error_notifier
         )
-        @telemetry = telemetry
-        @wrapped_notifiers = nil
       end
 
       def build
@@ -55,8 +52,6 @@ module Stoplight
         @emitter.emit(Domain::Telemetry::LightRegistered) do
           Domain::Telemetry::LightRegistered.new(settings: telemetry_settings)
         end
-
-        NotifierBridge.new(light_name: @name, notifiers:).subscribe(@telemetry) unless notifiers.empty?
 
         light
       end
@@ -94,17 +89,6 @@ module Stoplight
 
       def storage_set
         @storage_set ||= StorageSetBuilder.new(backend: build_backend, windowed: !config.window_size.nil?).build
-      end
-
-      # @return [<Stoplight::Notifier::Base>]
-      def notifiers
-        @wrapped_notifiers ||= Array(@notifiers).map do |notifier|
-          Infrastructure::Notifier::FailSafe.new(
-            notifier:,
-            error_notifier:,
-            circuit_breaker: create_circuit_breaker("notifier:#{notifier.class.name}")
-          )
-        end
       end
 
       def request_tracker

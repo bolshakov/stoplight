@@ -6,13 +6,13 @@ module Stoplight
         @system_name: String
         @failover_system: _System
         @factories: Hash[Domain::Config, LightFactory]
-        @telemetry: Domain::_TelemetryPublisher & Domain::_Telemetry
+        @telemetry: Domain::_TelemetryPublisher
 
         def initialize: (
             system_id: String,
             system_name: String,
             failover_system: _System,
-            telemetry: Domain::_TelemetryPublisher & Domain::_Telemetry
+            telemetry: Domain::_TelemetryPublisher
           ) -> void
 
         def state_snapshot: (Domain::Config) -> Domain::StateSnapshot
