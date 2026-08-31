@@ -1,6 +1,18 @@
 # frozen_string_literal: true
 
 RSpec.describe Stoplight::Admin::LightView do
+  def build_metrics_snapshot(**attributes)
+    Stoplight::Domain::MetricsSnapshot.new(
+      successes: nil,
+      errors: nil,
+      consecutive_errors: 0,
+      consecutive_successes: 0,
+      last_error: nil,
+      last_success_at: nil,
+      **attributes
+    )
+  end
+
   subject(:light) do
     described_class.new(
       config:,
@@ -141,17 +153,88 @@ RSpec.describe Stoplight::Admin::LightView do
     it { is_expected.to eq(latest_failure) }
   end
 
+  describe "#traffic_metric_label and #traffic_metric_value" do
+    subject(:traffic_metric) { [light.traffic_metric_label, light.traffic_metric_value] }
+
+    context "with unbounded metrics" do
+      let(:metrics_snapshot) { build_metrics_snapshot(consecutive_errors: 3) }
+
+      it "describes the consecutive failure streak" do
+        expect(traffic_metric).to eq(["Consecutive failures", "3"])
+      end
+    end
+
+    context "with windowed metrics" do
+      let(:metrics_snapshot) { build_metrics_snapshot(successes: 3, errors: 2) }
+
+      it "describes errors within the request window" do
+        expect(traffic_metric).to eq(["Errors", "2 / 5 requests (40.0%)"])
+      end
+    end
+
+    context "with an empty window" do
+      let(:metrics_snapshot) { build_metrics_snapshot(successes: 0, errors: 0) }
+
+      it "renders a zero error rate" do
+        expect(traffic_metric).to eq(["Errors", "0 / 0 requests (0.0%)"])
+      end
+    end
+
+    context "with a windowed snapshot missing its error rate" do
+      let(:metrics_snapshot) do
+        instance_double(
+          Stoplight::Domain::MetricsSnapshot,
+          last_error: nil,
+          requests: 1,
+          errors!: 0,
+          error_rate: nil
+        )
+      end
+
+      it "raises instead of rendering a misleading zero percent rate" do
+        expect { light.traffic_metric_value }.to raise_error(TypeError, "error_rate must not be nil")
+      end
+    end
+  end
+
   describe "#as_json" do
     subject(:json) { light.as_json }
 
-    it "returns a hash with the light's attributes" do
-      is_expected.to eq({
-        id:,
-        name:,
-        color:,
-        locked: false,
-        failures: [latest_failure]
-      })
+    context "with unbounded metrics" do
+      let(:metrics_snapshot) { build_metrics_snapshot(consecutive_errors: 3, last_error: latest_failure) }
+
+      it "returns the existing JSON fields" do
+        expect(json.keys).to eq([:id, :name, :color, :failures, :locked])
+        expect(json).to eq({
+          id:,
+          name:,
+          color:,
+          failures: [latest_failure],
+          locked: false
+        })
+      end
+    end
+
+    context "with windowed metrics" do
+      let(:metrics_snapshot) do
+        build_metrics_snapshot(successes: 3, errors: 2, consecutive_errors: 2, last_error: latest_failure)
+      end
+
+      it "returns the existing JSON shape without metric fields" do
+        expect(json.keys).to eq([:id, :name, :color, :failures, :locked])
+        expect(json).not_to include(:metrics, :failure_count, :errors, :requests, :error_rate)
+        expect(json).to eq({
+          id:,
+          name:,
+          color:,
+          failures: [latest_failure],
+          locked: false
+        })
+      end
+    end
+
+    it "does not expose the obsolete card metric reader" do
+      expect(light).not_to respond_to(:failure_count)
     end
   end
 

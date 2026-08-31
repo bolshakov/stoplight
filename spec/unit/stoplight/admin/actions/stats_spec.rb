@@ -34,7 +34,14 @@ RSpec.describe Stoplight::Admin::Actions::Stats do
       instance_double(Stoplight::Domain::StateSnapshot, color: "green", locked_state: "unlocked")
     end
     let(:metrics_snapshot) do
-      instance_double(Stoplight::Domain::MetricsSnapshot, last_error: nil, consecutive_errors: 0)
+      instance_double(
+        Stoplight::Domain::MetricsSnapshot,
+        last_error: nil,
+        consecutive_errors: 0,
+        requests: nil,
+        errors: nil,
+        error_rate: nil
+      )
     end
     let(:recovery_metrics_snapshot) { instance_double(Stoplight::Domain::MetricsSnapshot) }
 
@@ -49,7 +56,13 @@ RSpec.describe Stoplight::Admin::Actions::Stats do
 
       expect(lights).to contain_exactly(
         have_attributes(
-          id: "light-id", name: "foo", color: "green", state: "unlocked", failures: [], failure_count: 0
+          id: "light-id",
+          name: "foo",
+          color: "green",
+          state: "unlocked",
+          failures: [],
+          traffic_metric_label: "Consecutive failures",
+          traffic_metric_value: "0"
         )
       )
     end
@@ -58,6 +71,31 @@ RSpec.describe Stoplight::Admin::Actions::Stats do
       _, stats = call
 
       expect(stats).to eq(Stoplight::Admin::LightsStats::EMPTY_STATS.merge(count_green: 1, percent_green: 100))
+    end
+
+    context "with windowed metrics" do
+      let(:metrics_snapshot) do
+        instance_double(
+          Stoplight::Domain::MetricsSnapshot,
+          last_error: nil,
+          consecutive_errors: 9,
+          requests: 5,
+          errors: 2,
+          errors!: 2,
+          error_rate: 0.4
+        )
+      end
+
+      it "builds a light view that reflects the full metrics snapshot" do
+        lights, = call
+
+        expect(lights).to contain_exactly(
+          have_attributes(
+            traffic_metric_label: "Errors",
+            traffic_metric_value: "2 / 5 requests (40.0%)"
+          )
+        )
+      end
     end
   end
 end
