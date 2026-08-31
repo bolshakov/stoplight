@@ -11,7 +11,6 @@ module Stoplight
         # Constant names of the error matchers (matchers are named constants responding to #===).
         attr_reader tracked_errors: Array[String]
         attr_reader skipped_errors: Array[String]
-        # Policy tags plus their parameters (e.g. error_rate min_requests).
         attr_reader traffic_control: String
         attr_reader traffic_control_params: Hash[String, untyped]
         attr_reader traffic_recovery: String
