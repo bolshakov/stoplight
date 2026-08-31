@@ -22,7 +22,8 @@ module Stoplight
       def color: -> Domain::color
       def name: -> String
       def state: -> Domain::state
-      def failure_count: -> Integer
+      def traffic_metric_label: -> String
+      def traffic_metric_value: -> String
       def locked?: -> bool
       def unlocked?: -> bool
       def as_json: -> Hash[Symbol, _ToS]

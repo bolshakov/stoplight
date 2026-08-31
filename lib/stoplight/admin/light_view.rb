@@ -35,7 +35,26 @@ module Stoplight
       def name = @config.name
       def state = @state_snapshot.locked_state
       def latest_failure = @metrics_snapshot.last_error
-      def failure_count = @metrics_snapshot.consecutive_errors
+
+      def traffic_metric_label
+        if @metrics_snapshot.requests.nil?
+          "Consecutive failures"
+        else
+          "Errors"
+        end
+      end
+
+      def traffic_metric_value
+        requests = @metrics_snapshot.requests
+        if requests.nil?
+          @metrics_snapshot.consecutive_errors.to_s
+        else
+          error_rate = @metrics_snapshot.error_rate
+          raise TypeError, "error_rate must not be nil" if error_rate.nil?
+
+          "#{@metrics_snapshot.errors!} / #{requests} requests (#{format("%.1f%%", error_rate * 100)})"
+        end
+      end
 
       def unlocked?
         @state_snapshot.locked_state == Stoplight::State::UNLOCKED

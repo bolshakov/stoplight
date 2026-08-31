@@ -121,9 +121,11 @@
 
   <!-- Stats Row -->
   <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-3" style="margin-top: auto;">
-    <div>
-      <span class="font-medium">Failures:</span> <%= light.failure_count %>
-    </div>
+    <% if color == Stoplight::Color::GREEN %>
+      <div>
+        <span class="font-medium"><%= light.traffic_metric_label %>:</span> <%= light.traffic_metric_value %>
+      </div>
+    <% end %>
 
     <% if light.last_check %>
       <div>
