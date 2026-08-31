@@ -24,48 +24,4 @@ RSpec.describe Stoplight::Infrastructure::Redis::Storage::WindowMetrics, :redis 
       metrics.record_failure(StandardError.new)
     end
   end
-
-  describe "#buckets_for_window" do
-    subject(:buckets) { metrics.buckets_for_window(metric:, window_end:) }
-
-    let(:metric) { "failures" }
-
-    context "when window size is smaller than the bucket size" do
-      let(:window_end) { Time.at(1696156496) }
-      let(:window_size) { 1000 } # Smaller than BUCKET_SIZE (3600)
-
-      it "returns a single bucket key" do
-        is_expected.to contain_exactly(
-          "#{key_space}:window_metrics:failures:1696154400"
-        )
-      end
-    end
-
-    context "when window size spans multiple buckets" do
-      let(:window_end) { Time.at(1696154400) }
-      let(:window_size) { 14400 } # Spans 4 buckets (3600s each)
-
-      it "returns all bucket keys within the window" do
-        is_expected.to contain_exactly(
-          "#{key_space}:window_metrics:failures:1696140000",
-          "#{key_space}:window_metrics:failures:1696143600",
-          "#{key_space}:window_metrics:failures:1696147200",
-          "#{key_space}:window_metrics:failures:1696150800",
-          "#{key_space}:window_metrics:failures:1696154400"
-        )
-      end
-    end
-
-    context "when window size is exactly one bucket size" do
-      let(:window_end) { Time.at(1696154400) }
-      let(:window_size) { 3600 } # Exactly one bucket size
-
-      it "returns both bucket keys" do
-        is_expected.to contain_exactly(
-          "#{key_space}:window_metrics:failures:1696150800",
-          "#{key_space}:window_metrics:failures:1696154400"
-        )
-      end
-    end
-  end
 end

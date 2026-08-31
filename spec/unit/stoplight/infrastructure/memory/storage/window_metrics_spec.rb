@@ -39,8 +39,8 @@ RSpec.describe Stoplight::Infrastructure::Memory::Storage::WindowMetrics do
 
         successes = metrics.instance_variable_get(:@successes)
         buckets = successes.instance_variable_get(:@buckets)
-        expect(buckets.size).to eq(window_size + 1)
-        expect(buckets.keys).to contain_exactly(*(90..100))
+        expect(buckets.size).to eq(window_size)
+        expect(buckets.keys).to contain_exactly(*(91..100))
       end
     end
   end

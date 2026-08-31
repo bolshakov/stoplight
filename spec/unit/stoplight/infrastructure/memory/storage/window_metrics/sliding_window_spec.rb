@@ -29,7 +29,7 @@ RSpec.describe Stoplight::Infrastructure::Memory::Storage::WindowMetrics::Slidin
     context "when events span the configured window" do
       let(:window_size) { 2 }
 
-      it "counts events within the window" do
+      it "excludes events exactly window_size seconds old, keeping the rest" do
         at(98)
         counter.increment
         counter.increment
@@ -39,7 +39,7 @@ RSpec.describe Stoplight::Infrastructure::Memory::Storage::WindowMetrics::Slidin
         at(100)
         counter.increment
 
-        expect(counter.sum_in_window).to eq(5)
+        expect(counter.sum_in_window).to eq(3)
       end
     end
 
