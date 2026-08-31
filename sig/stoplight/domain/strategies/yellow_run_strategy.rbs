@@ -32,19 +32,19 @@ module Stoplight
         def with_recovery_lock: [T] (
             fallback: (^(StandardError?) -> T)?,
             state_snapshot: StateSnapshot,
-          ) { (duration_ms?) -> T } -> T
+          ) { (duration_ms) -> T } -> T
 
-        def capture_started_at: () -> Float?
-        def duration_since: (duration_ms?) -> duration_ms?
+        def capture_started_at: () -> Float
+        def duration_since: (duration_ms) -> duration_ms
 
         def record_recovery_probe_success: (
-            duration_ms: duration_ms?,
+            duration_ms: duration_ms,
             ?error: StandardError?
           ) -> void
 
         def record_recovery_probe_failure: (
             StandardError,
-            duration_ms: duration_ms?,
+            duration_ms: duration_ms,
             fallback_used: bool,
           ) -> void
 

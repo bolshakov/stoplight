@@ -13,17 +13,16 @@ module Stoplight
           @emitter = emitter
         end
 
-        # @param exception [Exception]
-        def record_failure(exception)
+        def record_failure(exception, duration_ms:)
           metrics_store.record_failure(exception)
 
-          recover
+          recover(duration_ms:, exception:)
         end
 
-        def record_success
+        def record_success(duration_ms:)
           metrics_store.record_success
 
-          recover
+          recover(duration_ms:, exception: nil)
         end
 
         private
@@ -35,8 +34,24 @@ module Stoplight
         attr_reader :state_store
         attr_reader :emitter
 
-        def recover
+        def recover(duration_ms:, exception:)
           recovery_metrics = metrics_store.metrics_snapshot
+
+          emitter.emit(Telemetry::RecoveryProbeCompleted) do
+            failure = exception ? Telemetry::Failure.new(exception:, tracked: true) : nil
+            Telemetry::RecoveryProbeCompleted.new(
+              outcome: failure ? :failure : :success,
+              duration_ms:,
+              failure:,
+              progress: Telemetry::Metrics.new(
+                successes: recovery_metrics.successes,
+                errors: recovery_metrics.errors,
+                consecutive_errors: recovery_metrics.consecutive_errors,
+                consecutive_successes: recovery_metrics.consecutive_successes
+              )
+            )
+          end
+
           recovery_result = traffic_recovery.determine_color(config, recovery_metrics)
 
           return if recovery_result == TrafficRecovery::YELLOW

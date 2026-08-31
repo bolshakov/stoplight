@@ -18,9 +18,12 @@ module Stoplight
           emitter: Telemetry::Emitter,
         ) -> void
 
-        def record_failure: (StandardError exception) -> void
-        def record_success: -> void
-        def recover: -> void
+        def record_failure: (StandardError exception, duration_ms: Float) -> void
+        def record_success: (duration_ms: Float) -> void
+
+        private
+
+        def recover: (duration_ms: Float, exception: StandardError?) -> void
         def transition: (from_color: color, to_color: color) -> bool
       end
     end
