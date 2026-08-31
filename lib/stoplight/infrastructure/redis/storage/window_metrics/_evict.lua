@@ -12,8 +12,8 @@
 -- what ZRANGE read.
 local EVICT_BATCH_SIZE = 1000
 
-local function evict_buckets(key, idx, window_start)
-  local buckets = redis.call('ZRANGE', idx, '-inf', window_start, 'BYSCORE')
+local function evict_buckets(metrics_key, ts_index_key, window_start)
+  local buckets = redis.call('ZRANGE', ts_index_key, '-inf', window_start, 'BYSCORE')
   if #buckets == 0 then
     return
   end
@@ -27,7 +27,7 @@ local function evict_buckets(key, idx, window_start)
       fields[#fields + 1] = buckets[i] .. ':s'
     end
 
-    local values = redis.call('HMGET', key, unpack(fields))
+    local values = redis.call('HMGET', metrics_key, unpack(fields))
 
     local failures, successes = 0, 0
     for i = 1, #values, 2 do
@@ -35,10 +35,10 @@ local function evict_buckets(key, idx, window_start)
       successes = successes + (tonumber(values[i + 1]) or 0)
     end
 
-    redis.call('HINCRBY', key, 'total_failures', -failures)
-    redis.call('HINCRBY', key, 'total_successes', -successes)
-    redis.call('HDEL', key, unpack(fields))
+    redis.call('HINCRBY', metrics_key, 'total_failures', -failures)
+    redis.call('HINCRBY', metrics_key, 'total_successes', -successes)
+    redis.call('HDEL', metrics_key, unpack(fields))
   end
 
-  redis.call('ZREMRANGEBYSCORE', idx, '-inf', window_start)
+  redis.call('ZREMRANGEBYSCORE', ts_index_key, '-inf', window_start)
 end
