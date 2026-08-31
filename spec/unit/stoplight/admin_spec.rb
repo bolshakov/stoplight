@@ -185,7 +185,7 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
           expect(last_response.body).to include("Unlock")
           expect(last_response.body).to include("Lock Red")
           expect(last_response.body).to include("Lock Green")
-          expect(last_response.body).to include("Failures")
+          expect(last_response.body).to include("Consecutive failures")
 
           expect(last_response.body).to_not include("No lights found")
           expect(last_response.body).not_to include("Ensure lights are registered and this Admin instance uses the same data store as your application.")
@@ -249,12 +249,43 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
           end
         end
 
-        it "displays the correct failure count" do
+        it "displays the consecutive failure count" do
           get "/systems/#{system_id}/lights"
 
           expect(last_response).to be_ok
 
-          expect(last_response.body).to include(">Failures:</span> 3")
+          expect(last_response.body).to include(">Consecutive failures:</span> 3")
+        end
+      end
+
+      context "with an error-rate light that has requests" do
+        let(:light) { system.register(SecureRandom.uuid, traffic_control: :error_rate, threshold: 0.5, window_size: 60) }
+
+        before do
+          3.times { light.run { "ok" } }
+          2.times { light.run(->(_) {}) { raise "whoops" } }
+        end
+
+        it "displays errors from the current request window" do
+          get "/systems/#{system_id}/lights"
+
+          expect(last_response).to be_ok
+
+          expect(last_response.body).to include(">Errors:</span> 2 / 5 requests (40.0%)")
+        end
+      end
+
+      context "with an error-rate light that has no requests" do
+        let(:light) { system.register(SecureRandom.uuid, traffic_control: :error_rate, threshold: 0.5, window_size: 60) }
+
+        before { light }
+
+        it "displays the empty request window as zero percent" do
+          get "/systems/#{system_id}/lights"
+
+          expect(last_response).to be_ok
+
+          expect(last_response.body).to include(">Errors:</span> 0 / 0 requests (0.0%)")
         end
       end
 
@@ -383,6 +414,32 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
       end
     end
 
+    context "with an error-rate light" do
+      let(:light) { system.register(light_name, traffic_control: :error_rate, threshold: 0.5, window_size: 60) }
+
+      before { light.run { "ok" } }
+
+      it "returns the existing response shape" do
+        get "/stats"
+
+        expect(last_response).to be_ok
+        expect(response_body).to eq(
+          {
+            "stats" =>
+              {"count_red" => 0,
+               "count_yellow" => 0,
+               "count_green" => 1,
+               "percent_red" => 0,
+               "percent_yellow" => 0,
+               "percent_green" => 100},
+            "lights" => [
+              {"id" => id, "name" => light_name, "color" => "green", "failures" => [], "locked" => false}
+            ]
+          }
+        )
+      end
+    end
+
     context "with more than one system configured" do
       let(:other_data_store) { Stoplight::DataStore::Redis.new(redis) }
       let(:other_system) { Stoplight.register_system(SecureRandom.uuid, data_store: other_data_store) }
@@ -450,6 +507,32 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
                "percent_green" => 100},
             "lights" => [
               {"id" => id, "color" => "green", "failures" => [], "locked" => false, "name" => light_name}
+            ]
+          }
+        )
+      end
+    end
+
+    context "with an error-rate light" do
+      let(:light) { system.register(light_name, traffic_control: :error_rate, threshold: 0.5, window_size: 60) }
+
+      before { light.run { "ok" } }
+
+      it "returns the existing response shape" do
+        get "/systems/#{system_id}/lights.json"
+
+        expect(last_response).to be_ok
+        expect(response_body).to eq(
+          {
+            "stats" =>
+              {"count_red" => 0,
+               "count_yellow" => 0,
+               "count_green" => 1,
+               "percent_red" => 0,
+               "percent_yellow" => 0,
+               "percent_green" => 100},
+            "lights" => [
+              {"id" => id, "name" => light_name, "color" => "green", "failures" => [], "locked" => false}
             ]
           }
         )
