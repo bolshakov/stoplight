@@ -39,5 +39,24 @@ RSpec.shared_examples "a window metrics snapshot" do
         end
       end
     end
+
+    describe "eviction" do
+      context "when many buckets have gone stale before the next write" do
+        let(:window_size) { 4200 }
+        let(:bucket_count) { window_size }
+
+        it "evicts the whole backlog without raising, keeping totals correct" do
+          Timecop.freeze(Time.now) do
+            bucket_count.times { |second| Timecop.freeze(second) { record_success } }
+
+            expect {
+              Timecop.freeze(bucket_count + window_size + 10) { record_success }
+            }.not_to raise_error
+
+            expect(metrics_snapshot.successes).to eq(1)
+          end
+        end
+      end
+    end
   end
 end
