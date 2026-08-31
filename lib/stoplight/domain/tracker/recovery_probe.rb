@@ -72,7 +72,23 @@ module Stoplight
               end
             end
           when TrafficRecovery::RED
-            transition(from_color: Color::YELLOW, to_color: Color::RED)
+            to_color = Color::RED
+            if transition(from_color: Color::YELLOW, to_color:)
+              emitter.emit(Telemetry::RecoveryFailed) do
+                Telemetry::RecoveryFailed.new(
+                  from_color: Color::YELLOW,
+                  to_color:,
+                  policy: traffic_recovery.name,
+                  failure: exception ? Telemetry::Failure.new(exception:, tracked: true) : nil,
+                  metrics: Telemetry::Metrics.new(
+                    successes: recovery_metrics.successes,
+                    errors: recovery_metrics.errors,
+                    consecutive_errors: recovery_metrics.consecutive_errors,
+                    consecutive_successes: recovery_metrics.consecutive_successes
+                  )
+                )
+              end
+            end
           else
             raise "recovery strategy returned unexpected color: #{recovery_result}"
           end

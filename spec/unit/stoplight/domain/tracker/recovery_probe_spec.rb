@@ -192,6 +192,7 @@ RSpec.describe Stoplight::Domain::Tracker::RecoveryProbe do
     context "when the probe changes from yellow to red" do
       before do
         allow(traffic_recovery).to receive(:determine_color).and_return(Stoplight::Domain::TrafficRecovery::RED)
+        allow(traffic_recovery).to receive(:name).and_return(policy_name)
         allow(state_store).to receive(:transition_to_color).with(Stoplight::Color::RED).and_return(true)
       end
 
@@ -289,12 +290,112 @@ RSpec.describe Stoplight::Domain::Tracker::RecoveryProbe do
       before do
         allow(metrics_store).to receive(:record_failure).with(exception)
         allow(traffic_recovery).to receive(:determine_color).and_return(Stoplight::Domain::TrafficRecovery::RED)
+        allow(traffic_recovery).to receive(:name).and_return(policy_name)
         allow(state_store).to receive(:transition_to_color).with(Stoplight::Color::RED).and_return(true)
       end
 
       it "still emits RecoveryProbeCompleted" do
         expect { recorder.record_failure(exception, duration_ms: 3.0) }
           .to emit(Stoplight::Domain::Telemetry::RecoveryProbeCompleted)
+      end
+    end
+  end
+
+  describe "RecoveryFailed telemetry" do
+    let(:exception) { KeyError.new("bang") }
+    let(:metrics_after_probe) {
+      instance_double(Stoplight::Domain::MetricsSnapshot,
+        successes: 0,
+        errors: 1,
+        consecutive_errors: 1,
+        consecutive_successes: 0)
+    }
+    let(:expected_metrics) {
+      Stoplight::Domain::Telemetry::Metrics.new(
+        successes: metrics_after_probe.successes,
+        errors: metrics_after_probe.errors,
+        consecutive_errors: metrics_after_probe.consecutive_errors,
+        consecutive_successes: metrics_after_probe.consecutive_successes
+      )
+    }
+
+    before do
+      allow(metrics_store).to receive(:record_failure).with(exception)
+      allow(metrics_store).to receive(:metrics_snapshot).and_return(metrics_after_probe)
+      allow(metrics_store).to receive(:clear)
+      allow(notifier).to receive(:notify)
+      allow(traffic_recovery).to receive(:determine_color).and_return(Stoplight::Domain::TrafficRecovery::RED)
+      allow(traffic_recovery).to receive(:name).and_return(policy_name)
+      allow(state_store).to receive(:transition_to_color).with(Stoplight::Color::RED).and_return(true)
+    end
+
+    it "emits RecoveryFailed with correct payload" do
+      expect { recorder.record_failure(exception, duration_ms: 3.0) }
+        .to emit(Stoplight::Domain::Telemetry::RecoveryFailed).with(
+          from_color: Stoplight::Color::YELLOW,
+          to_color: Stoplight::Color::RED,
+          policy: policy_name,
+          failure: have_attributes(exception: exception, tracked: true),
+          metrics: expected_metrics
+        )
+    end
+
+    it "emits exactly one RecoveryFailed event" do
+      recorder.record_failure(exception, duration_ms: 3.0)
+
+      count = emitter.emitted.count { |e| e.instance_of?(Stoplight::Domain::Telemetry::RecoveryFailed) }
+      expect(count).to eq(1)
+    end
+
+    context "when state store fails to transition" do
+      before do
+        allow(state_store).to receive(:transition_to_color).with(Stoplight::Color::RED).and_return(false)
+      end
+
+      it "does not emit RecoveryFailed" do
+        expect { recorder.record_failure(exception, duration_ms: 3.0) }
+          .not_to emit(Stoplight::Domain::Telemetry::RecoveryFailed)
+      end
+    end
+
+    context "when the light stays yellow" do
+      before do
+        allow(traffic_recovery).to receive(:determine_color).and_return(Stoplight::Domain::TrafficRecovery::YELLOW)
+      end
+
+      it "does not emit RecoveryFailed" do
+        expect { recorder.record_failure(exception, duration_ms: 3.0) }
+          .not_to emit(Stoplight::Domain::Telemetry::RecoveryFailed)
+      end
+    end
+
+    context "when the probe itself succeeds but recovery trips back to red" do
+      before do
+        allow(metrics_store).to receive(:record_success)
+      end
+
+      it "emits RecoveryFailed with failure: nil" do
+        expect { recorder.record_success(duration_ms: 5.0) }
+          .to emit(Stoplight::Domain::Telemetry::RecoveryFailed).with(
+            from_color: Stoplight::Color::YELLOW,
+            to_color: Stoplight::Color::RED,
+            policy: policy_name,
+            failure: nil,
+            metrics: expected_metrics
+          )
+      end
+    end
+
+    context "when the light transitions to green" do
+      before do
+        allow(metrics_store).to receive(:record_success)
+        allow(traffic_recovery).to receive(:determine_color).and_return(Stoplight::Domain::TrafficRecovery::GREEN)
+        allow(state_store).to receive(:transition_to_color).with(Stoplight::Color::GREEN).and_return(true)
+      end
+
+      it "does not emit RecoveryFailed" do
+        expect { recorder.record_success(duration_ms: 5.0) }
+          .not_to emit(Stoplight::Domain::Telemetry::RecoveryFailed)
       end
     end
   end
