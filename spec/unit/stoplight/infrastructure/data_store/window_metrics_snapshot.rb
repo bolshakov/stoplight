@@ -40,6 +40,22 @@ RSpec.shared_examples "a window metrics snapshot" do
       end
     end
 
+    describe "window boundary" do
+      context "when a success happened exactly window_size seconds ago" do
+        let(:window_size) { 300 }
+
+        it "excludes it from the count" do
+          Timecop.freeze(Time.now) do
+            record_success
+
+            Timecop.freeze(window_size) do
+              expect(metrics_snapshot.successes).to eq(0)
+            end
+          end
+        end
+      end
+    end
+
     describe "eviction" do
       context "when many buckets have gone stale before the next write" do
         let(:window_size) { 4200 }

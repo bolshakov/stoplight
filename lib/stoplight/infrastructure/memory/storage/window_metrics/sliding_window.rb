@@ -51,7 +51,7 @@ module Stoplight
 
               loop do
                 timestamp, sum = @buckets.first
-                if timestamp.nil? || timestamp >= window_start_ts
+                if timestamp.nil? || timestamp > window_start_ts
                   break
                 else
                   @running_sum -= sum.to_i
