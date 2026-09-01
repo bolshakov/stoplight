@@ -9,7 +9,7 @@ RSpec.shared_examples "a window metrics snapshot" do
         let(:window_size) { 5000 }
 
         before do
-          Timecop.freeze(-window_size - 10) do
+          Stoplight::TimeTravel.freeze(-window_size - 10) do
             record_success
           end
         end
@@ -27,7 +27,7 @@ RSpec.shared_examples "a window metrics snapshot" do
         let(:window_size) { 5000 }
 
         before do
-          Timecop.freeze(-window_size - 10) do
+          Stoplight::TimeTravel.freeze(-window_size - 10) do
             record_failure(error)
           end
         end
@@ -79,10 +79,10 @@ RSpec.shared_examples "a window metrics snapshot" do
         let(:window_size) { 300 }
 
         it "excludes it from the count" do
-          Timecop.freeze(Time.now) do
+          Stoplight::TimeTravel.freeze(Time.now) do
             record_success
 
-            Timecop.freeze(window_size) do
+            Stoplight::TimeTravel.freeze(window_size) do
               expect(metrics_snapshot.successes).to eq(0)
             end
           end
@@ -93,10 +93,10 @@ RSpec.shared_examples "a window metrics snapshot" do
         let(:window_size) { 300 }
 
         it "excludes it from the count" do
-          Timecop.freeze(Time.now) do
+          Stoplight::TimeTravel.freeze(Time.now) do
             record_failure(error)
 
-            Timecop.freeze(window_size) do
+            Stoplight::TimeTravel.freeze(window_size) do
               expect(metrics_snapshot.errors).to eq(0)
             end
           end
@@ -110,10 +110,10 @@ RSpec.shared_examples "a window metrics snapshot" do
         let(:bucket_count) { window_size }
 
         it "evicts the whole backlog without raising, keeping successes correct" do
-          Timecop.freeze(Time.now) do
-            bucket_count.times { |second| Timecop.freeze(second) { record_success } }
+          Stoplight::TimeTravel.freeze do
+            bucket_count.times { |second| Stoplight::TimeTravel.freeze(second) { record_success } }
 
-            Timecop.freeze(bucket_count + window_size + 10) do
+            Stoplight::TimeTravel.freeze(bucket_count + window_size + 10) do
               expect { record_success }.not_to raise_error
 
               expect(metrics_snapshot.successes).to eq(1)
@@ -122,10 +122,10 @@ RSpec.shared_examples "a window metrics snapshot" do
         end
 
         it "evicts the whole backlog without raising, keeping errors correct" do
-          Timecop.freeze(Time.now) do
-            bucket_count.times { |second| Timecop.freeze(second) { record_failure(error) } }
+          Stoplight::TimeTravel.freeze do
+            bucket_count.times { |second| Stoplight::TimeTravel.freeze(second) { record_failure(error) } }
 
-            Timecop.freeze(bucket_count + window_size + 10) do
+            Stoplight::TimeTravel.freeze(bucket_count + window_size + 10) do
               expect { record_failure(error) }.not_to raise_error
 
               expect(metrics_snapshot.errors).to eq(1)
@@ -134,12 +134,12 @@ RSpec.shared_examples "a window metrics snapshot" do
         end
 
         it "subtracts successes and failures independently when buckets mix both" do
-          Timecop.freeze(Time.now) do
+          Stoplight::TimeTravel.freeze do
             bucket_count.times do |second|
-              Timecop.freeze(second) { second.even? ? record_success : record_failure(error) }
+              Stoplight::TimeTravel.freeze(second) { second.even? ? record_success : record_failure(error) }
             end
 
-            Timecop.freeze(bucket_count + window_size + 10) do
+            Stoplight::TimeTravel.freeze(bucket_count + window_size + 10) do
               record_success
 
               expect(metrics_snapshot.successes).to eq(1)

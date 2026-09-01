@@ -13,7 +13,7 @@ RSpec.shared_examples "a metrics snapshot" do
       record_success
 
       expect do
-        Timecop.freeze(last_success_time) do
+        Stoplight::TimeTravel.freeze(last_success_time) do
           record_success
         end
       end.to change { metrics_snapshot.last_success_at }.to(be_within(rounding_error).of(last_success_time))
@@ -21,7 +21,7 @@ RSpec.shared_examples "a metrics snapshot" do
 
     specify "when first success tracked" do
       expect do
-        Timecop.freeze(last_success_time) do
+        Stoplight::TimeTravel.freeze(last_success_time) do
           record_success
         end
       end.to change { metrics_snapshot.last_success_at }.from(nil).to(be_within(rounding_error).of(last_success_time))
@@ -35,7 +35,7 @@ RSpec.shared_examples "a metrics snapshot" do
       record_failure(error)
 
       expect do
-        Timecop.freeze(last_error_time) do
+        Stoplight::TimeTravel.freeze(last_error_time) do
           record_failure(error)
         end
       end.to change { metrics_snapshot.last_error_at }.to(be_within(rounding_error).of(last_error_time))
@@ -43,7 +43,7 @@ RSpec.shared_examples "a metrics snapshot" do
 
     specify "when first failure tracked" do
       expect do
-        Timecop.freeze(last_error_time) do
+        Stoplight::TimeTravel.freeze(last_error_time) do
           record_failure(error)
         end
       end.to change { metrics_snapshot.last_error_at }.from(nil).to(be_within(rounding_error).of(last_error_time))

@@ -18,7 +18,7 @@ RSpec.describe Stoplight::Domain::Failure do
 
   describe ".from_error" do
     it "creates a failure" do
-      Timecop.freeze do
+      Stoplight::TimeTravel.freeze do
         failure = described_class.from_error(error, time: Time.now)
         expect(failure.error_class).to eql(error_class)
         expect(failure.error_message).to eql(error_message)
