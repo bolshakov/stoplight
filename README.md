@@ -511,6 +511,23 @@ light.lock(Stoplight::Color::GREEN)
 light.unlock
 ```
 
+### Admin
+
+Admin Panel can work in an read-only which could be useful for observability. To enabled read-only mode:
+
+```ruby
+Stoplight::Admin.configure do |config|
+  config.read_only = true
+end
+```
+
+Read-only mode could be turned on for a pre-built docker image by passing `STOPLIGHT_ADMIN_READ_ONLY` environment 
+variable:
+
+```sh
+docker run -e REDIS_URL=redis://localhost:6378  -e STOPLIGHT_ADMIN_READ_ONLY=true --net=host bolshakov/stoplight-admin
+```
+
 ## Rails Integration
 
 Wrap controller actions with minimal effort:
