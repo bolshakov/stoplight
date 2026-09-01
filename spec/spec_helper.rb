@@ -47,7 +47,7 @@ RSpec.configure do |rspec|
   end
 
   rspec.after do
-    Timecop.return
+    Stoplight::TimeTravel.return
     redis = Redis.new
     redis.del("stoplight:test_now_ms_stack")
   end

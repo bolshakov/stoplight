@@ -26,7 +26,7 @@ RSpec.describe Stoplight::Infrastructure::Redis::Storage::UnboundedMetrics, :red
     it "keeps the TTL on the metrics key for a subsequent out-of-order failure" do
       unbounded_metrics.record_failure(StandardError.new)
 
-      Timecop.freeze(Time.now - 30) do
+      Stoplight::TimeTravel.freeze(Time.now - 30) do
         unbounded_metrics.record_failure(StandardError.new)
       end
 
