@@ -8,8 +8,8 @@ Stoplight is a traffic control for code. It's an implementation of the circuit b
 
 ---
 
-:warning:️ You're currently browsing the documentation for Stoplight 5.x. If you're looking for
-the documentation of the previous version 4.x, you can find it [here](https://github.com/bolshakov/stoplight/tree/v4.1.1).
+:warning:️ You're currently browsing the documentation for Stoplight 6. If you're looking for
+the documentation of the previous version 5.x, you can find it [here](https://github.com/bolshakov/stoplight/tree/v5.8.3).
 
 Stoplight helps your application gracefully handle failures in external dependencies
 (like flaky databases, unreliable APIs, or spotty web services). By wrapping these unreliable
