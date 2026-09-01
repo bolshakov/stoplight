@@ -7,7 +7,7 @@ RSpec.describe Stoplight::Infrastructure::SystemClock do
     subject(:current_time) { clock.current_time }
 
     around do |example|
-      Timecop.freeze { example.run }
+      Stoplight::TimeTravel.freeze { example.run }
     end
 
     it "returns current wall-clock time" do
