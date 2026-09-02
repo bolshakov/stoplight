@@ -511,6 +511,35 @@ light.lock(Stoplight::Color::GREEN)
 light.unlock
 ```
 
+### Multiple Independent Systems
+
+By default, all lights share the same global configuration and data store. For larger applications with multiple 
+services or tenants, you can create **named systems** -- completely isolated instances with their own configuration, 
+notifiers, and data store:
+
+```ruby
+# Create independent systems with separate data stores
+Payments = Stoplight.register_system("Payments", threshold: 3, cool_off_time: 30)
+Analytics = Stoplight.register_system("Analytics", threshold: 5, cool_off_time: 60)
+
+# Register lights in each system
+Payments.register("stripe", cool_off_time: 30)
+Analytics.register("amplitude")
+
+# Use them — one system's state does not affect another
+Payments.light("stripe").run { charge_card }
+Analytics.light("amplitude").run { track_event }
+```
+
+Use cases for multiple systems:
+
+* **Multi-tenancy**: Each tenant gets its own isolated system and data store
+* **Service boundaries**: Separate failure domains with independent SLOs (e.g., payments vs. analytics)
+* **Independent data stores**: One service uses Redis for persistence, another uses in-memory
+
+For complete details on system configuration, boot-time registration patterns, and isolation guarantees, see 
+the [Systems guide](docs/systems.md).
+
 ### Admin
 
 Admin Panel can work in an read-only which could be useful for observability. To enabled read-only mode:
