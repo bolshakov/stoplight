@@ -20,3 +20,5 @@ profile_results
 .tmproj
 .idea
 Thumbs.db
+dump.rdb
+spec/tmp/

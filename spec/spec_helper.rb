@@ -27,6 +27,7 @@ require_relative "support/exception_helpers"
 require_relative "support/route_helpers"
 require_relative "support/matchers/emit"
 require_relative "support/time_travel"
+require_relative "support/scripting_helper"
 
 Timecop.safe_mode = true
 # Window buckets age on the monotonic clock; travel/freeze must move it too.

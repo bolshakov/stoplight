@@ -77,11 +77,9 @@ module Stoplight
           # Records successful circuit breaker execution
           #
           def record_success
-            timestamp = clock.current_time.to_f
-
             scripting.call(
               "unbounded_metrics/record_success",
-              args: [timestamp, metrics_ttl],
+              args: [metrics_ttl],
               keys: [metrics_key]
             )
           end
@@ -93,7 +91,7 @@ module Stoplight
 
             last_success_at, last_error_json, consecutive_errors, consecutive_successes = scripting.call(
               "unbounded_metrics/record_failure",
-              args: [timestamp, serialize_exception(exception, timestamp:), metrics_ttl],
+              args: [serialize_exception(exception, timestamp:), metrics_ttl],
               keys: [metrics_key]
             )
 
