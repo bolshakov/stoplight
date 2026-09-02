@@ -26,12 +26,10 @@ module Stoplight
           end
 
           def metrics_snapshot
-            timestamp = @clock.current_time.to_f
-
             successes, errors, last_success_at, last_error_json, consecutive_errors, consecutive_successes =
               @scripting.call(
                 "window_metrics/metrics_snapshot",
-                args: [timestamp, @window_size, *METRICS_FIELDS],
+                args: [@window_size, *METRICS_FIELDS],
                 keys: [@metrics_key, @ts_index_key]
               )
 
@@ -40,11 +38,9 @@ module Stoplight
           end
 
           def record_success
-            timestamp = @clock.current_time.to_f
-
             @scripting.call(
               "window_metrics/record_success",
-              args: [timestamp, @window_size, metrics_ttl],
+              args: [@window_size, metrics_ttl],
               keys: [@metrics_key, @ts_index_key]
             )
           end
@@ -55,7 +51,7 @@ module Stoplight
             successes, errors, last_success_at, last_error_json, consecutive_errors, consecutive_successes =
               @scripting.call(
                 "window_metrics/record_failure",
-                args: [timestamp, serialize_exception(exception, timestamp:), @window_size, metrics_ttl],
+                args: [serialize_exception(exception, timestamp:), @window_size, metrics_ttl],
                 keys: [@metrics_key, @ts_index_key]
               )
 
