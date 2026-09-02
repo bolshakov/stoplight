@@ -53,8 +53,8 @@ Feature: Stoplight configuration - Window Size
       | Threshold   | 3  |
     And the service starts failing with "timeout"
     And 1 request is made
-    And 1000 days have elapsed
+    And 1 hour have elapsed
     And 1 request is made
-    And 1000 days have elapsed
+    And 1 hour have elapsed
     And 1 request is made
     Then the light color is red

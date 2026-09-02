@@ -15,7 +15,7 @@ When(/^(\d+) (seconds|minutes|hours|days) have elapsed$/) do |seconds, unit|
   else
     raise ArgumentError, "Unknown time unit: #{unit}"
   end
-  Timecop.travel(Time.now + seconds)
+  sleep(seconds)
 end
 
 When(/^the service starts failing with "([^"]+)"(?: again)?$/) do |error_message|
