@@ -4,9 +4,8 @@ module Stoplight
   module Domain
     module Tracker
       class RecoveryProbe
-        def initialize(traffic_recovery:, notifiers:, config:, metrics_store:, state_store:, emitter:)
+        def initialize(traffic_recovery:, config:, metrics_store:, state_store:, emitter:)
           @traffic_recovery = traffic_recovery
-          @notifiers = notifiers
           @config = config
           @metrics_store = metrics_store
           @state_store = state_store
@@ -28,7 +27,6 @@ module Stoplight
         private
 
         attr_reader :traffic_recovery
-        attr_reader :notifiers
         attr_reader :config
         attr_reader :metrics_store
         attr_reader :state_store
@@ -59,7 +57,7 @@ module Stoplight
           case recovery_result
           when TrafficRecovery::GREEN
             to_color = Color::GREEN
-            if transition(from_color: Color::YELLOW, to_color:)
+            if transition(to_color:)
               emitter.emit(Telemetry::RecoverySucceeded) do
                 Telemetry::RecoverySucceeded.new(from_color: Color::YELLOW, to_color:,
                   policy: traffic_recovery.name,
@@ -73,7 +71,7 @@ module Stoplight
             end
           when TrafficRecovery::RED
             to_color = Color::RED
-            if transition(from_color: Color::YELLOW, to_color:)
+            if transition(to_color:)
               emitter.emit(Telemetry::RecoveryFailed) do
                 Telemetry::RecoveryFailed.new(
                   from_color: Color::YELLOW,
@@ -94,13 +92,9 @@ module Stoplight
           end
         end
 
-        def transition(from_color:, to_color:)
+        def transition(to_color:)
           return false unless state_store.transition_to_color(to_color)
           metrics_store.clear
-          info = LightInfo.new(name: config.name)
-          notifiers.each do |notifier|
-            notifier.notify(info, from_color, to_color, nil)
-          end
           true
         end
       end

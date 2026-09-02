@@ -10,9 +10,8 @@ module Stoplight
       #
       # @api private
       class Request
-        def initialize(traffic_control:, notifiers:, config:, metrics_store:, state_store:, emitter:)
+        def initialize(traffic_control:, config:, metrics_store:, state_store:, emitter:)
           @traffic_control = traffic_control
-          @notifiers = notifiers
           @config = config
           @metrics_store = metrics_store
           @state_store = state_store
@@ -30,7 +29,6 @@ module Stoplight
         private
 
         attr_reader :traffic_control
-        attr_reader :notifiers
         attr_reader :config
         attr_reader :metrics_store
         attr_reader :state_store
@@ -41,10 +39,6 @@ module Stoplight
             # Returns true only if not yet in red therefore preventing
             # duplicate notifications
             if state_store.transition_to_color(Color::RED)
-              info = LightInfo.new(name: config.name)
-              notifiers.each do |notifier|
-                notifier.notify(info, Color::GREEN, Color::RED, exception)
-              end
               emitter.emit(Telemetry::TrafficBreached) do
                 Telemetry::TrafficBreached.new(
                   from_color: Color::GREEN,

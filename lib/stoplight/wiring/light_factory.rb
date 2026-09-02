@@ -21,7 +21,6 @@ module Stoplight
         @error_notifier = Infrastructure::FailSafe::ErrorNotifier.new(
           error_notifier: config.error_notifier
         )
-        @notifiers = config.notifiers
         @traffic_recovery = config.traffic_recovery
         @traffic_control = config.traffic_control
 
@@ -37,7 +36,6 @@ module Stoplight
           clock: @clock,
           error_notifier: @error_notifier
         )
-        @wrapped_notifiers = nil
       end
 
       def build
@@ -93,25 +91,13 @@ module Stoplight
         @storage_set ||= StorageSetBuilder.new(backend: build_backend, windowed: !config.window_size.nil?).build
       end
 
-      # @return [<Stoplight::Notifier::Base>]
-      def notifiers
-        @wrapped_notifiers ||= Array(@notifiers).map do |notifier|
-          Infrastructure::Notifier::FailSafe.new(
-            notifier:,
-            error_notifier:,
-            circuit_breaker: create_circuit_breaker("notifier:#{notifier.class.name}")
-          )
-        end
-      end
-
       def request_tracker
-        Domain::Tracker::Request.new(traffic_control:, notifiers:, config:, metrics_store:, state_store:, emitter: @emitter)
+        Domain::Tracker::Request.new(traffic_control:, config:, metrics_store:, state_store:, emitter: @emitter)
       end
 
       def recovery_probe_tracker
         Domain::Tracker::RecoveryProbe.new(
           traffic_recovery:,
-          notifiers:,
           config:,
           metrics_store: recovery_metrics_store,
           state_store:,
@@ -130,7 +116,6 @@ module Stoplight
       def yellow_run_strategy
         Domain::Strategies::YellowRunStrategy.new(
           name: @name,
-          notifiers:,
           request_tracker: recovery_probe_tracker,
           state_store:,
           metrics_store:,

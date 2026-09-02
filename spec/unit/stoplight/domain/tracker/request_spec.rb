@@ -1,13 +1,11 @@
 # frozen_string_literal: true
 
 RSpec.describe Stoplight::Domain::Tracker::Request do
-  subject(:request_tracker) { described_class.new(state_store:, traffic_control:, notifiers:, config:, metrics_store:, emitter:) }
+  subject(:request_tracker) { described_class.new(state_store:, traffic_control:, config:, metrics_store:, emitter:) }
 
   let(:metrics_store) { instance_double(NullMetricsStore) }
   let(:state_store) { instance_double(NullStateStore) }
   let(:traffic_control) { instance_double(NullTrafficControl) }
-  let(:notifiers) { [notifier] }
-  let(:notifier) { instance_double(NullNotifier) }
   let(:config) { instance_double(Stoplight::Domain::Config, name: name) }
   let(:name) { SecureRandom.uuid }
   let(:emitter) { TestTelemetryEmitter.new }
@@ -25,21 +23,6 @@ RSpec.describe Stoplight::Domain::Tracker::Request do
 
     before do
       allow(metrics_store).to receive(:record_failure).with(exception).and_return(metrics)
-    end
-
-    context "when traffic control decides to stop the traffic" do
-      before do
-        allow(traffic_control).to receive(:stop_traffic?).with(config, metrics).and_return(true)
-      end
-
-      context "when failed to transition to RED" do
-        it "does not send notification about transition" do
-          allow(state_store).to receive(:transition_to_color).with(Stoplight::Color::RED).and_return(false)
-          expect(notifier).not_to receive(:notify)
-
-          request_tracker.record_failure(exception)
-        end
-      end
     end
 
     specify "when traffic control decides to continue the traffic flow" do
@@ -63,18 +46,11 @@ RSpec.describe Stoplight::Domain::Tracker::Request do
       allow(metrics_store).to receive(:record_failure).with(exception).and_return(metrics)
       allow(traffic_control).to receive(:stop_traffic?).with(config, metrics).and_return(true)
       allow(traffic_control).to receive(:name).and_return(policy_name)
-      allow(notifier).to receive(:notify)
     end
 
     context "when the transition to RED succeeds" do
       before do
         allow(state_store).to receive(:transition_to_color).with(Stoplight::Color::RED).and_return(true)
-      end
-
-      it "sends a notification about the color transition" do
-        expect(notifier).to receive(:notify).with(have_attributes(name:), Stoplight::Color::GREEN, Stoplight::Color::RED, exception)
-
-        request_tracker.record_failure(exception)
       end
 
       it "emits a TrafficBreached event with the transition details" do

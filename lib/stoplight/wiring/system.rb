@@ -65,6 +65,10 @@ module Stoplight
         @failover_system = failover_system
         @registry = registry
         @telemetry = Domain::Telemetry::Bus.new(error_notifier: config.error_notifier)
+
+        unless config.notifiers.empty?
+          NotifierBridge.new(notifiers: wrapped_notifiers).subscribe(@telemetry)
+        end
       end
 
       def persistent?
@@ -168,6 +172,20 @@ module Stoplight
       # @api private
       def __stoplight__registry
         @registry
+      end
+
+      private
+
+      def wrapped_notifiers
+        error_notifier = Infrastructure::FailSafe::ErrorNotifier.new(error_notifier: @config.error_notifier)
+
+        @config.notifiers.map do |notifier|
+          Infrastructure::Notifier::FailSafe.new(
+            notifier:,
+            error_notifier:,
+            circuit_breaker: T.must(@failover_system).register("notifier:#{notifier.class.name}")
+          )
+        end
       end
     end
   end

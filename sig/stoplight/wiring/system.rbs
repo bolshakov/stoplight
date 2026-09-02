@@ -19,6 +19,10 @@ module Stoplight
       def persistent?: -> bool
       def __stoplight__storage: -> Storage
       def __stoplight__registry: -> Domain::_Registry
+
+      private
+
+      def wrapped_notifiers: -> Array[Domain::_StateTransitionNotifier]
     end
   end
 end
