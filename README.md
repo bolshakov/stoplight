@@ -127,53 +127,51 @@ receives `nil`. In both cases, the return value of the fallback becomes the retu
 
 ## Admin Panel
 
-Stoplight comes with a built-in Admin Panel that can track all active Lights and manually lock them in the desired state (`Green` or `Red`). Locking lights in certain states might be helpful in scenarios like E2E testing.
+Stoplight comes with a built-in Admin Panel for observing and controlling all lights across your application. It 
+displays each light's current state, recent failures, and provides controls to lock/unlock lights manually.
 
 ![Admin Panel Screenshot](assets/admin.png)
 
-To add Admin Panel protected by basic authentication to your Rails project, add this configuration to your `config/routes.rb` file.
+### Basic Setup
+
+Add the Admin Panel to your Rails application with authentication:
 
 ```ruby
 Rails.application.routes.draw do
-  # ...
-
   Stoplight::Admin.use(Rack::Auth::Basic) do |username, password|
     username == ENV["STOPLIGHT_ADMIN_USERNAME"] && password == ENV["STOPLIGHT_ADMIN_PASSWORD"]
   end
   mount Stoplight::Admin => '/stoplights'
-
-  # ...
 end
 ```
 
-Then set up `STOPLIGHT_ADMIN_USERNAME` and `STOPLIGHT_ADMIN_PASSWORD` env variables to access your Admin panel.
+Then set environment variables:
+```bash
+export STOPLIGHT_ADMIN_USERNAME=admin
+export STOPLIGHT_ADMIN_PASSWORD=secret
+```
 
-**IMPORTANT:** Stoplight Admin Panel requires you to have `sinatra` and `sinatra-contrib` gems installed. You can either add them to your Gemfile:
+**IMPORTANT:** Stoplight Admin Panel requires `sinatra` and `sinatra-contrib` gems:
 
 ```ruby
 gem "sinatra", require: false
 gem "sinatra-contrib", require: false
 ```
 
-Or install it manually:
-```ruby
-gem install sinatra
-gem install sinatra-contrib
-```
+### Standalone Docker Setup
 
-### Standalone Admin Panel Setup
-
-It is possible to run the Admin Panel separately from your application using the `stoplight-admin:<release-version>` docker image.
+Run the Admin Panel as a separate service:
 
 ```shell
-docker run --net=host bolshakov/stoplight-admin
+docker run \
+  -e REDIS_URL=redis://localhost:6379 \
+  -e STOPLIGHT_ADMIN_USERNAME=admin \
+  -e STOPLIGHT_ADMIN_PASSWORD=secret \
+  -p 4567:4567 \
+  bolshakov/stoplight-admin
 ```
 
-**IMPORTANT:** Standalone Admin Panel should use the same Redis your application uses. To achieve this, set the `REDIS_URL` ENV variable via `-e REDIS_URL=<url-to-your-redis-servier>.` E.g.:
-
-```shell
-docker run -e REDIS_URL=redis://localhost:6378  --net=host bolshakov/stoplight-admin
-```
+For complete setup and multi-system configuration details, see the [Admin Panel guide](docs/admin.md).
 
 ## Configuration
 

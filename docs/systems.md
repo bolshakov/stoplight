@@ -215,3 +215,12 @@ Stoplight.telemetry.subscribe(Stoplight::Telemetry::LightTripped) do |envelope|
   log("Light #{envelope.event.light_name} tripped")
 end
 ```
+
+## Admin Panel with Multiple Systems
+
+The Admin Panel can observe and control all your systems through a system switcher. See the [Admin Panel guide](admin.md) for:
+- Multi-system configuration
+- System requirements (persistent data store)
+- System switcher UI
+- Read-only mode
+- Lock/unlock controls per system
