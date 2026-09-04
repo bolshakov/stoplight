@@ -8,8 +8,8 @@ Stoplight is a traffic control for code. It's an implementation of the circuit b
 
 ---
 
-:warning:️ You're currently browsing the documentation for Stoplight 5.x. If you're looking for
-the documentation of the previous version 4.x, you can find it [here](https://github.com/bolshakov/stoplight/tree/v4.1.1).
+:warning:️ You're currently browsing the documentation for Stoplight 6. If you're looking for
+the documentation of the previous version 5.x, you can find it [here](https://github.com/bolshakov/stoplight/tree/v5.8.3).
 
 Stoplight helps your application gracefully handle failures in external dependencies
 (like flaky databases, unreliable APIs, or spotty web services). By wrapping these unreliable
@@ -127,53 +127,51 @@ receives `nil`. In both cases, the return value of the fallback becomes the retu
 
 ## Admin Panel
 
-Stoplight comes with a built-in Admin Panel that can track all active Lights and manually lock them in the desired state (`Green` or `Red`). Locking lights in certain states might be helpful in scenarios like E2E testing.
+Stoplight comes with a built-in Admin Panel for observing and controlling all lights across your application. It 
+displays each light's current state, recent failures, and provides controls to lock/unlock lights manually.
 
 ![Admin Panel Screenshot](assets/admin.png)
 
-To add Admin Panel protected by basic authentication to your Rails project, add this configuration to your `config/routes.rb` file.
+### Basic Setup
+
+Add the Admin Panel to your Rails application with authentication:
 
 ```ruby
 Rails.application.routes.draw do
-  # ...
-
   Stoplight::Admin.use(Rack::Auth::Basic) do |username, password|
     username == ENV["STOPLIGHT_ADMIN_USERNAME"] && password == ENV["STOPLIGHT_ADMIN_PASSWORD"]
   end
   mount Stoplight::Admin => '/stoplights'
-
-  # ...
 end
 ```
 
-Then set up `STOPLIGHT_ADMIN_USERNAME` and `STOPLIGHT_ADMIN_PASSWORD` env variables to access your Admin panel.
+Then set environment variables:
+```bash
+export STOPLIGHT_ADMIN_USERNAME=admin
+export STOPLIGHT_ADMIN_PASSWORD=secret
+```
 
-**IMPORTANT:** Stoplight Admin Panel requires you to have `sinatra` and `sinatra-contrib` gems installed. You can either add them to your Gemfile:
+**IMPORTANT:** Stoplight Admin Panel requires `sinatra` and `sinatra-contrib` gems:
 
 ```ruby
 gem "sinatra", require: false
 gem "sinatra-contrib", require: false
 ```
 
-Or install it manually:
-```ruby
-gem install sinatra
-gem install sinatra-contrib
-```
+### Standalone Docker Setup
 
-### Standalone Admin Panel Setup
-
-It is possible to run the Admin Panel separately from your application using the `stoplight-admin:<release-version>` docker image.
+Run the Admin Panel as a separate service:
 
 ```shell
-docker run --net=host bolshakov/stoplight-admin
+docker run \
+  -e REDIS_URL=redis://localhost:6379 \
+  -e STOPLIGHT_ADMIN_USERNAME=admin \
+  -e STOPLIGHT_ADMIN_PASSWORD=secret \
+  -p 4567:4567 \
+  bolshakov/stoplight-admin
 ```
 
-**IMPORTANT:** Standalone Admin Panel should use the same Redis your application uses. To achieve this, set the `REDIS_URL` ENV variable via `-e REDIS_URL=<url-to-your-redis-servier>.` E.g.:
-
-```shell
-docker run -e REDIS_URL=redis://localhost:6378  --net=host bolshakov/stoplight-admin
-```
+For complete setup and multi-system configuration details, see the [Admin Panel guide](docs/admin.md).
 
 ## Configuration
 
@@ -477,6 +475,9 @@ By default, Stoplight logs state transitions to STDERR.
 Pull requests to update this section are welcome. If you want to implement your own notifier, refer to
 the [notifier interface documentation] for detailed instructions. Pull requests to update this section are welcome.
 
+For a lower-level way to observe circuit breaker events (state transitions, recovery, trips, and more - e.g. to
+build a metrics integration), see the [Telemetry guide](docs/telemetry.md).
+
 ### Error Notifiers
 
 Stoplight is built for resilience. If the Redis data store fails, Stoplight automatically falls back to the in-memory
@@ -509,6 +510,52 @@ light.lock(Stoplight::Color::GREEN)
 
 # Return to normal operation (automatic state transitions)
 light.unlock
+```
+
+### Multiple Independent Systems
+
+By default, all lights share the same global configuration and data store. For larger applications with multiple 
+services or tenants, you can create **named systems** -- completely isolated instances with their own configuration, 
+notifiers, and data store:
+
+```ruby
+# Create independent systems with separate data stores
+Payments = Stoplight.register_system("Payments", threshold: 3, cool_off_time: 30)
+Analytics = Stoplight.register_system("Analytics", threshold: 5, cool_off_time: 60)
+
+# Register lights in each system
+Payments.register("stripe", cool_off_time: 30)
+Analytics.register("amplitude")
+
+# Use them — one system's state does not affect another
+Payments.light("stripe").run { charge_card }
+Analytics.light("amplitude").run { track_event }
+```
+
+Use cases for multiple systems:
+
+* **Multi-tenancy**: Each tenant gets its own isolated system and data store
+* **Service boundaries**: Separate failure domains with independent SLOs (e.g., payments vs. analytics)
+* **Independent data stores**: One service uses Redis for persistence, another uses in-memory
+
+For complete details on system configuration, boot-time registration patterns, and isolation guarantees, see 
+the [Systems guide](docs/systems.md).
+
+### Admin
+
+Admin Panel can work in an read-only which could be useful for observability. To enabled read-only mode:
+
+```ruby
+Stoplight::Admin.configure do |config|
+  config.read_only = true
+end
+```
+
+Read-only mode could be turned on for a pre-built docker image by passing `STOPLIGHT_ADMIN_READ_ONLY` environment 
+variable:
+
+```sh
+docker run -e REDIS_URL=redis://localhost:6378  -e STOPLIGHT_ADMIN_READ_ONLY=true --net=host bolshakov/stoplight-admin
 ```
 
 ## Rails Integration

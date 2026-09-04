@@ -102,4 +102,32 @@ RSpec.shared_examples "a metrics snapshot" do
       expect { record_failure(error) }.to change { metrics_snapshot.consecutive_errors }.by(1)
     end
   end
+
+  describe "#clear" do
+    before do
+      record_failure(error)
+      record_success
+      clear
+    end
+
+    it "resets last_error to nil" do
+      expect(metrics_snapshot.last_error).to be_nil
+    end
+
+    it "resets last_error_at to nil" do
+      expect(metrics_snapshot.last_error_at).to be_nil
+    end
+
+    it "resets last_success_at to nil" do
+      expect(metrics_snapshot.last_success_at).to be_nil
+    end
+
+    it "resets consecutive_errors to 0" do
+      expect(metrics_snapshot.consecutive_errors).to eq(0)
+    end
+
+    it "resets consecutive_successes to 0" do
+      expect(metrics_snapshot.consecutive_successes).to eq(0)
+    end
+  end
 end

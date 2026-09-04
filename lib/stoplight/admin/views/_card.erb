@@ -103,13 +103,9 @@
 
   <div class="p-4 my-4 text-sm text-<%= color %>-800 rounded-lg bg-<%= color %>-50 dark:bg-gray-800 dark:text-<%= color %>-400">
     <div class="flex justify-between items-center">
-      <div class="pr-4">
-        <p class="font-semibold"><%= CGI.escapeHTML(light.description_title) %></p>
-        <p class="font-medium"><%= CGI.escapeHTML(light.description_message) %></p>
-        <p><%= CGI.escapeHTML(light.description_comment) %></p>
-      </div>
+      <p class="font-semibold pr-4"><%= CGI.escapeHTML(light.description_title) %></p>
       <% if light.latest_failure %>
-        <div class="whitespace-nowrap text-center" style="margin-bottom: auto;">
+        <div class="whitespace-nowrap text-center shrink-0">
           <%= light.latest_failure.time.strftime("%F %T") %>
           <span class="text-gray-400 dark:text-gray-500 uppercase tracking-wide">
             UTC
@@ -117,6 +113,8 @@
         </div>
       <% end %>
     </div>
+    <p class="font-medium"><%= CGI.escapeHTML(light.description_message) %></p>
+    <p><%= CGI.escapeHTML(light.description_comment) %></p>
   </div>
 
   <!-- Stats Row -->
