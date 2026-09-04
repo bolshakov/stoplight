@@ -196,25 +196,7 @@ sys_b.light("api").run { fail_once } # still green
 
 ## Accessing Telemetry by System
 
-Each system has its own telemetry bus:
-
-```ruby
-Payments = Stoplight.register_system("Payments")
-Payments.register("stripe")
-
-# Subscribe to events from the Payments system only
-Payments.telemetry.subscribe(Stoplight::Telemetry::LightTripped) do |envelope|
-  alert("Payments system: #{envelope.event.light_name} tripped")
-end
-```
-
-The default system's telemetry is also accessible globally:
-
-```ruby
-Stoplight.telemetry.subscribe(Stoplight::Telemetry::LightTripped) do |envelope|
-  log("Light #{envelope.event.light_name} tripped")
-end
-```
+Each system has its own, independent telemetry bus. See the [Telemetry guide](telemetry.md#per-system-telemetry).
 
 ## Admin Panel with Multiple Systems
 

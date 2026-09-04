@@ -475,6 +475,9 @@ By default, Stoplight logs state transitions to STDERR.
 Pull requests to update this section are welcome. If you want to implement your own notifier, refer to
 the [notifier interface documentation] for detailed instructions. Pull requests to update this section are welcome.
 
+For a lower-level way to observe circuit breaker events (state transitions, recovery, trips, and more - e.g. to
+build a metrics integration), see the [Telemetry guide](docs/telemetry.md).
+
 ### Error Notifiers
 
 Stoplight is built for resilience. If the Redis data store fails, Stoplight automatically falls back to the in-memory
