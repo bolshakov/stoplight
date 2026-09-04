@@ -15,6 +15,7 @@ RSpec.describe Stoplight::Infrastructure::Redis::Storage::WindowMetrics, :redis 
     def metrics_snapshot = metrics.metrics_snapshot
     def record_failure(error) = metrics.record_failure(error)
     def record_success = metrics.record_success
+    def clear = metrics.clear
   end
 
   describe "#record_failure" do
