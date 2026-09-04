@@ -11,5 +11,6 @@ RSpec.describe Stoplight::Infrastructure::Memory::Storage::UnboundedMetrics do
     def metrics_snapshot = unbounded_metrics.metrics_snapshot
     def record_failure(error) = unbounded_metrics.record_failure(error)
     def record_success = unbounded_metrics.record_success
+    def clear = unbounded_metrics.clear
   end
 end

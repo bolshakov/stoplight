@@ -102,7 +102,7 @@ module Stoplight
 
           def clear
             redis.with do |client|
-              client.hdel(metrics_key, "last_success_at", "last_error_json", "consecutive_errors", "consecutive_successes")
+              client.hdel(metrics_key, "last_success_at", "last_error_at", "last_error_json", "consecutive_errors", "consecutive_successes")
             end
           end
 

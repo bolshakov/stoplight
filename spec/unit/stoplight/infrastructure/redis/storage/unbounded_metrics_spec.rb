@@ -13,6 +13,7 @@ RSpec.describe Stoplight::Infrastructure::Redis::Storage::UnboundedMetrics, :red
     def metrics_snapshot = unbounded_metrics.metrics_snapshot
     def record_failure(error) = unbounded_metrics.record_failure(error)
     def record_success = unbounded_metrics.record_success
+    def clear = unbounded_metrics.clear
   end
 
   describe "#record_failure" do
@@ -38,6 +39,17 @@ RSpec.describe Stoplight::Infrastructure::Redis::Storage::UnboundedMetrics, :red
       expect(scripting).to receive(:call).once.and_call_original
 
       unbounded_metrics.record_failure(StandardError.new)
+    end
+  end
+
+  describe "#clear" do
+    it "removes every field #record_failure writes, leaving no residual hash fields" do
+      unbounded_metrics.record_failure(StandardError.new)
+
+      unbounded_metrics.clear
+
+      fields = redis.with { |client| client.hkeys(key_space.join(:metrics)) }
+      expect(fields).to be_empty
     end
   end
 end
