@@ -82,7 +82,7 @@ RSpec.describe "Notifications" do
   end
 
   context "with redis data store", :redis do
-    let(:data_store) { Stoplight::DataStore::Redis.new(redis, warn_on_clock_skew: false) }
+    let(:data_store) { Stoplight::DataStore::Redis.new(redis) }
 
     it_behaves_like "notify about state changes"
   end
