@@ -1,16 +1,11 @@
 # frozen_string_literal: true
 
 require "stoplight"
-require "timecop"
 require_relative "stoplight_world"
 require_relative "configure_light_world"
 require_relative "stoplight_assertion_helpers"
 
-# Window buckets age on the monotonic clock; travel/freeze must move it too.
-Timecop.mock_process_clock = true
-
 Before do
-  Timecop.return
   Stoplight.__stoplight__reset!
   reset!
 end

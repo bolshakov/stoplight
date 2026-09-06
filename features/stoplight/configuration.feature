@@ -33,9 +33,10 @@ Feature: Stoplight Custom Configuration
   Scenario: Light with custom recovery threshold recovers after specified successes
     Given a light configured with:
       | Recovery Threshold | 5 |
+      | Cool Off Time      | 1 |
     And the service starts failing with "connection-timeout"
     And the light enters red state
-    And 60 seconds have elapsed
+    And 2 seconds have elapsed
     And the service recovers and starts functioning normally
     And 4 requests are made
     And the light color is yellow
@@ -44,10 +45,10 @@ Feature: Stoplight Custom Configuration
 
   Scenario: Light with custom window size only counts recent failures
     Given a light configured with:
-      | Window Size | 10s |
+      | Window Size | 1s |
     And the service starts failing with "connection-timeout"
     And 2 request is made
-    When 11 seconds have elapsed
+    When 2 seconds have elapsed
     And 2 request is made
     Then the light color is green
     When 1 request is made
@@ -55,10 +56,10 @@ Feature: Stoplight Custom Configuration
 
   Scenario: Light with custom cool-off time recovers after specified period
     Given a light configured with:
-      | Cool Off Time | 5s |
+      | Cool Off Time | 1s |
     And the service starts failing with "connection-timeout"
     And the light enters red state
-    When 6 seconds have elapsed
+    When 2 seconds have elapsed
     Then the light color is yellow
 
   Scenario: Light with tracked_errors only counts specified errors

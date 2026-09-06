@@ -47,7 +47,7 @@ RSpec.describe "Notifications" do
         notifications_before_run = notifier.notifications(light.name).count
 
         executions_sequence.each do |(should_fail, time_gap)|
-          Timecop.freeze(Time.now + time_gap)
+          Stoplight::TimeTravel.freeze(Time.now + time_gap)
           suppress(StandardError) { light.run { raise if should_fail } }
 
           color_after_run = light.color
