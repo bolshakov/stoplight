@@ -24,7 +24,7 @@ Gem::Specification.new do |gem|
 
   gem.files = Dir.glob("lib/**/*") + Dir.glob("sig/**/*.rbs") + %w[UPGRADING.md CHANGELOG.md LICENSE.md README.md]
 
-  gem.required_ruby_version = ">= 3.2"
+  gem.required_ruby_version = ">= 3.3"
   gem.add_runtime_dependency "zeitwerk"
   gem.add_runtime_dependency "concurrent-ruby"
 end
