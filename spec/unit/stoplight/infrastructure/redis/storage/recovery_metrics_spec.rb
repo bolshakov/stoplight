@@ -7,7 +7,9 @@ RSpec.describe Stoplight::Infrastructure::Redis::Storage::RecoveryMetrics, :redi
 
   let(:clock) { Stoplight::Infrastructure::SystemClock.new }
   let(:key_space) { Stoplight::DataStore::Redis.key_space.join(SecureRandom.uuid) }
-  let(:scripting) { Stoplight::Infrastructure::Redis::Storage::Scripting.new(redis:) }
+  let(:scripting) do
+    Stoplight::Infrastructure::Redis::Storage::Scripting.new(redis:, scripts_path: Stoplight::TimeTravel.scripts_path)
+  end
 
   it_behaves_like "Stoplight::Domain::DataStore#get_recovery_metrics" do
     def get_metrics = metrics_store.metrics_snapshot

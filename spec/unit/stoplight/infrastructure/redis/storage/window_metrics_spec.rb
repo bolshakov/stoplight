@@ -8,7 +8,9 @@ RSpec.describe Stoplight::Infrastructure::Redis::Storage::WindowMetrics, :redis 
   let(:key_space) { Stoplight::DataStore::Redis.key_space.join(SecureRandom.uuid) }
   let(:clock) { Stoplight::Infrastructure::SystemClock.new }
   let(:config) { instance_double(Stoplight::Domain::Config, window_size:) }
-  let(:scripting) { Stoplight::Infrastructure::Redis::Storage::Scripting.new(redis:) }
+  let(:scripting) do
+    Stoplight::Infrastructure::Redis::Storage::Scripting.new(redis:, scripts_path: Stoplight::TimeTravel.scripts_path)
+  end
   let(:window_size) { 300 }
 
   it_behaves_like "a window metrics snapshot" do
