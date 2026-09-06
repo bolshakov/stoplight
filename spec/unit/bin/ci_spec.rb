@@ -27,17 +27,28 @@ RSpec.describe CI do
     end
 
     describe "#extended" do
-      it "spans every Ruby against every image" do
+      it "covers every combination the smoke run did not already run" do
         expect(versions.extended).to eq(
-          "ruby" => ["3.3", "3.4", "4.0"],
-          "data-store-image" => ["redis:7.4", "redis:8.6", "valkey/valkey:9.1-alpine"]
+          "include" => [
+            {"ruby" => "3.3", "data-store-image" => "redis:7.4"},
+            {"ruby" => "3.3", "data-store-image" => "redis:8.6"},
+            {"ruby" => "3.3", "data-store-image" => "valkey/valkey:9.1-alpine"},
+            {"ruby" => "3.4", "data-store-image" => "redis:7.4"},
+            {"ruby" => "3.4", "data-store-image" => "redis:8.6"},
+            {"ruby" => "3.4", "data-store-image" => "valkey/valkey:9.1-alpine"},
+            {"ruby" => "4.0", "data-store-image" => "redis:7.4"}
+          ]
         )
       end
 
-      it "keeps the combinations the smoke run already covered" do
-        combinations = versions.extended["ruby"].product(versions.extended["data-store-image"])
+      it "omits what smoke already covered" do
+        expect(versions.extended["include"]).not_to include(*versions.smoke["include"])
+      end
 
-        expect(combinations).to include(["4.0", "redis:8.6"])
+      it "together with smoke covers the whole matrix exactly once" do
+        every_run = versions.smoke["include"] + versions.extended["include"]
+
+        expect(every_run.uniq.size).to eq(config["rubies"].size * config["images"].size)
       end
     end
 

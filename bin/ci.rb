@@ -26,13 +26,15 @@ module CI
 
     # The gating run: the pinned Ruby against the newest image of every engine.
     def smoke
-      {"include" => latest_images.map { |image| {"ruby" => latest_ruby, "data-store-image" => image} }}
+      {"include" => latest_images.map { |image| spec_entry(latest_ruby, image) }}
     end
 
-    # Deliberately overlaps smoke. Subtracting the overlap would couple the two lists so that
-    # editing one silently drops coverage from the other, which costs more than the repeated jobs.
+    # Everything smoke did not already run. Safe to subtract because both sides are derived from
+    # the same lists here - the pair cannot drift the way two hand-written matrices would.
     def extended
-      {"ruby" => rubies, "data-store-image" => images}
+      every_combination = rubies.flat_map { |ruby| images.map { |image| spec_entry(ruby, image) } }
+
+      {"include" => every_combination - smoke["include"]}
     end
 
     def features
@@ -69,6 +71,10 @@ module CI
 
     def latest_images
       config.fetch("latest_images")
+    end
+
+    def spec_entry(ruby, image)
+      {"ruby" => ruby, "data-store-image" => image}
     end
 
     # The Memory store ignores the image, but a service container is started regardless.
