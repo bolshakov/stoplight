@@ -3,8 +3,14 @@
 module Stoplight
   module TimeTravel
     STACK_KEY = "stoplight:test_now_ms_stack"
+    LUA_PATH = File.expand_path("lua", __dir__)
 
     class << self
+      # LUA_PATH must stay first: the first now.lua on the path wins, and only that one reads STACK_KEY.
+      def scripts_path
+        [LUA_PATH, *Infrastructure::Redis::Storage::Scripting.default_scripts_path]
+      end
+
       def freeze(time = Time.now)
         if block_given?
           Timecop.freeze(time) do

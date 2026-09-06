@@ -7,7 +7,9 @@ RSpec.describe Stoplight::Infrastructure::Redis::Storage::UnboundedMetrics, :red
 
   let(:clock) { Stoplight::Infrastructure::SystemClock.new }
   let(:key_space) { Stoplight::DataStore::Redis.key_space.join(SecureRandom.uuid) }
-  let(:scripting) { Stoplight::Infrastructure::Redis::Storage::Scripting.new(redis:) }
+  let(:scripting) do
+    Stoplight::Infrastructure::Redis::Storage::Scripting.new(redis:, scripts_path: Stoplight::TimeTravel.scripts_path)
+  end
 
   it_behaves_like "a metrics snapshot" do
     def metrics_snapshot = unbounded_metrics.metrics_snapshot
