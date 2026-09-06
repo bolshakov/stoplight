@@ -7,9 +7,8 @@ module Stoplight
       KEY_SPACE: Infrastructure::Redis::Key
 
       attr_reader redis: Infrastructure::redis
-      attr_reader warn_on_clock_skew: bool
 
-      def initialize: (Infrastructure::redis, ?warn_on_clock_skew: bool) -> void
+      def initialize: (Infrastructure::redis) -> void
 
       def self.key_space: -> Infrastructure::Redis::Key
       def key_space: -> Infrastructure::Redis::Key
