@@ -27,9 +27,14 @@ end
 
 Given(/^(?:the light) enters yellow state$/) do
   step("the light enters red state")
-  Timecop.travel(Time.now + 1) until current_light.color == Stoplight::Color::YELLOW
 
-  expect(current_light.color).to eq(Stoplight::Color::YELLOW)
+  deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + 10
+  until current_light.color == Stoplight::Color::YELLOW
+    if Process.clock_gettime(Process::CLOCK_MONOTONIC) > deadline
+      raise "light stayed #{current_light.color} for 10s - is its cool off time longer than that?"
+    end
+    sleep(0.1)
+  end
 end
 
 Given(/^(?:the light) enters green state$/) do
