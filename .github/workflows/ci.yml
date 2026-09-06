@@ -21,16 +21,33 @@ permissions:  # added using https://github.com/step-security/secure-repo
   contents: read
 
 jobs:
+  versions:
+    name: Resolve versions 🧮
+    runs-on: ubuntu-latest
+    outputs:
+      latest-ruby: ${{ steps.resolve.outputs.latest-ruby }}
+      smoke: ${{ steps.resolve.outputs.smoke }}
+      extended: ${{ steps.resolve.outputs.extended }}
+      features: ${{ steps.resolve.outputs.features }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # Reads .github/ci-versions.yml. Stdlib only, so the runner's preinstalled Ruby is enough.
+      - name: Resolve matrices
+        id: resolve
+        run: bin/ci.rb matrices
+
   steep:
     name: Type Check 🔍
     runs-on: ubuntu-latest
+    needs: versions
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Set up Ruby
         uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1.321.0
         with:
-          ruby-version: 4.0
+          ruby-version: ${{ needs.versions.outputs.latest-ruby }}
           bundler-cache: true
       - run: bundle exec rbs collection install
       - run: bundle exec steep check --format=github
@@ -39,6 +56,7 @@ jobs:
   rubocop:
     name: Standard 👮
     runs-on: ubuntu-latest
+    needs: versions
     permissions:
       checks: write
       contents: read
@@ -53,28 +71,17 @@ jobs:
       - name: Standard Ruby
         uses: standardrb/standard-ruby-action@df5152f6106147e13feb6ee0fa820b0d435cb8cd # v1.6.0
         with:
-          ruby-version: '4.0'
+          ruby-version: ${{ needs.versions.outputs.latest-ruby }}
           autofix: false
 
   features:
     name: Features (${{ matrix.data-store }} Data Store and ${{ matrix.data-store-image }} Data Store image using ${{matrix.light-creation}}) 🥒
     runs-on: ubuntu-latest
-    environment: ${{ github.base_ref == 'develop' && 'features-manual' || 'features-auto' }}
+    # Gated transitively: spec-full cannot start without approval, so neither can this. Its own
+    # environment would go pending only after spec-full finished, costing a second approval click.
+    needs: [ spec-full, versions ]
     strategy:
-      matrix:
-        light-creation: [ 'Stoplight()', 'System#register' ]
-        data-store: [ 'Redis' ]
-        data-store-image:
-          - 'redis:7.4'
-          - 'valkey/valkey:8-alpine'
-        include:
-          # Memory does not depend on the Data Store so we only want to run its suite once
-          - data-store: 'Memory'
-            data-store-image: 'redis:7.4'
-            light-creation: 'Stoplight()'
-          - data-store: 'Memory'
-            data-store-image: 'redis:7.4'
-            light-creation: 'System#register'
+      matrix: ${{ fromJSON(needs.versions.outputs.features) }}
     services:
       data-store:
         image: ${{ matrix.data-store-image }}
@@ -97,7 +104,7 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1.321.0
         with:
-          ruby-version: 4.0
+          ruby-version: ${{ needs.versions.outputs.latest-ruby }}
           bundler-cache: true
 
       - name: Run Features
@@ -111,18 +118,11 @@ jobs:
   spec:
     permissions:
       contents: read  # for actions/checkout to fetch code
-    name: Specs on Ruby ${{ matrix.ruby }} with Data Store as ${{ matrix.data-store-image }} 💚
+    name: Smoke Specs on Ruby ${{ matrix.ruby }} with Data Store as ${{ matrix.data-store-image }} 💚
     runs-on: ubuntu-latest
+    needs: [ steep, rubocop, versions ]
     strategy:
-      matrix:
-        data-store-image:
-          - 'redis:7.4'
-          - 'redis:8.4'
-          - 'redis:8.6'
-          - 'valkey/valkey:7.2-alpine'
-          - 'valkey/valkey:8.1-alpine'
-          - 'valkey/valkey:9.1-alpine'
-        ruby: ['3.3', '3.4', '4.0' ]
+      matrix: ${{ fromJSON(needs.versions.outputs.smoke) }}
     services:
       data-store:
         image: ${{ matrix.data-store-image }}
@@ -152,3 +152,61 @@ jobs:
         run: bundle exec rake spec
         env:
           STOPLIGHT_REDIS_URL: 'redis://127.0.0.1:6379/0'
+
+  spec-full:
+    permissions:
+      contents: read  # for actions/checkout to fetch code
+    name: Specs on Ruby ${{ matrix.ruby }} with Data Store as ${{ matrix.data-store-image }} 💚
+    runs-on: ubuntu-latest
+    needs: [ spec, versions ]
+    environment:
+      name: ${{ github.base_ref == 'develop' && 'Full test suite' || 'Full test suite (automatic)' }}
+      # The gate is an approval, not a release: reviewers still block the job, but no
+      # deployment object is created. Incompatible with custom (GitHub App) protection rules.
+      deployment: false
+    strategy:
+      matrix: ${{ fromJSON(needs.versions.outputs.extended) }}
+    services:
+      data-store:
+        image: ${{ matrix.data-store-image }}
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+    steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
+        with:
+          egress-policy: audit
+
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1.321.0
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+
+      - name: Run Tests
+        run: bundle exec rake spec
+        env:
+          STOPLIGHT_REDIS_URL: 'redis://127.0.0.1:6379/0'
+
+  # The single name to set as the required status check on develop. Branch protection counts a
+  # skipped job as success, so requiring the stage jobs directly would pass a PR whose stage 3 never ran.
+  ci:
+    name: CI 🚦
+    runs-on: ubuntu-latest
+    if: always()
+    needs: [ versions, steep, rubocop, spec, spec-full, features ]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Verify every stage succeeded
+        env:
+          RESULTS: ${{ toJSON(needs) }}
+        run: bin/ci.rb verify
