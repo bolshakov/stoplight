@@ -160,7 +160,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [ spec, versions ]
     environment:
-      name: ${{ github.base_ref == 'develop' && 'extended-manual' || 'extended-auto' }}
+      name: ${{ github.base_ref == 'develop' && 'Full test suite' || 'Full test suite (automatic)' }}
       # The gate is an approval, not a release: reviewers still block the job, but no
       # deployment object is created. Incompatible with custom (GitHub App) protection rules.
       deployment: false
