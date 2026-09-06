@@ -34,7 +34,7 @@ module Stoplight
           if compatibility_result.incompatible?
             raise Error::ConfigurationError,
               "#{traffic_control} incompatible with config: #{compatibility_result.error_messages}",
-              caller(8)
+              ExternalCaller.backtrace
           end
         end
       end
@@ -45,7 +45,7 @@ module Stoplight
           if compatibility_result.incompatible?
             raise Error::ConfigurationError,
               "#{traffic_recovery} incompatible with config: #{compatibility_result.error_messages}",
-              caller(8)
+              ExternalCaller.backtrace
           end
         end
       end

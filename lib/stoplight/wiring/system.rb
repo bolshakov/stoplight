@@ -43,6 +43,9 @@ module Stoplight
     #   returns that cached instance and raises +Stoplight::Error::UnregisteredLightError+
     #   if the name was never registered.
     class System
+      REGISTRATION_FRAME_LIMIT = 5
+      private_constant :REGISTRATION_FRAME_LIMIT
+
       attr_reader :name
       # @api private
       attr_reader :config
@@ -123,26 +126,29 @@ module Stoplight
         )
         config_digest = light_dsl.digest
 
-        light, existing_digest, existing_source_line = @lights.compute_if_absent(name) do
-          source_line = caller(6, 1)&.first # Very expensive call
+        light, existing_digest, existing_backtrace = @lights[name] || begin
+          registered_at = ExternalCaller.backtrace.first(REGISTRATION_FRAME_LIMIT)
           config = light_dsl.configure!(@config)
-          built = LightFactory.new(
-            system_id: @config.id,
-            system_name: @name, config:,
-            failover_system: @failover_system,
-            telemetry: @telemetry
-          ).build
-          @registry.register(config)
-          [built, config_digest, source_line]
+          @lights.compute_if_absent(name) do
+            built = LightFactory.new(
+              system_id: @config.id,
+              system_name: @name, config:,
+              failover_system: @failover_system,
+              telemetry: @telemetry
+            ).build
+            @registry.register(config)
+            [built, config_digest, registered_at]
+          end
         end
 
         if config_digest != existing_digest
-          source_line = caller(1, 1)&.first # Very expensive call
+          original_site = existing_backtrace.map { |frame| "  #{frame}" }.join("\n")
 
-          raise Stoplight::Error::ConfigurationError, <<~MSG
+          raise Stoplight::Error::ConfigurationError, <<~MSG, ExternalCaller.backtrace
             Light `#{name}` already registered with different configuration.
-            Original registration: #{existing_source_line}
-            Current attempt: #{source_line}
+
+            Originally registered at:
+            #{original_site}
 
             Lights must have consistent configuration across all call sites.
           MSG

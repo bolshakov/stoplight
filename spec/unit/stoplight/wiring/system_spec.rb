@@ -141,16 +141,27 @@ RSpec.describe Stoplight::Wiring::System do
     end
 
     describe "error messages" do
-      before { system.register("bar", cool_off_time: 30) }
+      before do
+        @registered_at = __LINE__ + 1
+        system.register("bar", cool_off_time: 30)
+      end
 
-      it "includes both configs in error message" do
+      it "names the original registration site in the message" do
         expect do
           system.register("bar", cool_off_time: 30, threshold: 44)
         end.to raise_error(
           include(/Light `bar` already registered with different configuration/)
-            .and(include(/system_spec\.rb:144/))
-            .and(include(/system_spec\.rb:148/))
+            .and(include("system_spec.rb:#{@registered_at}"))
         )
+      end
+
+      it "points the error's backtrace at the conflicting call site" do
+        conflicting_line = __LINE__ + 2
+        expect do
+          system.register("bar", cool_off_time: 30, threshold: 44)
+        end.to raise_error(Stoplight::Error::ConfigurationError) { |error|
+          expect(error.backtrace.first).to include("system_spec.rb:#{conflicting_line}")
+        }
       end
     end
 

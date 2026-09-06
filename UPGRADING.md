@@ -22,13 +22,14 @@ together, so two places could configure the same name differently and both would
 up with depended on which file it executed.
 
 In 6.0, `Stoplight()` registers the light on first call and returns that same cached instance afterwards. If a later
-call passes settings that differ from the registration, Stoplight raises `Stoplight::Error::ConfigurationError` and
-names both call sites:
+call passes settings that differ from the registration, Stoplight raises `Stoplight::Error::ConfigurationError`. The
+message names where the light was first registered, and the error's backtrace points at the conflicting call:
 
 ```
 Light `Payment Service` already registered with different configuration.
-Original registration: app/services/payment_service.rb:14:in 'charge'
-Current attempt: app/jobs/retry_payment_job.rb:9:in 'perform'
+
+Originally registered at:
+  app/services/payment_service.rb:14:in 'charge'
 
 Lights must have consistent configuration across all call sites.
 ```
