@@ -5,7 +5,7 @@ RSpec.describe Stoplight::Infrastructure::Redis::Storage::Scripting, :redis do
 
   let(:script_file) { Tempfile.create(["script", ".lua"]) }
   let(:script_file_path) { Pathname.new(script_file.path) }
-  let(:scripts_root) { script_file_path.dirname.to_s }
+  let(:scripts_path) { [script_file_path.dirname.to_s] }
   let(:script_name) { script_file_path.basename.to_s.sub(".lua", "").to_sym }
   let(:script) { <<~LUA }
     local value = ARGV[1]
@@ -23,7 +23,7 @@ RSpec.describe Stoplight::Infrastructure::Redis::Storage::Scripting, :redis do
   let(:value) { SecureRandom.uuid }
   let(:key) { SecureRandom.uuid }
 
-  def script_manager_factory = described_class.new(redis:, scripts_root:)
+  def script_manager_factory = described_class.new(redis:, scripts_path:)
 
   it "can call existing script" do
     result = script_manager.call(script_name, args: [value], keys: [key])
@@ -57,7 +57,7 @@ RSpec.describe Stoplight::Infrastructure::Redis::Storage::Scripting, :redis do
     LUA
 
     before do
-      File.write(File.join(scripts_root, "multiply.lua"), <<~LUA)
+      File.write(File.join(scripts_path, "multiply.lua"), <<~LUA)
         local function multiply(a, b)
           return a * b
         end
@@ -65,13 +65,55 @@ RSpec.describe Stoplight::Infrastructure::Redis::Storage::Scripting, :redis do
     end
 
     after do
-      File.delete(File.join(scripts_root, "multiply.lua"))
+      File.delete(File.join(scripts_path, "multiply.lua"))
     end
 
     it "splices the included script's source into the calling script" do
       script_manager.call(script_name, args: [21], keys: [key])
 
       expect(redis.get(key)).to eq("42")
+    end
+  end
+
+  context "when the script includes another script defined in two locations" do
+    let(:tmp_dir) { Dir.tmpdir }
+    let(:scripts_path1) { File.join(tmp_dir, SecureRandom.uuid) }
+    let(:scripts_path2) { File.join(tmp_dir, SecureRandom.uuid) }
+    let(:scripts_path) { [scripts_path1, scripts_path2, *super()] }
+
+    let(:script1) { <<~LUA }
+      local function magic()
+        return 1 
+      end
+    LUA
+
+    let(:script2) { <<~LUA }
+      local function magic()
+        return 2
+      end
+    LUA
+
+    let(:script) { <<~LUA }
+      -- @include magic
+
+      return magic()
+    LUA
+
+    before do
+      Dir.mkdir(scripts_path1)
+      Dir.mkdir(scripts_path2)
+      File.write(File.join(scripts_path1, "magic.lua"), script1)
+      File.write(File.join(scripts_path2, "magic.lua"), script2)
+    end
+
+    after do
+      FileUtils.rm_r([scripts_path1, scripts_path2])
+    end
+
+    it "splices the included script's source into the calling script" do
+      magic = script_manager.call(script_name, args: [], keys: [])
+
+      expect(magic).to eq(1)
     end
   end
 
@@ -85,13 +127,13 @@ RSpec.describe Stoplight::Infrastructure::Redis::Storage::Scripting, :redis do
     LUA
 
     before do
-      File.write(File.join(scripts_root, "multiply.lua"), <<~LUA)
+      File.write(File.join(scripts_path, "multiply.lua"), <<~LUA)
         -- @include multiply/double
         local function multiply_by_four(a)
           return double(double(a))
         end
       LUA
-      File.write(File.join(scripts_root, "multiply", "double.lua"), <<~LUA)
+      File.write(File.join(scripts_path, "multiply", "double.lua"), <<~LUA)
         local function double(a)
           return a * 2
         end
@@ -99,14 +141,14 @@ RSpec.describe Stoplight::Infrastructure::Redis::Storage::Scripting, :redis do
     end
 
     around do |example|
-      Dir.mkdir(File.join(scripts_root, "multiply"))
+      Dir.mkdir(File.join(scripts_path, "multiply"))
       example.run
     ensure
-      FileUtils.rm_rf(File.join(scripts_root, "multiply"))
+      FileUtils.rm_rf(File.join(scripts_path, "multiply"))
     end
 
     after do
-      File.delete(File.join(scripts_root, "multiply.lua"))
+      File.delete(File.join(scripts_path, "multiply.lua"))
     end
 
     it "resolves transitively included scripts" do
@@ -127,12 +169,12 @@ RSpec.describe Stoplight::Infrastructure::Redis::Storage::Scripting, :redis do
     LUA
 
     before do
-      File.write(File.join(scripts_root, "double.lua"), <<~LUA)
+      File.write(File.join(scripts_path, "double.lua"), <<~LUA)
         local function double(a)
           return a * 2
         end
       LUA
-      File.write(File.join(scripts_root, "triple.lua"), <<~LUA)
+      File.write(File.join(scripts_path, "triple.lua"), <<~LUA)
         local function triple(a)
           return a * 3
         end
@@ -140,8 +182,8 @@ RSpec.describe Stoplight::Infrastructure::Redis::Storage::Scripting, :redis do
     end
 
     after do
-      File.delete(File.join(scripts_root, "double.lua"))
-      File.delete(File.join(scripts_root, "triple.lua"))
+      File.delete(File.join(scripts_path, "double.lua"))
+      File.delete(File.join(scripts_path, "triple.lua"))
     end
 
     it "splices in every included script" do
@@ -164,13 +206,13 @@ RSpec.describe Stoplight::Infrastructure::Redis::Storage::Scripting, :redis do
     end
   end
 
-  context "when the include target attempts to traverse outside scripts_root" do
+  context "when the include target attempts to traverse outside scripts_path" do
     let(:script) { <<~LUA }
       -- @include ../../../../../../etc/passwd
       return "safe"
     LUA
 
-    it "treats the directive as inert instead of reading outside scripts_root" do
+    it "treats the directive as inert instead of reading outside scripts_path" do
       result = script_manager.call(script_name, args: [value], keys: [key])
 
       expect(result).to eq("safe")

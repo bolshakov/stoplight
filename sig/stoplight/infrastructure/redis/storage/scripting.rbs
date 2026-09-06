@@ -7,15 +7,15 @@ module Stoplight
 
           INCLUDE_DIRECTIVE: Regexp
 
-          def self.default_scripts_root: -> String
+          def self.default_scripts_path: -> Array[String]
 
-          @scripts_root: String
+          @scripts_path: Array[String]
           @shas: Hash[String, String]
           @redis: redis
 
           def initialize: (
               redis: redis,
-              ?scripts_root: String,
+              ?scripts_path: Array[String],
             ) -> void
 
           def call: (

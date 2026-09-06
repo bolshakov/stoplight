@@ -26,6 +26,7 @@ require_relative "support/database_cleaner"
 require_relative "support/exception_helpers"
 require_relative "support/route_helpers"
 require_relative "support/matchers/emit"
+require_relative "support/time_travel"
 
 Timecop.safe_mode = true
 # Window buckets age on the monotonic clock; travel/freeze must move it too.
@@ -39,7 +40,17 @@ RSpec.configure do |rspec|
   rspec.include ExceptionHelpers
   rspec.include RouteHelpers, type: :request
 
-  rspec.before { Stoplight.__stoplight__reset! }
+  rspec.before do
+    redis = Redis.new
+    redis.del("stoplight:test_now_ms_stack")
+    Stoplight.__stoplight__reset!
+  end
+
+  rspec.after do
+    Timecop.return
+    redis = Redis.new
+    redis.del("stoplight:test_now_ms_stack")
+  end
 
   rspec.filter_run_when_matching :focus
   rspec.color = true
