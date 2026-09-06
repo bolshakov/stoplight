@@ -6,6 +6,7 @@ module Stoplight
           class SlidingWindow
             @buckets: Hash[Integer, Integer]
             @running_sum: Integer
+            @evicted_through: Integer?
             @clock: Domain::_Clock
             @window_size: Domain::duration_seconds
 
