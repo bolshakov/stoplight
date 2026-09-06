@@ -59,6 +59,7 @@ jobs:
   features:
     name: Features (${{ matrix.data-store }} Data Store and ${{ matrix.data-store-image }} Data Store image using ${{matrix.light-creation}}) 🥒
     runs-on: ubuntu-latest
+    environment: ${{ github.base_ref == 'develop' && 'features-manual' || 'features-auto' }}
     strategy:
       matrix:
         light-creation: [ 'Stoplight()', 'System#register' ]
