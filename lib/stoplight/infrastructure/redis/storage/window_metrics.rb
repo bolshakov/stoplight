@@ -22,7 +22,7 @@ module Stoplight
             @scripting = scripting
             @metrics_key = key_space.join("window_metrics")
             @ts_index_key = key_space.join("window_metrics", "ts_idx")
-            @window_size = T.must(config.window_size).to_i
+            @window_size = T.must(config.window_size)
           end
 
           def metrics_snapshot

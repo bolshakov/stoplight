@@ -49,12 +49,12 @@ module ConfigureLightWorld
     settings[:window_size] = if value == "nil"
       nil
     else
-      value.to_f
+      value.to_i
     end
   end
 
   def configure_cool_off_time(value, settings)
-    settings[:cool_off_time] = value.to_f
+    settings[:cool_off_time] = value.to_i
   end
 
   def configure_threshold(value, settings)

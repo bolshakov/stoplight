@@ -89,6 +89,14 @@ RSpec.describe "Stoplight" do
 
       expect { Stoplight(SecureRandom.uuid) }.not_to raise_error
     end
+
+    it "rejects an invalid default cool_off_time at configure time" do
+      expect do
+        Stoplight.configure(trust_me_im_an_engineer: true) do |config|
+          config.cool_off_time = 0.5
+        end
+      end.to raise_error(Stoplight::Error::ConfigurationError, /`cool_off_time` should be a whole number of seconds/)
+    end
   end
 
   describe ".register" do

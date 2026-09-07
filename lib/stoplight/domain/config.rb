@@ -22,7 +22,7 @@ module Stoplight
     )
     class Config
       def cool_off_time_in_milliseconds
-        (cool_off_time * 1_000).to_i
+        cool_off_time * 1_000
       end
 
       def with(

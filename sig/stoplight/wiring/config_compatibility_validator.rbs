@@ -12,6 +12,8 @@ module Stoplight
 
       private
 
+      def validate_window_size!: -> void
+      def validate_cool_off_time!: -> void
       def validate_traffic_control!: -> void
       def validate_traffic_recovery!: -> void
     end

@@ -169,15 +169,16 @@ end
 # Creates a new Stoplight circuit breaker with the given name and settings.
 #
 # @param name [String] The name of the circuit breaker.
-# @param cool_off_time The time to wait before resetting the circuit breaker.
+# @param cool_off_time The time to wait before resetting the circuit breaker, in whole seconds, at least 1.
 # @param threshold The failure threshold to trip the circuit breaker.
-# @param window_size The size of the rolling window for failure tracking.
+# @param window_size The size of the rolling window for failure tracking, in whole seconds, at least 1.
 # @param tracked_errors A list of errors to track.
 # @param skipped_errors A list of errors to skip.
 # @param traffic_control The traffic control strategy to use.
 #
 # @return [Stoplight::Light] A new circuit breaker instance.
 # @raise [ArgumentError] If an unknown option is provided in the settings.
+# @raise [Stoplight::Error::ConfigurationError] If a setting is invalid or conflicts with an earlier registration.
 #
 # @example configure circuit breaker behavior
 #   light = Stoplight("Payment API", window_size: 300, threshold: 5, cool_off_time: 60)

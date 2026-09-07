@@ -1,7 +1,7 @@
 module Stoplight
   module Domain
     type timestamp = Float | Integer
-    type duration_seconds = Float | Integer
+    type duration_seconds = Integer
     type duration_ms = Float
 
     # Light Colors
