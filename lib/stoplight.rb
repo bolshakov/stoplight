@@ -169,7 +169,7 @@ end
 # Creates a new Stoplight circuit breaker with the given name and settings.
 #
 # @param name [String] The name of the circuit breaker.
-# @param cool_off_time The time to wait before resetting the circuit breaker.
+# @param cool_off_time The time to wait before resetting the circuit breaker, in whole seconds, at least 1.
 # @param threshold The failure threshold to trip the circuit breaker.
 # @param window_size The size of the rolling window for failure tracking, in whole seconds, at least 1.
 # @param tracked_errors A list of errors to track.

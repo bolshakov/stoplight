@@ -24,6 +24,7 @@ module Stoplight
 
       def call
         validate_window_size!
+        validate_cool_off_time!
         validate_traffic_control!
         validate_traffic_recovery!
         config
@@ -38,6 +39,15 @@ module Stoplight
 
         raise Error::ConfigurationError,
           "`window_size` should be a whole number of seconds, at least 1, got #{window_size.inspect}",
+          ExternalCaller.backtrace
+      end
+
+      private def validate_cool_off_time!
+        cool_off_time = config.cool_off_time
+        return if cool_off_time.is_a?(Integer) && cool_off_time >= 1
+
+        raise Error::ConfigurationError,
+          "`cool_off_time` should be a whole number of seconds, at least 1, got #{cool_off_time.inspect}",
           ExternalCaller.backtrace
       end
 

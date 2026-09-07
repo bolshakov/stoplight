@@ -54,7 +54,7 @@ module ConfigureLightWorld
   end
 
   def configure_cool_off_time(value, settings)
-    settings[:cool_off_time] = value.to_f
+    settings[:cool_off_time] = value.to_i
   end
 
   def configure_threshold(value, settings)

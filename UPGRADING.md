@@ -13,6 +13,7 @@ Here's what you'll want to tackle during your upgrade, roughly ordered from the 
 - [ ] Account for Stoplight state reset after deployment
 - [ ] Re-check `error_rate` lights - `min_requests` is gone and the fixed minimum sample is now 100 requests
 - [ ] Round any fractional `window_size` up to a whole number of seconds
+- [ ] Round any fractional `cool_off_time` up to a whole number of seconds, at least 1
 - [ ] Drop `warn_on_clock_skew` from your Redis data store setup
 - [ ] Test thoroughly in a staging environment
 
@@ -215,6 +216,24 @@ the current bucket on most calls, so failures rarely accumulated enough to trip 
 the window is measured exactly as it always was. What changes is that the mismatch is no longer hidden: instead of
 quietly measuring a different span than you asked for, Stoplight escalates it as an error the moment the light is
 configured.
+
+### `cool_off_time` Must Be a Whole Number of Seconds
+
+`cool_off_time` now accepts only an `Integer` of at least 1. A `Float`, or anything below one second, raises
+`Stoplight::Error::ConfigurationError` when the value is applied - at `Stoplight()`, `Stoplight.register_system`, or
+`Stoplight.configure`.
+
+```ruby
+# Old way that won't work anymore
+light = Stoplight("Payment Service", cool_off_time: 1.5)
+
+# New way
+light = Stoplight("Payment Service", cool_off_time: 2)
+```
+
+Below a second the light turns yellow again before the failing dependency could plausibly have recovered, so it
+probes on nearly every call instead of breaking the circuit. Above that, a fraction of a second is marginal against
+the window the light measures failures over, so whole seconds are the only granularity worth expressing.
 
 ### Clock Skew Detection Is Gone
 
