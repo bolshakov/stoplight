@@ -46,6 +46,9 @@ module Stoplight
       REGISTRATION_FRAME_LIMIT = 5
       private_constant :REGISTRATION_FRAME_LIMIT
 
+      Registration = Data.define(:light, :digest, :backtrace, :without_settings)
+      private_constant :Registration
+
       attr_reader :name
       # @api private
       attr_reader :config
@@ -113,6 +116,16 @@ module Stoplight
         traffic_control: T.undefined,
         traffic_recovery: T.undefined
       )
+        without_settings = cool_off_time.is_a?(Undefined) && threshold.is_a?(Undefined) &&
+          recovery_threshold.is_a?(Undefined) && window_size.is_a?(Undefined) &&
+          tracked_errors.is_a?(Undefined) && skipped_errors.is_a?(Undefined) &&
+          traffic_control.is_a?(Undefined) && traffic_recovery.is_a?(Undefined)
+
+        if without_settings
+          registration = @lights[name]
+          return registration.light if registration&.without_settings
+        end
+
         light_dsl = LightConfigurationDsl.new(
           name:,
           cool_off_time:,
@@ -126,8 +139,8 @@ module Stoplight
         )
         config_digest = light_dsl.digest
 
-        light, existing_digest, existing_backtrace = @lights[name] || begin
-          registered_at = ExternalCaller.backtrace.first(REGISTRATION_FRAME_LIMIT)
+        registration = @lights[name] || begin
+          backtrace = ExternalCaller.backtrace.first(REGISTRATION_FRAME_LIMIT)
           config = light_dsl.configure!(@config)
           @lights.compute_if_absent(name) do
             built = LightFactory.new(
@@ -137,12 +150,12 @@ module Stoplight
               telemetry: @telemetry
             ).build
             @registry.register(config)
-            [built, config_digest, registered_at]
+            Registration.new(light: built, digest: config_digest, backtrace:, without_settings:)
           end
         end
 
-        if config_digest != existing_digest
-          original_site = existing_backtrace.map { |frame| "  #{frame}" }.join("\n")
+        if config_digest != registration.digest
+          original_site = registration.backtrace.map { |frame| "  #{frame}" }.join("\n")
 
           raise Stoplight::Error::ConfigurationError, <<~MSG, ExternalCaller.backtrace
             Light `#{name}` already registered with different configuration.
@@ -154,12 +167,12 @@ module Stoplight
           MSG
         end
 
-        light
+        registration.light
       end
 
       # @raise [Stoplight::Error::UnregisteredLightError] if no light was registered under +name+
       def light(name)
-        @lights[name]&.first || raise(Stoplight::Error::UnregisteredLightError, <<~MSG)
+        @lights[name]&.light || raise(Stoplight::Error::UnregisteredLightError, <<~MSG)
           Light `#{name}` was never registered on system `#{@name}`.
           Call `.register(#{name.inspect}, ...)` at boot before using it.
         MSG

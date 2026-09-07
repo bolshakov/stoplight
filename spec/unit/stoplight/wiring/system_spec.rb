@@ -24,6 +24,21 @@ RSpec.describe Stoplight::Wiring::System do
       end
     end
 
+    describe "repeated registration without settings" do
+      before { system.register("foo") }
+
+      it "does not allocate on the lookup path" do
+        allocations = lambda do
+          before = GC.stat(:total_allocated_objects)
+          system.register("foo")
+          GC.stat(:total_allocated_objects) - before
+        end
+        allocations.call
+
+        expect(allocations.call).to eq(0)
+      end
+    end
+
     describe "isolation with different light names" do
       let(:light) { system.register(name) }
       let(:name) { "foo" }
@@ -138,6 +153,33 @@ RSpec.describe Stoplight::Wiring::System do
           system.register("foo", threshold: system_config.threshold)
         end.to raise_error(Stoplight::Error::ConfigurationError)
       end
+    end
+
+    describe "conflict detection for every setting" do
+      let(:settings) do
+        {
+          cool_off_time: 120,
+          threshold: 7,
+          recovery_threshold: 2,
+          window_size: 300,
+          tracked_errors: [IOError],
+          skipped_errors: [ArgumentError],
+          traffic_control: :error_rate,
+          traffic_recovery: :consecutive_successes
+        }
+      end
+
+      before { system.register("foo") }
+
+      described_class.instance_method(:register).parameters
+        .filter_map { |kind, keyword| keyword if kind == :key }
+        .each do |setting|
+          it "raises when `#{setting}` is given after a registration without settings" do
+            expect do
+              system.register("foo", setting => settings.fetch(setting))
+            end.to raise_error(Stoplight::Error::ConfigurationError)
+          end
+        end
     end
 
     describe "error messages" do
