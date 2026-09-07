@@ -43,4 +43,53 @@ RSpec.describe Stoplight::Wiring::ConfigCompatibilityValidator do
       )
     end
   end
+
+  context "when window_size is not a whole number of seconds" do
+    let(:window_size) { 60.5 }
+
+    it "raises a configuration error" do
+      expect { validate }.to raise_error(
+        Stoplight::Error::ConfigurationError,
+        include("`window_size` should be a whole number of seconds")
+      )
+    end
+  end
+
+  context "when window_size is a whole-valued float" do
+    let(:window_size) { 60.0 }
+
+    it "raises a configuration error" do
+      expect { validate }.to raise_error(
+        Stoplight::Error::ConfigurationError,
+        include("`window_size` should be a whole number of seconds")
+      )
+    end
+  end
+
+  context "when window_size is shorter than one second" do
+    let(:window_size) { 0 }
+
+    it "raises a configuration error" do
+      expect { validate }.to raise_error(
+        Stoplight::Error::ConfigurationError,
+        include("`window_size` should be a whole number of seconds")
+      )
+    end
+  end
+
+  context "when window_size is a whole number of seconds" do
+    let(:window_size) { 1 }
+
+    it "accepts the config" do
+      expect { validate }.not_to raise_error
+    end
+  end
+
+  context "when window_size is nil" do
+    let(:window_size) { nil }
+
+    it "accepts the config" do
+      expect { validate }.not_to raise_error
+    end
+  end
 end

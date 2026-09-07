@@ -23,9 +23,22 @@ module Stoplight
       end
 
       def call
+        validate_window_size!
         validate_traffic_control!
         validate_traffic_recovery!
         config
+      end
+
+      # A window shorter than one bucket cannot be measured, and a fractional one silently
+      # rounds to a different span than requested.
+      private def validate_window_size!
+        window_size = config.window_size
+        return if window_size.nil?
+        return if window_size.is_a?(Integer) && window_size >= 1
+
+        raise Error::ConfigurationError,
+          "`window_size` should be a whole number of seconds, at least 1, got #{window_size.inspect}",
+          ExternalCaller.backtrace
       end
 
       private def validate_traffic_control!

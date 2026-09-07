@@ -13,6 +13,15 @@ RSpec.describe "Configuration error locations" do
     register_deeply(depth - 1, name, **settings)
   end
 
+  it "blames the line that registered a light with an invalid window_size" do
+    line = __LINE__ + 2
+    expect {
+      Stoplight(SecureRandom.uuid, window_size: 0.5)
+    }.to raise_error(Stoplight::Error::ConfigurationError) { |error|
+      expect(error.backtrace.first).to include("#{__FILE__}:#{line}")
+    }
+  end
+
   it "names the original registration site in the message" do
     name = SecureRandom.uuid
 

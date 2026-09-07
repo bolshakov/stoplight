@@ -49,7 +49,7 @@ module ConfigureLightWorld
     settings[:window_size] = if value == "nil"
       nil
     else
-      value.to_f
+      value.to_i
     end
   end
 

@@ -12,6 +12,7 @@ Here's what you'll want to tackle during your upgrade, roughly ordered from the 
 - [ ] Replace proc and anonymous-class error matchers with named classes or modules
 - [ ] Account for Stoplight state reset after deployment
 - [ ] Re-check `error_rate` lights - `min_requests` is gone and the fixed minimum sample is now 100 requests
+- [ ] Round any fractional `window_size` up to a whole number of seconds
 - [ ] Drop `warn_on_clock_skew` from your Redis data store setup
 - [ ] Test thoroughly in a staging environment
 
@@ -192,6 +193,28 @@ light = Stoplight("Payment Service", traffic_control: :error_rate, threshold: 0.
 
 The hash form of `traffic_control` is gone entirely, so passing it raises `Stoplight::Error::ConfigurationError`.
 `Stoplight::Domain::TrafficControl::ErrorRate.new` takes no arguments.
+
+### `window_size` Must Be a Whole Number of Seconds
+
+`window_size` now accepts only an `Integer` of at least 1. A `Float`, or anything below one second, raises
+`Stoplight::Error::ConfigurationError` when the value is applied - at `Stoplight()`, `Stoplight.register_system`, or
+`Stoplight.configure`. `nil` still means "no window".
+
+```ruby
+# Old way that won't work anymore
+light = Stoplight("Payment Service", window_size: 59.5, traffic_control: :error_rate, threshold: 0.5)
+
+# New way
+light = Stoplight("Payment Service", window_size: 60, traffic_control: :error_rate, threshold: 0.5)
+```
+
+Metrics are counted in per-second buckets, so a second is the smallest span the window can actually measure. A
+fractional value was never honoured as written - both stores truncated it to whole buckets, so `window_size: 59.5`
+measured 59 seconds on Redis and 59 or 60 in memory depending on when you asked, and anything under a second evicted
+the current bucket on most calls, so failures rarely accumulated enough to trip the light. None of that has changed -
+the window is measured exactly as it always was. What changes is that the mismatch is no longer hidden: instead of
+quietly measuring a different span than you asked for, Stoplight escalates it as an error the moment the light is
+configured.
 
 ### Clock Skew Detection Is Gone
 
