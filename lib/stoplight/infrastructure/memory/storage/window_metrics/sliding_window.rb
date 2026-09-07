@@ -23,6 +23,7 @@ module Stoplight
               @buckets = Hash.new { |buckets, bucket| buckets[bucket] = 0 }
               # The running sum of all increments in the current window
               @running_sum = 0
+              @evicted_through = nil
               @clock = clock
               @window_size = window_size
             end
@@ -47,11 +48,17 @@ module Stoplight
             private
 
             def slide_window!(window_start)
-              window_start_ts = window_start.to_i
+              # A bucket is keyed at the second it was written, which for a whole-second window is
+              # always past the boundary in force then, so a boundary already evicted can expire
+              # nothing.
+              boundary = window_start.floor
+              return if boundary == @evicted_through
+
+              @evicted_through = boundary
 
               loop do
                 timestamp, sum = @buckets.first
-                if timestamp.nil? || timestamp > window_start_ts
+                if timestamp.nil? || timestamp > boundary
                   break
                 else
                   @running_sum -= sum.to_i
