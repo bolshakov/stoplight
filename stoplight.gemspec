@@ -14,9 +14,8 @@ Gem::Specification.new do |gem|
   gem.license = "MIT"
 
   {
-    "Cameron Desautels" => "camdez@gmail.com",
-    "Taylor Fausak" => "taylor@fausak.me",
-    "Justin Steffy" => "steffy@orgsync.com"
+    "Tëma Bolshakov" => "tema@bolshakov.dev",
+    "George Asfour" => "archmage@hey.com"
   }.tap do |hash|
     gem.authors = hash.keys
     gem.email = hash.values
