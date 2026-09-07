@@ -6,7 +6,28 @@ module Stoplight
       @name: String
       REGISTRATION_FRAME_LIMIT: Integer
 
-      @lights: Concurrent::Map[String, [Domain::Light, Integer, Array[String]]]
+      class Registration < Data
+        attr_reader light: Domain::Light
+        attr_reader digest: Integer
+        attr_reader backtrace: Array[String]
+        attr_reader without_settings: bool
+
+        def self.new: (
+            light: Domain::Light,
+            digest: Integer,
+            backtrace: Array[String],
+            without_settings: bool,
+          ) -> instance
+
+        def initialize: (
+            light: Domain::Light,
+            digest: Integer,
+            backtrace: Array[String],
+            without_settings: bool,
+          ) -> void
+      end
+
+      @lights: Concurrent::Map[String, Registration]
       @failover_system: _System?
       @registry: Domain::_Registry
       @telemetry: Domain::Telemetry::Bus
