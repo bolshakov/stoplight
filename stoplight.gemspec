@@ -12,6 +12,12 @@ Gem::Specification.new do |gem|
   gem.description = "An implementation of the circuit breaker pattern."
   gem.homepage = "https://github.com/bolshakov/stoplight"
   gem.license = "MIT"
+  gem.metadata = {
+    "changelog_uri" => "https://github.com/bolshakov/stoplight/releases",
+    "source_code_uri" => "https://github.com/bolshakov/stoplight",
+    "bug_tracker_uri" => "https://github.com/bolshakov/stoplight/issues",
+    "documentation_uri" => "https://github.com/bolshakov/stoplight#readme"
+  }
 
   {
     "Tëma Bolshakov" => "tema@bolshakov.dev",
