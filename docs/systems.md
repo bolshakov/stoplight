@@ -163,13 +163,14 @@ system.register("api", threshold: 3)
 system.register("api", threshold: 5) # raises ConfigurationError
 ```
 
-This prevents the subtle bug where two call sites silently disagree on a light's configuration. The error shows both
-registration locations:
+This prevents the subtle bug where two call sites silently disagree on a light's configuration. The message names
+where the light was originally registered, and the error's own backtrace points at the conflicting call:
 
 ```
 Light `api` already registered with different configuration.
-Original registration: config/initializers/stoplight.rb:42:in `<top (required)>'
-Current attempt: app/services/payment_service.rb:15:in `initialize'
+
+Originally registered at:
+  config/initializers/stoplight.rb:42:in `<top (required)>'
 
 Lights must have consistent configuration across all call sites.
 ```
