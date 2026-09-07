@@ -475,8 +475,23 @@ By default, Stoplight logs state transitions to STDERR.
 Pull requests to update this section are welcome. If you want to implement your own notifier, refer to
 the [notifier interface documentation] for detailed instructions. Pull requests to update this section are welcome.
 
-For a lower-level way to observe circuit breaker events (state transitions, recovery, trips, and more - e.g. to
-build a metrics integration), see the [Telemetry guide](docs/telemetry.md).
+### Telemetry
+
+Notifiers only fire on state transitions. For everything else a light does - every run, trip, recovery probe, and
+manual lock - subscribe to the telemetry bus:
+
+```ruby
+Stoplight.telemetry.subscribe(Stoplight::Telemetry::TrafficBreached) do |envelope|
+  logger.warn("#{envelope.light_name} tripped: #{envelope.payload.failure&.exception&.message}")
+end
+```
+
+The [stoplight-statsd] gem is built on this bus. It forwards every event to Statsd, so a dashboard of your circuit
+breakers is a `bundle add` away:
+
+![Stoplight metrics in Grafana](assets/grafana.png)
+
+See the [Telemetry guide](docs/telemetry.md) for the full event list and the envelope format.
 
 ### Error Notifiers
 
@@ -684,6 +699,7 @@ Fowler’s [CircuitBreaker][] article.
 [the change log]: CHANGELOG.md
 [stoplight-sentry]: https://github.com/bolshakov/stoplight-sentry
 [stoplight-honeybadger]: https://github.com/qoqa/stoplight-honeybadger
+[stoplight-statsd]: https://github.com/bolshakov/stoplight-statsd
 [notifier interface documentation]: https://github.com/bolshakov/stoplight/blob/main/lib/stoplight/domain/state_transition_notifier.rb
 [camdez]: https://github.com/camdez
 [tfausak]: https://github.com/tfausak
