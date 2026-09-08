@@ -63,7 +63,7 @@ module Stoplight
 
             Domain::StateSnapshot.new(
               breached_at: breached_at_raw && clock.at(breached_at_raw.to_f),
-              locked_state: locked_state || Stoplight::State::UNLOCKED,
+              locked_state: locked_state&.to_sym || Stoplight::State::UNLOCKED,
               recovery_scheduled_after: recovery_scheduled_after_raw && clock.at(recovery_scheduled_after_raw.to_f),
               recovery_started_at: recovery_started_at_raw && clock.at(recovery_started_at_raw.to_f),
               time: clock.current_time

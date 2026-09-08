@@ -34,7 +34,7 @@ RSpec.describe Stoplight::Domain::Strategies::RedRunStrategy, :freeze do
     it "produces RunCompleted event" do
       expect { result }.to emit(Stoplight::Domain::Telemetry::RunCompleted).with(
         outcome: :blocked,
-        color: "red",
+        color: Stoplight::Color::RED,
         duration_ms: nil,
         failure: nil,
         fallback_used: true,
@@ -59,7 +59,7 @@ RSpec.describe Stoplight::Domain::Strategies::RedRunStrategy, :freeze do
         expect { result }.to raise_error(Stoplight::Error::RedLight)
       end.to emit(Stoplight::Domain::Telemetry::RunCompleted).with(
         outcome: :blocked,
-        color: "red",
+        color: Stoplight::Color::RED,
         duration_ms: nil,
         failure: nil,
         fallback_used: false,

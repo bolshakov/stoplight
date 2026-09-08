@@ -58,7 +58,7 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
 
           expect { result }.to emit(Stoplight::Domain::Telemetry::RunCompleted).with(
             outcome: :success,
-            color: "yellow",
+            color: Stoplight::Color::YELLOW,
             duration_ms: be_within(0.00001).of(0.8),
             failure: nil,
             fallback_used: false,
@@ -113,7 +113,7 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
                 expect { result }.to raise_error(error)
               end.to emit(Stoplight::Domain::Telemetry::RunCompleted).with(
                 outcome: :failure,
-                color: "yellow",
+                color: Stoplight::Color::YELLOW,
                 duration_ms: be_within(0.00001).of(0.8),
                 failure: have_attributes(exception: error, tracked: true),
                 fallback_used: false,
@@ -145,7 +145,7 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
 
               expect { result }.to emit(Stoplight::Domain::Telemetry::RunCompleted).with(
                 outcome: :failure,
-                color: "yellow",
+                color: Stoplight::Color::YELLOW,
                 duration_ms: be_within(0.00001).of(0.8),
                 failure: have_attributes(exception: error, tracked: true),
                 fallback_used: true,
@@ -168,7 +168,7 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
               expect { result }.to raise_error(StandardError, "Test error")
             end.to emit(Stoplight::Domain::Telemetry::RunCompleted).with(
               outcome: :success,
-              color: "yellow",
+              color: Stoplight::Color::YELLOW,
               duration_ms: be_within(0.00001).of(0.8),
               failure: have_attributes(exception: error, tracked: false),
               fallback_used: false,
@@ -264,7 +264,7 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
             strategy.execute(fallback, state_snapshot:, error_tracking_policy:) {}
           }.to emit(Stoplight::Domain::Telemetry::RunCompleted).with(
             outcome: :blocked,
-            color: "yellow",
+            color: Stoplight::Color::YELLOW,
             duration_ms: nil,
             failure: nil,
             fallback_used: true,
@@ -305,7 +305,7 @@ RSpec.describe Stoplight::Domain::Strategies::YellowRunStrategy do
             }
           end.to emit(Stoplight::Domain::Telemetry::RunCompleted).with(
             outcome: :blocked,
-            color: "yellow",
+            color: Stoplight::Color::YELLOW,
             duration_ms: nil,
             failure: nil,
             fallback_used: false,

@@ -142,14 +142,14 @@ module Stoplight
 
     patch "/systems/:system_id/lights/:light_id/lock" do
       light_id = T.must(params[:light_id])
-      color = T.must(params[:color])
+      color = T.must(params[:color]).to_sym
       dependencies.lock_action.call(light_id:, color:)
 
       redirect system_url(current_system_id, "/lights")
     end
 
     patch "/systems/:system_id/lights/lock" do
-      color = T.must(params[:color])
+      color = T.must(params[:color]).to_sym
       dependencies.lock_all_action.call(color:)
 
       redirect system_url(current_system_id, "/lights")

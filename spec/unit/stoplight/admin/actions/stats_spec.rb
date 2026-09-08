@@ -31,7 +31,7 @@ RSpec.describe Stoplight::Admin::Actions::Stats do
     let(:config) { instance_double(Stoplight::Domain::Config, id: "light-id", name: "foo") }
     let(:configs) { [config] }
     let(:state_snapshot) do
-      instance_double(Stoplight::Domain::StateSnapshot, color: "green", locked_state: "unlocked")
+      instance_double(Stoplight::Domain::StateSnapshot, color: Stoplight::Color::GREEN, locked_state: Stoplight::State::UNLOCKED)
     end
     let(:metrics_snapshot) do
       instance_double(
@@ -58,8 +58,8 @@ RSpec.describe Stoplight::Admin::Actions::Stats do
         have_attributes(
           id: "light-id",
           name: "foo",
-          color: "green",
-          state: "unlocked",
+          color: Stoplight::Color::GREEN,
+          state: Stoplight::State::UNLOCKED,
           failures: [],
           traffic_metric_label: "Consecutive failures",
           traffic_metric_value: "0"

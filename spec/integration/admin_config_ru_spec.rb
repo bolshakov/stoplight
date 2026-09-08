@@ -48,7 +48,7 @@ RSpec.describe "config.ru", :redis do
     patch "/systems/#{system_id}/lights/#{Stoplight::Domain::Id.for("foo")}/lock", color: "green"
 
     expect(last_response.status).to eq(302)
-    expect(Stoplight.light("foo").state).to eq("locked_green")
+    expect(Stoplight.light("foo").state).to eq(Stoplight::State::LOCKED_GREEN)
   end
 
   it "surfaces a light a separate process already wrote to the same Redis" do

@@ -43,4 +43,40 @@ RSpec.describe Stoplight::Admin::Helpers, :redis do
       end
     end
   end
+
+  describe "#red?" do
+    let(:light) { instance_double(Stoplight::Admin::LightView, color: Stoplight::Color::RED) }
+
+    context "when light is red" do
+      it "returns true" do
+        expect(helper.red?(light)).to be_truthy
+      end
+    end
+
+    context "when light is not red" do
+      let(:light) { instance_double(Stoplight::Admin::LightView, color: Stoplight::Color::GREEN) }
+
+      it "returns false" do
+        expect(helper.red?(light)).to be_falsey
+      end
+    end
+  end
+
+  describe "#yellow?" do
+    let(:light) { instance_double(Stoplight::Admin::LightView, color: Stoplight::Color::YELLOW) }
+
+    context "when light is yellow" do
+      it "returns true" do
+        expect(helper.yellow?(light)).to be_truthy
+      end
+    end
+
+    context "when light is not yellow" do
+      let(:light) { instance_double(Stoplight::Admin::LightView, color: Stoplight::Color::RED) }
+
+      it "returns false" do
+        expect(helper.yellow?(light)).to be_falsey
+      end
+    end
+  end
 end

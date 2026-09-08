@@ -3,6 +3,9 @@ module Stoplight
     module Helpers : Sinatra::Base
       COLORS: Array[Domain::color]
 
+      def red?: (LightView) -> bool
+      def yellow?: (LightView) -> bool
+
       def dependencies: -> Dependencies
       def system_url: (String system_id, String path) -> String
       def asset_path: (String) -> String

@@ -7,7 +7,7 @@ RSpec.describe Stoplight::Admin::Actions::Lock do
   let(:config_registry) { instance_double(Stoplight::Admin::ConfigRegistry) }
   let(:storage) { instance_double(Stoplight::Wiring::System::Storage) }
   let(:light_id) { SecureRandom.uuid }
-  let(:color) { "green" }
+  let(:color) { Stoplight::Color::GREEN }
 
   before do
     allow(config_registry).to receive(:find_by_id).with(light_id).and_return(config)
@@ -36,7 +36,7 @@ RSpec.describe Stoplight::Admin::Actions::Lock do
   end
 
   context "when color is not lockable" do
-    let(:color) { "yellow" }
+    let(:color) { Stoplight::Color::YELLOW }
     let(:config) { instance_double(Stoplight::Domain::Config) }
 
     it "throws halt without locking" do

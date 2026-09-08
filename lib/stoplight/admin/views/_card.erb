@@ -28,15 +28,15 @@
       </p>
       <span class="flex items-center text-sm font-medium text-gray-500 dark:text-gray-400 truncate me-3">
         <span class="flex w-2.5 h-2.5 bg-<%= color %>-600 rounded-full me-1.5 shrink-0"></span>
-        <% if light.color == "red" %>
+        <% if red?(light) %>
           Open
-        <% elsif light.color == "yellow" %>
+        <% elsif yellow?(light) %>
           Half-Open
         <% else %>
           Closed
         <% end %>
 
-        <% if light.color == "yellow" %>
+        <% if yellow?(light) %>
           (Recovering)
         <% elsif light.locked? %>
           (Locked)

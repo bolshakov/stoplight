@@ -9,6 +9,10 @@ module Stoplight
         Color::RED
       ].freeze
 
+      def red?(light) = light.color == Color::RED
+
+      def yellow?(light) = light.color == Color::YELLOW
+
       def dependencies
         Dependencies.new(system: current_system)
       end

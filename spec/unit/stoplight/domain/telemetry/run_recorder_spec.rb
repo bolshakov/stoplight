@@ -19,7 +19,7 @@ RSpec.describe Stoplight::Domain::Telemetry::RunRecorder do
     it "emits a success event for the recorder's color" do
       expect { run_recorder.record_success(duration_ms: 1.2) }.to emit(Stoplight::Domain::Telemetry::RunCompleted).with(
         outcome: :success,
-        color: "green",
+        color: Stoplight::Color::GREEN,
         duration_ms: 1.2,
         failure: nil,
         fallback_used: false,
@@ -34,7 +34,7 @@ RSpec.describe Stoplight::Domain::Telemetry::RunRecorder do
         run_recorder.record_success(duration_ms: 1.2, error:)
       end.to emit(Stoplight::Domain::Telemetry::RunCompleted).with(
         outcome: :success,
-        color: "green",
+        color: Stoplight::Color::GREEN,
         duration_ms: 1.2,
         failure: have_attributes(exception: error, tracked: false),
         fallback_used: false,
@@ -51,7 +51,7 @@ RSpec.describe Stoplight::Domain::Telemetry::RunRecorder do
         run_recorder.record_failure(error, duration_ms: 1.2, fallback_used: true)
       end.to emit(Stoplight::Domain::Telemetry::RunCompleted).with(
         outcome: :failure,
-        color: "green",
+        color: Stoplight::Color::GREEN,
         duration_ms: 1.2,
         failure: have_attributes(exception: error, tracked: true),
         fallback_used: true,
@@ -68,7 +68,7 @@ RSpec.describe Stoplight::Domain::Telemetry::RunRecorder do
         run_recorder.record_blocked(fallback_used: false, retry_after:)
       end.to emit(Stoplight::Domain::Telemetry::RunCompleted).with(
         outcome: :blocked,
-        color: "green",
+        color: Stoplight::Color::GREEN,
         duration_ms: nil,
         failure: nil,
         fallback_used: false,
