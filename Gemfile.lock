@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    stoplight (6.0.0.rc1)
+    stoplight (6.0.0.rc2)
       concurrent-ruby
       zeitwerk
 
