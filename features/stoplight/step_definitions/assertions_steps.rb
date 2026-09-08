@@ -4,7 +4,7 @@ Given(/^(?:the light|its) color is (red|yellow|green)$/) do |color|
   expect(current_light.color).to eq(color)
 end
 
-Then("notification about transition from {color} to {color} is sent") do |from_color, to_color|
+And("notification about transition from {color} to {color} is sent") do |from_color, to_color|
   notification = notifications.last_notification(current_light.name)
   expect(notification).not_to be_empty, "Expected a notification to be sent, but none was found."
   expect(notification)
