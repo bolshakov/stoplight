@@ -15,6 +15,7 @@ Here's what you'll want to tackle during your upgrade, roughly ordered from the 
 - [ ] Round any fractional `window_size` up to a whole number of seconds
 - [ ] Round any fractional `cool_off_time` up to a whole number of seconds, at least 1
 - [ ] Drop `warn_on_clock_skew` from your Redis data store setup
+- [ ] Compare `light.color` and `light.state` against symbols, not strings, and pass a symbol to `light.lock`
 - [ ] Test thoroughly in a staging environment
 
 ### Lights Are Registered and Reused
@@ -249,6 +250,31 @@ Stoplight::DataStore::Redis.new(redis)
 
 All time-dependent decisions are now made from Redis's own clock, so every instance reads the same time no matter
 what its host believes. With the coordination problem solved at the source, there is no skew left to warn about.
+
+### Colors and Lock States Are Symbols
+
+`light.color` now returns `:green`, `:yellow`, or `:red` instead of `"green"`, `"yellow"`, or `"red"`, and
+`light.state` returns `:unlocked`, `:locked_green`, or `:locked_red`. The constants under `Stoplight::Color` and
+`Stoplight::State` hold the same symbols, and every telemetry event carries them too: `from_color` and `to_color` on
+each transition, `from_state` and `to_state` on `LockChanged`.
+
+`light.lock` only recognises the symbols, so `light.lock("red")` now raises `Stoplight::Error::IncorrectColor`.
+
+Code that compares against the constants keeps working. Code that compares against, or passes, string literals needs
+updating:
+
+```ruby
+# Old way that won't work anymore
+alert! if light.color == "red"
+light.lock("green")
+
+# New way
+alert! if light.color == Stoplight::Color::RED
+light.lock(Stoplight::Color::GREEN)
+```
+
+Symbols are the idiomatic Ruby choice for a closed set of values. Anything that serializes them - logs, metrics tags,
+the Admin dashboard's JSON - renders the same text as before.
 
 ### Getting Help
 
