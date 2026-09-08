@@ -75,7 +75,7 @@ And(/^(\d+) request(?:s)? (?:is|are) made with:$/) do |count, table|
   end
 end
 
-When(/^I lock the light to ([^"]*)$/) do |color|
+When("I lock the light to {color}") do |color|
   current_light.lock(color)
 end
 
