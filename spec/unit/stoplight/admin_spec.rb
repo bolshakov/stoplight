@@ -226,6 +226,38 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
         end
       end
 
+      context "with a light locked red" do
+        before { light.lock(Stoplight::Color::RED) }
+
+        it "renders the card with open and locked Light" do
+          get "/systems/#{system_id}/lights"
+
+          expect(last_response).to be_ok
+          expect(last_response.body).to match(/(?<!Half-)Open\s+\(Locked\)/)
+        end
+      end
+
+      context "with a light in recovery" do
+        let(:light) { system.register(light_name, cool_off_time: 1) }
+
+        before do
+          3.times do
+            light.run { raise "boom" }
+          rescue
+            nil
+          end
+        end
+
+        it "renders the card with half-open and recovering Light" do
+          Timecop.travel(Time.now + 2) do
+            get "/systems/#{system_id}/lights"
+
+            expect(last_response).to be_ok
+            expect(last_response.body).to match(/Half-Open\s+\(Recovering\)/)
+          end
+        end
+      end
+
       context "when the light's name contains HTML" do
         let(:light_name) { %(<script>alert("xss")</script>) }
 

@@ -3,7 +3,7 @@ module Stoplight
   class Admin
     module Actions
       class Action
-        def halt: (Integer status) -> void
+        def halt: (Integer status) -> bot
       end
     end
   end
