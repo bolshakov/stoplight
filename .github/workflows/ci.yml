@@ -160,7 +160,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [ spec, versions ]
     environment:
-      name: ${{ github.base_ref == 'develop' && 'Full test suite' || 'Full test suite (automatic)' }}
+      name: Full test suite
       # The gate is an approval, not a release: reviewers still block the job, but no
       # deployment object is created. Incompatible with custom (GitHub App) protection rules.
       deployment: false
@@ -196,7 +196,7 @@ jobs:
         env:
           STOPLIGHT_REDIS_URL: 'redis://127.0.0.1:6379/0'
 
-  # The single name to set as the required status check on develop. Branch protection counts a
+  # The single name to set as the required status check on main. Branch protection counts a
   # skipped job as success, so requiring the stage jobs directly would pass a PR whose stage 3 never ran.
   ci:
     name: CI 🚦
