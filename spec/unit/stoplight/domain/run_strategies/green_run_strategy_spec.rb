@@ -32,7 +32,7 @@ RSpec.describe Stoplight::Domain::Strategies::GreenRunStrategy do
 
       expect { result }.to emit(Stoplight::Domain::Telemetry::RunCompleted).with(
         outcome: :success,
-        color: "green",
+        color: Stoplight::Color::GREEN,
         duration_ms: be_within(0.00001).of(0.8),
         failure: nil,
         fallback_used: false,
@@ -80,7 +80,7 @@ RSpec.describe Stoplight::Domain::Strategies::GreenRunStrategy do
             expect { result }.to raise_error(error)
           end.to emit(Stoplight::Domain::Telemetry::RunCompleted).with(
             outcome: :failure,
-            color: "green",
+            color: Stoplight::Color::GREEN,
             duration_ms: be_within(0.00001).of(0.8),
             failure: have_attributes(exception: error, tracked: true),
             fallback_used: false,
@@ -105,7 +105,7 @@ RSpec.describe Stoplight::Domain::Strategies::GreenRunStrategy do
             expect(result).to eq("Fallback")
           end.to emit(Stoplight::Domain::Telemetry::RunCompleted).with(
             outcome: :failure,
-            color: "green",
+            color: Stoplight::Color::GREEN,
             duration_ms: be_within(0.00001).of(0.8),
             failure: have_attributes(exception: error, tracked: true),
             fallback_used: true,
@@ -129,7 +129,7 @@ RSpec.describe Stoplight::Domain::Strategies::GreenRunStrategy do
           expect { result }.to raise_error(StandardError, "Test error")
         end.to emit(Stoplight::Domain::Telemetry::RunCompleted).with(
           outcome: :success,
-          color: "green",
+          color: Stoplight::Color::GREEN,
           duration_ms: be_within(0.00001).of(0.8),
           failure: have_attributes(exception: error, tracked: false),
           fallback_used: false,

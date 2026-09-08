@@ -6,8 +6,8 @@ RSpec.describe Stoplight::State do
   end
 
   describe "::UNLOCKED" do
-    it "is a string" do
-      expect(described_class::UNLOCKED).to be_a(String)
+    it "is a symbol" do
+      expect(described_class::UNLOCKED).to be_a(Symbol)
     end
 
     it "is frozen" do
@@ -16,8 +16,8 @@ RSpec.describe Stoplight::State do
   end
 
   describe "::LOCKED_GREEN" do
-    it "is a string" do
-      expect(described_class::LOCKED_GREEN).to be_a(String)
+    it "is a symbol" do
+      expect(described_class::LOCKED_GREEN).to be_a(Symbol)
     end
 
     it "is frozen" do
@@ -26,8 +26,8 @@ RSpec.describe Stoplight::State do
   end
 
   describe "::LOCKED_RED" do
-    it "is a string" do
-      expect(described_class::LOCKED_RED).to be_a(String)
+    it "is a symbol" do
+      expect(described_class::LOCKED_RED).to be_a(Symbol)
     end
 
     it "is frozen" do

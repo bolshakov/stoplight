@@ -5,15 +5,15 @@ module Stoplight
     type duration_ms = Float
 
     # Light Colors
-    type green = "green"
-    type yellow = "yellow"
-    type red = "red"
+    type green = :green
+    type yellow = :yellow
+    type red = :red
     type color = green | yellow | red
 
     # Light States
-    type unlocked = "unlocked"
-    type locked_green = "locked_green"
-    type locked_red = "locked_red"
+    type unlocked = :unlocked
+    type locked_green = :locked_green
+    type locked_red = :locked_red
     type state = unlocked | locked_green | locked_red
 
     type recovery_decision = :green | :yellow | :red

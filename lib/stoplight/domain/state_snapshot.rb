@@ -23,7 +23,7 @@ module Stoplight
       # @!attribute time
       #   The time when the snapshot was taken
 
-      # @return [String] one of +Color::GREEN+, +Color::RED+, or +Color::YELLOW+
+      # @return [Symbol] one of +Color::GREEN+, +Color::RED+, or +Color::YELLOW+
       def color
         if locked_state == State::LOCKED_GREEN
           Color::GREEN

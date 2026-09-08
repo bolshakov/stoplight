@@ -79,14 +79,14 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
       patch "/systems/#{system_id}/lights/#{other_light_id}/unlock"
 
       expect(last_response.status).to eq(404)
-      expect(other_light.state).to eq("locked_green")
+      expect(other_light.state).to eq(Stoplight::State::LOCKED_GREEN)
     end
 
     it "does not lock a light belonging to another system" do
       patch "/systems/#{system_id}/lights/#{other_light_id}/lock", color: "green"
 
       expect(last_response.status).to eq(404)
-      expect(other_light.state).to eq("unlocked")
+      expect(other_light.state).to eq(Stoplight::State::UNLOCKED)
     end
 
     it "bulk-locks only the requested system's lights" do
@@ -96,8 +96,8 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
       patch "/systems/#{system_id}/lights/lock", color: "green"
 
       expect(last_response.status).to eq(302)
-      expect(light.state).to eq("locked_green")
-      expect(other_light.state).to eq("locked_red")
+      expect(light.state).to eq(Stoplight::State::LOCKED_GREEN)
+      expect(other_light.state).to eq(Stoplight::State::LOCKED_RED)
     end
 
     it "does not delete a light belonging to another system" do
@@ -551,7 +551,7 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
 
       expect(last_response.status).to eq(302)
       expect(last_response.headers["location"]).to include("#{last_request.env["HTTP_HOST"]}/systems/#{system_id}/lights")
-      expect(light.state).to eq "unlocked"
+      expect(light.state).to eq(Stoplight::State::UNLOCKED)
     end
 
     it "cannot unlock non-existent light" do
@@ -575,7 +575,7 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
 
       expect(last_response.status).to eq(302)
       expect(last_response.headers["location"]).to include("#{last_request.env["HTTP_HOST"]}/systems/#{system_id}/lights")
-      expect(light.state).to eq "locked_green"
+      expect(light.state).to eq(Stoplight::State::LOCKED_GREEN)
     end
 
     it "locks the light red" do
@@ -583,7 +583,7 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
 
       expect(last_response.status).to eq(302)
       expect(last_response.headers["location"]).to include("#{last_request.env["HTTP_HOST"]}/systems/#{system_id}/lights")
-      expect(light.state).to eq "locked_red"
+      expect(light.state).to eq(Stoplight::State::LOCKED_RED)
     end
 
     it "cannot lock non-existent light" do
@@ -616,7 +616,7 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
       expect(last_response.headers["location"]).to include("#{last_request.env["HTTP_HOST"]}/systems/#{system_id}/lights")
 
       [light, another_light].each do |light|
-        expect(light.state).to eq "locked_green"
+        expect(light.state).to eq(Stoplight::State::LOCKED_GREEN)
       end
     end
 
@@ -625,14 +625,14 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
 
       expect(last_response.status).to eq(302)
       expect(last_response.headers["location"]).to include("#{last_request.env["HTTP_HOST"]}/systems/#{system_id}/lights")
-      expect(green_light.state).to_not eq("locked_green")
+      expect(green_light.state).to_not eq(Stoplight::State::LOCKED_GREEN)
     end
 
     it "refuses to bulk-lock lights to any color other than green" do
       patch "/systems/#{system_id}/lights/lock", color: "red"
 
       expect(last_response.status).to eq(400)
-      expect(light.state).to eq("locked_red")
+      expect(light.state).to eq(Stoplight::State::LOCKED_RED)
     end
 
     it "returns not found for an unknown system_id" do
@@ -745,7 +745,7 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
 
         expect(last_response.status).to eq(403)
         expect(last_response.body).to include("read-only mode")
-        expect(light.state).to eq("locked_green")
+        expect(light.state).to eq(Stoplight::State::LOCKED_GREEN)
       end
     end
 
@@ -756,7 +756,7 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
         patch "/systems/#{system_id}/lights/#{light_id}/lock"
 
         expect(last_response.status).to eq(403)
-        expect(light.state).to eq("unlocked")
+        expect(light.state).to eq(Stoplight::State::UNLOCKED)
       end
     end
 
@@ -767,7 +767,7 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
         patch "/systems/#{system_id}/lights/lock"
 
         expect(last_response.status).to eq(403)
-        expect(light.state).to eq("locked_red")
+        expect(light.state).to eq(Stoplight::State::LOCKED_RED)
       end
     end
 

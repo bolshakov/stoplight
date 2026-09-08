@@ -24,7 +24,7 @@ RSpec.describe Stoplight::Admin::LightView do
   let(:id) { SecureRandom.uuid }
   let(:latest_failure) { Stoplight::Domain::Failure.from_error(latest_exception, time: Time.now) }
   let(:latest_exception) { StandardError.new("bang!") }
-  let(:color) { "green" }
+  let(:color) { Stoplight::Color::GREEN }
   let(:name) { "light-specs" }
   let(:state) { Stoplight::State::UNLOCKED }
   let(:metrics_snapshot) do
@@ -240,19 +240,19 @@ RSpec.describe Stoplight::Admin::LightView do
 
   describe "#locked?" do
     context "when locked green" do
-      let(:state) { "locked_green" }
+      let(:state) { Stoplight::State::LOCKED_GREEN }
 
       it { is_expected.to be_locked }
     end
 
     context "when locked red" do
-      let(:state) { "locked_green" }
+      let(:state) { Stoplight::State::LOCKED_RED }
 
       it { is_expected.to be_locked }
     end
 
     context "when unlocked" do
-      let(:state) { "unlocked" }
+      let(:state) { Stoplight::State::UNLOCKED }
 
       it { is_expected.not_to be_locked }
     end
