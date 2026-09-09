@@ -11,7 +11,7 @@ module Stoplight
         class RecoveryMetrics < UnboundedMetrics
           def initialize(redis:, scripting:, key_space:, clock:)
             super
-            @metrics_key = key_space.key(:recovery_metrics)
+            @metrics_key = key_space.join("recovery_metrics")
           end
         end
       end

@@ -10,22 +10,22 @@ module Stoplight
       #   config = Stoplight::Domain::Config.new(threshold: 0.6, window_size: 300, traffic_control:)
       #
       # Will switch to red if 60% error rate reached within the 5-minute (300 seconds) sliding window.
-      # By default this traffic control strategy starts evaluating only after 10 requests have been made. You can
-      # adjust this by passing a different value for `min_requests` when initializing the strategy.
-      #
-      #   traffic_control = Stoplight::Domain::TrafficControl::ErrorRate.new(min_requests: 100)
       #
       # @api private
       class ErrorRate
-        # @param min_requests Minimum number of requests before traffic control is applied.
-        #   until this number of requests is reached, the error rate will not be considered.
-        def initialize(min_requests: 10)
-          @min_requests = min_requests
+        NAME = :error_rate
+
+        MIN_REQUESTS = 100
+        private_constant :MIN_REQUESTS
+
+        def initialize
         end
 
         def check_compatibility(config)
           if config.window_size.nil?
             CompatibilityResult.incompatible("`window_size` should be set")
+          elsif !config.threshold.is_a?(Numeric)
+            CompatibilityResult.incompatible("`threshold` should be a number")
           elsif config.threshold < 0 || config.threshold > 1
             CompatibilityResult.incompatible("`threshold` should be between 0 and 1")
           else
@@ -39,16 +39,20 @@ module Stoplight
 
           raise ArgumentError, "accepts only windowed metrics" if error_rate.nil? || requests.nil?
 
-          requests >= min_requests && error_rate >= config.threshold
+          requests >= MIN_REQUESTS && error_rate >= config.threshold
         end
+
+        def name = NAME.to_s
 
         def ==(other)
-          other.is_a?(self.class) && min_requests == other.min_requests
+          other.is_a?(self.class)
         end
 
-        protected
+        def eql?(other)
+          self == other
+        end
 
-        attr_reader :min_requests
+        def hash = self.class.hash
       end
     end
   end

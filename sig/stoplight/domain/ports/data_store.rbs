@@ -1,0 +1,9 @@
+module Stoplight
+  module Domain
+    # Data store configuration, specifies which data store should be
+    # used to store Stoplight state
+    interface _DataStore
+      def is_a?: (untyped klass) -> bool
+    end
+  end
+end

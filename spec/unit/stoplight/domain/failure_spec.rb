@@ -18,7 +18,7 @@ RSpec.describe Stoplight::Domain::Failure do
 
   describe ".from_error" do
     it "creates a failure" do
-      Timecop.freeze do
+      Stoplight::TimeTravel.freeze do
         failure = described_class.from_error(error, time: Time.now)
         expect(failure.error_class).to eql(error_class)
         expect(failure.error_message).to eql(error_message)
@@ -88,6 +88,27 @@ RSpec.describe Stoplight::Domain::Failure do
       it "returns false" do
         expect(described_class.new(error_class, error_message, time)).not_to eq(other)
       end
+    end
+  end
+
+  describe "#eql? and #hash" do
+    let(:failure) { described_class.new(error_class, error_message, time) }
+    let(:other) { described_class.new(error_class, error_message, time) }
+
+    it "is eql when equal" do
+      expect(failure).to eql(other)
+    end
+
+    it "has the same hash when equal" do
+      expect(failure.hash).to eq(other.hash)
+    end
+
+    it "collides as hash keys when equal" do
+      expect({failure => 1, other => 2}.size).to eq(1)
+    end
+
+    it "dedupes in an array when equal" do
+      expect([failure, other].uniq.size).to eq(1)
     end
   end
 end

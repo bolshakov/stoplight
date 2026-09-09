@@ -1,0 +1,28 @@
+module Stoplight
+  module Infrastructure
+    module Redis
+      module Storage
+        class UnboundedMetrics < Metrics
+          attr_reader redis: redis
+          attr_reader scripting: Scripting
+          attr_reader metrics_key: String
+          attr_reader clock: Domain::_Clock
+
+          def initialize: (
+            redis: redis,
+            clock: Domain::_Clock,
+            scripting: Scripting,
+            key_space: Key,
+          ) -> void
+
+          private def build_metrics_snapshot: (
+            consecutive_errors: String,
+            consecutive_successes: String,
+            last_error_json: String?,
+            last_success_at: String?
+          ) -> Domain::MetricsSnapshot
+        end
+      end
+    end
+  end
+end

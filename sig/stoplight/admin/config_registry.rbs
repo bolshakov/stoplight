@@ -1,0 +1,20 @@
+module Stoplight
+  class Admin
+    class ConfigRegistry
+      @registry: Domain::_Registry
+      @system_config: Domain::Config
+
+      def initialize: (
+          registry: Domain::_Registry,
+          system_config: Domain::Config
+        ) -> void
+
+      def all: -> Array[Domain::Config]
+      def find_by_id: (String) -> Domain::Config?
+
+      private
+
+      def deserialize_config: (Hash[String, untyped]) -> Domain::Config
+    end
+  end
+end

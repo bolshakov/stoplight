@@ -1,0 +1,19 @@
+module Stoplight
+  module Domain
+    module Strategies
+      class RedRunStrategy
+        include _RunStrategy
+
+        @name: String
+        @cool_off_time: duration_seconds
+        @run_recorder: Telemetry::RunRecorder
+
+        def initialize: (
+            name: String,
+            cool_off_time: duration_seconds,
+            run_recorder: Telemetry::RunRecorder,
+          ) -> void
+      end
+    end
+  end
+end

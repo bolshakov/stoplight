@@ -1,0 +1,26 @@
+module Stoplight
+  module Wiring
+    module Default
+      COOL_OFF_TIME: Domain::duration_seconds
+
+      DATA_STORE: Domain::_DataStore
+
+      ERROR_NOTIFIER: Domain::error_notifier
+
+      FORMATTER: Infrastructure::notification_formatter
+
+      NOTIFIERS: Array[Domain::_StateTransitionNotifier]
+
+      THRESHOLD: Domain::percentage | Integer
+      RECOVERY_THRESHOLD: Integer
+
+      WINDOW_SIZE: Domain::duration_seconds?
+
+      TRACKED_ERRORS: Array[Module]
+      SKIPPED_ERRORS: Array[Module]
+
+      TRAFFIC_CONTROL: Domain::_TrafficControl
+      TRAFFIC_RECOVERY: Domain::_TrafficRecovery
+    end
+  end
+end

@@ -1,0 +1,27 @@
+module Stoplight
+  module Infrastructure
+    module Redis
+      module Storage
+        class Registry
+          include Domain::_Registry
+
+          @redis: redis
+          @key_space: Key
+          @clock: Domain::_Clock
+          @config_serializer: singleton(ConfigSerializer)
+
+          def initialize: (
+              redis: redis,
+              key_space: Key,
+              clock: Domain::_Clock,
+              config_serializer: singleton(ConfigSerializer),
+            ) -> void
+
+          private
+
+          def key: () -> String
+        end
+      end
+    end
+  end
+end

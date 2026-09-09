@@ -1,8 +1,0 @@
-module Stoplight
-  module Domain
-    module Tracker
-      class Base
-      end
-    end
-  end
-end

@@ -10,9 +10,10 @@ module Stoplight
       #
       # @api private
       class GreenRunStrategy
-        def initialize(error_tracking_policy:, request_tracker:)
-          @error_tracking_policy = error_tracking_policy
+        def initialize(request_tracker:, run_recorder:, clock:)
           @request_tracker = request_tracker
+          @run_recorder = run_recorder
+          @clock = clock
         end
 
         # Executes the provided code block when the light is in the green state.
@@ -22,37 +23,50 @@ module Stoplight
         # @yield The code block to execute.
         # @return The result of the code block if successful.
         # @raise re-raises the error if it is not tracked or no fallback is provided.
-        def execute(fallback, state_snapshot:, &code)
-          # TODO: Consider implementing sampling rate to limit the memory footprint
-          result = code.call
-          record_success
-          result
-        rescue => error
-          if @error_tracking_policy.track?(error)
-            record_error(error)
+        def execute(fallback, state_snapshot:, error_tracking_policy:, &code)
+          started_at = capture_started_at
 
-            if fallback
-              fallback.call(error)
+          begin
+            result = code.call
+          rescue => error
+            if error_tracking_policy.track?(error)
+              record_error(error, duration_ms: duration_since(started_at), fallback_used: !fallback.nil?)
+
+              if fallback
+                fallback.call(error)
+              else
+                raise
+              end
             else
+              # User chose to not track the error, so we record it as a success
+              record_success(duration_ms: duration_since(started_at), error: error)
               raise
             end
           else
-            # User chose to not track the error, so we record it as a success
-            record_success
-            raise
+            record_success(duration_ms: duration_since(started_at))
+            result
           end
         end
 
         private
 
-        attr_reader :config
         attr_reader :request_tracker
 
-        def record_error(error)
+        def capture_started_at
+          @clock.monotonic_millis if @run_recorder.subscribed?
+        end
+
+        def duration_since(started_at)
+          @clock.monotonic_millis - started_at if started_at
+        end
+
+        def record_error(error, duration_ms:, fallback_used:)
+          @run_recorder.record_failure(error, duration_ms:, fallback_used:)
           request_tracker.record_failure(error)
         end
 
-        def record_success
+        def record_success(duration_ms:, error: nil)
+          @run_recorder.record_success(duration_ms:, error:)
           request_tracker.record_success
         end
       end

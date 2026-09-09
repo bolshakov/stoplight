@@ -1,0 +1,7 @@
+module Stoplight
+  module Domain
+    module Id
+      def self.for: (String) -> String
+    end
+  end
+end

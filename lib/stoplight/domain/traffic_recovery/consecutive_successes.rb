@@ -34,11 +34,13 @@ module Stoplight
       #
       # @api private
       class ConsecutiveSuccesses
+        NAME = :consecutive_successes
+
         def check_compatibility(config)
-          if config.recovery_threshold <= 0
-            CompatibilityResult.incompatible("`recovery_threshold` should be bigger than 0")
-          elsif !config.recovery_threshold.is_a?(Integer)
+          if !config.recovery_threshold.is_a?(Integer)
             CompatibilityResult.incompatible("`recovery_threshold` should be an integer")
+          elsif config.recovery_threshold <= 0
+            CompatibilityResult.incompatible("`recovery_threshold` should be bigger than 0")
           else
             CompatibilityResult.compatible
           end
@@ -55,7 +57,11 @@ module Stoplight
           end
         end
 
+        def hash = self.class.hash
+
         def ==(other) = other.is_a?(self.class)
+
+        def name = NAME.to_s
       end
     end
   end

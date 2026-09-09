@@ -2,20 +2,26 @@
 
 module Stoplight
   # A System is a composition root that groups related circuit breakers
-  # with shared configuration.
+  # with shared infrastructure configuration and defaults.
   interface _System
     def name: -> String
+    # @api private
+    def config: -> Domain::Config
 
-    def light: (
+    def register: (
       String name,
-      ?cool_off_time: optional[duration],
-      ?threshold: optional[percentage | Integer],
+      ?cool_off_time: optional[Domain::duration_seconds],
+      ?threshold: optional[Domain::percentage | Integer],
       ?recovery_threshold: optional[Integer],
-      ?window_size: optional[duration?],
-      ?skipped_errors: optional[Array[_ExceptionMatcher]],
-      ?tracked_errors: optional[Array[_ExceptionMatcher]],
-      ?traffic_control: optional[traffic_control],
-      ?traffic_recovery: optional[traffic_recovery]
-    ) -> _Light
+      ?window_size: optional[Domain::duration_seconds?],
+      ?skipped_errors: optional[Array[Module] | Module],
+      ?tracked_errors: optional[Array[Module] | Module],
+      ?traffic_control: optional[Wiring::traffic_control],
+      ?traffic_recovery: optional[Wiring::traffic_recovery]
+    ) -> Domain::Light
+
+    def light: (String name) -> Domain::Light
+
+    def telemetry: -> Domain::_Telemetry
   end
 end

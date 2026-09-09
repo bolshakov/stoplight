@@ -46,4 +46,33 @@ RSpec.describe Stoplight::Domain::ErrorTrackingPolicy do
       it { is_expected.to be false }
     end
   end
+
+  describe "#with" do
+    let(:tracked_errors) { [StandardError] }
+    let(:skipped_errors) { [Timeout::Error] }
+
+    it "returns itself when no overrides are provided" do
+      expect(policy.with).to equal(policy)
+    end
+
+    it "replaces tracked errors and preserves skipped errors" do
+      overridden = policy.with(tracked: KeyError)
+
+      expect(overridden).to satisfy { |candidate|
+        candidate.track?(KeyError.new) &&
+          !candidate.track?(ArgumentError.new) &&
+          !candidate.track?(Timeout::Error.new)
+      }
+    end
+
+    it "replaces skipped errors and preserves tracked errors" do
+      overridden = policy.with(skipped: KeyError)
+
+      expect(overridden).to satisfy { |candidate|
+        candidate.track?(Timeout::Error.new) &&
+          candidate.track?(ArgumentError.new) &&
+          !candidate.track?(KeyError.new)
+      }
+    end
+  end
 end

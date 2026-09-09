@@ -13,7 +13,7 @@ RSpec.shared_examples "a metrics snapshot" do
       record_success
 
       expect do
-        Timecop.freeze(last_success_time) do
+        Stoplight::TimeTravel.freeze(last_success_time) do
           record_success
         end
       end.to change { metrics_snapshot.last_success_at }.to(be_within(rounding_error).of(last_success_time))
@@ -21,7 +21,7 @@ RSpec.shared_examples "a metrics snapshot" do
 
     specify "when first success tracked" do
       expect do
-        Timecop.freeze(last_success_time) do
+        Stoplight::TimeTravel.freeze(last_success_time) do
           record_success
         end
       end.to change { metrics_snapshot.last_success_at }.from(nil).to(be_within(rounding_error).of(last_success_time))
@@ -35,7 +35,7 @@ RSpec.shared_examples "a metrics snapshot" do
       record_failure(error)
 
       expect do
-        Timecop.freeze(last_error_time) do
+        Stoplight::TimeTravel.freeze(last_error_time) do
           record_failure(error)
         end
       end.to change { metrics_snapshot.last_error_at }.to(be_within(rounding_error).of(last_error_time))
@@ -43,7 +43,7 @@ RSpec.shared_examples "a metrics snapshot" do
 
     specify "when first failure tracked" do
       expect do
-        Timecop.freeze(last_error_time) do
+        Stoplight::TimeTravel.freeze(last_error_time) do
           record_failure(error)
         end
       end.to change { metrics_snapshot.last_error_at }.from(nil).to(be_within(rounding_error).of(last_error_time))
@@ -60,6 +60,12 @@ RSpec.shared_examples "a metrics snapshot" do
 
     specify "when first tracked failure" do
       expect { record_failure(error) }.to change { metrics_snapshot.last_error&.error_message }.from(nil).to(error.message)
+    end
+  end
+
+  describe "#record_failure" do
+    it "returns the resulting metrics snapshot" do
+      expect(record_failure(error)).to eq(metrics_snapshot)
     end
   end
 
@@ -94,6 +100,34 @@ RSpec.shared_examples "a metrics snapshot" do
     it "increments multiple failers recorded" do
       expect { record_failure(error) }.to change { metrics_snapshot.consecutive_errors }.by(1)
       expect { record_failure(error) }.to change { metrics_snapshot.consecutive_errors }.by(1)
+    end
+  end
+
+  describe "#clear" do
+    before do
+      record_failure(error)
+      record_success
+      clear
+    end
+
+    it "resets last_error to nil" do
+      expect(metrics_snapshot.last_error).to be_nil
+    end
+
+    it "resets last_error_at to nil" do
+      expect(metrics_snapshot.last_error_at).to be_nil
+    end
+
+    it "resets last_success_at to nil" do
+      expect(metrics_snapshot.last_success_at).to be_nil
+    end
+
+    it "resets consecutive_errors to 0" do
+      expect(metrics_snapshot.consecutive_errors).to eq(0)
+    end
+
+    it "resets consecutive_successes to 0" do
+      expect(metrics_snapshot.consecutive_successes).to eq(0)
     end
   end
 end

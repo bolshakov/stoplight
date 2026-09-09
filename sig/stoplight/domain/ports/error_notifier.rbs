@@ -1,0 +1,12 @@
+module Stoplight
+  module Domain
+    # Called when Stoplight internals fail (e.g. Redis unavailable, notifier I/O).
+    interface _ErrorNotifier
+      def call: (StandardError) -> void
+
+      # Object methods
+      def ==: (untyped) -> bool
+      def is_a?: (untyped) -> bool
+    end
+  end
+end

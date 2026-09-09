@@ -1,0 +1,35 @@
+module Stoplight
+  module Infrastructure
+    module Redis
+      module Storage
+        class WindowMetrics < Metrics
+          METRICS_FIELDS: Array[String]
+
+          @redis: redis
+          @scripting: Scripting
+          @clock: Domain::_Clock
+          @metrics_key: Key
+          @ts_index_key: Key
+          @window_size: Integer
+
+          def initialize: (
+            redis: redis,
+            scripting: Scripting,
+            config: Domain::Config,
+            clock: Domain::_Clock,
+            key_space: Key
+          ) -> void
+
+          def build_metrics_snapshot: (
+            successes: Integer,
+            errors: Integer,
+            consecutive_errors: String,
+            consecutive_successes: String,
+            last_error_json: String?,
+            last_success_at: String?,
+          ) -> Domain::MetricsSnapshot
+        end
+      end
+    end
+  end
+end

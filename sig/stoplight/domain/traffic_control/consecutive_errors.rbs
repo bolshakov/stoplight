@@ -1,0 +1,11 @@
+module Stoplight
+  module Domain
+    module TrafficControl
+      class ConsecutiveErrors
+        include _TrafficControl
+
+        NAME: :consecutive_errors
+      end
+    end
+  end
+end

@@ -1,0 +1,14 @@
+module Stoplight
+  class Admin < Sinatra::Base
+    COLORS: Array[Domain::color]
+    ASSETS_PATH: String
+    ASSET_DIGESTS: Hash[String, String]
+    ONE_YEAR_IN_SECONDS: Integer
+    include Helpers
+
+    self.@systems: Array[Wiring::System]
+    def self.add_system: (Wiring::System) -> void
+    def self.__stoplight__reset_systems!: -> void
+    def self.validate_persistent_system!: (Wiring::System) -> Wiring::System
+  end
+end

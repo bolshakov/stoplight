@@ -1,0 +1,13 @@
+module Stoplight
+  module Infrastructure
+    module FailSafe
+      class ErrorNotifier
+        include Domain::_ErrorNotifier
+
+        attr_reader error_notifier: Domain::error_notifier
+
+        def initialize: (error_notifier: Domain::error_notifier) -> void
+      end
+    end
+  end
+end

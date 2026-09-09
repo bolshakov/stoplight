@@ -1,0 +1,22 @@
+# frozen_string_literal: true
+
+module Stoplight
+  class Admin
+    module Actions
+      # This action removes a light's metadata from Redis
+      class Remove < Action
+        @config_registry: ConfigRegistry
+        @storage: Wiring::System::Storage
+        @registry: Domain::_Registry
+
+        def initialize: (
+            config_registry: ConfigRegistry,
+            storage: Wiring::System::Storage,
+            registry: Domain::_Registry
+          ) -> void
+
+        def call: (light_id: String) -> void
+      end
+    end
+  end
+end

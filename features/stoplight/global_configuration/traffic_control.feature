@@ -20,10 +20,10 @@ Feature: Stoplight configuration - Traffic Control
       | Threshold       | 0.5        |
       | Window Size     | 60         |
     When a light exists
-    And 10 requests are made
+    And 50 requests are made
     Then the light color is green
     When the service starts failing with "timeout"
-    And 9 requests are made
+    And 49 requests are made
     Then the light color is green
     When 1 request is made
     Then the light color is red

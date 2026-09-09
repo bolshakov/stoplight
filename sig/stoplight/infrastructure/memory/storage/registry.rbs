@@ -1,0 +1,13 @@
+# frozen_string_literal: true
+
+module Stoplight
+  module Infrastructure
+    module Memory
+      module Storage
+        class Registry
+          include Domain::_Registry
+        end
+      end
+    end
+  end
+end

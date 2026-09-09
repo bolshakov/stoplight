@@ -1,0 +1,27 @@
+module Stoplight
+  module Infrastructure
+    module Memory
+      module Storage
+        class WindowMetrics
+          class SlidingWindow
+            @buckets: Hash[Integer, Integer]
+            @running_sum: Integer
+            @evicted_through: Integer?
+            @clock: Domain::_Clock
+            @window_size: Domain::duration_seconds
+
+            def initialize: (clock: Domain::_Clock, window_size: Domain::duration_seconds) -> void
+
+            def increment: -> void
+
+            def sum_in_window: -> Integer
+
+            private def slide_window!: (Float window_start) -> void
+
+            def inspect: -> String
+          end
+        end
+      end
+    end
+  end
+end

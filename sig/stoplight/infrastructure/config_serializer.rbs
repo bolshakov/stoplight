@@ -1,0 +1,12 @@
+module Stoplight
+  module Infrastructure
+    class ConfigSerializer
+      def self.call: (Domain::Config)-> Hash[String, untyped]
+
+      private
+
+      def self.serialize_traffic_control: (Domain::_TrafficControl) -> String
+      def self.serialize_traffic_recovery: (Domain::_TrafficRecovery) -> String
+    end
+  end
+end

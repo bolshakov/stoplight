@@ -9,31 +9,73 @@ RSpec.describe Stoplight::Admin::Helpers, :redis do
     end
   end
 
-  let(:data_store) { Stoplight::DataStore::Redis.new(redis) }
-  let(:settings) { class_double(Stoplight::Admin, data_store: data_store) }
+  let(:systems) { [system] }
+  let(:system) { instance_double(Stoplight::Wiring::System, persistent?: true, __stoplight__storage: storage) }
+  let(:storage) { instance_double(Stoplight::Wiring::System::Storage) }
+  let(:settings) { class_double(Stoplight::Admin, systems: systems) }
 
   before do
     allow(helper).to receive(:settings).and_return(settings)
   end
 
   describe "#dependencies" do
-    it "returns Dependencies" do
+    before { allow(helper).to receive(:current_system).and_return(system) }
+
+    it "returns Dependencies for the current system" do
+      expect(Stoplight::Admin::Dependencies).to receive(:new).with(system:).and_call_original
+
       expect(helper.dependencies).to be_an_instance_of(Stoplight::Admin::Dependencies)
     end
+  end
 
-    context "with Redis data store" do
-      let(:data_store) { Stoplight::DataStore::Redis.new(redis) }
-
-      it "does not raise an error" do
-        expect { helper.dependencies }.to_not raise_error
+  describe "#show_system_switcher?" do
+    context "with one system configured" do
+      it "returns false" do
+        expect(helper.show_system_switcher?).to be false
       end
     end
 
-    context "with Memory data store" do
-      let(:data_store) { Stoplight::DataStore::Memory.new }
+    context "with more than one system configured" do
+      let(:systems) { [system, system] }
 
-      it "raises an error" do
-        expect { helper.dependencies }.to raise_error StandardError, /Stoplight Admin requires a persistent data store/
+      it "returns true" do
+        expect(helper.show_system_switcher?).to be true
+      end
+    end
+  end
+
+  describe "#red?" do
+    let(:light) { instance_double(Stoplight::Admin::LightView, color: Stoplight::Color::RED) }
+
+    context "when light is red" do
+      it "returns true" do
+        expect(helper.red?(light)).to be_truthy
+      end
+    end
+
+    context "when light is not red" do
+      let(:light) { instance_double(Stoplight::Admin::LightView, color: Stoplight::Color::GREEN) }
+
+      it "returns false" do
+        expect(helper.red?(light)).to be_falsey
+      end
+    end
+  end
+
+  describe "#yellow?" do
+    let(:light) { instance_double(Stoplight::Admin::LightView, color: Stoplight::Color::YELLOW) }
+
+    context "when light is yellow" do
+      it "returns true" do
+        expect(helper.yellow?(light)).to be_truthy
+      end
+    end
+
+    context "when light is not yellow" do
+      let(:light) { instance_double(Stoplight::Admin::LightView, color: Stoplight::Color::RED) }
+
+      it "returns false" do
+        expect(helper.yellow?(light)).to be_falsey
       end
     end
   end

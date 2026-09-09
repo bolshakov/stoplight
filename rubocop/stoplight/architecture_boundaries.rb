@@ -96,7 +96,7 @@ module RuboCop
           if node.receiver.const_type?
             receiver_name = extract_constant_path(node.receiver)
             if receiver_name == "Stoplight" &&
-                [:light, :system_light, :configure].include?(node.method_name)
+                [:light, :register, :configure].include?(node.method_name)
               add_offense(
                 node,
                 message: format(
