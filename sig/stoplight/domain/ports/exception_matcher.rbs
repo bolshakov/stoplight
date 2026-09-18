@@ -1,0 +1,10 @@
+module Stoplight
+  module Domain
+    interface _ExceptionMatcher
+      def ===: (untyped) -> bool
+
+      # Object methods
+      def is_a?: (untyped) -> bool
+    end
+  end
+end

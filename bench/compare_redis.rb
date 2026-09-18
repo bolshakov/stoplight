@@ -5,7 +5,10 @@ require_relative "../lib/stoplight"
 require "redis"
 
 redis = Redis.new
-cashed_stoplight = Stoplight(SecureRandom.uuid, data_store: Stoplight::DataStore::Redis.new(redis), threshold: 10)
+Stoplight.configure do |config|
+  config.data_store = Stoplight::DataStore::Redis.new(redis)
+end
+cashed_stoplight = Stoplight(SecureRandom.uuid, threshold: 10)
 
 Benchmark.ips do |b|
   b.report("after") { cashed_stoplight.run(->(_) {}) { raise if rand(11) % 10 == 1 } }

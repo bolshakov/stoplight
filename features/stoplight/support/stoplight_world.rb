@@ -8,14 +8,6 @@ require_relative "notifications"
 
 # The StoplightWorld module provides a shared context for testing Stoplight functionality.
 module StoplightWorld
-  # @!attribute data_store
-  #   @return [Stoplight::DataStore::Base]
-  attr_reader :data_store
-
-  # @!attribute notifiers
-  #   @return [<Stoplight::Notifier::Base>]
-  attr_reader :notifiers
-
   # Provides access to the notifications system used for testing.
   #
   # @return [Notifications] The notifications instance.
@@ -36,6 +28,10 @@ module StoplightWorld
   # @!attribute last_fallback_received_argument
   #   @return [any] the last argument received by a fallback function
   attr_accessor :last_fallback_received_argument
+
+  # @!attribute received_telemetry_events
+  #   @return [Array<Stoplight::Domain::Telemetry::Envelope>] events captured by scenario telemetry subscriptions
+  attr_reader :received_telemetry_events
 
   # Provides access to the echo service used for testing.
   #
@@ -66,20 +62,23 @@ module StoplightWorld
     @last_exception = nil
     @last_result = nil
     @last_fallback_received_argument = :nothing
-    @data_store = case ENV.fetch("STOPLIGHT_DATA_STORE", "Memory")
-    when "Memory"
-      Stoplight::DataStore::Memory.new
-    when "Redis"
-      redis = Redis.new(url: ENV.fetch("STOPLIGHT_REDIS_URL", "redis://127.0.0.1:6379/0"))
+    @received_telemetry_events = []
+    Stoplight.configure(trust_me_im_an_engineer: true) do |config|
+      config.data_store = case ENV.fetch("STOPLIGHT_DATA_STORE", "Memory")
+      when "Memory"
+        Stoplight::DataStore::Memory.new
+      when "Redis"
+        redis = Redis.new(url: ENV.fetch("STOPLIGHT_REDIS_URL", "redis://127.0.0.1:6379/0"))
 
-      DatabaseCleaner[:redis].db = redis
-      DatabaseCleaner.clean_with(:deletion)
-      Stoplight::DataStore::Redis.new(redis)
-    else
-      raise ArgumentError, "unexpected data store"
+        DatabaseCleaner[:redis].db = redis
+        DatabaseCleaner.clean_with(:deletion)
+        Stoplight::DataStore::Redis.new(redis)
+      else
+        raise ArgumentError, "unexpected data store"
+      end
+      config.notifiers = [TestNotifier.new(notifications)]
     end
-    @notifiers = [TestNotifier.new(notifications)]
   end
 
-  def system = @system ||= Stoplight.__stoplight__system(SecureRandom.uuid, notifiers:, data_store:)
+  def system = @system ||= Stoplight.register_system(SecureRandom.uuid)
 end

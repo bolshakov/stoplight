@@ -1,0 +1,17 @@
+module Stoplight
+  class Admin
+    module Actions
+      class LockAll < Action
+        @config_registry: ConfigRegistry
+        @storage: Wiring::System::Storage
+
+        def initialize: (
+            config_registry: ConfigRegistry,
+            storage: Wiring::System::Storage
+          ) -> void
+
+        def call: (color: Domain::color)-> void
+      end
+    end
+  end
+end

@@ -1,0 +1,22 @@
+# Single source of truth for every version CI tests: adding or dropping one is an edit here and
+# nowhere else. bin/ci.rb derives the matrices from this file and refuses to run if latest_* drifts.
+
+latest_ruby: '4.0'
+
+rubies:
+  - '3.3'
+  - '3.4'
+  - '4.0'
+
+images:
+  - redis:7.4
+  - redis:8.4
+  - redis:8.6
+  - valkey/valkey:7.2-alpine
+  - valkey/valkey:8.1-alpine
+  - valkey/valkey:9.1-alpine
+
+# Newest of each engine. Drives the smoke specs and the cucumber features.
+latest_images:
+  - redis:8.6
+  - valkey/valkey:9.1-alpine

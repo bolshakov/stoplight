@@ -4,14 +4,48 @@ module Stoplight
   class Admin
     module Helpers
       COLORS = [
-        GREEN = Stoplight::Color::GREEN,
-        YELLOW = Stoplight::Color::YELLOW,
-        RED = Stoplight::Color::RED
+        Color::GREEN,
+        Color::YELLOW,
+        Color::RED
       ].freeze
 
-      # @return [Stoplight::Admin::Dependencies]
+      def red?(light) = light.color == Color::RED
+
+      def yellow?(light) = light.color == Color::YELLOW
+
       def dependencies
-        Dependencies.new(data_store:)
+        Dependencies.new(system: current_system)
+      end
+
+      def system_url(system_id, path)
+        url("/systems/#{system_id}#{path}")
+      end
+
+      def asset_path(name)
+        url("/#{name}?v=#{ASSET_DIGESTS.fetch(name)}")
+      end
+
+      # A read-only control keeps its place but loses its href, so there is nothing to follow
+      # and nothing to copy out of the page. aria-disabled carries that state to assistive
+      # technology, which the styling alone does not reach.
+      #
+      # @example The same control, writable and read-only
+      #   control_attributes(url("/light-id/lock?color=red"), verb: "patch")
+      #   # => href="http://localhost/light-id/lock?color=red" data-turbo-method="patch"
+      #
+      #   # once `set :read_only, true`
+      #   # => aria-disabled="true" title="Disabled in read-only mode"
+      #
+      # @param confirm [String, nil] message to confirm before following the link
+      # @param verb [String] the HTTP verb Turbo should use to follow the link
+      def control_attributes(href, confirm: nil, verb: "post")
+        return %(aria-disabled="true" title="Disabled in read-only mode") if settings.read_only?
+
+        [
+          %(href="#{CGI.escapeHTML(href)}"),
+          %(data-turbo-method="#{verb}"),
+          (%(data-turbo-confirm="#{CGI.escapeHTML(confirm)}") if confirm)
+        ].compact.join(" ")
       end
 
       def time_ago_in_words(time)
@@ -29,19 +63,22 @@ module Stoplight
         end
       end
 
-      private def data_store
-        if settings.data_store.is_a?(Stoplight::DataStore::Memory)
-          raise "Stoplight Admin requires a persistent data store, but the current data store is Memory. " \
-            "Please configure a different data store in your Stoplight configuration."
-        else
-          Stoplight::Wiring::LightBuilder.new(
-            config: Wiring::DefaultConfig.with(
-              name: "noname",
-              data_store: settings.data_store
-            ),
-            factory: nil
-          ).__send__(:data_store)
+      def find_system(system_id)
+        settings.systems.find(-> { halt 404 }) do |system|
+          system.config.id == system_id
         end
+      end
+
+      def current_system_id
+        T.must(params[:system_id])
+      end
+
+      def current_system
+        find_system(current_system_id)
+      end
+
+      def show_system_switcher?
+        settings.systems.size > 1
       end
     end
   end

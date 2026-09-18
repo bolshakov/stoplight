@@ -4,12 +4,12 @@ RSpec.describe Stoplight::Infrastructure::Redis::Storage::State, :redis do
   shared_examples Stoplight::Infrastructure::Redis::Storage::State do
     subject(:storage) { described_class.new(clock:, redis: connection, scripting:, key_space:, cool_off_time:) }
 
-    let(:scripting) { Stoplight::Infrastructure::Redis::Storage::Scripting.new(redis:) }
-    let(:key_space) { Stoplight::Infrastructure::Redis::Storage::KeySpace.build(light_name:, system_name:) }
+    let(:scripting) do
+      Stoplight::Infrastructure::Redis::Storage::Scripting.new(redis:, scripts_path: Stoplight::TimeTravel.scripts_path)
+    end
+    let(:key_space) { Stoplight::DataStore::Redis.key_space.join(SecureRandom.uuid) }
     let(:clock) { Stoplight::Infrastructure::SystemClock.new }
 
-    let(:light_name) { SecureRandom.uuid }
-    let(:system_name) { SecureRandom.uuid }
     let(:cool_off_time) { 60 }
 
     def state_snapshot = storage.state_snapshot

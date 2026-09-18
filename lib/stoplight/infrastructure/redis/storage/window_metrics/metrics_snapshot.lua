@@ -1,26 +1,19 @@
-local number_of_metric_buckets = tonumber(ARGV[1])
-local window_start_ts = tonumber(ARGV[2])
-local window_end_ts = tonumber(ARGV[3])
-local metrics_fields = {}
-for idx = 4, #ARGV do
-  table.insert(metrics_fields, ARGV[idx])
-end
+-- @include now
+-- @include window_metrics/_evict
 
-local metrics_key = KEYS[1]
+local window_size = tonumber(ARGV[1])
 
-local function count_events(start_idx, bucket_count, start_ts)
-  local total = 0
-  for idx = start_idx, start_idx + bucket_count - 1 do
-    total = total + tonumber(redis.call('ZCOUNT', KEYS[idx], start_ts, window_end_ts))
-  end
-  return total
-end
+local metrics_key  = KEYS[1]
+local ts_index_key = KEYS[2]
 
-local offset = 2
-local successes = count_events(2, number_of_metric_buckets, window_start_ts)
+local current_ts = now() / 1000.0
+evict_buckets(metrics_key, ts_index_key, math.floor(current_ts) - window_size)
 
-offset = offset + number_of_metric_buckets
-local errors = count_events(offset, number_of_metric_buckets, window_start_ts)
+-- copy arguments starting from index 2 to fields' tail
+local fields = {'total_successes','total_failures', unpack(ARGV, 2) }
+local metrics = redis.call('HMGET', metrics_key, unpack(fields))
 
-local metrics = redis.call('HMGET',  metrics_key, unpack(metrics_fields))
-return {successes, errors, unpack(metrics)}
+metrics[1] = tonumber(metrics[1]) or 0 -- total_successes
+metrics[2] = tonumber(metrics[2]) or 0 -- total_failures
+
+return metrics

@@ -46,7 +46,7 @@ module Stoplight
     #
     class DefaultConfiguration
       def initialize
-        @config = DefaultConfig.with
+        @config = DefaultConfig
         @cool_off_time = T.undefined
         @threshold = T.undefined
         @recovery_threshold = T.undefined
@@ -76,7 +76,8 @@ module Stoplight
 
       # Builds and validates configuration
       def to_config!
-        ConfigurationDsl.new(
+        SystemConfigurationDsl.new(
+          "Default",
           cool_off_time: @cool_off_time,
           threshold: @threshold,
           recovery_threshold: @recovery_threshold,

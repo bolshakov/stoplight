@@ -27,11 +27,13 @@ module Stoplight
       # Will switch to red only if 5 consecutive failures occur regardless of the time window
       # @api private
       class ConsecutiveErrors
+        NAME = :consecutive_errors
+
         def check_compatibility(config)
-          if config.threshold <= 0
-            CompatibilityResult.incompatible("`threshold` should be bigger than 0")
-          elsif !config.threshold.is_a?(Integer)
+          if !config.threshold.is_a?(Integer)
             CompatibilityResult.incompatible("`threshold` should be an integer")
+          elsif config.threshold <= 0
+            CompatibilityResult.incompatible("`threshold` should be bigger than 0")
           else
             CompatibilityResult.compatible
           end
@@ -41,8 +43,16 @@ module Stoplight
           metrics.consecutive_errors >= config.threshold
         end
 
+        def name = NAME.to_s
+
+        def hash = self.class.hash
+
         def ==(other)
           other.is_a?(self.class)
+        end
+
+        def eql?(other)
+          self == other
         end
       end
     end

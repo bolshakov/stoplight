@@ -2,65 +2,86 @@ name: 🚦Stoplight
 
 on:
   pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - '.docs/**'
   push:
     branches: [ main ]
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - '.docs/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:  # added using https://github.com/step-security/secure-repo
   contents: read
 
 jobs:
+  versions:
+    name: Resolve versions 🧮
+    runs-on: ubuntu-latest
+    outputs:
+      latest-ruby: ${{ steps.resolve.outputs.latest-ruby }}
+      smoke: ${{ steps.resolve.outputs.smoke }}
+      extended: ${{ steps.resolve.outputs.extended }}
+      features: ${{ steps.resolve.outputs.features }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # Reads .github/ci-versions.yml. Stdlib only, so the runner's preinstalled Ruby is enough.
+      - name: Resolve matrices
+        id: resolve
+        run: bin/ci.rb matrices
+
   steep:
     name: Type Check 🔍
     runs-on: ubuntu-latest
+    needs: versions
     steps:
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Set up Ruby
-        uses: ruby/setup-ruby@19a43a6a2428d455dbd1b85344698725179c9d8c # v1.289.0
+        uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1.321.0
         with:
-          ruby-version: 4.0
+          ruby-version: ${{ needs.versions.outputs.latest-ruby }}
           bundler-cache: true
-      - run: |
-          bundle exec steep check --format=github
+      - run: bundle exec rbs collection install
+      - run: bundle exec steep check --format=github
+      - run: bundle exec rbs -I sig validate
 
   rubocop:
     name: Standard 👮
     runs-on: ubuntu-latest
+    needs: versions
     permissions:
       checks: write
       contents: read
     steps:
       - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@58077d3c7e43986b6b15fba718e8ea69e387dfcc # v2.15.1
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
         with:
           egress-policy: audit
 
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Standard Ruby
-        uses: standardrb/standard-ruby-action@eecb3f730879f5b8830705348c2961e5aa26de78 # v1.5.0
+        uses: standardrb/standard-ruby-action@df5152f6106147e13feb6ee0fa820b0d435cb8cd # v1.6.0
         with:
-          ruby-version: '4.0'
+          ruby-version: ${{ needs.versions.outputs.latest-ruby }}
           autofix: false
 
   features:
     name: Features (${{ matrix.data-store }} Data Store and ${{ matrix.data-store-image }} Data Store image using ${{matrix.light-creation}}) 🥒
     runs-on: ubuntu-latest
+    # Gated transitively: spec-full cannot start without approval, so neither can this. Its own
+    # environment would go pending only after spec-full finished, costing a second approval click.
+    needs: [ spec-full, versions ]
     strategy:
-      matrix:
-        light-creation: [ 'Stoplight()', 'System#light' ]
-        data-store: [ 'Redis' ]
-        data-store-image:
-          - 'redis:7.4'
-          - 'valkey/valkey:8-alpine'
-        include:
-          # Memory does not depend on the Data Store so we only want to run its suite once
-          - data-store: 'Memory'
-            data-store-image: 'redis:7.4'
-            light-creation: 'Stoplight()'
-          - data-store: 'Memory'
-            data-store-image: 'redis:7.4'
-            light-creation: 'System#light'
+      matrix: ${{ fromJSON(needs.versions.outputs.features) }}
     services:
       data-store:
         image: ${{ matrix.data-store-image }}
@@ -73,17 +94,17 @@ jobs:
           - 6379:6379
     steps:
       - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@58077d3c7e43986b6b15fba718e8ea69e387dfcc # v2.15.1
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
         with:
           egress-policy: audit
 
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@19a43a6a2428d455dbd1b85344698725179c9d8c # v1.289.0
+        uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1.321.0
         with:
-          ruby-version: 4.0
+          ruby-version: ${{ needs.versions.outputs.latest-ruby }}
           bundler-cache: true
 
       - name: Run Features
@@ -96,20 +117,12 @@ jobs:
 
   spec:
     permissions:
-      checks: write  # for coverallsapp/github-action to create new checks
       contents: read  # for actions/checkout to fetch code
-    name: Specs on Ruby ${{ matrix.ruby }} with Data Store as ${{ matrix.data-store-image }} 💚
+    name: Smoke Specs on Ruby ${{ matrix.ruby }} with Data Store as ${{ matrix.data-store-image }} 💚
     runs-on: ubuntu-latest
+    needs: [ steep, rubocop, versions ]
     strategy:
-      matrix:
-        data-store-image:
-          - 'redis:6.2'
-          - 'redis:7.2'
-          - 'redis:7.4'
-          - 'redis:8.0'
-          - 'valkey/valkey:7.2-alpine'
-          - 'valkey/valkey:8.1-alpine'
-        ruby: [ '3.2', '3.3', '3.4', '4.0' ]
+      matrix: ${{ fromJSON(needs.versions.outputs.smoke) }}
     services:
       data-store:
         image: ${{ matrix.data-store-image }}
@@ -122,15 +135,15 @@ jobs:
           - 6379:6379
     steps:
       - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@58077d3c7e43986b6b15fba718e8ea69e387dfcc # v2.15.1
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
         with:
           egress-policy: audit
 
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@19a43a6a2428d455dbd1b85344698725179c9d8c # v1.289.0
+        uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1.321.0
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
@@ -139,25 +152,61 @@ jobs:
         run: bundle exec rake spec
         env:
           STOPLIGHT_REDIS_URL: 'redis://127.0.0.1:6379/0'
-      - name: Coveralls
-        uses: coverallsapp/github-action@5cbfd81b66ca5d10c19b062c04de0199c215fb6e # v2.3.7
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          flag-name: ruby-${{ matrix.ruby }}
-          parallel: true
-  finish:
+
+  spec-full:
     permissions:
-      checks: write  # for coverallsapp/github-action to create new checks
-    needs: spec
+      contents: read  # for actions/checkout to fetch code
+    name: Specs on Ruby ${{ matrix.ruby }} with Data Store as ${{ matrix.data-store-image }} 💚
     runs-on: ubuntu-latest
+    needs: [ spec, versions ]
+    environment:
+      name: Full test suite
+      # The gate is an approval, not a release: reviewers still block the job, but no
+      # deployment object is created. Incompatible with custom (GitHub App) protection rules.
+      deployment: false
+    strategy:
+      matrix: ${{ fromJSON(needs.versions.outputs.extended) }}
+    services:
+      data-store:
+        image: ${{ matrix.data-store-image }}
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
     steps:
       - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@58077d3c7e43986b6b15fba718e8ea69e387dfcc # v2.15.1
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
         with:
           egress-policy: audit
 
-      - name: Coveralls Finished
-        uses: coverallsapp/github-action@5cbfd81b66ca5d10c19b062c04de0199c215fb6e # master
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1.321.0
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          parallel-finished: true
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+
+      - name: Run Tests
+        run: bundle exec rake spec
+        env:
+          STOPLIGHT_REDIS_URL: 'redis://127.0.0.1:6379/0'
+
+  # The single name to set as the required status check on main. Branch protection counts a
+  # skipped job as success, so requiring the stage jobs directly would pass a PR whose stage 3 never ran.
+  ci:
+    name: CI 🚦
+    runs-on: ubuntu-latest
+    if: always()
+    needs: [ versions, steep, rubocop, spec, spec-full, features ]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Verify every stage succeeded
+        env:
+          RESULTS: ${{ toJSON(needs) }}
+        run: bin/ci.rb verify

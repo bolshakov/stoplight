@@ -2,10 +2,11 @@
 
 RSpec.describe Stoplight::Infrastructure::Notifier::FailSafe do
   describe "#notify" do
-    subject(:fail_safe_notifier) { described_class.new(notifier:, error_notifier:) }
+    subject(:fail_safe_notifier) { described_class.new(notifier:, error_notifier:, circuit_breaker:) }
 
     let(:notifier) { instance_double(NullNotifier) }
     let(:config) { instance_double(Stoplight::Domain::Config) }
+    let(:circuit_breaker) { Stoplight(SecureRandom.uuid) }
     let(:error_notifier) { instance_double(Proc) }
     let(:from_color) { "green" }
     let(:to_color) { "red" }

@@ -1,0 +1,9 @@
+module Stoplight
+  module DataStore
+    # Configuration for Memory-backed Stoplight storage.
+    #
+    # @note This is a configuration object, not the storage implementation itself.
+    class Memory < Base
+    end
+  end
+end

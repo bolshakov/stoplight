@@ -15,7 +15,7 @@ Stoplight.configure do |config|
   config.data_store = data_store
 end
 
-stoplight = Stoplight("example").with_threshold(5).with_cool_off_time(60)
+stoplight = Stoplight("example", threshold: 5, cool_off_time: 60)
 
 PROF_TYPES = {
   flat: RubyProf::FlatPrinter,

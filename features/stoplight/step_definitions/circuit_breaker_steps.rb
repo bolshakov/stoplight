@@ -27,9 +27,14 @@ end
 
 Given(/^(?:the light) enters yellow state$/) do
   step("the light enters red state")
-  Timecop.travel(Time.now + 1) until current_light.color == Stoplight::Color::YELLOW
 
-  expect(current_light.color).to eq(Stoplight::Color::YELLOW)
+  deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + 10
+  until current_light.color == Stoplight::Color::YELLOW
+    if Process.clock_gettime(Process::CLOCK_MONOTONIC) > deadline
+      raise "light stayed #{current_light.color} for 10s - is its cool off time longer than that?"
+    end
+    sleep(0.1)
+  end
 end
 
 Given(/^(?:the light) enters green state$/) do
@@ -58,7 +63,19 @@ And(/^(\d+) request(?:s)? (?:is|are) made(?: with "([^"]+)" message)?(?: (?:with
   end
 end
 
-When(/^I lock the light to ([^"]*)$/) do |color|
+And(/^(\d+) request(?:s)? (?:is|are) made with:$/) do |count, table|
+  settings = collect_settings(table).slice(:tracked_errors, :skipped_errors)
+
+  count.to_i.times do |x|
+    capture_result do
+      current_light.run(**settings) do
+        echo_service.call("hello #{x}")
+      end
+    end
+  end
+end
+
+When("I lock the light to {color}") do |color|
   current_light.lock(color)
 end
 

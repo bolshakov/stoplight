@@ -22,7 +22,7 @@ module Stoplight
         #     clock: SystemClock.new,
         #     redis: Redis.new,
         #     scripting: Scripting.new(redis:),
-        #     key_space: KeySpace.build(light_name: "payments", system_name: "main"),
+        #     key_space:,
         #     cool_off_time: 60
         #   )
         #
@@ -46,7 +46,7 @@ module Stoplight
             @clock = clock
             @cool_off_time = cool_off_time
 
-            @state_key = key_space.key(:state)
+            @state_key = key_space.join("state")
           end
 
           def set_state(state)
@@ -63,7 +63,7 @@ module Stoplight
 
             Domain::StateSnapshot.new(
               breached_at: breached_at_raw && clock.at(breached_at_raw.to_f),
-              locked_state: locked_state || Stoplight::State::UNLOCKED,
+              locked_state: locked_state&.to_sym || Stoplight::State::UNLOCKED,
               recovery_scheduled_after: recovery_scheduled_after_raw && clock.at(recovery_scheduled_after_raw.to_f),
               recovery_started_at: recovery_started_at_raw && clock.at(recovery_started_at_raw.to_f),
               time: clock.current_time
@@ -102,8 +102,8 @@ module Stoplight
           #
           def transition_to_green
             became_green = scripting.call(
-              :"state/transition_to_green",
-              args: [clock.current_time.to_f],
+              "state/transition_to_green",
+              args: [],
               keys: [state_key]
             )
             became_green == 1
@@ -113,8 +113,8 @@ module Stoplight
           #
           def transition_to_yellow
             became_yellow = scripting.call(
-              :"state/transition_to_yellow",
-              args: [clock.current_time.to_f],
+              "state/transition_to_yellow",
+              args: [],
               keys: [state_key]
             )
             became_yellow == 1
@@ -127,8 +127,8 @@ module Stoplight
             recovery_scheduled_after_ts = current_ts + cool_off_time
 
             became_red = scripting.call(
-              :"state/transition_to_red",
-              args: [current_ts, recovery_scheduled_after_ts],
+              "state/transition_to_red",
+              args: [recovery_scheduled_after_ts],
               keys: [state_key]
             )
 

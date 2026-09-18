@@ -1,0 +1,15 @@
+module Stoplight
+  module Domain
+    class LightInfo < Data
+      attr_reader name: String
+
+      def self.new: (
+          name: String,
+        ) -> instance
+
+      def initialize: (
+          name: String,
+        ) -> void
+    end
+  end
+end

@@ -1,6 +1,8 @@
+-- @include now
+
 local meta_key = KEYS[1]
-local current_ts = tonumber(ARGV[1])
-local recovery_scheduled_after_ts = tonumber(ARGV[2])
+local recovery_scheduled_after_ts = tonumber(ARGV[1])
+local current_ts = now() / 1000
 
 --  1 if the field is a new field in the hash and the value was set
 local became_red = redis.call('HSETNX', meta_key, 'breached_at', current_ts)

@@ -3,7 +3,7 @@
 require "redis"
 require "database_cleaner/redis"
 
-cleaning_strategy = DatabaseCleaner::Redis::Deletion.new(only: ["#{Stoplight::Infrastructure::Redis::DataStore::KEY_PREFIX}*"])
+cleaning_strategy = DatabaseCleaner::Redis::Deletion.new(only: ["stoplight:*"])
 DatabaseCleaner.strategy = cleaning_strategy
 
 RSpec.shared_context :redis, :redis do
