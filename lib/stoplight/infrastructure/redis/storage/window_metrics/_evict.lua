@@ -18,6 +18,8 @@ local function evict_buckets(metrics_key, ts_index_key, window_start)
     return
   end
 
+  local failures, successes = 0, 0
+
   for from = 1, #buckets, EVICT_BATCH_SIZE do
     local to = math.min(from + EVICT_BATCH_SIZE - 1, #buckets)
 
@@ -29,16 +31,15 @@ local function evict_buckets(metrics_key, ts_index_key, window_start)
 
     local values = redis.call('HMGET', metrics_key, unpack(fields))
 
-    local failures, successes = 0, 0
     for i = 1, #values, 2 do
       failures = failures + (tonumber(values[i]) or 0)
       successes = successes + (tonumber(values[i + 1]) or 0)
     end
 
-    redis.call('HINCRBY', metrics_key, 'total_failures', -failures)
-    redis.call('HINCRBY', metrics_key, 'total_successes', -successes)
     redis.call('HDEL', metrics_key, unpack(fields))
   end
 
+  redis.call('HINCRBY', metrics_key, 'total_failures', -failures)
+  redis.call('HINCRBY', metrics_key, 'total_successes', -successes)
   redis.call('ZREMRANGEBYSCORE', ts_index_key, '-inf', window_start)
 end
