@@ -203,7 +203,6 @@ Feature: Admin Lights Overview
 
   Rule: Landing on the panel root takes you somewhere useful
 
-    @wip
     Scenario: The root redirects to the first configured system
       Given systems "Core" and "Analytics" are configured in that order
       When I visit the admin root

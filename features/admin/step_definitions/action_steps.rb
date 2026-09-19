@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 When("I visit the admin root") do
-  pending
+  get "/"
 end
 
 When("I visit the lights page") do

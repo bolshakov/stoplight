@@ -21,11 +21,12 @@ Given("no systems are configured") do
 end
 
 Given("a system {string} is configured") do |system_name|
-  pending
+  configure_system(system_name)
 end
 
 Given(/^systems "([^"]+)" and "([^"]+)" are configured(?: in that order)?$/) do |first_system_name, second_system_name|
-  pending
+  configure_system(first_system_name)
+  configure_system(second_system_name)
 end
 
 Given("a system {string} configured with:") do |system_name, table|

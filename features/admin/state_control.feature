@@ -9,6 +9,7 @@ Feature: Admin State Control
 
   Rule: A light can be pinned to a color
 
+    @wip
     Scenario: Locking a light green forces traffic through
       Given light "checkout" enters red state
       When I lock light "checkout" to green

@@ -30,7 +30,8 @@ Then("I am redirected to the lights page") do
 end
 
 Then("I am redirected to the lights page for system {string}") do |system_name|
-  pending
+  expect(last_response).to be_redirect
+  expect(URI(last_response.location).path).to eq(lights_path(system_named(system_name)))
 end
 
 Then("I am redirected to the lights page for the default system") do

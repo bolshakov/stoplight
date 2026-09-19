@@ -7,7 +7,7 @@ require "database_cleaner/redis"
 module AdminWorld
   include Rack::Test::Methods
 
-  def app = Stoplight::Admin
+  def app = Stoplight::Admin::Panel
 
   def default_host = "localhost"
 
@@ -22,10 +22,24 @@ module AdminWorld
     @redis ||= Redis.new(url: ENV.fetch("STOPLIGHT_REDIS_URL", "redis://127.0.0.1:6379/0"))
   end
 
-  def system_for(light_reference)
-    pending("lights in named systems") if light_reference.system_name
+  def configure_system(name)
+    system = Stoplight.register_system(name, data_store: Stoplight::DataStore::Redis.new(redis))
+    Stoplight::Admin.add_system(system)
+    configured_systems[name] = system
+  end
 
-    Stoplight.__stoplight__default_system
+  def system_named(name)
+    configured_systems.fetch(name)
+  end
+
+  def configured_systems
+    @configured_systems ||= {}
+  end
+
+  def system_for(light_reference)
+    return Stoplight.__stoplight__default_system unless light_reference.system_name
+
+    system_named(light_reference.system_name)
   end
 
   def find_light(light_reference)
