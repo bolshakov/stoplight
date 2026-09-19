@@ -3,6 +3,7 @@
 require "rack/test"
 require "redis"
 require "database_cleaner/redis"
+require "nokogiri"
 
 module AdminWorld
   include Rack::Test::Methods
@@ -51,6 +52,10 @@ module AdminWorld
     light_id = Stoplight::Domain::Id.for(light_reference.name)
 
     "/systems/#{system_id}/lights/#{light_id}#{suffix}"
+  end
+
+  def document
+    Nokogiri::HTML5(last_response.body)
   end
 
   def lights_path(system)

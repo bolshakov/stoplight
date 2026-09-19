@@ -61,7 +61,6 @@ Feature: Admin Lights Overview
 
   Rule: An empty panel explains itself rather than showing a blank page
 
-    @wip
     Scenario: No lights are registered
       Given no lights exist
       When I visit the lights page
@@ -70,7 +69,6 @@ Feature: Admin Lights Overview
       And I see no color counts
 
     # A system with no lights still renders - it is configured, just idle.
-    @wip
     Scenario: A configured system has no lights of its own
       Given a system "Analytics" is configured
       And no lights in system "Analytics" exist

@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "nokogiri"
+
 RSpec.describe Stoplight::Admin::Panel, :redis, type: %i[request] do
   let(:data_store) { Stoplight::DataStore::Redis.new(redis) }
   let(:system) { Stoplight.register_system(SecureRandom.uuid, data_store:) }
@@ -22,6 +24,62 @@ RSpec.describe Stoplight::Admin::Panel, :redis, type: %i[request] do
 
       expect(last_response).to be_redirect
       expect(URI(last_response.location).path).to eq("/stoplights/systems/#{system_id}/lights")
+    end
+  end
+
+  describe "GET /systems/:system_id/lights" do
+    def document
+      Nokogiri::HTML5(last_response.body)
+    end
+
+    it "responds with 404 for a system that is not configured" do
+      get "/systems/unknown/lights"
+
+      expect(last_response.status).to eq(404)
+    end
+
+    it "lists registered lights by name instead of the empty state" do
+      system.register("checkout")
+
+      get "/systems/#{system_id}/lights"
+
+      expect(document.css('[data-role="light-row"]').map { |row| row["data-light"] }).to eq(["checkout"])
+      expect(document.css('[data-role="empty-state"]')).to be_empty
+    end
+
+    it "lists only the lights of the requested system" do
+      other_system = Stoplight.register_system(SecureRandom.uuid, data_store: data_store)
+      Stoplight::Admin.add_system(other_system)
+      other_system.register("reporting")
+      system.register("checkout")
+
+      get "/systems/#{other_system.config.id}/lights"
+
+      expect(document.css('[data-role="light-row"]').map { |row| row["data-light"] }).to eq(["reporting"])
+    end
+
+    it "escapes light names" do
+      system.register("<b>checkout</b>")
+
+      get "/systems/#{system_id}/lights"
+
+      expect(last_response.body).not_to include("<b>checkout</b>")
+      expect(document.at_css('[data-role="light-row"]').text.strip).to eq("<b>checkout</b>")
+    end
+
+    it "serves every stylesheet and script the page links to" do
+      get "/systems/#{system_id}/lights"
+
+      asset_urls = document.css("link[rel=stylesheet]").map { |link| link["href"] } +
+        document.css("script[src]").map { |script| script["src"] }
+
+      expect(asset_urls).not_to be_empty
+      asset_urls.each do |asset_url|
+        uri = URI(asset_url)
+        get "#{uri.path}?#{uri.query}"
+
+        expect(last_response.status).to eq(200), "#{asset_url} responded with #{last_response.status}"
+      end
     end
   end
 end

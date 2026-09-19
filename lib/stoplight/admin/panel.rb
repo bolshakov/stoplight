@@ -16,7 +16,6 @@ module Stoplight
       helpers Helpers
 
       set :systems, proc { Admin.settings.systems }
-      set :erb, escape_html: true
       set :views, File.join(T.must(__dir__), "panel", "views")
       set :nonce, proc { |request| }
       set :public_folder, ASSETS_PATH
@@ -26,6 +25,12 @@ module Stoplight
         system = settings.systems.first
 
         redirect system_url(system.config.id, "/lights")
+      end
+
+      get "/systems/:system_id/lights" do
+        lights, _stats = dependencies.stats_action.call
+
+        erb :lights, locals: {lights: lights}
       end
     end
   end

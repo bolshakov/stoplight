@@ -47,7 +47,7 @@ Then(/^read-only mode is (on|off)$/) do |mode|
 end
 
 Then("I am told to check that the admin uses the same data store as the application") do
-  pending
+  expect(document.text).to include("uses the same data store as your application")
 end
 
 Then("I am told the panel is running in read-only mode") do

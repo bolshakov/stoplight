@@ -53,11 +53,9 @@ Given("the following lights in system {string} exist:") do |system_name, table|
 end
 
 Given("no lights exist") do
-  pending
 end
 
-Given("no lights in system {string} exist") do |system_name|
-  pending
+Given("no lights in system {string} exist") do |_system_name|
 end
 
 Given("{int} {color} lights exist") do |count, color|

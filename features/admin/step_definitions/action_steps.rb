@@ -5,11 +5,11 @@ When("I visit the admin root") do
 end
 
 When("I visit the lights page") do
-  pending
+  get lights_path(app.settings.systems.first)
 end
 
 When("I visit the lights page for system {string}") do |system_name|
-  pending
+  get lights_path(system_named(system_name))
 end
 
 When("I open the actions for {light}") do |light|

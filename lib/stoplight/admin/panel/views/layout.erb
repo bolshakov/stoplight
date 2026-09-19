@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Stoplight Admin</title>
+
+    <link rel="icon" href="<%= asset_path("favicon.ico") %>" sizes="32x32">
+    <link rel="icon" href="<%= asset_path("icon.svg") %>" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="<%= asset_path("apple-touch-icon.png") %>">
+
+    <script nonce="<%= settings.nonce(request) %>" type="module" src="<%= asset_path("turbo.es2017-esm.min.js") %>"></script>
+    <link rel="stylesheet" href="<%= asset_path("flowbite.min.css") %>">
+    <link rel="stylesheet" href="<%= asset_path("panel.css") %>">
+  </head>
+  <body class="panel-page bg-gray-50 text-gray-900 antialiased">
+    <header class="flex flex-wrap items-center justify-between p-4 bg-white border-b border-gray-200">
+      <a href="<%= url("/") %>" class="flex items-center gap-3">
+        <span class="text-2xl" aria-hidden="true">🚦</span>
+        <span class="text-2xl font-semibold whitespace-nowrap">Stoplight Admin</span>
+      </a>
+    </header>
+
+    <main>
+      <%= yield %>
+    </main>
+  </body>
+</html>

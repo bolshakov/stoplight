@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 Then("I see {string}") do |text|
-  pending
+  expect(document.text).to include(text)
 end
 
 Then("I see {light}") do |light|
@@ -13,7 +13,7 @@ Then("I do not see {light}") do |light|
 end
 
 Then("I see no color counts") do
-  pending
+  expect(document.css('[data-role="color-count"]')).to be_empty
 end
 
 Then("the lights are listed in this order:") do |table|
