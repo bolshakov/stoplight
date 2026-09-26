@@ -241,6 +241,9 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
         let(:light) { system.register(light_name, cool_off_time: 1) }
 
         before do
+          allow(Stoplight::Infrastructure::Redis::Storage::Scripting)
+            .to receive(:default_scripts_path).and_return(Stoplight::TimeTravel.scripts_path)
+
           3.times do
             light.run { raise "boom" }
           rescue
@@ -249,7 +252,7 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
         end
 
         it "renders the card with half-open and recovering Light" do
-          Timecop.travel(Time.now + 2) do
+          Stoplight::TimeTravel.freeze(Time.now + 2) do
             get "/systems/#{system_id}/lights"
 
             expect(last_response).to be_ok

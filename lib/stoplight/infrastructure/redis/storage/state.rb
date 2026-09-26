@@ -57,16 +57,19 @@ module Stoplight
           end
 
           def state_snapshot
-            breached_at_raw, locked_state, recovery_scheduled_after_raw, recovery_started_at_raw = redis.with do |client|
-              client.hmget(state_key, :breached_at, :locked_state, :recovery_scheduled_after, :recovery_started_at)
-            end
+            breached_at_raw, locked_state, recovery_scheduled_after_raw, recovery_started_at_raw, now_ms =
+              scripting.call(
+                "state/state_snapshot",
+                args: [],
+                keys: [state_key]
+              )
 
             Domain::StateSnapshot.new(
               breached_at: breached_at_raw && clock.at(breached_at_raw.to_f),
               locked_state: locked_state&.to_sym || Stoplight::State::UNLOCKED,
               recovery_scheduled_after: recovery_scheduled_after_raw && clock.at(recovery_scheduled_after_raw.to_f),
               recovery_started_at: recovery_started_at_raw && clock.at(recovery_started_at_raw.to_f),
-              time: clock.current_time
+              time: clock.at(now_ms.fdiv(1000))
             )
           end
 
@@ -123,12 +126,9 @@ module Stoplight
           # Transitions to RED state and ensures only one notification
           #
           def transition_to_red
-            current_ts = clock.current_time.to_f
-            recovery_scheduled_after_ts = current_ts + cool_off_time
-
             became_red = scripting.call(
               "state/transition_to_red",
-              args: [recovery_scheduled_after_ts],
+              args: [cool_off_time],
               keys: [state_key]
             )
 
