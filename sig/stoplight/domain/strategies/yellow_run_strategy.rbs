@@ -1,0 +1,53 @@
+module Stoplight
+  module Domain
+    module Strategies
+      class YellowRunStrategy
+        include _RunStrategy
+
+        attr_reader state_store: Domain::_StateStore
+        attr_reader metrics_store: _MetricsStore
+        attr_reader recovery_lock_store: _RecoveryLockStore
+        attr_reader request_tracker: Tracker::RecoveryProbe
+
+        @name: String
+        @config: Domain::Config
+        @clock: _Clock
+        @run_recorder: Telemetry::RunRecorder
+        @emitter: Telemetry::Emitter
+
+        def initialize: (
+          name: String,
+          request_tracker: Tracker::RecoveryProbe,
+          state_store: _StateStore,
+          metrics_store: _MetricsStore,
+          recovery_lock_store: _RecoveryLockStore,
+          config: Config,
+          clock: _Clock,
+          run_recorder: Telemetry::RunRecorder,
+          emitter: Telemetry::Emitter
+        ) -> void
+
+        def with_recovery_lock: [T] (
+            fallback: (^(StandardError?) -> T)?,
+            state_snapshot: StateSnapshot,
+          ) { (duration_ms) -> T } -> T
+
+        def capture_started_at: () -> Float
+        def duration_since: (duration_ms) -> duration_ms
+
+        def record_recovery_probe_success: (
+            duration_ms: duration_ms,
+            ?error: StandardError?
+          ) -> void
+
+        def record_recovery_probe_failure: (
+            StandardError,
+            duration_ms: duration_ms,
+            fallback_used: bool,
+          ) -> void
+
+        def enter_recovery: (StateSnapshot) -> void
+      end
+    end
+  end
+end

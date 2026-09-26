@@ -1,0 +1,15 @@
+module Stoplight
+  module Infrastructure
+    module Notifier
+      class FailSafe
+        include Domain::_StateTransitionNotifier
+
+        attr_reader notifier: Domain::_StateTransitionNotifier
+        attr_reader error_notifier: Domain::error_notifier
+        attr_reader circuit_breaker: Domain::Light
+
+        def initialize: (notifier: Domain::_StateTransitionNotifier, error_notifier: Domain::error_notifier, circuit_breaker: Domain::Light) -> void
+      end
+    end
+  end
+end

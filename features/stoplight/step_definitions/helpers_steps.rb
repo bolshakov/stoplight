@@ -1,21 +1,7 @@
 # frozen_string_literal: true
 
-require "timecop"
-
-When(/^(\d+) (seconds|minutes|hours|days) have elapsed$/) do |seconds, unit|
-  case unit
-  when "seconds"
-    seconds = seconds.to_i
-  when "minutes"
-    seconds = seconds.to_i * 60
-  when "hours"
-    seconds = seconds.to_i * 60 * 60
-  when "days"
-    seconds = seconds.to_i * 60 * 60 * 24
-  else
-    raise ArgumentError, "Unknown time unit: #{unit}"
-  end
-  Timecop.travel(Time.now + seconds)
+When(/^(\d+) seconds? have elapsed$/) do |seconds|
+  sleep(seconds.to_i)
 end
 
 When(/^the service starts failing with "([^"]+)"(?: again)?$/) do |error_message|

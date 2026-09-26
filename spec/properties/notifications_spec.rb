@@ -39,9 +39,7 @@ RSpec.describe "Notifications" do
       }.check do |executions_sequence|
         light = Stoplight(
           SecureRandom.uuid,
-          data_store:,
           cool_off_time: 3,
-          notifiers: [notifier],
           recovery_threshold: 2
         )
 
@@ -49,7 +47,7 @@ RSpec.describe "Notifications" do
         notifications_before_run = notifier.notifications(light.name).count
 
         executions_sequence.each do |(should_fail, time_gap)|
-          Timecop.freeze(Time.now + time_gap)
+          Stoplight::TimeTravel.freeze(Time.now + time_gap)
           suppress(StandardError) { light.run { raise if should_fail } }
 
           color_after_run = light.color
@@ -70,6 +68,13 @@ RSpec.describe "Notifications" do
     end
   end
 
+  before do
+    Stoplight.configure(trust_me_im_an_engineer: true) do |config|
+      config.data_store = data_store
+      config.notifiers = [notifier]
+    end
+  end
+
   context "with memory data store" do
     let(:data_store) { Stoplight::DataStore::Memory.new }
 
@@ -77,7 +82,7 @@ RSpec.describe "Notifications" do
   end
 
   context "with redis data store", :redis do
-    let(:data_store) { Stoplight::DataStore::Redis.new(redis, warn_on_clock_skew: false) }
+    let(:data_store) { Stoplight::DataStore::Redis.new(redis) }
 
     it_behaves_like "notify about state changes"
   end

@@ -7,9 +7,9 @@ module ConfigureLightWorld
     factory_method = ENV.fetch("STOPLIGHT_LIGHT_CREATION", "Stoplight()")
     case factory_method
     when "Stoplight()"
-      Stoplight(name, notifiers:, data_store:, **collect_settings(table))
-    when "System#light"
-      system.light(name, **collect_settings(table))
+      Stoplight(name, **collect_settings(table))
+    when "System#register"
+      system.register(name, **collect_settings(table))
     else
       raise ArgumentError, "unexpected light creation method: `#{factory_method}`"
     end
@@ -49,12 +49,12 @@ module ConfigureLightWorld
     settings[:window_size] = if value == "nil"
       nil
     else
-      value.to_f
+      value.to_i
     end
   end
 
   def configure_cool_off_time(value, settings)
-    settings[:cool_off_time] = value.to_f
+    settings[:cool_off_time] = value.to_i
   end
 
   def configure_threshold(value, settings)

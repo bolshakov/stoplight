@@ -1,0 +1,13 @@
+module Stoplight
+  module Wiring
+    module ExternalCaller
+      LIB_ROOT: String
+
+      def self.backtrace: () -> Array[String]
+
+      private
+
+      def self.internal?: (Thread::Backtrace::Location) -> bool
+    end
+  end
+end

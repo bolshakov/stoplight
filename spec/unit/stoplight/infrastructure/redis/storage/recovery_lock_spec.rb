@@ -4,10 +4,8 @@ RSpec.describe Stoplight::Infrastructure::Redis::Storage::RecoveryLock, :redis d
   let(:store) { described_class.new(redis:, scripting:, config:, key_space:) }
   let(:scripting) { Stoplight::Infrastructure::Redis::Storage::Scripting.new(redis:) }
   let(:config) { instance_double(Stoplight::Domain::Config, cool_off_time_in_milliseconds:) }
-  let(:key_space) { Stoplight::Infrastructure::Redis::Storage::KeySpace.build(light_name:, system_name:) }
+  let(:key_space) { Stoplight::DataStore::Redis.key_space.join(SecureRandom.uuid) }
 
-  let(:light_name) { SecureRandom.uuid }
-  let(:system_name) { SecureRandom.uuid }
   let(:cool_off_time_in_milliseconds) { 100 }
 
   it "acquires lock and return recovery lock" do

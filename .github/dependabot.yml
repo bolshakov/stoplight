@@ -3,14 +3,30 @@ updates:
   - package-ecosystem: "bundler"
     directory: "/" # Location of package manifests
     schedule:
-      interval: "weekly"
+      interval: "monthly"
+    cooldown:
+      default-days: 14
+    groups:
+      bundler:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
 
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: daily
+      interval: monthly
+    cooldown:
+      default-days: 14
+    groups:
+      github-actions:
+        patterns: ["*"]
 
   - package-ecosystem: docker
     directory: /
     schedule:
-      interval: daily
+      interval: monthly
+    cooldown:
+      default-days: 14
+    groups:
+      docker:
+        patterns: ["*"]

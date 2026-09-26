@@ -1,0 +1,34 @@
+module Stoplight
+  module Infrastructure
+    module Redis
+      module Storage
+        class Scripting
+          SCRIPTS_ROOT: String
+
+          INCLUDE_DIRECTIVE: Regexp
+
+          def self.default_scripts_path: -> Array[String]
+
+          @scripts_path: Array[String]
+          @shas: Hash[String, String]
+          @redis: redis
+
+          def initialize: (
+              redis: redis,
+              ?scripts_path: Array[String],
+            ) -> void
+
+          def call: (
+              String script_name,
+              ?keys: Array[_ToS],
+              ?args: Array[_ToS]
+            ) -> untyped
+
+          private def reload_script: (String script_name) -> void
+
+          private def resolve_source: (String script_name) -> String
+        end
+      end
+    end
+  end
+end

@@ -1,0 +1,17 @@
+module Stoplight
+  module DataStore
+    # Configuration for Redis-backed Stoplight storage.
+    #
+    # @note This is a configuration object, not the storage implementation itself.
+    class Redis < Base
+      KEY_SPACE: Infrastructure::Redis::Key
+
+      attr_reader redis: Infrastructure::redis
+
+      def initialize: (Infrastructure::redis) -> void
+
+      def self.key_space: -> Infrastructure::Redis::Key
+      def key_space: -> Infrastructure::Redis::Key
+    end
+  end
+end

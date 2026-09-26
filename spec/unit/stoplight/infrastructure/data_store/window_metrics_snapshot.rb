@@ -9,7 +9,7 @@ RSpec.shared_examples "a window metrics snapshot" do
         let(:window_size) { 5000 }
 
         before do
-          Timecop.freeze(Time.now - window_size - 10) do
+          Stoplight::TimeTravel.freeze(-window_size - 10) do
             record_success
           end
         end
@@ -27,7 +27,7 @@ RSpec.shared_examples "a window metrics snapshot" do
         let(:window_size) { 5000 }
 
         before do
-          Timecop.freeze(Time.now - window_size - 10) do
+          Stoplight::TimeTravel.freeze(-window_size - 10) do
             record_failure(error)
           end
         end
@@ -36,6 +36,116 @@ RSpec.shared_examples "a window metrics snapshot" do
           record_failure(error)
 
           expect(metrics_snapshot.consecutive_errors).to eq(1)
+        end
+      end
+    end
+
+    describe "#successes" do
+      it "increments when a success is recorded" do
+        expect { record_success }.to change { metrics_snapshot.successes }.by(1)
+      end
+
+      it "does not reset when a failure is recorded after a success" do
+        record_success
+
+        expect { record_failure(error) }.not_to change { metrics_snapshot.successes }
+      end
+
+      it "accumulates multiple successes" do
+        expect { record_success }.to change { metrics_snapshot.successes }.by(1)
+        expect { record_success }.to change { metrics_snapshot.successes }.by(1)
+      end
+    end
+
+    describe "#errors" do
+      it "increments when a failure is recorded" do
+        expect { record_failure(error) }.to change { metrics_snapshot.errors }.by(1)
+      end
+
+      it "does not reset when a success is recorded after a failure" do
+        record_failure(error)
+
+        expect { record_success }.not_to change { metrics_snapshot.errors }
+      end
+
+      it "accumulates multiple failures" do
+        expect { record_failure(error) }.to change { metrics_snapshot.errors }.by(1)
+        expect { record_failure(error) }.to change { metrics_snapshot.errors }.by(1)
+      end
+    end
+
+    describe "window boundary" do
+      context "when a success happened exactly window_size seconds ago" do
+        let(:window_size) { 300 }
+
+        it "excludes it from the count" do
+          Stoplight::TimeTravel.freeze(Time.now) do
+            record_success
+
+            Stoplight::TimeTravel.freeze(window_size) do
+              expect(metrics_snapshot.successes).to eq(0)
+            end
+          end
+        end
+      end
+
+      context "when a failure happened exactly window_size seconds ago" do
+        let(:window_size) { 300 }
+
+        it "excludes it from the count" do
+          Stoplight::TimeTravel.freeze(Time.now) do
+            record_failure(error)
+
+            Stoplight::TimeTravel.freeze(window_size) do
+              expect(metrics_snapshot.errors).to eq(0)
+            end
+          end
+        end
+      end
+    end
+
+    describe "eviction" do
+      context "when many buckets have gone stale before the next write" do
+        let(:window_size) { 4200 }
+        let(:bucket_count) { window_size }
+
+        it "evicts the whole backlog without raising, keeping successes correct" do
+          Stoplight::TimeTravel.freeze do
+            bucket_count.times { |second| Stoplight::TimeTravel.freeze(second) { record_success } }
+
+            Stoplight::TimeTravel.freeze(bucket_count + window_size + 10) do
+              expect { record_success }.not_to raise_error
+
+              expect(metrics_snapshot.successes).to eq(1)
+            end
+          end
+        end
+
+        it "evicts the whole backlog without raising, keeping errors correct" do
+          Stoplight::TimeTravel.freeze do
+            bucket_count.times { |second| Stoplight::TimeTravel.freeze(second) { record_failure(error) } }
+
+            Stoplight::TimeTravel.freeze(bucket_count + window_size + 10) do
+              expect { record_failure(error) }.not_to raise_error
+
+              expect(metrics_snapshot.errors).to eq(1)
+            end
+          end
+        end
+
+        it "subtracts successes and failures independently when buckets mix both" do
+          Stoplight::TimeTravel.freeze do
+            bucket_count.times do |second|
+              Stoplight::TimeTravel.freeze(second) { second.even? ? record_success : record_failure(error) }
+            end
+
+            Stoplight::TimeTravel.freeze(bucket_count + window_size + 10) do
+              record_success
+
+              expect(metrics_snapshot.successes).to eq(1)
+              expect(metrics_snapshot.errors).to eq(0)
+            end
+          end
         end
       end
     end

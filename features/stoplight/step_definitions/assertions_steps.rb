@@ -1,12 +1,10 @@
 # frozen_string_literal: true
 
-match_color = "red|yellow|green"
-
-Given(/^(?:the light|its) color is (?:the )?(#{match_color})$/) do |color|
+Given(/^(?:the light|its) color is (red|yellow|green)$/) do |color|
   expect(current_light.color).to eq(color)
 end
 
-And(/^notification about transition from (#{match_color}) to (#{match_color}) is sent$/) do |from_color, to_color|
+And("notification about transition from {color} to {color} is sent") do |from_color, to_color|
   notification = notifications.last_notification(current_light.name)
   expect(notification).not_to be_empty, "Expected a notification to be sent, but none was found."
   expect(notification)
@@ -35,6 +33,6 @@ Then(/^the fallback have received an error:$/) do |table|
   expect_error(last_fallback_received_argument, table)
 end
 
-Then(/^the light is in "([^"]+)" state$/) do |state|
+Then('the light is in "{state}" state') do |state|
   expect(current_light.state).to eq(state)
 end

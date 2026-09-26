@@ -7,7 +7,8 @@ Feature: Stoplight configuration - Recovery Threshold
     Given global configuration:
       | Recovery Threshold | 3 |
     And the service starts failing with "timeout"
-    When a light exists
+    When a light configured with:
+      | Cool Off Time | 1 |
     And the light enters yellow state
     And the service recovers and starts functioning normally
     When 2 requests are made
@@ -20,6 +21,7 @@ Feature: Stoplight configuration - Recovery Threshold
       | Recovery Threshold | 5 |
     When a light configured with:
       | Recovery Threshold | 2 |
+      | Cool Off Time      | 1 |
     And the service starts failing with "timeout"
     And the light enters yellow state
     And the service recovers and starts functioning normally
@@ -32,6 +34,7 @@ Feature: Stoplight configuration - Recovery Threshold
   Scenario: Global threshold doesn't affect already-created lights
     Given a light configured with:
       | Recovery Threshold | 3 |
+      | Cool Off Time      | 1 |
     And I update global configuration:
       | Recovery Threshold | 10 |
     And the service starts failing with "timeout"
@@ -42,7 +45,8 @@ Feature: Stoplight configuration - Recovery Threshold
     When 1 request is made
     Then the light color is green
 
-    When a light exists
+    When a light configured with:
+      | Cool Off Time | 1 |
     And the service starts failing with "timeout"
     And the light enters yellow state
     And the service recovers and starts functioning normally

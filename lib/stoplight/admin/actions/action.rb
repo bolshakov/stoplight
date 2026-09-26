@@ -5,18 +5,10 @@ module Stoplight
     module Actions
       # @abstract
       class Action
-        # @!attribute lights_repository
-        #   @return [Stoplight::Admin::LightsRepository]
-        attr_reader :lights_repository
-        private :lights_repository
-
-        # @return lights_repository [Stoplight::Admin::LightsRepository]
-        def initialize(lights_repository:)
-          @lights_repository = lights_repository
-        end
-
-        def call(params)
-          raise NotImplementedError
+        # Unwinds to Sinatra's route dispatch via `throw :halt`, skipping the rest of the
+        # action and the route block, and using +status+ as the response status.
+        def halt(status)
+          throw :halt, status
         end
       end
     end

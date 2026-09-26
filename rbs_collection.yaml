@@ -17,6 +17,8 @@ gems:
   - name: connection_pool
   - name: redis
   - name: zeitwerk
+  - name: sinatra
+  - name: sinatra-contrib
 #   # If you want to avoid installing rbs files for gems, you can specify them here.
 #   - name: GEM_NAME
 #     ignore: true
