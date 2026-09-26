@@ -69,7 +69,7 @@ module Stoplight
               locked_state: locked_state&.to_sym || Stoplight::State::UNLOCKED,
               recovery_scheduled_after: recovery_scheduled_after_raw && clock.at(recovery_scheduled_after_raw.to_f),
               recovery_started_at: recovery_started_at_raw && clock.at(recovery_started_at_raw.to_f),
-              time: clock.at(now_ms.to_i / 1000.0)
+              time: clock.at(now_ms.fdiv(1000))
             )
           end
 
