@@ -4,7 +4,8 @@ Feature: Fallback Behavior
   a service under Stoplight protection.
 
   Background:
-    Given a light "custom-config" exists
+    Given a light "custom-config" configured with:
+      | Cool Off Time | 1 |
 
   Scenario: Fallback is ignored when light is green
     Given the light color is green

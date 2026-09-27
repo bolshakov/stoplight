@@ -39,11 +39,9 @@ module Stoplight
             recovery_lock if acquired
           end
 
-          # @param recovery_lock [Stoplight::Infrastructure::Redis::DataStore::RecoveryLockToken]
-          # @return [void]
           def release_lock(recovery_lock)
             scripting.call(
-              :"recovery_lock/release_lock",
+              "recovery_lock/release_lock",
               keys: [lock_key], args: [recovery_lock.token]
             )
           end
@@ -55,7 +53,7 @@ module Stoplight
           attr_reader :scripting
           attr_reader :key_space
 
-          def lock_key = key_space.key(:locks, :recovery)
+          def lock_key = key_space.join("locks", "recovery")
           def lock_timeout = config.cool_off_time_in_milliseconds
         end
       end

@@ -7,9 +7,8 @@ RSpec.describe Stoplight::Infrastructure::FailSafe::Storage::RecoveryLock do
       circuit_breaker: test_circuit_breaker_class.new
     )
   end
-  let(:failover_store) { Stoplight::Infrastructure::Memory::DataStore.new(recovery_lock_store:, clock:) }
+  let(:failover_store) { Stoplight::Infrastructure::Memory::Storage::RecoveryLock.new }
   let(:clock) { Stoplight::Infrastructure::SystemClock.new }
-  let(:recovery_lock_store) { Stoplight::Infrastructure::Memory::DataStore::RecoveryLockStore.new }
   let(:primary_store) { instance_double(NullRecoveryLockStore) }
   let(:config) { Stoplight::Domain::Config.empty.with(name:, window_size: 4, cool_off_time: 60, threshold: 3) }
   let(:error_notifier) { instance_double(Proc) }

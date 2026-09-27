@@ -7,11 +7,27 @@ RSpec.describe Stoplight::Infrastructure::SystemClock do
     subject(:current_time) { clock.current_time }
 
     around do |example|
-      Timecop.freeze { example.run }
+      Stoplight::TimeTravel.freeze { example.run }
     end
 
     it "returns current wall-clock time" do
       expect(current_time).to eq(Time.now)
+    end
+  end
+
+  describe "#monotonic_millis" do
+    subject(:monotonic_millis) { clock.monotonic_millis }
+
+    it "returns monotonic time in milliseconds" do
+      expect(monotonic_millis).to be_within(10).of(Process.clock_gettime(Process::CLOCK_MONOTONIC, :float_millisecond))
+    end
+  end
+
+  describe "#monotonic_seconds" do
+    subject(:monotonic_seconds) { clock.monotonic_seconds }
+
+    it "returns monotonic time in seconds" do
+      expect(monotonic_seconds).to be_within(1).of(Process.clock_gettime(Process::CLOCK_MONOTONIC, :float_second))
     end
   end
 

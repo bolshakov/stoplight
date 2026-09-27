@@ -3,6 +3,7 @@
 RSpec.describe Stoplight::Domain::Config do
   def config_factory(**settings)
     described_class.new(
+      id: SecureRandom.uuid,
       name: "PROTITYPE",
       cool_off_time: 60,
       threshold: 3,

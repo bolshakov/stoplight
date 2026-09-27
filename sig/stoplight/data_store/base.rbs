@@ -1,0 +1,7 @@
+module Stoplight
+  module DataStore
+    # @api private
+    class Base
+    end
+  end
+end

@@ -1,0 +1,43 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR/.claude/hooks/session-start.sh\""
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "#wh-fmt\nf=$(jq -r \".tool_input.file_path // empty\"); [ -n \"$f\" ] && bundle exec standardrb --fix \"$f\"; exit 0"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "#wh-check-lint\ni=$(cat); [ \"$(printf '%s' \"$i\" | jq -r '.stop_hook_active // false')\" = true ] && exit 0\ncd \"$CLAUDE_PROJECT_DIR\" || exit 2\nbundle exec standardrb >&2 || exit 2"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "#steep\ni=$(cat); [ \"$(printf '%s' \"$i\" | jq -r '.stop_hook_active // false')\" = true ] && exit 0\ncd \"$CLAUDE_PROJECT_DIR\" || exit 2\nbundle exec steep check >&2 || exit 2"
+          }
+        ]
+      }
+    ]
+  }
+}

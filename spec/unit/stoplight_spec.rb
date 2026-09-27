@@ -9,12 +9,6 @@ RSpec.describe "Stoplight" do
     Stoplight.configure(trust_me_im_an_engineer: true) {}
   end
 
-  it "creates a stoplight" do
-    expected_light = Stoplight.__stoplight__default_light_factory.build_with(name:)
-
-    expect(light).to eq(expected_light)
-  end
-
   it "is a class" do
     expect(light).to be_kind_of(Stoplight::Domain::Light)
   end
@@ -25,19 +19,10 @@ RSpec.describe "Stoplight" do
     end
   end
 
-  describe ".system_light" do
-    subject(:light) { Stoplight.system_light(name) }
-
-    it "prefix name with __stoplight__" do
-      expect(light.name).to eq("__stoplight__#{name}")
-    end
-  end
-
   context "with settings" do
     subject(:light) { Stoplight(name, **settings) }
 
-    let(:settings) { {**config_settings, **dependencies_settings} }
-    let(:config_settings) do
+    let(:settings) do
       {
         cool_off_time: 1,
         threshold: 4,
@@ -46,20 +31,6 @@ RSpec.describe "Stoplight" do
         skipped_errors: [KeyError],
         recovery_threshold: 3
       }
-    end
-    let(:dependencies_settings) do
-      {
-        data_store: data_store,
-        error_notifier: error_notifier,
-        notifiers: notifiers
-      }
-    end
-    let(:data_store) { Stoplight::DataStore::Memory.new }
-    let(:error_notifier) { ->(error) { warn error } }
-    let(:notifiers) { [Stoplight::Infrastructure::Notifier::IO.new($stdout)] }
-
-    it "instantiates with the correct settings" do
-      expect(light).to eq(Stoplight.__stoplight__default_light_factory.build_with(name:, **settings))
     end
 
     context "when unknown option is given" do
@@ -81,6 +52,16 @@ RSpec.describe "Stoplight" do
         Stoplight.configure {}
       end.to output(/Stoplight reconfigured. Existing circuit breakers will not see new configuration/)
         .to_stderr
+    end
+
+    it "drops telemetry subscriptions made before reconfiguring" do
+      received = []
+      Stoplight.telemetry.subscribe(Stoplight::Telemetry::RunCompleted) { |envelope| received << envelope }
+
+      Stoplight.configure(trust_me_im_an_engineer: true) {}
+      Stoplight(SecureRandom.uuid).run { "ok" }
+
+      expect(received).to be_empty
     end
 
     it "allows configuration with a block" do
@@ -108,24 +89,115 @@ RSpec.describe "Stoplight" do
 
       expect { Stoplight(SecureRandom.uuid) }.not_to raise_error
     end
+
+    it "rejects an invalid default cool_off_time at configure time" do
+      expect do
+        Stoplight.configure(trust_me_im_an_engineer: true) do |config|
+          config.cool_off_time = 0.5
+        end
+      end.to raise_error(Stoplight::Error::ConfigurationError, /`cool_off_time` should be a whole number of seconds/)
+    end
   end
 
-  describe ".__stoplight__system" do
+  describe ".register" do
+    it "returns the registered light" do
+      expect(Stoplight.register(name)).to be_kind_of(Stoplight::Domain::Light)
+    end
+
+    it "returns the same instance on repeated calls with matching settings" do
+      expect(Stoplight.register(name)).to equal(Stoplight.register(name))
+    end
+  end
+
+  describe ".light" do
+    context "when the name was registered" do
+      it "returns the registered light" do
+        registered = Stoplight.register(name)
+
+        expect(Stoplight.light(name)).to be(registered)
+      end
+    end
+
+    context "when the name was never registered" do
+      it "raises an error" do
+        expect { Stoplight.light(name) }.to raise_error(Stoplight::Error::UnregisteredLightError, /#{name}/)
+      end
+    end
+  end
+
+  describe ".telemetry" do
+    it "delivers events published while running a registered light" do
+      received = []
+      Stoplight.telemetry.subscribe(Stoplight::Telemetry::RunCompleted) { |envelope| received << envelope }
+
+      Stoplight(name).run { "ok" }
+
+      expect(received.size).to eq(1)
+      expect(received.first.payload).to be_a(Stoplight::Telemetry::RunCompleted)
+    end
+
+    it "does not expose the producer side of the bus" do
+      expect(Stoplight.telemetry).not_to respond_to(:publish)
+      expect(Stoplight.telemetry).not_to respond_to(:subscribed?)
+    end
+  end
+
+  describe ".register_system" do
     context "name is not in use yet" do
-      subject(:system) { Stoplight.__stoplight__system(SecureRandom.uuid) }
+      subject(:system) { Stoplight.register_system(SecureRandom.uuid) }
 
       it { is_expected.to be_kind_of(Stoplight::Wiring::System) }
     end
 
     context "name is already in use" do
-      subject(:system) { Stoplight.__stoplight__system(name) }
+      subject(:system) { Stoplight.register_system(name) }
 
       let(:name) { SecureRandom.uuid }
 
       it "raises argument error" do
-        Stoplight.__stoplight__system(name)
+        Stoplight.register_system(name)
 
         expect { system }.to raise_error(ArgumentError)
+      end
+    end
+
+    context "notifier circuit breaker isolation" do
+      before do
+        stub_const("BrokenNotifier", Class.new do
+          def notify(info, from_color, to_color, error = nil)
+            raise "notifier always fails"
+          end
+        end)
+
+        stub_const("SpyNotifier", Class.new do
+          attr_reader :notifications
+
+          def initialize
+            @notifications = []
+          end
+
+          def notify(info, from_color, to_color, error = nil)
+            @notifications << [from_color, to_color]
+          end
+        end)
+      end
+
+      let(:spy_notifier) { SpyNotifier.new }
+
+      it "a flaky notifier does not suppress notifications from an independent notifier" do
+        # Three BrokenNotifiers of the same class are enough to exhaust the failover
+        # system's default threshold of 3 in a single notifiers.each pass. If all
+        # notifiers share one circuit breaker (the bug), the breaker trips before
+        # SpyNotifier runs and SpyNotifier never sees the green→red transition.
+        system = Stoplight.register_system(
+          SecureRandom.uuid,
+          threshold: 1,
+          notifiers: [BrokenNotifier.new, BrokenNotifier.new, BrokenNotifier.new, spy_notifier]
+        )
+
+        system.register("payments").run(->(_) {}) { raise "dependency failure" }
+
+        expect(spy_notifier.notifications).not_to be_empty
       end
     end
   end

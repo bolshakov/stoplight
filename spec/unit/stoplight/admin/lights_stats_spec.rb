@@ -16,23 +16,23 @@ RSpec.describe Stoplight::Admin::LightsStats do
     context "when there are lights" do
       let(:lights) do
         [
-          Stoplight::Admin::LightsRepository::Light.new(
-            name: "green",
-            color: "green",
-            state: "unlocked",
-            failures: []
+          Stoplight::Admin::LightView.new(
+            config: instance_double(Stoplight::Domain::Config, name: "green", id: "a"),
+            metrics_snapshot: instance_double(Stoplight::Domain::MetricsSnapshot, last_error: nil),
+            state_snapshot: instance_double(Stoplight::Domain::StateSnapshot, color: Stoplight::Color::GREEN, locked_state: Stoplight::State::UNLOCKED),
+            recovery_metrics_snapshot: nil
           ),
-          Stoplight::Admin::LightsRepository::Light.new(
-            name: "yellow",
-            color: "yellow",
-            state: "unlocked",
-            failures: []
+          Stoplight::Admin::LightView.new(
+            config: instance_double(Stoplight::Domain::Config, name: "yellow", id: "b"),
+            metrics_snapshot: instance_double(Stoplight::Domain::MetricsSnapshot, last_error: nil),
+            state_snapshot: instance_double(Stoplight::Domain::StateSnapshot, color: Stoplight::Color::YELLOW, locked_state: Stoplight::State::UNLOCKED),
+            recovery_metrics_snapshot: instance_double(Stoplight::Domain::MetricsSnapshot, requests: 4)
           ),
-          Stoplight::Admin::LightsRepository::Light.new(
-            name: "red",
-            color: "red",
-            state: "locked",
-            failures: []
+          Stoplight::Admin::LightView.new(
+            config: instance_double(Stoplight::Domain::Config, name: "red", id: "c"),
+            metrics_snapshot: instance_double(Stoplight::Domain::MetricsSnapshot, last_error: nil),
+            state_snapshot: instance_double(Stoplight::Domain::StateSnapshot, color: Stoplight::Color::RED, locked_state: Stoplight::State::LOCKED_RED),
+            recovery_metrics_snapshot: nil
           )
         ]
       end

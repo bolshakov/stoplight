@@ -3,8 +3,6 @@ target :lib do
   check "lib"
   collection_config "rbs_collection.yaml"
 
-  ignore "lib/stoplight/admin"
-  ignore "lib/stoplight/admin.rb"
   ignore "lib/stoplight/rspec"
   ignore "lib/stoplight/rspec.rb"
 

@@ -1,0 +1,16 @@
+module Stoplight
+  module Domain
+    class LockControl
+      @state_store: _StateStore
+      @emitter: Telemetry::Emitter
+
+      def initialize: (
+          state_store: _StateStore,
+          emitter: Telemetry::Emitter
+        ) -> void
+
+      def lock: (color) -> void
+      def unlock: -> void
+    end
+  end
+end

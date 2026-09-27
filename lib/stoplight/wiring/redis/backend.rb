@@ -17,7 +17,7 @@ module Stoplight
       #   backend = Redis::Backend.new(
       #     redis: redis_connection,
       #     scripting: Scripting.new(redis:),
-      #     key_space: KeySpace.build(system_name: "payments", light_name: "stripe"),
+      #     key_space:,
       #     config: light_config,
       #     error_notifier: ->(e) { Logger.error(e) },
       #     failover_light: Stoplight("redis-failover"),

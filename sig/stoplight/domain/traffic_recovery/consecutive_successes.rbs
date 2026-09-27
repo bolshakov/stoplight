@@ -1,0 +1,11 @@
+module Stoplight
+  module Domain
+    module TrafficRecovery
+      class ConsecutiveSuccesses
+        include _TrafficRecovery
+
+        NAME: :consecutive_successes
+      end
+    end
+  end
+end

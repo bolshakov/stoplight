@@ -5,40 +5,40 @@ Feature: Stoplight configuration - Cool Off Time
 
   Scenario: Global cool off time applies to newly created lights
     Given global configuration:
-      | Cool Off Time | 30 |
+      | Cool Off Time | 3 |
     When a light exists
     And the service starts failing with "timeout"
     And the light enters red state
-    And 28 seconds have elapsed
+    And 2 seconds have elapsed
     Then the light color is red
-    When 3 seconds have elapsed
+    When 2 seconds have elapsed
     Then the light color is yellow
 
   Scenario: Instance cool off time overrides global window size
     Given global configuration:
-      | Cool Off Time | 30 |
+      | Cool Off Time | 3 |
     And a light configured with:
-      | Cool Off Time | 10 |
+      | Cool Off Time | 1 |
     And the service starts failing with "timeout"
     And the light enters red state
-    When 11 seconds have elapsed
+    When 2 seconds have elapsed
     Then the light color is yellow
 
 
   @global_configuration
   Scenario: Global cool off time doesn't affect already-created lights
     Given a light configured with:
-      | Cool Off Time | 10 |
+      | Cool Off Time | 1 |
     And I update global configuration:
-      | Cool Off Time | 30 |
+      | Cool Off Time | 3 |
     And the service starts failing with "timeout"
     And the light enters red state
-    When 11 seconds have elapsed
+    When 2 seconds have elapsed
     Then the light color is yellow
 
     Given a light exists
     And the light enters red state
-    When 28 seconds have elapsed
+    When 2 seconds have elapsed
     Then the light color is red
-    When 3 seconds have elapsed
+    When 2 seconds have elapsed
     Then the light color is yellow

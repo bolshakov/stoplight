@@ -39,6 +39,10 @@ module Stoplight
           error_message == other.error_message &&
           time == other.time
       end
+
+      alias_method :eql?, :==
+
+      def hash = [self.class, error_class, error_message, time].hash
     end
   end
 end

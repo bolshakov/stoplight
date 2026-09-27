@@ -6,10 +6,10 @@ Feature: Consecutive Errors Traffic Control Strategy
   Background:
     Given a light "basic-service" configured with:
       | Recovery Threshold | 3 |
-      | Cool Off Time     | 60 |
+      | Cool Off Time      | 1 |
     And the service starts failing with "connection-timeout"
     And the light enters red state
-    And 60 seconds have elapsed
+    And 2 seconds have elapsed
 
   Scenario: Light transitions to green after recover threshold successes
     When the service recovers and starts functioning normally

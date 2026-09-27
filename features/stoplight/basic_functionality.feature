@@ -5,7 +5,8 @@ Feature: Stoplight Basic Functionality
 
   Background:
     Given a light "basic-service" configured with:
-      | Threshold | 5 |
+      | Threshold     | 5 |
+      | Cool Off Time | 1 |
 
   Scenario: Light allows traffic in green state
     Given the service is functioning normally
@@ -19,16 +20,16 @@ Feature: Stoplight Basic Functionality
     When 1 request is made
     Then the light fails with error:
       | Type        | Stoplight::Error::RedLight |
-      | Message     | basic-service |
+      | Message     | Stoplight "basic-service" is red - traffic stopped until recovery. |
 
   Scenario: Light count all failures regardless of time
     Given the service starts failing with "connection-timeout"
     When 3 request is made
     Then the light color is green
-    When 10 days have elapsed
+    When 2 seconds have elapsed
     And 1 request is made
     Then the light color is green
-    When 10 days have elapsed
+    When 2 seconds have elapsed
     And 1 request is made
     Then the light color is red
 
@@ -57,6 +58,7 @@ Feature: Stoplight Basic Functionality
     When 4 requests is made
     Then the light color is green
     When a light "basic-service" configured with:
-      | Threshold | 5 |
+      | Threshold     | 5 |
+      | Cool Off Time | 1 |
     When 1 request is made
     Then the light color is red

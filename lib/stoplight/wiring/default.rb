@@ -3,7 +3,7 @@
 module Stoplight
   module Wiring
     module Default
-      COOL_OFF_TIME = 60.0
+      COOL_OFF_TIME = 60
 
       DATA_STORE = Stoplight::DataStore::Memory.new
 

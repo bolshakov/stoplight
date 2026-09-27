@@ -260,6 +260,19 @@ RSpec.describe RuboCop::Cop::Stoplight::ArchitectureBoundaries, :config do
       RUBY
     end
 
+    it "detects Stoplight.register() call" do
+      expect_offense(<<~RUBY, filename)
+        module Stoplight::Domain
+          class CircuitManager
+            def create
+              Stoplight.register("test")
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^ Stoplight/ArchitectureBoundaries: domain cannot reference Stoplight composition root (use Domain::Light directly)
+            end
+          end
+        end
+      RUBY
+    end
+
     it "detects Stoplight.configure() call" do
       expect_offense(<<~RUBY, filename)
         module Stoplight::Domain

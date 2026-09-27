@@ -8,8 +8,8 @@ Stoplight is a traffic control for code. It's an implementation of the circuit b
 
 ---
 
-:warning:️ You're currently browsing the documentation for Stoplight 5.x. If you're looking for
-the documentation of the previous version 4.x, you can find it [here](https://github.com/bolshakov/stoplight/tree/v4.1.1).
+:warning:️ You're currently browsing the documentation for Stoplight 6. If you're looking for
+the documentation of the previous version 5.x, you can find it [here](https://github.com/bolshakov/stoplight/tree/v5.8.3).
 
 Stoplight helps your application gracefully handle failures in external dependencies
 (like flaky databases, unreliable APIs, or spotty web services). By wrapping these unreliable
@@ -38,22 +38,7 @@ Stoplight uses [Semantic Versioning][]. Check out [the change log][] for a detai
 
 Stoplight operates like a traffic light with three states:
 
-```mermaid
-stateDiagram
-    Green --> Red: Errors reach threshold
-    Red --> Yellow: After cool_off_time
-    Yellow --> Green: Successful recovery
-    Yellow --> Red: Failed recovery
-    Green --> Green: Success
-    
-    classDef greenState fill:#28a745,stroke:#1e7e34,stroke-width:2px,color:#fff
-    classDef redState fill:#dc3545,stroke:#c82333,stroke-width:2px,color:#fff
-    classDef yellowState fill:#ffc107,stroke:#e0a800,stroke-width:2px,color:#000
-    
-    class Green greenState
-    class Red redState
-    class Yellow yellowState
-```
+![Stoplight state diagram][]
 
 - **Green**: Normal operation. Code runs as expected. (Circuit closed)
 - **Red**: Failure state. Fast-fails without running the code. (Circuit open)
@@ -142,53 +127,51 @@ receives `nil`. In both cases, the return value of the fallback becomes the retu
 
 ## Admin Panel
 
-Stoplight comes with a built-in Admin Panel that can track all active Lights and manually lock them in the desired state (`Green` or `Red`). Locking lights in certain states might be helpful in scenarios like E2E testing.
+Stoplight comes with a built-in Admin Panel for observing and controlling all lights across your application. It 
+displays each light's current state, recent failures, and provides controls to lock/unlock lights manually.
 
 ![Admin Panel Screenshot](assets/admin.png)
 
-To add Admin Panel protected by basic authentication to your Rails project, add this configuration to your `config/routes.rb` file.
+### Basic Setup
+
+Add the Admin Panel to your Rails application with authentication:
 
 ```ruby
 Rails.application.routes.draw do
-  # ...
-
   Stoplight::Admin.use(Rack::Auth::Basic) do |username, password|
     username == ENV["STOPLIGHT_ADMIN_USERNAME"] && password == ENV["STOPLIGHT_ADMIN_PASSWORD"]
   end
   mount Stoplight::Admin => '/stoplights'
-
-  # ...
 end
 ```
 
-Then set up `STOPLIGHT_ADMIN_USERNAME` and `STOPLIGHT_ADMIN_PASSWORD` env variables to access your Admin panel.
+Then set environment variables:
+```bash
+export STOPLIGHT_ADMIN_USERNAME=admin
+export STOPLIGHT_ADMIN_PASSWORD=secret
+```
 
-**IMPORTANT:** Stoplight Admin Panel requires you to have `sinatra` and `sinatra-contrib` gems installed. You can either add them to your Gemfile:
+**IMPORTANT:** Stoplight Admin Panel requires `sinatra` and `sinatra-contrib` gems:
 
 ```ruby
 gem "sinatra", require: false
 gem "sinatra-contrib", require: false
 ```
 
-Or install it manually:
-```ruby
-gem install sinatra
-gem install sinatra-contrib
-```
+### Standalone Docker Setup
 
-### Standalone Admin Panel Setup
-
-It is possible to run the Admin Panel separately from your application using the `stoplight-admin:<release-version>` docker image.
+Run the Admin Panel as a separate service:
 
 ```shell
-docker run --net=host bolshakov/stoplight-admin
+docker run \
+  -e REDIS_URL=redis://localhost:6379 \
+  -e STOPLIGHT_ADMIN_USERNAME=admin \
+  -e STOPLIGHT_ADMIN_PASSWORD=secret \
+  -p 4567:4567 \
+  bolshakov/stoplight-admin
 ```
 
-**IMPORTANT:** Standalone Admin Panel should use the same Redis your application uses. To achieve this, set the `REDIS_URL` ENV variable via `-e REDIS_URL=<url-to-your-redis-servier>.` E.g.:
-
-```shell
-docker run -e REDIS_URL=redis://localhost:6378  --net=host bolshakov/stoplight-admin
-```
+For complete setup and multi-system configuration details, see the [Admin Panel guide](docs/admin.md).
 
 ## Configuration
 
@@ -226,35 +209,15 @@ light = Stoplight("Payment Service")
 You can also provide settings during creation:
 
 ```ruby
-data_store = Stoplight::DataStore::Redis.new(Redis.new)
-
 light = Stoplight("Payment Service",
   window_size: 300,                       # Only count errors in the last five minutes
   threshold: 5,                           # 5 errors before turning red
   cool_off_time: 60,                      # Wait 60 seconds before attempting recovery
   recovery_threshold: 1,                  # 1 successful attempt to turn green again
-  data_store: data_store,                 # Use Redis for persistence
   tracked_errors: [TimeoutError],         # Only count TimeoutError
   skipped_errors: [ValidationError]       # Ignore ValidationError
 )
 ```
-
-### Modifying Stoplights
-
-You can create specialized versions of existing stoplights:
-
-```ruby
-# Base configuration for API calls
-base_api = Stoplight("Service API")
-
-# Create specialized version for the users endpoint
-users_api = base_api.with(
-  tracked_errors: [TimeoutError]          # Only track timeouts
-)
-```
-
-The `#with` method creates a new stoplight instance without modifying the original, making it ideal for creating
-specialized stoplights from a common configuration.
 
 ## Error Handling
 
@@ -277,7 +240,40 @@ light = Stoplight("Example API", tracked_errors: [NetworkError, Timeout::Error])
 
 When both methods are used, `skipped_errors` takes precedence over `tracked_errors`.
 
+Either list can be replaced for a single call without changing the light's configuration:
+
+```ruby
+light.run(tracked_errors: [Timeout::Error]) { fetch_data }
+light.run(skipped_errors: [ValidationError]) { process_data }
+```
+
+Any list omitted from `run` keeps its configured value. The provided list is replaced only for that call, and
+`skipped_errors` still takes precedence over `tracked_errors`.
+
 ## Advanced Configuration
+
+### Registering Lights
+
+Calling `Stoplight("name", ...)` at every call site works well for a handful of lights. As an app
+grows, repeating the same settings everywhere makes them easy to drift out of sync, and there's no
+single place listing what lights exist.
+
+Register a light once and look it up by name wherever you need it, instead of repeating the same
+settings at every call site.
+
+```ruby
+# config/initializers/stoplight.rb
+Stoplight.register("Payment Service", threshold: 5, cool_off_time: 60)
+```
+
+```ruby
+# anywhere else in your app
+Stoplight.light("Payment Service").run { payment_gateway.process(order) }
+```
+
+`Stoplight("name", ...)` still works as shown above -- registration is an addition, not a replacement.
+`Stoplight.light` is also approximately 10 times faster, since it's a plain lookup rather than re-validating 
+the configuration on every call.
 
 ### Traffic Control Strategies
 
@@ -340,18 +336,9 @@ light = Stoplight(
 
 Monitors error rate over a 5-minute sliding window. The stoplight turns red when error rate exceeds 50%.
 
-```ruby
-light = Stoplight(
-  "Payment API", 
-  traffic_control: {
-    error_rate: { min_requests: 20 },
-  }, 
-  window_size: 300, 
-  threshold: 0.5,
-)
-```
-
-Only evaluates error rate after at least 20 requests within the window. Default `min_requests` is 10.
+Error rate evaluation starts only after 100 requests within the window — enough samples
+for a statistically reliable estimate. If your service handles fewer than 100 requests
+per window, the breaker will never trip on error rate; use `traffic_control: :consecutive_errors` instead.
 
 
 #### When to use:
@@ -488,6 +475,24 @@ By default, Stoplight logs state transitions to STDERR.
 Pull requests to update this section are welcome. If you want to implement your own notifier, refer to
 the [notifier interface documentation] for detailed instructions. Pull requests to update this section are welcome.
 
+### Telemetry
+
+Notifiers only fire on state transitions. For everything else a light does - every run, trip, recovery probe, and
+manual lock - subscribe to the telemetry bus:
+
+```ruby
+Stoplight.telemetry.subscribe(Stoplight::Telemetry::TrafficBreached) do |envelope|
+  logger.warn("#{envelope.light_name} tripped: #{envelope.payload.failure&.exception&.message}")
+end
+```
+
+The [stoplight-statsd] gem is built on this bus. It forwards every event to Statsd, so a dashboard of your circuit
+breakers is a `bundle add` away:
+
+![Stoplight metrics in Grafana](assets/grafana.png)
+
+See the [Telemetry guide](docs/telemetry.md) for the full event list and the envelope format.
+
 ### Error Notifiers
 
 Stoplight is built for resilience. If the Redis data store fails, Stoplight automatically falls back to the in-memory
@@ -520,6 +525,52 @@ light.lock(Stoplight::Color::GREEN)
 
 # Return to normal operation (automatic state transitions)
 light.unlock
+```
+
+### Multiple Independent Systems
+
+By default, all lights share the same global configuration and data store. For larger applications with multiple 
+services or tenants, you can create **named systems** -- completely isolated instances with their own configuration, 
+notifiers, and data store:
+
+```ruby
+# Create independent systems with separate data stores
+Payments = Stoplight.register_system("Payments", threshold: 3, cool_off_time: 30)
+Analytics = Stoplight.register_system("Analytics", threshold: 5, cool_off_time: 60)
+
+# Register lights in each system
+Payments.register("stripe", cool_off_time: 30)
+Analytics.register("amplitude")
+
+# Use them — one system's state does not affect another
+Payments.light("stripe").run { charge_card }
+Analytics.light("amplitude").run { track_event }
+```
+
+Use cases for multiple systems:
+
+* **Multi-tenancy**: Each tenant gets its own isolated system and data store
+* **Service boundaries**: Separate failure domains with independent SLOs (e.g., payments vs. analytics)
+* **Independent data stores**: One service uses Redis for persistence, another uses in-memory
+
+For complete details on system configuration, boot-time registration patterns, and isolation guarantees, see 
+the [Systems guide](docs/systems.md).
+
+### Admin
+
+Admin Panel can work in an read-only which could be useful for observability. To enabled read-only mode:
+
+```ruby
+Stoplight::Admin.configure do |config|
+  config.read_only = true
+end
+```
+
+Read-only mode could be turned on for a pre-built docker image by passing `STOPLIGHT_ADMIN_READ_ONLY` environment 
+variable:
+
+```sh
+docker run -e REDIS_URL=redis://localhost:6378  -e STOPLIGHT_ADMIN_READ_ONLY=true --net=host bolshakov/stoplight-admin
 ```
 
 ## Rails Integration
@@ -602,13 +653,13 @@ We only actively support the latest major version of Stoplight.
 
 **Ruby**: Major versions that receive security updates (see [Ruby Maintenance Branches]):
 
-* Currently: Ruby 3.2.x, 3.3.x and 3.4.x
+* Currently: Ruby 3.3.x, 3.4.x and 4.0.x
 * We test against these versions in CI
 
 **Data Stores**: Current supported versions from upstream (versions that receive security updates):
 
-* Redis: 8.0.x, 7.4.x, 7.2.x, 6.2.x (following [Redis's support policy])
-* Valkey: 8.0.x, 7.2.x (following [Valkey's support policy])
+* Redis: 8.6.x, 8.4.x, 7.4.x (following [Redis's support policy])
+* Valkey: 9.1.x, 9.0.x, 8.1.x, 8.0.x, 7.2.x (following [Valkey's support policy])
 * We test against the latest version of each major release
 
 For dependencies:
@@ -622,7 +673,7 @@ For dependencies:
 * Ruby: When Ruby core team ends security support, we drop it in our next major release
 * Data Stores: When Redis/Valkey ends maintenance, we drop it in our next major release
 
-Example: "Ruby 3.2 reaches end-of-life in March 2026, so Stoplight 6.0 will require Ruby 3.3+"
+Example: "Ruby 3.3 reaches end-of-life in March 2027, so Stoplight 7.0 will require Ruby 3.4+"
 
 ## Development
 
@@ -639,15 +690,16 @@ Fowler’s [CircuitBreaker][] article.
 [Stoplight]: https://github.com/bolshakov/stoplight
 [Version badge]: https://img.shields.io/gem/v/stoplight.svg?label=version
 [version]: https://rubygems.org/gems/stoplight
-[Build badge]: https://github.com/bolshakov/stoplight/workflows/Specs/badge.svg
-[build]: https://github.com/bolshakov/stoplight/actions?query=branch%3Amaster
-[Coverage badge]: https://img.shields.io/coveralls/bolshakov/stoplight/master.svg?label=coverage
+[Build badge]: https://github.com/bolshakov/stoplight/actions/workflows/ci.yml/badge.svg?branch=main
+[build]: https://github.com/bolshakov/stoplight/actions?query=branch%3Amain
+[Coverage badge]: https://img.shields.io/coveralls/bolshakov/stoplight/main.svg?label=coverage
 [coverage]: https://coveralls.io/r/bolshakov/stoplight
 [stoplight-admin]: https://github.com/bolshakov/stoplight-admin
 [Semantic Versioning]: http://semver.org/spec/v2.0.0.html
 [the change log]: CHANGELOG.md
 [stoplight-sentry]: https://github.com/bolshakov/stoplight-sentry
 [stoplight-honeybadger]: https://github.com/qoqa/stoplight-honeybadger
+[stoplight-statsd]: https://github.com/bolshakov/stoplight-statsd
 [notifier interface documentation]: https://github.com/bolshakov/stoplight/blob/main/lib/stoplight/domain/state_transition_notifier.rb
 [camdez]: https://github.com/camdez
 [tfausak]: https://github.com/tfausak
@@ -663,3 +715,4 @@ Fowler’s [CircuitBreaker][] article.
 [Valkey's support policy]: https://valkey.io/topics/releases/
 [DragonflyDB]: https://www.dragonflydb.io/
 [DragonflyDB documentation]: https://www.dragonflydb.io/docs/managing-dragonfly/scripting#script-flags
+[Stoplight state diagram]: assets/state-diagram.svg

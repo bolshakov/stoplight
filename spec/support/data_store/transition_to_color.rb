@@ -40,7 +40,7 @@ RSpec.shared_examples "Stoplight::Domain::DataStore#transition_to_color" do
       it { expect(transition_to_color(Stoplight::Color::GREEN)).to be(true) }
 
       it "resets timestamps" do
-        Timecop.freeze(current_time) do
+        Stoplight::TimeTravel.freeze(current_time) do
           transition_to_color(Stoplight::Color::GREEN)
         end
 
@@ -73,7 +73,7 @@ RSpec.shared_examples "Stoplight::Domain::DataStore#transition_to_color" do
 
       it "sets the recovery_started_at timestamp" do
         expect do
-          Timecop.freeze(current_time) do
+          Stoplight::TimeTravel.freeze(current_time) do
             transition_to_color(Stoplight::Color::YELLOW)
           end
         end.to change { state_snapshot }
@@ -83,7 +83,7 @@ RSpec.shared_examples "Stoplight::Domain::DataStore#transition_to_color" do
 
       context "when cleared" do
         it "looses persisted state" do
-          Timecop.freeze(current_time) do
+          Stoplight::TimeTravel.freeze(current_time) do
             transition_to_color(Stoplight::Color::YELLOW)
           end
           clear
@@ -113,7 +113,7 @@ RSpec.shared_examples "Stoplight::Domain::DataStore#transition_to_color" do
 
       it "sets the breached_at and recovery_scheduled_after timestamps" do
         expect do
-          Timecop.freeze(current_time) do
+          Stoplight::TimeTravel.freeze(current_time) do
             transition_to_color(Stoplight::Color::RED)
           end
         end.to change { state_snapshot }
@@ -123,7 +123,7 @@ RSpec.shared_examples "Stoplight::Domain::DataStore#transition_to_color" do
 
       context "when cleared" do
         it "looses persisted state" do
-          Timecop.freeze(current_time) do
+          Stoplight::TimeTravel.freeze(current_time) do
             transition_to_color(Stoplight::Color::YELLOW)
           end
           clear
@@ -143,7 +143,7 @@ RSpec.shared_examples "Stoplight::Domain::DataStore#transition_to_color" do
 
       it "sets the breached_at and recovery_scheduled_after timestamps" do
         expect do
-          Timecop.freeze(current_time) do
+          Stoplight::TimeTravel.freeze(current_time) do
             transition_to_color(Stoplight::Color::RED)
           end
         end.to change { state_snapshot }
@@ -153,7 +153,7 @@ RSpec.shared_examples "Stoplight::Domain::DataStore#transition_to_color" do
 
       context "when cleared" do
         it "looses persisted state" do
-          Timecop.freeze(current_time) do
+          Stoplight::TimeTravel.freeze(current_time) do
             transition_to_color(Stoplight::Color::YELLOW)
           end
           clear

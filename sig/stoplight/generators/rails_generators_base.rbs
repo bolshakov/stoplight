@@ -1,0 +1,11 @@
+# Minimal stand-in for `Rails::Generators::Base` so InstallGenerator's signature resolves for
+# consumers that depend on this gem's sig/ without depending on Rails themselves (e.g. via a
+# git Gemfile source, which loads the whole sig/ tree). Real Rails apps get the full definition
+# from rbs-rails; RBS merges declarations of the same class across files, so this is harmless
+# there too.
+module Rails
+  module Generators
+    class Base
+    end
+  end
+end

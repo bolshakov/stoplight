@@ -6,8 +6,8 @@ RSpec.describe Stoplight::Wiring::Default do
   end
 
   describe "::COOL_OFF_TIME" do
-    it "is a float" do
-      expect(described_class::COOL_OFF_TIME).to be_a(Float)
+    it "is a whole number of seconds" do
+      expect(described_class::COOL_OFF_TIME).to be_a(Integer)
     end
   end
 

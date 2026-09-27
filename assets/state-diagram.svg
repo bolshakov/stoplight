@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 350" width="820" height="350" role="img" aria-label="Stoplight state diagram: Green (closed) turns Red (open) when errors reach the threshold. Red turns Yellow (half-open) after cool_off_time. Yellow turns back Green on successful recovery, or back Red on failed recovery.">
+  <defs>
+    <style>
+      @font-face {
+        font-family: 'Martian Mono';
+        font-weight: 400;
+        src: url(data:font/woff2;base64,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) format('woff2');
+      }
+      @font-face {
+        font-family: 'Martian Mono';
+        font-weight: 700;
+        src: url(data:font/woff2;base64,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) format('woff2');
+      }
+      text { font-family: 'Martian Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace; }
+    </style>
+    <filter id="glow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="12"/>
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 8 5 L 0 9 z" fill="#9ca3af"/>
+    </marker>
+  </defs>
+
+  <!-- card background -->
+  <rect x="1" y="1" width="818" height="348" rx="18" fill="#1f2937" stroke="#374151" stroke-width="1"/>
+
+  <!-- state names and circuit terms -->
+  <g text-anchor="middle">
+    <text x="120" y="52" font-size="18" font-weight="700" fill="#4ade80">Green</text>
+    <text x="120" y="74" font-size="12" fill="#9ca3af">closed &#183; traffic flows</text>
+
+    <text x="410" y="52" font-size="18" font-weight="700" fill="#f87171">Red</text>
+    <text x="410" y="74" font-size="12" fill="#9ca3af">open &#183; traffic stops</text>
+
+    <text x="700" y="52" font-size="18" font-weight="700" fill="#fde047">Yellow</text>
+    <text x="700" y="74" font-size="12" fill="#9ca3af">half-open &#183; probing</text>
+  </g>
+
+  <!-- glows -->
+  <circle cx="120" cy="140" r="34" fill="#22c55e" opacity="0.55" filter="url(#glow)"/>
+  <circle cx="410" cy="140" r="34" fill="#ef4444" opacity="0.55" filter="url(#glow)"/>
+  <circle cx="700" cy="140" r="34" fill="#facc15" opacity="0.55" filter="url(#glow)"/>
+
+  <!-- lights -->
+  <circle cx="120" cy="140" r="34" fill="#22c55e"/>
+  <circle cx="410" cy="140" r="34" fill="#ef4444"/>
+  <circle cx="700" cy="140" r="34" fill="#facc15"/>
+
+  <!-- straight transitions -->
+  <g stroke="#9ca3af" stroke-width="2" fill="none">
+    <line x1="162" y1="140" x2="366" y2="140" marker-end="url(#arrow)"/>
+    <line x1="452" y1="140" x2="656" y2="140" marker-end="url(#arrow)"/>
+  </g>
+
+  <!-- return arcs -->
+  <g stroke="#9ca3af" stroke-width="2" fill="none">
+    <!-- Yellow -> Red: failed recovery -->
+    <path d="M 682 168 C 630 225, 480 225, 428 168" marker-end="url(#arrow)"/>
+    <!-- Yellow -> Green: successful recovery -->
+    <path d="M 692 172 C 620 295, 200 295, 128 172" marker-end="url(#arrow)"/>
+  </g>
+
+  <!-- transition labels -->
+  <g font-size="12" fill="#d1d5db" text-anchor="middle">
+    <text x="264" y="122">errors reach threshold</text>
+    <text x="554" y="122">after cool_off_time</text>
+    <text x="555" y="232">failed recovery</text>
+    <text x="410" y="300">successful recovery</text>
+  </g>
+</svg>

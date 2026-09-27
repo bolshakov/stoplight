@@ -58,7 +58,7 @@ module Stoplight
             @clock = clock
             @scripting = scripting
             @redis = redis
-            @metrics_key = key_space.key(:metrics)
+            @metrics_key = key_space.join("metrics")
           end
 
           # Get metrics for the current light
@@ -71,23 +71,15 @@ module Stoplight
               )
             end
 
-            Domain::MetricsSnapshot.new(
-              successes: nil, errors: nil,
-              consecutive_errors: consecutive_errors.to_i,
-              consecutive_successes: consecutive_successes.to_i,
-              last_error: deserialize_failure(last_error_json),
-              last_success_at: (clock.at(last_success_at.to_f) if last_success_at)
-            )
+            build_metrics_snapshot(consecutive_errors:, consecutive_successes:, last_error_json:, last_success_at:)
           end
 
           # Records successful circuit breaker execution
           #
           def record_success
-            timestamp = clock.current_time.to_f
-
             scripting.call(
-              :"unbounded_metrics/record_success",
-              args: [timestamp, metrics_ttl],
+              "unbounded_metrics/record_success",
+              args: [metrics_ttl],
               keys: [metrics_key]
             )
           end
@@ -97,16 +89,18 @@ module Stoplight
           def record_failure(exception)
             timestamp = clock.current_time.to_f
 
-            scripting.call(
-              :"unbounded_metrics/record_failure",
-              args: [timestamp, serialize_exception(exception, timestamp:), metrics_ttl],
+            last_success_at, last_error_json, consecutive_errors, consecutive_successes = scripting.call(
+              "unbounded_metrics/record_failure",
+              args: [serialize_exception(exception, timestamp:), metrics_ttl],
               keys: [metrics_key]
             )
+
+            build_metrics_snapshot(consecutive_errors:, consecutive_successes:, last_error_json:, last_success_at:)
           end
 
           def clear
             redis.with do |client|
-              client.hdel(metrics_key, "last_success_at", "last_error_json", "consecutive_errors", "consecutive_successes")
+              client.hdel(metrics_key, "last_success_at", "last_error_at", "last_error_json", "consecutive_errors", "consecutive_successes")
             end
           end
 
@@ -116,6 +110,16 @@ module Stoplight
           attr_reader :scripting
           attr_reader :metrics_key
           attr_reader :clock
+
+          def build_metrics_snapshot(consecutive_errors:, consecutive_successes:, last_error_json:, last_success_at:)
+            Domain::MetricsSnapshot.new(
+              successes: nil, errors: nil,
+              consecutive_errors: consecutive_errors.to_i,
+              consecutive_successes: consecutive_successes.to_i,
+              last_error: deserialize_failure(last_error_json),
+              last_success_at: (clock.at(last_success_at.to_f) if last_success_at)
+            )
+          end
         end
       end
     end

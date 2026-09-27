@@ -39,6 +39,26 @@ RSpec.describe Stoplight::Domain::TrafficControl::ConsecutiveErrors do
         expect(strategy.error_messages).to eq("`threshold` should be an integer")
       end
     end
+
+    context "when threshold is nil" do
+      let(:threshold) { nil }
+
+      it { is_expected.to be_incompatible }
+
+      it "returns an error message" do
+        expect(strategy.error_messages).to eq("`threshold` should be an integer")
+      end
+    end
+
+    context "when threshold is a string" do
+      let(:threshold) { "3" }
+
+      it { is_expected.to be_incompatible }
+
+      it "returns an error message" do
+        expect(strategy.error_messages).to eq("`threshold` should be an integer")
+      end
+    end
   end
 
   describe "#stop_traffic?" do
@@ -95,6 +115,25 @@ RSpec.describe Stoplight::Domain::TrafficControl::ConsecutiveErrors do
 
         it { is_expected.to be(false) }
       end
+    end
+  end
+
+  describe "#name" do
+    it "returns the policy name as a string" do
+      expect(described_class.new.name).to eq("consecutive_errors")
+    end
+  end
+
+  describe "#eql?" do
+    it "returns true for equal instances" do
+      strategy_a = described_class.new
+      strategy_b = described_class.new
+
+      expect(strategy_a.eql?(strategy_b)).to be(true)
+    end
+
+    it "returns false for different classes" do
+      expect(described_class.new.eql?(Stoplight::Domain::TrafficControl::ErrorRate.new)).to be(false)
     end
   end
 end

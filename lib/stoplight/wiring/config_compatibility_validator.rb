@@ -23,9 +23,32 @@ module Stoplight
       end
 
       def call
+        validate_window_size!
+        validate_cool_off_time!
         validate_traffic_control!
         validate_traffic_recovery!
         config
+      end
+
+      # A window shorter than one bucket cannot be measured, and a fractional one silently
+      # rounds to a different span than requested.
+      private def validate_window_size!
+        window_size = config.window_size
+        return if window_size.nil?
+        return if window_size.is_a?(Integer) && window_size >= 1
+
+        raise Error::ConfigurationError,
+          "`window_size` should be a whole number of seconds, at least 1, got #{window_size.inspect}",
+          ExternalCaller.backtrace
+      end
+
+      private def validate_cool_off_time!
+        cool_off_time = config.cool_off_time
+        return if cool_off_time.is_a?(Integer) && cool_off_time >= 1
+
+        raise Error::ConfigurationError,
+          "`cool_off_time` should be a whole number of seconds, at least 1, got #{cool_off_time.inspect}",
+          ExternalCaller.backtrace
       end
 
       private def validate_traffic_control!
@@ -34,7 +57,7 @@ module Stoplight
           if compatibility_result.incompatible?
             raise Error::ConfigurationError,
               "#{traffic_control} incompatible with config: #{compatibility_result.error_messages}",
-              caller(8)
+              ExternalCaller.backtrace
           end
         end
       end
@@ -45,7 +68,7 @@ module Stoplight
           if compatibility_result.incompatible?
             raise Error::ConfigurationError,
               "#{traffic_recovery} incompatible with config: #{compatibility_result.error_messages}",
-              caller(8)
+              ExternalCaller.backtrace
           end
         end
       end

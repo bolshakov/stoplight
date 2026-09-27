@@ -6,6 +6,7 @@ module Stoplight
     #
     # @api private
     Config = Data.define(
+      :id,
       :name,
       :cool_off_time,
       :threshold,
@@ -21,10 +22,11 @@ module Stoplight
     )
     class Config
       def cool_off_time_in_milliseconds
-        (cool_off_time * 1_000).to_i
+        cool_off_time * 1_000
       end
 
       def with(
+        id: T.undefined,
         name: T.undefined,
         cool_off_time: T.undefined,
         threshold: T.undefined,
@@ -39,6 +41,7 @@ module Stoplight
         data_store: T.undefined
       )
         super(
+          id: id.is_a?(Undefined) ? self.id : id,
           name: name.is_a?(Undefined) ? self.name : name,
           cool_off_time: cool_off_time.is_a?(Undefined) ? self.cool_off_time : cool_off_time,
           threshold: threshold.is_a?(Undefined) ? self.threshold : threshold,

@@ -1,0 +1,78 @@
+module Stoplight
+  module Wiring
+    # Factory protocol for building +Stoplight::Light+ instances.
+    #
+    # This defines the interface that any Light factory must implement,
+    # regardless of the underlying implementation details.
+    #
+    # This uses the Abstract Factory pattern to decouple the domain (Light)
+    # from the application layer (concrete factory implementation). Light
+    # doesn't know HOW it's built, only that it needs something that can
+    # build variants of itself.
+    #
+    # By defining this interface in the domain layer:
+    # - Light can request reconfiguration without knowing about containers
+    # - Different factory implementations can be swapped (code, database-configured, etc.)
+    # - Dependency direction is preserved (Application → Domain, not Domain → Application)
+    #
+    class LightFactory
+      attr_reader data_store_config: Domain::_DataStore
+      attr_reader error_notifier: Domain::error_notifier
+      attr_reader clock: Domain::_Clock
+
+      attr_reader traffic_recovery: Domain::_TrafficRecovery
+      attr_reader traffic_control: Domain::_TrafficControl
+      attr_reader config: Domain::Config
+      attr_reader system_name: String
+
+      @system_id: String
+      @name: String
+      @cool_off_time: Domain::duration_seconds
+      @error_tracking_policy: Domain::ErrorTrackingPolicy
+      @emitter: Domain::Telemetry::Emitter
+      @failover_system: _System?
+      @storage_set: StorageSet
+      @key_space: Infrastructure::Redis::Key
+
+      def initialize: (
+          system_id: String,
+          config: Domain::Config,
+          system_name: String,
+          failover_system: _System?,
+          telemetry: Domain::_TelemetryPublisher
+        ) -> void
+
+      def lock_control: -> Domain::LockControl
+      def storage_set: -> StorageSet
+      def key_space: -> Infrastructure::Redis::Key
+      def state_store: -> Domain::_StateStore
+
+      def metrics_store: -> Domain::_MetricsStore
+      def recovery_lock_store: -> Domain::_RecoveryLockStore
+      def request_tracker: -> Domain::Tracker::Request
+      def recovery_probe_tracker: -> Domain::Tracker::RecoveryProbe
+      def recovery_metrics_store: -> Domain::_MetricsStore
+
+      def green_run_strategy: -> Domain::Strategies::GreenRunStrategy
+      def yellow_run_strategy: -> Domain::Strategies::YellowRunStrategy
+      def red_run_strategy: -> Domain::Strategies::RedRunStrategy
+      def run_recorder: (Domain::color) -> Domain::Telemetry::RunRecorder
+      def telemetry_settings: -> Domain::Telemetry::Settings
+      def redis: -> Infrastructure::redis
+      def storage_scripting: -> Infrastructure::Redis::Storage::Scripting
+      def failover_system: -> _System
+      def build_backend: -> DataStoreBackend
+
+      # Builds a Light instance with the current configuration.
+      #
+      # This method must construct a fully-wired Light with all required
+      # dependencies (strategies, data store, notifiers, etc.). The Light
+      # should be ready to use immediately after construction.
+      #
+      # @raise [Stoplight::Error::ConfigurationError] If configuration is invalid
+      def build: -> Domain::Light
+
+      def create_circuit_breaker: (String) -> Domain::Light
+    end
+  end
+end

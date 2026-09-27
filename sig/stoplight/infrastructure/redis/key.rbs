@@ -1,0 +1,10 @@
+module Stoplight
+  module Infrastructure
+    module Redis
+      class Key < String
+        def initialize: (*String) -> void
+        def join: (*String) -> Key
+      end
+    end
+  end
+end

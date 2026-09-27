@@ -4,7 +4,6 @@ require "concurrent/map"
 
 module Stoplight
   module Wiring
-    # 🚧UNDER CONSTRUCTION 🚧
     # System provides namespace isolation and shared configuration for related circuits.
     #
     # Systems enforce configuration consistency within their scope - creating the same
@@ -13,71 +12,100 @@ module Stoplight
     # This prevents subtle bugs where circuits silently interfere with each other.
     #
     # @example Basic usage
-    #   billing = Stoplight.system(:billing,
+    #   billing = Stoplight.register_system(
+    #     "Billing",
     #     data_store: billing_redis,
     #     threshold: 5,
     #     window_size: 300
     #   )
     #
-    #   billing.light("stripe")
-    #   billing.light("paypal")
+    #   billing.register("stripe")
+    #   billing.register("paypal")
+    #
+    #   billing.light("stripe").run { ... }
+    #   billing.light("paypal").run { ... }
     #
     # @example Multi-tenancy
-    #   tenant_a = Stoplight.system(:tenant_a, data_store: tenant_a_redis)
-    #   tenant_b = Stoplight.system(:tenant_b, data_store: tenant_b_redis)
+    #   tenant_a = Stoplight.register_system("Tenant A", data_store: tenant_a_redis)
+    #   tenant_b = Stoplight.register_system("Tenant B", data_store: tenant_b_redis)
     #
     #   # Same circuit name, completely isolated
-    #   tenant_a.light("api")
-    #   tenant_b.light("api")
+    #   tenant_a.register("api")
+    #   tenant_b.register("api")
     #
     # @example Configuration inheritance
-    #   system = Stoplight.system(:payments, threshold: 3, cool_off_time: 600)
+    #   system = Stoplight.register_system("Payments", threshold: 3, cool_off_time: 600)
     #
-    #   system.light("stripe")                # Inherits threshold: 3
-    #   system.light("paypal", threshold: 5)  # Overrides threshold
+    #   system.register("stripe")                # Inherits threshold: 3
+    #   system.register("paypal", threshold: 5)  # Overrides threshold
     #
-    # @note System configuration objects (data_store, notifiers) should be defined
-    #   as constants and reused, not created inline. This ensures configuration
-    #   matching works correctly across multiple system references.
-    #
-    # @note Light instances are cached within the system. Calling {#light} with
-    #   the same name returns the cached instance.
-    #
-    # @api private
+    # @note Light instances are cached within the system once {#register}ed. {#light}
+    #   returns that cached instance and raises +Stoplight::Error::UnregisteredLightError+
+    #   if the name was never registered.
     class System
-      attr_reader :name
-      # @!attribute system_config
-      #   @api private
-      attr_reader :system_config
+      REGISTRATION_FRAME_LIMIT = 5
+      private_constant :REGISTRATION_FRAME_LIMIT
 
-      def initialize(config:)
-        @name = config.name
-        @system_config = config
-        @lights = Concurrent::Map.new
+      Registration = Data.define(:light, :digest, :backtrace, :without_settings)
+      private_constant :Registration
+
+      attr_reader :name
+      # @api private
+      attr_reader :config
+
+      # Returns the consumer (subscribe-only) side of the telemetry bus.
+      def telemetry
+        Domain::Telemetry::Consumer.new(@telemetry)
       end
 
-      # Creates or retrieves a light.
+      # @param failover_system is a system used to create lights that protects components
+      #   of this system. For example if your system uses Redis data store, or notifiers that
+      #   communicate with external systems, they could go off. Failover system hosts
+      #   all the circuit breakers that are needed to protect these dependencies from failing.
+      #   Failover system itself never uses external dependencies and therefore does not need
+      #   external failover.
+      def initialize(config:, failover_system:, registry:)
+        @name = config.name
+        @config = config
+        @lights = Concurrent::Map.new
+        @failover_system = failover_system
+        @registry = registry
+        @telemetry = Domain::Telemetry::Bus.new(error_notifier: config.error_notifier)
+
+        unless config.notifiers.empty?
+          NotifierBridge.new(notifiers: wrapped_notifiers).subscribe(@telemetry)
+        end
+      end
+
+      def persistent?
+        case @config.data_store
+        when DataStore::Redis
+          true
+        when DataStore::Memory
+          false
+        else
+          raise T.absurd(@config.data_store)
+        end
+      end
+
+      # Registers and returns a light.
       #
-      # If a light with this name already exists, returns the cached instance.
+      # If a light with this name already exists, returns it.
       # If settings differ from the existing light, raises +Stoplight::Error::ConfigurationError+.
-      #
       #
       # @raise [Stoplight::Error::ConfigurationError] if light exists with different settings
       #
-      # @example Create a light
-      #   light = system.light("stripe", threshold: 5, window_size: 60)
-      #
-      # @example Retrieve existing light - both return cached light
-      #   light = system.light("stripe", threshold: 5, window_size: 60)
-      #   light = system.light("stripe")
+      # @example Register a light
+      #   system.register("stripe", threshold: 5, window_size: 60)
+      #   system.light("stripe") #=> returns named light
       #
       # @example Configuration conflict
-      #   system.light("api", threshold: 5)
-      #   system.light("api", threshold: 10)  # Raises ConfigurationError
+      #   system.register("api", threshold: 5)
+      #   system.register("api", threshold: 10)  # Raises ConfigurationError
       #
       # @note Thread-safe: multiple threads can safely call this method concurrently
       #
-      def light(
+      def register(
         name,
         cool_off_time: T.undefined,
         threshold: T.undefined,
@@ -88,7 +116,17 @@ module Stoplight
         traffic_control: T.undefined,
         traffic_recovery: T.undefined
       )
-        light_config = ConfigurationDsl.new(
+        without_settings = cool_off_time.is_a?(Undefined) && threshold.is_a?(Undefined) &&
+          recovery_threshold.is_a?(Undefined) && window_size.is_a?(Undefined) &&
+          tracked_errors.is_a?(Undefined) && skipped_errors.is_a?(Undefined) &&
+          traffic_control.is_a?(Undefined) && traffic_recovery.is_a?(Undefined)
+
+        if without_settings
+          registration = @lights[name]
+          return registration.light if registration&.without_settings
+        end
+
+        light_dsl = LightConfigurationDsl.new(
           name:,
           cool_off_time:,
           threshold:,
@@ -98,32 +136,76 @@ module Stoplight
           skipped_errors:,
           traffic_control:,
           traffic_recovery:
-        ).configure!(system_config)
+        )
+        config_digest = light_dsl.digest
 
-        light, _ = lights.compute(name) do |existing|
-          if existing
-            existing_light, existing_config = existing
-            if light_config == existing_config
-              [existing_light, existing_config]
-            else
-              raise Stoplight::Error::ConfigurationError, <<~MSG
-                Light name `#{name}` reused with different settings:
-                  existing settings: #{existing_config}
-                  new settings:      #{light_config}
-
-                You cannot use the same light name with different settings.
-              MSG
-            end
-          else
-            [LightFactory.new(system: self, config: light_config).build, light_config]
+        registration = @lights[name] || begin
+          backtrace = ExternalCaller.backtrace.first(REGISTRATION_FRAME_LIMIT)
+          config = light_dsl.configure!(@config)
+          @lights.compute_if_absent(name) do
+            built = LightFactory.new(
+              system_id: @config.id,
+              system_name: @name, config:,
+              failover_system: @failover_system,
+              telemetry: @telemetry
+            ).build
+            @registry.register(config)
+            Registration.new(light: built, digest: config_digest, backtrace:, without_settings:)
           end
         end
-        light
+
+        if config_digest != registration.digest
+          original_site = registration.backtrace.map { |frame| "  #{frame}" }.join("\n")
+
+          raise Stoplight::Error::ConfigurationError, <<~MSG, ExternalCaller.backtrace
+            Light `#{name}` already registered with different configuration.
+
+            Originally registered at:
+            #{original_site}
+
+            Lights must have consistent configuration across all call sites.
+          MSG
+        end
+
+        registration.light
+      end
+
+      # @raise [Stoplight::Error::UnregisteredLightError] if no light was registered under +name+
+      def light(name)
+        @lights[name]&.light || raise(Stoplight::Error::UnregisteredLightError, <<~MSG)
+          Light `#{name}` was never registered on system `#{@name}`.
+          Call `.register(#{name.inspect}, ...)` at boot before using it.
+        MSG
+      end
+
+      # @api private
+      def __stoplight__storage
+        Storage.new(
+          system_id: @config.id,
+          system_name: @name,
+          failover_system: T.must(@failover_system), # works only with redis ds
+          telemetry: @telemetry
+        )
+      end
+
+      # @api private
+      def __stoplight__registry
+        @registry
       end
 
       private
 
-      attr_reader :lights
+      def wrapped_notifiers
+        error_notifier = Infrastructure::FailSafe::ErrorNotifier.new(error_notifier: @config.error_notifier)
+
+        @config.notifiers.map do |notifier|
+          Infrastructure::Notifier::FailSafe.new(
+            notifier:,
+            error_notifier:,
+            circuit_breaker: T.must(@failover_system).register("notifier:#{notifier.class.name}")
+          )
+        end
+      end
     end
   end
 end

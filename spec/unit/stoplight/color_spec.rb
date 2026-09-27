@@ -6,8 +6,8 @@ RSpec.describe Stoplight::Color do
   end
 
   describe "::GREEN" do
-    it "is a string" do
-      expect(described_class::GREEN).to be_a(String)
+    it "is a symbol" do
+      expect(described_class::GREEN).to be_a(Symbol)
     end
 
     it "is frozen" do
@@ -16,8 +16,8 @@ RSpec.describe Stoplight::Color do
   end
 
   describe "::YELLOW" do
-    it "is a string" do
-      expect(described_class::YELLOW).to be_a(String)
+    it "is a symbol" do
+      expect(described_class::YELLOW).to be_a(Symbol)
     end
 
     it "is frozen" do
@@ -26,8 +26,8 @@ RSpec.describe Stoplight::Color do
   end
 
   describe "::RED" do
-    it "is a string" do
-      expect(described_class::RED).to be_a(String)
+    it "is a symbol" do
+      expect(described_class::RED).to be_a(Symbol)
     end
 
     it "is frozen" do

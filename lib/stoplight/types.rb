@@ -4,7 +4,19 @@ require "singleton"
 
 module Stoplight
   module Types
-    def self.undefined = Undefined.instance
+    UNDEFINED = Undefined.instance
+    def self.undefined = UNDEFINED
+
+    def self.absurd(value = nil)
+      msg = "Control flow reached T.absurd."
+
+      case value
+      when Kernel
+        msg += " Got value: #{value}"
+      end
+
+      TypeError.new(msg)
+    end
 
     # Asserts a value is non-nil, returning it with a narrowed type.
     #
@@ -19,7 +31,8 @@ module Stoplight
     # @return [T] the non-nil value
     #
     def self.must(value)
-      if value.nil?
+      case value
+      when nil
         raise TypeError, "must not have nil value"
       else
         value
