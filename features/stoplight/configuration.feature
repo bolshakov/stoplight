@@ -45,10 +45,10 @@ Feature: Stoplight Custom Configuration
 
   Scenario: Light with custom window size only counts recent failures
     Given a light configured with:
-      | Window Size | 1s |
+      | Window Size | 2s |
     And the service starts failing with "connection-timeout"
     And 2 request is made
-    When 2 seconds have elapsed
+    When 3 seconds have elapsed
     And 2 request is made
     Then the light color is green
     When 1 request is made
