@@ -20,6 +20,7 @@ group :development do
   gem "cucumber"
   gem "database_cleaner-redis", "~> 2.0"
   gem "debug"
+  gem "nokogiri"
   gem "rack-test"
   gem "rake", "~> 13.4"
   gem "rantly", "~> 2.0.0"
