@@ -82,4 +82,32 @@ RSpec.describe Stoplight::Admin::Panel, :redis, type: %i[request] do
       end
     end
   end
+
+  describe "read-only mode" do
+    around do |example|
+      Stoplight::Admin.configure { |config| config.read_only = true }
+      example.run
+      Stoplight::Admin.configure { |config| config.read_only = false }
+    end
+
+    %i[post put patch delete].each do |verb|
+      it "refuses #{verb.upcase} even on paths it does not route" do
+        public_send(verb, "/systems/#{system_id}/lights")
+
+        expect(last_response.status).to eq(403)
+      end
+    end
+
+    it "still serves reads" do
+      get "/systems/#{system_id}/lights"
+
+      expect(last_response.status).to eq(200)
+    end
+
+    it "still answers HEAD requests" do
+      head "/systems/#{system_id}/lights"
+
+      expect(last_response.status).to eq(200)
+    end
+  end
 end

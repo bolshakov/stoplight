@@ -8,6 +8,7 @@ module Stoplight
 
     self.@systems: Array[Wiring::System]
     def self.systems: -> Array[Wiring::System]
+    def self.read_only?: -> bool
     def self.add_system: (Wiring::System) -> void
     def self.__stoplight__reset_systems!: -> void
     def self.validate_persistent_system!: (Wiring::System) -> Wiring::System
