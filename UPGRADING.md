@@ -8,6 +8,7 @@ Here's what you'll want to tackle during your upgrade, roughly ordered from the 
 
 - [ ] Make every `Stoplight("name", ...)` call site for the same name pass identical settings
 - [ ] Move `data_store`, `notifiers`, and `error_notifier` from individual lights to `Stoplight.configure`
+- [ ] Make sure that you run at least Ruby 3.3+, Redis 7.4+ (or Valkey 7.2+)
 - [ ] Replace the `with_*` builder methods with settings passed at creation time
 - [ ] Replace proc and anonymous-class error matchers with named classes or modules
 - [ ] Account for Stoplight state reset after deployment
@@ -86,6 +87,13 @@ end
 
 If you genuinely need more than one data store - separate Redis instances per tenant, for example - use named
 systems, which own their own infrastructure. See [Systems: Namespace Isolation & Configuration][systems] for setup.
+
+### Ruby 3.3 and Redis 7.4 Are the new Minimum
+
+Stoplight 6 requires Ruby 3.3 or newer.
+We also require Redis 7.4 or newer and Valkey 7.2 or newer and no longer tested or supported earlier versions.
+
+See the [maintenance policy] for the versions under test.
 
 ### The Light Builder API Is Gone
 
@@ -582,6 +590,7 @@ Nothing. Stoplight will function as usual.
 [Community-supported notifiers]: https://github.com/bolshakov/stoplight/tree/master#community-supported-notifiers
 [How to implement your own notifier?]: https://github.com/bolshakov/stoplight/blob/master/lib/stoplight/notifier/generic.rb
 [dropped notifiers]: https://github.com/bolshakov/stoplight/tree/v3.0.1/lib/stoplight/notifier
+[maintenance policy]: https://github.com/bolshakov/stoplight#maintenance-policy
 [without passing an empty block]: https://github.com/bolshakov/stoplight-admin/blob/9c9848eb94410e46b20972548f0863db224cb6da/lib/sinatra/stoplight_admin.rb#L30
 [sliding window]: https://github.com/bolshakov/stoplight#custom-window-size
 [systems]: https://github.com/bolshakov/stoplight/blob/master/docs/systems.md
