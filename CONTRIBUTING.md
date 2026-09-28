@@ -42,7 +42,43 @@ bundle exec standardrb --fix
 
 1. **Check existing issues** - Look for related discussions
 2. **Open an issue** - Discuss major changes before coding
-3. **Create a branch** - Use descriptive names: `feature/add-retry-strategy`, `fix/memory-leak`
+3. **Create a branch** off `main` - Use descriptive names: `feature/add-retry-strategy`, `fix/memory-leak`
+
+## Branches and Releases
+
+`main` is the only long-lived branch. Every pull request targets it, and every release is a tag on it.
+
+### Releasing
+
+1. Open a pull request against `main` that bumps `Stoplight::VERSION` in `lib/stoplight/version.rb`, and merge it.
+2. Publish a GitHub Release with a new tag, such as `v6.1.0`, targeting `main`. Publishing creates the tag, saving a
+   draft does not. The form tags the target as it is at that moment, so if `main` has moved past the version bump,
+   target the bump commit instead. Mark prereleases such as `v6.1.0.rc1` as pre-releases.
+3. The new tag runs the Release workflow. It fails unless the tag matches the gem version, then publishes the gem and
+   the `stoplight-admin` Docker image. Prerelease versions do not move the `latest` image.
+
+Pushing the tag with git (`git tag v6.1.0 && git push origin v6.1.0`) works too. Then publish the GitHub Release for
+the existing tag - that page is the change log.
+
+### Hotfixes
+
+A fix for an already released version starts from that version's tag, not from `main`, because `main` may already
+carry unreleased changes:
+
+```bash
+git switch -c hotfix/v6.0.1 v6.0.0
+```
+
+Commit the fix and the version bump there, push the branch, and release it as above, targeting the hotfix branch
+instead of `main`. If the bug also exists on `main`, cherry-pick the fix onto a branch off `main` and open a pull
+request as usual. Delete the hotfix branch once the tag exists - the tag keeps the commits.
+
+GitHub runs the Release workflow from the tagged commit, so a hotfix cut from a tag older than v6.0.0 carries the old
+workflow, which does not react to tags. Bring the current one onto the hotfix branch before tagging:
+
+```bash
+git checkout main -- .github/workflows/release.yml
+```
 
 ## Testing Guidelines
 
@@ -109,4 +145,4 @@ end
 
 Thank you for contributing to Stoplight! Your efforts help make circuit breakers more reliable for everyone.
 
-[architecture.md]: https://github.com/bolshakov/stoplight/blob/develop/docs/architecture.md
+[architecture.md]: https://github.com/bolshakov/stoplight/blob/main/docs/architecture.md

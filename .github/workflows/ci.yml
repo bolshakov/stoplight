@@ -2,10 +2,6 @@ name: 🚦Stoplight
 
 on:
   pull_request:
-    paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - '.docs/**'
   push:
     branches: [ main ]
     paths-ignore:
