@@ -678,8 +678,8 @@ Example: "Ruby 3.3 reaches end-of-life in March 2027, so Stoplight 7.0 will requ
 ## Development
 
 After checking out the repo, run `bundle install` to install dependencies. Run tests with `bundle exec rspec` and check 
-code style with `bundle exec standardrb`. We follow a git flow branching strategy - see our [Git Flow wiki page] for 
-details on branch naming, releases, and contribution workflow. Also check our CONTRIBUTING.md guide for contributors.
+code style with `bundle exec standardrb`. All work happens on `main` - see [CONTRIBUTING.md] for branch naming,
+releases, and the contribution workflow.
 
 ## Credits
 
@@ -708,7 +708,7 @@ Fowler’s [CircuitBreaker][] article.
 [complete list of contributors]: https://github.com/bolshakov/stoplight/graphs/contributors
 [CircuitBreaker]: http://martinfowler.com/bliki/CircuitBreaker.html
 [Redis]: https://redis.io/
-[Git Flow wiki page]: https://github.com/bolshakov/stoplight/wiki/Git-Flow
+[CONTRIBUTING.md]: CONTRIBUTING.md
 [Valkey]: https://valkey.io/
 [Ruby Maintenance Branches]: https://www.ruby-lang.org/en/downloads/branches/
 [Redis's support policy]: https://redis.io/about/releases/
