@@ -73,7 +73,7 @@ jobs:
   features:
     name: Features (${{ matrix.data-store }} Data Store and ${{ matrix.data-store-image }} Data Store image using ${{matrix.light-creation}}) 🥒
     runs-on: ubuntu-latest
-    # Gated transitively: spec-full cannot start without approval, so neither can this. Its own
+    # Gated transitively: while spec-full waits for approval, so does this. Its own
     # environment would go pending only after spec-full finished, costing a second approval click.
     needs: [ spec-full, versions ]
     strategy:
@@ -156,7 +156,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: [ spec, versions ]
     environment:
-      name: Full test suite
+      # Only pull requests wait for approval. Every push to main is a merge, so there are no intermediate
+      # pushes to spare, and this is the only full run of the merged code.
+      name: ${{ github.event_name == 'push' && 'Full test suite (automatic)' || 'Full test suite' }}
       # The gate is an approval, not a release: reviewers still block the job, but no
       # deployment object is created. Incompatible with custom (GitHub App) protection rules.
       deployment: false
