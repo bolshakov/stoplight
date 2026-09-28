@@ -67,6 +67,17 @@ RSpec.describe Stoplight::Admin::Panel, :redis, type: %i[request] do
       expect(document.at_css('[data-role="light-row"]').text.strip).to eq("<b>checkout</b>")
     end
 
+    context "when no middleware vets the forwarded host" do
+      let(:app) { described_class.new! }
+
+      it "keeps a forwarded host out of the page" do
+        get "/systems/#{system_id}/lights", {}, "HTTP_X_FORWARDED_HOST" => %(evil.example"><svg/onload=alert(1)>)
+
+        expect(last_response).to be_ok
+        expect(last_response.body).not_to include("onload")
+      end
+    end
+
     it "serves every stylesheet and script the page links to" do
       get "/systems/#{system_id}/lights"
 
