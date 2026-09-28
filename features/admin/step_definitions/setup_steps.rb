@@ -24,9 +24,8 @@ Given("a system {string} is configured") do |system_name|
   configure_system(system_name)
 end
 
-Given(/^systems "([^"]+)" and "([^"]+)" are configured(?: in that order)?$/) do |first_system_name, second_system_name|
-  configure_system(first_system_name)
-  configure_system(second_system_name)
+Given("the following systems are configured:") do |table|
+  table.hashes.each { |row| configure_system(row.fetch("Name")) }
 end
 
 Given("a system {string} configured with:") do |system_name, table|

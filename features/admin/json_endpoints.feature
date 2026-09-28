@@ -85,7 +85,10 @@ Feature: Admin JSON Endpoints
 
     @wip
     Scenario: Unscoped stats report the first configured system
-      Given systems "Core" and "Analytics" are configured in that order
+      Given the following systems are configured:
+        | Name      |
+        | Core      |
+        | Analytics |
       And a green light "Cache Layer" in system "Core" exists
       And a red light "Event Ingest" in system "Analytics" exists
       When I request the unscoped stats JSON

@@ -204,6 +204,9 @@ Feature: Admin Lights Overview
   Rule: Landing on the panel root takes you somewhere useful
 
     Scenario: The root redirects to the first configured system
-      Given systems "Core" and "Analytics" are configured in that order
+      Given the following systems are configured:
+        | Name      |
+        | Core      |
+        | Analytics |
       When I visit the admin root
       Then I am redirected to the lights page for system "Core"

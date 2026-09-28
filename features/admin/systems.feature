@@ -19,7 +19,10 @@ Feature: Admin Systems
 
     @wip
     Scenario: Explicit systems are the only ones shown
-      Given systems "Core" and "Analytics" are configured
+      Given the following systems are configured:
+        | Name      |
+        | Core      |
+        | Analytics |
       When I visit the admin root
       Then I am redirected to the lights page for system "Core"
       And the system switcher offers systems "Core" and "Analytics"
@@ -34,7 +37,10 @@ Feature: Admin Systems
   Rule: Every page and every action is scoped to one system
 
     Background:
-      Given systems "Core" and "Analytics" are configured
+      Given the following systems are configured:
+        | Name      |
+        | Core      |
+        | Analytics |
       And the following lights in system "Core" exist:
         | Name            | Color |
         | Payment Gateway | red   |

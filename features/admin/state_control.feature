@@ -76,7 +76,10 @@ Feature: Admin State Control
 
     @wip
     Scenario: Bulk recovery is scoped to the current system
-      Given systems "Core" and "Analytics" are configured
+      Given the following systems are configured:
+        | Name      |
+        | Core      |
+        | Analytics |
       And a red light "Payment Gateway" in system "Core" exists
       And a red light "Event Ingest" in system "Analytics" exists
       When I lock all lights in system "Core" to green
