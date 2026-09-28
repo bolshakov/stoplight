@@ -1,11 +1,9 @@
 name: 🚦Stoplight
 
 on:
+  # No paths-ignore here: CI 🚦 is a required check on main, and a pull request that never runs this workflow
+  # never reports it, so a docs-only pull request could not merge.
   pull_request:
-    paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - '.docs/**'
   push:
     branches: [ main ]
     paths-ignore:
