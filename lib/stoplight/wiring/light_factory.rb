@@ -72,7 +72,16 @@ module Stoplight
       attr_reader :system_name
 
       def recovery_lock_store = storage_set.recovery_lock_store
-      def storage_scripting = Infrastructure::Redis::Storage::Scripting.new(redis:)
+
+      def storage_scripting
+        case data_store_config
+        when DataStore::Redis
+          data_store_config.__stoplight__scripting
+        else
+          raise T.absurd(data_store_config)
+        end
+      end
+
       def failover_system = T.must(@failover_system)
 
       def key_space

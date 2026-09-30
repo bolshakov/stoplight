@@ -37,6 +37,31 @@ RSpec.describe Stoplight::Wiring::LightFactory do
   before { bus.subscribe(Stoplight::Domain::Telemetry::LightRegistered) { |envelope| received << envelope } }
 
   describe "#build" do
+    context "with a Redis data store", :redis do
+      let(:data_store) { Stoplight::DataStore::Redis.new(redis) }
+      let(:config) { super().with(data_store:) }
+      let(:other_factory) do
+        described_class.new(
+          system_id: Stoplight::Domain::Id.for("Test"),
+          system_name: "Test",
+          config: config.with(name: "PayPay"),
+          failover_system:,
+          telemetry: bus
+        )
+      end
+
+      before do
+        allow(Stoplight::Infrastructure::Redis::Storage::Scripting).to receive(:new).and_call_original
+      end
+
+      it "shares the data store's script cache between lights" do
+        expect(Stoplight::Infrastructure::Redis::Storage::Scripting).to receive(:new).once
+
+        factory.build
+        other_factory.build
+      end
+    end
+
     it "emits exactly one LightRegistered event" do
       factory.build
 

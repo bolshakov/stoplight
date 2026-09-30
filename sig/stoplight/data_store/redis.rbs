@@ -7,8 +7,11 @@ module Stoplight
       KEY_SPACE: Infrastructure::Redis::Key
 
       attr_reader redis: Infrastructure::redis
+      @scripting: Infrastructure::Redis::Storage::Scripting?
 
       def initialize: (Infrastructure::redis) -> void
+
+      def __stoplight__scripting: -> Infrastructure::Redis::Storage::Scripting
 
       def self.key_space: -> Infrastructure::Redis::Key
       def key_space: -> Infrastructure::Redis::Key

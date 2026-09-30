@@ -11,6 +11,7 @@ module Stoplight
 
           @scripts_path: Array[String]
           @shas: Hash[String, String]
+          @invoked: Hash[String, bool]
           @redis: redis
 
           def initialize: (
@@ -24,7 +25,7 @@ module Stoplight
               ?args: Array[_ToS]
             ) -> untyped
 
-          private def reload_script: (String script_name) -> void
+          private def load_script: (String script_name) -> void
 
           private def resolve_source: (String script_name) -> String
         end
