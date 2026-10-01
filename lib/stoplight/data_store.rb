@@ -30,6 +30,13 @@ module Stoplight
       # @see Stoplight::Infrastructure::Redis::Key
       def self.key_space = KEY_SPACE
       def key_space = self.class.key_space
+
+      # Lua scripts are loaded into Redis once per server, so every light shares a single script cache.
+      #
+      # @api private
+      def __stoplight__scripting
+        @scripting ||= Infrastructure::Redis::Storage::Scripting.new(redis:)
+      end
     end
 
     class Memory < Base

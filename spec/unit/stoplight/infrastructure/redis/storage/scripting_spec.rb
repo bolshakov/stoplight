@@ -262,23 +262,57 @@ RSpec.describe Stoplight::Infrastructure::Redis::Storage::Scripting, :redis do
     end
   end
 
-  context "when two scripting instances call the same script" do
-    let(:script_sha) { Digest::SHA1.hexdigest(script) }
+  context "when the script is not in the Redis cache" do
+    before { redis.script(:flush, :sync) }
 
+    it "loads the script on the first miss and retries, without a warning" do
+      expect(redis).to receive(:evalsha).twice.and_call_original # the miss, then the retry
+      expect(redis).to receive(:script).with(:load, script).once.and_call_original
+
+      expect do
+        script_manager.call(script_name, args: [value], keys: [key])
+      end.not_to output.to_stderr
+    end
+
+    context "when script is already loaded in Redis" do
+      before { script_manager.call(script_name, args: [value], keys: [key]) }
+
+      it "runs scripts by SHA in a single round trip" do
+        expect(redis).to receive(:evalsha).once.and_call_original
+        expect(redis).not_to receive(:script)
+
+        script_manager.call(script_name, args: [value], keys: [key])
+      end
+    end
+  end
+
+  context "when another client already loaded the script" do
     before do
+      redis.script(:flush, :sync)
+      redis.script(:load, script)
+    end
+
+    it "runs it by SHA without loading it again" do
+      expect(redis).not_to receive(:script)
+
+      expect do
+        script_manager.call(script_name, args: [value], keys: [key])
+      end.not_to output.to_stderr
+    end
+  end
+
+  context "when the script cache is flushed after the first use" do
+    before do
+      script_manager.call(script_name, args: [value], keys: [key])
       redis.script(:flush, :sync)
     end
 
-    it "loads script only once" do
-      expect(redis).to receive(:script).with(:load, script).and_call_original.once
+    it "warns, reloads the script and retries once" do
+      expect(redis).to receive(:script).with(:load, script).once.and_call_original
 
-      script_manager1 = script_manager_factory
-      script_manager1.call(script_name, args: [value], keys: [key])
-
-      expect(redis).not_to receive(:script)
-      script_manager2 = script_manager_factory
-
-      script_manager2.call(script_name, args: [value], keys: [key])
+      expect do
+        expect(script_manager.call(script_name, args: [value], keys: [key])).to eq("OK")
+      end.to output(/script cache/).to_stderr
     end
   end
 end

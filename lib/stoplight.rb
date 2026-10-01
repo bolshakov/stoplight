@@ -3,7 +3,6 @@
 require "concurrent/map"
 require "zeitwerk"
 
-# steep:ignore:start
 loader = Zeitwerk::Loader.for_gem
 loader.inflector.inflect("io" => "IO")
 loader.do_not_eager_load(
@@ -14,7 +13,6 @@ loader.do_not_eager_load(
 loader.ignore("#{__dir__}/generators")
 loader.ignore("#{__dir__}/stoplight/rspec.rb", "#{__dir__}/stoplight/rspec")
 loader.setup
-# steep:ignore:end
 
 module Stoplight # rubocop:disable Style/Documentation
   T = Types
