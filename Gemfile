@@ -22,7 +22,7 @@ group :development do
   gem "debug"
   gem "rack-test"
   gem "rake", "~> 13.4"
-  gem "rantly", "~> 2.0.0"
+  gem "rantly", "~> 3.0.0"
   gem "rspec", "~> 3.13"
   gem "ruby-prof"
   gem "simplecov", "~> 1.1"
