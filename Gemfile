@@ -25,7 +25,7 @@ group :development do
   gem "rantly", "~> 3.0.0"
   gem "rspec", "~> 3.13"
   gem "ruby-prof"
-  gem "simplecov", "~> 1.1"
+  gem "simplecov", "~> 1.3"
   gem "simplecov-lcov", "~> 0.9"
   gem "standard"
   gem "steep", require: false
