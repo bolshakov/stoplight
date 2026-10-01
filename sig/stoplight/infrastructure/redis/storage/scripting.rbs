@@ -11,7 +11,7 @@ module Stoplight
 
           @scripts_path: Array[String]
           @shas: Hash[String, String]
-          @invoked: Hash[String, bool]
+          @invoked: Set[String]
           @redis: redis
 
           def initialize: (

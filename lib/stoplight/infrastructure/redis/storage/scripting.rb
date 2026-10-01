@@ -21,7 +21,7 @@ module Stoplight
             @shas = Hash.new do |hash, script_name|
               hash[script_name] = Digest::SHA1.hexdigest(resolve_source(script_name))
             end
-            @invoked = {}
+            @invoked = Set.new
           end
 
           def call(script_name, keys: [], args: [])
@@ -34,7 +34,7 @@ module Stoplight
             rescue ::Redis::CommandError => error
               if error.message.include?("NOSCRIPT") && !retried
                 retried = true
-                if @invoked[script_name] # skip warning for the first script invocation on app boot
+                if @invoked.include?(script_name) # skip warning for the first script invocation on app boot
                   warn "Stoplight is unable to find the script '#{script_name}' from Redis's script cache. " \
                          "Reloading and retrying..."
                 end
@@ -44,7 +44,7 @@ module Stoplight
                 raise error
               end
             ensure
-              @invoked[script_name] = true
+              @invoked << script_name
             end
           end
 
