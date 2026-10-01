@@ -17,6 +17,7 @@ Here's what you'll want to tackle during your upgrade, roughly ordered from the 
 - [ ] Round any fractional `cool_off_time` up to a whole number of seconds, at least 1
 - [ ] Drop `warn_on_clock_skew` from your Redis data store setup
 - [ ] Compare `light.color` and `light.state` against symbols, not strings, and pass a symbol to `light.lock`
+- [ ] Check anything that parses or matches `Stoplight::Error::RedLight` messages - the message format changed
 - [ ] Test thoroughly in a staging environment
 
 ### Lights Are Registered and Reused
@@ -283,6 +284,19 @@ light.lock(Stoplight::Color::GREEN)
 
 Symbols are the idiomatic Ruby choice for a closed set of values. Anything that serializes them - logs, metrics tags,
 the Admin dashboard's JSON - renders the same text as before.
+
+### The `RedLight` Exception Message Changed
+
+The message of `Stoplight::Error::RedLight` used to be the bare light name. It is now a sentence that names the light
+and says what happened, so a log line or an error tracker (e.g., in Sentry) entry is readable on its own:
+
+```
+# 5.x
+Stoplight::Error::RedLight: Payment Service
+
+# 6.0
+Stoplight::Error::RedLight: Stoplight "Payment Service" is red - traffic stopped until recovery.
+```
 
 ### Getting Help
 
