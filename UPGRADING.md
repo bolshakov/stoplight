@@ -295,7 +295,7 @@ and says what happened, so a log line or an error tracker (e.g., in Sentry) entr
 Stoplight::Error::RedLight: Payment Service
 
 # 6.0
-Stoplight::Error::RedLight: Stoplight "Payment Service" is red - traffic stopped until recovery.
+Stoplight::Error::RedLight: Light `Payment Service` is red - traffic stopped until recovery.
 ```
 
 ### Getting Help
