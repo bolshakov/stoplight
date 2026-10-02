@@ -80,7 +80,7 @@ After the last failure, the light turns red. The next call will raise a `Stoplig
 executing the block:
 
 ```ruby
-light.run { 1 / 0 } #=> raises Stoplight::Error::RedLight: Stoplight "Example" is red - traffic stopped until recovery.
+light.run { 1 / 0 } #=> raises Stoplight::Error::RedLight: Light `Example` is red - traffic stopped until recovery.
 light.color # => :red
 ```
 
