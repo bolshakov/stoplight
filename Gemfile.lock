@@ -306,6 +306,7 @@ DEPENDENCIES
   cucumber
   database_cleaner-redis (~> 2.0)
   debug
+  nokogiri
   puma
   rack-test
   rake (~> 13.4)

@@ -1,0 +1,3 @@
+default: --exclude features/admin
+admin: --require features/admin features/admin --tags "not @wip" --strict
+admin_wip: --require features/admin features/admin --tags @wip --wip

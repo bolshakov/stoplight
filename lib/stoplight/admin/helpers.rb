@@ -18,11 +18,11 @@ module Stoplight
       end
 
       def system_url(system_id, path)
-        url("/systems/#{system_id}#{path}")
+        url("/systems/#{system_id}#{path}", false)
       end
 
       def asset_path(name)
-        url("/#{name}?v=#{ASSET_DIGESTS.fetch(name)}")
+        url("/#{name}?v=#{ASSET_DIGESTS.fetch(name)}", false)
       end
 
       # A read-only control keeps its place but loses its href, so there is nothing to follow

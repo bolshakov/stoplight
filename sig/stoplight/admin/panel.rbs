@@ -1,0 +1,7 @@
+module Stoplight
+  class Admin
+    class Panel < Sinatra::Base
+      include Helpers
+    end
+  end
+end

@@ -111,6 +111,43 @@ jobs:
           STOPLIGHT_LIGHT_CREATION: ${{ matrix.light-creation }}
           CUCUMBER_PUBLISH_ENABLED: true
 
+  admin-features:
+    name: Admin Features (${{ matrix.data-store-image }} Data Store image) 🥒
+    runs-on: ubuntu-latest
+    needs: [ spec-full, versions ]
+    strategy:
+      matrix: ${{ fromJSON(needs.versions.outputs.smoke) }}
+    services:
+      data-store:
+        image: ${{ matrix.data-store-image }}
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+    steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
+        with:
+          egress-policy: audit
+
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1.321.0
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+
+      - name: Run Admin Features
+        run: bundle exec cucumber -p admin
+        env:
+          STOPLIGHT_REDIS_URL: 'redis://127.0.0.1:6379/0'
+          CUCUMBER_PUBLISH_ENABLED: true
+
   spec:
     permissions:
       contents: read  # for actions/checkout to fetch code
@@ -200,7 +237,7 @@ jobs:
     name: CI 🚦
     runs-on: ubuntu-latest
     if: always()
-    needs: [ versions, steep, rubocop, spec, spec-full, features ]
+    needs: [ versions, steep, rubocop, spec, spec-full, features, admin-features ]
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
