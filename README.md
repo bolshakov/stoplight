@@ -80,8 +80,8 @@ After the last failure, the light turns red. The next call will raise a `Stoplig
 executing the block:
 
 ```ruby
-light.run { 1 / 0 } #=> raises Stoplight::Error::RedLight: example-zero
-light.color # => "red"
+light.run { 1 / 0 } #=> raises Stoplight::Error::RedLight: Stoplight "Example" is red - traffic stopped until recovery.
+light.color # => :red
 ```
 
 The `Stoplight::Error::RedLight` provides metadata about the error:
@@ -108,7 +108,7 @@ light.run { 1 / 1 } #=> 1
 If the test probe succeeds, the light turns green again. If it fails, the light turns red again.
 
 ```ruby
-light.color #=> "green"
+light.color #=> :green
 ```
 
 ### Using Fallbacks
@@ -388,7 +388,7 @@ By default, Stoplight uses an in-memory data store:
 
 ```ruby
 require "stoplight"
-Stoplight::Default::DATA_STORE
+Stoplight::Wiring::Default::DATA_STORE
 # => #<Stoplight::DataStore::Memory:...>
 ```
 
@@ -700,7 +700,7 @@ Fowler’s [CircuitBreaker][] article.
 [stoplight-sentry]: https://github.com/bolshakov/stoplight-sentry
 [stoplight-honeybadger]: https://github.com/qoqa/stoplight-honeybadger
 [stoplight-statsd]: https://github.com/bolshakov/stoplight-statsd
-[notifier interface documentation]: https://github.com/bolshakov/stoplight/blob/main/lib/stoplight/domain/state_transition_notifier.rb
+[notifier interface documentation]: https://github.com/bolshakov/stoplight/blob/main/sig/stoplight/domain/ports/state_transition_notifier.rbs
 [camdez]: https://github.com/camdez
 [tfausak]: https://github.com/tfausak
 [bolshakov]: https://github.com/bolshakov

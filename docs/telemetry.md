@@ -84,9 +84,9 @@ already-removed or unknown token is a no-op.
 
 `TrafficBreached`, `RecoveryStarted`, `RecoverySucceeded`, `RecoveryFailed`, and `LockChanged` all include the
 `StateTransitioned` marker module (see [Subscribing](#subscribing)). `LockChanged` fires even when the resulting
-color is unchanged, so the lock timeline is complete. `from_color`/`to_color` are the string colors (`"green"`,
-`"yellow"`, `"red"`); `from_state`/`to_state` on `LockChanged` are lock states (`"unlocked"`, `"locked_green"`,
-`"locked_red"`).
+color is unchanged, so the lock timeline is complete. `from_color`/`to_color` are the color symbols (`:green`,
+`:yellow`, `:red`); `from_state`/`to_state` on `LockChanged` are lock state symbols (`:unlocked`, `:locked_green`,
+`:locked_red`).
 
 `failure`, where present, is a `Failure` wrapping the live `exception` and a `tracked` flag (`false` when the
 exception matched `skipped_errors` - the run still counted as a success). `metrics`/`progress` are a `Metrics`
