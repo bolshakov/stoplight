@@ -11,7 +11,7 @@ rescue LoadError
   raise <<~WARN
     "sinatra" and "sinatra-contrib" gems are unavailable and necessary for running Stoplight Admin panel
     Please add them to your Gemfile and run `bundle install`:
-      gem "sinatra", required: false
+      gem "sinatra", require: false
       gem "sinatra-contrib", require: false
   WARN
 end

@@ -1,0 +1,48 @@
+# frozen_string_literal: true
+
+module Stoplight
+  class Admin
+    # A Sinatra dashboard listing every light of a configured system and its state.
+    #
+    # It reads its systems and its +read_only+ setting from +Stoplight::Admin+, so a host
+    # configures them there and mounts either app.
+    #
+    # @example Mounting in Rails
+    #   Payments = Stoplight.register_system("Payments", data_store:)
+    #
+    #   Stoplight::Admin.configure do |config|
+    #     config.add_system Payments
+    #   end
+    #
+    #   mount Stoplight::Admin::Panel => "/stoplights"
+    #
+    class Panel < Sinatra::Base
+      helpers Helpers
+
+      set :systems, proc { Admin.settings.systems }
+      set :read_only, proc { Admin.settings.read_only? }
+      set :views, File.join(T.must(__dir__), "panel", "views")
+      set :nonce, proc { |request| }
+      set :public_folder, ASSETS_PATH
+      set :static_cache_control, [:public, max_age: ONE_YEAR_IN_SECONDS, immutable: true]
+
+      before do
+        if settings.read_only? && !request.get? && !request.head?
+          halt 403, "Stoplight Admin is running in read-only mode."
+        end
+      end
+
+      get "/" do
+        system = settings.systems.first
+
+        redirect system_url(system.config.id, "/lights")
+      end
+
+      get "/systems/:system_id/lights" do
+        lights, _stats = dependencies.stats_action.call
+
+        erb :lights, locals: {lights: lights}
+      end
+    end
+  end
+end

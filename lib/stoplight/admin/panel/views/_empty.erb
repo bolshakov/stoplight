@@ -1,0 +1,20 @@
+<section data-role="empty-state" class="panel-empty flex flex-col items-center justify-center text-center">
+  <div class="flex items-center justify-center w-16 h-16 mb-6 rounded-full bg-blue-50">
+    <svg class="w-8 h-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="m19 5 3-3"/><path d="m2 22 3-3"/><path d="M6.3 20.3a2.4 2.4 0 0 0 3.4 0L12 18l-6-6-2.3 2.3a2.4 2.4 0 0 0 0 3.4Z"/><path d="M7.5 13.5 10 11"/><path d="M10.5 16.5 13 14"/><path d="m12 6 6 6 2.3-2.3a2.4 2.4 0 0 0 0-3.4l-2.6-2.6a2.4 2.4 0 0 0-3.4 0Z"/>
+    </svg>
+  </div>
+
+  <h2 class="text-4xl leading-none font-semibold tracking-tight">No lights found</h2>
+
+  <p class="max-w-2xl mt-5 text-lg text-gray-500">
+    Ensure lights are registered and this Admin instance uses the same data store as your application.
+  </p>
+
+  <a href="<%= system_url(current_system_id, "/lights") %>" class="inline-flex items-center gap-2 mt-7 px-5 py-3 font-medium text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:ring-blue-300">
+    <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/>
+    </svg>
+    Refresh Lights
+  </a>
+</section>

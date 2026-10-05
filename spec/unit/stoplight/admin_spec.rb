@@ -151,12 +151,11 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
 
         expect(last_response).to be_ok
 
-        host = last_request.env["HTTP_HOST"]
         digests = Stoplight::Admin::ASSET_DIGESTS
 
-        expect(last_response.body).to include(%(<link rel="icon" href="http://#{host}/favicon.ico?v=#{digests.fetch("favicon.ico")}" sizes="32x32">))
-        expect(last_response.body).to include(%(<link rel="icon" href="http://#{host}/icon.svg?v=#{digests.fetch("icon.svg")}" type="image/svg+xml">))
-        expect(last_response.body).to include(%(<link rel="apple-touch-icon" href="http://#{host}/apple-touch-icon.png?v=#{digests.fetch("apple-touch-icon.png")}">))
+        expect(last_response.body).to include(%(<link rel="icon" href="/favicon.ico?v=#{digests.fetch("favicon.ico")}" sizes="32x32">))
+        expect(last_response.body).to include(%(<link rel="icon" href="/icon.svg?v=#{digests.fetch("icon.svg")}" type="image/svg+xml">))
+        expect(last_response.body).to include(%(<link rel="apple-touch-icon" href="/apple-touch-icon.png?v=#{digests.fetch("apple-touch-icon.png")}">))
       end
 
       context "with no lights" do
@@ -196,9 +195,9 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
 
           expect(last_response).to be_ok
 
-          expect(last_response.body).to include(%(href="http://#{last_request.env["HTTP_HOST"]}/systems/#{system_id}/lights/#{light_id}/unlock" data-turbo-method="patch"))
-          expect(last_response.body).to include(%(href="http://#{last_request.env["HTTP_HOST"]}/systems/#{system_id}/lights/#{light_id}/lock?color=green" data-turbo-method="patch"))
-          expect(last_response.body).to include(%(href="http://#{last_request.env["HTTP_HOST"]}/systems/#{system_id}/lights/#{light_id}/lock?color=red" data-turbo-method="patch"))
+          expect(last_response.body).to include(%(href="/systems/#{system_id}/lights/#{light_id}/unlock" data-turbo-method="patch"))
+          expect(last_response.body).to include(%(href="/systems/#{system_id}/lights/#{light_id}/lock?color=green" data-turbo-method="patch"))
+          expect(last_response.body).to include(%(href="/systems/#{system_id}/lights/#{light_id}/lock?color=red" data-turbo-method="patch"))
 
           expect(last_response.body).to_not include("Read-only")
         end
@@ -209,7 +208,7 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
           expect(last_response).to be_ok
 
           expect(last_response.body).to include(
-            %(href="http://#{last_request.env["HTTP_HOST"]}/systems/#{system_id}/lights/#{light_id}" data-turbo-method="delete" data-turbo-confirm="Are you sure you want to remove this light?")
+            %(href="/systems/#{system_id}/lights/#{light_id}" data-turbo-method="delete" data-turbo-confirm="Are you sure you want to remove this light?")
           )
           expect(last_response.body.scan("data-turbo-confirm").count).to eq(1)
         end
@@ -222,7 +221,29 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
           get "/systems/#{system_id}/lights"
 
           expect(last_response).to be_ok
-          expect(last_response.body).to include(%(href="http://#{last_request.env["HTTP_HOST"]}/systems/#{system_id}/lights/lock?color=green" data-turbo-method="patch"))
+          expect(last_response.body).to include(%(href="/systems/#{system_id}/lights/lock?color=green" data-turbo-method="patch"))
+        end
+
+        it "keeps the mount prefix in page links" do
+          get "/systems/#{system_id}/lights", {}, "SCRIPT_NAME" => "/admin"
+
+          expect(last_response.body).to include(%(href="/admin/systems/#{system_id}/lights/lock?color=green"))
+        end
+      end
+
+      context "when no middleware vets the forwarded host" do
+        let(:app) { described_class.new! }
+
+        before do
+          Stoplight::Admin.add_system(Stoplight.register_system(SecureRandom.uuid, data_store:))
+          light.lock(Stoplight::Color::RED)
+        end
+
+        it "keeps the forwarded host out of the page" do
+          get "/systems/#{system_id}/lights", {}, "HTTP_X_FORWARDED_HOST" => %(evil.example"><svg/onload=alert(1)>)
+
+          expect(last_response).to be_ok
+          expect(last_response.body).not_to include("onload")
         end
       end
 
@@ -368,19 +389,17 @@ RSpec.describe Stoplight::Admin, :redis, type: %i[request] do
       it "links each menu row to that system's dashboard" do
         get "/systems/#{system_id}/lights"
 
-        host = last_request.env["HTTP_HOST"]
-        expect(last_response.body).to include(%(href="http://#{host}/systems/#{other_system.config.id}/lights"))
+        expect(last_response.body).to include(%(href="/systems/#{other_system.config.id}/lights"))
       end
 
       it "highlights the current system's row in the menu" do
         get "/systems/#{system_id}/lights"
 
-        host = last_request.env["HTTP_HOST"]
         expect(last_response.body).to include(
-          %(href="http://#{host}/systems/#{system_id}/lights" class="block px-4 py-2 bg-blue-50 text-blue-700)
+          %(href="/systems/#{system_id}/lights" class="block px-4 py-2 bg-blue-50 text-blue-700)
         )
         expect(last_response.body).to include(
-          %(href="http://#{host}/systems/#{other_system.config.id}/lights" class="block px-4 py-2 hover:bg-gray-100)
+          %(href="/systems/#{other_system.config.id}/lights" class="block px-4 py-2 hover:bg-gray-100)
         )
       end
     end
