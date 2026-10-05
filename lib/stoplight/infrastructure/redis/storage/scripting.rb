@@ -19,7 +19,8 @@ module Stoplight
             @scripts_path = scripts_path
             @redis = redis
             @shas = Hash.new do |hash, script_name|
-              hash[script_name] = Digest::SHA1.hexdigest(resolve_source(script_name))
+              name = script_name #: String
+              hash[script_name] = Digest::SHA1.hexdigest(resolve_source(name))
             end
             @invoked = Set.new
           end
