@@ -48,7 +48,6 @@ Feature: Admin Systems
         | Name         | Color |
         | Event Ingest | green |
 
-    @wip
     Scenario: A system's page shows only its own lights
       When I visit the lights page for system "Core"
       Then I see light "Payment Gateway"
