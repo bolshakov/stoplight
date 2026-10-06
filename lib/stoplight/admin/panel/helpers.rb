@@ -49,6 +49,10 @@ module Stoplight
         def current_system
           find_system(current_system_id)
         end
+
+        def turbo_frame_request?
+          !!request.env["HTTP_TURBO_FRAME"]
+        end
       end
     end
   end
