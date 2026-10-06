@@ -188,6 +188,16 @@ RSpec.describe Stoplight::Admin::Panel, :redis, type: %i[request] do
 
       expect(last_response.status).to eq(404)
     end
+
+    it "marks the selected light's row as current, and no other row" do
+      system.register("alpha")
+      system.register("beta")
+
+      get "/systems/#{system_id}/lights/#{Stoplight::Domain::Id.for("beta")}"
+
+      rows = document.css('[data-role="light-row"] a')
+      expect(rows.map { |row| row["aria-current"] }).to eq([nil, "page"])
+    end
   end
 
   describe "read-only mode" do
