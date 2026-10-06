@@ -1,0 +1,23 @@
+module Stoplight
+  class Admin
+    class Panel
+      class LightSummary < Data
+        attr_reader id: String
+        attr_reader name: String
+        attr_reader color: Domain::color
+
+        def self.new: (
+            id: String,
+            name: String,
+            color: Domain::color,
+          ) -> instance
+
+        def initialize: (
+            id: String,
+            name: String,
+            color: Domain::color,
+          ) -> void
+      end
+    end
+  end
+end

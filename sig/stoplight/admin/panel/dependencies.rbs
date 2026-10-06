@@ -1,0 +1,14 @@
+module Stoplight
+  class Admin
+    class Panel
+      class Dependencies
+        @system: Wiring::System
+        @storage: Wiring::System::Storage
+
+        def initialize: (system: Wiring::System) -> void
+        def config_registry: -> ConfigRegistry
+        def light_list_action: -> Actions::LightList
+      end
+    end
+  end
+end

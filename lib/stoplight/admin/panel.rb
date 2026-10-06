@@ -39,7 +39,7 @@ module Stoplight
       end
 
       get "/systems/:system_id/lights" do
-        lights, _stats = dependencies.stats_action.call
+        lights = dependencies.light_list_action.call
 
         erb :lights, locals: {lights: lights}
       end
