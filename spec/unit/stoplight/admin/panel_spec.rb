@@ -79,6 +79,32 @@ RSpec.describe Stoplight::Admin::Panel, :redis, type: %i[request] do
       end
     end
 
+    it "marks a locked row" do
+      light = system.register("checkout")
+      light.lock(Stoplight::Color::GREEN)
+
+      get "/systems/#{system_id}/lights"
+
+      expect(document.at_css('[data-role="light-row"]')["data-locked"]).to eq("true")
+    end
+
+    it "shows a lock icon only for a locked row" do
+      light = system.register("checkout")
+      light.lock(Stoplight::Color::GREEN)
+
+      get "/systems/#{system_id}/lights"
+
+      expect(document.at_css('[data-role="light-row"] [data-role="lock-icon"]')).not_to be_nil
+    end
+
+    it "shows no lock icon for an unlocked row" do
+      system.register("checkout")
+
+      get "/systems/#{system_id}/lights"
+
+      expect(document.at_css('[data-role="light-row"] [data-role="lock-icon"]')).to be_nil
+    end
+
     it "shows the first (worst) light in the detail pane" do
       system.register("alpha")
       zulu = system.register("zulu", threshold: 1)

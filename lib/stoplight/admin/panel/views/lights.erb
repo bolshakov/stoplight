@@ -3,10 +3,15 @@
 <% else %>
   <ul data-role="light-list" class="bg-white border-b border-gray-200">
     <% lights.each do |light| %>
-      <li data-role="light-row" data-light="<%= CGI.escapeHTML(light.name) %>" data-color="<%= light.color %>" class="px-4 py-3 border-b border-gray-200 text-sm flex items-center gap-2">
+      <li data-role="light-row" data-light="<%= CGI.escapeHTML(light.name) %>" data-color="<%= light.color %>" data-locked="<%= light.locked? %>" class="px-4 py-3 border-b border-gray-200 text-sm flex items-center gap-2">
         <a href="<%= system_url(current_system_id, "/lights/#{CGI.escapeHTML(light.id)}") %>" data-turbo-frame="light-detail" data-turbo-action="advance" class="flex items-center gap-2 flex-1">
           <span class="w-2.5 h-2.5 rounded-full shrink-0 bg-<%= light.color %>-500"></span>
           <%= CGI.escapeHTML(light.name) %>
+          <% if light.locked? %>
+            <svg data-role="lock-icon" role="img" aria-label="Locked" class="w-3.5 h-3.5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="5" y="11" width="14" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+          <% end %>
         </a>
       </li>
     <% end %>
