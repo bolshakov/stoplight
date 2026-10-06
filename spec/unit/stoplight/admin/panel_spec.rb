@@ -198,6 +198,16 @@ RSpec.describe Stoplight::Admin::Panel, :redis, type: %i[request] do
       rows = document.css('[data-role="light-row"] a')
       expect(rows.map { |row| row["aria-current"] }).to eq([nil, "page"])
     end
+
+    it "renders only the light-detail frame content, without the page layout, for a Turbo-Frame request" do
+      system.register("beta")
+
+      get "/systems/#{system_id}/lights/#{Stoplight::Domain::Id.for("beta")}", {}, "HTTP_TURBO_FRAME" => "light-detail"
+
+      expect(document.at_css('[data-role="light-detail"]')["data-light"]).to eq("beta")
+      expect(document.at_css("header")).to be_nil
+      expect(document.css("link[rel=stylesheet]")).to be_empty
+    end
   end
 
   describe "read-only mode" do

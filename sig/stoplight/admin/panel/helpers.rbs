@@ -13,6 +13,7 @@ module Stoplight
         def find_system: (String) -> Wiring::System
         def current_system_id: -> String
         def current_system: -> Wiring::System
+        def turbo_frame_request?: -> bool
       end
     end
   end
