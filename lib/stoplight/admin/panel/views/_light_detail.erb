@@ -1,0 +1,7 @@
+<turbo-frame id="light-detail">
+  <div data-role="light-detail" data-light="<%= CGI.escapeHTML(light.name) %>">
+    <h2><%= CGI.escapeHTML(light.name) %></h2>
+
+    <%= erb state_template_for(light), locals: {light: light} %>
+  </div>
+</turbo-frame>

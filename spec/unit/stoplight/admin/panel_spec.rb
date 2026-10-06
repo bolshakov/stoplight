@@ -79,6 +79,21 @@ RSpec.describe Stoplight::Admin::Panel, :redis, type: %i[request] do
       end
     end
 
+    it "shows the first (worst) light in the detail pane" do
+      system.register("alpha")
+      zulu = system.register("zulu", threshold: 1)
+
+      begin
+        zulu.run { raise "boom" }
+      rescue
+        nil
+      end
+
+      get "/systems/#{system_id}/lights"
+
+      expect(document.at_css('[data-role="light-detail"]')["data-light"]).to eq("zulu")
+    end
+
     it "lists only the lights of the requested system" do
       other_system = Stoplight.register_system(SecureRandom.uuid, data_store: data_store)
       Stoplight::Admin.add_system(other_system)
@@ -123,6 +138,29 @@ RSpec.describe Stoplight::Admin::Panel, :redis, type: %i[request] do
 
         expect(last_response.status).to eq(200), "#{asset_url} responded with #{last_response.status}"
       end
+    end
+  end
+
+  describe "GET /systems/:system_id/lights/:light_id" do
+    def document
+      Nokogiri::HTML5(last_response.body)
+    end
+
+    it "selects the named light for the detail pane" do
+      system.register("alpha")
+      system.register("beta")
+
+      get "/systems/#{system_id}/lights/#{Stoplight::Domain::Id.for("beta")}"
+
+      expect(document.at_css('[data-role="light-detail"]')["data-light"]).to eq("beta")
+    end
+
+    it "responds with 404 for a light that is not registered" do
+      system.register("alpha")
+
+      get "/systems/#{system_id}/lights/unknown"
+
+      expect(last_response.status).to eq(404)
     end
   end
 

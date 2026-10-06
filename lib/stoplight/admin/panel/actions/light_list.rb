@@ -21,10 +21,13 @@ module Stoplight
           end
 
           private def build_light(config)
+            state_snapshot = @storage.state_snapshot(config)
+
             LightSummary.new(
               id: config.id,
               name: config.name,
-              color: @storage.state_snapshot(config).color
+              color: state_snapshot.color,
+              locked: state_snapshot.locked_state != Stoplight::State::UNLOCKED
             )
           end
 

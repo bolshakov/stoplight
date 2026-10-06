@@ -3,7 +3,11 @@
 module Stoplight
   class Admin
     class Panel
-      LightSummary = Data.define(:id, :name, :color)
+      LightSummary = Data.define(:id, :name, :color, :locked)
+
+      class LightSummary
+        def locked? = locked
+      end
     end
   end
 end
