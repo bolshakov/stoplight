@@ -37,7 +37,7 @@ Given("a {light} exists") do |light|
 end
 
 Given("a {color} {light} exists") do |color, light|
-  pending
+  register_lights(system_for(light), [{"Name" => light.name, "Color" => color.to_s}])
 end
 
 Given("a {light} configured with:") do |light, table|
@@ -45,11 +45,11 @@ Given("a {light} configured with:") do |light, table|
 end
 
 Given("the following lights exist:") do |table|
-  register_lights(Stoplight.__stoplight__default_system, table)
+  register_lights(Stoplight.__stoplight__default_system, table.hashes)
 end
 
 Given("the following lights in system {string} exist:") do |system_name, table|
-  register_lights(system_named(system_name), table)
+  register_lights(system_named(system_name), table.hashes)
 end
 
 Given("no lights exist") do
@@ -70,7 +70,7 @@ Given("{light} enters {color} state") do |light, color|
 end
 
 Given("{light} is locked to {color}") do |light, color|
-  pending
+  find_light(light).lock(color)
 end
 
 Given("{light} last failed with {string}") do |light, error_message|
