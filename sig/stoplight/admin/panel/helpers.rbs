@@ -2,7 +2,12 @@ module Stoplight
   class Admin
     class Panel
       module Helpers : Sinatra::Base
+        STATE_TEMPLATES: Hash[Array[Domain::color | bool], Symbol]
+
         def dependencies: -> Dependencies
+        def selected_light: (Array[LightSummary]) -> LightSummary?
+        def find_light: (Array[LightSummary], String) -> LightSummary
+        def state_template_for: (LightSummary) -> Symbol
         def system_url: (String system_id, String path) -> String
         def asset_path: (String) -> String
         def find_system: (String) -> Wiring::System

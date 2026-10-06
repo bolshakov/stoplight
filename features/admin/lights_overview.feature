@@ -75,7 +75,6 @@ Feature: Admin Lights Overview
 
   Rule: A card explains the light's state in words, not just color
 
-    @wip
     Scenario Outline: A light with no recorded error is described by its color
       Given a <color> light "checkout" exists
       When I visit the page for light "checkout"
@@ -84,11 +83,14 @@ Feature: Admin Lights Overview
       And its comment is "<comment>"
 
       Examples:
+        | color  | title   | message           | comment             |
+        | green  | Healthy | No recent errors  | Operating normally  |
+
+      @wip
+      Examples:
         | color  | title            | message          | comment                                 |
         | yellow | Testing Recovery | Not available    | Recovery started: awaiting test traffic |
-        | green  | Healthy          | No recent errors | Operating normally                      |
 
-    @wip
     Scenario Outline: A locked light reports the override
       Given a light "checkout" exists
       And light "checkout" is locked to <color>
@@ -99,8 +101,12 @@ Feature: Admin Lights Overview
 
       Examples:
         | color | title          | message                        | comment                                  |
-        | red   | Locked Open    | Circuit manually locked open   | Override active - all requests blocked   |
         | green | Forced Healthy | Circuit manually locked closed | Override active - all requests processed |
+
+      @wip
+      Examples:
+        | color | title       | message                      | comment                                 |
+        | red   | Locked Open | Circuit manually locked open | Override active - all requests blocked  |
 
     @wip
     Scenario: A red light shows its last error and counts down to recovery
@@ -145,7 +151,6 @@ Feature: Admin Lights Overview
       And its message is "RuntimeError: Timed out"
       And its comment is "Allowing limited test traffic (1 of 2 requests)"
 
-    @wip
     Scenario: A locked light is labelled as locked
       Given a light "checkout" exists
       And light "checkout" is locked to green

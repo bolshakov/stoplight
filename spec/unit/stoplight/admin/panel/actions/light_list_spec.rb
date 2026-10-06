@@ -22,7 +22,9 @@ RSpec.describe Stoplight::Admin::Panel::Actions::LightList do
   context "when there are lights" do
     let(:config) { instance_double(Stoplight::Domain::Config, id: "light-id", name: "foo") }
     let(:configs) { [config] }
-    let(:state_snapshot) { instance_double(Stoplight::Domain::StateSnapshot, color: Stoplight::Color::GREEN) }
+    let(:state_snapshot) do
+      instance_double(Stoplight::Domain::StateSnapshot, color: Stoplight::Color::GREEN, locked_state: Stoplight::State::UNLOCKED)
+    end
 
     before do
       allow(storage).to receive(:state_snapshot).with(config).and_return(state_snapshot)
@@ -30,7 +32,7 @@ RSpec.describe Stoplight::Admin::Panel::Actions::LightList do
 
     it "builds a light from the config and its state snapshot only" do
       expect(call).to contain_exactly(
-        have_attributes(id: "light-id", name: "foo", color: Stoplight::Color::GREEN)
+        have_attributes(id: "light-id", name: "foo", color: Stoplight::Color::GREEN, locked: false)
       )
     end
   end
@@ -44,13 +46,13 @@ RSpec.describe Stoplight::Admin::Panel::Actions::LightList do
 
     before do
       allow(storage).to receive(:state_snapshot).with(red_config)
-        .and_return(instance_double(Stoplight::Domain::StateSnapshot, color: Stoplight::Color::RED))
+        .and_return(instance_double(Stoplight::Domain::StateSnapshot, color: Stoplight::Color::RED, locked_state: Stoplight::State::UNLOCKED))
       allow(storage).to receive(:state_snapshot).with(yellow_config)
-        .and_return(instance_double(Stoplight::Domain::StateSnapshot, color: Stoplight::Color::YELLOW))
+        .and_return(instance_double(Stoplight::Domain::StateSnapshot, color: Stoplight::Color::YELLOW, locked_state: Stoplight::State::UNLOCKED))
       allow(storage).to receive(:state_snapshot).with(green_a_config)
-        .and_return(instance_double(Stoplight::Domain::StateSnapshot, color: Stoplight::Color::GREEN))
+        .and_return(instance_double(Stoplight::Domain::StateSnapshot, color: Stoplight::Color::GREEN, locked_state: Stoplight::State::UNLOCKED))
       allow(storage).to receive(:state_snapshot).with(green_b_config)
-        .and_return(instance_double(Stoplight::Domain::StateSnapshot, color: Stoplight::Color::GREEN))
+        .and_return(instance_double(Stoplight::Domain::StateSnapshot, color: Stoplight::Color::GREEN, locked_state: Stoplight::State::UNLOCKED))
     end
 
     it "orders worst color first, then by name" do
