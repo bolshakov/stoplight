@@ -45,11 +45,11 @@ Given("a {light} configured with:") do |light, table|
 end
 
 Given("the following lights exist:") do |table|
-  pending
+  register_lights(Stoplight.__stoplight__default_system, table)
 end
 
 Given("the following lights in system {string} exist:") do |system_name, table|
-  pending
+  register_lights(system_named(system_name), table)
 end
 
 Given("no lights exist") do

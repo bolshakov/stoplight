@@ -47,6 +47,38 @@ RSpec.describe Stoplight::Admin::Panel, :redis, type: %i[request] do
       expect(document.css('[data-role="empty-state"]')).to be_empty
     end
 
+    it "marks a red row" do
+      light = system.register("checkout", threshold: 1)
+
+      begin
+        light.run { raise "boom" }
+      rescue
+        nil
+      end
+
+      get "/systems/#{system_id}/lights"
+
+      expect(document.at_css('[data-role="light-row"]')["data-color"]).to eq("red")
+    end
+
+    it "marks a yellow row" do
+      allow(Stoplight::Infrastructure::Redis::Storage::Scripting)
+        .to receive(:default_scripts_path).and_return(Stoplight::TimeTravel.scripts_path)
+      light = system.register("checkout", cool_off_time: 1)
+
+      3.times do
+        light.run { raise "boom" }
+      rescue
+        nil
+      end
+
+      Stoplight::TimeTravel.freeze(Time.now + 2) do
+        get "/systems/#{system_id}/lights"
+
+        expect(document.at_css('[data-role="light-row"]')["data-color"]).to eq("yellow")
+      end
+    end
+
     it "lists only the lights of the requested system" do
       other_system = Stoplight.register_system(SecureRandom.uuid, data_store: data_store)
       Stoplight::Admin.add_system(other_system)
