@@ -66,6 +66,10 @@ module AdminWorld
     document.css('[data-role="light-row"]').map { |row| row["data-light"] }
   end
 
+  def find_card(light_reference)
+    document.at_css(%([data-role="light-detail"][data-light="#{light_reference.name}"]))
+  end
+
   def fail_request(light)
     light.run { raise "Service unavailable" }
   rescue RuntimeError, Stoplight::Error::RedLight
@@ -76,9 +80,7 @@ module AdminWorld
   MAX_BREACH_ATTEMPTS = 5
   YELLOW_WAIT_TIMEOUT = 10
 
-  def register_lights(system, table)
-    rows = table.hashes
-
+  def register_lights(system, rows)
     lights = rows.map { |row| [row, system.register(row.fetch("Name"), **registration_options(row))] }
     lights.each { |row, light| breach_light(light) unless row.fetch("Color") == "green" }
 
