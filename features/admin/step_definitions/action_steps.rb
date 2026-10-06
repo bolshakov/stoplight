@@ -12,6 +12,10 @@ When("I visit the lights page for system {string}") do |system_name|
   get lights_path(system_named(system_name))
 end
 
+When("I visit the page for {light}") do |light|
+  get light_path(light)
+end
+
 When("I open the actions for {light}") do |light|
   pending
 end
