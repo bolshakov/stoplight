@@ -1,0 +1,14 @@
+module Stoplight
+  class Admin
+    class Panel
+      module Helpers : Sinatra::Base
+        def dependencies: -> Dependencies
+        def system_url: (String system_id, String path) -> String
+        def asset_path: (String) -> String
+        def find_system: (String) -> Wiring::System
+        def current_system_id: -> String
+        def current_system: -> Wiring::System
+      end
+    end
+  end
+end
