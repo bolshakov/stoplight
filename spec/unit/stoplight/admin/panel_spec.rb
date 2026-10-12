@@ -87,6 +87,14 @@ RSpec.describe Stoplight::Admin::Panel, :redis, type: %i[request] do
       end
     end
 
+    it "names each row's color for screen readers" do
+      system.register("checkout")
+
+      get "/systems/#{system_id}/lights"
+
+      expect(document.at_css('[data-role="light-row"] [role="img"]')["aria-label"]).to eq("green")
+    end
+
     it "lists only the lights of the requested system" do
       other_system = Stoplight.register_system(SecureRandom.uuid, data_store: data_store)
       Stoplight::Admin.add_system(other_system)
