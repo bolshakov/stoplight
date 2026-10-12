@@ -95,6 +95,14 @@ RSpec.describe Stoplight::Admin::Panel, :redis, type: %i[request] do
       expect(document.at_css('[data-role="light-row"] [role="img"]')["aria-label"]).to eq("green")
     end
 
+    it "puts the light list in a navigation landmark" do
+      system.register("checkout")
+
+      get "/systems/#{system_id}/lights"
+
+      expect(document.at_css('nav[aria-label="Lights"] [data-role="light-row"]')).not_to be_nil
+    end
+
     it "marks a locked row" do
       light = system.register("checkout")
       light.lock(Stoplight::Color::GREEN)
