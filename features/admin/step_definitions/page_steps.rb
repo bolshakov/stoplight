@@ -45,19 +45,21 @@ Then("the system switcher does not offer the default system") do
 end
 
 Then("the card for {light} is titled {string}") do |light, title|
-  pending
+  @card = find_card(light)
+
+  expect(@card.at_css('[data-role="title"]').text).to eq(title)
 end
 
 Then("its message is {string}") do |message|
-  pending
+  expect(@card.at_css('[data-role="message"]').text).to eq(message)
 end
 
 Then("its comment is {string}") do |comment|
-  pending
+  expect(@card.at_css('[data-role="comment"]').text).to eq(comment)
 end
 
 Then("the card for {light} shows {string}") do |light, text|
-  pending
+  expect(find_card(light).text).to include(text)
 end
 
 Then("the card for {light} shows a threshold of {int}") do |light, threshold|

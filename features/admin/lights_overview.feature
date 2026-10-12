@@ -75,32 +75,38 @@ Feature: Admin Lights Overview
 
   Rule: A card explains the light's state in words, not just color
 
-    @wip
     Scenario Outline: A light with no recorded error is described by its color
       Given a <color> light "checkout" exists
-      When I visit the lights page
+      When I visit the page for light "checkout"
       Then the card for light "checkout" is titled "<title>"
       And its message is "<message>"
       And its comment is "<comment>"
 
       Examples:
+        | color  | title   | message           | comment             |
+        | green  | Healthy | No recent errors  | Operating normally  |
+
+      @wip
+      Examples:
         | color  | title            | message          | comment                                 |
         | yellow | Testing Recovery | Not available    | Recovery started: awaiting test traffic |
-        | green  | Healthy          | No recent errors | Operating normally                      |
 
-    @wip
     Scenario Outline: A locked light reports the override
       Given a light "checkout" exists
       And light "checkout" is locked to <color>
-      When I visit the lights page
+      When I visit the page for light "checkout"
       Then the card for light "checkout" is titled "<title>"
       And its message is "<message>"
       And its comment is "<comment>"
 
       Examples:
         | color | title          | message                        | comment                                  |
-        | red   | Locked Open    | Circuit manually locked open   | Override active - all requests blocked   |
         | green | Forced Healthy | Circuit manually locked closed | Override active - all requests processed |
+
+      @wip
+      Examples:
+        | color | title       | message                      | comment                                 |
+        | red   | Locked Open | Circuit manually locked open | Override active - all requests blocked  |
 
     @wip
     Scenario: A red light shows its last error and counts down to recovery
@@ -109,7 +115,7 @@ Feature: Admin Lights Overview
       And light "checkout" enters red state
       And light "checkout" last failed with "Timed out"
       And 5 seconds have elapsed
-      When I visit the lights page
+      When I visit the page for light "checkout"
       Then the card for light "checkout" is titled "Last Error"
       And its message is "RuntimeError: Timed out"
       And its comment is "Will attempt recovery in 55 seconds"
@@ -119,7 +125,7 @@ Feature: Admin Lights Overview
       Given a red light "checkout" exists
       And light "checkout" last failed with "Timed out"
       And light "checkout" is locked to red
-      When I visit the lights page
+      When I visit the page for light "checkout"
       Then the card for light "checkout" is titled "Last Error"
       And its message is "RuntimeError: Timed out"
       And its comment is "Override active - all requests blocked"
@@ -128,7 +134,7 @@ Feature: Admin Lights Overview
     Scenario: A yellow light keeps showing its last error while awaiting test traffic
       Given a yellow light "checkout" exists
       And light "checkout" last failed with "Timed out"
-      When I visit the lights page
+      When I visit the page for light "checkout"
       Then the card for light "checkout" is titled "Testing Recovery"
       And its message is "RuntimeError: Timed out"
       And its comment is "Recovery started: awaiting test traffic"
@@ -140,16 +146,15 @@ Feature: Admin Lights Overview
       And light "checkout" enters yellow state
       And light "checkout" last failed with "Timed out"
       And 1 request is made to light "checkout"
-      When I visit the lights page
+      When I visit the page for light "checkout"
       Then the card for light "checkout" is titled "Testing Recovery"
       And its message is "RuntimeError: Timed out"
       And its comment is "Allowing limited test traffic (1 of 2 requests)"
 
-    @wip
     Scenario: A locked light is labelled as locked
       Given a light "checkout" exists
       And light "checkout" is locked to green
-      When I visit the lights page
+      When I visit the page for light "checkout"
       Then the card for light "checkout" shows "(Locked)"
 
   Rule: The traffic metric matches the light's traffic control strategy
@@ -160,7 +165,7 @@ Feature: Admin Lights Overview
       Given a light "checkout" configured with:
         | Traffic Control | Consecutive Errors |
       And light "checkout" has recorded 3 consecutive errors
-      When I visit the lights page
+      When I visit the page for light "checkout"
       Then the card for light "checkout" shows "Consecutive failures: 3"
 
     @wip
@@ -168,7 +173,7 @@ Feature: Admin Lights Overview
       Given a light "checkout" configured with:
         | Traffic Control | Error Rate |
       And light "checkout" has recorded 4 errors out of 412 requests
-      When I visit the lights page
+      When I visit the page for light "checkout"
       Then the card for light "checkout" shows "Errors: 4 / 412 requests (1.0%)"
 
   Rule: Last check is the most recent thing that happened to the light
@@ -181,7 +186,7 @@ Feature: Admin Lights Overview
         | Last Success At          | <success>  |
         | Recovery Last Success At | <recovery> |
         | Breached At              | <breached> |
-      When I visit the lights page
+      When I visit the page for light "checkout"
       Then the card for light "checkout" shows a last check of "<shown>"
 
       Examples:
@@ -194,7 +199,7 @@ Feature: Admin Lights Overview
     Scenario: A light that has never been called shows no last check
       Given a light "checkout" exists
       And light "checkout" has never been called
-      When I visit the lights page
+      When I visit the page for light "checkout"
       Then the card for light "checkout" shows no last check
 
   Rule: Landing on the panel root takes you somewhere useful
