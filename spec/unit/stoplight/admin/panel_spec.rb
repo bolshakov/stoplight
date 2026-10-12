@@ -47,6 +47,14 @@ RSpec.describe Stoplight::Admin::Panel, :redis, type: %i[request] do
       expect(document.css('[data-role="empty-state"]')).to be_empty
     end
 
+    it "marks a green row" do
+      system.register("checkout")
+
+      get "/systems/#{system_id}/lights"
+
+      expect(document.at_css('[data-role="light-row"]')["data-color"]).to eq("green")
+    end
+
     it "marks a red row" do
       light = system.register("checkout", threshold: 1)
 
