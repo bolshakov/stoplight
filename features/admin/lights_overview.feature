@@ -8,7 +8,6 @@ Feature: Admin Lights Overview
 
   Rule: The panel lists every registered light, worst first
 
-    @wip
     Scenario: Lights are ordered red, then yellow, then green
       Given the following lights exist:
         | Name              | Color  |
@@ -23,7 +22,6 @@ Feature: Admin Lights Overview
         | Audit Logging   |
         | Backup Service  |
 
-    @wip
     Scenario: Lights of the same color are ordered by name
       Given the following lights exist:
         | Name            | Color |

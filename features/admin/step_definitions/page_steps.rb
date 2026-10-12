@@ -5,11 +5,11 @@ Then("I see {string}") do |text|
 end
 
 Then("I see {light}") do |light|
-  pending
+  expect(listed_light_names).to include(light.name)
 end
 
 Then("I do not see {light}") do |light|
-  pending
+  expect(listed_light_names).not_to include(light.name)
 end
 
 Then("I see no color counts") do
@@ -17,7 +17,7 @@ Then("I see no color counts") do
 end
 
 Then("the lights are listed in this order:") do |table|
-  pending
+  expect(listed_light_names).to eq(table.raw.map(&:first))
 end
 
 Then("the counts are:") do |table|

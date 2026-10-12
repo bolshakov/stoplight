@@ -62,9 +62,57 @@ module AdminWorld
     "/systems/#{system.config.id}/lights"
   end
 
+  def listed_light_names
+    document.css('[data-role="light-row"]').map { |row| row["data-light"] }
+  end
+
   def fail_request(light)
     light.run { raise "Service unavailable" }
   rescue RuntimeError, Stoplight::Error::RedLight
     nil
+  end
+
+  YELLOW_COOL_OFF_TIME = 1
+  MAX_BREACH_ATTEMPTS = 5
+  YELLOW_WAIT_TIMEOUT = 10
+
+  def register_lights(system, table)
+    rows = table.hashes
+
+    lights = rows.map { |row| [row, system.register(row.fetch("Name"), **registration_options(row))] }
+    lights.each { |row, light| breach_light(light) unless row.fetch("Color") == "green" }
+
+    yellow_lights = lights.select { |row, _| row.fetch("Color") == "yellow" }.map { |_, light| light }
+    wait_until_yellow(yellow_lights) unless yellow_lights.empty?
+
+    lights.each { |row, light| verify_color(light, row.fetch("Color")) }
+  end
+
+  def registration_options(row)
+    (row.fetch("Color") == "yellow") ? {cool_off_time: YELLOW_COOL_OFF_TIME} : {}
+  end
+
+  def breach_light(light)
+    MAX_BREACH_ATTEMPTS.times do
+      break if light.color == Stoplight::Color::RED
+
+      fail_request(light)
+    end
+  end
+
+  def wait_until_yellow(lights)
+    deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + YELLOW_WAIT_TIMEOUT
+    until lights.all? { |light| light.color == Stoplight::Color::YELLOW }
+      if Process.clock_gettime(Process::CLOCK_MONOTONIC) > deadline
+        raise "expected #{lights.map(&:name)} to turn yellow within #{YELLOW_WAIT_TIMEOUT}s, " \
+          "but their colors are #{lights.map(&:color)}"
+      end
+      sleep(0.1)
+    end
+  end
+
+  def verify_color(light, expected_color)
+    actual_color = light.color.to_s
+    raise "expected #{light.name.inspect} to be #{expected_color}, but it is #{actual_color}" if actual_color != expected_color
   end
 end
