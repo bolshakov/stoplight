@@ -1,0 +1,24 @@
+module Stoplight
+  class Admin
+    class Panel
+      module Actions
+        class LightList
+          COLORS: Array[Domain::color]
+
+          @config_registry: ConfigRegistry
+          @storage: Wiring::System::Storage
+
+          def initialize: (
+              config_registry: ConfigRegistry,
+              storage: Wiring::System::Storage,
+            ) -> void
+
+          def call: -> Array[LightSummary]
+
+          private def build_light: (Domain::Config) -> LightSummary
+          private def sort_key: (LightSummary) -> Array[Comparable]
+        end
+      end
+    end
+  end
+end
