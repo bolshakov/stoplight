@@ -5,20 +5,20 @@ module Stoplight
         attr_reader id: String
         attr_reader name: String
         attr_reader color: Domain::color
-        attr_reader locked: bool
+        attr_reader lock_state: Domain::state
 
         def self.new: (
             id: String,
             name: String,
             color: Domain::color,
-            locked: bool,
+            lock_state: Domain::state,
           ) -> instance
 
         def initialize: (
             id: String,
             name: String,
             color: Domain::color,
-            locked: bool,
+            lock_state: Domain::state,
           ) -> void
 
         def locked?: -> bool

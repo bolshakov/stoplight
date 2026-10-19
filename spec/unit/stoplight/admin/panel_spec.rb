@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "nokogiri"
-
 RSpec.describe Stoplight::Admin::Panel, :redis, type: %i[request] do
   let(:data_store) { Stoplight::DataStore::Redis.new(redis) }
   let(:system) { Stoplight.register_system(SecureRandom.uuid, data_store:) }
@@ -28,10 +26,6 @@ RSpec.describe Stoplight::Admin::Panel, :redis, type: %i[request] do
   end
 
   describe "GET /systems/:system_id/lights" do
-    def document
-      Nokogiri::HTML5(last_response.body)
-    end
-
     it "responds with 404 for a system that is not configured" do
       get "/systems/unknown/lights"
 
@@ -113,20 +107,13 @@ RSpec.describe Stoplight::Admin::Panel, :redis, type: %i[request] do
     end
 
     it "shows a lock icon only for a locked row" do
-      light = system.register("checkout")
-      light.lock(Stoplight::Color::GREEN)
+      system.register("checkout").lock(Stoplight::Color::GREEN)
+      system.register("reporting")
 
       get "/systems/#{system_id}/lights"
 
-      expect(document.at_css('[data-role="light-row"] [data-role="lock-icon"]')).not_to be_nil
-    end
-
-    it "shows no lock icon for an unlocked row" do
-      system.register("checkout")
-
-      get "/systems/#{system_id}/lights"
-
-      expect(document.at_css('[data-role="light-row"] [data-role="lock-icon"]')).to be_nil
+      expect(document.at_css('[data-role="light-row"][data-light="checkout"] [data-role="lock-icon"]')).not_to be_nil
+      expect(document.at_css('[data-role="light-row"][data-light="reporting"] [data-role="lock-icon"]')).to be_nil
     end
 
     it "shows the first (worst) light in the detail pane" do
@@ -192,10 +179,6 @@ RSpec.describe Stoplight::Admin::Panel, :redis, type: %i[request] do
   end
 
   describe "GET /systems/:system_id/lights/:light_id" do
-    def document
-      Nokogiri::HTML5(last_response.body)
-    end
-
     it "selects the named light for the detail pane" do
       system.register("alpha")
       system.register("beta")
@@ -231,6 +214,26 @@ RSpec.describe Stoplight::Admin::Panel, :redis, type: %i[request] do
       expect(document.at_css('[data-role="light-detail"]')["data-light"]).to eq("beta")
       expect(document.at_css("header")).to be_nil
       expect(document.css("link[rel=stylesheet]")).to be_empty
+    end
+
+    it "describes a green light in Stoplight's own vocabulary, not circuit-breaker terms" do
+      system.register("checkout")
+
+      get "/systems/#{system_id}/lights/#{Stoplight::Domain::Id.for("checkout")}"
+
+      expect(document.at_css(".light-detail-status").text).to include("Green")
+      expect(last_response.body).not_to match(/Closed|Circuit/)
+    end
+
+    it "describes a locked green light in Stoplight's own vocabulary, not circuit-breaker terms" do
+      light = system.register("checkout")
+      light.lock(Stoplight::Color::GREEN)
+
+      get "/systems/#{system_id}/lights/#{Stoplight::Domain::Id.for("checkout")}"
+
+      expect(document.at_css(".light-detail-status").text).to include("Green")
+      expect(document.at_css('[data-role="message"]').text).to eq("Light manually locked to green")
+      expect(last_response.body).not_to match(/Closed|Circuit/)
     end
   end
 

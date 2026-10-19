@@ -27,7 +27,7 @@ module Stoplight
               id: config.id,
               name: config.name,
               color: state_snapshot.color,
-              locked: state_snapshot.locked_state != Stoplight::State::UNLOCKED
+              lock_state: state_snapshot.locked_state
             )
           end
 

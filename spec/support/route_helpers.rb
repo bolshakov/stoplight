@@ -1,3 +1,5 @@
+require "nokogiri"
+
 module RouteHelpers
   def app
     described_class
@@ -5,6 +7,10 @@ module RouteHelpers
 
   def response_body
     JSON(last_response.body)
+  end
+
+  def document
+    Nokogiri::HTML5(last_response.body)
   end
 end
 

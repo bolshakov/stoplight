@@ -32,7 +32,7 @@ RSpec.describe Stoplight::Admin::Panel::Actions::LightList do
 
     it "builds a light from the config and its state snapshot only" do
       expect(call).to contain_exactly(
-        have_attributes(id: "light-id", name: "foo", color: Stoplight::Color::GREEN, locked: false)
+        have_attributes(id: "light-id", name: "foo", color: Stoplight::Color::GREEN, lock_state: Stoplight::State::UNLOCKED)
       )
     end
   end

@@ -101,12 +101,12 @@ Feature: Admin Lights Overview
 
       Examples:
         | color | title          | message                        | comment                                  |
-        | green | Forced Healthy | Circuit manually locked closed | Override active - all requests processed |
+        | green | Forced Healthy | Light manually locked to green | Override active - all requests processed |
 
       @wip
       Examples:
-        | color | title       | message                      | comment                                 |
-        | red   | Locked Open | Circuit manually locked open | Override active - all requests blocked  |
+        | color | title      | message                      | comment                                |
+        | red   | Locked Red | Light manually locked to red | Override active - all requests blocked |
 
     @wip
     Scenario: A red light shows its last error and counts down to recovery

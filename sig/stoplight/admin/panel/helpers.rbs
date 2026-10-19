@@ -2,7 +2,7 @@ module Stoplight
   class Admin
     class Panel
       module Helpers : Sinatra::Base
-        STATE_TEMPLATES: Hash[Array[Domain::color | bool], Symbol]
+        STATE_TEMPLATES: Hash[Array[Domain::color | Domain::state], Symbol]
 
         def dependencies: -> Dependencies
         def selected_light: (Array[LightSummary]) -> LightSummary?
