@@ -37,7 +37,12 @@ Given("a {light} exists") do |light|
 end
 
 Given("a {color} {light} exists") do |color, light|
-  pending
+  cool_off_time = (color == Stoplight::Color::YELLOW) ? AdminWorld::YELLOW_COOL_OFF_TIME : nil
+  entity = system_for(light).register(light.name, **(cool_off_time ? {cool_off_time:} : {}))
+
+  breach_light(entity) unless color == Stoplight::Color::GREEN
+  wait_until_yellow([entity]) if color == Stoplight::Color::YELLOW
+  verify_color(entity, color.to_s)
 end
 
 Given("a {light} configured with:") do |light, table|
@@ -70,7 +75,7 @@ Given("{light} enters {color} state") do |light, color|
 end
 
 Given("{light} is locked to {color}") do |light, color|
-  pending
+  find_light(light).lock(color)
 end
 
 Given("{light} last failed with {string}") do |light, error_message|

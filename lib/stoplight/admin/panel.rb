@@ -41,7 +41,13 @@ module Stoplight
       get "/systems/:system_id/lights" do
         lights = dependencies.light_list_action.call
 
-        erb :lights, locals: {lights: lights}
+        erb :lights, layout: !turbo_frame_request?, locals: {lights: lights, selected_light: selected_light(lights)}
+      end
+
+      get "/systems/:system_id/lights/:light_id" do
+        lights = dependencies.light_list_action.call
+
+        erb :lights, layout: !turbo_frame_request?, locals: {lights: lights, selected_light: find_light(lights, params[:light_id])}
       end
     end
   end

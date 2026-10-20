@@ -66,6 +66,10 @@ module AdminWorld
     document.css('[data-role="light-row"]').map { |row| row["data-light"] }
   end
 
+  def light_detail(light_reference)
+    document.at_css(%([data-role="light-detail"][data-light="#{light_reference.name}"]))
+  end
+
   def fail_request(light)
     light.run { raise "Service unavailable" }
   rescue RuntimeError, Stoplight::Error::RedLight
