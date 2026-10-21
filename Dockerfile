@@ -10,6 +10,9 @@ ENV RAILS_ENV="production" \
     BUNDLE_PATH="/usr/local/bundle" \
     BUNDLE_WITHOUT="development"
 
+# Refresh the trust bundle at build time to speed up recovery from CA-related breaches
+RUN apk add --no-cache --upgrade ca-certificates-bundle
+
 FROM base AS build
 
 RUN apk --update --no-cache add build-base
