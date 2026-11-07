@@ -22,7 +22,7 @@ RSpec.describe Stoplight::Domain::Failure do
         failure = described_class.from_error(error, time: Time.now)
         expect(failure.error_class).to eql(error_class)
         expect(failure.error_message).to eql(error_message)
-        expect(failure.time.to_i).to eql(Time.new.to_i)
+        expect(failure.time.to_i).to eql(Time.now.to_i)
       end
     end
   end
