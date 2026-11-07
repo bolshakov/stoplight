@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    stoplight (6.0.0)
+    stoplight (6.0.1)
       concurrent-ruby
       zeitwerk
 
@@ -427,7 +427,7 @@ CHECKSUMS
   standard-custom (1.0.2) sha256=424adc84179a074f1a2a309bb9cf7cd6bfdb2b6541f20c6bf9436c0ba22a652b
   standard-performance (1.9.0) sha256=49483d31be448292951d80e5e67cdcb576c2502103c7b40aec6f1b6e9c88e3f2
   steep (2.1.0) sha256=1daf53573283b0e6d404a7273cca41fe5c15b14ece05167934f5ffc179e171d9
-  stoplight (6.0.0)
+  stoplight (6.0.1)
   stringio (3.2.0) sha256=c37cb2e58b4ffbd33fe5cd948c05934af997b36e0b6ca6fdf43afa234cf222e1
   strscan (3.1.8) sha256=aae2db611a225559f21ffbb71765c9a4e60fd262534a9ea84f4f11c7f32f679e
   sys-uname (1.5.1) sha256=784d7e6491b0393c25cbbe5ac38324ac7be9fda083a6094832648af669386d7b
