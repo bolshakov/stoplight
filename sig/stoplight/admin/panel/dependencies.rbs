@@ -8,6 +8,7 @@ module Stoplight
         def initialize: (system: Wiring::System) -> void
         def config_registry: -> ConfigRegistry
         def light_list_action: -> Actions::LightList
+        def light_detail_action: -> Actions::LightDetail
       end
     end
   end
