@@ -1,0 +1,11 @@
+<% seconds = light.recovery_in_seconds %>
+<span class="light-detail-status flex items-center gap-2 mt-1 text-sm font-medium text-gray-500">
+  <span class="w-2.5 h-2.5 rounded-full bg-red-600"></span>
+  Red
+</span>
+
+<div class="light-detail-card mt-5 p-4 rounded-lg bg-red-50">
+  <p data-role="title" class="text-sm font-semibold text-red-800">Last Error</p>
+  <p data-role="comment" class="mt-1 text-xs text-red-800"><%= seconds&.positive? ? "Will attempt recovery in #{seconds} second#{"s" unless seconds == 1}" : "Recovery started: awaiting test traffic" %></p>
+  <p data-role="message" class="light-detail-message mt-3 pt-3 border-t border-red-100 text-sm text-red-900"><%= light.last_error ? CGI.escapeHTML("#{light.last_error.error_class}: #{light.last_error.error_message}") : "Not available" %></p>
+</div>

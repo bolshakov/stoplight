@@ -70,10 +70,18 @@ module AdminWorld
     document.at_css(%([data-role="light-detail"][data-light="#{light_reference.name}"]))
   end
 
-  def fail_request(light)
-    light.run { raise "Service unavailable" }
+  def fail_request(light, message = "Service unavailable")
+    light.run { raise message }
   rescue RuntimeError, Stoplight::Error::RedLight
     nil
+  end
+
+  def config_for(light_reference)
+    system = system_for(light_reference)
+    registry = Stoplight::Admin::ConfigRegistry.new(registry: system.__stoplight__registry, system_config: system.config)
+
+    registry.find_by_id(Stoplight::Domain::Id.for(light_reference.name)) ||
+      raise("no config registered for #{light_reference.name.inspect}")
   end
 
   YELLOW_COOL_OFF_TIME = 1
@@ -96,11 +104,11 @@ module AdminWorld
     (row.fetch("Color") == "yellow") ? {cool_off_time: YELLOW_COOL_OFF_TIME} : {}
   end
 
-  def breach_light(light)
+  def breach_light(light, message = "Service unavailable")
     MAX_BREACH_ATTEMPTS.times do
       break if light.color == Stoplight::Color::RED
 
-      fail_request(light)
+      fail_request(light, message)
     end
   end
 
