@@ -49,11 +49,11 @@ module Stoplight
         # Determines if traffic should be resumed based on successes counts.
         def determine_color(config, recovery_metrics)
           if recovery_metrics.consecutive_errors > 0
-            TrafficRecovery::RED
+            TrafficRecovery::FAILED_TO_RECOVER
           elsif recovery_metrics.consecutive_successes >= config.recovery_threshold
-            TrafficRecovery::GREEN
+            TrafficRecovery::RECOVERED
           else
-            TrafficRecovery::YELLOW
+            TrafficRecovery::PROBING
           end
         end
 

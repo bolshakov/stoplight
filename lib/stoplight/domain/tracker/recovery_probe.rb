@@ -52,10 +52,10 @@ module Stoplight
 
           recovery_result = traffic_recovery.determine_color(config, recovery_metrics)
 
-          return if recovery_result == TrafficRecovery::YELLOW
+          return if recovery_result == TrafficRecovery::PROBING
 
           case recovery_result
-          when TrafficRecovery::GREEN
+          when TrafficRecovery::RECOVERED
             to_color = Color::GREEN
             if transition(to_color:)
               emitter.emit(Telemetry::RecoverySucceeded) do
@@ -69,7 +69,7 @@ module Stoplight
                   ))
               end
             end
-          when TrafficRecovery::RED
+          when TrafficRecovery::FAILED_TO_RECOVER
             to_color = Color::RED
             if transition(to_color:)
               emitter.emit(Telemetry::RecoveryFailed) do

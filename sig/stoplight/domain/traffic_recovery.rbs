@@ -1,9 +1,9 @@
 module Stoplight
   module Domain
     module TrafficRecovery
-      GREEN: :green
-      YELLOW: :yellow
-      RED: :red
+      RECOVERED: :green
+      PROBING: :yellow
+      FAILED_TO_RECOVER: :red
     end
   end
 end
