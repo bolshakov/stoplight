@@ -69,7 +69,7 @@ RSpec.describe Stoplight::Domain::Tracker::RecoveryProbe do
       end
 
       it "raises an error" do
-        expect { record_probe }.to raise_error(/recovery strategy returned unexpected color/)
+        expect { record_probe }.to raise_error(/unexpected recovery decision/)
       end
     end
 

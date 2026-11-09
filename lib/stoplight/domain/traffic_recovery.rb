@@ -3,10 +3,9 @@
 module Stoplight
   module Domain
     module TrafficRecovery
-      # Values match Color's, so strategies that return Color constants keep working
-      RECOVERED = :green
-      PROBING = :yellow
-      FAILED_TO_RECOVER = :red
+      RECOVERED = :recovered
+      PROBING = :probing
+      FAILED_TO_RECOVER = :failed_to_recover
     end
   end
 end

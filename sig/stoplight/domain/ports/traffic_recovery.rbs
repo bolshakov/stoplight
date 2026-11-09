@@ -1,8 +1,8 @@
 module Stoplight
   module Domain
     # Strategies for determining how to recover traffic flow through the Stoplight.
-    # These strategies evaluate recovery metrics to decide which color the Stoplight should
-    # transition to during the recovery process.
+    # These strategies evaluate recovery metrics and return a recovery decision:
+    # TrafficRecovery::RECOVERED, TrafficRecovery::PROBING or TrafficRecovery::FAILED_TO_RECOVER.
     #
     # @example Creating a custom traffic recovery strategy
     #   class GradualRecovery

@@ -88,7 +88,7 @@ module Stoplight
               end
             end
           else
-            raise "recovery strategy returned unexpected color: #{recovery_result}"
+            raise "unexpected recovery decision: #{recovery_result}"
           end
         end
 
