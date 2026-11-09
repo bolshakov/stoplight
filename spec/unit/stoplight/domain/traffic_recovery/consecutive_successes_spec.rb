@@ -61,28 +61,28 @@ RSpec.describe Stoplight::Domain::TrafficRecovery::ConsecutiveSuccesses do
       let(:consecutive_errors) { 1 }
       let(:consecutive_successes) { 2 }
 
-      it { is_expected.to be(Stoplight::Domain::TrafficRecovery::RED) }
+      it { is_expected.to be(Stoplight::Domain::TrafficRecovery::FAILED_TO_RECOVER) }
     end
 
     context "when the number of consecutive successes is greater than the threshold" do
       let(:consecutive_errors) { 0 }
       let(:consecutive_successes) { recovery_threshold + 1 }
 
-      it { is_expected.to be(Stoplight::Domain::TrafficRecovery::GREEN) }
+      it { is_expected.to be(Stoplight::Domain::TrafficRecovery::RECOVERED) }
     end
 
     context "when the number of consecutive successes equals to the threshold" do
       let(:consecutive_errors) { 0 }
       let(:consecutive_successes) { recovery_threshold }
 
-      it { is_expected.to be(Stoplight::Domain::TrafficRecovery::GREEN) }
+      it { is_expected.to be(Stoplight::Domain::TrafficRecovery::RECOVERED) }
     end
 
     context "when the number of consecutive successes is less than the threshold" do
       let(:consecutive_errors) { 0 }
       let(:consecutive_successes) { recovery_threshold - 1 }
 
-      it { is_expected.to be(Stoplight::Domain::TrafficRecovery::YELLOW) }
+      it { is_expected.to be(Stoplight::Domain::TrafficRecovery::PROBING) }
     end
   end
 end

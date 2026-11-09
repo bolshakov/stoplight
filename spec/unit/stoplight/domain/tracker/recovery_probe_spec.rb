@@ -50,11 +50,11 @@ RSpec.describe Stoplight::Domain::Tracker::RecoveryProbe do
 
   shared_examples "recovering after probe" do
     include_examples "when recover to",
-      recover_to: Stoplight::Domain::TrafficRecovery::GREEN,
+      recover_to: Stoplight::Domain::TrafficRecovery::RECOVERED,
       transition_to: Stoplight::Color::GREEN
 
     include_examples "when recover to",
-      recover_to: Stoplight::Domain::TrafficRecovery::RED,
+      recover_to: Stoplight::Domain::TrafficRecovery::FAILED_TO_RECOVER,
       transition_to: Stoplight::Color::RED
 
     context "when recover to unexpected to outcome" do
@@ -69,16 +69,16 @@ RSpec.describe Stoplight::Domain::Tracker::RecoveryProbe do
       end
 
       it "raises an error" do
-        expect { record_probe }.to raise_error(/recovery strategy returned unexpected color/)
+        expect { record_probe }.to raise_error(/unexpected recovery decision/)
       end
     end
 
-    context "when recover to YELLOW (needs more probes)" do
+    context "when recover to PROBING (needs more probes)" do
       let(:metrics_after_probe) {
         instance_double(Stoplight::Domain::MetricsSnapshot,
           successes: 0, errors: 0, consecutive_errors: 0, consecutive_successes: 0)
       }
-      let(:recover_to) { Stoplight::Domain::TrafficRecovery::YELLOW }
+      let(:recover_to) { Stoplight::Domain::TrafficRecovery::PROBING }
 
       before do
         allow(traffic_recovery).to receive(:determine_color).with(config, metrics_after_probe).and_return(recover_to)
@@ -134,7 +134,7 @@ RSpec.describe Stoplight::Domain::Tracker::RecoveryProbe do
 
     context "when the probe changes from yellow to green" do
       before do
-        allow(traffic_recovery).to receive(:determine_color).and_return(Stoplight::Domain::TrafficRecovery::GREEN)
+        allow(traffic_recovery).to receive(:determine_color).and_return(Stoplight::Domain::TrafficRecovery::RECOVERED)
         allow(state_store).to receive(:transition_to_color).with(Stoplight::Color::GREEN).and_return(true)
         allow(traffic_recovery).to receive(:name).and_return(policy_name)
       end
@@ -173,7 +173,7 @@ RSpec.describe Stoplight::Domain::Tracker::RecoveryProbe do
 
     context "when the light stays yellow" do
       before do
-        allow(traffic_recovery).to receive(:determine_color).and_return(Stoplight::Domain::TrafficRecovery::YELLOW)
+        allow(traffic_recovery).to receive(:determine_color).and_return(Stoplight::Domain::TrafficRecovery::PROBING)
       end
 
       it "does not emit a RecoverySucceeded event" do
@@ -183,7 +183,7 @@ RSpec.describe Stoplight::Domain::Tracker::RecoveryProbe do
 
     context "when the probe changes from yellow to red" do
       before do
-        allow(traffic_recovery).to receive(:determine_color).and_return(Stoplight::Domain::TrafficRecovery::RED)
+        allow(traffic_recovery).to receive(:determine_color).and_return(Stoplight::Domain::TrafficRecovery::FAILED_TO_RECOVER)
         allow(traffic_recovery).to receive(:name).and_return(policy_name)
         allow(state_store).to receive(:transition_to_color).with(Stoplight::Color::RED).and_return(true)
       end
@@ -214,7 +214,7 @@ RSpec.describe Stoplight::Domain::Tracker::RecoveryProbe do
     before do
       allow(metrics_store).to receive(:metrics_snapshot).and_return(metrics_after_probe)
       allow(metrics_store).to receive(:clear)
-      allow(traffic_recovery).to receive(:determine_color).and_return(Stoplight::Domain::TrafficRecovery::YELLOW)
+      allow(traffic_recovery).to receive(:determine_color).and_return(Stoplight::Domain::TrafficRecovery::PROBING)
     end
 
     context "when a probe succeeds" do
@@ -264,7 +264,7 @@ RSpec.describe Stoplight::Domain::Tracker::RecoveryProbe do
     context "when the probe transitions to green" do
       before do
         allow(metrics_store).to receive(:record_success)
-        allow(traffic_recovery).to receive(:determine_color).and_return(Stoplight::Domain::TrafficRecovery::GREEN)
+        allow(traffic_recovery).to receive(:determine_color).and_return(Stoplight::Domain::TrafficRecovery::RECOVERED)
         allow(state_store).to receive(:transition_to_color).with(Stoplight::Color::GREEN).and_return(true)
         allow(traffic_recovery).to receive(:name).and_return(policy_name)
       end
@@ -280,7 +280,7 @@ RSpec.describe Stoplight::Domain::Tracker::RecoveryProbe do
 
       before do
         allow(metrics_store).to receive(:record_failure).with(exception)
-        allow(traffic_recovery).to receive(:determine_color).and_return(Stoplight::Domain::TrafficRecovery::RED)
+        allow(traffic_recovery).to receive(:determine_color).and_return(Stoplight::Domain::TrafficRecovery::FAILED_TO_RECOVER)
         allow(traffic_recovery).to receive(:name).and_return(policy_name)
         allow(state_store).to receive(:transition_to_color).with(Stoplight::Color::RED).and_return(true)
       end
@@ -314,7 +314,7 @@ RSpec.describe Stoplight::Domain::Tracker::RecoveryProbe do
       allow(metrics_store).to receive(:record_failure).with(exception)
       allow(metrics_store).to receive(:metrics_snapshot).and_return(metrics_after_probe)
       allow(metrics_store).to receive(:clear)
-      allow(traffic_recovery).to receive(:determine_color).and_return(Stoplight::Domain::TrafficRecovery::RED)
+      allow(traffic_recovery).to receive(:determine_color).and_return(Stoplight::Domain::TrafficRecovery::FAILED_TO_RECOVER)
       allow(traffic_recovery).to receive(:name).and_return(policy_name)
       allow(state_store).to receive(:transition_to_color).with(Stoplight::Color::RED).and_return(true)
     end
@@ -350,7 +350,7 @@ RSpec.describe Stoplight::Domain::Tracker::RecoveryProbe do
 
     context "when the light stays yellow" do
       before do
-        allow(traffic_recovery).to receive(:determine_color).and_return(Stoplight::Domain::TrafficRecovery::YELLOW)
+        allow(traffic_recovery).to receive(:determine_color).and_return(Stoplight::Domain::TrafficRecovery::PROBING)
       end
 
       it "does not emit RecoveryFailed" do
@@ -379,7 +379,7 @@ RSpec.describe Stoplight::Domain::Tracker::RecoveryProbe do
     context "when the light transitions to green" do
       before do
         allow(metrics_store).to receive(:record_success)
-        allow(traffic_recovery).to receive(:determine_color).and_return(Stoplight::Domain::TrafficRecovery::GREEN)
+        allow(traffic_recovery).to receive(:determine_color).and_return(Stoplight::Domain::TrafficRecovery::RECOVERED)
         allow(state_store).to receive(:transition_to_color).with(Stoplight::Color::GREEN).and_return(true)
       end
 

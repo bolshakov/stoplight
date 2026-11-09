@@ -1,8 +1,8 @@
 module Stoplight
   module Domain
     # Strategies for determining how to recover traffic flow through the Stoplight.
-    # These strategies evaluate recovery metrics to decide which color the Stoplight should
-    # transition to during the recovery process.
+    # These strategies evaluate recovery metrics and return a recovery decision:
+    # TrafficRecovery::RECOVERED, TrafficRecovery::PROBING or TrafficRecovery::FAILED_TO_RECOVER.
     #
     # @example Creating a custom traffic recovery strategy
     #   class GradualRecovery
@@ -15,16 +15,16 @@ module Stoplight
     #       total_probes = metrics.recovery_probe_successes + metrics.recovery_probe_errors
     #
     #       if total_probes < @min_samples
-    #         return Color::YELLOW # Keep recovering, not enough samples
+    #         return TrafficRecovery::PROBING # Keep recovering, not enough samples
     #       end
     #
     #       success_rate = metrics.recovery_probe_successes.fdiv(total_probes)
     #       if success_rate >= @min_success_rate
-    #         Color::GREEN # Recovery successful
+    #         TrafficRecovery::RECOVERED # Recovery successful
     #       elsif success_rate <= 0.2
-    #         Color::RED # Recovery failed, too many errors
+    #         TrafficRecovery::FAILED_TO_RECOVER # Recovery failed, too many errors
     #       else
-    #         Color::YELLOW # Continue recovery
+    #         TrafficRecovery::PROBING # Continue recovery
     #       end
     #     end
     #   end
