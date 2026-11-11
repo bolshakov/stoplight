@@ -98,6 +98,14 @@ li[data-color="red"] .light-row[aria-current="page"] {
   border-color: var(--color-green-100);
 }
 
+.border-red-100 {
+  border-color: var(--color-red-100);
+}
+
+.border-yellow-100 {
+  border-color: var(--color-yellow-100);
+}
+
 .w-2\.5 {
   width: calc(var(--spacing) * 2.5);
 }

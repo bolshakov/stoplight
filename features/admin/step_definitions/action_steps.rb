@@ -37,7 +37,8 @@ When("I lock all lights in system {string} to {color}") do |system_name, color|
 end
 
 When("{int} request(s) is/are made to {light}") do |count, light|
-  pending
+  entity = find_light(light)
+  count.times { entity.run { "ok" } }
 end
 
 When("I request the lights JSON") do

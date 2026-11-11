@@ -22,6 +22,13 @@ module Stoplight
             storage: @storage
           )
         end
+
+        def light_detail_action
+          Actions::LightDetail.new(
+            config_registry: config_registry,
+            storage: @storage
+          )
+        end
       end
     end
   end

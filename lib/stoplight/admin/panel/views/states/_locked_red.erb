@@ -1,0 +1,10 @@
+<span class="light-detail-status flex items-center gap-2 mt-1 text-sm font-medium text-gray-500">
+  <span class="w-2.5 h-2.5 rounded-full bg-red-600"></span>
+  Red (Locked)
+</span>
+
+<div class="light-detail-card mt-5 p-4 rounded-lg bg-red-50">
+  <p data-role="title" class="text-sm font-semibold text-red-800"><%= light.last_error ? "Last Error" : "Locked Red" %></p>
+  <p data-role="comment" class="mt-1 text-xs text-red-800">Override active - all requests blocked</p>
+  <p data-role="message" class="light-detail-message mt-3 pt-3 border-t border-red-100 text-sm text-red-900"><%= light.last_error ? CGI.escapeHTML("#{light.last_error.error_class}: #{light.last_error.error_message}") : "Light manually locked to red" %></p>
+</div>

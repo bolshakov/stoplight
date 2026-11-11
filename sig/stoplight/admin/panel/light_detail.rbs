@@ -1,0 +1,41 @@
+module Stoplight
+  class Admin
+    class Panel
+      class LightDetail < Data
+        attr_reader id: String
+        attr_reader name: String
+        attr_reader color: Domain::color
+        attr_reader lock_state: Domain::state
+        attr_reader last_error: Domain::Failure?
+        attr_reader recovery_scheduled_after: Time?
+        attr_reader consecutive_successes: Integer
+        attr_reader recovery_threshold: Integer
+
+        def self.new: (
+            id: String,
+            name: String,
+            color: Domain::color,
+            lock_state: Domain::state,
+            last_error: Domain::Failure?,
+            recovery_scheduled_after: Time?,
+            consecutive_successes: Integer,
+            recovery_threshold: Integer,
+          ) -> instance
+
+        def initialize: (
+            id: String,
+            name: String,
+            color: Domain::color,
+            lock_state: Domain::state,
+            last_error: Domain::Failure?,
+            recovery_scheduled_after: Time?,
+            consecutive_successes: Integer,
+            recovery_threshold: Integer,
+          ) -> void
+
+        def locked?: -> bool
+        def recovery_in_seconds: -> Integer?
+      end
+    end
+  end
+end
