@@ -62,6 +62,17 @@ RSpec.describe Stoplight::Wiring::LightFactory do
       end
     end
 
+    context "with an unsupported data store" do
+      let(:config) { super().with(data_store: Object.new) }
+
+      it "raises a TypeError naming the received class and the supported data stores" do
+        expect { factory.build }.to raise_error(
+          TypeError,
+          "Unsupported data store: Object. Supported data stores: Stoplight::DataStore::Redis, Stoplight::DataStore::Memory"
+        )
+      end
+    end
+
     it "emits exactly one LightRegistered event" do
       factory.build
 

@@ -70,7 +70,7 @@ module Stoplight
 
       def create_registry(config, failover_system)
         case config.data_store
-        when DataStore::Redis
+        in DataStore::Redis
           Infrastructure::FailSafe::Storage::Registry.new(
             primary_registry: Infrastructure::Redis::Storage::Registry.new(
               redis: config.data_store.redis,
@@ -82,10 +82,10 @@ module Stoplight
             failover_registry: Infrastructure::Memory::Storage::Registry.new,
             circuit_breaker: failover_system.register("registry")
           )
-        when DataStore::Memory
+        in DataStore::Memory
           Infrastructure::Memory::Storage::Registry.new
         else
-          raise TypeError, "unsupported data store type"
+          raise DataStore.unsupported(config.data_store)
         end
       end
     end

@@ -1,5 +1,16 @@
 module Stoplight
   module DataStore
+    # Builds the error raised wherever Stoplight has to choose behavior based on the configured
+    # data store and receives one it does not know how to handle.
+    #
+    # @api private
+    # @param data_store [Object] the unsupported data store
+    # @return [TypeError]
+    def self.unsupported(data_store)
+      supported = [Redis, Memory].map(&:name).join(", ")
+      TypeError.new("Unsupported data store: #{data_store.class}. Supported data stores: #{supported}")
+    end
+
     # @api private not for public use
     class Base
     end

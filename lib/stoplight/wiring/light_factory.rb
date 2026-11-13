@@ -75,10 +75,10 @@ module Stoplight
 
       def storage_scripting
         case data_store_config
-        when DataStore::Redis
+        in DataStore::Redis
           data_store_config.__stoplight__scripting
         else
-          raise T.absurd(data_store_config)
+          raise DataStore.unsupported(data_store_config)
         end
       end
 
@@ -86,13 +86,13 @@ module Stoplight
 
       def key_space
         @key_space ||= case data_store_config
-        when DataStore::Redis
+        in DataStore::Redis
           # We use keys like +stoplight:version:system_id:{light_id}:metrics+ prefixes,
           # Putting +liht_id+ into curly braces make it a Redis Cluster hash-tag - this is a  segment
           # for slot colocation.
           data_store_config.key_space.join(@system_id, "{#{@config.id}}")
         else
-          raise T.absurd(data_store_config)
+          raise DataStore.unsupported(data_store_config)
         end
       end
 
@@ -166,10 +166,10 @@ module Stoplight
 
       def redis
         case data_store_config
-        when DataStore::Redis
+        in DataStore::Redis
           data_store_config.redis
         else
-          raise T.absurd(data_store_config)
+          raise DataStore.unsupported(data_store_config)
         end
       end
 
@@ -182,6 +182,8 @@ module Stoplight
             redis:, scripting: storage_scripting, key_space:, clock:, config:, error_notifier:,
             failover_light: create_circuit_breaker("redis")
           )
+        else
+          raise DataStore.unsupported(data_store_config)
         end
       end
 
