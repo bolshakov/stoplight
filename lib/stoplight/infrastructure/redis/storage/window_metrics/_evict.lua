@@ -39,7 +39,11 @@ local function evict_buckets(metrics_key, ts_index_key, window_start)
     redis.call('HDEL', metrics_key, unpack(fields))
   end
 
-  redis.call('HINCRBY', metrics_key, 'total_failures', -failures)
-  redis.call('HINCRBY', metrics_key, 'total_successes', -successes)
+  if failures > 0 then
+    redis.call('HINCRBY', metrics_key, 'total_failures', -failures)
+  end
+  if successes > 0 then
+    redis.call('HINCRBY', metrics_key, 'total_successes', -successes)
+  end
   redis.call('ZREMRANGEBYSCORE', ts_index_key, '-inf', window_start)
 end

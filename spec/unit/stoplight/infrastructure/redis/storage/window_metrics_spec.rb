@@ -27,4 +27,28 @@ RSpec.describe Stoplight::Infrastructure::Redis::Storage::WindowMetrics, :redis 
       metrics.record_failure(StandardError.new)
     end
   end
+
+  describe "bucket eviction" do
+    it "does not call HINCRBY with -0 on total_failures when evicting buckets with only successes" do
+      Stoplight::TimeTravel.freeze(Time.now - window_size - 10) do
+        metrics.record_success
+      end
+
+      metrics.record_success
+
+      has_total_failures = redis.with { |client| client.hexists(key_space.join("window_metrics"), "total_failures") }
+      expect(has_total_failures).to be(false)
+    end
+
+    it "does not call HINCRBY with -0 on total_successes when evicting buckets with only failures" do
+      Stoplight::TimeTravel.freeze(Time.now - window_size - 10) do
+        metrics.record_failure(StandardError.new)
+      end
+
+      metrics.record_failure(StandardError.new)
+
+      has_total_successes = redis.with { |client| client.hexists(key_space.join("window_metrics"), "total_successes") }
+      expect(has_total_successes).to be(false)
+    end
+  end
 end
