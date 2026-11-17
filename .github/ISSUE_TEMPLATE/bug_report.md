@@ -23,6 +23,7 @@ If applicable, add screenshots to help explain your problem.
  - OS: [e.g. macOS 13.1 (22C65)]
  - Ruby [e.g. 3.0.4]
  - Version [e.g. 3.0.1]
+ - Redis [e.g. 8.4]
 
 **Additional context**
 Add any other context about the problem here.
