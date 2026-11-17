@@ -79,12 +79,12 @@ module Stoplight
 
       def persistent?
         case @config.data_store
-        when DataStore::Redis
+        in DataStore::Redis
           true
-        when DataStore::Memory
+        in DataStore::Memory
           false
         else
-          raise T.absurd(@config.data_store)
+          raise DataStore.unsupported(@config.data_store)
         end
       end
 

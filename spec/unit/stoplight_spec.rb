@@ -143,6 +143,13 @@ RSpec.describe "Stoplight" do
   end
 
   describe ".register_system" do
+    context "with an unsupported data store" do
+      it "raises a TypeError naming the received class and the supported data stores" do
+        expect { Stoplight.register_system(SecureRandom.uuid, data_store: Object.new) }
+          .to raise_error(TypeError, /Unsupported data store: Object\. Supported data stores: .*Redis, .*Memory/)
+      end
+    end
+
     context "name is not in use yet" do
       subject(:system) { Stoplight.register_system(SecureRandom.uuid) }
 

@@ -1,0 +1,5 @@
+module Stoplight
+  module DataStore
+    def self.unsupported: (untyped data_store) -> TypeError
+  end
+end

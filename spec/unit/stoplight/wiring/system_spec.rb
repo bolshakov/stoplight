@@ -12,6 +12,30 @@ RSpec.describe Stoplight::Wiring::System do
   end
   let(:registry) { instance_double(Stoplight::Infrastructure::Memory::Storage::Registry, register: nil) }
 
+  describe "#persistent?" do
+    let(:system_config) { Stoplight::Wiring::DefaultConfig.with(name: SecureRandom.uuid, data_store:) }
+
+    context "with a Memory data store" do
+      let(:data_store) { Stoplight::DataStore::Memory.new }
+
+      it { is_expected.not_to be_persistent }
+    end
+
+    context "with a Redis data store", :redis do
+      let(:data_store) { Stoplight::DataStore::Redis.new(redis) }
+
+      it { is_expected.to be_persistent }
+    end
+
+    context "with an unsupported data store" do
+      let(:data_store) { Object.new }
+
+      it "raises a TypeError naming the received class and the supported data stores" do
+        expect { system.persistent? }.to raise_error(TypeError, /Unsupported data store: Object\. Supported data stores: .*Redis, .*Memory/)
+      end
+    end
+  end
+
   describe "#register" do
     let(:system_config) { Stoplight::Wiring::DefaultConfig.with(name: SecureRandom.uuid) }
 
