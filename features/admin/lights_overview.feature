@@ -86,7 +86,6 @@ Feature: Admin Lights Overview
         | color  | title   | message           | comment             |
         | green  | Healthy | No recent errors  | Operating normally  |
 
-      @wip
       Examples:
         | color  | title            | message          | comment                                 |
         | yellow | Testing Recovery | Not available    | Recovery started: awaiting test traffic |
@@ -103,12 +102,10 @@ Feature: Admin Lights Overview
         | color | title          | message                        | comment                                  |
         | green | Forced Healthy | Light manually locked to green | Override active - all requests processed |
 
-      @wip
       Examples:
         | color | title      | message                      | comment                                |
         | red   | Locked Red | Light manually locked to red | Override active - all requests blocked |
 
-    @wip
     Scenario: A red light shows its last error and counts down to recovery
       Given a light "checkout" configured with:
         | Cool Off Time | 60 seconds |
@@ -120,7 +117,15 @@ Feature: Admin Lights Overview
       And its message is "RuntimeError: Timed out"
       And its comment is "Will attempt recovery in 55 seconds"
 
-    @wip
+    Scenario: A red light that failed its recovery probe still shows a card instead of crashing
+      Given a light "checkout" configured with:
+        | Cool Off Time | 1 second |
+      And light "checkout" enters yellow state
+      And a request to light "checkout" fails
+      When I visit the lights page
+      Then the card for light "checkout" is titled "Last Error"
+      And its message is "Not available"
+
     Scenario: A light locked to red keeps showing its last error
       Given a red light "checkout" exists
       And light "checkout" last failed with "Timed out"
@@ -130,7 +135,6 @@ Feature: Admin Lights Overview
       And its message is "RuntimeError: Timed out"
       And its comment is "Override active - all requests blocked"
 
-    @wip
     Scenario: A yellow light keeps showing its last error while awaiting test traffic
       Given a yellow light "checkout" exists
       And light "checkout" last failed with "Timed out"
@@ -139,7 +143,6 @@ Feature: Admin Lights Overview
       And its message is "RuntimeError: Timed out"
       And its comment is "Recovery started: awaiting test traffic"
 
-    @wip
     Scenario: A yellow light reports its progress towards recovery
       Given a light "checkout" configured with:
         | Recovery Threshold | 2 |

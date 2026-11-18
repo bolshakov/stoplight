@@ -1,0 +1,10 @@
+<span class="light-detail-status flex items-center gap-2 mt-1 text-sm font-medium text-gray-500">
+  <span class="w-2.5 h-2.5 rounded-full bg-yellow-600"></span>
+  Yellow
+</span>
+
+<div class="light-detail-card mt-5 p-4 rounded-lg bg-yellow-50">
+  <p data-role="title" class="text-sm font-semibold text-yellow-800">Testing Recovery</p>
+  <p data-role="comment" class="mt-1 text-xs text-yellow-800"><%= light.consecutive_successes.zero? ? "Recovery started: awaiting test traffic" : "Allowing limited test traffic (#{light.consecutive_successes} of #{light.recovery_threshold} requests)" %></p>
+  <p data-role="message" class="light-detail-message mt-3 pt-3 border-t border-yellow-100 text-sm text-yellow-900"><%= light.last_error ? CGI.escapeHTML("#{light.last_error.error_class}: #{light.last_error.error_message}") : "Not available" %></p>
+</div>

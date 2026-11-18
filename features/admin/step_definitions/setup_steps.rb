@@ -46,7 +46,20 @@ Given("a {color} {light} exists") do |color, light|
 end
 
 Given("a {light} configured with:") do |light, table|
-  pending
+  options = {cool_off_time: AdminWorld::YELLOW_COOL_OFF_TIME}
+
+  table.rows_hash.each do |key, value|
+    case key
+    when "Cool Off Time"
+      options[:cool_off_time] = value.to_i
+    when "Recovery Threshold"
+      options[:recovery_threshold] = value.to_i
+    else
+      raise "unsupported configuration key: #{key.inspect}"
+    end
+  end
+
+  system_for(light).register(light.name, **options)
 end
 
 Given("the following lights exist:") do |table|
@@ -68,10 +81,11 @@ Given("{int} {color} lights exist") do |count, color|
 end
 
 Given("{light} enters {color} state") do |light, color|
-  pending("entering #{color} state") unless color == Stoplight::Color::RED
+  pending("entering #{color} state") unless [Stoplight::Color::RED, Stoplight::Color::YELLOW].include?(color)
 
-  light = find_light(light)
-  fail_request(light) until light.color == color
+  entity = find_light(light)
+  fail_request(entity) until entity.color == Stoplight::Color::RED
+  wait_until_yellow([entity]) if color == Stoplight::Color::YELLOW
 end
 
 Given("{light} is locked to {color}") do |light, color|
@@ -79,7 +93,23 @@ Given("{light} is locked to {color}") do |light, color|
 end
 
 Given("{light} last failed with {string}") do |light, error_message|
-  pending
+  config = config_for(light)
+  storage = system_for(light).__stoplight__storage
+  entity = find_light(light)
+
+  case entity.color
+  when Stoplight::Color::RED
+    storage.delete(config)
+    breach_light(entity, error_message)
+  when Stoplight::Color::YELLOW
+    storage.send(:recovery_metrics_store, config).record_failure(RuntimeError.new(error_message))
+  else
+    raise "#{light.name.inspect} must be red or yellow before recording a last error, got #{entity.color}"
+  end
+end
+
+Given("a request to {light} fails") do |light|
+  fail_request(find_light(light))
 end
 
 Given("{light} has recorded {int} consecutive error(s)") do |light, count|
@@ -103,5 +133,5 @@ Given("{light} has been removed") do |light|
 end
 
 Given("{int} second(s) have elapsed") do |seconds|
-  pending
+  sleep(seconds)
 end

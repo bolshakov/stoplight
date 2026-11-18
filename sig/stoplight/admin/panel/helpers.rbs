@@ -7,7 +7,7 @@ module Stoplight
         def dependencies: -> Dependencies
         def selected_light: (Array[LightSummary]) -> LightSummary?
         def find_light: (Array[LightSummary], String) -> LightSummary
-        def state_template_for: (LightSummary) -> Symbol
+        def state_template_for: (LightSummary | LightDetail) -> Symbol
         def system_url: (String system_id, String path) -> String
         def asset_path: (String) -> String
         def find_system: (String) -> Wiring::System

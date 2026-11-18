@@ -1,0 +1,19 @@
+module Stoplight
+  class Admin
+    class Panel
+      module Actions
+        class LightDetail
+          @config_registry: ConfigRegistry
+          @storage: Wiring::System::Storage
+
+          def initialize: (
+              config_registry: ConfigRegistry,
+              storage: Wiring::System::Storage,
+            ) -> void
+
+          def call: (String) -> Panel::LightDetail?
+        end
+      end
+    end
+  end
+end
